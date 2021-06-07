@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",    
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"],
+    },
+    "plugins": [
+      {
+        "transform": "@zerollup/ts-transform-paths",
+        "exclude": ["*"]
+      }
+    ],
+    "target": "es6",
+    "module": "commonjs",
+    "declaration": true,
+    "declarationMap": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "lib": ["es2017", "dom"],
+    "typeRoots": ["./node_modules/@types", "./src/typings"]
+  },
+}

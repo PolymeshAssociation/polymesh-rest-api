@@ -1,0 +1,38 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "browser": true,
+    "jest": true,
+    "node": true,
+    "es6": true
+  },
+  "rules": {
+    "@typescript-eslint/indent": "off",
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "require-jsdoc": [
+      "warn",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        }
+      }
+    ],
+    "simple-import-sort/sort": "error",
+    "sort-imports": "off",
+    "import/order": "off",
+    "no-dupe-class-members": "off",
+    "no-shadow": "error",
+    "arrow-parens": "off"
+  },
+  "plugins": ["@typescript-eslint", "simple-import-sort"],
+  "parserOptions": {
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "extends": ["standard", "semistandard", "plugin:@typescript-eslint/recommended", "prettier"],
+  "ignorePatterns": ["src/polkadot/", "src/middleware/", "docs/*"]
+}
