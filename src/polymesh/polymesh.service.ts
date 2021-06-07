@@ -4,5 +4,9 @@ import { POLYMESH_API } from './polymesh.consts';
 
 @Injectable()
 export class PolymeshService {
-  constructor(@Inject(POLYMESH_API) public readonly polymeshApi: Polymesh) {}
+  constructor(@Inject(POLYMESH_API) public readonly polymeshApi: Polymesh) {
+    setInterval(() => {
+      this.polymeshApi.getLatestBlock();
+    }, 10000);
+  }
 }
