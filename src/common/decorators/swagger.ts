@@ -18,7 +18,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   const extraModels = [];
   let items;
   if (typeof model === 'string') {
-    items = { type: model, example, examples };
+    items = { type: model };
   } else {
     extraModels.push(model);
     items = { $ref: getSchemaPath(model) };
@@ -33,6 +33,8 @@ export const ApiArrayResponse = <TModel extends Type | string>(
               results: {
                 type: 'array',
                 items,
+                example,
+                examples,
               },
             },
           },
