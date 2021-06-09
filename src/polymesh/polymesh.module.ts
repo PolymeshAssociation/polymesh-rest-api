@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
-import { POLYMESH_API } from './polymesh.consts';
-import polymeshConfig from './config/polymesh.config';
-import { PolymeshService } from './polymesh.service';
 import { Polymesh } from '@polymathnetwork/polymesh-sdk';
+
+import polymeshConfig from './config/polymesh.config';
+import { POLYMESH_API } from './polymesh.consts';
+import { PolymeshService } from './polymesh.service';
 
 @Module({
   imports: [ConfigModule.forFeature(polymeshConfig)],

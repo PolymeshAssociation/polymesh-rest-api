@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { IdentitiesService } from './identities.service';
-import { IdentitiesController } from './identities.controller';
 import { TokensModule } from '~/tokens/tokens.module';
+
+import { IdentitiesController } from './identities.controller';
+import { IdentitiesService } from './identities.service';
 
 @Module({
   imports: [PolymeshModule, TokensModule],

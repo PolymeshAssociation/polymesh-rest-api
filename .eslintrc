@@ -9,26 +9,16 @@
   "rules": {
     "@typescript-eslint/indent": "off",
     "quotes": ["error", "single", { "avoidEscape": true }],
-    "require-jsdoc": [
-      "warn",
-      {
-        "require": {
-          "FunctionDeclaration": true,
-          "MethodDefinition": true,
-          "ClassDeclaration": true,
-          "ArrowFunctionExpression": false,
-          "FunctionExpression": false
-        }
-      }
-    ],
     "simple-import-sort/sort": "error",
     "sort-imports": "off",
     "import/order": "off",
     "no-dupe-class-members": "off",
     "no-shadow": "error",
-    "arrow-parens": "off"
+    "arrow-parens": "off",
+    "no-useless-constructor": "off",
+    "@typescript-eslint/no-useless-constructor": "error"
   },
-  "plugins": ["@typescript-eslint", "simple-import-sort"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "node", "import", "prettier", "promise"],
   "parserOptions": {
     "sourceType": "module",
     "project": "./tsconfig.json"
