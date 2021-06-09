@@ -1,32 +1,35 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+
+import { ResultsDto } from '~/common/dto/results.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { TokenDetailsDto } from '~/tokens/dto/token-details.dto';
 
 @Injectable()
 export class TokensService {
   constructor(private readonly polymeshService: PolymeshService) {}
 
-  public async findOne(ticker: string) {
+  public async findOne(ticker: string): Promise<TokenDetailsDto> {
     try {
       const token = await this.polymeshService.polymeshApi.getSecurityToken({ ticker });
 
       const {
-        owner: { did: owner },
+        owner,
         assetType,
         name,
         totalSupply,
-        primaryIssuanceAgent: { did: pia },
+        primaryIssuanceAgent: pia,
         isDivisible,
       } = await token.details();
 
-      return {
+      return new TokenDetailsDto({
         owner,
         assetType,
         name,
         totalSupply,
         pia,
         isDivisible,
-      };
+      });
     } catch (err: unknown) {
       if (err instanceof PolymeshError) {
         const { message } = err;
@@ -39,9 +42,9 @@ export class TokensService {
     }
   }
 
-  public async findAllByOwner(owner: string) {
+  public async findAllByOwner(owner: string): Promise<ResultsDto<string>> {
     const tokens = await this.polymeshService.polymeshApi.getSecurityTokens({ owner });
 
-    return tokens.map(({ ticker }) => ticker);
+    return { results: tokens.map(({ ticker }) => ticker) };
   }
 }

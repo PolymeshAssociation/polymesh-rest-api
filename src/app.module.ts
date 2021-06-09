@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { TokensModule } from './tokens/tokens.module';
-import { PolymeshModule } from './polymesh/polymesh.module';
 import { ConfigModule } from '@nestjs/config';
+import Joi from 'joi';
+
 import { IdentitiesModule } from './identities/identities.module';
-import Joi from '@hapi/joi';
+import { PolymeshModule } from './polymesh/polymesh.module';
+import { TokensModule } from './tokens/tokens.module';
 
 @Module({
   imports: [
@@ -21,7 +20,5 @@ import Joi from '@hapi/joi';
     PolymeshModule,
     IdentitiesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
