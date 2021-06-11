@@ -5,9 +5,16 @@ import { POLYMESH_API } from './polymesh.consts';
 
 @Injectable()
 export class PolymeshService {
+  private heartbeatInterval: NodeJS.Timeout;
+
   constructor(@Inject(POLYMESH_API) public readonly polymeshApi: Polymesh) {
-    setInterval(() => {
+    this.heartbeatInterval = setInterval(() => {
       this.polymeshApi.getLatestBlock();
     }, 10000);
+  }
+
+  public close(): Promise<void> {
+    clearInterval(this.heartbeatInterval);
+    return this.polymeshApi.disconnect();
   }
 }
