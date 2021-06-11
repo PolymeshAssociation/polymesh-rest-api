@@ -9,11 +9,15 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { TokensService } from '~/tokens/tokens.service';
 
 class GetTokensParams {
-  @IsHexadecimal()
+  @IsHexadecimal({
+    message: 'DID must be a hexadecimal number',
+  })
   @Matches(/^0x.+/, {
     message: 'DID must start with "0x"',
   })
-  @Length(DID_LENGTH)
+  @Length(DID_LENGTH, undefined, {
+    message: 'DID must be 66 characters long',
+  })
   readonly did: string;
 }
 
