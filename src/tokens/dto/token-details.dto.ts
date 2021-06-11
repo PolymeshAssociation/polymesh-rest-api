@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity, KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';

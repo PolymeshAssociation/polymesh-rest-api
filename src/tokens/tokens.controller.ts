@@ -5,7 +5,7 @@ import {
   Param,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { IsUppercase, MaxLength } from 'class-validator';
 
 import { TokenDetailsDto } from '~/tokens/dto/token-details.dto';
@@ -18,6 +18,7 @@ class FindOneParams {
   readonly ticker: string;
 }
 
+@ApiTags('tokens')
 @Controller('tokens')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TokensController {

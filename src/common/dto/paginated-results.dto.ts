@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 
 import { ResultsDto } from '~/common/dto/results.dto';
