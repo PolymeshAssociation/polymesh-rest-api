@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 export type Mocked<T> = T &
   {
     [K in keyof T]: T[K] extends (...args: infer Args) => unknown
