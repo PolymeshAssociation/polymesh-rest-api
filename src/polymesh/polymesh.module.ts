@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { Polymesh } from '@polymathnetwork/polymesh-sdk';

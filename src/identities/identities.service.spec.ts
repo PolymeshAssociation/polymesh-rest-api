@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { POLYMESH_API } from '~/polymesh/polymesh.consts';
+import { MockPolymeshClass } from '~/test-utils/mocks';
+
 import { IdentitiesService } from './identities.service';
 
 describe('IdentitiesService', () => {
@@ -8,7 +11,10 @@ describe('IdentitiesService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [IdentitiesService],
-    }).compile();
+    })
+      .overrideProvider(POLYMESH_API)
+      .useValue(new MockPolymeshClass())
+      .compile();
 
     service = module.get<IdentitiesService>(IdentitiesService);
   });

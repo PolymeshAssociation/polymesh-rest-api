@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { IsHexadecimal, Length, Matches } from 'class-validator';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
@@ -17,6 +17,7 @@ class GetTokensParams {
   readonly did: string;
 }
 
+@ApiTags('identities')
 @Controller('identities')
 export class IdentitiesController {
   constructor(
@@ -24,6 +25,7 @@ export class IdentitiesController {
     private readonly tokensService: TokensService
   ) {}
 
+  @ApiTags('tokens')
   @ApiParam({
     type: 'string',
     name: 'did',
