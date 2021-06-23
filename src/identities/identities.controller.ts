@@ -6,9 +6,10 @@ import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { ResultsDto } from '~/common/dto/results.dto';
 import { DID_LENGTH } from '~/identities/identities.consts';
 import { IdentitiesService } from '~/identities/identities.service';
+import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
-class GetTokensParams {
+class GetByDidParams {
   @IsHexadecimal({
     message: 'DID must be a hexadecimal number',
   })
@@ -26,7 +27,8 @@ class GetTokensParams {
 export class IdentitiesController {
   constructor(
     private readonly identitiesService: IdentitiesService,
-    private readonly tokensService: TokensService
+    private readonly tokensService: TokensService,
+    private readonly settlementsService: SettlementsService
   ) {}
 
   @ApiTags('tokens')
@@ -39,7 +41,21 @@ export class IdentitiesController {
     paginated: false,
     example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
   })
-  public getTokens(@Param() { did }: GetTokensParams): Promise<ResultsDto<string>> {
+  public getTokens(@Param() { did }: GetByDidParams): Promise<ResultsDto<string>> {
     return this.tokensService.findAllByOwner(did);
+  }
+
+  @ApiTags('settlements')
+  @ApiParam({
+    type: 'string',
+    name: 'did',
+  })
+  @Get(':did/pending-instructions')
+  @ApiArrayResponse('string', {
+    paginated: false,
+    example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
+  })
+  public getPendingInstructions(@Param() { did }: GetByDidParams): Promise<ResultsDto<string>> {
+    return this.settlementsService.findPendingInstructionsByDid(did);
   }
 }

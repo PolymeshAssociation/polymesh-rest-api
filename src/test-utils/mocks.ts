@@ -19,3 +19,7 @@ export class MockPolymeshClass {
 export class MockSecurityTokenClass {
   public details = jest.fn();
 }
+
+export class MockIdentityClass {
+  public getPendingInstructions = jest.fn();
+}

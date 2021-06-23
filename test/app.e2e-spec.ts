@@ -30,9 +30,9 @@ describe('AppController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await Promise.all([polymeshService.close(), app.close()]);
     // This is to avoid jest sometimes tearing down too slowly and issuing a warning
     await new Promise(resolve => setTimeout(resolve, 5000));
+    await Promise.all([app.close(), polymeshService.close()]);
   });
 
   describe('/tokens/:ticker (GET)', () => {
@@ -117,6 +117,37 @@ describe('AppController (e2e)', () => {
               'JERE03',
               'VICTOR2',
             ],
+          });
+      });
+    });
+  });
+
+  describe('/identities/:did/pending-instructions (GET)', () => {
+    describe('if the did is not a 66 digit hex value', () => {
+      it('should return a Bad Request error', () => {
+        return request(app.getHttpServer())
+          .get('/identities/zzz/pending-instructions')
+          .expect(HttpStatus.BAD_REQUEST)
+          .expect({
+            statusCode: 400,
+            message: [
+              'DID must be 66 characters long',
+              'DID must start with "0x"',
+              'DID must be a hexadecimal number',
+            ],
+            error: 'Bad Request',
+          });
+      });
+    });
+    describe('otherwise', () => {
+      it("should return a list of the Identity's pending instructions", () => {
+        return request(app.getHttpServer())
+          .get(
+            '/identities/0x0600000000000000000000000000000000000000000000000000000000000000/pending-instructions'
+          )
+          .expect(HttpStatus.OK)
+          .expect({
+            results: ['364', '315', '577', '572', '275'],
           });
       });
     });

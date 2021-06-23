@@ -13,6 +13,7 @@ export class PolymeshService {
     }, 10000);
   }
 
+  /* istanbul ignore next: not worth the trouble */
   public close(): Promise<void> {
     clearInterval(this.heartbeatInterval);
     return this.polymeshApi.disconnect();

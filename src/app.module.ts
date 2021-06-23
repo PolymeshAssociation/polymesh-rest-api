@@ -6,6 +6,7 @@ import Joi from 'joi';
 
 import { IdentitiesModule } from './identities/identities.module';
 import { PolymeshModule } from './polymesh/polymesh.module';
+import { SettlementsModule } from './settlements/settlements.module';
 import { TokensModule } from './tokens/tokens.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { TokensModule } from './tokens/tokens.module';
     TokensModule,
     PolymeshModule,
     IdentitiesModule,
+    SettlementsModule,
   ],
 })
 export class AppModule {}
