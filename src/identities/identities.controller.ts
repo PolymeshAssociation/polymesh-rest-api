@@ -1,32 +1,28 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Param,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { IsHexadecimal, Length, Matches } from 'class-validator';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { IsDid } from '~/common/decorators/validation';
 import { ResultsDto } from '~/common/dto/results.dto';
-import { DID_LENGTH } from '~/identities/identities.consts';
-import { IdentitiesService } from '~/identities/identities.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
-class GetByDidParams {
-  @IsHexadecimal({
-    message: 'DID must be a hexadecimal number',
-  })
-  @Matches(/^0x.+/, {
-    message: 'DID must start with "0x"',
-  })
-  @Length(DID_LENGTH, undefined, {
-    message: 'DID must be 66 characters long',
-  })
+class DidParams {
+  @IsDid()
   readonly did: string;
 }
 
 @ApiTags('identities')
 @Controller('identities')
+@UseInterceptors(ClassSerializerInterceptor)
 export class IdentitiesController {
   constructor(
-    private readonly identitiesService: IdentitiesService,
     private readonly tokensService: TokensService,
     private readonly settlementsService: SettlementsService
   ) {}
@@ -41,11 +37,13 @@ export class IdentitiesController {
     paginated: false,
     example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
   })
-  public getTokens(@Param() { did }: GetByDidParams): Promise<ResultsDto<string>> {
-    return this.tokensService.findAllByOwner(did);
+  public async getTokens(@Param() { did }: DidParams): Promise<ResultsDto<string>> {
+    const tokens = await this.tokensService.findAllByOwner(did);
+
+    return { results: tokens.map(({ ticker }) => ticker) };
   }
 
-  @ApiTags('settlements')
+  @ApiTags('settlements', 'instructions')
   @ApiParam({
     type: 'string',
     name: 'did',
@@ -53,9 +51,11 @@ export class IdentitiesController {
   @Get(':did/pending-instructions')
   @ApiArrayResponse('string', {
     paginated: false,
-    example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
+    example: ['123', '456', '789'],
   })
-  public getPendingInstructions(@Param() { did }: GetByDidParams): Promise<ResultsDto<string>> {
-    return this.settlementsService.findPendingInstructionsByDid(did);
+  public async getPendingInstructions(@Param() { did }: DidParams): Promise<ResultsDto<string>> {
+    const pendingInstructions = await this.settlementsService.findPendingInstructionsByDid(did);
+
+    return { results: pendingInstructions.map(({ id }) => id.toString()) };
   }
 }

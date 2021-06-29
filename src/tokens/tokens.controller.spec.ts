@@ -7,13 +7,12 @@ import { TokensController } from './tokens.controller';
 describe('TokensController', () => {
   let controller: TokensController;
   const mockTokensService = {
-    findOne: jest.fn(),
+    findDetails: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TokensController],
-      imports: [],
       providers: [TokensService],
     })
       .overrideProvider(TokensService)
@@ -29,12 +28,24 @@ describe('TokensController', () => {
 
   describe('findOne', () => {
     it('should return the details', async () => {
-      const expectedTokens = { results: ['FOO', 'BAR', 'BAZ'] };
-      mockTokensService.findOne.mockResolvedValue(expectedTokens);
+      const mockDetails = {
+        assetType: 'assetType',
+        isDivisible: false,
+        name: 'name',
+        owner: 'owner',
+        primaryIssuanceAgent: 'pia',
+        totalSupply: 'totalSupply',
+      };
+      const { primaryIssuanceAgent, ...expected } = mockDetails;
+      const expectedDetails = {
+        pia: primaryIssuanceAgent,
+        ...expected,
+      };
+      mockTokensService.findDetails.mockResolvedValue(mockDetails);
 
       const result = await controller.findOne({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual(expectedTokens);
+      expect(result).toEqual(expectedDetails);
     });
   });
 });

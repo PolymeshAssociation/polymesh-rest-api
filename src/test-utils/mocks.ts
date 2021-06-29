@@ -14,6 +14,9 @@ export class MockPolymeshClass {
   public getSecurityToken = jest.fn();
   public getIdentity = jest.fn();
   public getLatestBlock = jest.fn();
+  public isIdentityValid = jest.fn();
+  public disconnect = jest.fn();
+  public addSigner = jest.fn();
 }
 
 export class MockSecurityTokenClass {

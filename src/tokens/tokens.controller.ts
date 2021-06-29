@@ -6,15 +6,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { IsUppercase, MaxLength } from 'class-validator';
 
+import { IsTicker } from '~/common/decorators/validation';
 import { TokenDetailsDto } from '~/tokens/dto/token-details.dto';
-import { MAX_TICKER_LENGTH } from '~/tokens/tokens.consts';
 import { TokensService } from '~/tokens/tokens.service';
 
-class FindOneParams {
-  @MaxLength(MAX_TICKER_LENGTH)
-  @IsUppercase()
+class TickerParams {
+  @IsTicker()
   readonly ticker: string;
 }
 
@@ -29,7 +27,23 @@ export class TokensController {
     type: 'string',
     name: 'ticker',
   })
-  public findOne(@Param() { ticker }: FindOneParams): Promise<TokenDetailsDto> {
-    return this.tokensService.findOne(ticker);
+  public async findOne(@Param() { ticker }: TickerParams): Promise<TokenDetailsDto> {
+    const {
+      owner,
+      assetType,
+      name,
+      totalSupply,
+      primaryIssuanceAgent: pia,
+      isDivisible,
+    } = await this.tokensService.findDetails(ticker);
+
+    return new TokenDetailsDto({
+      owner,
+      assetType,
+      name,
+      totalSupply,
+      pia,
+      isDivisible,
+    });
   }
 }

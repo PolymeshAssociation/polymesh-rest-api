@@ -3,39 +3,40 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity, KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
-import { Transform } from 'class-transformer';
+
+import { FromBigNumber, FromIdentity } from '~/common/decorators/transformation';
 
 export class TokenDetailsDto {
   @ApiProperty({
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @Transform(({ value }) => value.did)
-  owner: Identity;
+  @FromIdentity()
+  readonly owner: Identity;
 
   @ApiProperty({
     example: KnownTokenType.EquityCommon,
   })
-  assetType: string;
+  readonly assetType: string;
 
   @ApiProperty({
     example: 'MyToken',
   })
-  name: string;
+  readonly name: string;
 
   @ApiProperty({ type: 'string', example: '1000' })
-  @Transform(({ value }) => value.toString())
-  totalSupply: BigNumber;
+  @FromBigNumber()
+  readonly totalSupply: BigNumber;
 
   @ApiProperty({
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
     description: 'Primary issuance agent',
   })
-  @Transform(({ value }) => value.did)
-  pia: Identity;
+  @FromIdentity()
+  readonly pia: Identity;
 
-  isDivisible: boolean;
+  readonly isDivisible: boolean;
 
   constructor(dto: TokenDetailsDto) {
     Object.assign(this, dto);
