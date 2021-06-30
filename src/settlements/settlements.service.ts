@@ -8,6 +8,8 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { SignerDto } from '~/common/dto/signer.dto';
+import { QueueResult } from '~/common/types';
+import { processQueue } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -38,7 +40,7 @@ export class SettlementsService {
   public async createInstruction(
     venueId: string,
     createInstructuionDto: CreateInstructionDto
-  ): Promise<Instruction> {
+  ): Promise<QueueResult<Instruction>> {
     const { signer, ...rest } = createInstructuionDto;
 
     let venue: Venue;
@@ -60,12 +62,13 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    const addInstructionQ = await venue.addInstruction(rest, { signer: address });
-
-    return addInstructionQ.run();
+    return processQueue(venue.addInstruction, rest, { signer: address });
   }
 
-  public async affirmInstruction(id: string, signerDto: SignerDto): Promise<void> {
+  public async affirmInstruction(
+    id: string,
+    signerDto: SignerDto
+  ): Promise<QueueResult<Instruction>> {
     const { signer } = signerDto;
 
     let instruction: Instruction;
@@ -88,8 +91,6 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    const affirmQ = await instruction.affirm(undefined, { signer: address });
-
-    await affirmQ.run();
+    return processQueue(instruction.affirm, undefined, { signer: address });
   }
 }

@@ -4,6 +4,7 @@ import { InstructionStatusResult, isPolymeshError } from '@polymathnetwork/polym
 import { IsNumberString } from 'class-validator';
 
 import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionQueueDto } from '~/common/dto/transaction-queue.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { InstructionIdDto } from '~/settlements/dto/instruction-id.dto';
 import { InstructionStatusDto } from '~/settlements/dto/instruction-status.dto';
@@ -55,13 +56,14 @@ export class SettlementsController {
     @Param() { id }: IdParams,
     @Body() createInstructionDto: CreateInstructionDto
   ): Promise<InstructionIdDto> {
-    const { id: instructionId } = await this.settlementsService.createInstruction(
-      id,
-      createInstructionDto
-    );
+    const {
+      result: { id: instructionId },
+      transactions,
+    } = await this.settlementsService.createInstruction(id, createInstructionDto);
 
     return {
       instructionId,
+      transactions,
     };
   }
 
@@ -74,7 +76,9 @@ export class SettlementsController {
   public async affirmInstruction(
     @Param() { id }: IdParams,
     @Body() signerDto: SignerDto
-  ): Promise<void> {
-    await this.settlementsService.affirmInstruction(id, signerDto);
+  ): Promise<TransactionQueueDto> {
+    const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
+
+    return { transactions };
   }
 }
