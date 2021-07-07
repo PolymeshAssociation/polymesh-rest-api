@@ -1,3 +1,7 @@
+/* istanbul ignore file: non production code */
+
+// TODO @monitz87: replace with actual database/vault
+
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { forEach, map } from 'lodash';

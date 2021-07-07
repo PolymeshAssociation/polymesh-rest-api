@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
@@ -9,12 +11,11 @@ import { IsTicker } from '~/common/decorators/validation';
 import { PortfolioDto } from '~/common/dto/portfolio.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 
-// TODO @monitz87: add comments for documentation
-
 class LegDto {
   @ApiProperty({
     type: 'string',
     example: '1000',
+    description: 'Amount of the Asset to be transferred',
   })
   @IsNumberString()
   @ToBigNumber()
@@ -22,6 +23,7 @@ class LegDto {
 
   @ApiProperty({
     type: () => PortfolioDto,
+    description: 'Origin Portfolio',
   })
   @Type(() => PortfolioDto)
   @ToPortfolioLike()
@@ -29,6 +31,7 @@ class LegDto {
 
   @ApiProperty({
     type: () => PortfolioDto,
+    description: 'Destination Portfolio',
   })
   @Type(() => PortfolioDto)
   @ToPortfolioLike()

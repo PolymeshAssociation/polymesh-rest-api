@@ -23,7 +23,7 @@ export async function processQueue<MethodArgs, ReturnType>(
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
       })),
     };
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: not worth the trouble */ {
     throw new InternalServerErrorException(err.message);
   }
 }

@@ -9,6 +9,7 @@ import { EventIdentifierDto } from '~/common/dto/event-identifier.dto';
 export class InstructionStatusDto {
   @ApiProperty({
     examples: [InstructionStatus.Pending, InstructionStatus.Executed, InstructionStatus.Failed],
+    enum: InstructionStatus,
   })
   readonly status: string;
 

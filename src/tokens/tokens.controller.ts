@@ -5,7 +5,7 @@ import {
   Param,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { IsTicker } from '~/common/decorators/validation';
 import { TokenDetailsDto } from '~/tokens/dto/token-details.dto';
@@ -22,11 +22,14 @@ class TickerParams {
 export class TokensController {
   constructor(private readonly tokensService: TokensService) {}
 
-  @Get(':ticker')
+  @ApiOperation({
+    summary: "Fetch a Security Token's details",
+  })
   @ApiParam({
     type: 'string',
     name: 'ticker',
   })
+  @Get(':ticker')
   public async findOne(@Param() { ticker }: TickerParams): Promise<TokenDetailsDto> {
     const {
       owner,

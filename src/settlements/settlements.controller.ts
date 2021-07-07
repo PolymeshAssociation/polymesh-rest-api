@@ -1,6 +1,13 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { InstructionStatusResult, isPolymeshError } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { IsNumberString } from 'class-validator';
 
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -17,6 +24,7 @@ class IdParams {
 
 @ApiTags('settlements')
 @Controller({})
+@UseInterceptors(ClassSerializerInterceptor)
 export class SettlementsController {
   constructor(private readonly settlementsService: SettlementsService) {}
 
@@ -25,22 +33,12 @@ export class SettlementsController {
     type: 'string',
     name: 'id',
   })
+  @ApiOperation({
+    summary: "Fetch an instruction's status",
+  })
   @Get('instructions/:id')
   public async getInstruction(@Param() { id }: IdParams): Promise<InstructionStatusDto> {
-    let status: InstructionStatusResult;
-    try {
-      status = await this.settlementsService.getInstruction(id);
-    } catch (err) {
-      if (isPolymeshError(err)) {
-        const { message } = err;
-
-        if (message.startsWith("The Instruction doesn't")) {
-          throw new NotFoundException(`There is no Instruction with ID ${id}`);
-        }
-      }
-
-      throw err;
-    }
+    const status = await this.settlementsService.findInstruction(id);
 
     return new InstructionStatusDto(status);
   }
@@ -50,6 +48,9 @@ export class SettlementsController {
   @ApiParam({
     type: 'string',
     name: 'id',
+  })
+  @ApiOperation({
+    summary: 'Create a new instruction',
   })
   @Post('venues/:id/instructions')
   public async createInstruction(
@@ -71,6 +72,10 @@ export class SettlementsController {
   @ApiParam({
     type: 'string',
     name: 'id',
+  })
+  @ApiOperation({
+    summary:
+      'Affirm an existing instruction. All owners of involved portfolios must affirm for the instruction to be executed',
   })
   @Post('instructions/:id/affirm')
   public async affirmInstruction(

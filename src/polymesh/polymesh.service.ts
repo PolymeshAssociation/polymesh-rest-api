@@ -18,6 +18,7 @@ export class PolymeshService {
 
     const accounts = relayerAccountsService.findAll();
 
+    /* istanbul ignore next: remove when this is replaced by a real service */
     accounts.forEach(({ mnemonic, did }) => {
       const { address: account } = polymeshApi.addSigner({ accountMnemonic: mnemonic });
 
