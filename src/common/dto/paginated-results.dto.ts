@@ -6,11 +6,11 @@ import { ResultsDto } from '~/common/dto/results.dto';
 
 export class PaginatedResultsDto<DataType> extends ResultsDto<DataType> {
   @ApiProperty()
-  total: number;
+  readonly total: number;
 
   @ApiProperty()
-  size: number;
+  readonly size: number;
 
   @ApiProperty()
-  start: string;
+  readonly start: string;
 }

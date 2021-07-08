@@ -1,37 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import {
+  isPolymeshError,
+  SecurityToken,
+  SecurityTokenDetails,
+} from '@polymathnetwork/polymesh-sdk/types';
 
-import { ResultsDto } from '~/common/dto/results.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { TokenDetailsDto } from '~/tokens/dto/token-details.dto';
 
 @Injectable()
 export class TokensService {
   constructor(private readonly polymeshService: PolymeshService) {}
 
-  public async findOne(ticker: string): Promise<TokenDetailsDto> {
+  public async findOne(ticker: string): Promise<SecurityToken> {
     try {
       const token = await this.polymeshService.polymeshApi.getSecurityToken({ ticker });
 
-      const {
-        owner,
-        assetType,
-        name,
-        totalSupply,
-        primaryIssuanceAgent: pia,
-        isDivisible,
-      } = await token.details();
-
-      return new TokenDetailsDto({
-        owner,
-        assetType,
-        name,
-        totalSupply,
-        pia,
-        isDivisible,
-      });
+      return token;
     } catch (err: unknown) {
-      if (err instanceof PolymeshError) {
+      if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith('There is no Security Token with ticker')) {
           throw new NotFoundException(message);
@@ -42,9 +28,22 @@ export class TokensService {
     }
   }
 
-  public async findAllByOwner(owner: string): Promise<ResultsDto<string>> {
-    const tokens = await this.polymeshService.polymeshApi.getSecurityTokens({ owner });
+  public async findDetails(ticker: string): Promise<SecurityTokenDetails> {
+    const token = await this.findOne(ticker);
 
-    return { results: tokens.map(({ ticker }) => ticker) };
+    return token.details();
+  }
+
+  public async findAllByOwner(owner: string): Promise<SecurityToken[]> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+    const isDidValid = await polymeshApi.isIdentityValid({ identity: owner });
+
+    if (!isDidValid) {
+      throw new NotFoundException(`There is no identity with DID ${owner}`);
+    }
+
+    return polymeshApi.getSecurityTokens({ owner });
   }
 }

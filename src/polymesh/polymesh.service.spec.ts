@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { MockPolymeshClass } from '~/test-utils/mocks';
 
 import { PolymeshService } from './polymesh.service';
@@ -17,14 +18,17 @@ describe('PolymeshService', () => {
     mockPolymeshApi = new MockPolymeshClass();
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [RelayerAccountsModule],
       providers: [PolymeshService, { provide: POLYMESH_API, useValue: mockPolymeshApi }],
     }).compile();
 
     service = module.get<PolymeshService>(PolymeshService);
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     jest.useRealTimers();
+    await service.close();
+    await new Promise(resolve => setTimeout(resolve, 5000));
   });
 
   it('should be defined', () => {

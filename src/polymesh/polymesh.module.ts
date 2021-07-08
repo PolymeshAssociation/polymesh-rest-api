@@ -4,12 +4,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { Polymesh } from '@polymathnetwork/polymesh-sdk';
 
-import polymeshConfig from './config/polymesh.config';
-import { POLYMESH_API } from './polymesh.consts';
-import { PolymeshService } from './polymesh.service';
+import polymeshConfig from '~/polymesh/config/polymesh.config';
+import { POLYMESH_API } from '~/polymesh/polymesh.consts';
+import { PolymeshService } from '~/polymesh/polymesh.service';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 
 @Module({
-  imports: [ConfigModule.forFeature(polymeshConfig)],
+  imports: [ConfigModule.forFeature(polymeshConfig), RelayerAccountsModule],
   providers: [
     PolymeshService,
     {

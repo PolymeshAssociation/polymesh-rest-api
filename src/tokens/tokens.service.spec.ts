@@ -1,16 +1,24 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
-import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
+import { PolymeshService } from '~/polymesh/polymesh.service';
 import { MockPolymeshClass, MockSecurityTokenClass } from '~/test-utils/mocks';
 
 import { TokensService } from './tokens.service';
 
+jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+  isPolymeshError: mockIsPolymeshError,
+}));
+
 describe('TokensService', () => {
   let service: TokensService;
+  let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymeshClass;
 
   beforeEach(async () => {
@@ -24,6 +32,11 @@ describe('TokensService', () => {
       .compile();
 
     service = module.get<TokensService>(TokensService);
+    polymeshService = module.get<PolymeshService>(PolymeshService);
+  });
+
+  afterEach(async () => {
+    await polymeshService.close();
   });
 
   it('should be defined', () => {
@@ -31,14 +44,21 @@ describe('TokensService', () => {
   });
 
   describe('findOne', () => {
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+    });
+
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
     describe('if the token does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.getSecurityToken.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.FatalError,
-            message: 'There is no Security Token with ticker',
-          });
+          throw new Error('There is no Security Token with ticker');
         });
+
+        mockIsPolymeshError.mockReturnValue(true);
 
         let error;
         try {
@@ -66,10 +86,9 @@ describe('TokensService', () => {
 
         expect(error).toEqual(expectedError);
 
-        expectedError = new PolymeshError({
-          code: ErrorCode.FatalError,
-          message: 'Something else',
-        });
+        expectedError = new Error('Something else');
+
+        mockIsPolymeshError.mockReturnValue(true);
 
         error = null;
         try {
@@ -82,45 +101,70 @@ describe('TokensService', () => {
       });
     });
     describe('otherwise', () => {
-      it('should return the token details', async () => {
-        const mockDetails = {
-          assetType: 'assetType',
-          isDivisible: false,
-          name: 'name',
-          owner: 'owner',
-          primaryIssuanceAgent: 'pia',
-          totalSupply: 'totalSupply',
-        };
-        const { primaryIssuanceAgent: pia, ...expected } = mockDetails;
-
-        const expectedDetails = {
-          ...expected,
-          pia,
-        };
-
+      it('should return the token entity', async () => {
         const mockSecurityToken = new MockSecurityTokenClass();
-        mockSecurityToken.details.mockReturnValue(mockDetails);
 
         mockPolymeshApi.getSecurityToken.mockReturnValue(mockSecurityToken);
 
         const result = await service.findOne('TICKER');
 
-        expect(result).toEqual(expectedDetails);
+        expect(result).toEqual(mockSecurityToken);
       });
     });
   });
 
-  describe('findAllByOwner', () => {
-    it('should return a list of security tokens', async () => {
-      const tokens = ['FOO, BAR, BAZ'];
-      const expectedResult = {
-        results: tokens,
+  describe('findDetails', () => {
+    it('should return the token details', async () => {
+      const mockDetails = {
+        assetType: 'assetType',
+        isDivisible: false,
+        name: 'name',
+        owner: 'owner',
+        primaryIssuanceAgent: 'pia',
+        totalSupply: 'totalSupply',
       };
-      mockPolymeshApi.getSecurityTokens.mockResolvedValue(tokens.map(ticker => ({ ticker })));
 
-      const result = await service.findAllByOwner('0x1');
+      const mockSecurityToken = new MockSecurityTokenClass();
 
-      expect(result).toEqual(expectedResult);
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockSecurityToken as any);
+      mockSecurityToken.details.mockResolvedValue(mockDetails);
+
+      const result = await service.findDetails('TICKER');
+
+      expect(result).toEqual(mockDetails);
+      findOneSpy.mockRestore();
+    });
+  });
+
+  describe('findAllByOwner', () => {
+    describe('if the identity does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        mockPolymeshApi.isIdentityValid.mockResolvedValue(false);
+
+        let error;
+        try {
+          await service.findAllByOwner('TICKER');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+    describe('otherwise', () => {
+      it('should return a list of security tokens', async () => {
+        mockPolymeshApi.isIdentityValid.mockResolvedValue(true);
+
+        const tokens = [{ ticker: 'FOO' }, { ticker: 'BAR' }, { ticker: 'BAZ' }];
+
+        mockPolymeshApi.getSecurityTokens.mockResolvedValue(tokens);
+
+        const result = await service.findAllByOwner('0x1');
+
+        expect(result).toEqual(tokens);
+      });
     });
   });
 });

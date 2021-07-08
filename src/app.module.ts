@@ -6,6 +6,8 @@ import Joi from 'joi';
 
 import { IdentitiesModule } from './identities/identities.module';
 import { PolymeshModule } from './polymesh/polymesh.module';
+import { RelayerAccountsModule } from './relayer-accounts/relayer-accounts.module';
+import { SettlementsModule } from './settlements/settlements.module';
 import { TokensModule } from './tokens/tokens.module';
 
 @Module({
@@ -21,6 +23,8 @@ import { TokensModule } from './tokens/tokens.module';
     TokensModule,
     PolymeshModule,
     IdentitiesModule,
+    SettlementsModule,
+    RelayerAccountsModule,
   ],
 })
 export class AppModule {}
