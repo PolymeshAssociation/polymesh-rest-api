@@ -1134,10 +1134,10 @@
     "@types/websocket" "^1.0.1"
     websocket "^1.0.33"
 
-"@polymathnetwork/polymesh-sdk@6.0.0-beta.17":
-  version "6.0.0-beta.17"
-  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-6.0.0-beta.17.tgz#4889169fc89fac27f2ab13780a442eef9b04de3b"
-  integrity sha512-zp7TsEY8/prSCJFZnecMNSZ5Z685/CkTEUjZA1b/ceJc/a9fD0qYLxrKiKf6TWKfIfVsb567oRl8NTCgu2vdBQ==
+"@polymathnetwork/polymesh-sdk@6.0.0-beta.19":
+  version "6.0.0-beta.19"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-6.0.0-beta.19.tgz#91e251c93ba965799d9e116b3f3411a166093f93"
+  integrity sha512-H6JSfATMrXvTraFYb89ShyHrpEV4KOfdj3kLMvl0qBqWOmrF+6hoR2OUonTTar1QEM0cV61LdVGcMUaj39KHlw==
   dependencies:
     "@polkadot/api" "3.5.1"
     "@polkadot/util" "5.3.1"
