@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { MockPolymeshClass } from '~/test-utils/mocks';
 
 import { IdentitiesService } from './identities.service';
@@ -16,7 +17,7 @@ describe('IdentitiesService', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule],
+      imports: [PolymeshModule, PortfoliosModule],
       providers: [IdentitiesService],
     })
       .overrideProvider(POLYMESH_API)

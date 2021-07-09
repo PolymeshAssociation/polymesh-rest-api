@@ -6,10 +6,14 @@ export class AccountModel {
   @ApiProperty({
     type: 'string',
   })
-  key: string;
+  key?: string;
 
   @ApiProperty({
     type: 'string',
   })
-  address: string;
+  address?: string;
+
+  constructor(model?: AccountModel) {
+    Object.assign(this.address, model);
+  }
 }

@@ -43,4 +43,8 @@ export class PortfolioModel {
     type: IdentityModel,
   })
   owner?: IdentityModel;
+
+  constructor(model?: PortfolioModel) {
+    Object.assign(this, model);
+  }
 }

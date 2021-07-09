@@ -14,20 +14,20 @@ export class AuthorizationRequestModel {
     description: 'Unique authorization request id',
     example: '123',
   })
-  authId: BigNumber;
+  authId?: BigNumber;
 
   @ApiProperty({
     description: 'Identity details of the issuer',
     type: IdentityModel,
   })
-  issuer: IdentityModel;
+  issuer?: IdentityModel;
 
   @ApiProperty({
     description: 'Identity or Account to which the request was made',
   })
-  target: SignerModel;
+  target?: SignerModel;
 
-  data: AuthorizationModel;
+  data?: AuthorizationModel;
 
   @ApiProperty({
     type: Date,
@@ -35,5 +35,9 @@ export class AuthorizationRequestModel {
     nullable: true,
   })
   @IsDate()
-  expiry: Date | null;
+  expiry?: Date | null;
+
+  constructor(model?: AuthorizationRequestModel) {
+    Object.assign(this, model);
+  }
 }

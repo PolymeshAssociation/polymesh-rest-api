@@ -10,5 +10,5 @@ export class PaginatedParamsDto {
 
   @IsOptional()
   @IsHexadecimal()
-  readonly start: string;
+  readonly start?: string;
 }

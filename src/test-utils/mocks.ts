@@ -1,12 +1,13 @@
 /* istanbul ignore file */
 
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
     [K in keyof T]: T[K] extends (...args: infer Args) => unknown
-      ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
-      : T[K];
+    ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
+    : T[K];
   };
 
 /* Polymesh SDK */
@@ -41,11 +42,17 @@ export class MockVenueClass {
 }
 
 export class MockIdentityClass {
+  portfolios = new MockPortfolios();
+  authorizations = new MockIdentityAuthorization();
+  public getPrimaryKey = jest.fn();
+  public areSecondaryKeysFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
+  public getVenues = jest.fn();
+  public getSecondaryKeys = jest.fn();
 }
 
 export class MockTransactionQueueClass {
-  constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
+  constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) { }
 
   public run = jest.fn();
 }
@@ -57,3 +64,21 @@ export class MockRelayerAccountsService {
 
   public findAll = jest.fn().mockReturnValue([]);
 }
+
+export class MockPortfolios {
+  public getPortfolios = jest.fn();
+}
+
+export class MockPortfolio {
+  id = new BigNumber(1);
+  public getName = jest.fn();
+  public getTokenBalances = jest.fn();
+  public isCustodiedBy = jest.fn();
+  public getCustodian = jest.fn();
+}
+
+export class MockIdentityAuthorization {
+  public getSent = jest.fn();
+  public getReceived = jest.fn();
+}
+

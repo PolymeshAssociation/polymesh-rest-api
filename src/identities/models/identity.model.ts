@@ -10,14 +10,14 @@ export class IdentityModel {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
     description: 'Unique identity key',
   })
-  did: string;
+  did?: string;
 
   @ApiProperty({
     type: 'string',
     description: 'Primary key of the identity',
     example: '5grwXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx',
   })
-  primaryKey: string;
+  primaryKey?: string;
 
   @ApiProperty({
     description: 'Secondary keys of the identity',
@@ -28,5 +28,9 @@ export class IdentityModel {
     type: 'boolean',
     description: 'Indicator to know if secondary keys are frozen or not',
   })
-  secondaryKeysFrozen: boolean;
+  secondaryKeysFrozen?: boolean;
+
+  constructor(model?: IdentityModel) {
+    Object.assign(this, model);
+  }
 }

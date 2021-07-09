@@ -50,7 +50,7 @@ export class IdentitiesController {
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
     private readonly portfoliosService: PortfoliosService
-  ) {}
+  ) { }
 
   @Get(':did')
   @ApiOperation({
