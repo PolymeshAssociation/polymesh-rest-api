@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsDateString, IsNumberString, IsOptional } from 'class-validator';
+import { IsDate, IsNumber, IsNumberString, IsOptional, ValidateNested } from 'class-validator';
 
 import { ToBigNumber, ToPortfolioLike } from '~/common/decorators/transformation';
 import { IsTicker } from '~/common/decorators/validation';
@@ -23,16 +23,16 @@ class LegDto {
 
   @ApiProperty({
     type: () => PortfolioDto,
-    description: 'Origin Portfolio',
   })
+  @ValidateNested()
   @Type(() => PortfolioDto)
   @ToPortfolioLike()
   readonly from: PortfolioLike;
 
   @ApiProperty({
     type: () => PortfolioDto,
-    description: 'Destination Portfolio',
   })
+  @ValidateNested()
   @Type(() => PortfolioDto)
   @ToPortfolioLike()
   readonly to: PortfolioLike;
@@ -46,6 +46,7 @@ class LegDto {
 }
 
 export class CreateInstructionDto extends SignerDto {
+  @ValidateNested({ each: true })
   @Type(() => LegDto)
   readonly legs: LegDto[];
 
@@ -55,7 +56,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   readonly tradeDate?: Date;
 
   @ApiProperty({
@@ -64,7 +65,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   readonly valueDate?: Date;
 
   @ApiProperty({
@@ -75,7 +76,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsNumberString()
+  @IsNumber()
   @ToBigNumber()
   readonly endBlock?: BigNumber;
 }
