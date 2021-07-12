@@ -2,7 +2,17 @@
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
-import { IsHexadecimal, IsUppercase, Length, Matches, MaxLength } from 'class-validator';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import {
+  IsHexadecimal,
+  IsUppercase,
+  Length,
+  Matches,
+  MaxLength,
+  registerDecorator,
+  ValidationArguments,
+  ValidationOptions,
+} from 'class-validator';
 
 import { DID_LENGTH } from '~/identities/identities.consts';
 import { MAX_TICKER_LENGTH } from '~/tokens/tokens.consts';
@@ -23,4 +33,24 @@ export function IsDid() {
 
 export function IsTicker() {
   return applyDecorators(MaxLength(MAX_TICKER_LENGTH), IsUppercase());
+}
+
+export function IsBigNumber(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isBigNumber',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          return value instanceof BigNumber && !value.isNaN();
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a number`;
+        },
+      },
+    });
+  };
 }

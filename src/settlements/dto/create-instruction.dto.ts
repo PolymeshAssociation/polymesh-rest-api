@@ -2,12 +2,11 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber, IsNumberString, IsOptional, ValidateNested } from 'class-validator';
+import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
-import { ToBigNumber, ToPortfolioLike } from '~/common/decorators/transformation';
-import { IsTicker } from '~/common/decorators/validation';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { PortfolioDto } from '~/common/dto/portfolio.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 
@@ -17,7 +16,7 @@ class LegDto {
     example: '1000',
     description: 'Amount of the Asset to be transferred',
   })
-  @IsNumberString()
+  @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 
@@ -26,16 +25,14 @@ class LegDto {
   })
   @ValidateNested()
   @Type(() => PortfolioDto)
-  @ToPortfolioLike()
-  readonly from: PortfolioLike;
+  readonly from: PortfolioDto;
 
   @ApiProperty({
     type: () => PortfolioDto,
   })
   @ValidateNested()
   @Type(() => PortfolioDto)
-  @ToPortfolioLike()
-  readonly to: PortfolioLike;
+  readonly to: PortfolioDto;
 
   @ApiProperty({
     description: 'Security Token ticker',
@@ -76,7 +73,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly endBlock?: BigNumber;
 }
