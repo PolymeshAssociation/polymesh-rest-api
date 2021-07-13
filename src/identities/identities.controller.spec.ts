@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
+
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
@@ -15,6 +16,7 @@ import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentityClass, MockPolymeshClass, MockPortfolio } from '~/test-utils/mocks';
 import { TokensService } from '~/tokens/tokens.service';
+
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
@@ -30,16 +32,16 @@ describe('IdentitiesController', () => {
 
   const mockIdentitiesService = {
     findOne: jest.fn(),
-    parseIdentity: jest.fn()
+    parseIdentity: jest.fn(),
   };
 
   const mockAuthorizationsService = {
-    parseAuthorizationRequest: jest.fn()
+    parseAuthorizationRequest: jest.fn(),
   };
 
   const mockPortfoliosService = {
-    parsePortfolio: jest.fn()
-  }
+    parsePortfolio: jest.fn(),
+  };
   let polymeshService: PolymeshService;
 
   beforeEach(async () => {
@@ -104,9 +106,9 @@ describe('IdentitiesController', () => {
       const did = '0x6'.padEnd(66, '0');
 
       const mockIdentityDetails = new IdentityModel({
-        primaryKey: "5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e",
+        primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
         secondaryKeysFrozen: false,
-        secondaryKeys: []
+        secondaryKeys: [],
       });
 
       const mockIdentity = new MockIdentityClass();
@@ -123,20 +125,19 @@ describe('IdentitiesController', () => {
   });
 
   describe('getPendingAuthorizations', () => {
-
     it('should return list of pending authorizations received by identity', async () => {
       const did = '0x6'.padEnd(66, '0');
       const pendingAuthorization = new AuthorizationRequestModel({
         authId: new BigNumber(2236),
         issuer: {
           primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
-          did
+          did,
         },
         data: {
           type: AuthorizationType.TransferTicker,
-          value: 'FOO'
+          value: 'FOO',
         },
-        expiry: null
+        expiry: null,
       });
 
       const mockIdentity = new MockIdentityClass();
@@ -152,7 +153,10 @@ describe('IdentitiesController', () => {
       const mockIdentity = new MockIdentityClass();
       mockIdentity.authorizations.getReceived.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      const result = await controller.getPendingAuthorizations({ did }, { type: AuthorizationType.JoinIdentity });
+      const result = await controller.getPendingAuthorizations(
+        { did },
+        { type: AuthorizationType.JoinIdentity }
+      );
       expect(result).toEqual([]);
     });
 
@@ -198,7 +202,7 @@ describe('IdentitiesController', () => {
       const mockDetails = new PortfolioModel({
         id: new BigNumber(2),
         name: 'P-1',
-        tokenBalances: []
+        tokenBalances: [],
       });
       mockDetails.id = new BigNumber(1);
       mockDetails.name = 'P-1';

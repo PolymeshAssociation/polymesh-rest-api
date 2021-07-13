@@ -54,3 +54,12 @@ export function FromIdentity() {
 export function FromBigNumber() {
   return applyDecorators(Transform(({ value }: { value: BigNumber }) => value.toString()));
 }
+
+/**
+ * String to Array
+ */
+export function FromStringToArray() {
+  return applyDecorators(
+    Transform(({ value }: { value: string }) => value.split(',').map(v => v.trim()))
+  );
+}

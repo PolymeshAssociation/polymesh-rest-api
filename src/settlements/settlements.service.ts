@@ -108,7 +108,7 @@ export class SettlementsService {
     return processQueue(instruction.affirm, undefined, { signer: address });
   }
 
-  public async getUserVenues(did: string) {
+  public async getUserVenues(did: string): Promise<Venue[]> {
     const identity = await this.identitiesService.findOne(did);
     return identity.getVenues();
   }

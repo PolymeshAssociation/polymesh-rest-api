@@ -10,7 +10,10 @@ import { TokenDetailsModel } from '~/tokens/models/token-details.model';
 export class PortfoliosService {
   // TODO method to be removed once serialization func is built
   /* istanbul ignore next */
-  async parsePortfolio(portfolio: DefaultPortfolio | NumberedPortfolio, did: string) {
+  async parsePortfolio(
+    portfolio: DefaultPortfolio | NumberedPortfolio,
+    did: string
+  ): Promise<PortfolioModel> {
     const parsedPortfolio = new PortfolioModel();
     if ((<NumberedPortfolio>portfolio).getName) {
       const numberedPortfolio = <NumberedPortfolio>portfolio;

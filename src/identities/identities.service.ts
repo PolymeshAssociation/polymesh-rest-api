@@ -7,8 +7,11 @@ import { map, snakeCase, uniq } from 'lodash';
 import { AccountModel } from '~/identities/models/account.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { SecondaryKeyModel } from '~/identities/models/secondary-key.model';
+import { SignerModel } from '~/identities/models/signer.model';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
+
+import { PermissionsModel } from './models/secondary-key.model';
 
 @Injectable()
 export class IdentitiesService {
@@ -17,7 +20,7 @@ export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly portfoliosService: PortfoliosService
-  ) {}
+  ) { }
 
   /**
    * Method to get identity for a specific did
@@ -53,7 +56,7 @@ export class IdentitiesService {
       for (const sk of secondaryKeys) {
         const secondaryKey = new SecondaryKeyModel();
         secondaryKey.signer = this.parseSigner(sk.signer);
-        secondaryKey.permissions = await this.permissionsToMeshPermissions(sk.permissions);
+        secondaryKey.permissions = await this.parsePermissions(sk.permissions);
         identityModel.secondaryKeys.push(secondaryKey);
       }
     }
@@ -65,7 +68,7 @@ export class IdentitiesService {
    * Skipping test cases as this would be replaced after serialization
    */
   /** istanbul ignore next */
-  public parseSigner(signer: Signer) {
+  public parseSigner(signer: Signer): SignerModel {
     if (signer instanceof Account) {
       const accountDto = new AccountModel();
       accountDto.address = signer.address;
@@ -77,11 +80,11 @@ export class IdentitiesService {
   }
 
   /**
-   * Method to convert permission to mesh permissions
+   * Method to parse permissions
    * Skipping test cases as this would be replaced after serialization
    */
   /** istanbul ignore next */
-  public async permissionsToMeshPermissions(permissions: Permissions) {
+  public parsePermissions(permissions: Permissions): PermissionsModel {
     const { tokens, transactions, portfolios } = permissions;
 
     const extrinsicDict: Record<string, string[]> = {};

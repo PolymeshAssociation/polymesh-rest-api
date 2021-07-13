@@ -10,33 +10,22 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
-import { IsEnum, IsOptional } from 'class-validator';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { IsDid } from '~/common/decorators/validation';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { AuthorizationTypeParams, DidParams } from '~/common/dto/params.dto';
 import { PortfolioDto } from '~/common/dto/portfolio.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentityModel } from '~/identities/models/identity.model';
+import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
 import { IdentitiesService } from './identities.service';
-
-class DidParams {
-  @IsDid()
-  readonly did: string;
-}
-
-class AuthorizationTypeParams {
-  @IsEnum(AuthorizationType)
-  @IsOptional()
-  readonly type?: AuthorizationType;
-}
 
 @ApiTags('identities')
 @Controller('identities')
@@ -50,7 +39,7 @@ export class IdentitiesController {
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
     private readonly portfoliosService: PortfoliosService
-  ) { }
+  ) {}
 
   @Get(':did')
   @ApiOperation({
@@ -67,7 +56,7 @@ export class IdentitiesController {
     description: 'Returns basic details of identity',
     type: IdentityModel,
   })
-  async getIdentityDetails(@Param() { did }: DidParams) {
+  async getIdentityDetails(@Param() { did }: DidParams): Promise<IdentityModel> {
     this.logger.debug(`Method begins here for did ${did}`);
     const identity = await this.identitiesService.findOne(did);
     const identityModel = await this.identitiesService.parseIdentity(identity);
@@ -108,7 +97,7 @@ export class IdentitiesController {
     @Param() { did }: DidParams,
     @Query() { type }: AuthorizationTypeParams,
     @Query('includeExpired', new DefaultValuePipe(true)) includeExpired?: boolean
-  ) {
+  ): Promise<AuthorizationRequestModel[]> {
     this.logger.debug(`Fetching pending authorization received by did ${did}`);
 
     const identity = await this.identitiesService.findOne(did);
@@ -155,14 +144,14 @@ export class IdentitiesController {
   async getRequestedAuthorizations(
     @Param() { did }: DidParams,
     @Query() { size, start }: PaginatedParamsDto
-  ) {
+  ): Promise<PaginatedResultsModel<AuthorizationRequestModel>> {
     this.logger.debug(`Fetching requested authorizations for ${did} from start`);
 
     const identity = await this.identitiesService.findOne(did);
 
     const requestedAuthorizations = await identity.authorizations.getSent({
       size,
-      start,
+      start: start?.toString(),
     });
 
     const authorizationRequests: AuthorizationRequestModel[] = [];
@@ -198,7 +187,7 @@ export class IdentitiesController {
     isArray: true,
   })
   @Get(':did/portfolios')
-  async getPortfolios(@Param() { did }: DidParams) {
+  async getPortfolios(@Param() { did }: DidParams): Promise<PortfolioModel[]> {
     this.logger.debug(`Fetching portfolios for ${did}`);
     const identity = await this.identitiesService.findOne(did);
 
@@ -268,7 +257,7 @@ export class IdentitiesController {
     isArray: true,
   })
   @Get(':did/venues')
-  async getVenues(@Param() { did }: DidParams) {
+  async getVenues(@Param() { did }: DidParams): Promise<ResultsModel<string>> {
     const venues = await this.settlementsService.getUserVenues(did);
     return { results: venues.map(({ id }) => id.toString()) };
   }

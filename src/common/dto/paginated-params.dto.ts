@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { IsHexadecimal, IsNumber, IsOptional, Max } from 'class-validator';
+import { IsNumber, IsOptional, Max } from 'class-validator';
 
 export class PaginatedParamsDto {
   @IsNumber()
@@ -9,6 +9,5 @@ export class PaginatedParamsDto {
   readonly size: number = 10;
 
   @IsOptional()
-  @IsHexadecimal()
-  readonly start?: string;
+  readonly start?: string | number;
 }
