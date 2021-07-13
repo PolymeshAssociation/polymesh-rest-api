@@ -20,7 +20,7 @@ export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly portfoliosService: PortfoliosService
-  ) { }
+  ) {}
 
   /**
    * Method to get identity for a specific did

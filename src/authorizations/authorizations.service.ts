@@ -52,7 +52,7 @@ export class AuthorizationsService {
         value = null;
         break;
       case AuthorizationType.JoinIdentity:
-        value = this.identitiesService.permissionsToMeshPermissions(data.value);
+        value = this.identitiesService.parsePermissions(data.value);
         break;
       case AuthorizationType.PortfolioCustody:
         value = this.portfoliosService.portfolioToPortfolioId(data.value);
