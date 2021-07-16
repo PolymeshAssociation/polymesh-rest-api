@@ -56,10 +56,10 @@ export class SettlementsController {
       createInstructionDto
     );
 
-    return {
+    return new InstructionIdDto({
       instructionId,
       transactions,
-    };
+    });
   }
 
   @ApiTags('instructions')
@@ -78,6 +78,6 @@ export class SettlementsController {
   ): Promise<TransactionQueueDto> {
     const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
 
-    return { transactions };
+    return new TransactionQueueDto({ transactions });
   }
 }
