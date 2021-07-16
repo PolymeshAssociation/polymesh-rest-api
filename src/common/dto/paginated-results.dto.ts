@@ -13,4 +13,11 @@ export class PaginatedResultsDto<DataType> extends ResultsDto<DataType> {
 
   @ApiProperty()
   readonly start: string;
+
+  constructor(dto: PaginatedResultsDto<DataType>) {
+    const { results, ...rest } = dto;
+    super({ results });
+
+    Object.assign(this, rest);
+  }
 }

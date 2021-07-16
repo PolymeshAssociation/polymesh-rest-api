@@ -1,11 +1,6 @@
-import {
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Param,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Instruction, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IsDid } from '~/common/decorators/validation';
@@ -20,7 +15,6 @@ class DidParams {
 
 @ApiTags('identities')
 @Controller('identities')
-@UseInterceptors(ClassSerializerInterceptor)
 export class IdentitiesController {
   constructor(
     private readonly tokensService: TokensService,
@@ -40,10 +34,10 @@ export class IdentitiesController {
     example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
   })
   @Get(':did/tokens')
-  public async getTokens(@Param() { did }: DidParams): Promise<ResultsDto<string>> {
+  public async getTokens(@Param() { did }: DidParams): Promise<ResultsDto<SecurityToken>> {
     const tokens = await this.tokensService.findAllByOwner(did);
 
-    return { results: tokens.map(({ ticker }) => ticker) };
+    return new ResultsDto({ results: tokens });
   }
 
   @ApiTags('settlements', 'instructions')
@@ -59,9 +53,11 @@ export class IdentitiesController {
     example: ['123', '456', '789'],
   })
   @Get(':did/pending-instructions')
-  public async getPendingInstructions(@Param() { did }: DidParams): Promise<ResultsDto<string>> {
+  public async getPendingInstructions(
+    @Param() { did }: DidParams
+  ): Promise<ResultsDto<Instruction>> {
     const pendingInstructions = await this.settlementsService.findPendingInstructionsByDid(did);
 
-    return { results: pendingInstructions.map(({ id }) => id.toString()) };
+    return new ResultsDto({ results: pendingInstructions });
   }
 }

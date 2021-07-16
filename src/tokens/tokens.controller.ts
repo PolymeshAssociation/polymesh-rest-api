@@ -1,10 +1,4 @@
-import {
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Param,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { IsTicker } from '~/common/decorators/validation';
@@ -18,7 +12,6 @@ class TickerParams {
 
 @ApiTags('tokens')
 @Controller('tokens')
-@UseInterceptors(ClassSerializerInterceptor)
 export class TokensController {
   constructor(private readonly tokensService: TokensService) {}
 
@@ -36,7 +29,6 @@ export class TokensController {
       assetType,
       name,
       totalSupply,
-      primaryIssuanceAgent: pia,
       isDivisible,
     } = await this.tokensService.findDetails(ticker);
 
@@ -45,7 +37,6 @@ export class TokensController {
       assetType,
       name,
       totalSupply,
-      pia,
       isDivisible,
     });
   }

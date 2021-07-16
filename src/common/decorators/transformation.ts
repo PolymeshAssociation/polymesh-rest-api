@@ -3,8 +3,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, Venue } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity, Venue } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
+
+import { Entity } from '~/common/types';
 
 /**
  * String -> BigNumber
@@ -21,10 +23,27 @@ export function FromVenue() {
 }
 
 /**
- * Identity -> string
+ * Entity -> POJO
  */
-export function FromIdentity() {
-  return applyDecorators(Transform(({ value: { did } }: { value: Identity }) => did));
+export function FromEntity() {
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value.toJson()));
+}
+
+/**
+ * Transforms every Entity in an array to its POJO version
+ */
+export function FromMaybeEntityArray() {
+  return applyDecorators(
+    Transform(({ value }: { value: unknown[] }) =>
+      value.map(val => {
+        if (isEntity(val)) {
+          return val.toJson();
+        }
+
+        return val;
+      })
+    )
+  );
 }
 
 /**

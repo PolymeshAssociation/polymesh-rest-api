@@ -1,12 +1,4 @@
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
@@ -27,7 +19,6 @@ class IdParams {
 
 @ApiTags('settlements')
 @Controller({})
-@UseInterceptors(ClassSerializerInterceptor)
 export class SettlementsController {
   constructor(private readonly settlementsService: SettlementsService) {}
 
@@ -60,15 +51,15 @@ export class SettlementsController {
     @Param() { id }: IdParams,
     @Body() createInstructionDto: CreateInstructionDto
   ): Promise<InstructionIdDto> {
-    const {
-      result: { id: instructionId },
-      transactions,
-    } = await this.settlementsService.createInstruction(id, createInstructionDto);
+    const { result: instructionId, transactions } = await this.settlementsService.createInstruction(
+      id,
+      createInstructionDto
+    );
 
-    return {
+    return new InstructionIdDto({
       instructionId,
       transactions,
-    };
+    });
   }
 
   @ApiTags('instructions')
@@ -87,6 +78,6 @@ export class SettlementsController {
   ): Promise<TransactionQueueDto> {
     const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
 
-    return { transactions };
+    return new TransactionQueueDto({ transactions });
   }
 }

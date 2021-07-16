@@ -8,3 +8,9 @@ export type QueueResult<T> = {
     transactionTag: TxTag;
   }[];
 };
+
+export interface Entity<Serialized> {
+  uuid: string;
+
+  toJson(): Serialized;
+}
