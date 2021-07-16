@@ -33,19 +33,13 @@ describe('TokensController', () => {
         isDivisible: false,
         name: 'name',
         owner: 'owner',
-        primaryIssuanceAgent: 'pia',
         totalSupply: 'totalSupply',
-      };
-      const { primaryIssuanceAgent, ...expected } = mockDetails;
-      const expectedDetails = {
-        pia: primaryIssuanceAgent,
-        ...expected,
       };
       mockTokensService.findDetails.mockResolvedValue(mockDetails);
 
       const result = await controller.findOne({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual(expectedDetails);
+      expect(result).toEqual(mockDetails);
     });
   });
 });

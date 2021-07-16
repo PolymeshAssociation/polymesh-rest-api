@@ -64,7 +64,7 @@ describe('SettlementsController', () => {
     it('should create an instruction and return the data returned by the service', async () => {
       const transactions = ['transaction'];
       const mockData = {
-        result: { id: 'id' },
+        result: 'fakeInstruction',
         transactions,
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
@@ -73,7 +73,7 @@ describe('SettlementsController', () => {
       const result = await controller.createInstruction({ id: new BigNumber('3') }, {} as any);
 
       expect(result).toEqual({
-        instructionId: 'id',
+        instructionId: 'fakeInstruction',
         transactions,
       });
     });
