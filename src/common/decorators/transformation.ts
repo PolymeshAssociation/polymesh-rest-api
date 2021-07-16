@@ -34,7 +34,7 @@ export function FromEntity() {
  */
 export function FromMaybeEntityArray() {
   return applyDecorators(
-    Transform(({ value }: { value: Entity<unknown>[] }) =>
+    Transform(({ value }: { value: unknown[] }) =>
       value.map(val => {
         if (isEntity(val)) {
           return val.toJson();
