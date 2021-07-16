@@ -16,7 +16,9 @@ export class InstructionIdDto extends TransactionQueueDto {
   readonly instructionId: Instruction;
 
   constructor(dto: InstructionIdDto) {
-    super();
-    Object.assign(this, dto);
+    const { transactions, ...rest } = dto;
+    super({ transactions });
+
+    Object.assign(this, rest);
   }
 }
