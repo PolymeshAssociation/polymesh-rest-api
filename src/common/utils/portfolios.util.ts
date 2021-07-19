@@ -18,20 +18,15 @@ export async function parsePortfolio(
     parsedPortfolio.name = 'default';
   }
   const tokenBalances = await portfolio.getTokenBalances();
-  parsedPortfolio.tokenBalances = [] as TokenBalanceModel[];
-  for (const tb of tokenBalances) {
-    // const tokenDetails = await tb.token.details();
-    // const tokenDetailsDto = new TokenDetailsModel();
-    // tokenDetailsDto.name = tokenDetails.name;
-    // tokenDetailsDto.assetType = tokenDetails.assetType;
-    parsedPortfolio.tokenBalances.push(
+  parsedPortfolio.tokenBalances = tokenBalances.map(
+    tb =>
       new TokenBalanceModel({
+        token: tb.token,
         total: tb.total,
         free: tb.free,
         locked: tb.locked,
       })
-    );
-  }
+  );
   const isCustodian = await portfolio.isCustodiedBy({ identity: did });
   if (!isCustodian) {
     parsedPortfolio.custodian = await portfolio.getCustodian();

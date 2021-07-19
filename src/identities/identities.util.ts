@@ -17,12 +17,13 @@ export async function parseIdentity(identity: Identity): Promise<IdentityModel> 
   identityModel.secondaryKeysFrozen = await identity.areSecondaryKeysFrozen();
   const secondaryKeys = await identity.getSecondaryKeys();
   if (secondaryKeys?.length > 0) {
-    identityModel.secondaryKeys = [];
-    for (const sk of secondaryKeys) {
-      const secondaryKey = new SecondaryKeyModel();
-      secondaryKey.signer = parseSigner(sk.signer);
-      identityModel.secondaryKeys.push(secondaryKey);
-    }
+    identityModel.secondaryKeys = secondaryKeys.map(
+      sk =>
+        new SecondaryKeyModel({
+          signer: parseSigner(sk.signer),
+          permissions: sk.permissions,
+        })
+    );
   }
   return identityModel;
 }

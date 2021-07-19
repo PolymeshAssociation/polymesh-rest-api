@@ -8,11 +8,6 @@ import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
 
 export class PortfolioModel {
   @ApiProperty({
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  did?: string;
-
-  @ApiProperty({
     nullable: true,
     example: '123',
     description: 'Portfolio number, do not send any value for the Default Portfolio',
@@ -35,6 +30,7 @@ export class PortfolioModel {
   @ApiProperty({
     description: 'Details of the custodian of the portfolio',
     type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @FromEntity()
   custodian?: Identity;
@@ -42,6 +38,7 @@ export class PortfolioModel {
   @ApiProperty({
     description: 'Owner details of the portfolio',
     type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @FromEntity()
   owner?: Identity;

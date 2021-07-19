@@ -28,16 +28,11 @@ export class TokenDetailsModel {
   totalSupply: BigNumber;
 
   @ApiProperty({
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-    description: 'Primary issuance agent',
+    type: 'boolean',
+    example: 'false',
   })
-  pia: Identity;
-
   isDivisible: boolean;
 
-  constructor();
-  constructor(dto: TokenDetailsModel);
   constructor(dto?: TokenDetailsModel) {
     Object.assign(this, dto);
   }

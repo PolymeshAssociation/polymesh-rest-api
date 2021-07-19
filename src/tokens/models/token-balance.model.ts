@@ -1,16 +1,18 @@
 /* istanbul ignore file */
-
 import { ApiProperty } from '@nestjs/swagger';
+import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
+import { FromEntity } from '~/common/decorators/transformation';
 import { BalanceModel } from '~/tokens/models/balance.model';
-import { TokenDetailsModel } from '~/tokens/models/token-details.model';
 
 export class TokenBalanceModel extends BalanceModel {
   @ApiProperty({
-    description: 'Identity details of the issuer',
-    type: TokenDetailsModel,
+    description: 'Ticker of the token',
+    type: 'string',
+    example: 'TICKER',
   })
-  readonly token?: TokenDetailsModel;
+  @FromEntity()
+  readonly token?: SecurityToken;
 
   constructor(model: TokenBalanceModel) {
     const { token, ...balance } = model;
