@@ -1,35 +1,23 @@
-import {
-  ClassSerializerInterceptor,
-  Controller,
-  DefaultValuePipe,
-  Get,
-  Logger,
-  Param,
-  Query,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, DefaultValuePipe, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
-
+import { AuthorizationRequest, AuthorizationType, Instruction, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { AuthorizationTypeParams, DidParams } from '~/common/dto/params.dto';
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
-import { IdentitiesService } from './identities.service';
 
 @ApiTags('identities')
 @Controller('identities')
-@UseInterceptors(ClassSerializerInterceptor)
 export class IdentitiesController {
   private readonly logger = new Logger(IdentitiesController.name);
 
@@ -97,7 +85,7 @@ export class IdentitiesController {
     @Param() { did }: DidParams,
     @Query() { type }: AuthorizationTypeParams,
     @Query('includeExpired', new DefaultValuePipe(true)) includeExpired?: boolean
-  ): Promise<AuthorizationRequestModel[]> {
+  ): Promise<ResultsModel<AuthorizationRequest>> {
     this.logger.debug(`Fetching pending authorization received by did ${did}`);
 
     const identity = await this.identitiesService.findOne(did);
@@ -106,13 +94,7 @@ export class IdentitiesController {
       includeExpired,
       type,
     });
-    const receivedAuthorizations = [];
-    for (const request of receivedPendingAuthorizations) {
-      receivedAuthorizations.push(
-        await this.authorizationsService.parseAuthorizationRequest(request)
-      );
-    }
-    return receivedAuthorizations;
+    return new ResultsModel({ results: receivedPendingAuthorizations });
   }
 
   @ApiOperation({
@@ -137,37 +119,30 @@ export class IdentitiesController {
     type: 'number',
     required: false,
   })
-  @ApiArrayResponse(AuthorizationRequestModel, {
+  @ApiArrayResponse('AuthorizationRequest', {
     paginated: true,
   })
   @Get(':did/authorizations/request')
   async getRequestedAuthorizations(
     @Param() { did }: DidParams,
     @Query() { size, start }: PaginatedParamsDto
-  ): Promise<PaginatedResultsModel<AuthorizationRequestModel>> {
+  ): Promise<PaginatedResultsModel<AuthorizationRequest>> {
     this.logger.debug(`Fetching requested authorizations for ${did} from start`);
 
     const identity = await this.identitiesService.findOne(did);
 
-    const requestedAuthorizations = await identity.authorizations.getSent({
+    const {
+      data, count, next
+    } = await identity.authorizations.getSent({
       size,
       start: start?.toString(),
     });
 
-    const authorizationRequests: AuthorizationRequestModel[] = [];
-    if (requestedAuthorizations.data?.length > 0) {
-      for (const request of requestedAuthorizations.data) {
-        authorizationRequests.push(
-          await this.authorizationsService.parseAuthorizationRequest(request)
-        );
-      }
-    }
-
-    return {
-      results: authorizationRequests,
-      total: requestedAuthorizations.count,
-      next: requestedAuthorizations.next,
-    } as PaginatedResultsModel<AuthorizationRequestModel>;
+    return new PaginatedResultsModel<AuthorizationRequest>({
+      results: data,
+      total: count,
+      next: next,
+    });
   }
 
   @ApiTags('portfolios')
@@ -183,7 +158,7 @@ export class IdentitiesController {
   })
   @ApiOkResponse({
     description: 'Return the list of all portfolios of the given identity',
-    type: PortfolioDto,
+    type: PortfolioModel,
     isArray: true,
   })
   @Get(':did/portfolios')
@@ -215,10 +190,10 @@ export class IdentitiesController {
     example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
   })
   @Get(':did/tokens')
-  public async getTokens(@Param() { did }: DidParams): Promise<ResultsModel<string>> {
+  public async getTokens(@Param() { did }: DidParams): Promise<ResultsModel<SecurityToken>> {
     const tokens = await this.tokensService.findAllByOwner(did);
 
-    return { results: tokens.map(({ ticker }) => ticker) };
+    return new ResultsModel({ results: tokens });
   }
 
   @ApiTags('settlements', 'instructions')
@@ -234,10 +209,12 @@ export class IdentitiesController {
     example: ['123', '456', '789'],
   })
   @Get(':did/pending-instructions')
-  public async getPendingInstructions(@Param() { did }: DidParams): Promise<ResultsModel<string>> {
+  public async getPendingInstructions(
+    @Param() { did }: DidParams
+  ): Promise<ResultsModel<Instruction>> {
     const pendingInstructions = await this.settlementsService.findPendingInstructionsByDid(did);
 
-    return { results: pendingInstructions.map(({ id }) => id.toString()) };
+    return new ResultsModel({ results: pendingInstructions });
   }
 
   @ApiTags('settlements')

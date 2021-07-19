@@ -3,35 +3,16 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, PortfolioLike, Venue } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity, Venue } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
 
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
+import { Entity } from '~/common/types';
 
 /**
  * String -> BigNumber
  */
 export function ToBigNumber() {
   return applyDecorators(Transform(({ value }: { value: string }) => new BigNumber(value)));
-}
-
-/**
- * PortfolioDto -> PortfolioLike
- */
-export function ToPortfolioLike() {
-  return applyDecorators(
-    Transform(
-      ({ value: { did, id } }: { value: PortfolioDto }): PortfolioLike => {
-        if (id) {
-          return {
-            identity: did,
-            id: new BigNumber(id),
-          };
-        }
-        return did;
-      }
-    )
-  );
 }
 
 /**
@@ -42,10 +23,27 @@ export function FromVenue() {
 }
 
 /**
- * Identity -> string
+ * Entity -> POJO
  */
-export function FromIdentity() {
-  return applyDecorators(Transform(({ value: { did } }: { value: Identity }) => did));
+export function FromEntity() {
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value.toJson()));
+}
+
+/**
+ * Transforms every Entity in an array to its POJO version
+ */
+export function FromMaybeEntityArray() {
+  return applyDecorators(
+    Transform(({ value }: { value: unknown[] }) =>
+      value.map(val => {
+        if (isEntity(val)) {
+          return val.toJson();
+        }
+
+        return val;
+      })
+    )
+  );
 }
 
 /**

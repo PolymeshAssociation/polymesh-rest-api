@@ -79,21 +79,19 @@ describe('IdentitiesController', () => {
 
   describe('getTokens', () => {
     it("should return the Identity's Tokens", async () => {
-      const tokens = [{ ticker: 'FOO' }, { ticker: 'BAR' }, { ticker: 'BAZ' }];
+      const tokens = ['FOO', 'BAR', 'BAZ'];
       mockTokensService.findAllByOwner.mockResolvedValue(tokens);
 
       const result = await controller.getTokens({ did: '0x1' });
 
-      expect(result).toEqual({ results: tokens.map(({ ticker }) => ticker) });
+      expect(result).toEqual({ results: tokens });
     });
   });
 
   describe('getPendingInstructions', () => {
     it("should return the Identity's pending Instructions", async () => {
       const expectedInstructions = ['1', '2', '3'];
-      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue(
-        expectedInstructions.map(id => ({ id }))
-      );
+      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue(expectedInstructions);
 
       const result = await controller.getPendingInstructions({ did: '0x1' });
 

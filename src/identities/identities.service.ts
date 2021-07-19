@@ -56,7 +56,6 @@ export class IdentitiesService {
       for (const sk of secondaryKeys) {
         const secondaryKey = new SecondaryKeyModel();
         secondaryKey.signer = this.parseSigner(sk.signer);
-        secondaryKey.permissions = await this.parsePermissions(sk.permissions);
         identityModel.secondaryKeys.push(secondaryKey);
       }
     }
@@ -70,53 +69,13 @@ export class IdentitiesService {
   /** istanbul ignore next */
   public parseSigner(signer: Signer): SignerModel {
     if (signer instanceof Account) {
-      const accountDto = new AccountModel();
-      accountDto.address = signer.address;
-      return accountDto;
+      return new AccountModel({
+        address: signer.address
+      });
     }
-    const identityDto = new IdentityModel();
-    identityDto.did = signer.did;
-    return identityDto;
+    return new IdentityModel({
+      did: signer.did
+    });;
   }
 
-  /**
-   * Method to parse permissions
-   * Skipping test cases as this would be replaced after serialization
-   */
-  /** istanbul ignore next */
-  public parsePermissions(permissions: Permissions): PermissionsModel {
-    const { tokens, transactions, portfolios } = permissions;
-
-    const extrinsicDict: Record<string, string[]> = {};
-    let extrinsic: { palletName: string; dispatchableNames: string[] }[] | null = null;
-
-    if (transactions) {
-      uniq(transactions)
-        .sort()
-        .forEach(tag => {
-          const [modName, txName] = tag.split('.');
-
-          const palletName = stringUpperFirst(modName);
-          const dispatchableName = snakeCase(txName);
-
-          const pallet = (extrinsicDict[palletName] = extrinsicDict[palletName] || []);
-
-          pallet.push(dispatchableName);
-        });
-
-      extrinsic = map(extrinsicDict, (val, key) => ({
-        palletName: key,
-        dispatchableNames: val,
-      }));
-    }
-
-    const value = {
-      asset: tokens?.map(({ ticker }) => ticker.toString()) ?? null,
-      extrinsic,
-      portfolio:
-        portfolios?.map(portfolio => this.portfoliosService.portfolioToPortfolioId(portfolio)) ??
-        null,
-    };
-    return value;
-  }
 }

@@ -1,9 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumberString, IsOptional } from 'class-validator';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
+import { IsOptional } from 'class-validator';
 
-import { IsDid } from '~/common/decorators/validation';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber, IsDid } from '~/common/decorators/validation';
 
 export class PortfolioDto {
   @ApiProperty({
@@ -18,6 +21,24 @@ export class PortfolioDto {
     description: 'Portfolio number, do not send any value for the Default Portfolio',
   })
   @IsOptional()
-  @IsNumberString()
-  readonly id?: string;
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly id?: BigNumber;
+
+  public toPortfolioLike(): PortfolioLike {
+    const { did, id } = this;
+
+    if (id) {
+      return {
+        identity: did,
+        id,
+      };
+    }
+
+    return did;
+  }
+
+  constructor(dto: Omit<PortfolioDto, 'toPortfolioLike'>) {
+    Object.assign(this, dto);
+  }
 }

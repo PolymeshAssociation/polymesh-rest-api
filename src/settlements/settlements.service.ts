@@ -29,19 +29,19 @@ export class SettlementsService {
     return identity.getPendingInstructions();
   }
 
-  public async findInstruction(id: string): Promise<InstructionStatusResult> {
+  public async findInstruction(id: BigNumber): Promise<InstructionStatusResult> {
     let instruction: Instruction;
 
     try {
       instruction = await this.polymeshService.polymeshApi.settlements.getInstruction({
-        id: new BigNumber(id),
+        id,
       });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { message } = err;
 
         if (message.startsWith("The Instruction doesn't")) {
-          throw new NotFoundException(`There is no Instruction with ID ${id}`);
+          throw new NotFoundException(`There is no Instruction with ID ${id.toString()}`);
         }
       }
 
@@ -52,7 +52,7 @@ export class SettlementsService {
   }
 
   public async createInstruction(
-    venueId: string,
+    venueId: BigNumber,
     createInstructuionDto: CreateInstructionDto
   ): Promise<QueueResult<Instruction>> {
     const { signer, ...rest } = createInstructuionDto;
@@ -61,13 +61,13 @@ export class SettlementsService {
 
     try {
       venue = await this.polymeshService.polymeshApi.settlements.getVenue({
-        id: new BigNumber(venueId),
+        id: venueId,
       });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith('The Venue')) {
-          throw new NotFoundException(`There is no Venue with ID ${venueId}`);
+          throw new NotFoundException(`There is no Venue with ID ${venueId.toString()}`);
         }
       }
 
@@ -75,12 +75,20 @@ export class SettlementsService {
     }
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
+    const params = {
+      ...rest,
+      legs: rest.legs.map(leg => ({
+        ...leg,
+        from: leg.from.toPortfolioLike(),
+        to: leg.to.toPortfolioLike(),
+      })),
+    };
 
-    return processQueue(venue.addInstruction, rest, { signer: address });
+    return processQueue(venue.addInstruction, params, { signer: address });
   }
 
   public async affirmInstruction(
-    id: string,
+    id: BigNumber,
     signerDto: SignerDto
   ): Promise<QueueResult<Instruction>> {
     const { signer } = signerDto;
@@ -89,14 +97,14 @@ export class SettlementsService {
 
     try {
       instruction = await this.polymeshService.polymeshApi.settlements.getInstruction({
-        id: new BigNumber(id),
+        id,
       });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { message } = err;
 
         if (message.startsWith("The Instruction doesn't exist")) {
-          throw new NotFoundException(`There is no Instruction with ID ${id}`);
+          throw new NotFoundException(`There is no Instruction with ID ${id.toString()}`);
         }
       }
 

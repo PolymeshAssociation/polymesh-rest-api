@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Instruction } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber } from '~/common/decorators/transformation';
+import { FromEntity } from '~/common/decorators/transformation';
 import { TransactionQueueDto } from '~/common/dto/transaction-queue.dto';
 
 export class InstructionIdDto extends TransactionQueueDto {
@@ -12,11 +12,13 @@ export class InstructionIdDto extends TransactionQueueDto {
     description: 'ID of the newly created settlement Instruction',
     example: '123',
   })
-  @FromBigNumber()
-  readonly instructionId: BigNumber;
+  @FromEntity()
+  readonly instructionId: Instruction;
 
   constructor(dto: InstructionIdDto) {
-    super();
-    Object.assign(this, dto);
+    const { transactions, ...rest } = dto;
+    super({ transactions });
+
+    Object.assign(this, rest);
   }
 }

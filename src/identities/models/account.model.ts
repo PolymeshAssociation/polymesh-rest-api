@@ -14,6 +14,6 @@ export class AccountModel {
   address?: string;
 
   constructor(model?: AccountModel) {
-    Object.assign(this.address, model);
+    Object.assign(this, model);
   }
 }

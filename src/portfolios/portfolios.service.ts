@@ -25,16 +25,15 @@ export class PortfoliosService {
     const tokenBalances = await portfolio.getTokenBalances();
     parsedPortfolio.tokenBalances = [] as TokenBalanceModel[];
     for (const tb of tokenBalances) {
-      const tokenDetails = await tb.token.details();
-      const tokenDetailsDto = new TokenDetailsModel();
-      tokenDetailsDto.name = tokenDetails.name;
-      tokenDetailsDto.assetType = tokenDetails.assetType;
-      parsedPortfolio.tokenBalances.push({
+      // const tokenDetails = await tb.token.details();
+      // const tokenDetailsDto = new TokenDetailsModel();
+      // tokenDetailsDto.name = tokenDetails.name;
+      // tokenDetailsDto.assetType = tokenDetails.assetType;
+      parsedPortfolio.tokenBalances.push(new TokenBalanceModel({
         total: tb.total,
         free: tb.free,
         locked: tb.locked,
-        token: tokenDetailsDto,
-      });
+      }));
     }
     const isCustodian = await portfolio.isCustodiedBy({ identity: did });
     if (!isCustodian) {
@@ -44,20 +43,5 @@ export class PortfoliosService {
     }
 
     return parsedPortfolio;
-  }
-
-  /**
-   * Method to parse portfolio details
-   */
-  /* istanbul ignore next */
-  public portfolioToPortfolioId(portfolio: DefaultPortfolio | NumberedPortfolio): PortfolioModel {
-    const {
-      owner: { did },
-    } = portfolio;
-    if ((<NumberedPortfolio>portfolio).getName) {
-      const numberedPortfolio = <NumberedPortfolio>portfolio;
-      return { did, id: numberedPortfolio.id };
-    }
-    return { did };
   }
 }

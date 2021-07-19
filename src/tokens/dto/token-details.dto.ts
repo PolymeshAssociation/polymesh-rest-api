@@ -4,14 +4,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity, KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber, FromIdentity } from '~/common/decorators/transformation';
+import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
 export class TokenDetailsDto {
   @ApiProperty({
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @FromIdentity()
+  @FromEntity()
   readonly owner: Identity;
 
   @ApiProperty({
@@ -27,14 +27,6 @@ export class TokenDetailsDto {
   @ApiProperty({ type: 'string', example: '1000' })
   @FromBigNumber()
   readonly totalSupply: BigNumber;
-
-  @ApiProperty({
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-    description: 'Primary issuance agent',
-  })
-  @FromIdentity()
-  readonly pia: Identity;
 
   readonly isDivisible: boolean;
 

@@ -10,5 +10,11 @@ export class TokenBalanceModel extends BalanceModel {
     description: 'Identity details of the issuer',
     type: TokenDetailsModel,
   })
-  token: TokenDetailsModel;
+  readonly token?: TokenDetailsModel;
+
+  constructor(model: TokenBalanceModel) {
+    const {token, ...balance} = model;
+    super(balance);
+    this.token = token;
+  }
 }
