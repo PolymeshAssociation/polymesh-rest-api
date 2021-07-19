@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber } from '~/common/decorators/transformation';
-import { IdentityModel } from '~/identities/models/identity.model';
+import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
 
 export class PortfolioModel {
@@ -34,15 +34,17 @@ export class PortfolioModel {
 
   @ApiProperty({
     description: 'Details of the custodian of the portfolio',
-    type: IdentityModel,
+    type: 'string',
   })
-  custodian?: IdentityModel;
+  @FromEntity()
+  custodian?: Identity;
 
   @ApiProperty({
     description: 'Owner details of the portfolio',
-    type: IdentityModel,
+    type: 'string',
   })
-  owner?: IdentityModel;
+  @FromEntity()
+  owner?: Identity;
 
   constructor(model?: PortfolioModel) {
     Object.assign(this, model);

@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
+import { PortfolioModel } from '~/common/models/portfolio.model';
 import { SignerModel } from '~/identities/models/signer.model';
-import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 
 export class ExtrinsicModel {
   palletName: string;

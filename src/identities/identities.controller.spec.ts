@@ -2,17 +2,13 @@ import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
-import { AuthorizationsModule } from '~/authorizations/authorizations.module';
-import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import { PortfolioModel } from '~/common/models/portfolio.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { PortfolioModel } from '~/portfolios/models/portfolio.model';
-import { PortfoliosModule } from '~/portfolios/portfolios.module';
-import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentityClass, MockPolymeshClass, MockPortfolio } from '~/test-utils/mocks';
 import { TokensService } from '~/tokens/tokens.service';
@@ -32,23 +28,15 @@ describe('IdentitiesController', () => {
 
   const mockIdentitiesService = {
     findOne: jest.fn(),
-    parseIdentity: jest.fn(),
   };
 
-  const mockAuthorizationsService = {
-    parseAuthorizationRequest: jest.fn(),
-  };
-
-  const mockPortfoliosService = {
-    parsePortfolio: jest.fn(),
-  };
   let polymeshService: PolymeshService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module = await Test.createTestingModule({
       controllers: [IdentitiesController],
-      imports: [PolymeshModule, PortfoliosModule, AuthorizationsModule],
+      imports: [PolymeshModule],
       providers: [TokensService, SettlementsService, IdentitiesService],
     })
       .overrideProvider(POLYMESH_API)
@@ -59,10 +47,6 @@ describe('IdentitiesController', () => {
       .useValue(mockSettlementsService)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
-      .overrideProvider(PortfoliosService)
-      .useValue(mockPortfoliosService)
-      .overrideProvider(AuthorizationsService)
-      .useValue(mockAuthorizationsService)
       .compile();
 
     controller = module.get<IdentitiesController>(IdentitiesController);
@@ -106,15 +90,15 @@ describe('IdentitiesController', () => {
       const mockIdentityDetails = new IdentityModel({
         primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
         secondaryKeysFrozen: false,
-        secondaryKeys: [],
       });
 
       const mockIdentity = new MockIdentityClass();
-      mockIdentity.getPrimaryKey.mockResolvedValue('XYZ');
+      mockIdentity.getPrimaryKey.mockResolvedValue(
+        '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e'
+      );
       mockIdentity.areSecondaryKeysFrozen.mockResolvedValue(false);
       mockIdentity.getSecondaryKeys.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      mockIdentitiesService.parseIdentity.mockResolvedValue(mockIdentityDetails);
 
       const result = await controller.getIdentityDetails({ did });
 
@@ -125,7 +109,7 @@ describe('IdentitiesController', () => {
   describe('getPendingAuthorizations', () => {
     it('should return list of pending authorizations received by identity', async () => {
       const did = '0x6'.padEnd(66, '0');
-      const pendingAuthorization = new AuthorizationRequestModel({
+      const pendingAuthorization = {
         authId: new BigNumber(2236),
         issuer: {
           primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
@@ -136,14 +120,13 @@ describe('IdentitiesController', () => {
           value: 'FOO',
         },
         expiry: null,
-      });
+      };
 
       const mockIdentity = new MockIdentityClass();
       mockIdentity.authorizations.getReceived.mockResolvedValue([pendingAuthorization]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      mockAuthorizationsService.parseAuthorizationRequest.mockResolvedValue(pendingAuthorization);
       const result = await controller.getPendingAuthorizations({ did }, {});
-      expect(result).toEqual([pendingAuthorization]);
+      expect(result).toEqual(new ResultsModel({ results: [pendingAuthorization] }));
     });
 
     it('should support filtering pending authorizations by authorization type', async () => {
@@ -155,7 +138,7 @@ describe('IdentitiesController', () => {
         { did },
         { type: AuthorizationType.JoinIdentity }
       );
-      expect(result).toEqual([]);
+      expect(result).toEqual(new ResultsModel({ results: [] }));
     });
 
     it('should support filtering pending authorizations by expiry of authorization', async () => {
@@ -164,7 +147,7 @@ describe('IdentitiesController', () => {
       mockIdentity.authorizations.getReceived.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
       const result = await controller.getPendingAuthorizations({ did }, {}, false);
-      expect(result).toEqual([]);
+      expect(result).toEqual(new ResultsModel({ results: [] }));
     });
   });
 
@@ -205,7 +188,6 @@ describe('IdentitiesController', () => {
       mockDetails.id = new BigNumber(1);
       mockDetails.name = 'P-1';
       mockDetails.tokenBalances = [];
-      mockPortfoliosService.parsePortfolio.mockResolvedValue(mockDetails);
       const result = await controller.getPortfolios({ did });
 
       expect(result).toEqual([mockDetails]);

@@ -1,20 +1,24 @@
 import { Controller, DefaultValuePipe, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AuthorizationRequest, AuthorizationType, Instruction, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
-import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import {
+  AuthorizationRequest,
+  AuthorizationType,
+  Instruction,
+  SecurityToken,
+} from '@polymathnetwork/polymesh-sdk/types';
+
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { AuthorizationTypeParams, DidParams } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { PortfolioModel } from '~/common/models/portfolio.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { parsePortfolio } from '~/common/utils/portfolios.util';
 import { IdentitiesService } from '~/identities/identities.service';
+import { parseIdentity } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
-import { PortfolioModel } from '~/portfolios/models/portfolio.model';
-import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
-
 
 @ApiTags('identities')
 @Controller('identities')
@@ -24,9 +28,7 @@ export class IdentitiesController {
   constructor(
     private readonly tokensService: TokensService,
     private readonly settlementsService: SettlementsService,
-    private readonly identitiesService: IdentitiesService,
-    private readonly authorizationsService: AuthorizationsService,
-    private readonly portfoliosService: PortfoliosService
+    private readonly identitiesService: IdentitiesService
   ) {}
 
   @Get(':did')
@@ -47,7 +49,7 @@ export class IdentitiesController {
   async getIdentityDetails(@Param() { did }: DidParams): Promise<IdentityModel> {
     this.logger.debug(`Method begins here for did ${did}`);
     const identity = await this.identitiesService.findOne(did);
-    const identityModel = await this.identitiesService.parseIdentity(identity);
+    const identityModel = await parseIdentity(identity);
     return identityModel;
   }
 
@@ -75,10 +77,9 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiOkResponse({
+  @ApiArrayResponse('AuthorizationRequest', {
     description: 'List of all pending authorizations received by the identity',
-    type: AuthorizationRequestModel,
-    isArray: true,
+    paginated: false,
   })
   @Get(':did/authorizations')
   async getPendingAuthorizations(
@@ -120,6 +121,7 @@ export class IdentitiesController {
     required: false,
   })
   @ApiArrayResponse('AuthorizationRequest', {
+    description: 'List of all requested authorizations by the identity',
     paginated: true,
   })
   @Get(':did/authorizations/request')
@@ -131,9 +133,7 @@ export class IdentitiesController {
 
     const identity = await this.identitiesService.findOne(did);
 
-    const {
-      data, count, next
-    } = await identity.authorizations.getSent({
+    const { data, count, next } = await identity.authorizations.getSent({
       size,
       start: start?.toString(),
     });
@@ -170,7 +170,7 @@ export class IdentitiesController {
 
     const portfolioDetails = [];
     for (const portfolio of portfolios) {
-      const details = await this.portfoliosService.parsePortfolio(portfolio, did);
+      const details = await parsePortfolio(portfolio, did);
       portfolioDetails.push(details);
     }
     this.logger.debug(`Returning details of ${portfolioDetails.length} portfolios for did ${did}`);
@@ -205,6 +205,7 @@ export class IdentitiesController {
     name: 'did',
   })
   @ApiArrayResponse('string', {
+    description: 'List of all pending instructions id',
     paginated: false,
     example: ['123', '456', '789'],
   })
@@ -228,10 +229,10 @@ export class IdentitiesController {
     type: 'string',
     required: true,
   })
-  @ApiOkResponse({
-    description: 'Returns the list of venue ids',
-    type: String,
-    isArray: true,
+  @ApiArrayResponse('string', {
+    description: 'List of all pending instructions id',
+    paginated: false,
+    example: ['123', '456', '789'],
   })
   @Get(':did/venues')
   async getVenues(@Param() { did }: DidParams): Promise<ResultsModel<string>> {

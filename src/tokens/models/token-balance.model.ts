@@ -13,7 +13,7 @@ export class TokenBalanceModel extends BalanceModel {
   readonly token?: TokenDetailsModel;
 
   constructor(model: TokenBalanceModel) {
-    const {token, ...balance} = model;
+    const { token, ...balance } = model;
     super(balance);
     this.token = token;
   }

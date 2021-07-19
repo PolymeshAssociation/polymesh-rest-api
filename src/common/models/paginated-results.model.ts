@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { NextKey } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ResultsModel } from '~/common/models/results.model';
 
