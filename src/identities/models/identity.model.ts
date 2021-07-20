@@ -1,36 +1,43 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { SignerType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { SecondaryKeyModel } from '~/identities/models/secondary-key.model';
+import { SignerModel } from '~/identities/models/signer.model';
 
-export class IdentityModel {
+export class IdentityModel extends SignerModel {
   @ApiProperty({
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-    description: 'Unique identity key',
+    description: 'Unique Identity identifier (DID: Decentralized IDentity)',
   })
-  did?: string;
+  readonly did: string;
 
   @ApiProperty({
     type: 'string',
-    description: 'Primary key of the identity',
+    description: 'Primary key of the Identity',
     example: '5grwXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx',
   })
-  primaryKey?: string;
+  readonly primaryKey: string;
 
   @ApiProperty({
-    description: 'Secondary keys of the identity',
+    description: 'Secondary keys of the Identity',
+    type: SecondaryKeyModel,
+    isArray: true,
   })
-  secondaryKeys?: SecondaryKeyModel[];
+  readonly secondaryKeys: SecondaryKeyModel[];
 
   @ApiProperty({
     type: 'boolean',
     description: 'Indicator to know if secondary keys are frozen or not',
   })
-  secondaryKeysFrozen?: boolean;
+  readonly secondaryKeysFrozen: boolean;
 
-  constructor(model?: IdentityModel) {
+  constructor(model: { did: string });
+  constructor(model: IdentityModel);
+  constructor(model: IdentityModel) {
+    super({ signerType: SignerType.Identity });
     Object.assign(this, model);
   }
 }

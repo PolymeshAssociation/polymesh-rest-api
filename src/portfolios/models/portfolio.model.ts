@@ -1,7 +1,9 @@
 /* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity } from '@polymathnetwork/polymesh-sdk/types';
+import { IsOptional } from 'class-validator';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
@@ -10,38 +12,43 @@ export class PortfolioModel {
   @ApiProperty({
     nullable: true,
     example: '123',
-    description: 'Portfolio number, do not send any value for the Default Portfolio',
+    description: 'Portfolio number. An empty value represents the Default Portfolio',
   })
   @FromBigNumber()
-  id?: BigNumber;
+  @IsOptional()
+  readonly id?: BigNumber;
 
   @ApiProperty({
     example: 'ABC',
-    description: 'Name of the portfolio',
+    description: 'Name of the Portfolio',
   })
-  name?: string;
+  @IsOptional()
+  readonly name?: string;
 
   @ApiProperty({
-    description: 'List of balances for each token in the portfolio',
+    description: 'List of balances for each token in the Portfolio',
     type: TokenBalanceModel,
   })
-  tokenBalances?: TokenBalanceModel[];
+  readonly tokenBalances: TokenBalanceModel[];
 
   @ApiProperty({
-    description: 'Details of the custodian of the portfolio',
+    description: 'Identity who custodies the Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    nullable: true,
+  })
+  @FromEntity()
+  @IsOptional()
+  readonly custodian?: Identity;
+
+  @ApiProperty({
+    description: 'Identity who owns the Portfolio',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @FromEntity()
-  custodian?: Identity;
-
-  @ApiProperty({
-    description: 'Owner details of the portfolio',
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @FromEntity()
-  owner?: Identity;
+  @IsOptional()
+  readonly owner?: Identity;
 
   constructor(model?: PortfolioModel) {
     Object.assign(this, model);

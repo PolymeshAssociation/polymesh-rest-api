@@ -9,29 +9,33 @@ import { SecondaryKeyModel } from '~/identities/models/secondary-key.model';
 import { SignerModel } from '~/identities/models/signer.model';
 
 /**
- * Method to parse identity from SDK
+ * Fetch and assemble data for an Identity
  */
-export async function parseIdentity(identity: Identity): Promise<IdentityModel> {
-  const identityModel = new IdentityModel();
-  identityModel.primaryKey = await identity.getPrimaryKey();
-  identityModel.secondaryKeysFrozen = await identity.areSecondaryKeysFrozen();
-  const secondaryKeys = await identity.getSecondaryKeys();
-  if (secondaryKeys?.length > 0) {
-    identityModel.secondaryKeys = secondaryKeys.map(
-      sk =>
+export async function createIdentityModel(identity: Identity): Promise<IdentityModel> {
+  const [primaryKey, secondaryKeysFrozen, secondaryKeys] = await Promise.all([
+    identity.getPrimaryKey(),
+    identity.areSecondaryKeysFrozen(),
+    identity.getSecondaryKeys(),
+  ]);
+  return new IdentityModel({
+    did: identity.did,
+    primaryKey,
+    secondaryKeysFrozen,
+    secondaryKeys: secondaryKeys.map(
+      ({ signer, permissions }) =>
         new SecondaryKeyModel({
-          signer: parseSigner(sk.signer),
-          permissions: sk.permissions,
+          signer: createSignerModel(signer),
+          permissions: permissions,
         })
-    );
-  }
-  return identityModel;
+    ),
+  });
 }
 
 /**
- * Method to parse signer based on account/identity
+ * Create signer based on account/identity
  */
-export function parseSigner(signer: Signer): SignerModel {
+export function createSignerModel(signer: Signer): SignerModel {
+  // TODO @monitz87: replace with typeguard when they are exported from the SDK
   if (signer instanceof Account) {
     return new AccountModel({
       address: signer.address,

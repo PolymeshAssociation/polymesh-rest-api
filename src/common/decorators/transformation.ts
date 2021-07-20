@@ -5,6 +5,7 @@ import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { isEntity, Venue } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
+import { mapValues } from 'lodash';
 
 import { Entity } from '~/common/types';
 
@@ -16,17 +17,10 @@ export function ToBigNumber() {
 }
 
 /**
- * Venue -> string
- */
-export function FromVenue() {
-  return applyDecorators(Transform(({ value: { id } }: { value: Venue }) => id.toString()));
-}
-
-/**
  * Entity -> POJO
  */
 export function FromEntity() {
-  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value.toJson()));
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toJson()));
 }
 
 /**
@@ -37,7 +31,7 @@ export function FromMaybeEntityArray() {
     Transform(({ value }: { value: unknown[] }) =>
       value.map(val => {
         if (isEntity(val)) {
-          return val.toJson();
+          return val?.toJson();
         }
 
         return val;
@@ -47,17 +41,40 @@ export function FromMaybeEntityArray() {
 }
 
 /**
- * BigNumber -> string
+ * Entity from SDK -> POJO
  */
-export function FromBigNumber() {
-  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value.toString()));
+export function FromEntityObject() {
+  return applyDecorators(Transform(({ value }: { value: unknown }) => toJsonObject(value)));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toJsonObject<T>(obj: T): any {
+  if (isEntity(obj)) {
+    return obj.toJson();
+  }
+
+  if (obj instanceof BigNumber) {
+    return obj.toString();
+  }
+
+  if (obj instanceof Date) {
+    return obj.toISOString();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(toJsonObject);
+  }
+
+  if (obj && typeof obj === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return mapValues(obj as any, val => toJsonObject(val));
+  }
+  return obj;
 }
 
 /**
- * String to Array
+ * BigNumber -> string
  */
-export function FromStringToArray() {
-  return applyDecorators(
-    Transform(({ value }: { value: string }) => value.split(',').map(v => v.trim()))
-  );
+export function FromBigNumber() {
+  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
 }

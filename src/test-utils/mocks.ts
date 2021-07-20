@@ -64,6 +64,7 @@ export class MockPortfolios {
 }
 
 export class MockIdentityClass {
+  did: string;
   portfolios = new MockPortfolios();
   authorizations = new MockIdentityAuthorization();
   public getPrimaryKey = jest.fn();

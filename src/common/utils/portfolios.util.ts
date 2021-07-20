@@ -1,36 +1,56 @@
 /** istanbul ignore file */
 
-import { DefaultPortfolio, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  DefaultPortfolio,
+  Identity,
+  NumberedPortfolio,
+  PortfolioBalance,
+} from '@polymathnetwork/polymesh-sdk/types';
+import { merge } from 'lodash';
 
-import { PortfolioModel } from '~/common/models/portfolio.model';
+import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
 
-export async function parsePortfolio(
+export async function createPortfolioModel(
   portfolio: DefaultPortfolio | NumberedPortfolio,
   did: string
 ): Promise<PortfolioModel> {
-  const parsedPortfolio = new PortfolioModel();
+  let custodian: Identity;
+  let tokenBalances: PortfolioBalance[];
+  let name;
+
+  let portfolioId;
+  // TODO @monitz87: replace with typeguard when they are implemented in the SDK
   if ((<NumberedPortfolio>portfolio).getName) {
     const numberedPortfolio = <NumberedPortfolio>portfolio;
-    parsedPortfolio.id = await numberedPortfolio.id;
-    parsedPortfolio.name = await numberedPortfolio.getName();
+    portfolioId = numberedPortfolio.id;
+    [tokenBalances, custodian, name] = await Promise.all([
+      portfolio.getTokenBalances(),
+      portfolio.getCustodian(),
+      numberedPortfolio.getName(),
+    ]);
   } else {
-    parsedPortfolio.name = 'default';
-  }
-  const tokenBalances = await portfolio.getTokenBalances();
-  parsedPortfolio.tokenBalances = tokenBalances.map(
-    tb =>
-      new TokenBalanceModel({
-        token: tb.token,
-        total: tb.total,
-        free: tb.free,
-        locked: tb.locked,
-      })
-  );
-  const isCustodian = await portfolio.isCustodiedBy({ identity: did });
-  if (!isCustodian) {
-    parsedPortfolio.custodian = await portfolio.getCustodian();
+    [tokenBalances, custodian] = await Promise.all([
+      portfolio.getTokenBalances(),
+      portfolio.getCustodian(),
+    ]);
   }
 
-  return parsedPortfolio;
+  const portfolioModel = new PortfolioModel({
+    id: portfolioId,
+    name,
+    tokenBalances: tokenBalances.map(
+      ({ token, total, free, locked }) =>
+        new TokenBalanceModel({
+          token,
+          total,
+          free,
+          locked,
+        })
+    ),
+  });
+  if (custodian.did !== did) {
+    merge(portfolioModel, { custodian });
+  }
+  return portfolioModel;
 }

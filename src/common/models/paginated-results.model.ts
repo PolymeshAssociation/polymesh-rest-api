@@ -14,7 +14,8 @@ export class PaginatedResultsModel<DataType> extends ResultsModel<DataType> {
 
   @ApiProperty({
     type: 'string',
-    description: 'Offset start value for the next set of paginated data',
+    description:
+      'Offset start value for the next set of paginated data (null means there is no more data to fetch)',
   })
   readonly next: string | number | null;
 

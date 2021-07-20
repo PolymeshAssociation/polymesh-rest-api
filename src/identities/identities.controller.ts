@@ -1,22 +1,20 @@
-import { Controller, DefaultValuePipe, Get, Logger, Param, Query } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import {
-  AuthorizationRequest,
-  AuthorizationType,
-  Instruction,
-  SecurityToken,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
+import { AuthorizationType, Instruction, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { AuthorizationTypeParams, DidParams } from '~/common/dto/params.dto';
+import { AuthorizationsFilterDto, AuthorizationTypeDto, DidDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { PortfolioModel } from '~/common/models/portfolio.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { parsePortfolio } from '~/common/utils/portfolios.util';
+import { createPortfolioModel } from '~/common/utils/portfolios.util';
 import { IdentitiesService } from '~/identities/identities.service';
-import { parseIdentity } from '~/identities/identities.util';
+import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
+import { PortfolioModel } from '~/portfolios/models/portfolio.model';
+import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
@@ -28,39 +26,40 @@ export class IdentitiesController {
   constructor(
     private readonly tokensService: TokensService,
     private readonly settlementsService: SettlementsService,
-    private readonly identitiesService: IdentitiesService
+    private readonly identitiesService: IdentitiesService,
+    private readonly authorizationsService: AuthorizationsService,
+    private readonly portfoliosService: PortfoliosService
   ) {}
 
   @Get(':did')
   @ApiOperation({
-    summary: 'Get identity details',
-    description: 'This api will allow you to give the basic details of an identity',
+    summary: 'Get Identity details',
+    description: 'This endpoint will allow you to give the basic details of an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The unique did whose details are to be fetched',
+    description: 'The DID whose details are to be fetched',
     type: 'string',
     required: true,
   })
   @ApiOkResponse({
-    description: 'Returns basic details of identity',
+    description: 'Returns basic details of the Identity',
     type: IdentityModel,
   })
-  async getIdentityDetails(@Param() { did }: DidParams): Promise<IdentityModel> {
-    this.logger.debug(`Method begins here for did ${did}`);
+  async getIdentityDetails(@Param() { did }: DidDto): Promise<IdentityModel> {
+    this.logger.debug(`Get identity details for did ${did}`);
     const identity = await this.identitiesService.findOne(did);
-    const identityModel = await parseIdentity(identity);
-    return identityModel;
+    return createIdentityModel(identity);
   }
 
   @ApiOperation({
-    summary: 'Get pending authorizations received by an identity',
+    summary: 'Get pending Authorizations received by an Identity',
     description:
-      'This api will provide list of all the pending authorizations received by an identity',
+      'This endpoint will provide list of all the pending Authorizations received by an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The unique did whose pending authorizations are to be fetched',
+    description: 'The DID whose pending Authorizations are to be fetched',
     type: 'string',
     required: true,
   })
@@ -73,70 +72,65 @@ export class IdentitiesController {
   })
   @ApiQuery({
     name: 'includeExpired',
-    description: 'Indicates whether to include expired authorizations or not',
+    description: 'Indicates whether to include expired authorizations or not. Defaults to true',
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse('AuthorizationRequest', {
-    description: 'List of all pending authorizations received by the identity',
+  @ApiArrayResponse(AuthorizationRequest, {
+    description: 'List of all pending authorizations received by the Identity',
     paginated: false,
   })
-  @Get(':did/authorizations')
+  @Get(':did/pending-authorizations')
   async getPendingAuthorizations(
-    @Param() { did }: DidParams,
-    @Query() { type }: AuthorizationTypeParams,
-    @Query('includeExpired', new DefaultValuePipe(true)) includeExpired?: boolean
+    @Param() { did }: DidDto,
+    @Query() { type }: AuthorizationTypeDto,
+    @Query() { includeExpired }: AuthorizationsFilterDto
   ): Promise<ResultsModel<AuthorizationRequest>> {
     this.logger.debug(`Fetching pending authorization received by did ${did}`);
 
-    const identity = await this.identitiesService.findOne(did);
+    const results = await this.authorizationsService.getPendingByDid(did, includeExpired, type);
 
-    const receivedPendingAuthorizations = await identity.authorizations.getReceived({
-      includeExpired,
-      type,
-    });
-    return new ResultsModel({ results: receivedPendingAuthorizations });
+    return new ResultsModel({ results });
   }
 
   @ApiOperation({
-    summary: 'Get requested authorizations by an identity',
-    description: 'This api will provide list of all the authorizations added by an identity',
+    summary: 'Get Authorizations issued by an Identity',
+    description: 'This endpoint will provide a list of all the Authorizations added by an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The unique did whose pending authorizations are to be fetched',
+    description: 'The DID whose issued Authorizations are to be fetched',
     type: 'string',
     required: true,
   })
   @ApiQuery({
     name: 'size',
-    description: 'The number of pending authorizations to be fetched',
+    description: 'The number of issued Authorizations to be fetched',
     type: 'number',
     required: false,
   })
   @ApiQuery({
     name: 'start',
-    description: 'Start index from which values are to be fetched',
-    type: 'number',
+    description: 'Start key from which values are to be fetched',
+    type: 'string',
     required: false,
   })
-  @ApiArrayResponse('AuthorizationRequest', {
-    description: 'List of all requested authorizations by the identity',
+  @ApiArrayResponse(AuthorizationRequest, {
+    description: 'List of all Authorizations issued by the Identity',
     paginated: true,
   })
-  @Get(':did/authorizations/request')
-  async getRequestedAuthorizations(
-    @Param() { did }: DidParams,
+  @Get(':did/issued-authorizations')
+  async getIssuedAuthorizations(
+    @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AuthorizationRequest>> {
     this.logger.debug(`Fetching requested authorizations for ${did} from start`);
 
-    const identity = await this.identitiesService.findOne(did);
-
-    const { data, count, next } = await identity.authorizations.getSent({
+    const { data, count, next } = await this.authorizationsService.getIssuedByDid(
+      did,
       size,
-      start: start?.toString(),
-    });
+      start?.toString()
+    );
 
     return new PaginatedResultsModel<AuthorizationRequest>({
       results: data,
@@ -147,34 +141,32 @@ export class IdentitiesController {
 
   @ApiTags('portfolios')
   @ApiOperation({
-    summary: 'Get all portfolios of an identity',
-    description: 'This api will provide list of all the portfolios of that identity',
+    summary: 'Get all Portfolios of an Identity',
+    description: 'This endpoint will provide list of all the Portfolios of an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The unique did whose portfolios are to be fetched',
+    description: 'The DID whose Portfolios are to be fetched',
     type: 'string',
     required: true,
   })
-  @ApiOkResponse({
-    description: 'Return the list of all portfolios of the given identity',
-    type: PortfolioModel,
-    isArray: true,
+  @ApiArrayResponse(PortfolioModel, {
+    description: 'Return the list of all Portfolios of the given Identity',
+    paginated: false,
   })
   @Get(':did/portfolios')
-  async getPortfolios(@Param() { did }: DidParams): Promise<PortfolioModel[]> {
+  async getPortfolios(@Param() { did }: DidDto): Promise<ResultsModel<PortfolioModel>> {
     this.logger.debug(`Fetching portfolios for ${did}`);
-    const identity = await this.identitiesService.findOne(did);
 
-    const portfolios = await identity.portfolios.getPortfolios();
+    const portfolios = await this.portfoliosService.findAllByOwner(did);
 
-    const portfolioDetails = [];
-    for (const portfolio of portfolios) {
-      const details = await parsePortfolio(portfolio, did);
-      portfolioDetails.push(details);
-    }
-    this.logger.debug(`Returning details of ${portfolioDetails.length} portfolios for did ${did}`);
-    return portfolioDetails;
+    const results = await Promise.all(
+      portfolios.map(portfolio => createPortfolioModel(portfolio, did))
+    );
+
+    this.logger.debug(`Returning details of ${portfolios.length} portfolios for did ${did}`);
+
+    return new ResultsModel({ results });
   }
 
   @ApiTags('tokens')
@@ -190,7 +182,7 @@ export class IdentitiesController {
     example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
   })
   @Get(':did/tokens')
-  public async getTokens(@Param() { did }: DidParams): Promise<ResultsModel<SecurityToken>> {
+  public async getTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
     const tokens = await this.tokensService.findAllByOwner(did);
 
     return new ResultsModel({ results: tokens });
@@ -205,13 +197,13 @@ export class IdentitiesController {
     name: 'did',
   })
   @ApiArrayResponse('string', {
-    description: 'List of all pending instructions id',
+    description: 'List of IDs of all pending Instructions',
     paginated: false,
     example: ['123', '456', '789'],
   })
   @Get(':did/pending-instructions')
   public async getPendingInstructions(
-    @Param() { did }: DidParams
+    @Param() { did }: DidDto
   ): Promise<ResultsModel<Instruction>> {
     const pendingInstructions = await this.settlementsService.findPendingInstructionsByDid(did);
 
@@ -220,23 +212,23 @@ export class IdentitiesController {
 
   @ApiTags('settlements')
   @ApiOperation({
-    summary: 'Get all venues of an identity',
-    description: 'This api will provide list of venues for an identity',
+    summary: 'Get all Venues owned by an Identity',
+    description: 'This endpoint will provide list of venues for an identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The unique did whose venues are to be fetched',
+    description: 'The DID whose Venues are to be fetched',
     type: 'string',
     required: true,
   })
-  @ApiArrayResponse('string', {
-    description: 'List of all pending instructions id',
+  @ApiArrayResponse(Venue, {
+    description: 'List of IDs of all owned Venues',
     paginated: false,
     example: ['123', '456', '789'],
   })
   @Get(':did/venues')
-  async getVenues(@Param() { did }: DidParams): Promise<ResultsModel<string>> {
-    const venues = await this.settlementsService.getUserVenues(did);
-    return { results: venues.map(({ id }) => id.toString()) };
+  async getVenues(@Param() { did }: DidDto): Promise<ResultsModel<Venue>> {
+    const results = await this.settlementsService.findVenuesByOwner(did);
+    return new ResultsModel({ results });
   }
 }
