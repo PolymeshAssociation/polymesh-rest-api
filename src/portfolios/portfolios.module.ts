@@ -1,13 +1,14 @@
 /* istanbul ignore file */
 
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
-import { PortfoliosService } from '~/portfolios/portfolios.service';
+import { IdentitiesModule } from '~/identities/identities.module';
+
+import { PortfoliosService } from './portfolios.service';
 
 @Module({
-  imports: [],
+  imports: [forwardRef(() => IdentitiesModule)],
   providers: [PortfoliosService],
   exports: [PortfoliosService],
-  controllers: [],
 })
 export class PortfoliosModule {}

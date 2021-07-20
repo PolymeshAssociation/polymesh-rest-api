@@ -11,6 +11,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
@@ -99,7 +100,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findInstruction('123');
+          await service.findInstruction(new BigNumber('123'));
         } catch (err) {
           error = err;
         }
@@ -116,7 +117,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findInstruction('123');
+          await service.findInstruction(new BigNumber('123'));
         } catch (err) {
           error = err;
         }
@@ -129,7 +130,7 @@ describe('SettlementsService', () => {
 
         error = null;
         try {
-          await service.findInstruction('123');
+          await service.findInstruction(new BigNumber('123'));
         } catch (err) {
           error = err;
         }
@@ -146,7 +147,7 @@ describe('SettlementsService', () => {
         const expectedStatus = 'status';
         mockInstruction.getStatus.mockResolvedValue(expectedStatus);
 
-        const result = await service.findInstruction('123');
+        const result = await service.findInstruction(new BigNumber('123'));
 
         expect(result).toEqual(expectedStatus);
       });
@@ -165,7 +166,7 @@ describe('SettlementsService', () => {
         let error;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.createInstruction('123', {} as any);
+          await service.createInstruction(new BigNumber('123'), {} as any);
         } catch (err) {
           error = err;
         }
@@ -183,7 +184,7 @@ describe('SettlementsService', () => {
         let error;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.createInstruction('123', {} as any);
+          await service.createInstruction(new BigNumber('123'), {} as any);
         } catch (err) {
           error = err;
         }
@@ -197,7 +198,7 @@ describe('SettlementsService', () => {
         error = null;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.createInstruction('123', {} as any);
+          await service.createInstruction(new BigNumber('123'), {} as any);
         } catch (err) {
           error = err;
         }
@@ -224,7 +225,12 @@ describe('SettlementsService', () => {
         mockVenue.addInstruction.mockResolvedValue(mockQueue);
 
         const params = {
-          foo: 'bar',
+          legs: [
+            {
+              from: new PortfolioDto({ did: 'fromDid' }),
+              to: new PortfolioDto({ did: 'toDid' }),
+            },
+          ],
         };
         const body = {
           signer: 'signer',
@@ -234,7 +240,7 @@ describe('SettlementsService', () => {
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await service.createInstruction('123', body as any);
+        const result = await service.createInstruction(new BigNumber('123'), body as any);
 
         expect(result).toEqual({
           result: mockInstruction,
@@ -246,7 +252,10 @@ describe('SettlementsService', () => {
             },
           ],
         });
-        expect(mockVenue.addInstruction).toHaveBeenCalledWith(params, { signer: address });
+        expect(mockVenue.addInstruction).toHaveBeenCalledWith(
+          { legs: [{ from: 'fromDid', to: 'toDid' }] },
+          { signer: address }
+        );
       });
     });
   });
@@ -263,7 +272,7 @@ describe('SettlementsService', () => {
         let error;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.affirmInstruction('123', {} as any);
+          await service.affirmInstruction(new BigNumber('123'), {} as any);
         } catch (err) {
           error = err;
         }
@@ -281,7 +290,7 @@ describe('SettlementsService', () => {
         let error;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.affirmInstruction('123', {} as any);
+          await service.affirmInstruction(new BigNumber('123'), {} as any);
         } catch (err) {
           error = err;
         }
@@ -295,7 +304,7 @@ describe('SettlementsService', () => {
         error = null;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.affirmInstruction('123', {} as any);
+          await service.affirmInstruction(new BigNumber('123'), {} as any);
         } catch (err) {
           error = err;
         }
@@ -326,7 +335,7 @@ describe('SettlementsService', () => {
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await service.affirmInstruction('123', body as any);
+        const result = await service.affirmInstruction(new BigNumber('123'), body as any);
 
         expect(result).toEqual({
           result: undefined,

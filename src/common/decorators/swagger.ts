@@ -13,7 +13,13 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     paginated,
     example,
     examples,
-  }: { paginated: boolean; example?: unknown; examples?: unknown[] | Record<string, unknown> } = {
+    description,
+  }: {
+    paginated: boolean;
+    example?: unknown;
+    examples?: unknown[] | Record<string, unknown>;
+    description?: string;
+  } = {
     paginated: true,
   }
 ) => {
@@ -27,6 +33,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   }
   return applyDecorators(
     ApiOkResponse({
+      description,
       schema: {
         allOf: [
           { $ref: getSchemaPath(paginated ? PaginatedResultsModel : ResultsModel) },

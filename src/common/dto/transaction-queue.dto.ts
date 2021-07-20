@@ -24,4 +24,8 @@ class TransactionIdentifierDto {
 export class TransactionQueueDto {
   @ApiProperty()
   transactions: TransactionIdentifierDto[];
+
+  constructor(dto: TransactionQueueDto) {
+    Object.assign(this, dto);
+  }
 }

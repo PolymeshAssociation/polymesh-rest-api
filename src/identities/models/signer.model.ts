@@ -1,6 +1,18 @@
 /* istanbul ignore file */
 
-import { AccountModel } from '~/identities/models/account.model';
-import { IdentityModel } from '~/identities/models/identity.model';
+import { ApiProperty } from '@nestjs/swagger';
+import { SignerType } from '@polymathnetwork/polymesh-sdk/types';
 
-export type SignerModel = IdentityModel | AccountModel;
+export class SignerModel {
+  @ApiProperty({
+    description: 'Type of the Signer',
+    enum: SignerType,
+    type: 'string',
+    example: SignerType.Account,
+  })
+  readonly signerType?: SignerType;
+
+  constructor(model: SignerModel) {
+    Object.assign(this, model);
+  }
+}

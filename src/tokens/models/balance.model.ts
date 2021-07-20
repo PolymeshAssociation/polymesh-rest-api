@@ -12,7 +12,7 @@ export class BalanceModel {
     example: '123',
   })
   @FromBigNumber()
-  free: BigNumber;
+  readonly free: BigNumber;
 
   @ApiProperty({
     type: 'string',
@@ -20,7 +20,7 @@ export class BalanceModel {
     example: '456',
   })
   @FromBigNumber()
-  locked: BigNumber;
+  readonly locked: BigNumber;
 
   @ApiProperty({
     type: 'string',
@@ -28,5 +28,9 @@ export class BalanceModel {
     example: '578',
   })
   @FromBigNumber()
-  total: BigNumber;
+  readonly total: BigNumber;
+
+  constructor(model: BalanceModel) {
+    Object.assign({}, model);
+  }
 }

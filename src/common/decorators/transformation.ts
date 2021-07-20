@@ -3,10 +3,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, PortfolioLike, Venue } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity, Venue } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
+import { mapValues } from 'lodash';
 
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
+import { Entity } from '~/common/types';
 
 /**
  * String -> BigNumber
@@ -16,50 +17,64 @@ export function ToBigNumber() {
 }
 
 /**
- * PortfolioDto -> PortfolioLike
+ * Entity -> POJO
  */
-export function ToPortfolioLike() {
+export function FromEntity() {
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toJson()));
+}
+
+/**
+ * Transforms every Entity in an array to its POJO version
+ */
+export function FromMaybeEntityArray() {
   return applyDecorators(
-    Transform(
-      ({ value: { did, id } }: { value: PortfolioDto }): PortfolioLike => {
-        if (id) {
-          return {
-            identity: did,
-            id: new BigNumber(id),
-          };
+    Transform(({ value }: { value: unknown[] }) =>
+      value.map(val => {
+        if (isEntity(val)) {
+          return val?.toJson();
         }
-        return did;
-      }
+
+        return val;
+      })
     )
   );
 }
 
 /**
- * Venue -> string
+ * Entity from SDK -> POJO
  */
-export function FromVenue() {
-  return applyDecorators(Transform(({ value: { id } }: { value: Venue }) => id.toString()));
+export function FromEntityObject() {
+  return applyDecorators(Transform(({ value }: { value: unknown }) => toJsonObject(value)));
 }
 
-/**
- * Identity -> string
- */
-export function FromIdentity() {
-  return applyDecorators(Transform(({ value: { did } }: { value: Identity }) => did));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toJsonObject<T>(obj: T): any {
+  if (isEntity(obj)) {
+    return obj.toJson();
+  }
+
+  if (obj instanceof BigNumber) {
+    return obj.toString();
+  }
+
+  if (obj instanceof Date) {
+    return obj.toISOString();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(toJsonObject);
+  }
+
+  if (obj && typeof obj === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return mapValues(obj as any, val => toJsonObject(val));
+  }
+  return obj;
 }
 
 /**
  * BigNumber -> string
  */
 export function FromBigNumber() {
-  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value.toString()));
-}
-
-/**
- * String to Array
- */
-export function FromStringToArray() {
-  return applyDecorators(
-    Transform(({ value }: { value: string }) => value.split(',').map(v => v.trim()))
-  );
+  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
 }

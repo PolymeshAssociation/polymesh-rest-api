@@ -4,7 +4,7 @@ import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -32,16 +32,17 @@ describe('IdentitiesController', () => {
 
   const mockIdentitiesService = {
     findOne: jest.fn(),
-    parseIdentity: jest.fn(),
   };
 
   const mockAuthorizationsService = {
-    parseAuthorizationRequest: jest.fn(),
+    getPendingByDid: jest.fn(),
+    getIssuedByDid: jest.fn(),
   };
 
   const mockPortfoliosService = {
-    parsePortfolio: jest.fn(),
+    findAllByOwner: jest.fn(),
   };
+
   let polymeshService: PolymeshService;
 
   beforeEach(async () => {
@@ -79,21 +80,19 @@ describe('IdentitiesController', () => {
 
   describe('getTokens', () => {
     it("should return the Identity's Tokens", async () => {
-      const tokens = [{ ticker: 'FOO' }, { ticker: 'BAR' }, { ticker: 'BAZ' }];
+      const tokens = ['FOO', 'BAR', 'BAZ'];
       mockTokensService.findAllByOwner.mockResolvedValue(tokens);
 
       const result = await controller.getTokens({ did: '0x1' });
 
-      expect(result).toEqual({ results: tokens.map(({ ticker }) => ticker) });
+      expect(result).toEqual({ results: tokens });
     });
   });
 
   describe('getPendingInstructions', () => {
     it("should return the Identity's pending Instructions", async () => {
       const expectedInstructions = ['1', '2', '3'];
-      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue(
-        expectedInstructions.map(id => ({ id }))
-      );
+      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue(expectedInstructions);
 
       const result = await controller.getPendingInstructions({ did: '0x1' });
 
@@ -106,17 +105,20 @@ describe('IdentitiesController', () => {
       const did = '0x6'.padEnd(66, '0');
 
       const mockIdentityDetails = new IdentityModel({
+        did,
         primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
         secondaryKeysFrozen: false,
         secondaryKeys: [],
       });
 
       const mockIdentity = new MockIdentityClass();
-      mockIdentity.getPrimaryKey.mockResolvedValue('XYZ');
+      mockIdentity.did = did;
+      mockIdentity.getPrimaryKey.mockResolvedValue(
+        '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e'
+      );
       mockIdentity.areSecondaryKeysFrozen.mockResolvedValue(false);
       mockIdentity.getSecondaryKeys.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      mockIdentitiesService.parseIdentity.mockResolvedValue(mockIdentityDetails);
 
       const result = await controller.getIdentityDetails({ did });
 
@@ -127,7 +129,7 @@ describe('IdentitiesController', () => {
   describe('getPendingAuthorizations', () => {
     it('should return list of pending authorizations received by identity', async () => {
       const did = '0x6'.padEnd(66, '0');
-      const pendingAuthorization = new AuthorizationRequestModel({
+      const pendingAuthorization = {
         authId: new BigNumber(2236),
         issuer: {
           primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
@@ -138,52 +140,45 @@ describe('IdentitiesController', () => {
           value: 'FOO',
         },
         expiry: null,
-      });
+      };
 
-      const mockIdentity = new MockIdentityClass();
-      mockIdentity.authorizations.getReceived.mockResolvedValue([pendingAuthorization]);
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      mockAuthorizationsService.parseAuthorizationRequest.mockResolvedValue(pendingAuthorization);
-      const result = await controller.getPendingAuthorizations({ did }, {});
-      expect(result).toEqual([pendingAuthorization]);
+      mockAuthorizationsService.getPendingByDid.mockResolvedValue([pendingAuthorization]);
+      const result = await controller.getPendingAuthorizations({ did }, {}, {});
+      expect(result).toEqual(new ResultsModel({ results: [pendingAuthorization] }));
     });
 
     it('should support filtering pending authorizations by authorization type', async () => {
       const did = '0x6'.padEnd(66, '0');
-      const mockIdentity = new MockIdentityClass();
-      mockIdentity.authorizations.getReceived.mockResolvedValue([]);
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockAuthorizationsService.getPendingByDid.mockResolvedValue([]);
       const result = await controller.getPendingAuthorizations(
         { did },
-        { type: AuthorizationType.JoinIdentity }
+        { type: AuthorizationType.JoinIdentity },
+        {}
       );
-      expect(result).toEqual([]);
+      expect(result).toEqual(new ResultsModel({ results: [] }));
     });
 
-    it('should support filtering pending authorizations by expiry of authorization', async () => {
+    it('should support filtering pending authorizations by whether they have expired or not', async () => {
       const did = '0x6'.padEnd(66, '0');
-      const mockIdentity = new MockIdentityClass();
-      mockIdentity.authorizations.getReceived.mockResolvedValue([]);
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      const result = await controller.getPendingAuthorizations({ did }, {}, false);
-      expect(result).toEqual([]);
+      mockAuthorizationsService.getPendingByDid.mockResolvedValue([]);
+      const result = await controller.getPendingAuthorizations(
+        { did },
+        {},
+        { includeExpired: false }
+      );
+      expect(result).toEqual(new ResultsModel({ results: [] }));
     });
   });
 
-  describe('getRequestedAuthorizations', () => {
-    it('should return list of requested authorizations created by identity', async () => {
+  describe('getIssuedAuthorizations', () => {
+    it('should return list of authorizations issued by an identity', async () => {
       const did = '0x6'.padEnd(66, '0');
       const mockRequestedAuthorizations = { next: undefined, results: [], total: 0 };
-
-      const mockIdentity = new MockIdentityClass();
-      mockIdentity.authorizations.getSent.mockResolvedValue({
+      mockAuthorizationsService.getIssuedByDid.mockResolvedValue({
         data: [],
         count: 0,
       });
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-
-      const result = await controller.getRequestedAuthorizations({ did }, { size: 1 });
-
+      const result = await controller.getIssuedAuthorizations({ did }, { size: 1 });
       expect(result).toEqual(mockRequestedAuthorizations);
     });
   });
@@ -191,26 +186,20 @@ describe('IdentitiesController', () => {
   describe('getPortfolios', () => {
     it('should return list of all portfolios of an identity', async () => {
       const did = '0x6'.padEnd(66, '0');
-      const mockIdentity = new MockIdentityClass();
       const mockPortfolio = new MockPortfolio();
       mockPortfolio.getTokenBalances.mockResolvedValue([]);
-      mockPortfolio.isCustodiedBy.mockResolvedValue(true);
+      mockPortfolio.getCustodian.mockResolvedValue({ did });
       mockPortfolio.getName.mockResolvedValue('P-1');
-      mockIdentity.portfolios.getPortfolios.mockResolvedValue([mockPortfolio]);
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockPortfoliosService.findAllByOwner.mockResolvedValue([mockPortfolio]);
 
       const mockDetails = new PortfolioModel({
-        id: new BigNumber(2),
+        id: new BigNumber(1),
         name: 'P-1',
         tokenBalances: [],
       });
-      mockDetails.id = new BigNumber(1);
-      mockDetails.name = 'P-1';
-      mockDetails.tokenBalances = [];
-      mockPortfoliosService.parsePortfolio.mockResolvedValue(mockDetails);
       const result = await controller.getPortfolios({ did });
 
-      expect(result).toEqual([mockDetails]);
+      expect(result).toEqual(new ResultsModel({ results: [mockDetails] }));
     });
   });
 });

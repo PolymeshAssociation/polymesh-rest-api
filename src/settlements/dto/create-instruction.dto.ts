@@ -2,14 +2,13 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsDateString, IsNumberString, IsOptional } from 'class-validator';
+import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
-import { ToBigNumber, ToPortfolioLike } from '~/common/decorators/transformation';
-import { IsTicker } from '~/common/decorators/validation';
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
 class LegDto {
   @ApiProperty({
@@ -17,25 +16,23 @@ class LegDto {
     example: '1000',
     description: 'Amount of the Asset to be transferred',
   })
-  @IsNumberString()
+  @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 
   @ApiProperty({
     type: () => PortfolioDto,
-    description: 'Origin Portfolio',
   })
+  @ValidateNested()
   @Type(() => PortfolioDto)
-  @ToPortfolioLike()
-  readonly from: PortfolioLike;
+  readonly from: PortfolioDto;
 
   @ApiProperty({
     type: () => PortfolioDto,
-    description: 'Destination Portfolio',
   })
+  @ValidateNested()
   @Type(() => PortfolioDto)
-  @ToPortfolioLike()
-  readonly to: PortfolioLike;
+  readonly to: PortfolioDto;
 
   @ApiProperty({
     description: 'Security Token ticker',
@@ -46,6 +43,7 @@ class LegDto {
 }
 
 export class CreateInstructionDto extends SignerDto {
+  @ValidateNested({ each: true })
   @Type(() => LegDto)
   readonly legs: LegDto[];
 
@@ -55,7 +53,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   readonly tradeDate?: Date;
 
   @ApiProperty({
@@ -64,7 +62,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   readonly valueDate?: Date;
 
   @ApiProperty({
@@ -75,7 +73,7 @@ export class CreateInstructionDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsNumberString()
+  @IsBigNumber()
   @ToBigNumber()
   readonly endBlock?: BigNumber;
 }

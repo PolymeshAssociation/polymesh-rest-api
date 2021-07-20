@@ -3,27 +3,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { MockPolymeshClass } from '~/test-utils/mocks';
 
 import { AuthorizationsService } from './authorizations.service';
 
-describe('AuthorizationService', () => {
-  let authorizationsService: AuthorizationsService;
+describe('AuthorizationsService', () => {
+  let service: AuthorizationsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymeshClass;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PortfoliosModule, IdentitiesModule],
+      imports: [IdentitiesModule],
       providers: [AuthorizationsService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .compile();
 
-    authorizationsService = module.get<AuthorizationsService>(AuthorizationsService);
+    service = module.get<AuthorizationsService>(AuthorizationsService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
   });
 
@@ -32,6 +31,6 @@ describe('AuthorizationService', () => {
   });
 
   it('should be defined', () => {
-    expect(authorizationsService).toBeDefined();
+    expect(service).toBeDefined();
   });
 });

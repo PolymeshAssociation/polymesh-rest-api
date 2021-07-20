@@ -1,20 +1,24 @@
 /* istanbul ignore file */
 
+import { ApiProperty } from '@nestjs/swagger';
+import { Permissions } from '@polymathnetwork/polymesh-sdk/types';
+
+import { FromEntityObject } from '~/common/decorators/transformation';
 import { SignerModel } from '~/identities/models/signer.model';
-import { PortfolioModel } from '~/portfolios/models/portfolio.model';
-
-export class ExtrinsicModel {
-  palletName: string;
-  dispatchableNames: string[];
-}
-
-export class PermissionsModel {
-  asset: string[] | null;
-  extrinsic: ExtrinsicModel[] | null;
-  portfolio: PortfolioModel[] | null;
-}
 
 export class SecondaryKeyModel {
-  signer: SignerModel;
-  permissions?: PermissionsModel;
+  @ApiProperty({
+    description: 'Signer details',
+  })
+  readonly signer: SignerModel;
+
+  @ApiProperty({
+    description: 'Permissions present with this secondary key',
+  })
+  @FromEntityObject()
+  readonly permissions: Permissions;
+
+  constructor(model: SecondaryKeyModel) {
+    Object.assign(this, model);
+  }
 }

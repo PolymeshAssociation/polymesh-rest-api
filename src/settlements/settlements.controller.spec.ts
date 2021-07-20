@@ -54,7 +54,7 @@ describe('SettlementsController', () => {
       };
       mockSettlementsService.findInstruction.mockResolvedValue(mockStatus);
 
-      const result = await controller.getInstruction({ id: '3' });
+      const result = await controller.getInstruction({ id: new BigNumber('3') });
 
       expect(result).toEqual(mockStatus);
     });
@@ -64,16 +64,16 @@ describe('SettlementsController', () => {
     it('should create an instruction and return the data returned by the service', async () => {
       const transactions = ['transaction'];
       const mockData = {
-        result: { id: 'id' },
+        result: 'fakeInstruction',
         transactions,
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.createInstruction({ id: '3' }, {} as any);
+      const result = await controller.createInstruction({ id: new BigNumber('3') }, {} as any);
 
       expect(result).toEqual({
-        instructionId: 'id',
+        instructionId: 'fakeInstruction',
         transactions,
       });
     });
@@ -88,7 +88,7 @@ describe('SettlementsController', () => {
       mockSettlementsService.affirmInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.affirmInstruction({ id: '3' }, {} as any);
+      const result = await controller.affirmInstruction({ id: new BigNumber('3') }, {} as any);
 
       expect(result).toEqual({
         transactions,
