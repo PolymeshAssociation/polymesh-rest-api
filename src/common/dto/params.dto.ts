@@ -1,6 +1,6 @@
 /** istanbul ignore file */
 
-import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 
 import { IsDid } from '~/common/decorators/validation';
@@ -10,14 +10,14 @@ export class DidDto {
   readonly did: string;
 }
 
-export class AuthorizationTypeDto {
-  @IsEnum(AuthorizationType)
+export class ClaimTypeDto {
+  @IsEnum(ClaimType, { each: true })
   @IsOptional()
-  readonly type?: AuthorizationType;
+  readonly claimTypes?: Exclude<ClaimType, ClaimType.InvestorUniquenessV2>[];
 }
 
-export class AuthorizationsFilterDto {
+export class IncludeExpiredDto {
   @IsBoolean()
   @IsOptional()
-  readonly includeExpired?: boolean;
+  readonly includeExpired?: boolean = true;
 }

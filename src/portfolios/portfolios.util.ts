@@ -17,7 +17,7 @@ export async function createPortfolioModel(
 ): Promise<PortfolioModel> {
   let custodian: Identity;
   let tokenBalances: PortfolioBalance[];
-  let name;
+  let name = 'default';
 
   let portfolioId;
   // TODO @monitz87: replace with typeguard when they are implemented in the SDK

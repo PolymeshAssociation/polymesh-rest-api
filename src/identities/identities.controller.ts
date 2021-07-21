@@ -4,17 +4,18 @@ import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/inter
 import { AuthorizationType, Instruction, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { AuthorizationsFilterDto, AuthorizationTypeDto, DidDto } from '~/common/dto/params.dto';
+import { DidDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { createPortfolioModel } from '~/common/utils/portfolios.util';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
+import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
@@ -41,6 +42,7 @@ export class IdentitiesController {
     description: 'The DID whose details are to be fetched',
     type: 'string',
     required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
     description: 'Returns basic details of the Identity',
@@ -62,6 +64,7 @@ export class IdentitiesController {
     description: 'The DID whose pending Authorizations are to be fetched',
     type: 'string',
     required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
     name: 'type',
@@ -79,16 +82,29 @@ export class IdentitiesController {
   @ApiArrayResponse(AuthorizationRequest, {
     description: 'List of all pending authorizations received by the Identity',
     paginated: false,
+    example: [
+      {
+        id: '1',
+        expiry: null,
+        data: {
+          type: 'NoData',
+        },
+        issuer: '0x6'.padEnd(66, '1a1a'),
+        target: {
+          type: 'Identity',
+          value: '0x0600000000000000000000000000000000000000000000000000000000000000',
+        },
+      },
+    ],
   })
   @Get(':did/pending-authorizations')
   async getPendingAuthorizations(
     @Param() { did }: DidDto,
-    @Query() { type }: AuthorizationTypeDto,
-    @Query() { includeExpired }: AuthorizationsFilterDto
+    @Query() { type, includeExpired }: AuthorizationsFilterDto
   ): Promise<ResultsModel<AuthorizationRequest>> {
     this.logger.debug(`Fetching pending authorization received by did ${did}`);
 
-    const results = await this.authorizationsService.getPendingByDid(did, includeExpired, type);
+    const results = await this.authorizationsService.findPendingByDid(did, includeExpired, type);
 
     return new ResultsModel({ results });
   }
@@ -102,6 +118,7 @@ export class IdentitiesController {
     description: 'The DID whose issued Authorizations are to be fetched',
     type: 'string',
     required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
     name: 'size',
@@ -118,6 +135,24 @@ export class IdentitiesController {
   @ApiArrayResponse(AuthorizationRequest, {
     description: 'List of all Authorizations issued by the Identity',
     paginated: true,
+    example: [
+      {
+        id: '2',
+        expiry: null,
+        data: {
+          type: 'PortfolioCustody',
+          value: {
+            did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+            id: '1',
+          },
+        },
+        issuer: '0x0600000000000000000000000000000000000000000000000000000000000000',
+        target: {
+          type: 'Identity',
+          value: '0x6'.padEnd(66, '1a1a'),
+        },
+      },
+    ],
   })
   @Get(':did/issued-authorizations')
   async getIssuedAuthorizations(
@@ -126,7 +161,7 @@ export class IdentitiesController {
   ): Promise<PaginatedResultsModel<AuthorizationRequest>> {
     this.logger.debug(`Fetching requested authorizations for ${did} from start`);
 
-    const { data, count, next } = await this.authorizationsService.getIssuedByDid(
+    const { data, count, next } = await this.authorizationsService.findIssuedByDid(
       did,
       size,
       start?.toString()
@@ -149,6 +184,7 @@ export class IdentitiesController {
     description: 'The DID whose Portfolios are to be fetched',
     type: 'string',
     required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse(PortfolioModel, {
     description: 'Return the list of all Portfolios of the given Identity',
@@ -174,8 +210,11 @@ export class IdentitiesController {
     summary: 'Fetch all Security Tokens owned by an Identity',
   })
   @ApiParam({
-    type: 'string',
     name: 'did',
+    description: 'The DID whose Security Tokens are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
     paginated: false,
@@ -193,8 +232,11 @@ export class IdentitiesController {
     summary: 'Fetch all pending settlement Instructions where an Identity is involved',
   })
   @ApiParam({
-    type: 'string',
     name: 'did',
+    description: 'The DID whose pending settlement Instructions are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
     description: 'List of IDs of all pending Instructions',
@@ -220,8 +262,9 @@ export class IdentitiesController {
     description: 'The DID whose Venues are to be fetched',
     type: 'string',
     required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiArrayResponse(Venue, {
+  @ApiArrayResponse('string', {
     description: 'List of IDs of all owned Venues',
     paginated: false,
     example: ['123', '456', '789'],

@@ -11,7 +11,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 export class AuthorizationsService {
   constructor(private readonly identitiesService: IdentitiesService) {}
 
-  public async getPendingByDid(
+  public async findPendingByDid(
     did: string,
     includeExpired?: boolean,
     type?: AuthorizationType
@@ -24,7 +24,7 @@ export class AuthorizationsService {
     });
   }
 
-  public async getIssuedByDid(
+  public async findIssuedByDid(
     did: string,
     size: number,
     start?: string
