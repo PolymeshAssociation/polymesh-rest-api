@@ -2,14 +2,12 @@ import { forwardRef } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymeshClass } from '~/test-utils/mocks';
-
-import { MockIdentityClass } from './../test-utils/mocks';
-import { AuthorizationsService } from './authorizations.service';
+import { MockIdentityClass, MockPolymeshClass } from '~/test-utils/mocks';
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;

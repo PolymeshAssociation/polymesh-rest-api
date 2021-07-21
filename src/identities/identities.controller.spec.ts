@@ -7,13 +7,13 @@ import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
+import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentityClass, MockPolymeshClass, MockPortfolio } from '~/test-utils/mocks';
 import { TokensService } from '~/tokens/tokens.service';
 
-import { PolymeshModule } from './../polymesh/polymesh.module';
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {

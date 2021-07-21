@@ -10,12 +10,12 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { createPortfolioModel } from '~/common/utils/portfolios.util';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
+import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TokensService } from '~/tokens/tokens.service';
 
