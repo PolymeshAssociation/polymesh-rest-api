@@ -6,7 +6,6 @@ import {
   NumberedPortfolio,
   PortfolioBalance,
 } from '@polymathnetwork/polymesh-sdk/types';
-import { merge } from 'lodash';
 
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
@@ -36,7 +35,8 @@ export async function createPortfolioModel(
     ]);
   }
 
-  const portfolioModel = new PortfolioModel({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let portfolioModelParams: any = {
     id: portfolioId,
     name,
     tokenBalances: tokenBalances.map(
@@ -48,9 +48,10 @@ export async function createPortfolioModel(
           locked,
         })
     ),
-  });
+    owner: portfolio.owner,
+  };
   if (custodian.did !== did) {
-    merge(portfolioModel, { custodian });
+    portfolioModelParams = { ...portfolioModelParams, custodian };
   }
-  return portfolioModel;
+  return new PortfolioModel(portfolioModelParams);
 }

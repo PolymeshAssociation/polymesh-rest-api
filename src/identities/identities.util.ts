@@ -4,6 +4,7 @@ import { Account } from '@polymathnetwork/polymesh-sdk/internal';
 import { Identity, Signer } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AccountModel } from '~/identities/models/account.model';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { SecondaryKeyModel } from '~/identities/models/secondary-key.model';
 import { SignerModel } from '~/identities/models/signer.model';
@@ -41,7 +42,7 @@ export function createSignerModel(signer: Signer): SignerModel {
       address: signer.address,
     });
   }
-  return new IdentityModel({
+  return new IdentitySignerModel({
     did: signer.did,
   });
 }

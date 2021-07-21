@@ -6,19 +6,15 @@ import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
-import { POLYMESH_API } from '~/polymesh/polymesh.consts';
-import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentityClass, MockPolymeshClass, MockPortfolio } from '~/test-utils/mocks';
+import { MockIdentityClass, MockPortfolio } from '~/test-utils/mocks';
 import { TokensService } from '~/tokens/tokens.service';
 
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
-  let mockPolymeshApi: MockPolymeshClass;
   const mockTokensService = {
     findAllByOwner: jest.fn(),
   };
@@ -40,12 +36,9 @@ describe('IdentitiesController', () => {
     findAllByOwner: jest.fn(),
   };
 
-  let polymeshService: PolymeshService;
-
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
     const module = await Test.createTestingModule({
-      imports: [PolymeshModule],
+      imports: [],
       controllers: [IdentitiesController],
       providers: [
         TokensService,
@@ -55,8 +48,6 @@ describe('IdentitiesController', () => {
         AuthorizationsService,
       ],
     })
-      .overrideProvider(POLYMESH_API)
-      .useValue(mockPolymeshApi)
       .overrideProvider(TokensService)
       .useValue(mockTokensService)
       .overrideProvider(SettlementsService)
@@ -70,11 +61,6 @@ describe('IdentitiesController', () => {
       .compile();
 
     controller = module.get<IdentitiesController>(IdentitiesController);
-    polymeshService = module.get<PolymeshService>(PolymeshService);
-  });
-
-  afterEach(async () => {
-    await polymeshService.close();
   });
 
   it('should be defined', () => {
