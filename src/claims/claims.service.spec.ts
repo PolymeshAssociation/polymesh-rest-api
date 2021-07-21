@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { IdentityWithClaims } from '@polymathnetwork/polymesh-sdk/middleware/types';
-import { ClaimData, ResultSet } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimData, ClaimType, ResultSet } from '@polymathnetwork/polymesh-sdk/types';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -37,28 +36,60 @@ describe('ClaimsService', () => {
   });
 
   describe('findIssuedByDid', () => {
-    it('should return the issued claims', async () => {
+    it('should return the issued Claims', async () => {
       const claimsResult = {
         data: [],
         next: null,
         count: 0,
       } as ResultSet<ClaimData>;
-      mockPolymeshApi.claims.findIssuedByDid.mockResolvedValue(claimsResult);
+      mockPolymeshApi.claims.getIssuedClaims.mockResolvedValue(claimsResult);
       const result = await claimsService.findIssuedByDid('did');
       expect(result).toBe(claimsResult);
     });
   });
 
   describe('findAssociatedByDid', () => {
-    it('should return the issued claims', async () => {
-      const claimsResult = {
-        data: [],
+    it('should return the associated Claims', async () => {
+      const did = '0x6'.padEnd(66, '1');
+      const mockAssociatedClaims = [
+        {
+          issuedAt: '2020-08-21T16:36:55.000Z',
+          expiry: null,
+          claim: {
+            type: ClaimType.Accredited,
+            scope: {
+              type: 'Identity',
+              value: '0x9'.padEnd(66, '1'),
+            },
+          },
+          target: {
+            did,
+          },
+          issuer: {
+            did: '0x6'.padEnd(66, '1'),
+          },
+        },
+      ];
+
+      const mockIdentitiesWithClaims = {
+        data: [
+          {
+            identity: {
+              did: '0x6',
+            },
+            claims: mockAssociatedClaims,
+          },
+        ],
         next: null,
-        count: 0,
-      } as ResultSet<IdentityWithClaims>;
-      mockPolymeshApi.claims.findAssociatedByDid.mockResolvedValue(claimsResult);
-      const result = await claimsService.findAssociatedByDid('did');
-      expect(result).toBe(claimsResult);
+        count: 1,
+      };
+      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
+      const result = await claimsService.findAssociatedByDid(did);
+      expect(result).toStrictEqual({
+        data: mockAssociatedClaims,
+        next: null,
+        count: 1,
+      });
     });
   });
 });

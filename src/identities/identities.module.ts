@@ -3,6 +3,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
+import { ClaimsModule } from '~/claims/claims.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
@@ -17,7 +18,8 @@ import { IdentitiesService } from './identities.service';
     TokensModule,
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),
-    PortfoliosModule,
+    forwardRef(() => PortfoliosModule),
+    ClaimsModule,
   ],
   controllers: [IdentitiesController],
   providers: [IdentitiesService],
