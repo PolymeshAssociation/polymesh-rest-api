@@ -1,8 +1,9 @@
 import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -36,6 +37,11 @@ describe('IdentitiesController', () => {
     findAllByOwner: jest.fn(),
   };
 
+  const mockClaimsService = {
+    findIssuedByDid: jest.fn(),
+    findAssociatedByDid: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       imports: [],
@@ -46,6 +52,7 @@ describe('IdentitiesController', () => {
         IdentitiesService,
         PortfoliosService,
         AuthorizationsService,
+        ClaimsService,
       ],
     })
       .overrideProvider(TokensService)
@@ -58,6 +65,8 @@ describe('IdentitiesController', () => {
       .useValue(mockPortfoliosService)
       .overrideProvider(AuthorizationsService)
       .useValue(mockAuthorizationsService)
+      .overrideProvider(ClaimsService)
+      .useValue(mockClaimsService)
       .compile();
 
     controller = module.get<IdentitiesController>(IdentitiesController);
@@ -146,7 +155,7 @@ describe('IdentitiesController', () => {
       expect(result).toEqual(new ResultsModel({ results: [] }));
     });
 
-    it('should support filtering pending authorizations by whether they have expired or not', async () => {
+    it('should support filtering pending Authorizations by whether they have expired or not', async () => {
       const did = '0x6'.padEnd(66, '0');
       mockAuthorizationsService.findPendingByDid.mockResolvedValue([]);
       const result = await controller.getPendingAuthorizations({ did }, { includeExpired: false });
@@ -184,6 +193,118 @@ describe('IdentitiesController', () => {
       const result = await controller.getPortfolios({ did });
 
       expect(result).toEqual(new ResultsModel({ results: [mockDetails] }));
+    });
+  });
+
+  describe('getIssuedClaims', () => {
+    const did = '0x6'.padEnd(66, '0');
+    const targetDid = '0x6'.padEnd(66, '1');
+    const claims = [
+      {
+        issuedAt: new Date(),
+        expiry: null,
+        claim: {
+          type: 'CustomerDueDiligence',
+          id: '0xcc32ef7ab217d4f1f8cc2ecea89e09234f3bbf8f96af56d55c819037d4603552',
+        },
+        target: {
+          did: targetDid,
+        },
+        issuer: {
+          did,
+        },
+      },
+    ];
+    const paginatedResult = {
+      data: claims,
+      next: null,
+      count: 1,
+    };
+    it('should give issued Claims with no start value', async () => {
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
+      const result = await controller.getIssuedClaims(
+        { did },
+        { size: 10 },
+        { includeExpired: false }
+      );
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: paginatedResult.data,
+      });
+    });
+
+    it('should give issued Claims with start value', async () => {
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
+      const result = await controller.getIssuedClaims(
+        { did },
+        { size: 10, start: 1 },
+        { includeExpired: false }
+      );
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: paginatedResult.data,
+      });
+    });
+  });
+
+  describe('getAssociatedClaims', () => {
+    const did = '0x6'.padEnd(66, '0');
+    const mockAssociatedClaims = {
+      data: [
+        {
+          issuedAt: '2020-08-21T16:36:55.000Z',
+          expiry: null,
+          claim: {
+            type: ClaimType.Accredited,
+            scope: {
+              type: 'Identity',
+              value: '0x9'.padEnd(66, '1'),
+            },
+          },
+          target: {
+            did,
+          },
+          issuer: {
+            did: '0x6'.padEnd(66, '1'),
+          },
+        },
+      ],
+      next: null,
+      count: 1,
+    };
+
+    it('should give associated Claims with no start value', async () => {
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      const result = await controller.getAssociatedClaims({ did }, { size: 10 }, {});
+      expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
+    });
+
+    it('should give associated Claims with start value', async () => {
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      const result = await controller.getAssociatedClaims({ did }, { size: 10, start: 1 }, {});
+      expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
+    });
+
+    it('should give associated Claims with claim type filter', async () => {
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      const result = await controller.getAssociatedClaims(
+        { did },
+        { size: 10, start: 1 },
+        { claimTypes: [ClaimType.Accredited] }
+      );
+      expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
+    });
+
+    it('should give associated Claims by whether they have expired or not', async () => {
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      const result = await controller.getAssociatedClaims(
+        { did },
+        { size: 10, start: 1 },
+        { includeExpired: true }
+      );
+      expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
   });
 });
