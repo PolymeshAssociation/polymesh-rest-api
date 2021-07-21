@@ -7,8 +7,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { MockIdentityClass,MockPolymeshClass  } from '~/test-utils/mocks';
-
+import { MockIdentityClass, MockPolymeshClass } from '~/test-utils/mocks';
 
 describe('PortfoliosService', () => {
   let service: PortfoliosService;

@@ -3,6 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Identity } from '@polymathnetwork/polymesh-sdk/internal';
 import { Claim } from '@polymathnetwork/polymesh-sdk/types';
+
 import { FromEntity } from '~/common/decorators/transformation';
 
 export class ClaimModel<T = Claim> {
@@ -30,7 +31,7 @@ export class ClaimModel<T = Claim> {
   readonly issuedAt: Date;
 
   @ApiProperty({
-    type: Date,
+    type: 'string',
     nullable: true,
     description: 'Expiry date of the Claim',
     example: new Date('10/14/1987').toISOString(),
@@ -39,6 +40,13 @@ export class ClaimModel<T = Claim> {
 
   @ApiProperty({
     description: 'Details of the Claim containing type and scope',
+    example: {
+      type: 'Accredited',
+      scope: {
+        type: 'Identity',
+        value: '0x6'.padEnd(66, '1a'),
+      },
+    },
   })
   readonly claim?: T;
 

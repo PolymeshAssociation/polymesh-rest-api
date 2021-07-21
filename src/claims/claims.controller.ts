@@ -1,14 +1,16 @@
 import { Controller, DefaultValuePipe, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Claim, ClaimType } from '@polymathnetwork/polymesh-sdk/types';
+
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimModel } from '~/claims/model/claim.model';
-import { ClaimsIdentityModel } from '~/claims/model/claims-identity.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { AuthorizationsFilterDto, ClaimTypeDto, DidDto } from '~/common/dto/params.dto';
+import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+
+import { ClaimsFilterDto } from './dto/claims-filter.dto';
 
 @ApiTags('claims')
 @Controller(':did/claims')
@@ -54,7 +56,7 @@ export class ClaimsController {
   async getIssuedClaims(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto,
-    @Query() { includeExpired }: AuthorizationsFilterDto
+    @Query() { includeExpired }: IncludeExpiredFilterDto
   ): Promise<PaginatedResultsModel<ClaimModel<Claim>>> {
     this.logger.debug(
       `Fetch ${size} issued claims for did ${did} starting from ${size} with include expired ${includeExpired}`
@@ -66,6 +68,7 @@ export class ClaimsController {
       size,
       Number(start)
     );
+
     const claimsData =
       claimsResultSet.data?.map(
         ({ issuedAt, expiry, claim, target, issuer }) =>
@@ -117,11 +120,12 @@ export class ClaimsController {
   })
   @ApiQuery({
     name: 'claimTypes',
-    description: 'Comma separated list of Claim types for filtering',
+    description: 'Claim types for filtering associated Claims',
     type: 'string',
     required: false,
     isArray: true,
     enum: ClaimType,
+    example: [ClaimType.Accredited, ClaimType.CustomerDueDiligence],
   })
   @ApiArrayResponse(ClaimModel, {
     paginated: true,
@@ -130,7 +134,7 @@ export class ClaimsController {
   async getAssociatedClaims(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto,
-    @Query() { claimTypes }: ClaimTypeDto,
+    @Query() { claimTypes }: ClaimsFilterDto,
     @Query('includeExpired', new DefaultValuePipe(true)) includeExpired?: boolean
   ): Promise<ResultsModel<ClaimModel>> {
     const identitiesWithClaimsResultSet = await this.claimsService.findAssociatedByDid(
@@ -141,7 +145,7 @@ export class ClaimsController {
       size,
       Number(start)
     );
-    const results = identitiesWithClaimsResultSet.data?.map(
+    const results = identitiesWithClaimsResultSet.data.map(
       ({ issuedAt, expiry, claim, target, issuer }) =>
         new ClaimModel({
           issuedAt,

@@ -1,12 +1,6 @@
-import { flatten } from 'lodash';
 import { Injectable } from '@nestjs/common';
-import {
-  ClaimData,
-  ClaimType,
-  IdentityWithClaims,
-  ResultSet,
-  Scope,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimData, ClaimType, ResultSet, Scope } from '@polymathnetwork/polymesh-sdk/types';
+import { flatten } from 'lodash';
 
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
@@ -36,15 +30,16 @@ export class ClaimsService {
     size?: number,
     start?: number
   ): Promise<ResultSet<ClaimData>> {
-    const identitiesWithClaims =
-      await this.polymeshService.polymeshApi.claims.getIdentitiesWithClaims({
+    const identitiesWithClaims = await this.polymeshService.polymeshApi.claims.getIdentitiesWithClaims(
+      {
         targets: [target],
         scope,
         claimTypes,
         includeExpired,
         size,
         start,
-      });
+      }
+    );
     return {
       data: flatten(identitiesWithClaims.data?.map(({ claims }) => claims || [])),
       next: identitiesWithClaims.next,
