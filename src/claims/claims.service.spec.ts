@@ -36,28 +36,28 @@ describe('ClaimsService', () => {
     expect(claimsService).toBeDefined();
   });
 
-  describe('getIssuedClaims', () => {
+  describe('findIssuedByDid', () => {
     it('should return the issued claims', async () => {
       const claimsResult = {
         data: [],
         next: null,
         count: 0,
       } as ResultSet<ClaimData>;
-      mockPolymeshApi.claims.getIssuedClaims.mockResolvedValue(claimsResult);
-      const result = await claimsService.getIssuedClaims('did');
+      mockPolymeshApi.claims.findIssuedByDid.mockResolvedValue(claimsResult);
+      const result = await claimsService.findIssuedByDid('did');
       expect(result).toBe(claimsResult);
     });
   });
 
-  describe('getIdentitiesWithClaims', () => {
+  describe('findAssociatedByDid', () => {
     it('should return the issued claims', async () => {
       const claimsResult = {
         data: [],
         next: null,
         count: 0,
       } as ResultSet<IdentityWithClaims>;
-      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(claimsResult);
-      const result = await claimsService.getIdentitiesWithClaims('did');
+      mockPolymeshApi.claims.findAssociatedByDid.mockResolvedValue(claimsResult);
+      const result = await claimsService.findAssociatedByDid('did');
       expect(result).toBe(claimsResult);
     });
   });

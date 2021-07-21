@@ -16,12 +16,6 @@ export class AuthorizationTypeDto {
   readonly type?: AuthorizationType;
 }
 
-export class ClaimTypeDto {
-  @IsEnum(ClaimType, { each: true })
-  @IsOptional()
-  readonly claimTypes?: Exclude<ClaimType, ClaimType.InvestorUniquenessV2>[];
-}
-
 export class AuthorizationsFilterDto {
   @IsBoolean()
   @IsOptional()

@@ -28,8 +28,8 @@ export class MockPolymeshClass {
   };
 
   public claims = {
-    getIssuedClaims: jest.fn(),
-    getIdentitiesWithClaims: jest.fn(),
+    findIssuedByDid: jest.fn(),
+    findAssociatedByDid: jest.fn(),
   };
 }
 

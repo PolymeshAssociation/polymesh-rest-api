@@ -14,8 +14,8 @@ describe('ClaimsController', () => {
   let mockPolymeshApi: MockPolymeshClass;
 
   const mockClaimsService = {
-    getIssuedClaims: jest.fn(),
-    getIdentitiesWithClaims: jest.fn(),
+    findIssuedByDid: jest.fn(),
+    findAssociatedByDid: jest.fn(),
   };
   let polymeshService: PolymeshService;
 
@@ -69,8 +69,12 @@ describe('ClaimsController', () => {
       count: 1,
     };
     it('should give issued claims with no start value', async () => {
-      mockClaimsService.getIssuedClaims.mockResolvedValue(paginatedResult);
-      const result = await controller.getIssuedClaims({ did }, { size: 10 }, false);
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
+      const result = await controller.getIssuedClaims(
+        { did },
+        { size: 10 },
+        { includeExpired: false }
+      );
       expect(result).toEqual({
         total: paginatedResult.count,
         next: paginatedResult.next,
@@ -79,8 +83,12 @@ describe('ClaimsController', () => {
     });
 
     it('should give issued claims with start value', async () => {
-      mockClaimsService.getIssuedClaims.mockResolvedValue(paginatedResult);
-      const result = await controller.getIssuedClaims({ did }, { size: 10, start: 1 }, false);
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
+      const result = await controller.getIssuedClaims(
+        { did },
+        { size: 10, start: 1 },
+        { includeExpired: false }
+      );
       expect(result).toEqual({
         total: paginatedResult.count,
         next: paginatedResult.next,
@@ -122,7 +130,7 @@ describe('ClaimsController', () => {
       count: 1,
     };
     it('should give issued claims with no start value', async () => {
-      mockClaimsService.getIdentitiesWithClaims.mockResolvedValue(paginatedResult);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getAssociatedClaims({ did }, { size: 10 }, {}, false);
       expect(result).toEqual({
         total: paginatedResult.count,
@@ -132,7 +140,7 @@ describe('ClaimsController', () => {
     });
 
     it('should give issued claims with start value', async () => {
-      mockClaimsService.getIdentitiesWithClaims.mockResolvedValue(paginatedResult);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getAssociatedClaims(
         { did },
         { size: 10, start: 1 },
@@ -147,7 +155,7 @@ describe('ClaimsController', () => {
     });
 
     it('should give issued claims with claim type filter', async () => {
-      mockClaimsService.getIdentitiesWithClaims.mockResolvedValue(paginatedResult);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getAssociatedClaims(
         { did },
         { size: 10, start: 1 },

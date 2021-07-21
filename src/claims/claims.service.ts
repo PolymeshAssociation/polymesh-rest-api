@@ -1,3 +1,4 @@
+import { flatten } from 'lodash';
 import { Injectable } from '@nestjs/common';
 import {
   ClaimData,
@@ -13,7 +14,7 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 export class ClaimsService {
   constructor(private readonly polymeshService: PolymeshService) {}
 
-  public async getIssuedClaims(
+  public async findIssuedByDid(
     target: string,
     includeExpired?: boolean,
     size?: number,
@@ -27,21 +28,27 @@ export class ClaimsService {
     });
   }
 
-  public async getIdentitiesWithClaims(
+  public async findAssociatedByDid(
     target: string,
     scope?: Scope,
     claimTypes?: Exclude<ClaimType, ClaimType.InvestorUniquenessV2>[],
     includeExpired?: boolean,
     size?: number,
     start?: number
-  ): Promise<ResultSet<IdentityWithClaims>> {
-    return await this.polymeshService.polymeshApi.claims.getIdentitiesWithClaims({
-      targets: [target],
-      scope,
-      claimTypes,
-      includeExpired,
-      size,
-      start,
-    });
+  ): Promise<ResultSet<ClaimData>> {
+    const identitiesWithClaims =
+      await this.polymeshService.polymeshApi.claims.getIdentitiesWithClaims({
+        targets: [target],
+        scope,
+        claimTypes,
+        includeExpired,
+        size,
+        start,
+      });
+    return {
+      data: flatten(identitiesWithClaims.data?.map(({ claims }) => claims || [])),
+      next: identitiesWithClaims.next,
+      count: identitiesWithClaims.count,
+    };
   }
 }
