@@ -35,8 +35,7 @@ export async function createPortfolioModel(
     ]);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let portfolioModelParams: any = {
+  let portfolioModelParams: ConstructorParameters<typeof PortfolioModel>[0] = {
     id: portfolioId,
     name,
     tokenBalances: tokenBalances.map(

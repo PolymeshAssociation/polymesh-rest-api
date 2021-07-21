@@ -336,17 +336,16 @@ export class IdentitiesController {
       Number(start)
     );
 
-    const claimsData =
-      claimsResultSet.data?.map(
-        ({ issuedAt, expiry, claim, target, issuer }) =>
-          new ClaimModel({
-            issuedAt,
-            expiry,
-            claim,
-            target,
-            issuer,
-          })
-      ) || [];
+    const claimsData = claimsResultSet.data.map(
+      ({ issuedAt, expiry, claim, target, issuer }) =>
+        new ClaimModel({
+          issuedAt,
+          expiry,
+          claim,
+          target,
+          issuer,
+        })
+    );
 
     return new PaginatedResultsModel({
       results: claimsData,

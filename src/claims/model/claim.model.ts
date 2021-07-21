@@ -48,7 +48,7 @@ export class ClaimModel<T = Claim> {
       },
     },
   })
-  readonly claim?: T;
+  readonly claim: T;
 
   constructor(model: ClaimModel) {
     Object.assign(this, model);

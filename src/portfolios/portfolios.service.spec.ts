@@ -13,7 +13,6 @@ describe('PortfoliosService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [],
       providers: [PortfoliosService, IdentitiesService],
     })
       .overrideProvider(IdentitiesService)

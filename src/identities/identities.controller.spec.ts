@@ -44,7 +44,6 @@ describe('IdentitiesController', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [],
       controllers: [IdentitiesController],
       providers: [
         TokensService,
