@@ -1,40 +1,26 @@
-import { forwardRef } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { IdentitiesModule } from '~/identities/identities.module';
 import { IdentitiesService } from '~/identities/identities.service';
-import { POLYMESH_API } from '~/polymesh/polymesh.consts';
-import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockIdentityClass, MockPolymeshClass } from '~/test-utils/mocks';
+import { MockIdentityClass } from '~/test-utils/mocks';
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
-  let polymeshService: PolymeshService;
-  let mockPolymeshApi: MockPolymeshClass;
   const mockIdentitiesService = {
     findOne: jest.fn(),
   };
 
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [forwardRef(() => IdentitiesModule)],
-      providers: [AuthorizationsService],
+      imports: [],
+      providers: [AuthorizationsService, IdentitiesService],
     })
-      .overrideProvider(POLYMESH_API)
-      .useValue(mockPolymeshApi)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
       .compile();
 
     service = module.get<AuthorizationsService>(AuthorizationsService);
-    polymeshService = module.get<PolymeshService>(PolymeshService);
-  });
-
-  afterEach(async () => {
-    await polymeshService.close();
   });
 
   it('should be defined', () => {

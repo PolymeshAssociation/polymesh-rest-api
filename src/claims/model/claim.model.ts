@@ -13,7 +13,7 @@ export class ClaimModel<T = Claim> {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @FromEntity()
-  readonly target?: Identity;
+  readonly target: Identity;
 
   @ApiProperty({
     type: 'string',
@@ -21,7 +21,7 @@ export class ClaimModel<T = Claim> {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @FromEntity()
-  readonly issuer?: Identity;
+  readonly issuer: Identity;
 
   @ApiProperty({
     type: 'string',

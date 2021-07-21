@@ -1,4 +1,4 @@
-import { Controller, DefaultValuePipe, Get, Logger, Param, Query } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
 import {
@@ -285,6 +285,7 @@ export class IdentitiesController {
     return new ResultsModel({ results });
   }
 
+  @ApiTags('claims')
   @ApiOperation({
     summary: 'Get all issued Claims',
     description: 'This endpoint will provide a list of all the Claims issued by an Identity',
@@ -354,6 +355,7 @@ export class IdentitiesController {
     });
   }
 
+  @ApiTags('claims')
   @ApiOperation({
     summary: 'Get all Claims targeting an Identity',
     description: 'This endpoint will provide a list of all the Claims made about an Identity',
@@ -400,8 +402,7 @@ export class IdentitiesController {
   async getAssociatedClaims(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto,
-    @Query() { claimTypes }: ClaimsFilterDto,
-    @Query('includeExpired', new DefaultValuePipe(true)) includeExpired?: boolean
+    @Query() { claimTypes, includeExpired }: ClaimsFilterDto
   ): Promise<ResultsModel<ClaimModel>> {
     const claimsResultSet = await this.claimsService.findAssociatedByDid(
       did,

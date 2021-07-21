@@ -22,7 +22,6 @@ export class PortfolioModel {
     description: 'Name of the Portfolio',
     type: 'string',
     example: 'ABC',
-    nullable: true,
   })
   readonly name: string;
 
@@ -51,7 +50,7 @@ export class PortfolioModel {
   @FromEntity()
   readonly owner: Identity;
 
-  constructor(model: Partial<PortfolioModel>) {
+  constructor(model: PortfolioModel) {
     Object.assign(this, model);
   }
 }

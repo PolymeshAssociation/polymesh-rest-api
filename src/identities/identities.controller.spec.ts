@@ -7,19 +7,15 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
-import { POLYMESH_API } from '~/polymesh/polymesh.consts';
-import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentityClass, MockPolymeshClass, MockPortfolio } from '~/test-utils/mocks';
+import { MockIdentityClass, MockPortfolio } from '~/test-utils/mocks';
 import { TokensService } from '~/tokens/tokens.service';
 
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
-  let mockPolymeshApi: MockPolymeshClass;
   const mockTokensService = {
     findAllByOwner: jest.fn(),
   };
@@ -46,12 +42,9 @@ describe('IdentitiesController', () => {
     findAssociatedByDid: jest.fn(),
   };
 
-  let polymeshService: PolymeshService;
-
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
     const module = await Test.createTestingModule({
-      imports: [PolymeshModule],
+      imports: [],
       controllers: [IdentitiesController],
       providers: [
         TokensService,
@@ -62,8 +55,6 @@ describe('IdentitiesController', () => {
         ClaimsService,
       ],
     })
-      .overrideProvider(POLYMESH_API)
-      .useValue(mockPolymeshApi)
       .overrideProvider(TokensService)
       .useValue(mockTokensService)
       .overrideProvider(SettlementsService)
@@ -79,11 +70,6 @@ describe('IdentitiesController', () => {
       .compile();
 
     controller = module.get<IdentitiesController>(IdentitiesController);
-    polymeshService = module.get<PolymeshService>(PolymeshService);
-  });
-
-  afterEach(async () => {
-    await polymeshService.close();
   });
 
   it('should be defined', () => {
@@ -169,7 +155,7 @@ describe('IdentitiesController', () => {
       expect(result).toEqual(new ResultsModel({ results: [] }));
     });
 
-    it('should support filtering pending authorizations by whether they have expired or not', async () => {
+    it('should support filtering pending Authorizations by whether they have expired or not', async () => {
       const did = '0x6'.padEnd(66, '0');
       mockAuthorizationsService.findPendingByDid.mockResolvedValue([]);
       const result = await controller.getPendingAuthorizations({ did }, { includeExpired: false });
@@ -234,7 +220,7 @@ describe('IdentitiesController', () => {
       next: null,
       count: 1,
     };
-    it('should give issued claims with no start value', async () => {
+    it('should give issued Claims with no start value', async () => {
       mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getIssuedClaims(
         { did },
@@ -248,7 +234,7 @@ describe('IdentitiesController', () => {
       });
     });
 
-    it('should give issued claims with start value', async () => {
+    it('should give issued Claims with start value', async () => {
       mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getIssuedClaims(
         { did },
@@ -289,30 +275,34 @@ describe('IdentitiesController', () => {
       count: 1,
     };
 
-    it('should give issued claims with no start value', async () => {
+    it('should give associated Claims with no start value', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
-      const result = await controller.getAssociatedClaims({ did }, { size: 10 }, {}, false);
+      const result = await controller.getAssociatedClaims({ did }, { size: 10 }, {});
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
-    it('should give issued claims with start value', async () => {
+    it('should give associated Claims with start value', async () => {
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      const result = await controller.getAssociatedClaims({ did }, { size: 10, start: 1 }, {});
+      expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
+    });
+
+    it('should give associated Claims with claim type filter', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
       const result = await controller.getAssociatedClaims(
         { did },
         { size: 10, start: 1 },
-        {},
-        false
+        { claimTypes: [ClaimType.Accredited] }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
-    it('should give issued claims with claim type filter', async () => {
+    it('should give associated Claims by whether they have expired or not', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
       const result = await controller.getAssociatedClaims(
         { did },
         { size: 10, start: 1 },
-        { claimTypes: [ClaimType.Accredited] },
-        false
+        { includeExpired: true }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
