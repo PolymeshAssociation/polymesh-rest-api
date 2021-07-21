@@ -10,7 +10,7 @@ export class SignerModel {
     type: 'string',
     example: SignerType.Account,
   })
-  readonly signerType?: SignerType;
+  readonly signerType: SignerType;
 
   constructor(model: SignerModel) {
     Object.assign(this, model);

@@ -2,21 +2,18 @@ import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
-import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
-import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { PortfolioModel } from '~/portfolios/models/portfolio.model';
-import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentityClass, MockPolymeshClass, MockPortfolio } from '~/test-utils/mocks';
 import { TokensService } from '~/tokens/tokens.service';
 
+import { PolymeshModule } from './../polymesh/polymesh.module';
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
@@ -35,8 +32,8 @@ describe('IdentitiesController', () => {
   };
 
   const mockAuthorizationsService = {
-    getPendingByDid: jest.fn(),
-    getIssuedByDid: jest.fn(),
+    findPendingByDid: jest.fn(),
+    findIssuedByDid: jest.fn(),
   };
 
   const mockPortfoliosService = {
@@ -48,9 +45,15 @@ describe('IdentitiesController', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module = await Test.createTestingModule({
+      imports: [PolymeshModule],
       controllers: [IdentitiesController],
-      imports: [PolymeshModule, PortfoliosModule, AuthorizationsModule],
-      providers: [TokensService, SettlementsService, IdentitiesService],
+      providers: [
+        TokensService,
+        SettlementsService,
+        IdentitiesService,
+        PortfoliosService,
+        AuthorizationsService,
+      ],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -142,30 +145,25 @@ describe('IdentitiesController', () => {
         expiry: null,
       };
 
-      mockAuthorizationsService.getPendingByDid.mockResolvedValue([pendingAuthorization]);
-      const result = await controller.getPendingAuthorizations({ did }, {}, {});
+      mockAuthorizationsService.findPendingByDid.mockResolvedValue([pendingAuthorization]);
+      const result = await controller.getPendingAuthorizations({ did }, {});
       expect(result).toEqual(new ResultsModel({ results: [pendingAuthorization] }));
     });
 
     it('should support filtering pending authorizations by authorization type', async () => {
       const did = '0x6'.padEnd(66, '0');
-      mockAuthorizationsService.getPendingByDid.mockResolvedValue([]);
+      mockAuthorizationsService.findPendingByDid.mockResolvedValue([]);
       const result = await controller.getPendingAuthorizations(
         { did },
-        { type: AuthorizationType.JoinIdentity },
-        {}
+        { type: AuthorizationType.JoinIdentity }
       );
       expect(result).toEqual(new ResultsModel({ results: [] }));
     });
 
     it('should support filtering pending authorizations by whether they have expired or not', async () => {
       const did = '0x6'.padEnd(66, '0');
-      mockAuthorizationsService.getPendingByDid.mockResolvedValue([]);
-      const result = await controller.getPendingAuthorizations(
-        { did },
-        {},
-        { includeExpired: false }
-      );
+      mockAuthorizationsService.findPendingByDid.mockResolvedValue([]);
+      const result = await controller.getPendingAuthorizations({ did }, { includeExpired: false });
       expect(result).toEqual(new ResultsModel({ results: [] }));
     });
   });
@@ -174,7 +172,7 @@ describe('IdentitiesController', () => {
     it('should return list of authorizations issued by an identity', async () => {
       const did = '0x6'.padEnd(66, '0');
       const mockRequestedAuthorizations = { next: undefined, results: [], total: 0 };
-      mockAuthorizationsService.getIssuedByDid.mockResolvedValue({
+      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({
         data: [],
         count: 0,
       });
@@ -192,11 +190,11 @@ describe('IdentitiesController', () => {
       mockPortfolio.getName.mockResolvedValue('P-1');
       mockPortfoliosService.findAllByOwner.mockResolvedValue([mockPortfolio]);
 
-      const mockDetails = new PortfolioModel({
+      const mockDetails = {
         id: new BigNumber(1),
         name: 'P-1',
         tokenBalances: [],
-      });
+      };
       const result = await controller.getPortfolios({ did });
 
       expect(result).toEqual(new ResultsModel({ results: [mockDetails] }));

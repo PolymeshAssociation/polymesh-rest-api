@@ -17,7 +17,7 @@ import { IdentitiesService } from './identities.service';
     TokensModule,
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),
-    forwardRef(() => PortfoliosModule),
+    PortfoliosModule,
   ],
   controllers: [IdentitiesController],
   providers: [IdentitiesService],

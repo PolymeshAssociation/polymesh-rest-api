@@ -11,7 +11,7 @@ export class AccountModel extends SignerModel {
   })
   readonly address: string;
 
-  constructor(model?: AccountModel) {
+  constructor(model: Omit<AccountModel, 'signerType'>) {
     super({ signerType: SignerType.Account });
     Object.assign(this, model);
   }

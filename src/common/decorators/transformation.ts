@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { isEntity, Venue } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
 import { mapValues } from 'lodash';
 
@@ -31,7 +31,7 @@ export function FromMaybeEntityArray() {
     Transform(({ value }: { value: unknown[] }) =>
       value.map(val => {
         if (isEntity(val)) {
-          return val?.toJson();
+          return val.toJson();
         }
 
         return val;
@@ -41,24 +41,16 @@ export function FromMaybeEntityArray() {
 }
 
 /**
- * Entity from SDK -> POJO
+ * Transform all SDK Entities in the object/array into their serialized versions,
+ *   or serialize the value if it is an SDK Entity in
  */
 export function FromEntityObject() {
   return applyDecorators(Transform(({ value }: { value: unknown }) => toJsonObject(value)));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function toJsonObject<T>(obj: T): any {
+function toJsonObject(obj: unknown): unknown {
   if (isEntity(obj)) {
     return obj.toJson();
-  }
-
-  if (obj instanceof BigNumber) {
-    return obj.toString();
-  }
-
-  if (obj instanceof Date) {
-    return obj.toISOString();
   }
 
   if (Array.isArray(obj)) {
