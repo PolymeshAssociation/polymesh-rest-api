@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ClaimData, ClaimType, ResultSet, Scope } from '@polymathnetwork/polymesh-sdk/types';
-import { flatten } from 'lodash';
 
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
@@ -41,7 +40,7 @@ export class ClaimsService {
       }
     );
     return {
-      data: flatten(identitiesWithClaims.data?.map(({ claims }) => claims || [])),
+      data: identitiesWithClaims.data?.[0].claims || [],
       next: identitiesWithClaims.next,
       count: identitiesWithClaims.count,
     };
