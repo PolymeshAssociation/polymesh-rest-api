@@ -3,8 +3,8 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
 
-import { PaginatedResultsDto } from '~/common/dto/paginated-results.dto';
-import { ResultsDto } from '~/common/dto/results.dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const ApiArrayResponse = <TModel extends Type | string>(
@@ -13,7 +13,13 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     paginated,
     example,
     examples,
-  }: { paginated: boolean; example?: unknown; examples?: unknown[] | Record<string, unknown> } = {
+    description,
+  }: {
+    paginated: boolean;
+    example?: unknown;
+    examples?: unknown[] | Record<string, unknown>;
+    description?: string;
+  } = {
     paginated: true,
   }
 ) => {
@@ -27,9 +33,10 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   }
   return applyDecorators(
     ApiOkResponse({
+      description,
       schema: {
         allOf: [
-          { $ref: getSchemaPath(paginated ? PaginatedResultsDto : ResultsDto) },
+          { $ref: getSchemaPath(paginated ? PaginatedResultsModel : ResultsModel) },
           {
             properties: {
               results: {
@@ -43,6 +50,6 @@ export const ApiArrayResponse = <TModel extends Type | string>(
         ],
       },
     }),
-    ApiExtraModels(PaginatedResultsDto, ResultsDto)
+    ApiExtraModels(PaginatedResultsModel, ResultsModel)
   );
 };

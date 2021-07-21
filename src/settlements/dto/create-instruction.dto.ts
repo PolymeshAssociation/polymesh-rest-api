@@ -7,8 +7,8 @@ import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
 class LegDto {
   @ApiProperty({

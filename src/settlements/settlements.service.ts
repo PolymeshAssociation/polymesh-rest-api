@@ -9,7 +9,7 @@ import {
 
 import { SignerDto } from '~/common/dto/signer.dto';
 import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue } from '~/common/utils/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -114,5 +114,10 @@ export class SettlementsService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
     return processQueue(instruction.affirm, undefined, { signer: address });
+  }
+
+  public async findVenuesByOwner(did: string): Promise<Venue[]> {
+    const identity = await this.identitiesService.findOne(did);
+    return identity.getVenues();
   }
 }

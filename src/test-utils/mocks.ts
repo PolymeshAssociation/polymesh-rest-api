@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
@@ -25,6 +26,11 @@ export class MockPolymeshClass {
     getInstruction: jest.fn(),
     getVenue: jest.fn(),
   };
+
+  public claims = {
+    getIssuedClaims: jest.fn(),
+    getIdentitiesWithClaims: jest.fn(),
+  };
 }
 
 export class MockSecurityTokenClass {
@@ -40,8 +46,32 @@ export class MockVenueClass {
   public addInstruction = jest.fn();
 }
 
+export class MockPortfolio {
+  id = new BigNumber(1);
+  public getName = jest.fn();
+  public getTokenBalances = jest.fn();
+  public isCustodiedBy = jest.fn();
+  public getCustodian = jest.fn();
+}
+
+export class MockIdentityAuthorization {
+  public getSent = jest.fn();
+  public getReceived = jest.fn();
+}
+
+export class MockPortfolios {
+  public getPortfolios = jest.fn();
+}
+
 export class MockIdentityClass {
+  did: string;
+  portfolios = new MockPortfolios();
+  authorizations = new MockIdentityAuthorization();
+  public getPrimaryKey = jest.fn();
+  public areSecondaryKeysFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
+  public getVenues = jest.fn();
+  public getSecondaryKeys = jest.fn();
 }
 
 export class MockTransactionQueueClass {

@@ -3,8 +3,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { isEntity, Venue } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
+import { mapValues } from 'lodash';
 
 import { Entity } from '~/common/types';
 
@@ -16,17 +17,10 @@ export function ToBigNumber() {
 }
 
 /**
- * Venue -> string
- */
-export function FromVenue() {
-  return applyDecorators(Transform(({ value: { id } }: { value: Venue }) => id.toString()));
-}
-
-/**
  * Entity -> POJO
  */
 export function FromEntity() {
-  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value.toJson()));
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toJson()));
 }
 
 /**
@@ -47,8 +41,32 @@ export function FromMaybeEntityArray() {
 }
 
 /**
+ * Transform all SDK Entities in the object/array into their serialized versions,
+ *   or serialize the value if it is an SDK Entity in
+ */
+export function FromEntityObject() {
+  return applyDecorators(Transform(({ value }: { value: unknown }) => toJsonObject(value)));
+}
+
+function toJsonObject(obj: unknown): unknown {
+  if (isEntity(obj)) {
+    return obj.toJson();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(toJsonObject);
+  }
+
+  if (obj && typeof obj === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return mapValues(obj as any, val => toJsonObject(val));
+  }
+  return obj;
+}
+
+/**
  * BigNumber -> string
  */
 export function FromBigNumber() {
-  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value.toString()));
+  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
 }

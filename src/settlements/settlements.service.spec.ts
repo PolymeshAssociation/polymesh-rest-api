@@ -6,12 +6,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {

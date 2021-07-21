@@ -4,8 +4,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
+import { ClaimsModule } from '~/claims/claims.module';
+
+import { AuthorizationsModule } from './authorizations/authorizations.module';
 import { IdentitiesModule } from './identities/identities.module';
 import { PolymeshModule } from './polymesh/polymesh.module';
+import { PortfoliosModule } from './portfolios/portfolios.module';
 import { RelayerAccountsModule } from './relayer-accounts/relayer-accounts.module';
 import { SettlementsModule } from './settlements/settlements.module';
 import { TokensModule } from './tokens/tokens.module';
@@ -25,6 +29,9 @@ import { TokensModule } from './tokens/tokens.module';
     IdentitiesModule,
     SettlementsModule,
     RelayerAccountsModule,
+    AuthorizationsModule,
+    PortfoliosModule,
+    ClaimsModule,
   ],
 })
 export class AppModule {}
