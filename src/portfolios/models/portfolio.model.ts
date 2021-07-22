@@ -5,8 +5,8 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
+import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
-import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
 
 export class PortfolioModel {
   @ApiProperty({
@@ -26,12 +26,12 @@ export class PortfolioModel {
   readonly name: string;
 
   @ApiProperty({
-    description: 'List of balances for each token in the Portfolio',
-    type: () => TokenBalanceModel,
+    description: 'List of balances for each Asset in the Portfolio',
+    type: () => AssetBalanceModel,
     isArray: true,
   })
-  @Type(() => TokenBalanceModel)
-  readonly tokenBalances: TokenBalanceModel[];
+  @Type(() => AssetBalanceModel)
+  readonly assetBalances: AssetBalanceModel[];
 
   @ApiProperty({
     description: 'Identity who custodies the Portfolio',

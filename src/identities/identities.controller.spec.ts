@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
@@ -10,13 +11,12 @@ import { IdentityModel } from '~/identities/models/identity.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentityClass, MockPortfolio } from '~/test-utils/mocks';
-import { TokensService } from '~/tokens/tokens.service';
 
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
-  const mockTokensService = {
+  const mockAssetsService = {
     findAllByOwner: jest.fn(),
   };
 
@@ -46,7 +46,7 @@ describe('IdentitiesController', () => {
     const module = await Test.createTestingModule({
       controllers: [IdentitiesController],
       providers: [
-        TokensService,
+        AssetsService,
         SettlementsService,
         IdentitiesService,
         PortfoliosService,
@@ -54,8 +54,8 @@ describe('IdentitiesController', () => {
         ClaimsService,
       ],
     })
-      .overrideProvider(TokensService)
-      .useValue(mockTokensService)
+      .overrideProvider(AssetsService)
+      .useValue(mockAssetsService)
       .overrideProvider(SettlementsService)
       .useValue(mockSettlementsService)
       .overrideProvider(IdentitiesService)
@@ -75,14 +75,14 @@ describe('IdentitiesController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('getTokens', () => {
-    it("should return the Identity's Tokens", async () => {
-      const tokens = ['FOO', 'BAR', 'BAZ'];
-      mockTokensService.findAllByOwner.mockResolvedValue(tokens);
+  describe('getAssets', () => {
+    it("should return the Identity's Assets", async () => {
+      const assets = ['FOO', 'BAR', 'BAZ'];
+      mockAssetsService.findAllByOwner.mockResolvedValue(assets);
 
-      const result = await controller.getTokens({ did: '0x1' });
+      const result = await controller.getAssets({ did: '0x1' });
 
-      expect(result).toEqual({ results: tokens });
+      expect(result).toEqual({ results: assets });
     });
   });
 
@@ -187,7 +187,7 @@ describe('IdentitiesController', () => {
       const mockDetails = {
         id: new BigNumber(1),
         name: 'P-1',
-        tokenBalances: [],
+        assetBalances: [],
       };
       const result = await controller.getPortfolios({ did });
 

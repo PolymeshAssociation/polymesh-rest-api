@@ -6,13 +6,13 @@ import Joi from 'joi';
 
 import { ClaimsModule } from '~/claims/claims.module';
 
+import { AssetsModule } from './assets/assets.module';
 import { AuthorizationsModule } from './authorizations/authorizations.module';
 import { IdentitiesModule } from './identities/identities.module';
 import { PolymeshModule } from './polymesh/polymesh.module';
 import { PortfoliosModule } from './portfolios/portfolios.module';
 import { RelayerAccountsModule } from './relayer-accounts/relayer-accounts.module';
 import { SettlementsModule } from './settlements/settlements.module';
-import { TokensModule } from './tokens/tokens.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { TokensModule } from './tokens/tokens.module';
         POLYMESH_MIDDLEWARE_API_KEY: Joi.string(),
       }).and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY'),
     }),
-    TokensModule,
+    AssetsModule,
     PolymeshModule,
     IdentitiesModule,
     SettlementsModule,

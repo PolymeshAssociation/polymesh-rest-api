@@ -139,7 +139,7 @@ describe('SettlementsService', () => {
       });
     });
     describe('otherwise', () => {
-      it('should return the token entity', async () => {
+      it('should return the Instruction entity', async () => {
         const mockInstruction = new MockInstructionClass();
 
         mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
@@ -155,7 +155,7 @@ describe('SettlementsService', () => {
   });
 
   describe('createInstruction', () => {
-    describe('if the venue does not exist', () => {
+    describe('if the Venue does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
           throw new Error('The Venue');

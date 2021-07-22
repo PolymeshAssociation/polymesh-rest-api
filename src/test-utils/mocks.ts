@@ -35,6 +35,20 @@ export class MockPolymeshClass {
 
 export class MockSecurityTokenClass {
   public details = jest.fn();
+  public getIdentifiers = jest.fn();
+  public tokenHolders = {
+    get: jest.fn(),
+  };
+
+  public documents = {
+    get: jest.fn(),
+  };
+
+  public compliance = {
+    requirements: {
+      get: jest.fn(),
+    },
+  };
 }
 
 export class MockInstructionClass {

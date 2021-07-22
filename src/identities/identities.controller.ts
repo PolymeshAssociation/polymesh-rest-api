@@ -9,6 +9,7 @@ import {
   SecurityToken,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { ClaimsService } from '~/claims/claims.service';
@@ -26,7 +27,6 @@ import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { TokensService } from '~/tokens/tokens.service';
 
 @ApiTags('identities')
 @Controller('identities')
@@ -34,7 +34,7 @@ export class IdentitiesController {
   private readonly logger = new Logger(IdentitiesController.name);
 
   constructor(
-    private readonly tokensService: TokensService,
+    private readonly assetsService: AssetsService,
     private readonly settlementsService: SettlementsService,
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
@@ -215,13 +215,13 @@ export class IdentitiesController {
     return new ResultsModel({ results });
   }
 
-  @ApiTags('tokens')
+  @ApiTags('assets')
   @ApiOperation({
-    summary: 'Fetch all Security Tokens owned by an Identity',
+    summary: 'Fetch all Assets owned by an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Security Tokens are to be fetched',
+    description: 'The DID whose Assets are to be fetched',
     type: 'string',
     required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
@@ -230,11 +230,10 @@ export class IdentitiesController {
     paginated: false,
     example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
   })
-  @Get(':did/tokens')
-  public async getTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
-    const tokens = await this.tokensService.findAllByOwner(did);
-
-    return new ResultsModel({ results: tokens });
+  @Get(':did/assets')
+  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
+    const results = await this.assetsService.findAllByOwner(did);
+    return new ResultsModel({ results });
   }
 
   @ApiTags('settlements', 'instructions')

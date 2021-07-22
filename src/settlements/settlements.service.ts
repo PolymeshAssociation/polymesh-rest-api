@@ -77,10 +77,11 @@ export class SettlementsService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {
       ...rest,
-      legs: rest.legs.map(leg => ({
-        ...leg,
-        from: leg.from.toPortfolioLike(),
-        to: leg.to.toPortfolioLike(),
+      legs: rest.legs.map(({ amount, asset, from, to }) => ({
+        amount,
+        token: asset,
+        from: from.toPortfolioLike(),
+        to: to.toPortfolioLike(),
       })),
     };
 

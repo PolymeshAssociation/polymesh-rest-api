@@ -35,11 +35,11 @@ class LegDto {
   readonly to: PortfolioDto;
 
   @ApiProperty({
-    description: 'Security Token ticker',
+    description: 'Asset ticker',
     example: 'MY_TOKEN',
   })
   @IsTicker()
-  readonly token: string;
+  readonly asset: string;
 }
 
 export class CreateInstructionDto extends SignerDto {

@@ -6,8 +6,9 @@ import { Identity, KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
-export class TokenDetailsDto {
+export class AssetDetailsModel {
   @ApiProperty({
+    description: 'The DID of the Asset owner',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -15,22 +16,36 @@ export class TokenDetailsDto {
   readonly owner: Identity;
 
   @ApiProperty({
+    description: 'Type of the Asset',
+    type: 'string',
+    enum: KnownTokenType,
     example: KnownTokenType.EquityCommon,
   })
   readonly assetType: string;
 
   @ApiProperty({
+    description: 'Name of the Asset',
+    type: 'string',
     example: 'MyToken',
   })
   readonly name: string;
 
-  @ApiProperty({ type: 'string', example: '1000' })
+  @ApiProperty({
+    description: 'Total supply count of the Asset',
+    type: 'string',
+    example: '1000',
+  })
   @FromBigNumber()
   readonly totalSupply: BigNumber;
 
+  @ApiProperty({
+    description: 'Indicator to know if Asset is divisible or not',
+    type: 'boolean',
+    example: 'false',
+  })
   readonly isDivisible: boolean;
 
-  constructor(dto: TokenDetailsDto) {
+  constructor(dto: AssetDetailsModel) {
     Object.assign(this, dto);
   }
 }

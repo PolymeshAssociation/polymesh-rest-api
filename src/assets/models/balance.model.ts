@@ -31,6 +31,6 @@ export class BalanceModel {
   readonly total: BigNumber;
 
   constructor(model: BalanceModel) {
-    Object.assign({}, model);
+    Object.assign(this, model);
   }
 }
