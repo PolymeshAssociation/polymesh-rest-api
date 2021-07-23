@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, ValidateNested } from 'class-validator';
@@ -47,30 +47,27 @@ export class CreateInstructionDto extends SignerDto {
   @Type(() => LegDto)
   readonly legs: LegDto[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Date at which the trade was agreed upon (optional, for offchain trades)',
     example: new Date('10/14/1987').toISOString(),
-    nullable: true,
   })
   @IsOptional()
   @IsDate()
   readonly tradeDate?: Date;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Date at which the trade was executed (optional, for offchain trades)',
     example: new Date('10/14/1987').toISOString(),
-    nullable: true,
   })
   @IsOptional()
   @IsDate()
   readonly valueDate?: Date;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: 'string',
     description:
       'Block at which the Instruction will be executed. If not passed, the Instruction will be executed when all parties affirm or as soon as one party rejects',
     example: '123',
-    nullable: true,
   })
   @IsOptional()
   @IsBigNumber()

@@ -2,9 +2,9 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
+import { createAssetDetailsModel } from '~/assets/assets.util';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
-import { AssetIdentifierModel } from '~/assets/models/asset-identifier.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequirementModel } from '~/assets/models/requirement.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
@@ -29,7 +29,7 @@ export class AssetsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The unique ticker whose details are to be fetched',
+    description: 'The ticker of the Asset whose details are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -39,51 +39,8 @@ export class AssetsController {
   })
   @Get(':ticker')
   public async getDetails(@Param() { ticker }: TickerParams): Promise<AssetDetailsModel> {
-    const {
-      owner,
-      assetType,
-      name,
-      totalSupply,
-      isDivisible,
-    } = await this.assetsService.findDetails(ticker);
-
-    return new AssetDetailsModel({
-      owner,
-      assetType,
-      name,
-      totalSupply,
-      isDivisible,
-    });
-  }
-
-  @ApiOperation({
-    summary: 'Fetch Asset Identifiers',
-    description: 'This endpoint will provide the list of Asset Identifiers',
-  })
-  @ApiParam({
-    name: 'ticker',
-    description: 'The unique ticker whose identifiers are to be fetched',
-    type: 'string',
-    example: 'TICKER',
-  })
-  @ApiArrayResponse(AssetIdentifierModel, {
-    description: 'Returns the list of Asset identifiers',
-    example: [
-      {
-        type: 'Isin',
-        value: 'US0000000000',
-      },
-    ],
-    paginated: false,
-  })
-  @Get(':ticker/identifiers')
-  public async getIdentifiers(
-    @Param() { ticker }: TickerParams
-  ): Promise<ResultsModel<AssetIdentifierModel>> {
-    const results = await this.assetsService.findIdentifiers(ticker);
-    return new ResultsModel({
-      results: results.map(assetIdentifier => new AssetIdentifierModel(assetIdentifier)),
-    });
+    const asset = await this.assetsService.findOne(ticker);
+    return createAssetDetailsModel(asset);
   }
 
   @ApiOperation({
@@ -93,7 +50,7 @@ export class AssetsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The unique ticker whose details are to be fetched',
+    description: 'The ticker of the Asset whose holders are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -110,16 +67,15 @@ export class AssetsController {
     required: false,
   })
   @ApiArrayResponse(IdentityBalanceModel, {
-    description:
-      'Returns the list of Asset holders, each consisting of their existing Asset balance',
+    description: 'List of Asset holders, each consisting of a DID and their current Asset balance',
     paginated: true,
   })
   @Get(':ticker/holders')
-  public async getAssetHolders(
+  public async getHolders(
     @Param() { ticker }: TickerParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.assetsService.findAssetHolders(
+    const { data, count: total, next } = await this.assetsService.findHolders(
       ticker,
       size,
       start?.toString()
@@ -144,7 +100,7 @@ export class AssetsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The unique ticker whose attached documents are to be fetched',
+    description: 'The ticker of the Asset whose attached documents are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -153,19 +109,21 @@ export class AssetsController {
     description: 'The number of documents to be fetched',
     type: 'number',
     required: false,
+    example: 10,
   })
   @ApiQuery({
     name: 'start',
     description: 'Start key from which documents are to be fetched',
     type: 'string',
     required: false,
+    example: 'STARTKEY',
   })
   @ApiArrayResponse(AssetDocumentModel, {
-    description: 'Returns the documents attached to the Asset',
+    description: 'List of documents attached to the Asset',
     paginated: true,
   })
   @Get(':ticker/documents')
-  public async getAssetDocuments(
+  public async getDocuments(
     @Param() { ticker }: TickerParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
@@ -193,16 +151,16 @@ export class AssetsController {
 
   @ApiOperation({
     summary: 'Fetch compliance requirements for an Asset',
-    description: 'This endpoint will provide the list of all compliance requirements ',
+    description: 'This endpoint will provide the list of all compliance requirements of an Asset',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The unique ticker whose compliance requirements are to be fetched',
+    description: 'The ticker of the Asset whose compliance requirements are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
   @ApiArrayResponse(RequirementModel, {
-    description: 'Returns the list of compliance requirements for the Asset',
+    description: 'List of compliance requirements of the Asset',
     paginated: false,
   })
   @Get(':ticker/compliance-requirements')

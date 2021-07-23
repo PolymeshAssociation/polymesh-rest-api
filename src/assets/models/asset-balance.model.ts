@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -12,7 +13,7 @@ export class AssetBalanceModel extends BalanceModel {
     example: 'TICKER',
   })
   @FromEntity()
-  readonly asset?: SecurityToken;
+  readonly asset: SecurityToken;
 
   constructor(model: AssetBalanceModel) {
     const { asset, ...balance } = model;

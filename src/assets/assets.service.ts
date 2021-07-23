@@ -5,9 +5,7 @@ import {
   Requirement,
   ResultSet,
   SecurityToken,
-  SecurityTokenDetails,
   TokenDocument,
-  TokenIdentifier,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -25,18 +23,12 @@ export class AssetsService {
       if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith('There is no Security Token with ticker')) {
-          throw new NotFoundException(message);
+          throw new NotFoundException('There is no Asset with ticker');
         }
       }
 
       throw err;
     }
-  }
-
-  public async findDetails(ticker: string): Promise<SecurityTokenDetails> {
-    const asset = await this.findOne(ticker);
-
-    return asset.details();
   }
 
   public async findAllByOwner(owner: string): Promise<SecurityToken[]> {
@@ -52,13 +44,7 @@ export class AssetsService {
     return polymeshApi.getSecurityTokens({ owner });
   }
 
-  public async findIdentifiers(ticker: string): Promise<TokenIdentifier[]> {
-    const asset = await this.findOne(ticker);
-
-    return asset.getIdentifiers();
-  }
-
-  public async findAssetHolders(
+  public async findHolders(
     ticker: string,
     size: number,
     start?: string

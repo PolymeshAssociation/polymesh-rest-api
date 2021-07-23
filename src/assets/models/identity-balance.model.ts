@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity } from '@polymathnetwork/polymesh-sdk/types';
@@ -14,7 +16,7 @@ export class IdentityBalanceModel {
   readonly identity: Identity;
 
   @ApiProperty({
-    description: 'The existing balance with the Asset Holder',
+    description: 'Balance held by the Identity',
     type: 'string',
     example: '12345',
   })

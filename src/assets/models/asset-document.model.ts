@@ -1,4 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+/* istanbul ignore file */
+
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AssetDocumentModel {
   @ApiProperty({
@@ -22,18 +24,16 @@ export class AssetDocumentModel {
   })
   readonly contentHash: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Type of the document',
     type: 'string',
-    nullable: true,
     example: 'Word Document',
   })
   readonly type?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Date at which the document was filed',
     type: 'string',
-    nullable: true,
     example: new Date('10/14/1987').toISOString(),
   })
   readonly filedAt?: Date;

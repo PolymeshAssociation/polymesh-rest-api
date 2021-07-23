@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
 import { IsOptional } from 'class-validator';
@@ -15,8 +15,7 @@ export class PortfolioDto {
   @IsDid()
   readonly did: string;
 
-  @ApiProperty({
-    nullable: true,
+  @ApiPropertyOptional({
     example: '123',
     description: 'Portfolio number, do not send any value for the Default Portfolio',
   })

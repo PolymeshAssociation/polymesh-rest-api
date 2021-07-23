@@ -2,9 +2,9 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, KnownTokenType, TokenIdentifier } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { FromBigNumber, FromEntity, FromEntityObject } from '~/common/decorators/transformation';
 
 export class AssetDetailsModel {
   @ApiProperty({
@@ -44,6 +44,19 @@ export class AssetDetailsModel {
     example: 'false',
   })
   readonly isDivisible: boolean;
+
+  @ApiProperty({
+    description: 'List of Asset identifiers',
+    isArray: true,
+    example: [
+      {
+        type: 'Isin',
+        value: 'US0000000000',
+      },
+    ],
+  })
+  @FromEntityObject()
+  readonly identifiers: TokenIdentifier[];
 
   constructor(dto: AssetDetailsModel) {
     Object.assign(this, dto);

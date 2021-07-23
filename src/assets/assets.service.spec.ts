@@ -68,7 +68,7 @@ describe('AssetsService', () => {
         } catch (err) {
           error = err;
         }
-        console.log(error);
+
         expect(error).toBeInstanceOf(NotFoundException);
       });
     });
@@ -115,31 +115,6 @@ describe('AssetsService', () => {
     });
   });
 
-  describe('findDetails', () => {
-    it('should return the Asset details', async () => {
-      const mockDetails = {
-        assetType: 'assetType',
-        isDivisible: false,
-        name: 'name',
-        owner: 'owner',
-        primaryIssuanceAgent: 'pia',
-        totalSupply: 'totalSupply',
-      };
-
-      const mockSecurityToken = new MockSecurityTokenClass();
-
-      const findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockSecurityToken as any);
-      mockSecurityToken.details.mockResolvedValue(mockDetails);
-
-      const result = await service.findDetails('TICKER');
-
-      expect(result).toEqual(mockDetails);
-      findOneSpy.mockRestore();
-    });
-  });
-
   describe('findAllByOwner', () => {
     describe('if the identity does not exist', () => {
       it('should throw a NotFoundException', async () => {
@@ -170,8 +145,8 @@ describe('AssetsService', () => {
     });
   });
 
-  describe('findAssetHolders', () => {
-    const mockAssetHolders = {
+  describe('findHolders', () => {
+    const mockHolders = {
       data: [
         {
           identity: '0x6'.padEnd(66, '0'),
@@ -182,29 +157,29 @@ describe('AssetsService', () => {
       count: 2,
     };
 
-    it('should return the list of Asset Identifiers', async () => {
+    it('should return the list of Asset holders', async () => {
       const mockSecurityToken = new MockSecurityTokenClass();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockSecurityToken as any);
-      mockSecurityToken.tokenHolders.get.mockResolvedValue(mockAssetHolders);
+      mockSecurityToken.tokenHolders.get.mockResolvedValue(mockHolders);
 
-      const result = await service.findAssetHolders('TICKER', 10);
-      expect(result).toEqual(mockAssetHolders);
+      const result = await service.findHolders('TICKER', 10);
+      expect(result).toEqual(mockHolders);
       findOneSpy.mockRestore();
     });
 
-    it('should return the list of Asset Identifiers from a start value', async () => {
+    it('should return the list of Asset holders from a start value', async () => {
       const mockSecurityToken = new MockSecurityTokenClass();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockSecurityToken as any);
-      mockSecurityToken.tokenHolders.get.mockResolvedValue(mockAssetHolders);
+      mockSecurityToken.tokenHolders.get.mockResolvedValue(mockHolders);
 
-      const result = await service.findAssetHolders('TICKER', 10, 'NEXTKEY');
-      expect(result).toEqual(mockAssetHolders);
+      const result = await service.findHolders('TICKER', 10, 'NEXTKEY');
+      expect(result).toEqual(mockHolders);
       findOneSpy.mockRestore();
     });
   });
@@ -248,6 +223,7 @@ describe('AssetsService', () => {
       findOneSpy.mockRestore();
     });
   });
+
   describe('findComplianceRequirements', () => {
     it('should return the list of Asset compliance requirements', async () => {
       const mockRequirements = [

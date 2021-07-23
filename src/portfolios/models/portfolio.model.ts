@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
@@ -9,10 +9,9 @@ import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
 export class PortfolioModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Portfolio number. An empty value represents the Default Portfolio',
     type: 'string',
-    nullable: true,
     example: '123',
   })
   @FromBigNumber()
@@ -33,10 +32,9 @@ export class PortfolioModel {
   @Type(() => AssetBalanceModel)
   readonly assetBalances: AssetBalanceModel[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Identity who custodies the Portfolio',
     type: 'string',
-    nullable: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @FromEntity()

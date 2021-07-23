@@ -28,10 +28,17 @@ export function FromEntity() {
  */
 export function FromMaybeEntityArray() {
   return applyDecorators(
-    Transform(({ value }: { value: unknown[] }) => value.map(val => toJsonObject(val)))
+    Transform(({ value }: { value: unknown[] }) =>
+      value.map(val => {
+        if (isEntity(val)) {
+          return val.toJson();
+        }
+
+        return val;
+      })
+    )
   );
 }
-
 /**
  * Transform all SDK Entities in the object/array into their serialized versions,
  *   or serialize the value if it is an SDK Entity in

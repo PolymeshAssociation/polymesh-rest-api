@@ -28,7 +28,8 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   if (typeof model === 'string') {
     items = { type: model };
   } else {
-    extraModels.push(model);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    extraModels.push(model as any);
     items = { $ref: getSchemaPath(model) };
   }
   return applyDecorators(
@@ -50,6 +51,6 @@ export const ApiArrayResponse = <TModel extends Type | string>(
         ],
       },
     }),
-    ApiExtraModels(PaginatedResultsModel, ResultsModel)
+    ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
   );
 };
