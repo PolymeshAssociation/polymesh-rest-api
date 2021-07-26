@@ -28,8 +28,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   if (typeof model === 'string') {
     items = { type: model };
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    extraModels.push(model as any);
+    extraModels.push(model);
     items = { $ref: getSchemaPath(model) };
   }
   return applyDecorators(

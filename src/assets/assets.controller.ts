@@ -34,7 +34,7 @@ export class AssetsController {
     example: 'TICKER',
   })
   @ApiOkResponse({
-    description: 'Returns basic details of the Asset',
+    description: 'Basic details of the Asset',
     type: AssetDetailsModel,
   })
   @Get(':ticker')

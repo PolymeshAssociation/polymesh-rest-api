@@ -23,7 +23,7 @@ export class AssetsService {
       if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith('There is no Security Token with ticker')) {
-          throw new NotFoundException('There is no Asset with ticker');
+          throw new NotFoundException(`There is no Asset with ticker "${ticker}"`);
         }
       }
 
