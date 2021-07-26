@@ -14,8 +14,8 @@ import {
   ValidationOptions,
 } from 'class-validator';
 
+import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
-import { MAX_TICKER_LENGTH } from '~/tokens/tokens.consts';
 
 export function IsDid() {
   return applyDecorators(

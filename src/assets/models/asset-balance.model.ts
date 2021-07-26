@@ -1,22 +1,23 @@
 /* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
+import { BalanceModel } from '~/assets/models/balance.model';
 import { FromEntity } from '~/common/decorators/transformation';
-import { BalanceModel } from '~/tokens/models/balance.model';
 
-export class TokenBalanceModel extends BalanceModel {
+export class AssetBalanceModel extends BalanceModel {
   @ApiProperty({
-    description: 'Ticker of the token',
+    description: 'Ticker of the Asset',
     type: 'string',
     example: 'TICKER',
   })
   @FromEntity()
-  readonly token?: SecurityToken;
+  readonly asset: SecurityToken;
 
-  constructor(model: TokenBalanceModel) {
-    const { token, ...balance } = model;
+  constructor(model: AssetBalanceModel) {
+    const { asset, ...balance } = model;
     super(balance);
-    this.token = token;
+    this.asset = asset;
   }
 }

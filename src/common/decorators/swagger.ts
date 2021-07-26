@@ -50,6 +50,6 @@ export const ApiArrayResponse = <TModel extends Type | string>(
         ],
       },
     }),
-    ApiExtraModels(PaginatedResultsModel, ResultsModel)
+    ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
   );
 };

@@ -7,8 +7,8 @@ import {
   PortfolioBalance,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
-import { TokenBalanceModel } from '~/tokens/models/token-balance.model';
 
 export async function createPortfolioModel(
   portfolio: DefaultPortfolio | NumberedPortfolio,
@@ -38,10 +38,10 @@ export async function createPortfolioModel(
   let portfolioModelParams: ConstructorParameters<typeof PortfolioModel>[0] = {
     id: portfolioId,
     name,
-    tokenBalances: tokenBalances.map(
-      ({ token, total, free, locked }) =>
-        new TokenBalanceModel({
-          token,
+    assetBalances: tokenBalances.map(
+      ({ token: asset, total, free, locked }) =>
+        new AssetBalanceModel({
+          asset,
           total,
           free,
           locked,

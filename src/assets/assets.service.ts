@@ -1,37 +1,34 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  IdentityBalance,
   isPolymeshError,
+  Requirement,
+  ResultSet,
   SecurityToken,
-  SecurityTokenDetails,
+  TokenDocument,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
-export class TokensService {
+export class AssetsService {
   constructor(private readonly polymeshService: PolymeshService) {}
 
   public async findOne(ticker: string): Promise<SecurityToken> {
     try {
-      const token = await this.polymeshService.polymeshApi.getSecurityToken({ ticker });
+      const asset = await this.polymeshService.polymeshApi.getSecurityToken({ ticker });
 
-      return token;
+      return asset;
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith('There is no Security Token with ticker')) {
-          throw new NotFoundException(message);
+          throw new NotFoundException(`There is no Asset with ticker "${ticker}"`);
         }
       }
 
       throw err;
     }
-  }
-
-  public async findDetails(ticker: string): Promise<SecurityTokenDetails> {
-    const token = await this.findOne(ticker);
-
-    return token.details();
   }
 
   public async findAllByOwner(owner: string): Promise<SecurityToken[]> {
@@ -45,5 +42,28 @@ export class TokensService {
     }
 
     return polymeshApi.getSecurityTokens({ owner });
+  }
+
+  public async findHolders(
+    ticker: string,
+    size: number,
+    start?: string
+  ): Promise<ResultSet<IdentityBalance>> {
+    const asset = await this.findOne(ticker);
+    return asset.tokenHolders.get({ size, start });
+  }
+
+  public async findDocuments(
+    ticker: string,
+    size: number,
+    start?: string
+  ): Promise<ResultSet<TokenDocument>> {
+    const asset = await this.findOne(ticker);
+    return asset.documents.get({ size, start });
+  }
+
+  public async findComplianceRequirements(ticker: string): Promise<Requirement[]> {
+    const asset = await this.findOne(ticker);
+    return asset.compliance.requirements.get();
   }
 }

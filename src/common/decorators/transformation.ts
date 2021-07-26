@@ -39,7 +39,6 @@ export function FromMaybeEntityArray() {
     )
   );
 }
-
 /**
  * Transform all SDK Entities in the object/array into their serialized versions,
  *   or serialize the value if it is an SDK Entity in
