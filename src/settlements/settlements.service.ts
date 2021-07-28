@@ -2,9 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   Instruction,
-  InstructionStatusResult,
+  InstructionAffirmation,
   isPolymeshError,
+  ResultSet,
   Venue,
+  VenueDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -29,7 +31,7 @@ export class SettlementsService {
     return identity.getPendingInstructions();
   }
 
-  public async findInstruction(id: BigNumber): Promise<InstructionStatusResult> {
+  public async findInstruction(id: BigNumber): Promise<Instruction> {
     let instruction: Instruction;
 
     try {
@@ -48,7 +50,7 @@ export class SettlementsService {
       throw err;
     }
 
-    return instruction.getStatus();
+    return instruction;
   }
 
   public async createInstruction(
@@ -57,24 +59,9 @@ export class SettlementsService {
   ): Promise<QueueResult<Instruction>> {
     const { signer, ...rest } = createInstructuionDto;
 
-    let venue: Venue;
-
-    try {
-      venue = await this.polymeshService.polymeshApi.settlements.getVenue({
-        id: venueId,
-      });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { message } = err;
-        if (message.startsWith('The Venue')) {
-          throw new NotFoundException(`There is no Venue with ID ${venueId.toString()}`);
-        }
-      }
-
-      throw err;
-    }
-
+    const venue = await this.findVenue(venueId);
     const address = this.relayerAccountsService.findAddressByDid(signer);
+
     const params = {
       ...rest,
       legs: rest.legs.map(({ amount, asset, from, to }) => ({
@@ -94,23 +81,7 @@ export class SettlementsService {
   ): Promise<QueueResult<Instruction>> {
     const { signer } = signerDto;
 
-    let instruction: Instruction;
-
-    try {
-      instruction = await this.polymeshService.polymeshApi.settlements.getInstruction({
-        id,
-      });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { message } = err;
-
-        if (message.startsWith("The Instruction doesn't exist")) {
-          throw new NotFoundException(`There is no Instruction with ID ${id.toString()}`);
-        }
-      }
-
-      throw err;
-    }
+    const instruction = await this.findInstruction(id);
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
@@ -120,5 +91,41 @@ export class SettlementsService {
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
     const identity = await this.identitiesService.findOne(did);
     return identity.getVenues();
+  }
+
+  public async findVenue(id: BigNumber): Promise<Venue> {
+    let venue: Venue;
+    try {
+      venue = await this.polymeshService.polymeshApi.settlements.getVenue({
+        id,
+      });
+    } catch (err: unknown) {
+      if (isPolymeshError(err)) {
+        const { message } = err;
+
+        if (message.startsWith("The Venue doesn't")) {
+          throw new NotFoundException(`There is no Venue with ID ${id.toString()}`);
+        }
+      }
+
+      throw err;
+    }
+    return venue;
+  }
+
+  public async findVenueDetails(id: BigNumber): Promise<VenueDetails> {
+    const venue = await this.findVenue(id);
+
+    return venue.details();
+  }
+
+  public async findAffirmations(
+    id: BigNumber,
+    size: number,
+    start?: string
+  ): Promise<ResultSet<InstructionAffirmation>> {
+    const instruction = await this.findInstruction(id);
+
+    return instruction.getAffirmations({ size, start });
   }
 }

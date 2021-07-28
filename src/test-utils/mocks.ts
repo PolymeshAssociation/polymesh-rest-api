@@ -54,10 +54,14 @@ export class MockSecurityTokenClass {
 export class MockInstructionClass {
   public getStatus = jest.fn();
   public affirm = jest.fn();
+  public details = jest.fn();
+  public getLegs = jest.fn();
+  public getAffirmations = jest.fn();
 }
 
 export class MockVenueClass {
   public addInstruction = jest.fn();
+  public details = jest.fn();
 }
 
 export class MockPortfolio {
