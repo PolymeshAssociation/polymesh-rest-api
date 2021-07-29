@@ -7,10 +7,10 @@ import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { TransactionQueueDto } from '~/common/dto/transaction-queue.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { InstructionIdDto } from '~/settlements/dto/instruction-id.dto';
+import { InstructionIdModel } from '~/settlements/dto/instruction-id.dto';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -36,7 +36,7 @@ export class SettlementsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the instruction',
+    description: 'The ID of the Instruction',
     type: 'string',
     example: '123',
   })
@@ -61,20 +61,20 @@ export class SettlementsController {
     example: '123',
   })
   @ApiOkResponse({
-    description: 'The details of the Instruction being created',
-    type: InstructionIdDto,
+    description: 'The ID of the newly created Instruction',
+    type: InstructionIdModel,
   })
   @Post('venues/:id/instructions')
   public async createInstruction(
     @Param() { id }: IdParams,
     @Body() createInstructionDto: CreateInstructionDto
-  ): Promise<InstructionIdDto> {
+  ): Promise<InstructionIdModel> {
     const { result: instructionId, transactions } = await this.settlementsService.createInstruction(
       id,
       createInstructionDto
     );
 
-    return new InstructionIdDto({
+    return new InstructionIdModel({
       instructionId,
       transactions,
     });
@@ -84,26 +84,26 @@ export class SettlementsController {
   @ApiOperation({
     summary: 'Affirm an existing Instruction',
     description:
-      'The endpoint will affirm a pending Instruction. All owners of involved portfolios must affirm for the instruction to be executed',
+      'The endpoint will affirm a pending Instruction. All owners of involved portfolios must affirm for the Instruction to be executed',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the instruction to be affirmed',
+    description: 'The ID of the Instruction to be affirmed',
     type: 'string',
     example: '123',
   })
   @ApiOkResponse({
     description: 'Details of the transaction',
-    type: TransactionQueueDto,
+    type: TransactionQueueModel,
   })
   @Post('instructions/:id/affirm')
   public async affirmInstruction(
     @Param() { id }: IdParams,
     @Body() signerDto: SignerDto
-  ): Promise<TransactionQueueDto> {
+  ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
 
-    return new TransactionQueueDto({ transactions });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('venues')
@@ -135,7 +135,7 @@ export class SettlementsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the instruction whose affirmations are to be fetched',
+    description: 'The ID of the Instruction whose affirmations are to be fetched',
     type: 'string',
     example: '123',
   })
@@ -152,8 +152,7 @@ export class SettlementsController {
     required: false,
   })
   @ApiArrayResponse(InstructionAffirmationModel, {
-    description:
-      'List of all affirmations consisting of the target Identity and its current status',
+    description: 'List of all affirmations related to the target Identity and their current status',
     paginated: true,
   })
   @Get('instructions/:id/affirmations')

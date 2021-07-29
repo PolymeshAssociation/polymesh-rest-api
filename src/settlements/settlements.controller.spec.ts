@@ -61,9 +61,7 @@ describe('SettlementsController', () => {
           id: new BigNumber('123'),
         },
         status: InstructionStatus.Pending,
-        createdDate: date,
-        tradeDate: null,
-        valueDate: null,
+        createdAt: date,
         type: InstructionType.SettleOnBlock,
         endBlock: new BigNumber('1000000'),
       };

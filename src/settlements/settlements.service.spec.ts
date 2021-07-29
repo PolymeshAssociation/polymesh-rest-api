@@ -259,6 +259,7 @@ describe('SettlementsService', () => {
         { legs: [{ from: 'fromDid', to: 'toDid' }] },
         { signer: address }
       );
+      findVenueSpy.mockRestore();
     });
   });
 
@@ -299,6 +300,7 @@ describe('SettlementsService', () => {
         ],
       });
       expect(mockInstruction.affirm).toHaveBeenCalledWith(undefined, { signer: address });
+      findInstructionSpy.mockRestore();
     });
   });
 
@@ -321,11 +323,12 @@ describe('SettlementsService', () => {
       const result = await service.findVenueDetails(new BigNumber('123'));
 
       expect(result).toEqual(mockDetails);
+      findVenueSpy.mockRestore();
     });
   });
 
   describe('findAffirmations', () => {
-    it('should list of affirmations for an Instruction', async () => {
+    it('should return a list of affirmations for an Instruction', async () => {
       const mockAffirmations = {
         data: [
           {
@@ -348,6 +351,7 @@ describe('SettlementsService', () => {
       const result = await service.findAffirmations(new BigNumber('123'), 10);
 
       expect(result).toEqual(mockAffirmations);
+      findInstructionSpy.mockRestore();
     });
   });
 });

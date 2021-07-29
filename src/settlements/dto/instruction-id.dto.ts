@@ -4,9 +4,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Instruction } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
-import { TransactionQueueDto } from '~/common/dto/transaction-queue.dto';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
-export class InstructionIdDto extends TransactionQueueDto {
+export class InstructionIdModel extends TransactionQueueModel {
   @ApiProperty({
     type: 'string',
     description: 'ID of the newly created settlement Instruction',
@@ -15,7 +15,7 @@ export class InstructionIdDto extends TransactionQueueDto {
   @FromEntity()
   readonly instructionId: Instruction;
 
-  constructor(dto: InstructionIdDto) {
+  constructor(dto: InstructionIdModel) {
     const { transactions, ...rest } = dto;
     super({ transactions });
 

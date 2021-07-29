@@ -15,7 +15,7 @@ import { LegModel } from '~/settlements/model/leg.model';
 
 export class InstructionModel {
   @ApiProperty({
-    description: 'ID of the venue through which the settlement is handled',
+    description: 'ID of the Venue through which the settlement is handled',
     type: 'string',
     example: '123',
   })
@@ -37,29 +37,27 @@ export class InstructionModel {
   })
   readonly status: InstructionStatus;
 
-  @ApiProperty({
-    description: 'Date when the trade is performed',
+  @ApiPropertyOptional({
+    description: 'Date at which the trade was agreed upon (optional, for offchain trades)',
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
-    nullable: true,
   })
-  readonly tradeDate: Date | null;
-
-  @ApiProperty({
-    description: 'Date when the value is transferred',
-    type: 'string',
-    example: new Date('10/14/1987').toISOString(),
-    nullable: true,
-  })
-  readonly valueDate: Date | null;
+  readonly tradeDate?: Date;
 
   @ApiPropertyOptional({
+    description: 'Date at which the trade was executed (optional, for offchain trades)',
+    type: 'string',
+    example: new Date('10/14/1987').toISOString(),
+  })
+  readonly valueDate?: Date;
+
+  @ApiProperty({
     description: 'Type of the Instruction',
     type: 'string',
     enum: InstructionType,
     example: InstructionType.SettleOnBlock,
   })
-  readonly type?: InstructionType;
+  readonly type: InstructionType;
 
   @ApiPropertyOptional({
     description:

@@ -7,7 +7,7 @@ import { FromEntity } from '~/common/decorators/transformation';
 
 export class InstructionAffirmationModel {
   @ApiProperty({
-    description: 'The DID of the identity affirming the instruction',
+    description: 'The DID of the identity affirming the Instruction',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })

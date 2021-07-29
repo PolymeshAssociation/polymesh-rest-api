@@ -104,7 +104,7 @@ export class SettlementsService {
         const { message } = err;
 
         if (message.startsWith("The Venue doesn't")) {
-          throw new NotFoundException(`There is no Venue with ID ${id.toString()}`);
+          throw new NotFoundException(`There is no Venue with ID "${id.toString()}"`);
         }
       }
 
