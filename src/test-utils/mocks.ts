@@ -62,6 +62,7 @@ export class MockInstructionClass {
 export class MockVenueClass {
   public addInstruction = jest.fn();
   public details = jest.fn();
+  public modify = jest.fn();
 }
 
 export class MockPortfolio {

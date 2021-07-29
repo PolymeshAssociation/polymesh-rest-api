@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { ModifyVenueParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   Instruction,
   InstructionAffirmation,
@@ -7,6 +8,7 @@ import {
   ResultSet,
   Venue,
   VenueDetails,
+  VenueType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -16,6 +18,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
+import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 
 @Injectable()
 export class SettlementsService {
@@ -127,5 +130,49 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return instruction.getAffirmations({ size, start });
+  }
+
+  public async modifyVenue(
+    venueId: BigNumber,
+    modifyVenueDto: ModifyVenueDto
+  ): Promise<QueueResult<void>> {
+    const { signer, ...rest } = modifyVenueDto;
+
+    let venue: Venue;
+    try {
+      venue = await this.polymeshService.polymeshApi.settlements.getVenue({
+        id: venueId,
+      });
+    } catch (err: unknown) {
+      if (isPolymeshError(err)) {
+        const { message } = err;
+        if (message.startsWith('The Venue')) {
+          throw new NotFoundException(`There is no Venue with ID ${venueId.toString()}`);
+        }
+      }
+
+      throw err;
+    }
+    let params: ModifyVenueParams;
+    if (rest.description && rest.type) {
+      params = {
+        description: rest.description,
+        type: rest.type,
+      };
+    } else if (rest.description && !rest.type) {
+      params = {
+        description: rest.description,
+      };
+    } else if (!rest.description && rest.type) {
+      params = {
+        type: rest.type,
+      };
+    } else {
+      throw new BadRequestException('description or type must be specified');
+    }
+
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+
+    return processQueue(venue.modify, params, { signer: address });
   }
 }
