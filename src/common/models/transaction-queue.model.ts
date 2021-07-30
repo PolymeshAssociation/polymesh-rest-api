@@ -36,7 +36,7 @@ export class TransactionQueueModel {
   @Type(() => TransactionIdentifierModel)
   transactions: TransactionIdentifierModel[];
 
-  constructor(dto: TransactionQueueModel) {
-    Object.assign(this, dto);
+  constructor(model: TransactionQueueModel) {
+    Object.assign(this, model);
   }
 }
