@@ -192,7 +192,12 @@ describe('SettlementsController', () => {
       };
       mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
 
-      const result = await controller.modifyVenue({ id: new BigNumber('3') }, {} as any);
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        description: 'A generic exchange',
+      };
+
+      const result = await controller.modifyVenue({ id: new BigNumber('3') }, body);
 
       expect(result).toEqual({
         transactions,

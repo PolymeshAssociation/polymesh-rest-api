@@ -363,11 +363,14 @@ describe('SettlementsService', () => {
         });
 
         mockIsPolymeshError.mockReturnValue(true);
-
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          description: 'A generic exchange',
+        };
         let error;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.modifyVenue(new BigNumber('123'), { description: 'Generic' } as any);
+          await service.modifyVenue(new BigNumber('123'), body);
         } catch (err) {
           error = err;
         }
@@ -389,6 +392,9 @@ describe('SettlementsService', () => {
         ];
         const mockQueue = new MockTransactionQueueClass(transactions);
         mockVenue.modify.mockResolvedValue(mockQueue);
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+        };
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -397,7 +403,7 @@ describe('SettlementsService', () => {
         let error = null;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.modifyVenue(new BigNumber('123'), {} as any);
+          await service.modifyVenue(new BigNumber('123'), body);
         } catch (err) {
           error = err;
         }
@@ -412,24 +418,19 @@ describe('SettlementsService', () => {
           throw expectedError;
         });
 
-        let error;
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.modifyVenue(new BigNumber('123'), { description: 'Generic' } as any);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          description: 'A generic exchange',
+        };
 
         expectedError = new Error('Something else');
 
         mockIsPolymeshError.mockReturnValue(true);
 
-        error = null;
+        let error = null;
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.modifyVenue(new BigNumber('123'), { description: 'Generic' } as any);
+          await service.modifyVenue(new BigNumber('123'), body);
         } catch (err) {
           error = err;
         }
@@ -454,6 +455,7 @@ describe('SettlementsService', () => {
         mockVenue.modify.mockResolvedValue(mockQueue);
 
         const body = {
+          signer: '0x6'.padEnd(66, '0'),
           description: 'A generic exchange',
           type: VenueType.Exchange,
         };
@@ -461,7 +463,7 @@ describe('SettlementsService', () => {
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await service.modifyVenue(new BigNumber('123'), body as any);
+        const result = await service.modifyVenue(new BigNumber('123'), body);
 
         expect(result).toEqual({
           result: undefined,
