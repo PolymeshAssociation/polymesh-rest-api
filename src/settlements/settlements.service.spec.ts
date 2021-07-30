@@ -4,7 +4,7 @@ const mockIsPolymeshError = jest.fn();
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { AffirmationStatus, TxTags, VenueType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { IdentitiesModule } from '~/identities/identities.module';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -141,32 +141,25 @@ describe('SettlementsService', () => {
     describe('otherwise', () => {
       it('should return the Instruction entity', async () => {
         const mockInstruction = new MockInstructionClass();
-
         mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
-
-        const expectedStatus = 'status';
-        mockInstruction.getStatus.mockResolvedValue(expectedStatus);
-
         const result = await service.findInstruction(new BigNumber('123'));
-
-        expect(result).toEqual(expectedStatus);
+        expect(result).toEqual(mockInstruction);
       });
     });
   });
 
-  describe('createInstruction', () => {
+  describe('findVenue', () => {
     describe('if the Venue does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw new Error('The Venue');
+          throw new Error("The Venue doesn't");
         });
 
         mockIsPolymeshError.mockReturnValue(true);
 
         let error;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.createInstruction(new BigNumber('123'), {} as any);
+          await service.findVenue(new BigNumber('123'));
         } catch (err) {
           error = err;
         }
@@ -183,8 +176,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.createInstruction(new BigNumber('123'), {} as any);
+          await service.findVenue(new BigNumber('123'));
         } catch (err) {
           error = err;
         }
@@ -197,8 +189,7 @@ describe('SettlementsService', () => {
 
         error = null;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.createInstruction(new BigNumber('123'), {} as any);
+          await service.findVenue(new BigNumber('123'));
         } catch (err) {
           error = err;
         }
@@ -207,148 +198,160 @@ describe('SettlementsService', () => {
       });
     });
     describe('otherwise', () => {
-      it('should run an addInstruction procedure and return the queue data', async () => {
+      it('should return the Venue entity', async () => {
         const mockVenue = new MockVenueClass();
-
         mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
-
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            tag: TxTags.settlement.AddInstruction,
-          },
-        ];
-        const mockQueue = new MockTransactionQueueClass(transactions);
-        const mockInstruction = 'instruction';
-        mockQueue.run.mockResolvedValue(mockInstruction);
-        mockVenue.addInstruction.mockResolvedValue(mockQueue);
-
-        const params = {
-          legs: [
-            {
-              from: new PortfolioDto({ did: 'fromDid' }),
-              to: new PortfolioDto({ did: 'toDid' }),
-            },
-          ],
-        };
-        const body = {
-          signer: 'signer',
-          ...params,
-        };
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await service.createInstruction(new BigNumber('123'), body as any);
-
-        expect(result).toEqual({
-          result: mockInstruction,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              transactionTag: TxTags.settlement.AddInstruction,
-            },
-          ],
-        });
-        expect(mockVenue.addInstruction).toHaveBeenCalledWith(
-          { legs: [{ from: 'fromDid', to: 'toDid' }] },
-          { signer: address }
-        );
+        const result = await service.findVenue(new BigNumber('123'));
+        expect(result).toEqual(mockVenue);
       });
     });
   });
 
-  describe('affirmInstruction', () => {
-    describe('if the instruction does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw new Error("The Instruction doesn't exist");
-        });
+  describe('createInstruction', () => {
+    it('should run an addInstruction procedure and return the queue data', async () => {
+      const mockVenue = new MockVenueClass();
 
-        mockIsPolymeshError.mockReturnValue(true);
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.settlement.AddInstruction,
+        },
+      ];
+      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockInstruction = 'instruction';
+      mockQueue.run.mockResolvedValue(mockInstruction);
+      mockVenue.addInstruction.mockResolvedValue(mockQueue);
 
-        let error;
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.affirmInstruction(new BigNumber('123'), {} as any);
-        } catch (err) {
-          error = err;
-        }
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
 
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
-    });
-    describe('if there is a different error when fetching the instruction', () => {
-      it('should pass the error along the chain', async () => {
-        let expectedError = new Error('foo');
-        mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw expectedError;
-        });
+      const params = {
+        legs: [
+          {
+            from: new PortfolioDto({ did: 'fromDid' }),
+            to: new PortfolioDto({ did: 'toDid' }),
+          },
+        ],
+      };
+      const body = {
+        signer: 'signer',
+        ...params,
+      };
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        let error;
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.affirmInstruction(new BigNumber('123'), {} as any);
-        } catch (err) {
-          error = err;
-        }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await service.createInstruction(new BigNumber('123'), body as any);
 
-        expect(error).toEqual(expectedError);
-
-        expectedError = new Error('Something else');
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        error = null;
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.affirmInstruction(new BigNumber('123'), {} as any);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-      });
-    });
-    describe('otherwise', () => {
-      it('should run an affirm procedure and return the queue data', async () => {
-        const mockInstruction = new MockInstructionClass();
-
-        mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
-
-        const transactions = [
+      expect(result).toEqual({
+        result: mockInstruction,
+        transactions: [
           {
             blockHash: '0x1',
-            txHash: '0x2',
-            tag: TxTags.settlement.AffirmInstruction,
+            transactionHash: '0x2',
+            transactionTag: TxTags.settlement.AddInstruction,
           },
-        ];
-        const mockQueue = new MockTransactionQueueClass(transactions);
-        mockInstruction.affirm.mockResolvedValue(mockQueue);
-
-        const body = {
-          signer: 'signer',
-        };
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await service.affirmInstruction(new BigNumber('123'), body as any);
-
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              transactionTag: TxTags.settlement.AffirmInstruction,
-            },
-          ],
-        });
-        expect(mockInstruction.affirm).toHaveBeenCalledWith(undefined, { signer: address });
+        ],
       });
+      expect(mockVenue.addInstruction).toHaveBeenCalledWith(
+        { legs: [{ from: 'fromDid', to: 'toDid' }] },
+        { signer: address }
+      );
+      findVenueSpy.mockRestore();
+    });
+  });
+
+  describe('affirmInstruction', () => {
+    it('should run an affirm procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstructionClass();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.settlement.AffirmInstruction,
+        },
+      ];
+      const mockQueue = new MockTransactionQueueClass(transactions);
+      mockInstruction.affirm.mockResolvedValue(mockQueue);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const body = {
+        signer: 'signer',
+      };
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await service.affirmInstruction(new BigNumber('123'), body as any);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.settlement.AffirmInstruction,
+          },
+        ],
+      });
+      expect(mockInstruction.affirm).toHaveBeenCalledWith(undefined, { signer: address });
+      findInstructionSpy.mockRestore();
+    });
+  });
+
+  describe('findVenueDetails', () => {
+    it('should return the Venue details', async () => {
+      const mockDetails = {
+        owner: {
+          did: '0x6'.padEnd(66, '0'),
+        },
+        description: 'Venue desc',
+        type: VenueType.Distribution,
+      };
+      const mockVenue = new MockVenueClass();
+      mockVenue.details.mockResolvedValue(mockDetails);
+
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
+
+      const result = await service.findVenueDetails(new BigNumber('123'));
+
+      expect(result).toEqual(mockDetails);
+      findVenueSpy.mockRestore();
+    });
+  });
+
+  describe('findAffirmations', () => {
+    it('should return a list of affirmations for an Instruction', async () => {
+      const mockAffirmations = {
+        data: [
+          {
+            identity: {
+              did: '0x6'.padEnd(66, '0'),
+            },
+            status: AffirmationStatus.Pending,
+          },
+        ],
+        next: null,
+      };
+
+      const mockInstruction = new MockInstructionClass();
+      mockInstruction.getAffirmations.mockResolvedValue(mockAffirmations);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.findAffirmations(new BigNumber('123'), 10);
+
+      expect(result).toEqual(mockAffirmations);
+      findInstructionSpy.mockRestore();
     });
   });
 });

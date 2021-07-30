@@ -1,15 +1,22 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
+import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
+import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { TransactionQueueDto } from '~/common/dto/transaction-queue.dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { InstructionIdDto } from '~/settlements/dto/instruction-id.dto';
-import { InstructionStatusDto } from '~/settlements/dto/instruction-status.dto';
+import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
+import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
+import { InstructionModel } from '~/settlements/model/instruction.model';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { createInstructionModel } from '~/settlements/settlements.util';
+
+import { VenueDetailsModel } from './model/venue-details.model';
 
 class IdParams {
   @IsBigNumber()
@@ -23,61 +30,151 @@ export class SettlementsController {
   constructor(private readonly settlementsService: SettlementsService) {}
 
   @ApiTags('instructions')
-  @ApiParam({
-    type: 'string',
-    name: 'id',
-  })
   @ApiOperation({
-    summary: "Fetch an instruction's status",
+    summary: 'Fetch Instruction details',
+    description: 'The endpoint will provide the details of the Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the Instruction',
+    type: InstructionModel,
   })
   @Get('instructions/:id')
-  public async getInstruction(@Param() { id }: IdParams): Promise<InstructionStatusDto> {
-    const status = await this.settlementsService.findInstruction(id);
-
-    return new InstructionStatusDto(status);
+  public async getInstruction(@Param() { id }: IdParams): Promise<InstructionModel> {
+    const instruction = await this.settlementsService.findInstruction(id);
+    return createInstructionModel(instruction);
   }
 
-  @ApiTags('instructions')
-  @ApiTags('venues')
-  @ApiParam({
-    type: 'string',
-    name: 'id',
-  })
+  @ApiTags('venues', 'instructions')
   @ApiOperation({
-    summary: 'Create a new instruction',
+    summary: 'Create a new Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Venue through which Settlement will be handled',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'The ID of the newly created Instruction',
+    type: InstructionIdModel,
   })
   @Post('venues/:id/instructions')
   public async createInstruction(
     @Param() { id }: IdParams,
     @Body() createInstructionDto: CreateInstructionDto
-  ): Promise<InstructionIdDto> {
+  ): Promise<InstructionIdModel> {
     const { result: instructionId, transactions } = await this.settlementsService.createInstruction(
       id,
       createInstructionDto
     );
 
-    return new InstructionIdDto({
+    return new InstructionIdModel({
       instructionId,
       transactions,
     });
   }
 
   @ApiTags('instructions')
-  @ApiParam({
-    type: 'string',
-    name: 'id',
-  })
   @ApiOperation({
-    summary:
-      'Affirm an existing instruction. All owners of involved portfolios must affirm for the instruction to be executed',
+    summary: 'Affirm an existing Instruction',
+    description:
+      'The endpoint will affirm a pending Instruction. All owners of involved portfolios must affirm for the Instruction to be executed',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction to be affirmed',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
   })
   @Post('instructions/:id/affirm')
   public async affirmInstruction(
     @Param() { id }: IdParams,
     @Body() signerDto: SignerDto
-  ): Promise<TransactionQueueDto> {
+  ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
 
-    return new TransactionQueueDto({ transactions });
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiTags('venues')
+  @ApiOperation({
+    summary: 'Fetch details of a Venue',
+    description: 'This endpoint will provide the basic details of a Venue',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Venue whose details are to be fetched',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the Venue',
+    type: VenueDetailsModel,
+  })
+  @Get('venues/:id')
+  public async getVenueDetails(@Param() { id }: IdParams): Promise<VenueDetailsModel> {
+    const venueDetails = await this.settlementsService.findVenueDetails(id);
+    return new VenueDetailsModel(venueDetails);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'List of affirmations',
+    description:
+      'The endpoint will provide the list of all affirmations generated by a Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction whose affirmations are to be fetched',
+    type: 'string',
+    example: '123',
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of affirmations to be fetched',
+    type: 'number',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start index from which affirmations are to be fetched',
+    type: 'string',
+    required: false,
+  })
+  @ApiArrayResponse(InstructionAffirmationModel, {
+    description: 'List of all affirmations related to the target Identity and their current status',
+    paginated: true,
+  })
+  @Get('instructions/:id/affirmations')
+  public async getAffirmations(
+    @Param() { id }: IdParams,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<InstructionAffirmationModel>> {
+    const { data, count, next } = await this.settlementsService.findAffirmations(
+      id,
+      size,
+      start?.toString()
+    );
+    return new PaginatedResultsModel({
+      results: data?.map(
+        ({ identity, status }) =>
+          new InstructionAffirmationModel({
+            identity,
+            status,
+          })
+      ),
+      total: count,
+      next,
+    });
   }
 }
