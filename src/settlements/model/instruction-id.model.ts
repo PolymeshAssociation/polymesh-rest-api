@@ -15,8 +15,8 @@ export class InstructionIdModel extends TransactionQueueModel {
   @FromEntity()
   readonly instructionId: Instruction;
 
-  constructor(dto: InstructionIdModel) {
-    const { transactions, ...rest } = dto;
+  constructor(model: InstructionIdModel) {
+    const { transactions, ...rest } = model;
     super({ transactions });
 
     Object.assign(this, rest);

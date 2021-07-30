@@ -19,8 +19,8 @@ export class PaginatedResultsModel<DataType> extends ResultsModel<DataType> {
   })
   readonly next: string | number | null;
 
-  constructor(dto: PaginatedResultsModel<DataType>) {
-    const { results, ...rest } = dto;
+  constructor(model: PaginatedResultsModel<DataType>) {
+    const { results, ...rest } = model;
     super({ results });
 
     Object.assign(this, rest);

@@ -58,7 +58,7 @@ export class AssetDetailsModel {
   @FromEntityObject()
   readonly identifiers: TokenIdentifier[];
 
-  constructor(dto: AssetDetailsModel) {
-    Object.assign(this, dto);
+  constructor(model: AssetDetailsModel) {
+    Object.assign(this, model);
   }
 }
