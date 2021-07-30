@@ -10,7 +10,7 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { InstructionIdModel } from '~/settlements/dto/instruction-id.dto';
+import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { SettlementsService } from '~/settlements/settlements.service';
