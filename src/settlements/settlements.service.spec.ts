@@ -366,6 +366,7 @@ describe('SettlementsService', () => {
         const body = {
           signer: '0x6'.padEnd(66, '0'),
           description: 'A generic exchange',
+          type: VenueType.Exchange,
         };
         let error;
         try {
@@ -377,37 +378,6 @@ describe('SettlementsService', () => {
         expect(error).toBeInstanceOf(NotFoundException);
       });
     });
-    describe('If no fields are passed in the body', () => {
-      it('should throw a bad request', async () => {
-        const mockVenue = new MockVenueClass();
-        mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
-
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            tag: TxTags.settlement.UpdateVenue,
-          },
-        ];
-        const mockQueue = new MockTransactionQueueClass(transactions);
-        mockVenue.modify.mockResolvedValue(mockQueue);
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-        };
-
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        let error = null;
-        try {
-          await service.modifyVenue(new BigNumber('123'), body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(BadRequestException);
-      });
-    });
     describe('if there is a different error when fetching the venue', () => {
       it('should pass the error along the chain', async () => {
         let expectedError = new Error('foo');
@@ -417,6 +387,7 @@ describe('SettlementsService', () => {
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
+          type: VenueType.Exchange,
           description: 'A generic exchange',
         };
 
@@ -435,7 +406,7 @@ describe('SettlementsService', () => {
       });
     });
     describe('otherwise', () => {
-      it('should run an modify procedure and return the queue data', async () => {
+      it('should run a modify procedure and return the queue data', async () => {
         const mockVenue = new MockVenueClass();
 
         mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);

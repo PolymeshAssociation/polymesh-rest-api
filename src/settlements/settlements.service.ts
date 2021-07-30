@@ -135,7 +135,7 @@ export class SettlementsService {
     venueId: BigNumber,
     modifyVenueDto: ModifyVenueDto
   ): Promise<QueueResult<void>> {
-    const { signer, ...rest } = modifyVenueDto;
+    const { signer, ...params } = modifyVenueDto;
 
     let venue: Venue;
     try {
@@ -146,30 +146,12 @@ export class SettlementsService {
       if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith('The Venue')) {
-          throw new NotFoundException(`There is no Venue with ID ${venueId.toString()}`);
+          throw new NotFoundException(`There is no Venue with ID "${venueId.toString()}"`);
         }
       }
 
       throw err;
     }
-    let params: ModifyVenueParams;
-    if (rest.description && rest.type) {
-      params = {
-        description: rest.description,
-        type: rest.type,
-      };
-    } else if (rest.description && !rest.type) {
-      params = {
-        description: rest.description,
-      };
-    } else if (!rest.description && rest.type) {
-      params = {
-        type: rest.type,
-      };
-    } else {
-      throw new BadRequestException('description or type must be specified');
-    }
-
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
     return processQueue(venue.modify, params, { signer: address });

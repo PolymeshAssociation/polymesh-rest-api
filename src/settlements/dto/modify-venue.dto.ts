@@ -1,26 +1,27 @@
 /* istanbul ignore file */
 
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { VenueType } from '@polymathnetwork/polymesh-sdk/types';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { SignerDto } from '~/common/dto/signer.dto';
 
 export class ModifyVenueDto extends SignerDto {
-  @ApiPropertyOptional({
-    description: 'Details about the venue',
+  @ApiProperty({
+    description: 'Details about the Venue',
     example: 'The TSX is an exchange located in Toronto, Ontario',
   })
   @IsOptional()
+  @ValidateIf(({ type, description }: ModifyVenueDto) => !type || !!description)
   @IsString()
-  readonly description?: string;
+  readonly description: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The type of Venue',
     enum: VenueType,
     example: VenueType.Exchange,
   })
-  @IsOptional()
+  @ValidateIf(({ type, description }: ModifyVenueDto) => !!type || !description)
   @IsEnum(VenueType)
-  readonly type?: VenueType;
+  readonly type: VenueType;
 }

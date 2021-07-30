@@ -195,6 +195,7 @@ describe('SettlementsController', () => {
       const body = {
         signer: '0x6'.padEnd(66, '0'),
         description: 'A generic exchange',
+        type: VenueType.Exchange,
       };
 
       const result = await controller.modifyVenue({ id: new BigNumber('3') }, body);
