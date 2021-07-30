@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -17,7 +18,7 @@ describe('IdentitiesService', () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [IdentitiesService],
+      providers: [IdentitiesService, mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)

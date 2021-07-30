@@ -8,6 +8,7 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
+import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentityClass, MockPortfolio } from '~/test-utils/mocks';
@@ -52,6 +53,7 @@ describe('IdentitiesController', () => {
         PortfoliosService,
         AuthorizationsService,
         ClaimsService,
+        mockPolymeshLoggerProvider,
       ],
     })
       .overrideProvider(AssetsService)
