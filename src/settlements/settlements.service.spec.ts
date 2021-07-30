@@ -369,7 +369,6 @@ describe('SettlementsService', () => {
         };
         let error;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await service.modifyVenue(new BigNumber('123'), body);
         } catch (err) {
           error = err;
@@ -399,10 +398,8 @@ describe('SettlementsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let error = null;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await service.modifyVenue(new BigNumber('123'), body);
         } catch (err) {
           error = err;
@@ -429,7 +426,6 @@ describe('SettlementsService', () => {
 
         let error = null;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await service.modifyVenue(new BigNumber('123'), body);
         } catch (err) {
           error = err;
@@ -462,7 +458,6 @@ describe('SettlementsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await service.modifyVenue(new BigNumber('123'), body);
 
         expect(result).toEqual({

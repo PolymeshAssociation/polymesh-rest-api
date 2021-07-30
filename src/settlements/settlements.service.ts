@@ -8,7 +8,6 @@ import {
   ResultSet,
   Venue,
   VenueDetails,
-  VenueType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { SignerDto } from '~/common/dto/signer.dto';
