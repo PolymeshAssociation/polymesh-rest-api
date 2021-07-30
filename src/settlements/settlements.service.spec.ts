@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { AffirmationStatus, TxTags, VenueType } from '@polymathnetwork/polymesh-sdk/types';
@@ -352,100 +352,6 @@ describe('SettlementsService', () => {
 
       expect(result).toEqual(mockAffirmations);
       findInstructionSpy.mockRestore();
-    });
-  });
-
-  describe('modifyVenue', () => {
-    describe('if the venue does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw new Error("The Venue doesn't exist");
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          description: 'A generic exchange',
-          type: VenueType.Exchange,
-        };
-        let error;
-        try {
-          await service.modifyVenue(new BigNumber('123'), body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
-    });
-    describe('if there is a different error when fetching the venue', () => {
-      it('should pass the error along the chain', async () => {
-        let expectedError = new Error('foo');
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          type: VenueType.Exchange,
-          description: 'A generic exchange',
-        };
-
-        expectedError = new Error('Something else');
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error = null;
-        try {
-          await service.modifyVenue(new BigNumber('123'), body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-      });
-    });
-    describe('otherwise', () => {
-      it('should run a modify procedure and return the queue data', async () => {
-        const mockVenue = new MockVenueClass();
-
-        mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
-
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            tag: TxTags.settlement.UpdateVenue,
-          },
-        ];
-        const mockQueue = new MockTransactionQueueClass(transactions);
-        mockVenue.modify.mockResolvedValue(mockQueue);
-
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          description: 'A generic exchange',
-          type: VenueType.Exchange,
-        };
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        const result = await service.modifyVenue(new BigNumber('123'), body);
-
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              transactionTag: TxTags.settlement.UpdateVenue,
-            },
-          ],
-        });
-        expect(mockVenue.modify).toHaveBeenCalledWith(
-          { description: body.description, type: body.type },
-          { signer: address }
-        );
-      });
     });
   });
 });
