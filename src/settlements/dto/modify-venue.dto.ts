@@ -14,7 +14,7 @@ export class ModifyVenueDto extends SignerDto {
   @IsOptional()
   @ValidateIf(({ type, description }: ModifyVenueDto) => !type || !!description)
   @IsString()
-  readonly description: string;
+  readonly description?: string;
 
   @ApiProperty({
     description: 'The type of Venue',
@@ -23,5 +23,5 @@ export class ModifyVenueDto extends SignerDto {
   })
   @ValidateIf(({ type, description }: ModifyVenueDto) => !!type || !description)
   @IsEnum(VenueType)
-  readonly type: VenueType;
+  readonly type?: VenueType;
 }
