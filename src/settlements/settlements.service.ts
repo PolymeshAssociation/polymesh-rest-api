@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ModifyVenueParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   Instruction,
   InstructionAffirmation,
@@ -135,7 +134,7 @@ export class SettlementsService {
     venueId: BigNumber,
     modifyVenueDto: ModifyVenueDto
   ): Promise<QueueResult<void>> {
-    const { signer, ...params } = modifyVenueDto;
+    const { signer, ...rest } = modifyVenueDto;
 
     let venue: Venue;
     try {
@@ -152,7 +151,11 @@ export class SettlementsService {
 
       throw err;
     }
+    const params = {
+      description: rest.description as Required<string>,
+      type: rest.type,
+    };
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(venue.modify, params as ModifyVenueParams, { signer: address });
+    return processQueue(venue.modify, params, { signer: address });
   }
 }
