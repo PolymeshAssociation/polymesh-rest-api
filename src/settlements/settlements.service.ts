@@ -19,6 +19,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
+import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 
 @Injectable()
@@ -132,6 +133,17 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return instruction.getAffirmations({ size, start });
+  }
+
+  public async createVenue(createVenueDto: CreateVenueDto): Promise<QueueResult<Venue>> {
+    const { signer, ...rest } = createVenueDto;
+    const params = {
+      details: rest.description,
+      type: rest.type,
+    };
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const identity = await this.identitiesService.findOne(signer);
+    return processQueue(identity.createVenue, params, { signer: address });
   }
 
   public async modifyVenue(
