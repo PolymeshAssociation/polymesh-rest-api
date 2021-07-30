@@ -151,10 +151,7 @@ export class SettlementsService {
 
       throw err;
     }
-    const params = {
-      description: rest.description as Required<string>,
-      type: rest.type,
-    };
+    const params = rest as Required<typeof rest>;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(venue.modify, params, { signer: address });
   }
