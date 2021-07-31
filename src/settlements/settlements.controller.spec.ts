@@ -30,6 +30,7 @@ describe('SettlementsController', () => {
     affirmInstruction: jest.fn(),
     findVenueDetails: jest.fn(),
     findAffirmations: jest.fn(),
+    modifyVenue: jest.fn(),
   };
   const mockIdentitiesService = {};
 
@@ -181,6 +182,27 @@ describe('SettlementsController', () => {
           next: null,
         })
       );
+    });
+  });
+  describe('modifyVenue', () => {
+    it('should modify a venue and return the data returned by the service', async () => {
+      const transactions = ['transaction'];
+      const mockData = {
+        transactions,
+      };
+      mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
+
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        description: 'A generic exchange',
+        type: VenueType.Exchange,
+      };
+
+      const result = await controller.modifyVenue({ id: new BigNumber('3') }, body);
+
+      expect(result).toEqual({
+        transactions,
+      });
     });
   });
 });
