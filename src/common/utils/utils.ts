@@ -1,5 +1,10 @@
-import { InternalServerErrorException } from '@nestjs/common';
-import { ProcedureMethod, ProcedureOpts } from '@polymathnetwork/polymesh-sdk/types';
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  ErrorCode,
+  isPolymeshError,
+  ProcedureMethod,
+  ProcedureOpts,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { QueueResult } from '~/common/types';
 
@@ -24,6 +29,15 @@ export async function processQueue<MethodArgs, ReturnType>(
       })),
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
+    if (isPolymeshError(err)) {
+      const { message, code } = err;
+      switch (code) {
+        case ErrorCode.ValidationError:
+          throw new BadRequestException(message);
+        default:
+          throw new InternalServerErrorException(message);
+      }
+    }
     throw new InternalServerErrorException(err.message);
   }
 }

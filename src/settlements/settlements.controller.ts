@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
@@ -10,8 +10,9 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
+import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
+import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
@@ -176,5 +177,22 @@ export class SettlementsController {
       total: count,
       next,
     });
+  }
+
+  @ApiTags('venues')
+  @ApiParam({
+    type: 'string',
+    name: 'id',
+  })
+  @ApiOperation({
+    summary: "Modify a venue's details",
+  })
+  @Patch('venues/:id')
+  public async modifyVenue(
+    @Param() { id }: IdParams,
+    @Body() modifyVenueDto: ModifyVenueDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.settlementsService.modifyVenue(id, modifyVenueDto);
+    return new TransactionQueueModel({ transactions });
   }
 }
