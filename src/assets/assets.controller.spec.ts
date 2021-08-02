@@ -12,6 +12,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { MockSecurityTokenClass } from '~/test-utils/mocks';
 
+import { ResultsModel } from './../common/models/results.model';
 import { AssetsController } from './assets.controller';
 
 describe('AssetsController', () => {
@@ -22,6 +23,7 @@ describe('AssetsController', () => {
     findHolders: jest.fn(),
     findDocuments: jest.fn(),
     findComplianceRequirements: jest.fn(),
+    findTrustedClaimIssuers: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -182,7 +184,23 @@ describe('AssetsController', () => {
 
       const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual({ results: mockRequirements });
+      expect(result).toEqual(new ResultsModel({ results: mockRequirements }));
+    });
+  });
+
+  describe('getTrustedClaimIssuers', () => {
+    it('should return the list of all trusted Claim Issuers of an Asset', async () => {
+      const mockClaimIssuers = [
+        {
+          did: 'Ox6'.padEnd(66, '0'),
+          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+        },
+      ];
+      mockAssetsService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
+
+      const result = await controller.getTrustedClaimIssuers({ ticker: 'SOME_TICKER' });
+
+      expect(result).toEqual({ results: mockClaimIssuers });
     });
   });
 });

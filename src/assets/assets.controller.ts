@@ -7,6 +7,7 @@ import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequirementModel } from '~/assets/models/requirement.model';
+import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
@@ -171,6 +172,32 @@ export class AssetsController {
 
     return new ResultsModel({
       results: results.map(({ id, conditions }) => new RequirementModel({ id, conditions })),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Fetch trusted Claim Issuers of an Asset',
+    description: 'This endpoint will provide the list of all trusted Claim Issuers of an Asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose trusted Claim Issuers are to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiArrayResponse(TrustedClaimIssuerModel, {
+    description: 'List of trusted Claim Issuers of the Asset',
+    paginated: false,
+  })
+  @Get(':ticker/trusted-claim-issuers')
+  public async getTrustedClaimIssuers(
+    @Param() { ticker }: TickerParams
+  ): Promise<ResultsModel<TrustedClaimIssuerModel>> {
+    const results = await this.assetsService.findTrustedClaimIssuers(ticker);
+    return new ResultsModel({
+      results: results.map(
+        ({ did, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
+      ),
     });
   }
 }
