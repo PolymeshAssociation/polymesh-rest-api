@@ -1,13 +1,17 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
 export class IdentitiesService {
-  private readonly logger = new Logger(IdentitiesService.name);
-
-  constructor(private readonly polymeshService: PolymeshService) {}
+  constructor(
+    private readonly polymeshService: PolymeshService,
+    private readonly logger: PolymeshLogger
+  ) {
+    this.logger.setContext(IdentitiesService.name);
+  }
 
   /**
    * Method to get identity for a specific did

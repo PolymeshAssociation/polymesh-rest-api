@@ -1,4 +1,4 @@
-import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
 import {
@@ -23,6 +23,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -31,16 +32,17 @@ import { SettlementsService } from '~/settlements/settlements.service';
 @ApiTags('identities')
 @Controller('identities')
 export class IdentitiesController {
-  private readonly logger = new Logger(IdentitiesController.name);
-
   constructor(
     private readonly assetsService: AssetsService,
     private readonly settlementsService: SettlementsService,
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
     private readonly portfoliosService: PortfoliosService,
-    private readonly claimsService: ClaimsService
-  ) {}
+    private readonly claimsService: ClaimsService,
+    private readonly logger: PolymeshLogger
+  ) {
+    this.logger.setContext(IdentitiesController.name);
+  }
 
   @Get(':did')
   @ApiOperation({
