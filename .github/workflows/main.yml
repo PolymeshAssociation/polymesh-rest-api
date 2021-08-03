@@ -53,5 +53,5 @@ jobs:
       - name: install dependencies
         run: yarn --frozen-lockfile
       - name: test
-        run: yarn test
+        run: yarn test:cov
       # TODO @monitz87: add SonarCloud step when the account confusion is sorted
