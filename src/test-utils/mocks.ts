@@ -48,6 +48,9 @@ export class MockSecurityTokenClass {
     requirements: {
       get: jest.fn(),
     },
+    trustedClaimIssuers: {
+      get: jest.fn(),
+    },
   };
 }
 

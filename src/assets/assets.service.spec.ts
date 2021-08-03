@@ -259,4 +259,27 @@ describe('AssetsService', () => {
       findOneSpy.mockRestore();
     });
   });
+
+  describe('findTrustedClaimIssuers', () => {
+    it('should return the list of trusted Claim Issuers of an Asset', async () => {
+      const mockClaimIssuers = [
+        {
+          did: 'Ox6'.padEnd(66, '0'),
+          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+        },
+      ];
+
+      const mockSecurityToken = new MockSecurityTokenClass();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockSecurityToken as any);
+      mockSecurityToken.compliance.trustedClaimIssuers.get.mockResolvedValue(mockClaimIssuers);
+
+      const result = await service.findTrustedClaimIssuers('TICKER');
+
+      expect(result).toEqual(mockClaimIssuers);
+      findOneSpy.mockRestore();
+    });
+  });
 });
