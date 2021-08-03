@@ -264,20 +264,21 @@ describe('SettlementsService', () => {
   });
 
   describe('modifyVenue', () => {
-    describe('if there is an error when fetching the venue', () => {
+    describe('if there is an error when updating the venue', () => {
       it('should pass the error along the chain', async () => {
-        let expectedError = new Error('foo');
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw expectedError;
-        });
-
+        const expectedError = new Error('foo');
         const body = {
           signer: '0x6'.padEnd(66, '0'),
           type: VenueType.Exchange,
           description: 'A generic exchange',
         };
-
-        expectedError = new Error('Something else');
+        const mockVenue = new MockVenueClass();
+        mockVenue.modify.mockImplementation(() => {
+          throw expectedError;
+        });
+        const findVenueSpy = jest.spyOn(service, 'findVenue');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findVenueSpy.mockResolvedValue(mockVenue as any);
 
         mockIsPolymeshError.mockReturnValue(true);
 
@@ -287,7 +288,6 @@ describe('SettlementsService', () => {
         } catch (err) {
           error = err;
         }
-
         expect(error).toEqual(expectedError);
       });
     });
@@ -295,7 +295,9 @@ describe('SettlementsService', () => {
       it('should run a modify procedure and return the queue data', async () => {
         const mockVenue = new MockVenueClass();
 
-        mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
+        const findVenueSpy = jest.spyOn(service, 'findVenue');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findVenueSpy.mockResolvedValue(mockVenue as any);
 
         const transactions = [
           {
