@@ -8,12 +8,11 @@ import {
   TokenIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { MockSecurityTokenClass } from '~/test-utils/mocks';
-
-import { ResultsModel } from './../common/models/results.model';
-import { AssetsController } from './assets.controller';
 
 describe('AssetsController', () => {
   let controller: AssetsController;

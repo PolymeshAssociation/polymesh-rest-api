@@ -177,7 +177,8 @@ export class AssetsController {
 
   @ApiOperation({
     summary: 'Fetch trusted Claim Issuers of an Asset',
-    description: 'This endpoint will provide the list of all trusted Claim Issuers of an Asset',
+    description:
+      'This endpoint will provide the list of all default trusted Claim Issuers of an Asset',
   })
   @ApiParam({
     name: 'ticker',
@@ -196,7 +197,9 @@ export class AssetsController {
     const results = await this.assetsService.findTrustedClaimIssuers(ticker);
     return new ResultsModel({
       results: results.map(
-        ({ did, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
+        ({ did, trustedFor }) =>
+          // TODO @monitz87 remove the below null conversion once updated in SDK
+          new TrustedClaimIssuerModel({ did, trustedFor: trustedFor || null })
       ),
     });
   }

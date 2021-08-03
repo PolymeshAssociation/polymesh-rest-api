@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
 
 export class TrustedClaimIssuerModel {
@@ -9,15 +9,16 @@ export class TrustedClaimIssuerModel {
   })
   readonly did: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description:
-      'List of Claim types for which this Claim Issuer is trusted. An undefined value means that the issuer is trusted for all Claim types',
+      'List of Claim types for which this Claim Issuer is trusted. A null value means that the issuer is trusted for all Claim types',
     type: 'string',
     enum: ClaimType,
     isArray: true,
     example: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+    nullable: true,
   })
-  readonly trustedFor?: ClaimType[];
+  readonly trustedFor: ClaimType[] | null;
 
   constructor(model: TrustedClaimIssuerModel) {
     Object.assign(this, model);
