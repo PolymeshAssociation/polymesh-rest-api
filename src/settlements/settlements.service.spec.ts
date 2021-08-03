@@ -264,29 +264,7 @@ describe('SettlementsService', () => {
   });
 
   describe('modifyVenue', () => {
-    describe('if the venue does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw new Error("The Venue doesn't exist");
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          description: 'A generic exchange',
-          type: VenueType.Exchange,
-        };
-        let error;
-        try {
-          await service.modifyVenue(new BigNumber('123'), body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
-    });
-    describe('if there is a different error when fetching the venue', () => {
+    describe('if there is an error when fetching the venue', () => {
       it('should pass the error along the chain', async () => {
         let expectedError = new Error('foo');
         mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
