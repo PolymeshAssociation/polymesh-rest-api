@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  DefaultTrustedClaimIssuer,
   IdentityBalance,
   isPolymeshError,
   Requirement,
@@ -65,5 +66,10 @@ export class AssetsService {
   public async findComplianceRequirements(ticker: string): Promise<Requirement[]> {
     const asset = await this.findOne(ticker);
     return asset.compliance.requirements.get();
+  }
+
+  public async findTrustedClaimIssuers(ticker: string): Promise<DefaultTrustedClaimIssuer[]> {
+    const asset = await this.findOne(ticker);
+    return asset.compliance.trustedClaimIssuers.get();
   }
 }
