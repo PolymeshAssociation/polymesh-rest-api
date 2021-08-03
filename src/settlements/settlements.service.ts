@@ -135,22 +135,7 @@ export class SettlementsService {
     modifyVenueDto: ModifyVenueDto
   ): Promise<QueueResult<void>> {
     const { signer, ...rest } = modifyVenueDto;
-
-    let venue: Venue;
-    try {
-      venue = await this.polymeshService.polymeshApi.settlements.getVenue({
-        id: venueId,
-      });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { message } = err;
-        if (message.startsWith('The Venue')) {
-          throw new NotFoundException(`There is no Venue with ID "${venueId.toString()}"`);
-        }
-      }
-
-      throw err;
-    }
+    const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(venue.modify, params, { signer: address });
