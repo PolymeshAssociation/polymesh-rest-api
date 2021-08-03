@@ -16,16 +16,18 @@ describe('processQueue', () => {
       mockVenue.modify.mockImplementation(() => {
         throw new PolymeshError({ code });
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(processQueue(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(expected);
     });
   });
 
   describe('it should handle non polymesh errors', () => {
-    it('should transform other errors into InternalServerException', async () => {
+    it('should transform errors into InternalServerException', async () => {
       const mockVenue = new MockVenueClass();
       mockVenue.modify.mockImplementation(() => {
         throw new Error('Foo');
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(processQueue(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(
         InternalServerErrorException
       );
