@@ -266,7 +266,7 @@ describe('SettlementsService', () => {
   describe('modifyVenue', () => {
     describe('if there is an error when updating the venue', () => {
       it('should pass the error along the chain', async () => {
-        const expectedError = new Error('foo');
+        const expectedError = new Error('New type is the same as the current one');
         const body = {
           signer: '0x6'.padEnd(66, '0'),
           type: VenueType.Exchange,
