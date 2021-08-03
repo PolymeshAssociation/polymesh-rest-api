@@ -289,6 +289,7 @@ describe('SettlementsService', () => {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        findVenueSpy.mockRestore();
       });
     });
     describe('otherwise', () => {
@@ -333,6 +334,7 @@ describe('SettlementsService', () => {
           { description: body.description, type: body.type },
           { signer: address }
         );
+        findVenueSpy.mockRestore();
       });
     });
   });
