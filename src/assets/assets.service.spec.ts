@@ -1,15 +1,31 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ClaimType, ConditionType, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import {
+  ClaimType,
+  ConditionType,
+  ErrorCode,
+  KnownTokenType,
+  ScopeType,
+  TxTags,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymeshClass, MockSecurityTokenClass } from '~/test-utils/mocks';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import {
+  MockPolymeshClass,
+  MockRelayerAccountsService,
+  MockReservedTicker,
+  MockSecurityTokenClass,
+  MockTransactionQueueClass,
+} from '~/test-utils/mocks';
 
 import { AssetsService } from './assets.service';
 
@@ -22,15 +38,18 @@ describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymeshClass;
+  const mockRelayerAccountsService = new MockRelayerAccountsService();
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule],
+      imports: [PolymeshModule, RelayerAccountsModule],
       providers: [AssetsService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
+      .overrideProvider(RelayerAccountsService)
+      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<AssetsService>(AssetsService);
@@ -280,6 +299,202 @@ describe('AssetsService', () => {
 
       expect(result).toEqual(mockClaimIssuers);
       findOneSpy.mockRestore();
+    });
+  });
+
+  describe('findTickerReservation', () => {
+    describe('if the reservation does not exist', () => {
+      it('it should throw a NotFoundException', async () => {
+        const tickerReservationSpy = jest.spyOn(
+          polymeshService.polymeshApi,
+          'getTickerReservation'
+        );
+        mockIsPolymeshError.mockReturnValue(true);
+        tickerReservationSpy.mockImplementation(() => {
+          throw new PolymeshError({
+            message: 'There is no reservation for',
+            code: ErrorCode.FatalError,
+          });
+        });
+        let error;
+        try {
+          await service.findTickerReservation('BRK.A');
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(NotFoundException);
+        tickerReservationSpy.mockRestore();
+      });
+    });
+    describe('if the asset has already been created', () => {
+      it('should throw a BadRequestException', async () => {
+        const tickerReservationSpy = jest.spyOn(
+          polymeshService.polymeshApi,
+          'getTickerReservation'
+        );
+        mockIsPolymeshError.mockReturnValue(true);
+        tickerReservationSpy.mockImplementation(() => {
+          throw new Error('BRK.A token has been created');
+        });
+        let error;
+        try {
+          await service.findTickerReservation('BRK.A');
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(BadRequestException);
+        tickerReservationSpy.mockRestore();
+      });
+    });
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('Something else');
+        const tickerReservationSpy = jest.spyOn(
+          polymeshService.polymeshApi,
+          'getTickerReservation'
+        );
+        mockIsPolymeshError.mockReturnValue(true);
+        tickerReservationSpy.mockImplementation(() => {
+          throw expectedError;
+        });
+        let error;
+        try {
+          await service.findTickerReservation('BRK.A');
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBe(expectedError);
+        tickerReservationSpy.mockRestore();
+      });
+    });
+    describe('otherwise', () => {
+      it('should return the reservation', async () => {
+        const mockTickerReservation = {
+          ticker: 'BRK.A',
+        };
+        const tickerReservationSpy = jest.spyOn(
+          polymeshService.polymeshApi,
+          'getTickerReservation'
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        tickerReservationSpy.mockResolvedValue(mockTickerReservation as any);
+        const result = await service.findTickerReservation('BRK.A');
+        expect(result).toEqual(mockTickerReservation);
+        tickerReservationSpy.mockRestore();
+      });
+    });
+  });
+  describe('createAsset', () => {
+    describe('if there is an error', () => {
+      it('should pass it up the chain', async () => {
+        const expectedError = new Error('Some error');
+        const mockReservedTicker = new MockReservedTicker();
+
+        const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findTickerReservationSpy.mockResolvedValue(mockReservedTicker as any);
+
+        mockReservedTicker.createToken.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        const body = {
+          signer: '0x6000',
+          name: 'Berkshire Class A',
+          ticker: 'BRK.A',
+          isDivisible: false,
+          tokenType: KnownTokenType.EquityCommon,
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        let error;
+        try {
+          await service.createAsset(body);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toEqual(expectedError);
+        findTickerReservationSpy.mockRestore();
+      });
+    });
+    describe('otherwise', () => {
+      it('should create the asset', async () => {
+        const mockReservedTicker = new MockReservedTicker();
+
+        const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findTickerReservationSpy.mockResolvedValue(mockReservedTicker as any);
+
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.asset.CreateAsset,
+          },
+        ];
+        const mockQueue = new MockTransactionQueueClass(transactions);
+        mockReservedTicker.createToken.mockResolvedValue(mockQueue);
+
+        const body = {
+          signer: '0x6000',
+          name: 'Berkshire Class A',
+          ticker: 'BRK.A',
+          isDivisible: false,
+          tokenType: KnownTokenType.EquityCommon,
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const result = await service.createAsset(body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.asset.CreateAsset,
+            },
+          ],
+        });
+        findTickerReservationSpy.mockRestore();
+      });
+    });
+  });
+
+  describe('registerTicker', () => {
+    describe('otherwise', () => {
+      it('should register the ticker', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.asset.RegisterTicker,
+          },
+        ];
+
+        const mockQueue = new MockTransactionQueueClass(transactions);
+        mockPolymeshApi.reserveTicker.mockResolvedValue(mockQueue);
+
+        const body = {
+          signer: '0x6000',
+          ticker: 'BRK.A',
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const result = await service.registerTicker(body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.asset.RegisterTicker,
+            },
+          ],
+        });
+      });
     });
   });
 });

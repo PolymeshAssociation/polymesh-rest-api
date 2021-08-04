@@ -1,8 +1,10 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
@@ -13,6 +15,7 @@ import { IsTicker } from '~/common/decorators/validation';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
 class TickerParams {
   @IsTicker()
@@ -76,11 +79,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.assetsService.findHolders(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findHolders(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -128,11 +131,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
-    const { data, count: total, next } = await this.assetsService.findDocuments(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findDocuments(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -202,5 +205,25 @@ export class AssetsController {
           new TrustedClaimIssuerModel({ did, trustedFor: trustedFor || null })
       ),
     });
+  }
+
+  @ApiOperation({
+    summary: 'Reserves a Ticker',
+    description: 'Reserves a ticker so that an asset can be created with it later.',
+  })
+  @Post('/reservations/tickers')
+  public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
+    const result = await this.assetsService.registerTicker(params);
+    return { transactions: result.transactions };
+  }
+
+  @ApiOperation({
+    summary: 'Creates an asset',
+    description: 'This endpoint allows for the creation of new assets.',
+  })
+  @Post('')
+  public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
+    const result = await this.assetsService.createAsset(params);
+    return { transactions: result.transactions };
   }
 }
