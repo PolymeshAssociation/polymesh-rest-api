@@ -1,4 +1,4 @@
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -7,11 +7,14 @@ import { MockVenueClass } from '~/test-utils/mocks';
 
 describe('processQueue', () => {
   describe('it should handle Polymesh errors', () => {
-    test.each`
-      code                         | expected
-      ${ErrorCode.ValidationError} | ${BadRequestException}
-      ${ErrorCode.FatalError}      | ${InternalServerErrorException}
-    `('should transform $code code into $expected', async ({ code, expected }) => {
+    // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
+    type Constructor<T extends {} = {}> = new (...args: any[]) => T;
+    type Case = [ErrorCode, Constructor<HttpException>];
+    const cases: Case[] = [
+      [ErrorCode.ValidationError, BadRequestException],
+      [ErrorCode.FatalError, InternalServerErrorException],
+    ];
+    test.each(cases)('should transform %p into %p', async (code, expected) => {
       const mockVenue = new MockVenueClass();
       mockVenue.modify.mockImplementation(() => {
         throw new PolymeshError({ code });
