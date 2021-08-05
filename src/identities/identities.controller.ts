@@ -6,6 +6,7 @@ import {
   Claim,
   ClaimType,
   Instruction,
+  Order,
   SecurityToken,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -16,6 +17,7 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/model/claim.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { OrderDto } from '~/common/dto/order.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -423,6 +425,38 @@ export class IdentitiesController {
         })
     );
 
+    return new ResultsModel({ results });
+  }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Fetch all Assets for which an Identity is a trusted Claim Issuer',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID for which the Assets are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiQuery({
+    name: 'order',
+    description: 'Order in which Assets are to be fetched',
+    type: 'string',
+    required: false,
+    example: Order.Asc,
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of Assets for which the Identity is a trusted Claim Issuer',
+    paginated: false,
+    example: ['BAR_TOKEN', 'FOO_TOKEN'],
+  })
+  @Get(':did/trusting-tokens')
+  async getTrustingTokens(
+    @Param() { did }: DidDto,
+    @Query() { order }: OrderDto
+  ): Promise<ResultsModel<SecurityToken>> {
+    const results = await this.identitiesService.findTrustingTokens(did, order);
     return new ResultsModel({ results });
   }
 }
