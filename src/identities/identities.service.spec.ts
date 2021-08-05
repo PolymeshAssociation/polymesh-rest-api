@@ -1,6 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Order } from '@polymathnetwork/polymesh-sdk/types';
 
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -68,7 +67,7 @@ describe('IdentitiesService', () => {
   });
 
   describe('findTrustingTokens', () => {
-    it('should return the list of Asset for which the Identity is a trusted Claim Issuer', async () => {
+    it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
       const mockTokens = [
         {
           ticker: 'BAR_TOKEN',
@@ -84,34 +83,8 @@ describe('IdentitiesService', () => {
       findOneSpy.mockResolvedValue(mockIdentity as any);
       mockIdentity.getTrustingTokens.mockResolvedValue(mockTokens);
 
-      const result = await service.findTrustingTokens('TICKER', Order.Asc);
+      const result = await service.findTrustingTokens('TICKER');
       expect(result).toEqual(mockTokens);
-
-      findOneSpy.mockRestore();
-    });
-
-    it('should return the list of Asset for which the Identity is a trusted Claim Issuer in descending order', async () => {
-      const mockTokens = [
-        {
-          ticker: 'FOO_TOKEN',
-        },
-        {
-          ticker: 'BAR_TOKEN',
-        },
-      ];
-      const mockIdentity = new MockIdentityClass();
-
-      const findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockIdentity as any);
-      mockIdentity.getTrustingTokens.mockResolvedValue(mockTokens);
-
-      const result = await service.findTrustingTokens('TICKER', Order.Desc);
-      const sortedResult = [...mockTokens].sort((a, b) =>
-        a.ticker > b.ticker ? -1 : a.ticker < b.ticker ? 1 : 0
-      );
-      expect(result).toEqual(mockTokens);
-      expect(result).toEqual(sortedResult);
 
       findOneSpy.mockRestore();
     });

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Identity, Order, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -33,10 +33,10 @@ export class IdentitiesService {
   }
 
   /**
-   * Method to get trusting tokens for a specific did in desired order
+   * Method to get trusting tokens for a specific did
    */
-  public async findTrustingTokens(did: string, order: Order): Promise<SecurityToken[]> {
+  public async findTrustingTokens(did: string): Promise<SecurityToken[]> {
     const identity = await this.findOne(did);
-    return identity.getTrustingTokens({ order });
+    return identity.getTrustingTokens();
   }
 }

@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AuthorizationType, ClaimType, Order } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
@@ -311,7 +311,7 @@ describe('IdentitiesController', () => {
   });
 
   describe('getTrustingTokens', () => {
-    it('should return the list of Assets for which the Identity is a trusted Claim Issuer', async () => {
+    it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
       const did = '0x6'.padEnd(66, '0');
       const mockAssets = [
         {
@@ -323,24 +323,7 @@ describe('IdentitiesController', () => {
       ];
       mockIdentitiesService.findTrustingTokens.mockResolvedValue(mockAssets);
 
-      const result = await controller.getTrustingTokens({ did }, { order: Order.Asc });
-
-      expect(result).toEqual(new ResultsModel({ results: mockAssets }));
-    });
-
-    it('should return the list of Assets for which the Identity is a trusted Claim Issuer in descending order', async () => {
-      const did = '0x6'.padEnd(66, '0');
-      const mockAssets = [
-        {
-          ticker: 'FOO_TOKEN',
-        },
-        {
-          ticker: 'BAR_TOKEN',
-        },
-      ];
-      mockIdentitiesService.findTrustingTokens.mockResolvedValue(mockAssets);
-
-      const result = await controller.getTrustingTokens({ did }, { order: Order.Desc });
+      const result = await controller.getTrustingTokens({ did });
 
       expect(result).toEqual(new ResultsModel({ results: mockAssets }));
     });
