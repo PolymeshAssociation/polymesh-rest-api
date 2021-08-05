@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 import {
   IsHexadecimal,
   IsUppercase,
@@ -49,6 +50,36 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a number`;
+        },
+      },
+    });
+  };
+}
+
+interface customAssetType {
+  custom: string;
+}
+export function IsAssetType() {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isAssetType',
+      target: object.constructor,
+      propertyName: propertyName,
+      validator: {
+        validate(value: string | customAssetType) {
+          if (typeof value === 'string') {
+            console.log(Object.values(KnownTokenType));
+            return Object.values(KnownTokenType).includes(value as KnownTokenType);
+          } else if (typeof value === 'object') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return Object.keys(value).length === 1 && typeof (value.custom as any) === 'string';
+          } else {
+            return false;
+          }
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a Known type or object with key "custom"`;
         },
       },
     });
