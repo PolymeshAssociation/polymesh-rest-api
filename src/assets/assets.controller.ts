@@ -1,5 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -208,8 +215,13 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Reserves a Ticker',
-    description: 'Reserves a ticker so that an asset can be created with it later.',
+    summary: 'Reserve a Ticker',
+    description: 'Reserves a ticker so that an Asset can be created with it later',
+  })
+  @ApiResponse({
+    description: 'Details about the transaction',
+    status: 201,
+    type: TransactionQueueModel,
   })
   @Post('/reservations/tickers')
   public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
@@ -218,12 +230,17 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Creates an asset',
-    description: 'This endpoint allows for the creation of new assets.',
+    summary: 'Create an Asset',
+    description: 'This endpoint allows for the creation of new assets',
+  })
+  @ApiResponse({
+    description: 'Details about the transaction',
+    status: 201,
+    type: TransactionQueueModel,
   })
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
-    const result = await this.assetsService.createAsset(params);
-    return { transactions: result.transactions };
+    const { transactions } = await this.assetsService.createAsset(params);
+    return new TransactionQueueModel({ transactions });
   }
 }

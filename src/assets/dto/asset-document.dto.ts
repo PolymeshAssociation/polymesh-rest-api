@@ -1,7 +1,9 @@
+/* istanbul ignore file */
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDate, IsOptional, IsString } from 'class-validator';
 
-export class TokenDocumentDto {
+export class AssetDocumentDto {
   @ApiProperty({
     description: 'The name of the document',
     example: 'Anual report, 2021',
@@ -14,6 +16,7 @@ export class TokenDocumentDto {
     example:
       'https://www.sec.gov/ix?doc=/Archives/edgar/data/1067983/000156459021009611/brka-10k_20201231.htm',
   })
+  @IsString()
   readonly uri: string;
 
   @ApiProperty({

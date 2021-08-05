@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { TokenIdentifierType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum, IsString } from 'class-validator';
 
-export class TokenIdentifierDto {
+export class AssetIdentifierDto {
   @ApiProperty({
-    description: 'The type of token identifier',
+    description: 'The type of asset identifier',
     enum: TokenIdentifierType,
     example: TokenIdentifierType.Isin,
   })

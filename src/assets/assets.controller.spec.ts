@@ -10,7 +10,6 @@ import {
 
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
-import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { MockSecurityTokenClass } from '~/test-utils/mocks';
