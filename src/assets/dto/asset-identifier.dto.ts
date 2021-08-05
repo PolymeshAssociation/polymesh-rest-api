@@ -9,7 +9,7 @@ export class AssetIdentifierDto {
     example: TokenIdentifierType.Isin,
   })
   @IsEnum(TokenIdentifierType)
-  readonly type: string;
+  readonly type: TokenIdentifierType;
 
   @ApiProperty({
     description: 'The identifier',

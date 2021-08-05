@@ -2,12 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import {
-  KnownTokenType,
-  TokenDocument,
-  TokenIdentifier,
-  TokenIdentifierType,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 
@@ -35,6 +30,7 @@ export class CreateAssetDto extends SignerDto {
   @ApiPropertyOptional({
     description: 'The total supply count of the Asset',
     example: '627880',
+    type: BigNumber,
   })
   @IsOptional()
   @ToBigNumber()
@@ -42,7 +38,7 @@ export class CreateAssetDto extends SignerDto {
   readonly totalSupply?: BigNumber;
 
   @ApiProperty({
-    description: 'Specifies if an Asset can be divided',
+    description: 'Specifies if the Asset token can be divided',
     example: 'false',
   })
   @IsBoolean()
@@ -54,16 +50,16 @@ export class CreateAssetDto extends SignerDto {
     example: KnownTokenType.EquityCommon,
   })
   @IsEnum(KnownTokenType)
-  readonly tokenType: KnownTokenType;
+  readonly assetType: KnownTokenType;
 
   @ApiPropertyOptional({
     description: 'List of Asset Identifiers',
-    example: `[{ "type": "${TokenIdentifierType.Isin}", "value": "US0846701086"}]`,
     isArray: true,
+    type: AssetIdentifierDto,
   })
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => AssetIdentifierDto)
-  readonly tokenIdentifiers?: TokenIdentifier[];
+  readonly identifiers?: AssetIdentifierDto[];
 
   @ApiPropertyOptional({
     description: 'The current funding round of the Asset',
@@ -76,17 +72,10 @@ export class CreateAssetDto extends SignerDto {
   @ApiPropertyOptional({
     description: 'Documents related to the Asset',
     isArray: true,
-    example: [
-      {
-        name: 'Annual report, 2021',
-        uri: 'https://www.sec.gov/ix?doc=/Archives/edgar/data/1067983/000156459021009611/brka-10k_20201231.htm',
-        contentHash: 'h512',
-        type: '10K',
-      },
-    ],
+    type: AssetDocumentDto,
   })
   @IsOptional()
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => AssetDocumentDto)
-  readonly documents?: TokenDocument[];
+  readonly documents?: AssetDocumentDto[];
 }

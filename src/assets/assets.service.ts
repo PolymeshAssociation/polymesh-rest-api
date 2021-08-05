@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateSecurityTokenParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   DefaultTrustedClaimIssuer,
   IdentityBalance,
@@ -85,16 +86,23 @@ export class AssetsService {
   public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const method = this.polymeshService.polymeshApi.reserveTicker;
-    return processQueue(method, rest, { signer: address });
+    return processQueue(this.polymeshService.polymeshApi.reserveTicker, rest, { signer: address });
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<SecurityToken>> {
     const { signer, ...rest } = params;
-
     const reservation = await this.findTickerReservation(params.ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(reservation.createToken, rest, { signer: address });
+    const args: CreateSecurityTokenParams = {
+      name: rest.name,
+      totalSupply: rest.totalSupply,
+      isDivisible: rest.isDivisible,
+      tokenType: rest.assetType,
+      tokenIdentifiers: rest.identifiers,
+      fundingRound: rest.fundingRound,
+      documents: rest.documents,
+    };
+    return processQueue(reservation.createToken, args, { signer: address });
   }
 
   public async findTickerReservation(ticker: string): Promise<TickerReservation> {
@@ -107,7 +115,7 @@ export class AssetsService {
         if (message.startsWith('There is no reservation for')) {
           throw new NotFoundException(`There is no reservation for "${ticker}"`);
         } else if (message.endsWith('token has been created')) {
-          throw new BadRequestException(`${ticker} has already been created`);
+          throw new NotFoundException(`${ticker} has already been created`);
         }
       }
 

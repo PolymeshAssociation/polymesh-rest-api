@@ -6,7 +6,7 @@ import { IsDate, IsOptional, IsString } from 'class-validator';
 export class AssetDocumentDto {
   @ApiProperty({
     description: 'The name of the document',
-    example: 'Anual report, 2021',
+    example: 'Annual report, 2021',
   })
   @IsString()
   readonly name: string;
@@ -36,7 +36,7 @@ export class AssetDocumentDto {
 
   @ApiPropertyOptional({
     description: 'The time the document was filed',
-    example: 'May 21, 2021',
+    example: '2021-05-23',
   })
   @IsOptional()
   @IsDate()

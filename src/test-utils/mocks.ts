@@ -98,7 +98,7 @@ export class MockIdentityClass {
   public getSecondaryKeys = jest.fn();
 }
 
-export class MockReservedTicker {
+export class MockTickerReservation {
   public createToken = jest.fn();
 }
 

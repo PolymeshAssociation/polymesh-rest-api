@@ -223,10 +223,14 @@ export class AssetsController {
     status: 201,
     type: TransactionQueueModel,
   })
+  @ApiResponse({
+    description: 'The ticker has already been reserved',
+    status: 400,
+  })
   @Post('/reservations/tickers')
   public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
-    const result = await this.assetsService.registerTicker(params);
-    return { transactions: result.transactions };
+    const { transactions } = await this.assetsService.registerTicker(params);
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiOperation({
@@ -237,6 +241,10 @@ export class AssetsController {
     description: 'Details about the transaction',
     status: 201,
     type: TransactionQueueModel,
+  })
+  @ApiResponse({
+    description: 'The ticker reservation does not exist',
+    status: 404,
   })
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {

@@ -231,7 +231,7 @@ describe('AssetsController', () => {
           name: 'Berkshire Class A',
           ticker: 'BRK.A',
           isDivisible: false,
-          tokenType: KnownTokenType.EquityCommon,
+          assetType: KnownTokenType.EquityCommon,
         };
         const response = {
           transactions: [

@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
@@ -22,8 +22,8 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 import {
   MockPolymeshClass,
   MockRelayerAccountsService,
-  MockReservedTicker,
   MockSecurityTokenClass,
+  MockTickerReservation,
   MockTransactionQueueClass,
 } from '~/test-utils/mocks';
 
@@ -38,10 +38,11 @@ describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymeshClass;
-  const mockRelayerAccountsService = new MockRelayerAccountsService();
+  let mockRelayerAccountsService: MockRelayerAccountsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
+    mockRelayerAccountsService = new MockRelayerAccountsService();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule, RelayerAccountsModule],
       providers: [AssetsService],
@@ -304,18 +305,14 @@ describe('AssetsService', () => {
 
   describe('findTickerReservation', () => {
     describe('if the reservation does not exist', () => {
-      it('it should throw a NotFoundException', async () => {
-        const tickerReservationSpy = jest.spyOn(
-          polymeshService.polymeshApi,
-          'getTickerReservation'
-        );
-        mockIsPolymeshError.mockReturnValue(true);
-        tickerReservationSpy.mockImplementation(() => {
+      it('should throw a NotFoundException', async () => {
+        mockPolymeshApi.getTickerReservation.mockImplementation(() => {
           throw new PolymeshError({
             message: 'There is no reservation for',
             code: ErrorCode.FatalError,
           });
         });
+        mockIsPolymeshError.mockReturnValue(true);
         let error;
         try {
           await service.findTickerReservation('BRK.A');
@@ -323,40 +320,30 @@ describe('AssetsService', () => {
           error = err;
         }
         expect(error).toBeInstanceOf(NotFoundException);
-        tickerReservationSpy.mockRestore();
       });
     });
     describe('if the asset has already been created', () => {
-      it('should throw a BadRequestException', async () => {
-        const tickerReservationSpy = jest.spyOn(
-          polymeshService.polymeshApi,
-          'getTickerReservation'
-        );
-        mockIsPolymeshError.mockReturnValue(true);
-        tickerReservationSpy.mockImplementation(() => {
+      it('should throw a NotFoundException', async () => {
+        mockPolymeshApi.getTickerReservation.mockImplementation(() => {
           throw new Error('BRK.A token has been created');
         });
+        mockIsPolymeshError.mockReturnValue(true);
         let error;
         try {
           await service.findTickerReservation('BRK.A');
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(BadRequestException);
-        tickerReservationSpy.mockRestore();
+        expect(error).toBeInstanceOf(NotFoundException);
       });
     });
     describe('if there is a different error', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('Something else');
-        const tickerReservationSpy = jest.spyOn(
-          polymeshService.polymeshApi,
-          'getTickerReservation'
-        );
-        mockIsPolymeshError.mockReturnValue(true);
-        tickerReservationSpy.mockImplementation(() => {
+        mockPolymeshApi.getTickerReservation.mockImplementation(() => {
           throw expectedError;
         });
+        mockIsPolymeshError.mockReturnValue(true);
         let error;
         try {
           await service.findTickerReservation('BRK.A');
@@ -364,7 +351,6 @@ describe('AssetsService', () => {
           error = err;
         }
         expect(error).toBe(expectedError);
-        tickerReservationSpy.mockRestore();
       });
     });
     describe('otherwise', () => {
@@ -372,15 +358,9 @@ describe('AssetsService', () => {
         const mockTickerReservation = {
           ticker: 'BRK.A',
         };
-        const tickerReservationSpy = jest.spyOn(
-          polymeshService.polymeshApi,
-          'getTickerReservation'
-        );
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        tickerReservationSpy.mockResolvedValue(mockTickerReservation as any);
+        mockPolymeshApi.getTickerReservation.mockResolvedValue(mockTickerReservation);
         const result = await service.findTickerReservation('BRK.A');
         expect(result).toEqual(mockTickerReservation);
-        tickerReservationSpy.mockRestore();
       });
     });
   });
@@ -388,13 +368,13 @@ describe('AssetsService', () => {
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
         const expectedError = new Error('Some error');
-        const mockReservedTicker = new MockReservedTicker();
+        const mockTickerReservation = new MockTickerReservation();
 
         const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findTickerReservationSpy.mockResolvedValue(mockReservedTicker as any);
+        findTickerReservationSpy.mockResolvedValue(mockTickerReservation as any);
 
-        mockReservedTicker.createToken.mockImplementation(() => {
+        mockTickerReservation.createToken.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -403,7 +383,7 @@ describe('AssetsService', () => {
           name: 'Berkshire Class A',
           ticker: 'BRK.A',
           isDivisible: false,
-          tokenType: KnownTokenType.EquityCommon,
+          assetType: KnownTokenType.EquityCommon,
         };
 
         const address = 'address';
@@ -420,11 +400,11 @@ describe('AssetsService', () => {
     });
     describe('otherwise', () => {
       it('should create the asset', async () => {
-        const mockReservedTicker = new MockReservedTicker();
+        const mockTickerReservation = new MockTickerReservation();
 
         const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findTickerReservationSpy.mockResolvedValue(mockReservedTicker as any);
+        findTickerReservationSpy.mockResolvedValue(mockTickerReservation as any);
 
         const transactions = [
           {
@@ -434,14 +414,14 @@ describe('AssetsService', () => {
           },
         ];
         const mockQueue = new MockTransactionQueueClass(transactions);
-        mockReservedTicker.createToken.mockResolvedValue(mockQueue);
+        mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
         const body = {
           signer: '0x6000',
           name: 'Berkshire Class A',
           ticker: 'BRK.A',
           isDivisible: false,
-          tokenType: KnownTokenType.EquityCommon,
+          assetType: KnownTokenType.EquityCommon,
         };
 
         const address = 'address';
