@@ -39,6 +39,7 @@
     "swagger-ui-express": "4.1.6"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.15.0",
     "@commitlint/cli": "12.1.4",
     "@commitlint/config-conventional": "12.1.4",
     "@nestjs/cli": "7.6.0",
@@ -78,25 +79,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "moduleNameMapper": {
-      "~/(.*)": "<rootDir>/$1"
-    },
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }
