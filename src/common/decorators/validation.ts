@@ -69,7 +69,6 @@ export function IsAssetType() {
       validator: {
         validate(value: string | customAssetType) {
           if (typeof value === 'string') {
-            console.log(Object.values(KnownTokenType));
             return Object.values(KnownTokenType).includes(value as KnownTokenType);
           } else if (typeof value === 'object') {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

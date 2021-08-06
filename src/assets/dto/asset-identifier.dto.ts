@@ -4,7 +4,7 @@ import { IsEnum, IsString } from 'class-validator';
 
 export class AssetIdentifierDto {
   @ApiProperty({
-    description: 'The type of asset identifier',
+    description: 'The type of Asset identifier',
     enum: TokenIdentifierType,
     example: TokenIdentifierType.Isin,
   })

@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -223,9 +225,8 @@ export class AssetsController {
     status: 201,
     type: TransactionQueueModel,
   })
-  @ApiResponse({
+  @ApiBadRequestResponse({
     description: 'The ticker has already been reserved',
-    status: 400,
   })
   @Post('/reservations/tickers')
   public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
@@ -242,9 +243,8 @@ export class AssetsController {
     status: 201,
     type: TransactionQueueModel,
   })
-  @ApiResponse({
+  @ApiNotFoundResponse({
     description: 'The ticker reservation does not exist',
-    status: 404,
   })
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
