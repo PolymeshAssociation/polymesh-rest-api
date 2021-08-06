@@ -7,6 +7,5 @@ module.exports = {
   testPathIgnorePatterns: ['dist'],
   moduleNameMapper: {
     '~/(.*)': '<rootDir>/src/$1',
-    'polymesh-types/(.*)': '<rootDir>/src/polkadot/$1',
   },
 };
