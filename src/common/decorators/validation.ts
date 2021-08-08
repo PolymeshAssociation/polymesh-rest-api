@@ -14,6 +14,7 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
+import { get } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
@@ -56,9 +57,6 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
   };
 }
 
-interface customAssetType {
-  custom: string;
-}
 export function IsAssetType() {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
@@ -67,18 +65,19 @@ export function IsAssetType() {
       target: object.constructor,
       propertyName: propertyName,
       validator: {
-        validate(value: string | customAssetType) {
+        validate(value: unknown) {
           if (typeof value === 'string') {
             return Object.values(KnownTokenType).includes(value as KnownTokenType);
-          } else if (typeof value === 'object') {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return Object.keys(value).length === 1 && typeof (value.custom as any) === 'string';
           } else {
-            return false;
+            return (
+              typeof value === 'object' &&
+              typeof get(value, 'custom') === 'string' &&
+              Object.keys(value as Record<string, unknown>).length === 1
+            );
           }
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a Known type or object with key "custom"`;
+          return `${args.property} must be a Known type or object with key "custom" with a string value`;
         },
       },
     });
