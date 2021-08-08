@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -7,9 +7,8 @@ import { MockVenueClass } from '~/test-utils/mocks';
 
 describe('processQueue', () => {
   describe('it should handle Polymesh errors', () => {
-    // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
-    type Constructor<T extends {} = {}> = new (...args: any[]) => T;
-    type Case = [ErrorCode, Constructor<HttpException>];
+    // Any nest StatusCodeException would work for the type declaration.
+    type Case = [ErrorCode, typeof BadRequestException];
     const cases: Case[] = [
       [ErrorCode.ValidationError, BadRequestException],
       [ErrorCode.FatalError, InternalServerErrorException],
