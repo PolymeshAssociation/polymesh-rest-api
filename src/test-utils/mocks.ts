@@ -94,6 +94,7 @@ export class MockIdentityClass {
   public getPendingInstructions = jest.fn();
   public getVenues = jest.fn();
   public getSecondaryKeys = jest.fn();
+  public getTrustingTokens = jest.fn();
 }
 
 export class MockTransactionQueueClass {

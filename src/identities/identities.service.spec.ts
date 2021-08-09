@@ -5,7 +5,7 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymeshClass } from '~/test-utils/mocks';
+import { MockIdentityClass, MockPolymeshClass } from '~/test-utils/mocks';
 
 import { IdentitiesService } from './identities.service';
 
@@ -63,6 +63,30 @@ describe('IdentitiesService', () => {
 
         expect(result).toBe(fakeResult);
       });
+    });
+  });
+
+  describe('findTrustingTokens', () => {
+    it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
+      const mockTokens = [
+        {
+          ticker: 'BAR_TOKEN',
+        },
+        {
+          ticker: 'FOO_TOKEN',
+        },
+      ];
+      const mockIdentity = new MockIdentityClass();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockIdentity as any);
+      mockIdentity.getTrustingTokens.mockResolvedValue(mockTokens);
+
+      const result = await service.findTrustingTokens('TICKER');
+      expect(result).toEqual(mockTokens);
+
+      findOneSpy.mockRestore();
     });
   });
 });

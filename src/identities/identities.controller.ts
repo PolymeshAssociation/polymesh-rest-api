@@ -425,4 +425,26 @@ export class IdentitiesController {
 
     return new ResultsModel({ results });
   }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Fetch all Assets for which an Identity is a trusted Claim Issuer',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Claim Issuer for which the Assets are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of Assets for which the Identity is a trusted Claim Issuer',
+    paginated: false,
+    example: ['BAR_TOKEN', 'FOO_TOKEN'],
+  })
+  @Get(':did/trusting-tokens')
+  async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
+    const results = await this.identitiesService.findTrustingTokens(did);
+    return new ResultsModel({ results });
+  }
 }
