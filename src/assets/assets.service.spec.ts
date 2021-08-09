@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
@@ -323,7 +323,7 @@ describe('AssetsService', () => {
       });
     });
     describe('if the asset has already been created', () => {
-      it('should throw a NotFoundException', async () => {
+      it('should throw a GoneException', async () => {
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
           throw new Error('BRK.A token has been created');
         });
@@ -334,7 +334,7 @@ describe('AssetsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error).toBeInstanceOf(GoneException);
       });
     });
     describe('if there is a different error', () => {

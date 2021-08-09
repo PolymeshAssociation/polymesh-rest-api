@@ -77,7 +77,7 @@ export function IsAssetType() {
           }
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a Known type or object with key "custom" with a string value`;
+          return `${args.property} must be a Known type or object of type "{ custom: string }"`;
         },
       },
     });

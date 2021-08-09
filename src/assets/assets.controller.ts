@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiGoneResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -220,9 +221,8 @@ export class AssetsController {
     summary: 'Reserve a Ticker',
     description: 'Reserves a ticker so that an Asset can be created with it later',
   })
-  @ApiResponse({
+  @ApiCreatedResponse({
     description: 'Details about the transaction',
-    status: 201,
     type: TransactionQueueModel,
   })
   @ApiBadRequestResponse({
@@ -238,13 +238,15 @@ export class AssetsController {
     summary: 'Create an Asset',
     description: 'This endpoint allows for the creation of new assets',
   })
-  @ApiResponse({
+  @ApiCreatedResponse({
     description: 'Details about the transaction',
-    status: 201,
     type: TransactionQueueModel,
   })
   @ApiNotFoundResponse({
     description: 'The ticker reservation does not exist',
+  })
+  @ApiGoneResponse({
+    description: 'The ticker has already been used to create an asset',
   })
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {

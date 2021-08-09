@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSecurityTokenParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   DefaultTrustedClaimIssuer,
@@ -115,7 +115,7 @@ export class AssetsService {
         if (message.startsWith('There is no reservation for')) {
           throw new NotFoundException(`There is no reservation for "${ticker}"`);
         } else if (message.endsWith('token has been created')) {
-          throw new NotFoundException(`${ticker} has already been created`);
+          throw new GoneException(`${ticker} has already been created`);
         }
       }
 
