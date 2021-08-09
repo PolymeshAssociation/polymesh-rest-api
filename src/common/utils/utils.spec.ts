@@ -7,8 +7,7 @@ import { MockVenueClass } from '~/test-utils/mocks';
 
 describe('processQueue', () => {
   describe('it should handle Polymesh errors', () => {
-    // Any nest StatusCodeException would work for the type declaration.
-    type Case = [ErrorCode, typeof BadRequestException];
+    type Case = [ErrorCode, Class];
     const cases: Case[] = [
       [ErrorCode.ValidationError, BadRequestException],
       [ErrorCode.FatalError, InternalServerErrorException],
