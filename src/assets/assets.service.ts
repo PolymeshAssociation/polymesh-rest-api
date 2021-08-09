@@ -91,7 +91,19 @@ export class AssetsService {
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<SecurityToken>> {
     const { signer, ...rest } = params;
-    const reservation = await this.findTickerReservation(params.ticker);
+    let reservation;
+    let reserveResponse: QueueResult<TickerReservation>;
+    // if the asset isn't already reserved we will attempt to reserve it for the user
+    try {
+      reservation = await this.findTickerReservation(params.ticker);
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        reserveResponse = await this.registerTicker({ signer, ticker: params.ticker });
+        reservation = await this.findTickerReservation(params.ticker);
+      } else {
+        throw err;
+      }
+    }
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const args: CreateSecurityTokenParams = {
       name: rest.name,
@@ -102,7 +114,13 @@ export class AssetsService {
       fundingRound: rest.fundingRound,
       documents: rest.documents,
     };
-    return processQueue(reservation.createToken, args, { signer: address });
+    return processQueue(reservation.createToken, args, { signer: address }).then(res => {
+      // prepend the reserve transaction if nessesary
+      if (reserveResponse) {
+        res.transactions = reserveResponse.transactions.concat(res.transactions);
+      }
+      return res;
+    });
   }
 
   public async findTickerReservation(ticker: string): Promise<TickerReservation> {

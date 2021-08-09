@@ -440,6 +440,67 @@ describe('AssetsService', () => {
         findTickerReservationSpy.mockRestore();
       });
     });
+    it('will reserve the ticker if its not already reserved', async () => {
+      const mockTickerReservation = new MockTickerReservation();
+
+      const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findTickerReservationSpy
+        .mockImplementationOnce(() => {
+          throw new NotFoundException('There is no reservation for "BRK.A"');
+        })
+        .mockResolvedValueOnce(mockTickerReservation as any);
+
+      const registerTransaction = [
+        {
+          blockHash: '0x2',
+          txHash: '0x4',
+          tag: TxTags.asset.RegisterTicker,
+        },
+      ];
+      const registerTickerSpy = jest.spyOn(service, 'registerTicker');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      registerTickerSpy.mockResolvedValue({ transactions: registerTransaction } as any);
+
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.asset.CreateAsset,
+        },
+      ];
+      const mockQueue = new MockTransactionQueueClass(transactions);
+      mockTickerReservation.createToken.mockResolvedValue(mockQueue);
+
+      const body = {
+        signer: '0x6000',
+        name: 'Berkshire Class A',
+        ticker: 'BRK.A',
+        isDivisible: false,
+        assetType: KnownTokenType.EquityCommon,
+      };
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      const result = await service.createAsset(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x2',
+            txHash: '0x4',
+            tag: TxTags.asset.RegisterTicker,
+          },
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.asset.CreateAsset,
+          },
+        ],
+      });
+      findTickerReservationSpy.mockRestore();
+      registerTickerSpy.mockRestore();
+    });
   });
 
   describe('registerTicker', () => {
