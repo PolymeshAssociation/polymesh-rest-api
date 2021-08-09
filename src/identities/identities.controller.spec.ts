@@ -27,6 +27,7 @@ describe('IdentitiesController', () => {
 
   const mockIdentitiesService = {
     findOne: jest.fn(),
+    findTrustingTokens: jest.fn(),
   };
 
   const mockAuthorizationsService = {
@@ -306,6 +307,25 @@ describe('IdentitiesController', () => {
         { includeExpired: true }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
+    });
+  });
+
+  describe('getTrustingTokens', () => {
+    it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
+      const did = '0x6'.padEnd(66, '0');
+      const mockAssets = [
+        {
+          ticker: 'BAR_TOKEN',
+        },
+        {
+          ticker: 'FOO_TOKEN',
+        },
+      ];
+      mockIdentitiesService.findTrustingTokens.mockResolvedValue(mockAssets);
+
+      const result = await controller.getTrustingTokens({ did });
+
+      expect(result).toEqual(new ResultsModel({ results: mockAssets }));
     });
   });
 });
