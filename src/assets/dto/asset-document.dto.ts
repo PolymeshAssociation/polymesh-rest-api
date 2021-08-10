@@ -13,8 +13,7 @@ export class AssetDocumentDto {
 
   @ApiProperty({
     description: 'The URI of the document',
-    example:
-      'https://www.sec.gov/ix?doc=/Archives/edgar/data/1067983/000156459021009611/brka-10k_20201231.htm',
+    example: 'https://example.com/sec/10k-05-23-2021.htm',
   })
   @IsString()
   readonly uri: string;
@@ -36,7 +35,8 @@ export class AssetDocumentDto {
 
   @ApiPropertyOptional({
     description: 'The time the document was filed',
-    example: '2021-05-23',
+    example: new Date('05/23/2021').toISOString(),
+    type: 'string',
   })
   @IsOptional()
   @IsDate()
