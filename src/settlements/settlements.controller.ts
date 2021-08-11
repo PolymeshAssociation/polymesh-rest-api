@@ -1,10 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IdParams } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -18,12 +16,6 @@ import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
 
 import { VenueDetailsModel } from './model/venue-details.model';
-
-class IdParams {
-  @IsBigNumber()
-  @ToBigNumber()
-  readonly id: BigNumber;
-}
 
 @ApiTags('settlements')
 @Controller({})
