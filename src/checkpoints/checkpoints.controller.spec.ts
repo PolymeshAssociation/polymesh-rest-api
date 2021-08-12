@@ -5,8 +5,7 @@ import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-
-import { ResultsModel } from './../common/models/results.model';
+import { ResultsModel } from '~/common/models/results.model';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
