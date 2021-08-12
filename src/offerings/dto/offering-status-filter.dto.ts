@@ -7,7 +7,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum, IsOptional } from 'class-validator';
 
-export class OfferingStatusDto {
+export class OfferingStatusFilterDto {
   @IsEnum(StoTimingStatus)
   @IsOptional()
   readonly timing?: StoTimingStatus;

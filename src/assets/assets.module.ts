@@ -1,14 +1,13 @@
 /* istanbul ignore file */
 
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
-import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 
 @Module({
-  imports: [PolymeshModule, forwardRef(() => OfferingsModule)],
+  imports: [PolymeshModule],
   controllers: [AssetsController],
   providers: [AssetsService],
   exports: [AssetsService],

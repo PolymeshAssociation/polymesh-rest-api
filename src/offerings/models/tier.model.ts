@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
 
-class OfferingTierModel {
+export class TierModel {
   @ApiProperty({
     description: 'Total amount available in the Tier',
     type: 'string',
@@ -22,12 +22,6 @@ class OfferingTierModel {
   @FromBigNumber()
   readonly price: BigNumber;
 
-  constructor(model: OfferingTierModel) {
-    Object.assign(this, model);
-  }
-}
-
-export class TierModel extends OfferingTierModel {
   @ApiProperty({
     description: 'Total amount remaining for purchase in the Tier',
     type: 'string',
@@ -37,9 +31,6 @@ export class TierModel extends OfferingTierModel {
   readonly remaining: BigNumber;
 
   constructor(model: TierModel) {
-    const { remaining, ...stoTier } = model;
-    super({ ...stoTier });
-
-    this.remaining = remaining;
+    Object.assign(this, model);
   }
 }

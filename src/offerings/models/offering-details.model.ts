@@ -53,12 +53,16 @@ export class OfferingDetailsModel {
 
   @ApiProperty({
     description: 'Portfolio receiving the Asset being raised',
+    example: {
+      did: '0x0000000000000000000000000000000000000000000000000000000000000000',
+      id: '1',
+    },
   })
   @FromEntity()
   readonly raisingPortfolio: NumberedPortfolio | DefaultPortfolio;
 
   @ApiProperty({
-    description: 'Currency in which payment is received',
+    description: 'Currency denomination of the investment',
     type: 'string',
     example: 'CURR',
   })
@@ -73,7 +77,9 @@ export class OfferingDetailsModel {
   readonly tiers: TierModel[];
 
   @ApiProperty({
-    description: 'The Venue used for raising the Asset',
+    description: 'The Venue used for the Offering',
+    type: 'string',
+    example: '1',
   })
   @FromEntity()
   readonly venue: Venue;
@@ -86,7 +92,8 @@ export class OfferingDetailsModel {
   readonly start: Date;
 
   @ApiProperty({
-    description: 'End time of the Offering',
+    description: "End time of the Offering. A null value means the Offering doesn't end",
+    nullable: true,
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
   })

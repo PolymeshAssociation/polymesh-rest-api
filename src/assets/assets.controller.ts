@@ -1,41 +1,23 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import {
-  StoBalanceStatus,
-  StoSaleStatus,
-  StoTimingStatus,
-} from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequirementModel } from '~/assets/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { IsTicker } from '~/common/decorators/validation';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { OfferingDetailsModel } from '~/offerings/models/offering-details.model';
-import { OfferingsService } from '~/offerings/offerings.service';
-import { createOfferingDetailsModel } from '~/offerings/offerings.util';
-
-import { OfferingStatusDto } from '../offerings/dto/offering-status.dto';
-
-class TickerParams {
-  @IsTicker()
-  readonly ticker: string;
-}
 
 @ApiTags('assets')
 @Controller('assets')
 export class AssetsController {
-  constructor(
-    private readonly assetsService: AssetsService,
-    private readonly offeringsService: OfferingsService
-  ) {}
+  constructor(private readonly assetsService: AssetsService) {}
 
   @ApiOperation({
     summary: 'Fetch Asset details',
@@ -52,7 +34,7 @@ export class AssetsController {
     type: AssetDetailsModel,
   })
   @Get(':ticker')
-  public async getDetails(@Param() { ticker }: TickerParams): Promise<AssetDetailsModel> {
+  public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<AssetDetailsModel> {
     const asset = await this.assetsService.findOne(ticker);
     return createAssetDetailsModel(asset);
   }
@@ -86,7 +68,7 @@ export class AssetsController {
   })
   @Get(':ticker/holders')
   public async getHolders(
-    @Param() { ticker }: TickerParams,
+    @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
     const { data, count: total, next } = await this.assetsService.findHolders(
@@ -138,7 +120,7 @@ export class AssetsController {
   })
   @Get(':ticker/documents')
   public async getDocuments(
-    @Param() { ticker }: TickerParams,
+    @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
     const { data, count: total, next } = await this.assetsService.findDocuments(
@@ -179,7 +161,7 @@ export class AssetsController {
   })
   @Get(':ticker/compliance-requirements')
   public async getComplianceRequirements(
-    @Param() { ticker }: TickerParams
+    @Param() { ticker }: TickerParamsDto
   ): Promise<ResultsModel<RequirementModel>> {
     const results = await this.assetsService.findComplianceRequirements(ticker);
 
@@ -205,7 +187,7 @@ export class AssetsController {
   })
   @Get(':ticker/trusted-claim-issuers')
   public async getTrustedClaimIssuers(
-    @Param() { ticker }: TickerParams
+    @Param() { ticker }: TickerParamsDto
   ): Promise<ResultsModel<TrustedClaimIssuerModel>> {
     const results = await this.assetsService.findTrustedClaimIssuers(ticker);
     return new ResultsModel({
@@ -214,53 +196,6 @@ export class AssetsController {
           // TODO @monitz87 remove the below null conversion once updated in SDK
           new TrustedClaimIssuerModel({ did, trustedFor: trustedFor || null })
       ),
-    });
-  }
-
-  @ApiOperation({
-    summary: 'Fetch all Asset Offerings',
-    description: 'This endpoint will provide the list of all Asset Offerings',
-  })
-  @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Offerings are to be fetched',
-    type: 'string',
-    example: 'TICKER',
-  })
-  @ApiQuery({
-    name: 'timing',
-    description: 'Timing status of the Offering',
-    enum: StoTimingStatus,
-    required: false,
-  })
-  @ApiQuery({
-    name: 'balance',
-    description: 'Balance status of the Offering',
-    enum: StoBalanceStatus,
-    required: false,
-  })
-  @ApiQuery({
-    name: 'sale',
-    description: 'Sale status of the Offering',
-    enum: StoSaleStatus,
-    required: false,
-  })
-  @ApiArrayResponse(OfferingDetailsModel, {
-    description: 'List of Asset Offerings',
-    paginated: false,
-  })
-  @Get(':ticker/offerings')
-  public async getOfferings(
-    @Param() { ticker }: TickerParams,
-    @Query() { timing, balance, sale }: OfferingStatusDto
-  ): Promise<ResultsModel<OfferingDetailsModel>> {
-    const offerings = await this.offeringsService.findAllByTicker(ticker, {
-      timing,
-      balance,
-      sale,
-    });
-    return new ResultsModel({
-      results: offerings.map(offering => createOfferingDetailsModel(offering)),
     });
   }
 }
