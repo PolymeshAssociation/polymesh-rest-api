@@ -444,12 +444,9 @@ describe('AssetsService', () => {
       const mockTickerReservation = new MockTickerReservation();
 
       const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
-      findTickerReservationSpy
-        .mockImplementationOnce(() => {
-          throw new NotFoundException('There is no reservation for "BRK.A"');
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(mockTickerReservation as any);
+      findTickerReservationSpy.mockImplementation(() => {
+        throw new NotFoundException('There is no reservation for "BRK.A"');
+      });
 
       const registerTransaction = [
         {
@@ -459,8 +456,12 @@ describe('AssetsService', () => {
         },
       ];
       const registerTickerSpy = jest.spyOn(service, 'registerTicker');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      registerTickerSpy.mockResolvedValue({ transactions: registerTransaction } as any);
+      const mockResult = {
+        transactions: registerTransaction,
+        result: mockTickerReservation,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any;
+      registerTickerSpy.mockResolvedValue(mockResult);
 
       const transactions = [
         {
