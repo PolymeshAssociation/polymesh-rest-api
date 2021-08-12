@@ -1,7 +1,7 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
-import { IdParams } from '~/common/dto/id-params.dto';
+import { DidDto } from '~/common/dto/params.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PortfolioTransferDto } from '~/portfolios/dto/portfolio-transfer.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
@@ -12,25 +12,25 @@ export class PortfoliosController {
   constructor(private readonly portfoliosService: PortfoliosService) {}
 
   @ApiOperation({
-    summary: 'Move Assets',
-    description: 'Transfers Assets between Portfolios',
+    summary: 'Move Assets between portfolios',
+    description: 'This endpoint transfers Assets between Portfolios',
   })
   @ApiParam({
-    name: 'id',
-    description: 'The Portfolio ID to transfer Assets from. 0 for default Portfolio',
+    name: 'did',
+    description: 'The DID of the owner of the Portfolios to transfer assets between.',
     type: 'string',
-    example: '3',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiCreatedResponse({
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
-  @Post(':id/transfers')
+  @Post('/identities/:did/portfolio-asset-transfers')
   public async moveAssets(
-    @Param() { id }: IdParams,
+    @Param() { did }: DidDto,
     @Body() transferParams: PortfolioTransferDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.portfoliosService.moveAssets(id, transferParams);
+    const { transactions } = await this.portfoliosService.moveAssets(did, transferParams);
     return new TransactionQueueModel({ transactions });
   }
 }

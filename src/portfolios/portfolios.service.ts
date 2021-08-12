@@ -23,20 +23,20 @@ export class PortfoliosService {
 
   public async findOne(
     did: string,
-    portfolioId: BigNumber
+    portfolioId?: BigNumber
   ): Promise<DefaultPortfolio | NumberedPortfolio> {
     const identity = await this.identitiesService.findOne(did);
     try {
-      if (portfolioId.eq(0)) {
-        return await identity.portfolios.getPortfolio();
-      } else {
+      if (portfolioId) {
         return await identity.portfolios.getPortfolio({ portfolioId });
+      } else {
+        return await identity.portfolios.getPortfolio();
       }
     } catch (err) {
       if (isPolymeshError(err)) {
         const { message } = err;
         if (message.startsWith("The Portfolio doesn't")) {
-          throw new NotFoundException(`There is no portfolio with ID: ${portfolioId}`);
+          throw new NotFoundException(`There is no portfolio with ID: "${portfolioId}"`);
         }
       }
       throw err;
@@ -44,19 +44,19 @@ export class PortfoliosService {
   }
 
   public async moveAssets(
-    fromId: BigNumber,
+    did: string,
     params: PortfolioTransferDto
   ): Promise<TransactionQueueModel> {
-    const { signer, ...rest } = params;
-    const fromPortfolio = await this.findOne(signer, fromId);
+    const { signer, to, items } = params;
+    const fromPortfolio = await this.findOne(did, params.from);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const args: MoveFundsParams = {
-      to: rest.to,
-      items: rest.items.map(i => {
+      to,
+      items: items.map(({ ticker: token, amount, memo }) => {
         return {
-          token: i.ticker,
-          amount: new BigNumber(i.amount),
-          memo: i.memo,
+          token,
+          amount: new BigNumber(amount),
+          memo: memo,
         };
       }),
     };

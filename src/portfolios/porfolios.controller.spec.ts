@@ -4,7 +4,6 @@ const mockIsPolymeshError = jest.fn();
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
-import { IdentitiesService } from '~/identities/identities.service';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 
@@ -18,17 +17,14 @@ describe('PortfoliosController', () => {
   const mockPortfoliosService = {
     moveAssets: jest.fn(),
   };
-  const mockIdentitiesService = {};
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PortfoliosController],
-      providers: [PortfoliosService, IdentitiesService],
+      providers: [PortfoliosService],
     })
       .overrideProvider(PortfoliosService)
       .useValue(mockPortfoliosService)
-      .overrideProvider(IdentitiesService)
-      .useValue(mockIdentitiesService)
       .compile();
 
     controller = module.get<PortfoliosController>(PortfoliosController);
@@ -48,7 +44,7 @@ describe('PortfoliosController', () => {
         items: [{ to: '3', ticker: 'NOK', amount: new BigNumber('100') }],
       };
 
-      const result = await controller.moveAssets({ id: new BigNumber('3') }, params);
+      const result = await controller.moveAssets({ did: '0x6000' }, params);
 
       expect(result).toEqual({ transactions: ['transaction'] });
     });

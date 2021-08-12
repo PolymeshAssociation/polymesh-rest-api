@@ -165,7 +165,7 @@ describe('PortfoliosService', () => {
         ],
       };
 
-      const result = await service.moveAssets(new BigNumber('123'), body);
+      const result = await service.moveAssets('0x6000', body);
       expect(result).toEqual({
         result: undefined,
         transactions: [
