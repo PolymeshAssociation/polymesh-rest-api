@@ -19,7 +19,7 @@ export class CheckpointDetailsModel {
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
   })
-  createdAt: Date;
+  readonly createdAt: Date;
 
   @ApiProperty({
     description: 'Total supply of the Asset at this Checkpoint',
@@ -27,7 +27,7 @@ export class CheckpointDetailsModel {
     example: '10000',
   })
   @FromBigNumber()
-  totalSupply: BigNumber;
+  readonly totalSupply: BigNumber;
 
   constructor(model: CheckpointDetailsModel) {
     Object.assign(this, model);
