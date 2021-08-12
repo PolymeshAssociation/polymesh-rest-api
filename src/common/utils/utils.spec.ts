@@ -1,13 +1,14 @@
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
+import { Class } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { MockVenueClass } from '~/test-utils/mocks';
 
 describe('processQueue', () => {
   describe('it should handle Polymesh errors', () => {
-    type Case = [ErrorCode, Class];
+    type Case = [ErrorCode, Class<HttpException>];
     const cases: Case[] = [
       [ErrorCode.ValidationError, BadRequestException],
       [ErrorCode.FatalError, InternalServerErrorException],
