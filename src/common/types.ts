@@ -14,3 +14,6 @@ export interface Entity<Serialized> {
 
   toJson(): Serialized;
 }
+
+// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
+export type Class<T extends {} = {}> = new (...args: any[]) => T;
