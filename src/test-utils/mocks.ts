@@ -56,6 +56,10 @@ export class MockSecurityTokenClass {
   public offerings = {
     get: jest.fn(),
   };
+
+  public checkpoints = {
+    get: jest.fn(),
+  };
 }
 
 export class MockInstructionClass {
