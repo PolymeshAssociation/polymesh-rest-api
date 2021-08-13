@@ -12,7 +12,7 @@ import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 
 @ApiTags('portfolios')
-@Controller('portfolios')
+@Controller('/identities/:did/portfolios')
 export class PortfoliosController {
   constructor(
     private readonly portfoliosService: PortfoliosService,
@@ -63,7 +63,7 @@ export class PortfoliosController {
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
-  @Post('/identities/:did/portfolio-asset-transfers')
+  @Post('/asset-transfers')
   public async moveAssets(
     @Param() { did }: DidDto,
     @Body() transferParams: PortfolioTransferDto
