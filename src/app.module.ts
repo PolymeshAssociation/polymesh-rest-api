@@ -9,6 +9,7 @@ import { ClaimsModule } from '~/claims/claims.module';
 import { AssetsModule } from './assets/assets.module';
 import { AuthorizationsModule } from './authorizations/authorizations.module';
 import { IdentitiesModule } from './identities/identities.module';
+import { OfferingsModule } from './offerings/offerings.module';
 import { PolymeshModule } from './polymesh/polymesh.module';
 import { PortfoliosModule } from './portfolios/portfolios.module';
 import { RelayerAccountsModule } from './relayer-accounts/relayer-accounts.module';
@@ -32,6 +33,7 @@ import { SettlementsModule } from './settlements/settlements.module';
     AuthorizationsModule,
     PortfoliosModule,
     ClaimsModule,
+    OfferingsModule,
   ],
 })
 export class AppModule {}
