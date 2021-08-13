@@ -456,11 +456,11 @@ describe('AssetsService', () => {
         },
       ];
       const registerTickerSpy = jest.spyOn(service, 'registerTicker');
-      const mockResult = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockResult: any = {
         transactions: registerTransaction,
         result: mockTickerReservation,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any;
+      };
       registerTickerSpy.mockResolvedValue(mockResult);
 
       const transactions = [
