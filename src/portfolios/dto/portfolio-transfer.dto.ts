@@ -2,6 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Type } from 'class-transformer';
 import { IsOptional, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
@@ -33,6 +34,7 @@ export class PortfolioTransferDto extends SignerDto {
     isArray: true,
     type: PortfolioMovementDto,
   })
+  @Type(() => PortfolioMovementDto)
   @ValidateNested({ each: true })
   readonly items: PortfolioMovementDto[];
 

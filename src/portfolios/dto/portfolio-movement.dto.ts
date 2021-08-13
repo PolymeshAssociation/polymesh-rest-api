@@ -2,7 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { IsOptional, IsString } from 'class-validator';
+import { IsByteLength, isByteLength, IsOptional, IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
@@ -30,5 +30,6 @@ export class PortfolioMovementDto {
   })
   @IsOptional()
   @IsString()
+  @IsByteLength(0, 32)
   readonly memo?: string;
 }
