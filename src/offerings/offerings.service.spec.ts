@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
@@ -81,6 +82,60 @@ describe('OfferingsService', () => {
       const result = await service.findAllByTicker('TICKER', { timing: StoTimingStatus.Started });
 
       expect(result).toEqual(mockOfferings);
+    });
+  });
+  describe('findInvestments', () => {
+    const mockInvestments = {
+      data: [
+        {
+          investor: '0x6000',
+          soldAmount: '100',
+          investedAmount: '200',
+        },
+      ],
+      next: '10',
+      count: 2,
+    };
+    const mockAsset = {
+      offerings: {
+        get: jest.fn(),
+      },
+    };
+    const offerings = [
+      {
+        sto: {
+          id: new BigNumber(1),
+          getInvestments: jest.fn().mockReturnValue(mockInvestments),
+        },
+      },
+    ];
+    describe('if the offering is not found', () => {
+      it('should throw a NotFoundException', async () => {
+        mockAsset.offerings.get.mockResolvedValue(offerings);
+        mockAssetsService.findOne.mockReturnValue(mockAsset);
+
+        let error;
+        try {
+          await service.findInvestments('GME', new BigNumber('99'), 0);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+    describe('otherwise', () => {
+      it('should return a list of investments', async () => {
+        mockAsset.offerings.get.mockResolvedValue(offerings);
+        mockAssetsService.findOne.mockReturnValue(mockAsset);
+
+        const result = await service.findInvestments('GME', new BigNumber('1'), 0);
+
+        expect(result).toEqual({
+          data: mockInvestments.data,
+          count: mockInvestments.count,
+          next: mockInvestments.next,
+        });
+      });
     });
   });
 });
