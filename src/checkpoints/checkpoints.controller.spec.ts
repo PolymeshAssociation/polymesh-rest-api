@@ -31,7 +31,7 @@ describe('CheckpointsController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findAllByTicker', () => {
+  describe('getCheckpoints', () => {
     const mockCheckpoints = {
       data: [
         {
@@ -77,7 +77,7 @@ describe('CheckpointsController', () => {
     });
   });
 
-  describe('findSchedules', () => {
+  describe('getSchedules', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
       const mockDate = new Date();
       const mockSchedules = [
