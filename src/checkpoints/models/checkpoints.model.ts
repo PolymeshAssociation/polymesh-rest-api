@@ -15,7 +15,7 @@ export class CheckpointDetailsModel {
   readonly id: BigNumber;
 
   @ApiProperty({
-    description: 'Date at which Checkpoint is created',
+    description: 'Date at which the Checkpoint was created',
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
   })
