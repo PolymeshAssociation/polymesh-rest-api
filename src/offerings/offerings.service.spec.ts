@@ -84,7 +84,7 @@ describe('OfferingsService', () => {
       expect(result).toEqual(mockOfferings);
     });
   });
-  describe('findInvestments', () => {
+  describe('findInvestmentsByTicker', () => {
     const mockInvestments = {
       data: [
         {
@@ -96,11 +96,6 @@ describe('OfferingsService', () => {
       next: '10',
       count: 2,
     };
-    const mockAsset = {
-      offerings: {
-        get: jest.fn(),
-      },
-    };
     const offerings = [
       {
         sto: {
@@ -111,30 +106,34 @@ describe('OfferingsService', () => {
     ];
     describe('if the offering is not found', () => {
       it('should throw a NotFoundException', async () => {
-        mockAsset.offerings.get.mockResolvedValue(offerings);
-        mockAssetsService.findOne.mockReturnValue(mockAsset);
+        const findSpy = jest.spyOn(service, 'findAllByTicker');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findSpy.mockResolvedValue(offerings as any);
 
         let error;
         try {
-          await service.findInvestments('GME', new BigNumber('99'), 0);
+          await service.findInvestmentsByTicker('TICKER', new BigNumber('99'), 0);
         } catch (err) {
           error = err;
         }
         expect(error).toBeInstanceOf(NotFoundException);
+        findSpy.mockRestore();
       });
     });
     describe('otherwise', () => {
       it('should return a list of investments', async () => {
-        mockAsset.offerings.get.mockResolvedValue(offerings);
-        mockAssetsService.findOne.mockReturnValue(mockAsset);
+        const findSpy = jest.spyOn(service, 'findAllByTicker');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findSpy.mockResolvedValue(offerings as any);
 
-        const result = await service.findInvestments('GME', new BigNumber('1'), 0);
+        const result = await service.findInvestmentsByTicker('TICKER', new BigNumber('1'), 0);
 
         expect(result).toEqual({
           data: mockInvestments.data,
           count: mockInvestments.count,
           next: mockInvestments.next,
         });
+        findSpy.mockRestore();
       });
     });
   });

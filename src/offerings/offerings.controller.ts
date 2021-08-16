@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   StoBalanceStatus,
   StoSaleStatus,
@@ -28,12 +28,7 @@ class OfferingParams extends IdParamsDto {
 @ApiTags('offerings')
 @Controller('assets/:ticker/offerings')
 export class OfferingsController {
-  constructor(
-    private readonly offeringsService: OfferingsService,
-    private readonly logger: PolymeshLogger
-  ) {
-    this.logger.setContext(OfferingsController.name);
-  }
+  constructor(private readonly offeringsService: OfferingsService) {}
 
   @ApiTags('assets')
   @ApiOperation({
@@ -85,7 +80,8 @@ export class OfferingsController {
 
   @ApiOperation({
     summary: 'List Investments made in an Offering',
-    description: 'This endpoint will return a list of Investments made in an Offering',
+    description:
+      'This endpoint will return a list of Investments made in an Offering for a given Asset',
   })
   @ApiParam({
     name: 'ticker',
@@ -101,7 +97,7 @@ export class OfferingsController {
   })
   @ApiQuery({
     name: 'size',
-    description: 'The number of results to return',
+    description: 'The number of Investments to be fetched',
     type: 'number',
     required: false,
   })
@@ -110,35 +106,28 @@ export class OfferingsController {
     description: 'Starting offset for pagination.',
     type: 'number',
     required: false,
+    example: 10,
   })
-  @ApiOkResponse({
-    description: 'A paginated list of Investments',
-    type: InvestmentModel,
+  @ApiArrayResponse(InvestmentModel, {
+    description: 'A List of Investments',
+    paginated: true,
   })
   @Get(':id/investments')
   public async getInvestments(
     @Param() { ticker, id }: OfferingParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<InvestmentModel>> {
-    this.logger.debug(
-      `Fetching investments. Ticker: "${ticker}", Offering ID: "${id}", size: "${size}", start: "${start}"`
-    );
     const {
       data,
       count: total,
       next,
-    } = await this.offeringsService.findInvestments(
-      ticker,
-      id,
-      size,
-      start ? parseInt(start.toString()) : 0
-    );
+    } = await this.offeringsService.findInvestmentsByTicker(ticker, id, size, start ? +start : 0);
     return new PaginatedResultsModel({
       results: data?.map(({ investor, soldAmount, investedAmount }) => {
         return new InvestmentModel({
           investor,
-          soldAmount: soldAmount,
-          investedAmount: investedAmount,
+          soldAmount,
+          investedAmount,
         });
       }),
       total,

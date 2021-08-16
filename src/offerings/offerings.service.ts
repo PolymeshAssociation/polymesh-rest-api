@@ -17,14 +17,13 @@ export class OfferingsService {
     return asset.offerings.get({ status: stoStatus });
   }
 
-  public async findInvestments(
+  public async findInvestmentsByTicker(
     ticker: string,
     id: BigNumber,
     size: number,
     start?: number
   ): Promise<ResultSet<InvestmentModel>> {
-    const asset = await this.assetsService.findOne(ticker);
-    const offerings = await asset.offerings.get();
+    const offerings = await this.findAllByTicker(ticker);
     const offering = offerings.find(o => o.sto.id.eq(id));
     if (!offering) {
       throw new NotFoundException(`Offering with ID "${id}" for Asset "${ticker}" was not found`);

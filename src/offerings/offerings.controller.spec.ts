@@ -8,7 +8,6 @@ import {
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { OfferingsController } from '~/offerings/offerings.controller';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
@@ -16,14 +15,14 @@ import { createOfferingDetailsModel } from '~/offerings/offerings.util';
 describe('OfferingsController', () => {
   let controller: OfferingsController;
   const mockOfferingsService = {
-    findInvestments: jest.fn(),
+    findInvestmentsByTicker: jest.fn(),
     findAllByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OfferingsController],
-      providers: [OfferingsService, mockPolymeshLoggerProvider],
+      providers: [OfferingsService],
     })
       .overrideProvider(OfferingsService)
       .useValue(mockOfferingsService)
@@ -107,11 +106,11 @@ describe('OfferingsController', () => {
       next: '10',
       count: 2,
     };
-    it('should return the a paginated list of investments', async () => {
-      mockOfferingsService.findInvestments.mockResolvedValue(mockInvestments);
+    it('should return a paginated list of Investments mad in an Offering', async () => {
+      mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
 
       const result = await controller.getInvestments(
-        { ticker: 'GME', id: new BigNumber('1') },
+        { ticker: 'TICKER', id: new BigNumber('1') },
         { start: 0, size: 10 }
       );
 
