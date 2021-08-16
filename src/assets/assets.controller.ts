@@ -14,6 +14,7 @@ import {
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { IssueAssetDto } from '~/assets/dto/issue-asset.dto';
 import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
@@ -210,6 +211,30 @@ export class AssetsController {
           new TrustedClaimIssuerModel({ did, trustedFor: trustedFor || null })
       ),
     });
+  }
+
+  @ApiOperation({
+    summary: 'Issue more of an Asset',
+    description:
+      'This endpoint issues more of a given Asset. It must be called by either the Asset Owner or the PIA (Primary Issuance Agent)',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to issue',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':ticker/issuance')
+  public async issueAsset(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: IssueAssetDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.issueAsset(ticker, params);
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiOperation({

@@ -505,6 +505,65 @@ describe('AssetsService', () => {
     });
   });
 
+  describe('issueAsset', () => {
+    const ticker = 'TICKER';
+    const body = {
+      signer: '0x6000',
+      amount: new BigNumber(1000),
+    };
+    describe('if there is an error', () => {
+      it('should pass it up the chain', async () => {
+        const expectedError = new Error('foo');
+        const findSpy = jest.spyOn(service, 'findOne');
+        findSpy.mockImplementation(() => {
+          throw expectedError;
+        });
+        let error;
+        try {
+          await service.issueAsset(ticker, body);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toEqual(expectedError);
+        findSpy.mockRestore();
+      });
+    });
+    describe('otherwise', () => {
+      it('should issue the asset', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.asset.Issue,
+          },
+        ];
+        const findSpy = jest.spyOn(service, 'findOne');
+
+        const mockQueue = new MockTransactionQueueClass(transactions);
+        const mockAsset = {
+          issuance: { issue: jest.fn().mockResolvedValue(mockQueue) },
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findSpy.mockResolvedValue(mockAsset as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const result = await service.issueAsset('TICKER', body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.asset.Issue,
+            },
+          ],
+        });
+        findSpy.mockRestore();
+      });
+    });
+  });
+
   describe('registerTicker', () => {
     describe('otherwise', () => {
       it('should register the ticker', async () => {
