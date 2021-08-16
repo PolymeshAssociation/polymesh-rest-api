@@ -61,6 +61,10 @@ export class MockSecurityTokenClass {
 
   public checkpoints = {
     get: jest.fn(),
+
+    schedules: {
+      get: jest.fn(),
+    },
   };
 }
 
