@@ -25,7 +25,7 @@ export class PortfolioMovementDto {
   readonly amount: BigNumber;
 
   @ApiPropertyOptional({
-    description: 'Memo to help identify the transfer',
+    description: 'Memo to help identify the transfer. Maximum 32 bytes',
     example: 'Transfer to growth portfolio',
   })
   @IsOptional()
