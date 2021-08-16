@@ -20,7 +20,7 @@ export class CheckpointsService {
     return asset.checkpoints.get({ start, size });
   }
 
-  public async findSchedules(ticker: string): Promise<ScheduleWithDetails[]> {
+  public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.checkpoints.schedules.get();
   }

@@ -62,12 +62,12 @@ export class CheckpointScheduleModel {
     description:
       'Abstract measure of the complexity of this Schedule. Shorter periods translate into more complexity',
     type: 'number',
-    example: '1',
+    example: 1,
   })
   readonly complexity: number;
 
   @ApiProperty({
-    description: 'Number of Checkpoints the Schedule will create',
+    description: 'Number of Checkpoints left to be created by the Schedule',
     type: 'number',
     example: 10,
   })

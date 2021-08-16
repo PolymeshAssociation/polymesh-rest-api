@@ -12,7 +12,7 @@ describe('CheckpointsController', () => {
 
   const mockCheckpointsService = {
     findAllByTicker: jest.fn(),
-    findSchedules: jest.fn(),
+    findSchedulesByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -99,7 +99,7 @@ describe('CheckpointsController', () => {
         },
       ];
 
-      mockCheckpointsService.findSchedules.mockResolvedValue(mockSchedules);
+      mockCheckpointsService.findSchedulesByTicker.mockResolvedValue(mockSchedules);
 
       const result = await controller.getSchedules({ ticker: 'TICKER' });
 

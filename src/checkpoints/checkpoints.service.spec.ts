@@ -66,7 +66,7 @@ describe('CheckpointsService', () => {
     });
   });
 
-  describe('findSchedules', () => {
+  describe('findSchedulesByTicker', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
       const mockSchedules = [
         {
@@ -92,7 +92,7 @@ describe('CheckpointsService', () => {
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
-      const result = await service.findSchedules('TICKER');
+      const result = await service.findSchedulesByTicker('TICKER');
 
       expect(result).toEqual(mockSchedules);
     });
