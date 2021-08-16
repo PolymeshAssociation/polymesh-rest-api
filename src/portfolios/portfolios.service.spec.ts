@@ -159,7 +159,7 @@ describe('PortfoliosService', () => {
         to: new BigNumber('2'),
         items: [
           {
-            ticker: 'GME',
+            ticker: 'TICKER',
             amount: new BigNumber('123'),
           },
         ],
@@ -182,7 +182,7 @@ describe('PortfoliosService', () => {
           items: [
             {
               amount: new BigNumber('123'),
-              token: 'GME',
+              token: 'TICKER',
               memo: undefined,
             },
           ],

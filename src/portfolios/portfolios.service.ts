@@ -44,11 +44,11 @@ export class PortfoliosService {
   }
 
   public async moveAssets(
-    did: string,
+    owner: string,
     params: PortfolioTransferDto
   ): Promise<TransactionQueueModel> {
     const { signer, to, items } = params;
-    const fromPortfolio = await this.findOne(did, params.from);
+    const fromPortfolio = await this.findOne(owner, params.from);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const args: MoveFundsParams = {
       to,

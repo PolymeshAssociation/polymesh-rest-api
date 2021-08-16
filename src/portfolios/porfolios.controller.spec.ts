@@ -65,7 +65,7 @@ describe('PortfoliosController', () => {
       const params = {
         signer: '0x6000',
         to: new BigNumber('2'),
-        items: [{ to: '3', ticker: 'NOK', amount: new BigNumber('100') }],
+        items: [{ to: '3', ticker: 'TICKER', amount: new BigNumber('100') }],
       };
 
       const result = await controller.moveAssets({ did: '0x6000' }, params);
