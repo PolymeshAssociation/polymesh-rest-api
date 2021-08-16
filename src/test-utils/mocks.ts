@@ -22,6 +22,8 @@ export class MockPolymeshClass {
   public isIdentityValid = jest.fn();
   public disconnect = jest.fn();
   public addSigner = jest.fn();
+  public reserveTicker = jest.fn();
+  public getTickerReservation = jest.fn();
   public settlements = {
     getInstruction: jest.fn(),
     getVenue: jest.fn(),
@@ -107,6 +109,10 @@ export class MockIdentityClass {
   public getVenues = jest.fn();
   public getSecondaryKeys = jest.fn();
   public getTrustingTokens = jest.fn();
+}
+
+export class MockTickerReservation {
+  public createToken = jest.fn();
 }
 
 export class MockTransactionQueueClass {
