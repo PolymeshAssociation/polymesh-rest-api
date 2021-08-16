@@ -13,7 +13,6 @@ import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { OfferingStatusFilterDto } from '~/offerings/dto/offering-status-filter.dto';
 import { InvestmentModel } from '~/offerings/models/investment.model';
 import { OfferingDetailsModel } from '~/offerings/models/offering-details.model';

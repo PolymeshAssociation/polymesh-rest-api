@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 import {
   IsHexadecimal,
   IsUppercase,
@@ -13,6 +14,7 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
+import { get } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
@@ -49,6 +51,33 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a number`;
+        },
+      },
+    });
+  };
+}
+
+export function IsAssetType() {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isAssetType',
+      target: object.constructor,
+      propertyName: propertyName,
+      validator: {
+        validate(value: unknown) {
+          if (typeof value === 'string') {
+            return Object.values(KnownTokenType).includes(value as KnownTokenType);
+          } else {
+            return (
+              typeof value === 'object' &&
+              typeof get(value, 'custom') === 'string' &&
+              Object.keys(value as Record<string, unknown>).length === 1
+            );
+          }
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a Known type or object of type "{ custom: string }"`;
         },
       },
     });

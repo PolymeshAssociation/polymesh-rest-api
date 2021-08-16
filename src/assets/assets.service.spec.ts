@@ -1,15 +1,31 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ClaimType, ConditionType, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import {
+  ClaimType,
+  ConditionType,
+  ErrorCode,
+  KnownTokenType,
+  ScopeType,
+  TxTags,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymeshClass, MockSecurityTokenClass } from '~/test-utils/mocks';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import {
+  MockPolymeshClass,
+  MockRelayerAccountsService,
+  MockSecurityTokenClass,
+  MockTickerReservation,
+  MockTransactionQueueClass,
+} from '~/test-utils/mocks';
 
 import { AssetsService } from './assets.service';
 
@@ -22,15 +38,19 @@ describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymeshClass;
+  let mockRelayerAccountsService: MockRelayerAccountsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
+    mockRelayerAccountsService = new MockRelayerAccountsService();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule],
+      imports: [PolymeshModule, RelayerAccountsModule],
       providers: [AssetsService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
+      .overrideProvider(RelayerAccountsService)
+      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<AssetsService>(AssetsService);
@@ -280,6 +300,244 @@ describe('AssetsService', () => {
 
       expect(result).toEqual(mockClaimIssuers);
       findOneSpy.mockRestore();
+    });
+  });
+
+  describe('findTickerReservation', () => {
+    describe('if the reservation does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        mockPolymeshApi.getTickerReservation.mockImplementation(() => {
+          throw new PolymeshError({
+            message: 'There is no reservation for',
+            code: ErrorCode.FatalError,
+          });
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+        let error;
+        try {
+          await service.findTickerReservation('BRK.A');
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+    describe('if the asset has already been created', () => {
+      it('should throw a GoneException', async () => {
+        mockPolymeshApi.getTickerReservation.mockImplementation(() => {
+          throw new Error('BRK.A token has been created');
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+        let error;
+        try {
+          await service.findTickerReservation('BRK.A');
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(GoneException);
+      });
+    });
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('Something else');
+        mockPolymeshApi.getTickerReservation.mockImplementation(() => {
+          throw expectedError;
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+        let error;
+        try {
+          await service.findTickerReservation('BRK.A');
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBe(expectedError);
+      });
+    });
+    describe('otherwise', () => {
+      it('should return the reservation', async () => {
+        const mockTickerReservation = {
+          ticker: 'BRK.A',
+        };
+        mockPolymeshApi.getTickerReservation.mockResolvedValue(mockTickerReservation);
+        const result = await service.findTickerReservation('BRK.A');
+        expect(result).toEqual(mockTickerReservation);
+      });
+    });
+  });
+  describe('createAsset', () => {
+    describe('if there is an error', () => {
+      it('should pass it up the chain', async () => {
+        const expectedError = new Error('Some error');
+        const mockTickerReservation = new MockTickerReservation();
+
+        const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findTickerReservationSpy.mockResolvedValue(mockTickerReservation as any);
+
+        mockTickerReservation.createToken.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        const body = {
+          signer: '0x6000',
+          name: 'Berkshire Class A',
+          ticker: 'BRK.A',
+          isDivisible: false,
+          assetType: KnownTokenType.EquityCommon,
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        let error;
+        try {
+          await service.createAsset(body);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toEqual(expectedError);
+        findTickerReservationSpy.mockRestore();
+      });
+    });
+    describe('otherwise', () => {
+      it('should create the asset', async () => {
+        const mockTickerReservation = new MockTickerReservation();
+
+        const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findTickerReservationSpy.mockResolvedValue(mockTickerReservation as any);
+
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.asset.CreateAsset,
+          },
+        ];
+        const mockQueue = new MockTransactionQueueClass(transactions);
+        mockTickerReservation.createToken.mockResolvedValue(mockQueue);
+
+        const body = {
+          signer: '0x6000',
+          name: 'Berkshire Class A',
+          ticker: 'BRK.A',
+          isDivisible: false,
+          assetType: KnownTokenType.EquityCommon,
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const result = await service.createAsset(body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.asset.CreateAsset,
+            },
+          ],
+        });
+        findTickerReservationSpy.mockRestore();
+      });
+    });
+    it('will reserve the ticker if its not already reserved', async () => {
+      const mockTickerReservation = new MockTickerReservation();
+
+      const findTickerReservationSpy = jest.spyOn(service, 'findTickerReservation');
+      findTickerReservationSpy.mockImplementation(() => {
+        throw new NotFoundException('There is no reservation for "BRK.A"');
+      });
+
+      const registerTransaction = [
+        {
+          blockHash: '0x2',
+          txHash: '0x4',
+          tag: TxTags.asset.RegisterTicker,
+        },
+      ];
+      const registerTickerSpy = jest.spyOn(service, 'registerTicker');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockResult: any = {
+        transactions: registerTransaction,
+        result: mockTickerReservation,
+      };
+      registerTickerSpy.mockResolvedValue(mockResult);
+
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.asset.CreateAsset,
+        },
+      ];
+      const mockQueue = new MockTransactionQueueClass(transactions);
+      mockTickerReservation.createToken.mockResolvedValue(mockQueue);
+
+      const body = {
+        signer: '0x6000',
+        name: 'Berkshire Class A',
+        ticker: 'BRK.A',
+        isDivisible: false,
+        assetType: KnownTokenType.EquityCommon,
+      };
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      const result = await service.createAsset(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x2',
+            txHash: '0x4',
+            tag: TxTags.asset.RegisterTicker,
+          },
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.asset.CreateAsset,
+          },
+        ],
+      });
+      expect(registerTickerSpy).toHaveBeenCalled();
+      findTickerReservationSpy.mockRestore();
+      registerTickerSpy.mockRestore();
+    });
+  });
+
+  describe('registerTicker', () => {
+    describe('otherwise', () => {
+      it('should register the ticker', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.asset.RegisterTicker,
+          },
+        ];
+
+        const mockQueue = new MockTransactionQueueClass(transactions);
+        mockPolymeshApi.reserveTicker.mockResolvedValue(mockQueue);
+
+        const body = {
+          signer: '0x6000',
+          ticker: 'BRK.A',
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const result = await service.registerTicker(body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.asset.RegisterTicker,
+            },
+          ],
+        });
+      });
     });
   });
 });

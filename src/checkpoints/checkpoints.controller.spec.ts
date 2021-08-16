@@ -1,15 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
 
   const mockCheckpointsService = {
     findAllByTicker: jest.fn(),
+    findSchedulesByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -28,7 +31,7 @@ describe('CheckpointsController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findAllByTicker', () => {
+  describe('getCheckpoints', () => {
     const mockCheckpoints = {
       data: [
         {
@@ -71,6 +74,51 @@ describe('CheckpointsController', () => {
       );
 
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getSchedules', () => {
+    it('should return the list of active Checkpoint Schedules for an Asset', async () => {
+      const mockDate = new Date();
+      const mockSchedules = [
+        {
+          schedule: {
+            id: new BigNumber('1'),
+            period: {
+              unit: CalendarUnit.Month,
+              amount: 3,
+            },
+            start: mockDate,
+            complexity: 4,
+            expiryDate: null,
+          },
+          details: {
+            remainingCheckpoints: 1,
+            nextCheckpointDate: mockDate,
+          },
+        },
+      ];
+
+      mockCheckpointsService.findSchedulesByTicker.mockResolvedValue(mockSchedules);
+
+      const result = await controller.getSchedules({ ticker: 'TICKER' });
+
+      const mockResult = [
+        {
+          id: new BigNumber('1'),
+          period: {
+            unit: CalendarUnit.Month,
+            amount: 3,
+          },
+          start: mockDate,
+          complexity: 4,
+          expiryDate: null,
+          remainingCheckpoints: 1,
+          nextCheckpointDate: mockDate,
+        },
+      ];
+
+      expect(result).toEqual(new ResultsModel({ results: mockResult }));
     });
   });
 });

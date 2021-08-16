@@ -1,8 +1,20 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiGoneResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -13,6 +25,7 @@ import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
 @ApiTags('assets')
 @Controller('assets')
@@ -71,11 +84,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.assetsService.findHolders(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findHolders(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -123,11 +136,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
-    const { data, count: total, next } = await this.assetsService.findDocuments(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findDocuments(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -197,5 +210,42 @@ export class AssetsController {
           new TrustedClaimIssuerModel({ did, trustedFor: trustedFor || null })
       ),
     });
+  }
+
+  @ApiOperation({
+    summary: 'Reserve a Ticker',
+    description: 'Reserves a ticker so that an Asset can be created with it later',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description: 'The ticker has already been reserved',
+  })
+  @Post('/reservations/tickers')
+  public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.registerTicker(params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Create an Asset',
+    description: 'This endpoint allows for the creation of new assets',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The ticker reservation does not exist',
+  })
+  @ApiGoneResponse({
+    description: 'The ticker has already been used to create an asset',
+  })
+  @Post('')
+  public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.createAsset(params);
+    return new TransactionQueueModel({ transactions });
   }
 }
