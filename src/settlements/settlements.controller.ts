@@ -10,10 +10,12 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
+import { LegDto } from '~/settlements/dto/leg.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
 import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
+import { TransferBreakdownModel } from '~/settlements/model/transfer-breakdown.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
 
@@ -194,5 +196,20 @@ export class SettlementsController {
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.modifyVenue(id, modifyVenueDto);
     return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Check if Asset transfer is possible',
+    description: 'The endpoint will provide transfer breakdown of an Asset transfer',
+  })
+  @ApiOkResponse({
+    description: 'Returns reason why a specific Asset transfer would fail.',
+    type: TransferBreakdownModel,
+  })
+  @Post('can-transfer')
+  public async canTransfer(@Body() legDto: LegDto): Promise<TransferBreakdownModel> {
+    const transferBreakdown = await this.settlementsService.canTransfer(legDto);
+    return new TransferBreakdownModel(transferBreakdown);
   }
 }

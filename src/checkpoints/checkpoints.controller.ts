@@ -49,11 +49,11 @@ export class CheckpointsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<CheckpointDetailsModel>> {
-    const {
-      data,
-      count: total,
-      next,
-    } = await this.checkpointsService.findAllByTicker(ticker, size, start?.toString());
+    const { data, count: total, next } = await this.checkpointsService.findAllByTicker(
+      ticker,
+      size,
+      start?.toString()
+    );
 
     return new PaginatedResultsModel({
       results: data.map(

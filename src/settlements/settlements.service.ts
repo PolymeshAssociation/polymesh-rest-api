@@ -5,10 +5,12 @@ import {
   InstructionAffirmation,
   isPolymeshError,
   ResultSet,
+  TransferBreakdown,
   Venue,
   VenueDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetsService } from '~/assets/assets.service';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
@@ -18,12 +20,15 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 
+import { LegDto } from './dto/leg.dto';
+
 @Injectable()
 export class SettlementsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly relayerAccountsService: RelayerAccountsService,
+    private readonly assetsService: AssetsService
   ) {}
 
   public async findPendingInstructionsByDid(did: string): Promise<Instruction[]> {
@@ -139,5 +144,15 @@ export class SettlementsService {
     const params = rest as Required<typeof rest>;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(venue.modify, params, { signer: address });
+  }
+
+  public async canTransfer(legDto: LegDto): Promise<TransferBreakdown> {
+    const { asset, from, to, amount } = legDto;
+    const assetDetails = await this.assetsService.findOne(asset);
+    return assetDetails.settlements.canTransfer({
+      from: from?.toPortfolioLike(),
+      to: to.toPortfolioLike(),
+      amount: amount,
+    });
   }
 }

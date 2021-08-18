@@ -7,11 +7,13 @@ import {
   AffirmationStatus,
   InstructionStatus,
   InstructionType,
+  TransferError,
   VenueType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { IdentitiesService } from '~/identities/identities.service';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 
@@ -31,6 +33,7 @@ describe('SettlementsController', () => {
     findVenueDetails: jest.fn(),
     findAffirmations: jest.fn(),
     modifyVenue: jest.fn(),
+    canTransfer: jest.fn(),
   };
   const mockIdentitiesService = {};
 
@@ -203,6 +206,31 @@ describe('SettlementsController', () => {
       expect(result).toEqual({
         transactions,
       });
+    });
+  });
+
+  describe('canTransfer', () => {
+    it('should return if Asset transfer is possible ', async () => {
+      const mockTransferBreakdown = {
+        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+        compliance: {
+          requirements: [],
+          complies: false,
+        },
+        restrictions: [],
+        result: false,
+      };
+
+      mockSettlementsService.canTransfer.mockResolvedValue(mockTransferBreakdown);
+
+      const result = await controller.canTransfer({
+        from: new PortfolioDto({ did: 'fromDid' }),
+        to: new PortfolioDto({ did: 'toDid' }),
+        asset: 'TICKER',
+        amount: new BigNumber('123'),
+      });
+
+      expect(result).toEqual(mockTransferBreakdown);
     });
   });
 });

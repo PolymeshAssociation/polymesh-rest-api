@@ -46,6 +46,10 @@ export class MockSecurityTokenClass {
     get: jest.fn(),
   };
 
+  public settlements = {
+    canTransfer: jest.fn(),
+  };
+
   public compliance = {
     requirements: {
       get: jest.fn(),

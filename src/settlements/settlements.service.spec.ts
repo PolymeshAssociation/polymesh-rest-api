@@ -4,8 +4,14 @@ const mockIsPolymeshError = jest.fn();
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AffirmationStatus, TxTags, VenueType } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  AffirmationStatus,
+  TransferError,
+  TxTags,
+  VenueType,
+} from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetsService } from '~/assets/assets.service';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -19,6 +25,7 @@ import {
   MockInstructionClass,
   MockPolymeshClass,
   MockRelayerAccountsService,
+  MockSecurityTokenClass,
   MockTransactionQueueClass,
   MockVenueClass,
 } from '~/test-utils/mocks';
@@ -37,18 +44,23 @@ describe('SettlementsService', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
   };
+  const mockAssetsService = {
+    findOne: jest.fn(),
+  };
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymeshClass();
     const module: TestingModule = await Test.createTestingModule({
       imports: [IdentitiesModule, PolymeshModule, RelayerAccountsModule],
-      providers: [SettlementsService],
+      providers: [SettlementsService, AssetsService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
+      .overrideProvider(AssetsService)
+      .useValue(mockAssetsService)
       .overrideProvider(RelayerAccountsService)
       .useValue(mockRelayerAccountsService)
       .compile();
@@ -428,6 +440,34 @@ describe('SettlementsService', () => {
 
       expect(result).toEqual(mockAffirmations);
       findInstructionSpy.mockRestore();
+    });
+  });
+
+  describe('canTransfer', () => {
+    it('should return if Asset transfer is possible ', async () => {
+      const mockTransferBreakdown = {
+        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+        compliance: {
+          requirements: [],
+          complies: false,
+        },
+        restrictions: [],
+        result: false,
+      };
+
+      const mockSecurityToken = new MockSecurityTokenClass();
+      mockSecurityToken.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.canTransfer({
+        from: new PortfolioDto({ did: 'fromDid' }),
+        to: new PortfolioDto({ did: 'toDid' }),
+        asset: 'TICKER',
+        amount: new BigNumber('123'),
+      });
+
+      expect(result).toEqual(mockTransferBreakdown);
     });
   });
 });
