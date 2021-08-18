@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CorporateActionDefaults } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  CorporateActionDefaults,
+  DistributionWithDetails,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 
@@ -10,5 +13,10 @@ export class CorporateActionsService {
   public async findDefaultsByTicker(ticker: string): Promise<CorporateActionDefaults> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.corporateActions.getDefaults();
+  }
+
+  public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
+    const asset = await this.assetsService.findOne(ticker);
+    return asset.corporateActions.distributions.get();
   }
 }

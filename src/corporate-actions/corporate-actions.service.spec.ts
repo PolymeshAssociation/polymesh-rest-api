@@ -64,4 +64,46 @@ describe('CorporateActionsService', () => {
       expect(result).toEqual(mockCorporateActionDefaults);
     });
   });
+
+  describe('findDistributionsByTicker', () => {
+    it('should return the Dividend Distributions associated with an Asset', async () => {
+      const mockDistributions = [
+        {
+          distribution: {
+            origin: {
+              did: 'Ox6'.padEnd(66, '0'),
+            },
+            currency: 'TOKEN2',
+            perShare: new BigNumber('0.1'),
+            maxAmount: new BigNumber('2100.1'),
+            expiryDate: null,
+            paymentDate: new Date(),
+            ticker: 'TOKEN4',
+            id: new BigNumber('1'),
+            declarationDate: new Date(),
+            defaultTaxWithholding: new BigNumber('0'),
+            taxWithholdings: [],
+            targets: {
+              identities: ['Ox6'.padEnd(66, '0')],
+              treatment: TargetTreatment.Exclude,
+            },
+            description: 'uuuu',
+          },
+          details: {
+            remainingFunds: new BigNumber('2100.1'),
+            fundsReclaimed: false,
+          },
+        },
+      ];
+
+      const mockSecurityToken = new MockSecurityTokenClass();
+      mockSecurityToken.corporateActions.distributions.get.mockResolvedValue(mockDistributions);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.findDistributionsByTicker('TICKER');
+
+      expect(result).toEqual(mockDistributions);
+    });
+  });
 });

@@ -68,6 +68,9 @@ export class MockSecurityTokenClass {
   };
 
   public corporateActions = {
+    distributions: {
+      get: jest.fn(),
+    },
     getDefaults: jest.fn(),
   };
 }
