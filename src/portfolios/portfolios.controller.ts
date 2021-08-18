@@ -6,7 +6,7 @@ import { DidDto } from '~/common/dto/params.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import { PortfolioTransferDto } from '~/portfolios/dto/portfolio-transfer.dto';
+import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -51,11 +51,11 @@ export class PortfoliosController {
 
   @ApiOperation({
     summary: 'Move Assets between portfolios',
-    description: 'This endpoint transfers Assets between Portfolios',
+    description: 'This endpoint moves Assets between Portfolios',
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID of the owner of the Portfolios to transfer assets between.',
+    description: 'The DID of the owner of the Portfolios to move assets between.',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -63,10 +63,10 @@ export class PortfoliosController {
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
-  @Post('/asset-transfers')
+  @Post('/asset-movements')
   public async moveAssets(
     @Param() { did }: DidDto,
-    @Body() transferParams: PortfolioTransferDto
+    @Body() transferParams: AssetMovementDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.portfoliosService.moveAssets(did, transferParams);
     return new TransactionQueueModel({ transactions });

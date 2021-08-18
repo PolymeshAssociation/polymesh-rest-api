@@ -10,7 +10,7 @@ import { IsBigNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PortfolioMovementDto } from '~/portfolios/dto/portfolio-movement.dto';
 
-export class PortfolioTransferDto extends SignerDto {
+export class AssetMovementDto extends SignerDto {
   @ApiPropertyOptional({
     example: '2',
     description: 'ID of the Portfolio to move the Asset from. Defaults to default Portfolio',
