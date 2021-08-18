@@ -106,7 +106,7 @@ describe('OfferingsController', () => {
       next: '10',
       count: 2,
     };
-    it('should return a paginated list of Investments mad in an Offering', async () => {
+    it('should return a paginated list of Investments made in an Offering', async () => {
       mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
 
       const result = await controller.getInvestments(
