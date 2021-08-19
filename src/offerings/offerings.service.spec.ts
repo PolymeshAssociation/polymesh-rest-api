@@ -96,6 +96,39 @@ describe('OfferingsService', () => {
       next: '10',
       count: 2,
     };
+    const offering = {
+      sto: {
+        id: new BigNumber(1),
+        getInvestments: jest.fn().mockReturnValue(mockInvestments),
+      },
+    };
+    it('should return a list of investments', async () => {
+      const findSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(offering as any);
+
+      const result = await service.findInvestmentsByTicker('TICKER', new BigNumber('1'), 0);
+
+      expect(result).toEqual({
+        data: mockInvestments.data,
+        count: mockInvestments.count,
+        next: mockInvestments.next,
+      });
+      findSpy.mockRestore();
+    });
+  });
+  describe('findOneInvestment', () => {
+    const mockInvestments = {
+      data: [
+        {
+          investor: '0x6000',
+          soldAmount: '100',
+          investedAmount: '200',
+        },
+      ],
+      next: '10',
+      count: 2,
+    };
     const offerings = [
       {
         sto: {
@@ -121,18 +154,13 @@ describe('OfferingsService', () => {
       });
     });
     describe('otherwise', () => {
-      it('should return a list of investments', async () => {
+      it('should return the offering', async () => {
         const findSpy = jest.spyOn(service, 'findAllByTicker');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findSpy.mockResolvedValue(offerings as any);
 
-        const result = await service.findInvestmentsByTicker('TICKER', new BigNumber('1'), 0);
-
-        expect(result).toEqual({
-          data: mockInvestments.data,
-          count: mockInvestments.count,
-          next: mockInvestments.next,
-        });
+        const result = await service.findOne('TICKER', new BigNumber('1'));
+        expect(result).toEqual(offerings[0]);
         findSpy.mockRestore();
       });
     });

@@ -102,10 +102,10 @@ export class OfferingsController {
   })
   @ApiQuery({
     name: 'start',
-    description: 'Starting offset for pagination.',
+    description: 'Starting offset for pagination',
     type: 'number',
     required: false,
-    example: 10,
+    example: 0,
   })
   @ApiArrayResponse(InvestmentModel, {
     description: 'A List of Investments',
@@ -120,9 +120,9 @@ export class OfferingsController {
       data,
       count: total,
       next,
-    } = await this.offeringsService.findInvestmentsByTicker(ticker, id, size, start ? +start : 0);
+    } = await this.offeringsService.findInvestmentsByTicker(ticker, id, size, Number(start) || 0);
     return new PaginatedResultsModel({
-      results: data?.map(({ investor, soldAmount, investedAmount }) => {
+      results: data.map(({ investor, soldAmount, investedAmount }) => {
         return new InvestmentModel({
           investor,
           soldAmount,
