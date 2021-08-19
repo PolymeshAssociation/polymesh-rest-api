@@ -7,9 +7,9 @@ import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
-export class IssueAssetDto extends SignerDto {
+export class IssueDto extends SignerDto {
   @ApiProperty({
-    description: 'The amount of the asset to issue',
+    description: 'The amount of the Asset to issue',
     example: '1000',
     type: BigNumber,
   })

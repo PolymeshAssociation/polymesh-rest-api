@@ -25,7 +25,7 @@ describe('AssetsController', () => {
     findTrustedClaimIssuers: jest.fn(),
     registerTicker: jest.fn(),
     createAsset: jest.fn(),
-    issueAsset: jest.fn(),
+    issue: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -265,11 +265,11 @@ describe('AssetsController', () => {
             },
           ],
         };
-        mockAssetsService.issueAsset.mockResolvedValue(response);
+        mockAssetsService.issue.mockResolvedValue(response);
 
-        const result = await controller.issueAsset({ ticker }, { signer, amount });
+        const result = await controller.issue({ ticker }, { signer, amount });
         expect(result).toEqual(response);
-        expect(mockAssetsService.issueAsset).toHaveBeenCalledWith(ticker, { signer, amount });
+        expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
       });
     });
   });

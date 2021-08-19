@@ -12,7 +12,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
-import { IssueAssetDto } from '~/assets/dto/issue-asset.dto';
+import { IssueDto } from '~/assets/dto/issue.dto';
 import { ReserveTickerDto as RegisterTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
@@ -126,10 +126,7 @@ export class AssetsService {
     return res;
   }
 
-  public async issueAsset(
-    ticker: string,
-    params: IssueAssetDto
-  ): Promise<QueueResult<SecurityToken>> {
+  public async issue(ticker: string, params: IssueDto): Promise<QueueResult<SecurityToken>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
