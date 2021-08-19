@@ -53,7 +53,7 @@ export class PortfoliosService {
         return {
           token,
           amount: new BigNumber(amount),
-          memo: memo?.padEnd(32, '\x00'), // Workaround for SDK erroring on less than 32 byte memo.
+          memo,
         };
       }),
     };
