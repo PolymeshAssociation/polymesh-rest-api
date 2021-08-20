@@ -117,7 +117,7 @@ describe('OfferingsService', () => {
       findSpy.mockRestore();
     });
   });
-  describe('findOneInvestment', () => {
+  describe('findOne', () => {
     const mockInvestments = {
       data: [
         {
