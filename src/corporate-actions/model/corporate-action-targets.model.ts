@@ -17,7 +17,7 @@ export class CorporateActionTargetsModel {
 
   @ApiProperty({
     description:
-      'Determines which Identities will be affected by the Corporate Action. If the value of treatment is Include, then all Identities in this array will be affected. Otherwise, every Asset holder Identity EXCEPT for the ones in this array will be affected',
+      'Determines which Identities will be affected by the Corporate Action. If the value of `treatment` is `Include`, then all Identities in this array will be affected. Otherwise, every Asset holder Identity **EXCEPT** for the ones in this array will be affected',
     type: 'string',
     isArray: true,
     example: [
