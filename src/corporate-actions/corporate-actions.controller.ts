@@ -16,7 +16,7 @@ export class CorporateActionsController {
   @ApiOperation({
     summary: 'Fetch Corporate Action defaults',
     description:
-      'This endpoint will provide the default values applied for each Corporate Action for an Asset',
+      "This endpoint will provide the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
   })
   @ApiParam({
     name: 'ticker',

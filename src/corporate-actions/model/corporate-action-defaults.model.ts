@@ -10,13 +10,14 @@ import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.m
 
 export class CorporateActionDefaultsModel {
   @ApiProperty({
-    description: 'The target DIDs relevant to this Corporate Action',
+    description: 'Identities that will be affected by the Corporate Actions',
     type: CorporateActionTargetsModel,
   })
   targets: CorporateActionTargetsModel;
 
   @ApiProperty({
-    description: 'The default withholding tax at the time of Corporate Action creation',
+    description:
+      "Tax withholding percentage that applies to Identities that don't have a specific percentage assigned to them",
     type: 'string',
     example: '0.0005',
   })
@@ -24,7 +25,8 @@ export class CorporateActionDefaultsModel {
   defaultTaxWithholding: BigNumber;
 
   @ApiProperty({
-    description: 'List of withholding tax overrides in relation to the default.',
+    description:
+      'List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`',
     type: TaxWithholdingModel,
     isArray: true,
   })
