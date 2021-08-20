@@ -32,13 +32,14 @@ describe('CheckpointsController', () => {
   });
 
   describe('getCheckpoints', () => {
+    const mockDate = new Date();
     const mockCheckpoints = {
       data: [
         {
           checkpoint: {
             id: new BigNumber(1),
           },
-          createdAt: new Date(),
+          createdAt: mockDate,
           totalSupply: new BigNumber('10000'),
         },
       ],
@@ -50,7 +51,7 @@ describe('CheckpointsController', () => {
       results: [
         {
           id: new BigNumber(1),
-          createdAt: new Date(),
+          createdAt: mockDate,
           totalSupply: new BigNumber('10000'),
         },
       ],
