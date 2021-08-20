@@ -88,6 +88,7 @@ export class MockPortfolio {
   public getTokenBalances = jest.fn();
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
+  public moveFunds = jest.fn();
 }
 
 export class MockIdentityAuthorization {
@@ -97,6 +98,7 @@ export class MockIdentityAuthorization {
 
 export class MockPortfolios {
   public getPortfolios = jest.fn();
+  public getPortfolio = jest.fn();
 }
 
 export class MockIdentityClass {

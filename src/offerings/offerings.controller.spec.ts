@@ -6,6 +6,7 @@ import {
   StoTimingStatus,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { OfferingsController } from '~/offerings/offerings.controller';
 import { OfferingsService } from '~/offerings/offerings.service';
@@ -13,8 +14,8 @@ import { createOfferingDetailsModel } from '~/offerings/offerings.util';
 
 describe('OfferingsController', () => {
   let controller: OfferingsController;
-
   const mockOfferingsService = {
+    findInvestmentsByTicker: jest.fn(),
     findAllByTicker: jest.fn(),
   };
 
@@ -91,6 +92,35 @@ describe('OfferingsController', () => {
         ),
       });
       expect(result).toEqual(mockResult);
+    });
+  });
+  describe('getInvestments', () => {
+    const mockInvestments = {
+      data: [
+        {
+          investor: '0x6000',
+          soldAmount: '100',
+          investedAmount: '200',
+        },
+      ],
+      next: '10',
+      count: 2,
+    };
+    it('should return a paginated list of Investments made in an Offering', async () => {
+      mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
+
+      const result = await controller.getInvestments(
+        { ticker: 'TICKER', id: new BigNumber('1') },
+        { start: 0, size: 10 }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: mockInvestments.data,
+          total: mockInvestments.count,
+          next: mockInvestments.next,
+        })
+      );
     });
   });
 });
