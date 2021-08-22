@@ -24,9 +24,6 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import { PortfolioModel } from '~/portfolios/models/portfolio.model';
-import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { SettlementsService } from '~/settlements/settlements.service';
 
 @ApiTags('identities')
@@ -37,7 +34,6 @@ export class IdentitiesController {
     private readonly settlementsService: SettlementsService,
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
-    private readonly portfoliosService: PortfoliosService,
     private readonly claimsService: ClaimsService,
     private readonly logger: PolymeshLogger
   ) {
@@ -184,37 +180,6 @@ export class IdentitiesController {
       total: count,
       next: next,
     });
-  }
-
-  @ApiTags('portfolios')
-  @ApiOperation({
-    summary: 'Get all Portfolios of an Identity',
-    description: 'This endpoint will provide list of all the Portfolios of an Identity',
-  })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID whose Portfolios are to be fetched',
-    type: 'string',
-    required: true,
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiArrayResponse(PortfolioModel, {
-    description: 'Return the list of all Portfolios of the given Identity',
-    paginated: false,
-  })
-  @Get(':did/portfolios')
-  async getPortfolios(@Param() { did }: DidDto): Promise<ResultsModel<PortfolioModel>> {
-    this.logger.debug(`Fetching portfolios for ${did}`);
-
-    const portfolios = await this.portfoliosService.findAllByOwner(did);
-
-    const results = await Promise.all(
-      portfolios.map(portfolio => createPortfolioModel(portfolio, did))
-    );
-
-    this.logger.debug(`Returning details of ${portfolios.length} portfolios for did ${did}`);
-
-    return new ResultsModel({ results });
   }
 
   @ApiTags('assets')

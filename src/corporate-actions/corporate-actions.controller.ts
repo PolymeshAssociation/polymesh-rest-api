@@ -2,13 +2,13 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { ResultsModel } from '~/common/models/results.model';
+import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
+import { DistributionWithDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
-
-import { CorporateActionsService } from './corporate-actions.service';
-import { DistributionWithDetailsModel } from './model/dividend-distribution-details.model';
 
 @ApiTags('corporate-actions')
 @Controller('assets/:ticker/corporate-actions')
@@ -18,7 +18,7 @@ export class CorporateActionsController {
   @ApiOperation({
     summary: 'Fetch Corporate Action defaults',
     description:
-      'This endpoint will provide the default values applied for each Corporate Action for an Asset',
+      "This endpoint will provide the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
   })
   @ApiParam({
     name: 'ticker',
@@ -59,9 +59,9 @@ export class CorporateActionsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiOkResponse({
+  @ApiArrayResponse(CorporateActionDefaultsModel, {
     description: 'List of Dividend Distributions associated with the specified Asset',
-    type: CorporateActionDefaultsModel,
+    paginated: false,
   })
   @Get('dividend-distributions')
   public async getDividendDistributions(

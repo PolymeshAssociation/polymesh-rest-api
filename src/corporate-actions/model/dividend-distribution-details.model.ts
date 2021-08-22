@@ -12,7 +12,7 @@ export class DistributionWithDetailsModel {
   distribution: DividendDistribution;
 
   @ApiProperty({
-    description: 'Number of remaining funds',
+    description: 'Amount of remaining funds',
     type: 'string',
     example: '1000',
   })

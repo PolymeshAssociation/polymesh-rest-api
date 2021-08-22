@@ -8,11 +8,21 @@ import {
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { IsTicker } from '~/common/decorators/validation';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
+import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { OfferingStatusFilterDto } from '~/offerings/dto/offering-status-filter.dto';
+import { InvestmentModel } from '~/offerings/models/investment.model';
 import { OfferingDetailsModel } from '~/offerings/models/offering-details.model';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
+
+class OfferingParams extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
 
 @ApiTags('offerings')
 @Controller('assets/:ticker/offerings')
@@ -64,6 +74,64 @@ export class OfferingsController {
     });
     return new ResultsModel({
       results: offerings.map(offering => createOfferingDetailsModel(offering)),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'List Investments made in an Offering',
+    description:
+      'This endpoint will return a list of Investments made in an Offering for a given Asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Offering',
+    type: 'string',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of Investments to be fetched',
+    type: 'number',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Starting offset for pagination',
+    type: 'number',
+    required: false,
+    example: 0,
+  })
+  @ApiArrayResponse(InvestmentModel, {
+    description: 'A List of Investments',
+    paginated: true,
+  })
+  @Get(':id/investments')
+  public async getInvestments(
+    @Param() { ticker, id }: OfferingParams,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<InvestmentModel>> {
+    const { data, count: total, next } = await this.offeringsService.findInvestmentsByTicker(
+      ticker,
+      id,
+      size,
+      Number(start) || 0
+    );
+    return new PaginatedResultsModel({
+      results: data.map(({ investor, soldAmount, investedAmount }) => {
+        return new InvestmentModel({
+          investor,
+          soldAmount,
+          investedAmount,
+        });
+      }),
+      total,
+      next,
     });
   }
 }

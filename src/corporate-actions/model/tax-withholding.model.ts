@@ -8,7 +8,7 @@ import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
 export class TaxWithholdingModel {
   @ApiProperty({
-    description: 'DID for which withholding tax is overridden',
+    description: 'DID for which the tax withholding percentage is overridden',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -16,9 +16,9 @@ export class TaxWithholdingModel {
   identity: Identity;
 
   @ApiProperty({
-    description: 'Tax withholding percentage',
+    description: 'Tax withholding percentage (from 0 to 100)',
     type: 'string',
-    example: '0.0001',
+    example: '67.25',
   })
   @FromBigNumber()
   percentage: BigNumber;
