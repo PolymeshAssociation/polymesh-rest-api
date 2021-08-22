@@ -7,17 +7,17 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { LegDto } from '~/settlements/dto/leg.dto';
+import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
 import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { TransferBreakdownModel } from '~/settlements/model/transfer-breakdown.model';
+import { VenueDetailsModel } from '~/settlements/model/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
-
-import { VenueDetailsModel } from './model/venue-details.model';
 
 @ApiTags('settlements')
 @Controller({})
@@ -192,16 +192,31 @@ export class SettlementsController {
 
   @ApiTags('assets')
   @ApiOperation({
-    summary: 'Check if Asset transfer is possible',
+    summary: 'Check if a Leg meets the transfer requirements',
     description: 'The endpoint will provide transfer breakdown of an Asset transfer',
   })
   @ApiOkResponse({
-    description: 'Returns reason why a specific Asset transfer would fail.',
+    description:
+      'Breakdown of every requirement that must be fulfilled for an Asset transfer to be executed successfully, and whether said requirement is met or not',
     type: TransferBreakdownModel,
   })
-  @Post('can-transfer')
-  public async canTransfer(@Body() legDto: LegDto): Promise<TransferBreakdownModel> {
-    const transferBreakdown = await this.settlementsService.canTransfer(legDto);
+  @Get('leg-validations')
+  public async validateLeg(
+    @Query() { asset, amount, fromDid, fromPortfolio, toDid, toPortfolio }: LegValidationParamsDto
+  ): Promise<TransferBreakdownModel> {
+    const fromPortfolioLike = new PortfolioDto({
+      did: fromDid,
+      id: fromPortfolio,
+    }).toPortfolioLike();
+    const toPortfolioLike = new PortfolioDto({ did: toDid, id: toPortfolio }).toPortfolioLike();
+
+    const transferBreakdown = await this.settlementsService.canTransfer(
+      fromPortfolioLike,
+      toPortfolioLike,
+      asset,
+      amount
+    );
+
     return new TransferBreakdownModel(transferBreakdown);
   }
 }

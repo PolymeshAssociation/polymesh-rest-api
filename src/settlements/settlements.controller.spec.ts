@@ -13,11 +13,9 @@ import {
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { IdentitiesService } from '~/identities/identities.service';
-import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-
-import { MockInstructionClass } from './../test-utils/mocks';
+import { MockInstructionClass } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -209,8 +207,8 @@ describe('SettlementsController', () => {
     });
   });
 
-  describe('canTransfer', () => {
-    it('should return if Asset transfer is possible ', async () => {
+  describe('validateLeg', () => {
+    it('should call the service and return the Leg validations', async () => {
       const mockTransferBreakdown = {
         general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
         compliance: {
@@ -223,9 +221,11 @@ describe('SettlementsController', () => {
 
       mockSettlementsService.canTransfer.mockResolvedValue(mockTransferBreakdown);
 
-      const result = await controller.canTransfer({
-        from: new PortfolioDto({ did: 'fromDid' }),
-        to: new PortfolioDto({ did: 'toDid' }),
+      const result = await controller.validateLeg({
+        fromDid: 'fromDid',
+        fromPortfolio: new BigNumber('1'),
+        toDid: 'toDid',
+        toPortfolio: new BigNumber('1'),
         asset: 'TICKER',
         amount: new BigNumber('123'),
       });

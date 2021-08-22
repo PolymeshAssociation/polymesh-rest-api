@@ -460,12 +460,12 @@ describe('SettlementsService', () => {
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
-      const result = await service.canTransfer({
-        from: new PortfolioDto({ did: 'fromDid' }),
-        to: new PortfolioDto({ did: 'toDid' }),
-        asset: 'TICKER',
-        amount: new BigNumber('123'),
-      });
+      const result = await service.canTransfer(
+        new PortfolioDto({ did: 'fromDid' }).toPortfolioLike(),
+        new PortfolioDto({ did: 'toDid' }).toPortfolioLike(),
+        'TICKER',
+        new BigNumber('123')
+      );
 
       expect(result).toEqual(mockTransferBreakdown);
     });

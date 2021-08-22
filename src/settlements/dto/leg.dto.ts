@@ -37,7 +37,7 @@ export class LegDto {
 
   @ApiProperty({
     description: 'Asset ticker',
-    example: 'MY_TOKEN',
+    example: 'TICKER',
   })
   @IsTicker()
   readonly asset: string;

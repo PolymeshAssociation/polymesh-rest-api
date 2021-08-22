@@ -4,6 +4,7 @@ import {
   Instruction,
   InstructionAffirmation,
   isPolymeshError,
+  PortfolioLike,
   ResultSet,
   TransferBreakdown,
   Venue,
@@ -19,8 +20,6 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
-
-import { LegDto } from './dto/leg.dto';
 
 @Injectable()
 export class SettlementsService {
@@ -146,13 +145,13 @@ export class SettlementsService {
     return processQueue(venue.modify, params, { signer: address });
   }
 
-  public async canTransfer(legDto: LegDto): Promise<TransferBreakdown> {
-    const { asset, from, to, amount } = legDto;
-    const assetDetails = await this.assetsService.findOne(asset);
-    return assetDetails.settlements.canTransfer({
-      from: from?.toPortfolioLike(),
-      to: to.toPortfolioLike(),
-      amount: amount,
-    });
+  public async canTransfer(
+    from: PortfolioLike,
+    to: PortfolioLike,
+    ticker: string,
+    amount: BigNumber
+  ): Promise<TransferBreakdown> {
+    const assetDetails = await this.assetsService.findOne(ticker);
+    return assetDetails.settlements.canTransfer({ from, to, amount });
   }
 }
