@@ -5,9 +5,10 @@ import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
+import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
-import { DistributionWithDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
+import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
 
 @ApiTags('corporate-actions')
@@ -66,12 +67,11 @@ export class CorporateActionsController {
   @Get('dividend-distributions')
   public async getDividendDistributions(
     @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<DistributionWithDetailsModel>> {
+  ): Promise<ResultsModel<DividendDistributionModel>> {
     const results = await this.corporateActionsService.findDistributionsByTicker(ticker);
     return new ResultsModel({
-      results: results.map(
-        ({ distribution, details }) =>
-          new DistributionWithDetailsModel({ distribution, ...details })
+      results: results.map(distributionWithDetails =>
+        createDividendDistributionModel(distributionWithDetails)
       ),
     });
   }

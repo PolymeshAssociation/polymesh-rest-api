@@ -1,0 +1,44 @@
+/* istanbul ignore file */
+
+import { DistributionWithDetails } from '@polymathnetwork/polymesh-sdk/types';
+
+import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
+
+export function createDividendDistributionModel(
+  distributionWithDetails: DistributionWithDetails
+): DividendDistributionModel {
+  const {
+    distribution: {
+      origin,
+      currency,
+      perShare,
+      maxAmount,
+      expiryDate,
+      paymentDate,
+      id,
+      ticker,
+      declarationDate,
+      description,
+      targets,
+      defaultTaxWithholding,
+      taxWithholdings,
+    },
+    details,
+  } = distributionWithDetails;
+  return new DividendDistributionModel({
+    origin,
+    currency,
+    perShare,
+    maxAmount,
+    expiryDate,
+    paymentDate,
+    id,
+    ticker,
+    declarationDate,
+    description,
+    targets,
+    defaultTaxWithholding,
+    taxWithholdings,
+    ...details,
+  });
+}

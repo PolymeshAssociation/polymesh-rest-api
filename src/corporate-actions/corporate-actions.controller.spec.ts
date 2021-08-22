@@ -4,7 +4,7 @@ import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { DistributionWithDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
+import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
 
 import { CorporateActionsController } from './corporate-actions.controller';
 
@@ -90,7 +90,7 @@ describe('CorporateActionsController', () => {
               identities: ['Ox6'.padEnd(66, '0')],
               treatment: TargetTreatment.Exclude,
             },
-            description: 'uuuu',
+            description: 'Mock description',
             remainingFunds: new BigNumber('2100.1'),
             fundsReclaimed: false,
           },
@@ -107,10 +107,9 @@ describe('CorporateActionsController', () => {
 
       expect(result).toEqual(
         new ResultsModel({
-          results: mockDistributions.map(
-            ({ distribution, details }) =>
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              new DistributionWithDetailsModel({ distribution: distribution as any, ...details })
+          results: mockDistributions.map(distributionWithDetails =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            createDividendDistributionModel(distributionWithDetails as any)
           ),
         })
       );

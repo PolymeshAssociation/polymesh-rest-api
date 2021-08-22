@@ -13,7 +13,8 @@ export class CorporateActionDefaultsModel {
     description: 'Identities that will be affected by the Corporate Actions',
     type: CorporateActionTargetsModel,
   })
-  targets: CorporateActionTargetsModel;
+  @Type(() => CorporateActionTargetsModel)
+  readonly targets: CorporateActionTargetsModel;
 
   @ApiProperty({
     description:
@@ -22,7 +23,7 @@ export class CorporateActionDefaultsModel {
     example: '0.0005',
   })
   @FromBigNumber()
-  defaultTaxWithholding: BigNumber;
+  readonly defaultTaxWithholding: BigNumber;
 
   @ApiProperty({
     description:
@@ -31,7 +32,7 @@ export class CorporateActionDefaultsModel {
     isArray: true,
   })
   @Type(() => TaxWithholdingModel)
-  taxWithholdings: TaxWithholdingModel[];
+  readonly taxWithholdings: TaxWithholdingModel[];
 
   constructor(model: CorporateActionDefaultsModel) {
     Object.assign(this, model);
