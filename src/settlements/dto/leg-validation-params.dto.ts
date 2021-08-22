@@ -44,7 +44,7 @@ export class LegValidationParamsDto {
 
   @ApiPropertyOptional({
     description:
-      'Portfolio of the receiver from which Asset is to be transferred. Do not send any value for the Default Portfolio',
+      'Portfolio of the receiver to which Asset is to be transferred. Do not send any value for the Default Portfolio',
     type: 'string',
     example: '2',
   })
@@ -55,6 +55,7 @@ export class LegValidationParamsDto {
 
   @ApiProperty({
     description: 'Ticker of the Asset to be transferred',
+    type: 'string',
     example: 'TICKER',
   })
   @IsTicker()
