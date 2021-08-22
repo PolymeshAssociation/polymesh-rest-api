@@ -60,7 +60,7 @@ export class CorporateActionsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiArrayResponse(CorporateActionDefaultsModel, {
+  @ApiArrayResponse(DividendDistributionModel, {
     description: 'List of Dividend Distributions associated with the specified Asset',
     paginated: false,
   })
