@@ -1,10 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -20,12 +18,6 @@ import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
 
 import { VenueDetailsModel } from './model/venue-details.model';
-
-class IdParams {
-  @IsBigNumber()
-  @ToBigNumber()
-  readonly id: BigNumber;
-}
 
 @ApiTags('settlements')
 @Controller({})
@@ -48,7 +40,7 @@ export class SettlementsController {
     type: InstructionModel,
   })
   @Get('instructions/:id')
-  public async getInstruction(@Param() { id }: IdParams): Promise<InstructionModel> {
+  public async getInstruction(@Param() { id }: IdParamsDto): Promise<InstructionModel> {
     const instruction = await this.settlementsService.findInstruction(id);
     return createInstructionModel(instruction);
   }
@@ -69,7 +61,7 @@ export class SettlementsController {
   })
   @Post('venues/:id/instructions')
   public async createInstruction(
-    @Param() { id }: IdParams,
+    @Param() { id }: IdParamsDto,
     @Body() createInstructionDto: CreateInstructionDto
   ): Promise<InstructionIdModel> {
     const { result: instructionId, transactions } = await this.settlementsService.createInstruction(
@@ -101,7 +93,7 @@ export class SettlementsController {
   })
   @Post('instructions/:id/affirm')
   public async affirmInstruction(
-    @Param() { id }: IdParams,
+    @Param() { id }: IdParamsDto,
     @Body() signerDto: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
@@ -125,7 +117,7 @@ export class SettlementsController {
     type: VenueDetailsModel,
   })
   @Get('venues/:id')
-  public async getVenueDetails(@Param() { id }: IdParams): Promise<VenueDetailsModel> {
+  public async getVenueDetails(@Param() { id }: IdParamsDto): Promise<VenueDetailsModel> {
     const venueDetails = await this.settlementsService.findVenueDetails(id);
     return new VenueDetailsModel(venueDetails);
   }
@@ -160,7 +152,7 @@ export class SettlementsController {
   })
   @Get('instructions/:id/affirmations')
   public async getAffirmations(
-    @Param() { id }: IdParams,
+    @Param() { id }: IdParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<InstructionAffirmationModel>> {
     const { data, count, next } = await this.settlementsService.findAffirmations(
@@ -191,7 +183,7 @@ export class SettlementsController {
   })
   @Patch('venues/:id')
   public async modifyVenue(
-    @Param() { id }: IdParams,
+    @Param() { id }: IdParamsDto,
     @Body() modifyVenueDto: ModifyVenueDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.modifyVenue(id, modifyVenueDto);

@@ -9,9 +9,8 @@ import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentityClass, MockPortfolio } from '~/test-utils/mocks';
+import { MockIdentityClass } from '~/test-utils/mocks';
 
 import { IdentitiesController } from './identities.controller';
 
@@ -35,10 +34,6 @@ describe('IdentitiesController', () => {
     findIssuedByDid: jest.fn(),
   };
 
-  const mockPortfoliosService = {
-    findAllByOwner: jest.fn(),
-  };
-
   const mockClaimsService = {
     findIssuedByDid: jest.fn(),
     findAssociatedByDid: jest.fn(),
@@ -51,7 +46,6 @@ describe('IdentitiesController', () => {
         AssetsService,
         SettlementsService,
         IdentitiesService,
-        PortfoliosService,
         AuthorizationsService,
         ClaimsService,
         mockPolymeshLoggerProvider,
@@ -63,8 +57,6 @@ describe('IdentitiesController', () => {
       .useValue(mockSettlementsService)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
-      .overrideProvider(PortfoliosService)
-      .useValue(mockPortfoliosService)
       .overrideProvider(AuthorizationsService)
       .useValue(mockAuthorizationsService)
       .overrideProvider(ClaimsService)
@@ -175,26 +167,6 @@ describe('IdentitiesController', () => {
       });
       const result = await controller.getIssuedAuthorizations({ did }, { size: 1 });
       expect(result).toEqual(mockRequestedAuthorizations);
-    });
-  });
-
-  describe('getPortfolios', () => {
-    it('should return list of all portfolios of an identity', async () => {
-      const did = '0x6'.padEnd(66, '0');
-      const mockPortfolio = new MockPortfolio();
-      mockPortfolio.getTokenBalances.mockResolvedValue([]);
-      mockPortfolio.getCustodian.mockResolvedValue({ did });
-      mockPortfolio.getName.mockResolvedValue('P-1');
-      mockPortfoliosService.findAllByOwner.mockResolvedValue([mockPortfolio]);
-
-      const mockDetails = {
-        id: new BigNumber(1),
-        name: 'P-1',
-        assetBalances: [],
-      };
-      const result = await controller.getPortfolios({ did });
-
-      expect(result).toEqual(new ResultsModel({ results: [mockDetails] }));
     });
   });
 
