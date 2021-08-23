@@ -17,7 +17,7 @@ export class TransferBreakdownModel {
   readonly general: TransferError[];
 
   @ApiProperty({
-    description: 'Compliance rules to which the Asset transfer adheres',
+    description: 'Compliance rules for the Asset, and whether the Asset transfer adheres to them',
   })
   @FromEntityObject()
   readonly compliance: Compliance;
