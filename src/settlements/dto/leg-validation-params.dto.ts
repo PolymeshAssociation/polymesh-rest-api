@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { IsOptional } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
 
 export class LegValidationParamsDto {
   @ApiProperty({
@@ -22,6 +22,7 @@ export class LegValidationParamsDto {
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
+  @IsDid()
   readonly fromDid: string;
 
   @ApiPropertyOptional({
@@ -40,6 +41,7 @@ export class LegValidationParamsDto {
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
+  @IsDid()
   readonly toDid: string;
 
   @ApiPropertyOptional({
