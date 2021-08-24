@@ -2,33 +2,26 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import {
-  DefaultPortfolio,
-  NumberedPortfolio,
-  SecurityToken,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 
 export class LegModel {
   @ApiProperty({
     description: 'Portfolio from which the transfer is to be made',
-    example: {
-      did: '0x0000000000000000000000000000000000000000000000000000000000000000',
-      id: '1',
-    },
+    type: PortfolioIdentifierModel,
   })
-  @FromEntity()
-  readonly from: DefaultPortfolio | NumberedPortfolio;
+  @Type(() => PortfolioIdentifierModel)
+  readonly from: PortfolioIdentifierModel;
 
   @ApiProperty({
     description: 'Portfolio to which the transfer is to be made',
-    example: {
-      did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-    },
+    type: PortfolioIdentifierModel,
   })
-  @FromEntity()
-  readonly to: DefaultPortfolio | NumberedPortfolio;
+  @Type(() => PortfolioIdentifierModel)
+  readonly to: PortfolioIdentifierModel;
 
   @ApiProperty({
     description: 'Amount to be transferred',

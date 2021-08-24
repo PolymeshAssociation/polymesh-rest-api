@@ -3,9 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
-  DefaultPortfolio,
   Identity,
-  NumberedPortfolio,
   StoBalanceStatus,
   StoSaleStatus,
   StoStatus,
@@ -16,6 +14,7 @@ import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 import { TierModel } from '~/offerings/models/tier.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 
 export class OfferingDetailsModel {
   @ApiProperty({
@@ -43,23 +42,17 @@ export class OfferingDetailsModel {
 
   @ApiProperty({
     description: 'Portfolio containing the Asset being offered',
-    example: {
-      did: '0x0000000000000000000000000000000000000000000000000000000000000000',
-      id: '1',
-    },
+    type: PortfolioIdentifierModel,
   })
-  @FromEntity()
-  readonly offeringPortfolio: NumberedPortfolio | DefaultPortfolio;
+  @Type(() => PortfolioIdentifierModel)
+  readonly offeringPortfolio: PortfolioIdentifierModel;
 
   @ApiProperty({
     description: 'Portfolio receiving the Asset being raised',
-    example: {
-      did: '0x0000000000000000000000000000000000000000000000000000000000000000',
-      id: '1',
-    },
+    type: PortfolioIdentifierModel,
   })
-  @FromEntity()
-  readonly raisingPortfolio: NumberedPortfolio | DefaultPortfolio;
+  @Type(() => PortfolioIdentifierModel)
+  readonly raisingPortfolio: PortfolioIdentifierModel;
 
   @ApiProperty({
     description: 'Currency denomination of the investment',

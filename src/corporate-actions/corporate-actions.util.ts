@@ -3,6 +3,7 @@
 import { DistributionWithDetails } from '@polymathnetwork/polymesh-sdk/types';
 
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
+import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 
 export function createDividendDistributionModel(
   distributionWithDetails: DistributionWithDetails
@@ -25,8 +26,9 @@ export function createDividendDistributionModel(
     },
     details,
   } = distributionWithDetails;
+
   return new DividendDistributionModel({
-    origin,
+    origin: createPortfolioIdentifierModel(origin),
     currency,
     perShare,
     maxAmount,

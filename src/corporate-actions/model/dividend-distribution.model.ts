@@ -2,21 +2,19 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { DefaultPortfolio, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/types';
+import { Type } from 'class-transformer';
 
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { FromBigNumber } from '~/common/decorators/transformation';
 import { CorporateActionModel } from '~/corporate-actions/model/corporate-action.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 
 export class DividendDistributionModel extends CorporateActionModel {
   @ApiProperty({
     description: 'Portfolio from which the Dividends are distributed',
-    example: {
-      did: '0x0000000000000000000000000000000000000000000000000000000000000000',
-      id: '1',
-    },
+    type: PortfolioIdentifierModel,
   })
-  @FromEntity()
-  readonly origin: DefaultPortfolio | NumberedPortfolio;
+  @Type(() => PortfolioIdentifierModel)
+  readonly origin: PortfolioIdentifierModel;
 
   @ApiProperty({
     description: 'Ticker of the currency in which Dividends are distributed',
@@ -46,6 +44,7 @@ export class DividendDistributionModel extends CorporateActionModel {
       'Date after which Dividends can no longer be paid/reclaimed. A null value means the Distribution never expires',
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
+    nullable: true,
   })
   readonly expiryDate: null | Date;
 

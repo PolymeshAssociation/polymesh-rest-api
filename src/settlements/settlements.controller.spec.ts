@@ -12,10 +12,10 @@ import {
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { IdentitiesService } from '~/identities/identities.service';
+import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-
-import { MockInstructionClass } from './../test-utils/mocks';
+import { MockInstructionClass } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -97,8 +97,10 @@ describe('SettlementsController', () => {
         ...mockInstructionDetails,
         legs:
           mockLegs.data.map(({ from, to, amount, token: asset }) => ({
-            from,
-            to,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            from: createPortfolioIdentifierModel(from as any),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            to: createPortfolioIdentifierModel(to as any),
             amount,
             asset,
           })) || [],

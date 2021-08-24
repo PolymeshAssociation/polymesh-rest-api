@@ -55,10 +55,14 @@ describe('OfferingsController', () => {
             },
             name: 'SERIES A',
             offeringPortfolio: {
-              did: 'Ox6'.padEnd(66, '0'),
+              owner: {
+                did: 'Ox6'.padEnd(66, '0'),
+              },
             },
             raisingPortfolio: {
-              did: 'Ox6'.padEnd(66, '0'),
+              owner: {
+                did: 'Ox6'.padEnd(66, '0'),
+              },
             },
             raisingCurrency: 'CURRENCY',
             venue: {

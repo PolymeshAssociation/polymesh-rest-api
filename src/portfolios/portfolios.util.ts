@@ -8,6 +8,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 
 export async function createPortfolioModel(
@@ -53,4 +54,20 @@ export async function createPortfolioModel(
     portfolioModelParams = { ...portfolioModelParams, custodian };
   }
   return new PortfolioModel(portfolioModelParams);
+}
+
+export function createPortfolioIdentifierModel(
+  portfolio: DefaultPortfolio | NumberedPortfolio
+): PortfolioIdentifierModel {
+  let portfolioIdentifierModelParams: ConstructorParameters<typeof PortfolioIdentifierModel>[0] = {
+    did: portfolio.owner.did,
+  };
+
+  // TODO @monitz87: replace with typeguard when they are implemented in the SDK
+  if ((<NumberedPortfolio>portfolio).getName) {
+    const { id } = <NumberedPortfolio>portfolio;
+    portfolioIdentifierModelParams = { ...portfolioIdentifierModelParams, id };
+  }
+
+  return new PortfolioIdentifierModel(portfolioIdentifierModelParams);
 }

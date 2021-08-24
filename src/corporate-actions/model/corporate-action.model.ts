@@ -2,11 +2,13 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Type } from 'class-transformer';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
-import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
+import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
+import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
 
-export class CorporateActionModel extends CorporateActionDefaultsModel {
+export class CorporateActionModel {
   @ApiProperty({
     description: 'ID of the Corporate Action',
     type: 'string',
@@ -36,10 +38,33 @@ export class CorporateActionModel extends CorporateActionDefaultsModel {
   })
   readonly description: string;
 
-  constructor(model: CorporateActionModel) {
-    const { targets, defaultTaxWithholding, taxWithholdings, ...rest } = model;
-    super({ targets, defaultTaxWithholding, taxWithholdings });
+  @ApiProperty({
+    description:
+      'Default value for Identities that will be affected by all future Corporate Actions',
+    type: CorporateActionTargetsModel,
+  })
+  @Type(() => CorporateActionTargetsModel)
+  readonly targets: CorporateActionTargetsModel;
 
-    Object.assign(this, rest);
+  @ApiProperty({
+    description:
+      "Tax withholding percentage that applies to Identities that don't have a specific percentage assigned to them",
+    type: 'string',
+    example: '0.0005',
+  })
+  @FromBigNumber()
+  readonly defaultTaxWithholding: BigNumber;
+
+  @ApiProperty({
+    description:
+      'List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`',
+    type: TaxWithholdingModel,
+    isArray: true,
+  })
+  @Type(() => TaxWithholdingModel)
+  readonly taxWithholdings: TaxWithholdingModel[];
+
+  constructor(model: CorporateActionModel) {
+    Object.assign(this, model);
   }
 }

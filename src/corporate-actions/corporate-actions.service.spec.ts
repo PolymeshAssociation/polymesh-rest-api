@@ -71,7 +71,9 @@ describe('CorporateActionsService', () => {
         {
           distribution: {
             origin: {
-              did: 'Ox6'.padEnd(66, '0'),
+              owner: {
+                did: 'Ox6'.padEnd(66, '0'),
+              },
             },
             currency: 'TOKEN2',
             perShare: new BigNumber('0.1'),

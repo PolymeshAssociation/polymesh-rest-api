@@ -4,6 +4,7 @@ import {
   InstructionType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { LegModel } from '~/settlements/model/leg.model';
 
@@ -23,7 +24,13 @@ export async function createInstructionModel(instruction: Instruction): Promise<
     type,
     legs:
       legsResultSet.data?.map(
-        ({ from, to, amount, token: asset }) => new LegModel({ from, to, amount, asset })
+        ({ from, to, amount, token: asset }) =>
+          new LegModel({
+            from: createPortfolioIdentifierModel(from),
+            to: createPortfolioIdentifierModel(to),
+            amount,
+            asset,
+          })
       ) || [],
   };
 
