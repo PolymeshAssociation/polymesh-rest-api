@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prepare": "husky install",
     "postinstall": "rimraf node_modules/@polymathnetwork/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto}",
     "prebuild": "rimraf dist",
     "build": "nest build",
