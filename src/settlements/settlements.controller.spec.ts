@@ -7,6 +7,7 @@ import {
   AffirmationStatus,
   InstructionStatus,
   InstructionType,
+  TransferError,
   VenueType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -31,6 +32,7 @@ describe('SettlementsController', () => {
     findVenueDetails: jest.fn(),
     findAffirmations: jest.fn(),
     modifyVenue: jest.fn(),
+    canTransfer: jest.fn(),
   };
   const mockIdentitiesService = {};
 
@@ -205,6 +207,33 @@ describe('SettlementsController', () => {
       expect(result).toEqual({
         transactions,
       });
+    });
+  });
+
+  describe('validateLeg', () => {
+    it('should call the service and return the Leg validations', async () => {
+      const mockTransferBreakdown = {
+        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+        compliance: {
+          requirements: [],
+          complies: false,
+        },
+        restrictions: [],
+        result: false,
+      };
+
+      mockSettlementsService.canTransfer.mockResolvedValue(mockTransferBreakdown);
+
+      const result = await controller.validateLeg({
+        fromDid: 'fromDid',
+        fromPortfolio: new BigNumber('1'),
+        toDid: 'toDid',
+        toPortfolio: new BigNumber('1'),
+        asset: 'TICKER',
+        amount: new BigNumber('123'),
+      });
+
+      expect(result).toEqual(mockTransferBreakdown);
     });
   });
 });

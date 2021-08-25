@@ -4,11 +4,14 @@ import {
   Instruction,
   InstructionAffirmation,
   isPolymeshError,
+  PortfolioLike,
   ResultSet,
+  TransferBreakdown,
   Venue,
   VenueDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetsService } from '~/assets/assets.service';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
@@ -23,7 +26,8 @@ export class SettlementsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly relayerAccountsService: RelayerAccountsService,
+    private readonly assetsService: AssetsService
   ) {}
 
   public async findPendingInstructionsByDid(did: string): Promise<Instruction[]> {
@@ -139,5 +143,15 @@ export class SettlementsService {
     const params = rest as Required<typeof rest>;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(venue.modify, params, { signer: address });
+  }
+
+  public async canTransfer(
+    from: PortfolioLike,
+    to: PortfolioLike,
+    ticker: string,
+    amount: BigNumber
+  ): Promise<TransferBreakdown> {
+    const assetDetails = await this.assetsService.findOne(ticker);
+    return assetDetails.settlements.canTransfer({ from, to, amount });
   }
 }
