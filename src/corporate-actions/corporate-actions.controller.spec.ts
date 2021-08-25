@@ -5,6 +5,7 @@ import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
+import { MockIdentityClass, MockPortfolio } from '~/test-utils/mocks';
 
 import { CorporateActionsController } from './corporate-actions.controller';
 
@@ -73,11 +74,7 @@ describe('CorporateActionsController', () => {
       const mockDistributions = [
         {
           distribution: {
-            origin: {
-              owner: {
-                did: 'Ox6'.padEnd(66, '0'),
-              },
-            },
+            origin: new MockPortfolio(),
             currency: 'TOKEN2',
             perShare: new BigNumber('0.1'),
             maxAmount: new BigNumber('2100.1'),
@@ -89,7 +86,7 @@ describe('CorporateActionsController', () => {
             defaultTaxWithholding: new BigNumber('0'),
             taxWithholdings: [],
             targets: {
-              identities: ['Ox6'.padEnd(66, '0')],
+              identities: [new MockIdentityClass()],
               treatment: TargetTreatment.Exclude,
             },
             description: 'Mock description',

@@ -100,6 +100,7 @@ export class MockPortfolio {
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
   public moveFunds = jest.fn();
+  public toJson = jest.fn();
 }
 
 export class MockIdentityAuthorization {

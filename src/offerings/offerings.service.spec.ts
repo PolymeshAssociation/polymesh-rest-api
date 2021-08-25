@@ -9,7 +9,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { OfferingsService } from '~/offerings/offerings.service';
-import { MockSecurityTokenClass } from '~/test-utils/mocks';
+import { MockPortfolio, MockSecurityTokenClass } from '~/test-utils/mocks';
 
 describe('OfferingsService', () => {
   let service: OfferingsService;
@@ -51,16 +51,8 @@ describe('OfferingsService', () => {
               did: 'Ox6'.padEnd(66, '0'),
             },
             name: 'SERIES A',
-            offeringPortfolio: {
-              owner: {
-                did: 'Ox6'.padEnd(66, '0'),
-              },
-            },
-            raisingPortfolio: {
-              owner: {
-                did: 'Ox6'.padEnd(66, '0'),
-              },
-            },
+            offeringPortfolio: new MockPortfolio(),
+            raisingPortfolio: new MockPortfolio(),
             raisingCurrency: 'CURRENCY',
             venue: {
               id: new BigNumber('1'),

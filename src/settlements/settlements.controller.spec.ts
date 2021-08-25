@@ -16,7 +16,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockInstructionClass } from '~/test-utils/mocks';
+import { MockInstructionClass, MockPortfolio } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -71,16 +71,8 @@ describe('SettlementsController', () => {
       const mockLegs = {
         data: [
           {
-            from: {
-              owner: {
-                did: '0x6'.padEnd(66, '0'),
-              },
-            },
-            to: {
-              owner: {
-                did: '0x6'.padEnd(66, '1'),
-              },
-            },
+            from: new MockPortfolio(),
+            to: new MockPortfolio(),
             amount: new BigNumber('100'),
             token: {
               ticker: 'TICKER',
