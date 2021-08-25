@@ -3,7 +3,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
-import { ToBigNumber } from '~/common/decorators/transformation';
+import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class PortfolioIdentifierModel {
   @ApiProperty({
@@ -18,7 +18,7 @@ export class PortfolioIdentifierModel {
     type: 'string',
     example: '123',
   })
-  @ToBigNumber()
+  @FromBigNumber()
   readonly id?: BigNumber;
 
   constructor(model: PortfolioIdentifierModel) {

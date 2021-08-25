@@ -59,15 +59,6 @@ export async function createPortfolioModel(
 export function createPortfolioIdentifierModel(
   portfolio: DefaultPortfolio | NumberedPortfolio
 ): PortfolioIdentifierModel {
-  let portfolioIdentifierModelParams: ConstructorParameters<typeof PortfolioIdentifierModel>[0] = {
-    did: portfolio.owner.did,
-  };
-
-  // TODO @monitz87: replace with typeguard when they are implemented in the SDK
-  if ((<NumberedPortfolio>portfolio).getName) {
-    const { id } = <NumberedPortfolio>portfolio;
-    portfolioIdentifierModelParams = { ...portfolioIdentifierModelParams, id };
-  }
-
-  return new PortfolioIdentifierModel(portfolioIdentifierModelParams);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new PortfolioIdentifierModel(portfolio.toJson() as any);
 }

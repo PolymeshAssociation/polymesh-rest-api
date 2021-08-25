@@ -39,8 +39,7 @@ export class CorporateActionModel {
   readonly description: string;
 
   @ApiProperty({
-    description:
-      'Default value for Identities that will be affected by all future Corporate Actions',
+    description: 'Identities that will be affected by this Corporate Action',
     type: CorporateActionTargetsModel,
   })
   @Type(() => CorporateActionTargetsModel)
@@ -50,7 +49,7 @@ export class CorporateActionModel {
     description:
       "Tax withholding percentage that applies to Identities that don't have a specific percentage assigned to them",
     type: 'string',
-    example: '0.0005',
+    example: '25',
   })
   @FromBigNumber()
   readonly defaultTaxWithholding: BigNumber;
