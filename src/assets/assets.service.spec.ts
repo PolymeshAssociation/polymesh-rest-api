@@ -20,11 +20,11 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
-  MockPolymeshClass,
+  MockPolymesh,
   MockRelayerAccountsService,
-  MockSecurityTokenClass,
+  MockSecurityToken,
   MockTickerReservation,
-  MockTransactionQueueClass,
+  MockTransactionQueue,
 } from '~/test-utils/mocks';
 
 import { AssetsService } from './assets.service';
@@ -37,11 +37,11 @@ jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
 describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
-  let mockPolymeshApi: MockPolymeshClass;
+  let mockPolymeshApi: MockPolymesh;
   let mockRelayerAccountsService: MockRelayerAccountsService;
 
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
+    mockPolymeshApi = new MockPolymesh();
     mockRelayerAccountsService = new MockRelayerAccountsService();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule, RelayerAccountsModule],
@@ -124,7 +124,7 @@ describe('AssetsService', () => {
     });
     describe('otherwise', () => {
       it('should return the Asset', async () => {
-        const mockSecurityToken = new MockSecurityTokenClass();
+        const mockSecurityToken = new MockSecurityToken();
 
         mockPolymeshApi.getSecurityToken.mockReturnValue(mockSecurityToken);
 
@@ -178,7 +178,7 @@ describe('AssetsService', () => {
     };
 
     it('should return the list of Asset holders', async () => {
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -191,7 +191,7 @@ describe('AssetsService', () => {
     });
 
     it('should return the list of Asset holders from a start value', async () => {
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -218,7 +218,7 @@ describe('AssetsService', () => {
     };
 
     it('should return the list of Asset documents', async () => {
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -231,7 +231,7 @@ describe('AssetsService', () => {
     });
 
     it('should return the list of Asset documents from a start value', async () => {
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -266,7 +266,7 @@ describe('AssetsService', () => {
         },
       ];
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -289,7 +289,7 @@ describe('AssetsService', () => {
         },
       ];
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -413,7 +413,7 @@ describe('AssetsService', () => {
             tag: TxTags.asset.CreateAsset,
           },
         ];
-        const mockQueue = new MockTransactionQueueClass(transactions);
+        const mockQueue = new MockTransactionQueue(transactions);
         mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
         const body = {
@@ -470,7 +470,7 @@ describe('AssetsService', () => {
           tag: TxTags.asset.CreateAsset,
         },
       ];
-      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockQueue = new MockTransactionQueue(transactions);
       mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
       const body = {
@@ -520,7 +520,7 @@ describe('AssetsService', () => {
       ];
       const findSpy = jest.spyOn(service, 'findOne');
 
-      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockQueue = new MockTransactionQueue(transactions);
       const mockAsset = {
         issuance: { issue: jest.fn().mockResolvedValue(mockQueue) },
       };
@@ -555,7 +555,7 @@ describe('AssetsService', () => {
           },
         ];
 
-        const mockQueue = new MockTransactionQueueClass(transactions);
+        const mockQueue = new MockTransactionQueue(transactions);
         mockPolymeshApi.reserveTicker.mockResolvedValue(mockQueue);
 
         const body = {

@@ -47,7 +47,7 @@ export class CorporateActionModel {
 
   @ApiProperty({
     description:
-      "Tax withholding percentage that applies to Identities that don't have a specific percentage assigned to them",
+      "Tax withholding percentage(0-100) that applies to Identities that don't have a specific percentage assigned to them",
     type: 'string',
     example: '25',
   })

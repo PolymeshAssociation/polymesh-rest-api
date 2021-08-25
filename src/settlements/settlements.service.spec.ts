@@ -21,13 +21,13 @@ import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
-  MockIdentityClass,
-  MockInstructionClass,
-  MockPolymeshClass,
+  MockIdentity,
+  MockInstruction,
+  MockPolymesh,
   MockRelayerAccountsService,
-  MockSecurityTokenClass,
-  MockTransactionQueueClass,
-  MockVenueClass,
+  MockSecurityToken,
+  MockTransactionQueue,
+  MockVenue,
 } from '~/test-utils/mocks';
 
 import { SettlementsService } from './settlements.service';
@@ -40,7 +40,7 @@ jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
 describe('SettlementsService', () => {
   let service: SettlementsService;
   let polymeshService: PolymeshService;
-  let mockPolymeshApi: MockPolymeshClass;
+  let mockPolymeshApi: MockPolymesh;
   const mockIdentitiesService = {
     findOne: jest.fn(),
   };
@@ -50,7 +50,7 @@ describe('SettlementsService', () => {
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
+    mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [IdentitiesModule, PolymeshModule, RelayerAccountsModule],
       providers: [SettlementsService, AssetsService],
@@ -84,7 +84,7 @@ describe('SettlementsService', () => {
 
   describe('findPendingInstructionsByDid', () => {
     it('should return a list of pending instructions', async () => {
-      const mockIdentity = new MockIdentityClass();
+      const mockIdentity = new MockIdentity();
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
 
       const mockInstructions = [
@@ -152,7 +152,7 @@ describe('SettlementsService', () => {
     });
     describe('otherwise', () => {
       it('should return the Instruction entity', async () => {
-        const mockInstruction = new MockInstructionClass();
+        const mockInstruction = new MockInstruction();
         mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
         const result = await service.findInstruction(new BigNumber('123'));
         expect(result).toEqual(mockInstruction);
@@ -211,7 +211,7 @@ describe('SettlementsService', () => {
     });
     describe('otherwise', () => {
       it('should return the Venue entity', async () => {
-        const mockVenue = new MockVenueClass();
+        const mockVenue = new MockVenue();
         mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
         const result = await service.findVenue(new BigNumber('123'));
         expect(result).toEqual(mockVenue);
@@ -221,7 +221,7 @@ describe('SettlementsService', () => {
 
   describe('createInstruction', () => {
     it('should run an addInstruction procedure and return the queue data', async () => {
-      const mockVenue = new MockVenueClass();
+      const mockVenue = new MockVenue();
 
       const transactions = [
         {
@@ -230,7 +230,7 @@ describe('SettlementsService', () => {
           tag: TxTags.settlement.AddInstruction,
         },
       ];
-      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockQueue = new MockTransactionQueue(transactions);
       const mockInstruction = 'instruction';
       mockQueue.run.mockResolvedValue(mockInstruction);
       mockVenue.addInstruction.mockResolvedValue(mockQueue);
@@ -284,7 +284,7 @@ describe('SettlementsService', () => {
           type: VenueType.Exchange,
           description: 'A generic exchange',
         };
-        const mockVenue = new MockVenueClass();
+        const mockVenue = new MockVenue();
         mockVenue.modify.mockImplementation(() => {
           throw expectedError;
         });
@@ -306,7 +306,7 @@ describe('SettlementsService', () => {
     });
     describe('otherwise', () => {
       it('should run a modify procedure and return the queue data', async () => {
-        const mockVenue = new MockVenueClass();
+        const mockVenue = new MockVenue();
 
         const findVenueSpy = jest.spyOn(service, 'findVenue');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -319,7 +319,7 @@ describe('SettlementsService', () => {
             tag: TxTags.settlement.UpdateVenue,
           },
         ];
-        const mockQueue = new MockTransactionQueueClass(transactions);
+        const mockQueue = new MockTransactionQueue(transactions);
         mockVenue.modify.mockResolvedValue(mockQueue);
 
         const body = {
@@ -353,7 +353,7 @@ describe('SettlementsService', () => {
 
   describe('affirmInstruction', () => {
     it('should run an affirm procedure and return the queue data', async () => {
-      const mockInstruction = new MockInstructionClass();
+      const mockInstruction = new MockInstruction();
       const transactions = [
         {
           blockHash: '0x1',
@@ -361,7 +361,7 @@ describe('SettlementsService', () => {
           tag: TxTags.settlement.AffirmInstruction,
         },
       ];
-      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockQueue = new MockTransactionQueue(transactions);
       mockInstruction.affirm.mockResolvedValue(mockQueue);
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
@@ -401,7 +401,7 @@ describe('SettlementsService', () => {
         description: 'Venue desc',
         type: VenueType.Distribution,
       };
-      const mockVenue = new MockVenueClass();
+      const mockVenue = new MockVenue();
       mockVenue.details.mockResolvedValue(mockDetails);
 
       const findVenueSpy = jest.spyOn(service, 'findVenue');
@@ -429,7 +429,7 @@ describe('SettlementsService', () => {
         next: null,
       };
 
-      const mockInstruction = new MockInstructionClass();
+      const mockInstruction = new MockInstruction();
       mockInstruction.getAffirmations.mockResolvedValue(mockAffirmations);
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
@@ -455,7 +455,7 @@ describe('SettlementsService', () => {
         result: false,
       };
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);

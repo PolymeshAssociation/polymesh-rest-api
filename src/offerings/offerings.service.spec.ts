@@ -9,7 +9,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { OfferingsService } from '~/offerings/offerings.service';
-import { MockPortfolio, MockSecurityTokenClass } from '~/test-utils/mocks';
+import { MockPortfolio, MockSecurityToken } from '~/test-utils/mocks';
 
 describe('OfferingsService', () => {
   let service: OfferingsService;
@@ -71,7 +71,7 @@ describe('OfferingsService', () => {
         },
       ];
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.offerings.get.mockResolvedValue(mockOfferings);
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 

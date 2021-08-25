@@ -10,7 +10,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentityClass } from '~/test-utils/mocks';
+import { MockIdentity } from '~/test-utils/mocks';
 
 import { IdentitiesController } from './identities.controller';
 
@@ -103,7 +103,7 @@ describe('IdentitiesController', () => {
         secondaryKeys: [],
       });
 
-      const mockIdentity = new MockIdentityClass();
+      const mockIdentity = new MockIdentity();
       mockIdentity.did = did;
       mockIdentity.getPrimaryKey.mockResolvedValue(
         '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e'

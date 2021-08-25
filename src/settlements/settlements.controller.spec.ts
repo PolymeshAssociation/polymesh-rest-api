@@ -16,7 +16,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockInstructionClass, MockPortfolio } from '~/test-utils/mocks';
+import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -58,7 +58,7 @@ describe('SettlementsController', () => {
     it('should return the Instruction details', async () => {
       const date = new Date();
 
-      const mockInstruction = new MockInstructionClass();
+      const mockInstruction = new MockInstruction();
       const mockInstructionDetails = {
         venue: {
           id: new BigNumber('123'),

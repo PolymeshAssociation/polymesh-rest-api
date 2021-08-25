@@ -8,6 +8,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
+import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { MockPortfolio } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
@@ -47,11 +48,9 @@ describe('PortfoliosController', () => {
       mockPortfolio.getName.mockResolvedValue('P-1');
       mockPortfoliosService.findAllByOwner.mockResolvedValue([mockPortfolio]);
 
-      const mockDetails = {
-        id: new BigNumber(1),
-        name: 'P-1',
-        assetBalances: [],
-      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockDetails = await createPortfolioModel(mockPortfolio as any, did);
+
       const result = await controller.getPortfolios({ did });
 
       expect(result).toEqual(new ResultsModel({ results: [mockDetails] }));

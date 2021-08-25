@@ -12,7 +12,7 @@ import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { MockSecurityTokenClass } from '~/test-utils/mocks';
+import { MockSecurityToken } from '~/test-utils/mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;
@@ -61,7 +61,7 @@ describe('AssetsController', () => {
           value: 'US000000000',
         },
       ];
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.details.mockResolvedValue(mockTokenDetails);
       mockSecurityToken.getIdentifiers.mockResolvedValue(mockIdentifiers);
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);

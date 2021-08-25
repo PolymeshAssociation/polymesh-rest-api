@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { MockIdentityClass, MockPortfolio, MockSecurityTokenClass } from '~/test-utils/mocks';
+import {
+  MockCorporateActionDefaults,
+  MockDistributionWithDetails,
+  MockSecurityToken,
+} from '~/test-utils/mocks';
 
 describe('CorporateActionsService', () => {
   let service: CorporateActionsService;
@@ -30,30 +32,9 @@ describe('CorporateActionsService', () => {
 
   describe('findDefaultsByTicker', () => {
     it('should return the Corporate Action defaults for an Asset', async () => {
-      const mockCorporateActionDefaults = {
-        targets: {
-          treatment: TargetTreatment.Include,
-          identities: [
-            {
-              did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-            },
-            {
-              did: '0x0611111111111111111111111111111111111111111111111111111111111111',
-            },
-          ],
-        },
-        defaultTaxWithholding: new BigNumber('0.0005'),
-        taxWithholdings: [
-          {
-            identity: {
-              did: '0x0611111111111111111111111111111111111111111111111111111111111111',
-            },
-            percentage: new BigNumber('0.0001'),
-          },
-        ],
-      };
+      const mockCorporateActionDefaults = new MockCorporateActionDefaults();
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.corporateActions.getDefaults.mockResolvedValue(mockCorporateActionDefaults);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
@@ -66,34 +47,9 @@ describe('CorporateActionsService', () => {
 
   describe('findDistributionsByTicker', () => {
     it('should return the Dividend Distributions associated with an Asset', async () => {
-      const mockDistributions = [
-        {
-          distribution: {
-            origin: new MockPortfolio(),
-            currency: 'TOKEN2',
-            perShare: new BigNumber('0.1'),
-            maxAmount: new BigNumber('2100.1'),
-            expiryDate: null,
-            paymentDate: new Date(),
-            ticker: 'TOKEN4',
-            id: new BigNumber('1'),
-            declarationDate: new Date(),
-            defaultTaxWithholding: new BigNumber('0'),
-            taxWithholdings: [],
-            targets: {
-              identities: [new MockIdentityClass()],
-              treatment: TargetTreatment.Exclude,
-            },
-            description: 'uuuu',
-          },
-          details: {
-            remainingFunds: new BigNumber('2100.1'),
-            fundsReclaimed: false,
-          },
-        },
-      ];
+      const mockDistributions = [new MockDistributionWithDetails()];
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.corporateActions.distributions.get.mockResolvedValue(mockDistributions);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);

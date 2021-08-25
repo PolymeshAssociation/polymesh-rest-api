@@ -4,17 +4,17 @@ import { ClaimData, ClaimType, ResultSet } from '@polymathnetwork/polymesh-sdk/t
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymeshClass } from '~/test-utils/mocks';
+import { MockPolymesh } from '~/test-utils/mocks';
 
 import { ClaimsService } from './claims.service';
 
 describe('ClaimsService', () => {
   let claimsService: ClaimsService;
-  let mockPolymeshApi: MockPolymeshClass;
+  let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
 
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
+    mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
       providers: [ClaimsService],

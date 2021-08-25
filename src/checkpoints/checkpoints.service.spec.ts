@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
-import { MockSecurityTokenClass } from '~/test-utils/mocks';
+import { MockSecurityToken } from '~/test-utils/mocks';
 
 import { AssetsService } from './../assets/assets.service';
 import { CheckpointsService } from './checkpoints.service';
@@ -44,7 +44,7 @@ describe('CheckpointsService', () => {
       count: 2,
     };
     it('should return the list of Checkpoints created on an Asset', async () => {
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.checkpoints.get.mockResolvedValue(mockCheckpoints);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
@@ -55,7 +55,7 @@ describe('CheckpointsService', () => {
     });
 
     it('should return the list of Checkpoints created on an Asset from start key', async () => {
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.checkpoints.get.mockResolvedValue(mockCheckpoints);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
@@ -87,7 +87,7 @@ describe('CheckpointsService', () => {
         },
       ];
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
