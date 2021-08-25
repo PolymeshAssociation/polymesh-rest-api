@@ -12,7 +12,7 @@ export class ConditionGroupDto {
   @ApiProperty({
     isArray: true,
     description:
-      'An array of conditions Asset transfers. Transfers that meet the requirement of at least one `conditionSet` will be allowed',
+      'List of conditions for Asset transfers. Transfers that meet the requirement of at least one `conditionSet` will be allowed',
     type: ConditionDto,
   })
   @Type(() => ConditionDto)

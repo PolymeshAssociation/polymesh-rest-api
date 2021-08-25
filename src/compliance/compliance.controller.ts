@@ -13,15 +13,15 @@ export class ComplianceController {
 
   @ApiTags('assets')
   @ApiOperation({
-    summary: 'Sets compliance rules for an Asset',
+    summary: 'Set Compliance rules for an Asset',
     description:
-      'This endpoint sets compliance rules for an Asset. This method will replace the current rules',
+      'This endpoint sets Compliance rules for an Asset. This method will replace the current rules',
   })
   @ApiCreatedResponse({
     description: 'Details of the transaction',
     type: TransactionQueueModel,
   })
-  @Put('/')
+  @Put()
   public async setRules(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: SetRulesDto

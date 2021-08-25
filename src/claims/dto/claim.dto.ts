@@ -17,6 +17,7 @@ export class ClaimDto {
   @ApiProperty({
     description: 'The type of Claim. Note that different types require different fields',
     enum: ClaimType,
+    example: ClaimType.Accredited,
   })
   @IsEnum(ClaimType)
   type: ClaimType;

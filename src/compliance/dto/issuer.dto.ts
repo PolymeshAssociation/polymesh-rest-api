@@ -12,7 +12,7 @@ export class IssuerDto {
   identity: string;
 
   @ApiPropertyOptional({
-    description: 'What Claim types this issuer is trusted for. Defaults to all types',
+    description: 'List of Claim types for which an issuer is trusted. Defaults to all types',
     enum: ClaimType,
     isArray: true,
   })

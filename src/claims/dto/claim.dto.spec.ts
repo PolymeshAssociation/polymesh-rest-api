@@ -3,16 +3,15 @@ import { ClaimType, CountryCode, ScopeType } from '@polymathnetwork/polymesh-sdk
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 
-const scope = {
-  type: ScopeType.Identity,
-  value: '0x0600000000000000000000000000000000000000000000000000000000000000',
-};
-
 // message, input, expected
 type ValidCase = [string, Record<string, unknown>];
 type InvalidCase = [string, Record<string, unknown>, string[]];
 
 describe('claimsDto', () => {
+  const scope = {
+    type: ScopeType.Identity,
+    value: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  };
   const target: ValidationPipe = new ValidationPipe({ transform: true });
   const metadata: ArgumentMetadata = {
     type: 'body',
