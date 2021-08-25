@@ -1,5 +1,12 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
@@ -176,8 +183,12 @@ export class SettlementsController {
 
   @ApiTags('venues')
   @ApiOperation({
-    summary: 'Creates a Venue',
+    summary: 'Create a Venue',
     description: 'This endpoint creates a new Venue',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
   })
   @Post('/venues')
   public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<TransactionQueueModel> {

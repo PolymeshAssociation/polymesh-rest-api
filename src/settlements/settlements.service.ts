@@ -136,10 +136,10 @@ export class SettlementsService {
   }
 
   public async createVenue(createVenueDto: CreateVenueDto): Promise<QueueResult<Venue>> {
-    const { signer, ...rest } = createVenueDto;
+    const { signer, details, type } = createVenueDto;
     const params = {
-      details: rest.description,
-      type: rest.type,
+      details,
+      type,
     };
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const identity = await this.identitiesService.findOne(signer);

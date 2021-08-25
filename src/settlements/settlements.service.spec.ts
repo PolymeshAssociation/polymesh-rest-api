@@ -292,7 +292,7 @@ describe('SettlementsService', () => {
 
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        description: 'A generic exchange',
+        details: 'A generic exchange',
         type: VenueType.Exchange,
       };
       const address = 'address';
@@ -311,7 +311,7 @@ describe('SettlementsService', () => {
         ],
       });
       expect(mockIdentity.createVenue).toHaveBeenCalledWith(
-        { details: body.description, type: body.type },
+        { details: body.details, type: body.type },
         { signer: address }
       );
     });

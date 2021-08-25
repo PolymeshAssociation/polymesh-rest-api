@@ -191,7 +191,7 @@ describe('SettlementsController', () => {
     it('should create a Venue and return the data returned by the service', async () => {
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        description: 'Generic Exchange',
+        details: 'Generic Exchange',
         type: VenueType.Exchange,
       };
       const transactions = ['transaction'];
