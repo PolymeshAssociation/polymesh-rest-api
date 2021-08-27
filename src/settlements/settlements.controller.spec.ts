@@ -7,6 +7,7 @@ import {
   AffirmationStatus,
   InstructionStatus,
   InstructionType,
+  TransferError,
   VenueType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -14,8 +15,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { IdentitiesService } from '~/identities/identities.service';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-
-import { MockInstructionClass } from './../test-utils/mocks';
+import { MockInstructionClass } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -31,6 +31,7 @@ describe('SettlementsController', () => {
     findVenueDetails: jest.fn(),
     findAffirmations: jest.fn(),
     modifyVenue: jest.fn(),
+    canTransfer: jest.fn(),
   };
   const mockIdentitiesService = {};
 
@@ -203,6 +204,33 @@ describe('SettlementsController', () => {
       expect(result).toEqual({
         transactions,
       });
+    });
+  });
+
+  describe('validateLeg', () => {
+    it('should call the service and return the Leg validations', async () => {
+      const mockTransferBreakdown = {
+        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+        compliance: {
+          requirements: [],
+          complies: false,
+        },
+        restrictions: [],
+        result: false,
+      };
+
+      mockSettlementsService.canTransfer.mockResolvedValue(mockTransferBreakdown);
+
+      const result = await controller.validateLeg({
+        fromDid: 'fromDid',
+        fromPortfolio: new BigNumber('1'),
+        toDid: 'toDid',
+        toPortfolio: new BigNumber('1'),
+        asset: 'TICKER',
+        amount: new BigNumber('123'),
+      });
+
+      expect(result).toEqual(mockTransferBreakdown);
     });
   });
 });
