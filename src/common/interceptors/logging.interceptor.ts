@@ -26,18 +26,17 @@ export class LoggingInterceptor implements NestInterceptor {
     const req: Request = context.switchToHttp().getRequest();
     const { method, url, body } = req;
 
-    const ctx = `${this.ctxPrefix} - ${method} - ${url}`;
-
-    const message = `Incoming request - ${method} - ${url}`;
+    const message = `Request: ${method} ${url}`;
 
     // TODO @prashantasdeveloper Log header values once API authentication is in place
     this.logger.log(
       {
         message,
         method,
+        url,
         body,
       },
-      ctx
+      this.getLogContext(method, url)
     );
 
     return next.handle().pipe(
@@ -54,42 +53,41 @@ export class LoggingInterceptor implements NestInterceptor {
 
   /**
    * Logs the request response in success cases
+   *
    * @param context details about the current request
    */
   private logNext(context: ExecutionContext): void {
-    const req = context.switchToHttp().getRequest();
-    const res = context.switchToHttp().getResponse();
-    const { method, url } = req;
-    const { statusCode } = res;
+    const { method, url } = context.switchToHttp().getRequest();
+    const { statusCode } = context.switchToHttp().getResponse();
 
-    const ctx = `${this.ctxPrefix} - ${method} - ${url}`;
+    const ctx = this.getLogContext(method, url);
+    const message = `Response ${statusCode}`;
 
-    const message = `Response - ${statusCode}`;
-
-    this.logger.log({ message }, ctx);
+    this.logger.log({ message, method, url }, ctx);
   }
 
   /**
    * Logs the request response in success cases
+   *
    * @param error Error object
    * @param context details about the current request
    */
   private logError(error: Error, context: ExecutionContext): void {
-    const req = context.switchToHttp().getRequest();
-    const { method, url, body } = req;
+    const { method, url, body } = context.switchToHttp().getRequest();
+    const ctx = this.getLogContext(method, url);
 
     if (error instanceof HttpException) {
       const statusCode = error.getStatus();
-      const ctx = `${this.ctxPrefix} - ${method} - ${url}`;
-      const message = `Response - ${statusCode}`;
+      const message = `Response: ${statusCode}`;
 
       if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
         this.logger.error(
           {
+            message,
             method,
             url,
             body,
-            message,
+            statusCode,
             error,
           },
           error.stack,
@@ -98,11 +96,12 @@ export class LoggingInterceptor implements NestInterceptor {
       } else {
         this.logger.warn(
           {
+            message,
             method,
             url,
-            error,
             body,
-            message,
+            statusCode,
+            error,
           },
           ctx
         );
@@ -113,8 +112,19 @@ export class LoggingInterceptor implements NestInterceptor {
           message: 'Error occurred',
         },
         error.stack,
-        `${this.ctxPrefix} - ${method} - ${url}`
+        ctx
       );
     }
+  }
+
+  /**
+   * Get log context to be appended in logs
+   *
+   * @param method Method of the request
+   * @param url Request url
+   * @returns Formatted context template
+   */
+  getLogContext(method: string, url: string) {
+    return `${this.ctxPrefix} ${method} ${url}`;
   }
 }
