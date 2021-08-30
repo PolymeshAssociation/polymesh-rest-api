@@ -61,7 +61,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const { statusCode } = context.switchToHttp().getResponse();
 
     const ctx = this.getLogContext(method, url);
-    const message = `Response ${statusCode}`;
+    const message = `Response: ${statusCode}`;
 
     this.logger.log({ message, method, url }, ctx);
   }
@@ -124,7 +124,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param url Request url
    * @returns Formatted context template
    */
-  getLogContext(method: string, url: string) {
+  getLogContext(method: string, url: string): string {
     return `${this.ctxPrefix} ${method} ${url}`;
   }
 }
