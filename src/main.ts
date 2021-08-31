@@ -5,6 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -18,7 +21,11 @@ async function bootstrap() {
       },
     })
   );
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  const logger = new PolymeshLogger();
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+    new LoggingInterceptor(logger)
+  );
 
   // Swagger
   const options = new DocumentBuilder()
