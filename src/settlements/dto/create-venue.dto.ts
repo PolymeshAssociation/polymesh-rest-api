@@ -8,14 +8,14 @@ import { SignerDto } from '~/common/dto/signer.dto';
 
 export class CreateVenueDto extends SignerDto {
   @ApiProperty({
-    description: 'Description of the venue',
+    description: 'Description of the Venue',
     example: 'A place to exchange commodity Assets',
   })
   @IsString()
   readonly details: string;
 
   @ApiProperty({
-    description: 'Type of venue this is',
+    description: 'The type of Venue',
     enum: VenueType,
     example: VenueType.Exchange,
   })
