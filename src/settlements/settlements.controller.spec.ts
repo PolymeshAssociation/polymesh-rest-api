@@ -31,6 +31,7 @@ describe('SettlementsController', () => {
     affirmInstruction: jest.fn(),
     findVenueDetails: jest.fn(),
     findAffirmations: jest.fn(),
+    createVenue: jest.fn(),
     modifyVenue: jest.fn(),
     canTransfer: jest.fn(),
   };
@@ -138,23 +139,6 @@ describe('SettlementsController', () => {
     });
   });
 
-  describe('getVenueDetails', () => {
-    it('should return the details of the Venue', async () => {
-      const mockVenueDetails = {
-        owner: {
-          did: '0x6'.padEnd(66, '0'),
-        },
-        description: 'Venue desc',
-        type: VenueType.Distribution,
-      };
-      mockSettlementsService.findVenueDetails.mockResolvedValue(mockVenueDetails);
-
-      const result = await controller.getVenueDetails({ id: new BigNumber('3') });
-
-      expect(result).toEqual(mockVenueDetails);
-    });
-  });
-
   describe('getAffirmations', () => {
     it('should return the list of affirmations generated for a Instruction', async () => {
       const mockAffirmations = {
@@ -180,6 +164,43 @@ describe('SettlementsController', () => {
       );
     });
   });
+
+  describe('getVenueDetails', () => {
+    it('should return the details of the Venue', async () => {
+      const mockVenueDetails = {
+        owner: {
+          did: '0x6'.padEnd(66, '0'),
+        },
+        description: 'Venue desc',
+        type: VenueType.Distribution,
+      };
+      mockSettlementsService.findVenueDetails.mockResolvedValue(mockVenueDetails);
+
+      const result = await controller.getVenueDetails({ id: new BigNumber('3') });
+
+      expect(result).toEqual(mockVenueDetails);
+    });
+  });
+
+  describe('createVenue', () => {
+    it('should create a Venue and return the data returned by the service', async () => {
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        details: 'Generic Exchange',
+        type: VenueType.Exchange,
+      };
+      const transactions = ['transaction'];
+      const mockData = {
+        transactions,
+      };
+      mockSettlementsService.createVenue.mockResolvedValue(mockData);
+
+      const result = await controller.createVenue(body);
+
+      expect(result).toEqual(mockData);
+    });
+  });
+
   describe('modifyVenue', () => {
     it('should modify a venue and return the data returned by the service', async () => {
       const transactions = ['transaction'];
