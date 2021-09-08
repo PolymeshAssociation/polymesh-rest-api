@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ResultsModel } from '~/common/models/results.model';
+import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
-import { MockCorporateActionDefaults, MockDistributionWithDetails } from '~/test-utils/mocks';
-
-import { CorporateActionsController } from './corporate-actions.controller';
+import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;

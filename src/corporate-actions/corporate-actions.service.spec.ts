@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import {
-  MockCorporateActionDefaults,
-  MockDistributionWithDetails,
-  MockSecurityToken,
-} from '~/test-utils/mocks';
+import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
+import { MockSecurityToken } from '~/test-utils/mocks';
 
 describe('CorporateActionsService', () => {
   let service: CorporateActionsService;

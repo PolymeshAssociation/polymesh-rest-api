@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment, TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -134,42 +134,6 @@ export class MockTransactionQueue {
   constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
 
   public run = jest.fn();
-}
-
-export class MockCorporateActionDefaults {
-  defaultTaxWithholding = new BigNumber('25');
-  taxWithholdings = [
-    {
-      identity: new MockIdentity(),
-      percentage: new BigNumber('10'),
-    },
-  ];
-
-  targets = {
-    identities: [new MockIdentity()],
-    treatment: TargetTreatment.Exclude,
-  };
-}
-
-export class MockDistribution extends MockCorporateActionDefaults {
-  origin = new MockPortfolio();
-  currency = 'TOKEN2';
-  perShare = new BigNumber('0.1');
-  maxAmount = new BigNumber('2100.1');
-  expiryDate = null;
-  paymentDate = new Date('10/14/1987');
-  ticker = 'TOKEN4';
-  id = new BigNumber('1');
-  declarationDate = new Date('10/14/1987');
-  description = 'Mock Description';
-}
-
-export class MockDistributionWithDetails {
-  distribution = new MockDistribution();
-  details = {
-    remainingFunds: new BigNumber('2100.1'),
-    fundsReclaimed: false,
-  };
 }
 
 /* Services */

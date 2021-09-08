@@ -1,9 +1,6 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-
-import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class PortfolioIdentifierModel {
   @ApiProperty({
@@ -18,8 +15,7 @@ export class PortfolioIdentifierModel {
     type: 'string',
     example: '123',
   })
-  @FromBigNumber()
-  readonly id?: BigNumber;
+  readonly id?: string;
 
   constructor(model: PortfolioIdentifierModel) {
     Object.assign(this, model);

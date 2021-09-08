@@ -59,6 +59,5 @@ export async function createPortfolioModel(
 export function createPortfolioIdentifierModel(
   portfolio: DefaultPortfolio | NumberedPortfolio
 ): PortfolioIdentifierModel {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new PortfolioIdentifierModel(portfolio.toJson() as any);
+  return new PortfolioIdentifierModel(portfolio.toJson());
 }
