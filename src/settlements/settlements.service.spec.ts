@@ -275,6 +275,48 @@ describe('SettlementsService', () => {
     });
   });
 
+  describe('createVenue', () => {
+    it('should run a createVenue procedure and return the queue data', async () => {
+      const mockIdentity = new MockIdentityClass();
+
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.settlement.CreateVenue,
+        },
+      ];
+      const mockQueue = new MockTransactionQueueClass(transactions);
+      mockIdentity.createVenue.mockResolvedValue(mockQueue);
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        details: 'A generic exchange',
+        type: VenueType.Exchange,
+      };
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+      const result = await service.createVenue(body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.settlement.CreateVenue,
+          },
+        ],
+      });
+      expect(mockIdentity.createVenue).toHaveBeenCalledWith(
+        { details: body.details, type: body.type },
+        { signer: address }
+      );
+    });
+  });
+
   describe('modifyVenue', () => {
     describe('if there is an error when updating the venue', () => {
       it('should pass the error along the chain', async () => {

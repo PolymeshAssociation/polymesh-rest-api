@@ -1,5 +1,12 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
@@ -9,6 +16,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
+import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
@@ -101,27 +109,6 @@ export class SettlementsController {
     return new TransactionQueueModel({ transactions });
   }
 
-  @ApiTags('venues')
-  @ApiOperation({
-    summary: 'Fetch details of a Venue',
-    description: 'This endpoint will provide the basic details of a Venue',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Venue whose details are to be fetched',
-    type: 'string',
-    example: '123',
-  })
-  @ApiOkResponse({
-    description: 'Details of the Venue',
-    type: VenueDetailsModel,
-  })
-  @Get('venues/:id')
-  public async getVenueDetails(@Param() { id }: IdParamsDto): Promise<VenueDetailsModel> {
-    const venueDetails = await this.settlementsService.findVenueDetails(id);
-    return new VenueDetailsModel(venueDetails);
-  }
-
   @ApiTags('instructions')
   @ApiOperation({
     summary: 'List of affirmations',
@@ -171,6 +158,42 @@ export class SettlementsController {
       total: count,
       next,
     });
+  }
+
+  @ApiTags('venues')
+  @ApiOperation({
+    summary: 'Fetch details of a Venue',
+    description: 'This endpoint will provide the basic details of a Venue',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Venue whose details are to be fetched',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the Venue',
+    type: VenueDetailsModel,
+  })
+  @Get('venues/:id')
+  public async getVenueDetails(@Param() { id }: IdParamsDto): Promise<VenueDetailsModel> {
+    const venueDetails = await this.settlementsService.findVenueDetails(id);
+    return new VenueDetailsModel(venueDetails);
+  }
+
+  @ApiTags('venues')
+  @ApiOperation({
+    summary: 'Create a Venue',
+    description: 'This endpoint creates a new Venue',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('/venues')
+  public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<TransactionQueueModel> {
+    const { transactions } = await this.settlementsService.createVenue(createVenueDto);
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('venues')
