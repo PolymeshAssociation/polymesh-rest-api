@@ -53,17 +53,21 @@ describe('conditionDto', () => {
       ],
       [
         'IsIdentity',
-        { type: ConditionType.IsIdentity, target: ConditionTarget.Sender, identity: address },
+        {
+          type: ConditionType.IsIdentity,
+          target: ConditionTarget.Sender,
+          identity: { did: address },
+        },
       ],
       [
-        'IsPresent with trustedClaimProviders',
+        'IsPresent with trustedClaimIssuers',
         {
           type: ConditionType.IsPresent,
           target: ConditionTarget.Both,
           claim: validClaim,
-          trustedClaimProviders: [
+          trustedClaimIssuers: [
             {
-              identity: address,
+              identity: { did: address },
             },
           ],
         },
@@ -79,7 +83,7 @@ describe('conditionDto', () => {
   describe('invalid ConditionDtos', () => {
     const cases: InvalidCase[] = [
       [
-        'IsPresetn without `target`',
+        'IsPresent without `target`',
         { type: ConditionType.IsPresent, claim: validClaim },
         ['target must be a valid enum value'],
       ],
@@ -91,7 +95,7 @@ describe('conditionDto', () => {
       [
         'IsAnyOf without `claims`',
         { type: ConditionType.IsAnyOf, target: ConditionTarget.Receiver },
-        ['claims must be a non-empty object'],
+        ['claims should not be empty'],
       ],
       [
         'IsNoneOf with an invalid claim in `claims`',
@@ -108,21 +112,21 @@ describe('conditionDto', () => {
         ],
       ],
       [
-        'IsPresent with invalid `identity` in `trustedClaimProviders`',
+        'IsPresent with invalid `identity` in `trustedClaimIssuers`',
         {
           type: ConditionType.IsPresent,
           target: ConditionTarget.Both,
           claim: validClaim,
-          trustedClaimProviders: [
+          trustedClaimIssuers: [
             {
-              identity: 123,
+              identity: { did: 123 },
             },
           ],
         },
         [
-          'trustedClaimProviders.0.DID must be a hexadecimal number',
-          'trustedClaimProviders.0.DID must start with "0x"',
-          'trustedClaimProviders.0.DID must be 66 characters long',
+          'trustedClaimIssuers.0.identity.DID must be a hexadecimal number',
+          'trustedClaimIssuers.0.identity.DID must start with "0x"',
+          'trustedClaimIssuers.0.identity.DID must be 66 characters long',
         ],
       ],
     ];

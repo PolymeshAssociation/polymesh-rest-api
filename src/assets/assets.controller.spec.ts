@@ -2,9 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   ClaimType,
-  ConditionType,
   KnownTokenType,
-  ScopeType,
   TokenIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -12,22 +10,12 @@ import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { ResultsModel } from '~/common/models/results.model';
-import { MockSecurityToken } from '~/test-utils/mocks';
+import { MockAssetService, MockSecurityToken } from '~/test-utils/mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;
 
-  const mockAssetsService = {
-    findOne: jest.fn(),
-    findHolders: jest.fn(),
-    findDocuments: jest.fn(),
-    findComplianceRequirements: jest.fn(),
-    findTrustedClaimIssuers: jest.fn(),
-    registerTicker: jest.fn(),
-    createAsset: jest.fn(),
-    issue: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -159,35 +147,6 @@ describe('AssetsController', () => {
           next: mockDocuments.next,
         })
       );
-    });
-  });
-
-  describe('getComplianceRequirements', () => {
-    it('should return the list of all compliance requirements of an Asset', async () => {
-      const mockRequirements = [
-        {
-          id: 1,
-          conditions: [
-            {
-              type: ConditionType.IsPresent,
-              claim: {
-                type: ClaimType.Accredited,
-                scope: {
-                  type: ScopeType.Identity,
-                  value: 'Ox6'.padEnd(66, '0'),
-                },
-              },
-              target: 'Receiver',
-              trustedClaimIssuers: [],
-            },
-          ],
-        },
-      ];
-      mockAssetsService.findComplianceRequirements.mockResolvedValue(mockRequirements);
-
-      const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
-
-      expect(result).toEqual(new ResultsModel({ results: mockRequirements }));
     });
   });
 

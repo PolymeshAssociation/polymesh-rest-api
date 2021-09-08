@@ -1,17 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, ConditionType, ScopeType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import { MockRelayerAccountsService, MockTransactionQueueClass } from '~/test-utils/mocks';
+import {
+  MockAssetService,
+  MockRelayerAccountsService,
+  MockSecurityToken,
+  MockTransactionQueue,
+} from '~/test-utils/mocks';
 
 describe('ComplianceService', () => {
   let service: ComplianceService;
   const mockRelayerAccountsService = new MockRelayerAccountsService();
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,13 +33,43 @@ describe('ComplianceService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('setRules', () => {
-    it('should run a set rules procedure and return the queue data', async () => {
-      const mockAsset = {
-        compliance: {
-          requirements: { set: jest.fn() },
+  describe('findComplianceRequirements', () => {
+    it('should return the list of Asset compliance requirements', async () => {
+      const mockRequirements = [
+        {
+          id: 1,
+          conditions: [
+            {
+              type: ConditionType.IsPresent,
+              claim: {
+                type: ClaimType.Accredited,
+                scope: {
+                  type: ScopeType.Identity,
+                  value: 'Ox6'.padEnd(66, '0'),
+                },
+              },
+              target: 'Receiver',
+              trustedClaimIssuers: [],
+            },
+          ],
         },
-      };
+      ];
+
+      const mockSecurityToken = new MockSecurityToken();
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockRequirements);
+
+      const result = await service.findComplianceRequirements('TICKER');
+
+      expect(result).toEqual(mockRequirements);
+    });
+  });
+
+  describe('setRequirements', () => {
+    it('should run a set rules procedure and return the queue data', async () => {
+      const mockAsset = new MockSecurityToken();
       const transactions = [
         {
           blockHash: '0x1',
@@ -44,16 +77,16 @@ describe('ComplianceService', () => {
           tag: TxTags.complianceManager.AddComplianceRequirement,
         },
       ];
-      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockQueue = new MockTransactionQueue(transactions);
+      const address = 'address';
       mockAsset.compliance.requirements.set.mockResolvedValue(mockQueue);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockRelayerAccountsService.findAddressByDid.mockResolvedValue('address');
-
-      const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
-      const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-      const result = await service.setRules('TICKER', body);
+      const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
+
+      const result = await service.setRequirements('TICKER', body);
 
       expect(result).toEqual({
         result: undefined,

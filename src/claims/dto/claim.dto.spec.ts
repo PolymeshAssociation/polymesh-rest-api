@@ -49,10 +49,10 @@ describe('claimsDto', () => {
         },
       ],
       [
-        'CustomerDurDilidence with `cddId`',
+        'CustomerDueDilidence with `cddId`',
         {
           type: ClaimType.CustomerDueDiligence,
-          cddId: 'ABC',
+          cddId: '0x60000000000000000000000000000000',
         },
       ],
       [
@@ -87,12 +87,13 @@ describe('claimsDto', () => {
       [
         'InvestorUniqueness claim with `scope`',
         {
-          type: ClaimType.Blocked,
+          type: ClaimType.InvestorUniqueness,
           scope,
+          cddId: '0x60000000000000000000000000000000',
         },
       ],
       [
-        'NoData claim no additonal fields',
+        'NoData claim with no additional fields',
         {
           type: ClaimType.NoData,
         },
@@ -101,7 +102,7 @@ describe('claimsDto', () => {
         'InvestorUniquenessV2 with `cddId`',
         {
           type: ClaimType.InvestorUniquenessV2,
-          cddId: 'ABC',
+          cddId: '0x60000000000000000000000000000000',
         },
       ],
       [
@@ -156,28 +157,45 @@ describe('claimsDto', () => {
           type: ClaimType.Affiliate,
           scope: { type: 'Wrong', value: 123 },
         },
-        ['scope.type must be a valid enum value', 'scope.value must be a string'],
+        ['scope.type must be a valid enum value'],
       ],
       [
         'InvestorUniquenessV2 without `cddId`',
         {
           type: ClaimType.InvestorUniquenessV2,
         },
-        ['cddId must be a string'],
+        [
+          'cddId must be a hexadecimal number',
+          'cddId must start with "0x"',
+          'cddId must be 34 characters long',
+        ],
+      ],
+      [
+        'CustomerDueDiligence without `cddId`',
+        {
+          type: ClaimType.CustomerDueDiligence,
+        },
+        [
+          'cddId must be a hexadecimal number',
+          'cddId must start with "0x"',
+          'cddId must be 34 characters long',
+        ],
       ],
       [
         'Accredited with bad ClaimType in `issuers`',
         {
           type: ClaimType.Accredited,
           scope,
-          issuers: [
+          trustedClaimIssuers: [
             {
-              identity: '0x0600000000000000000000000000000000000000000000000000000000000000',
+              identity: {
+                did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+              },
               trustedFor: ['Bad Claims'],
             },
           ],
         },
-        ['issuers.0.trustedFor must be a valid enum value'],
+        ['trustedClaimIssuers.0.each value in trustedFor must be a valid enum value'],
       ],
     ];
     test.each(cases)('%s', async (_, input, expected) => {

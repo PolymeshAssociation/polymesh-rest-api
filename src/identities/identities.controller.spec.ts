@@ -10,15 +10,13 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentity } from '~/test-utils/mocks';
+import { MockAssetService, MockIdentity } from '~/test-utils/mocks';
 
 import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
-  const mockAssetsService = {
-    findAllByOwner: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   const mockSettlementsService = {
     findPendingInstructionsByDid: jest.fn(),

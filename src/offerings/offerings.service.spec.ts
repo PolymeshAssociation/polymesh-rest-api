@@ -9,13 +9,11 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { OfferingsService } from '~/offerings/offerings.service';
-import { MockPortfolio, MockSecurityToken } from '~/test-utils/mocks';
+import { MockAssetService, MockPortfolio, MockSecurityToken } from '~/test-utils/mocks';
 
 describe('OfferingsService', () => {
   let service: OfferingsService;
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

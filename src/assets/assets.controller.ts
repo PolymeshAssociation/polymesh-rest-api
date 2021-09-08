@@ -20,7 +20,6 @@ import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
-import { RequirementModel } from '~/assets/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
@@ -156,31 +155,6 @@ export class AssetsController {
       ),
       total,
       next,
-    });
-  }
-
-  @ApiOperation({
-    summary: 'Fetch compliance requirements for an Asset',
-    description: 'This endpoint will provide the list of all compliance requirements of an Asset',
-  })
-  @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be fetched',
-    type: 'string',
-    example: 'TICKER',
-  })
-  @ApiArrayResponse(RequirementModel, {
-    description: 'List of compliance requirements of the Asset',
-    paginated: false,
-  })
-  @Get(':ticker/compliance-requirements')
-  public async getComplianceRequirements(
-    @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<RequirementModel>> {
-    const results = await this.assetsService.findComplianceRequirements(ticker);
-
-    return new ResultsModel({
-      results: results.map(({ id, conditions }) => new RequirementModel({ id, conditions })),
     });
   }
 

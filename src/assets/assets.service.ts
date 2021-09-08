@@ -5,7 +5,6 @@ import {
   ErrorCode,
   IdentityBalance,
   isPolymeshError,
-  Requirement,
   ResultSet,
   SecurityToken,
   TickerReservation,
@@ -76,11 +75,6 @@ export class AssetsService {
   ): Promise<ResultSet<TokenDocument>> {
     const asset = await this.findOne(ticker);
     return asset.documents.get({ size, start });
-  }
-
-  public async findComplianceRequirements(ticker: string): Promise<Requirement[]> {
-    const asset = await this.findOne(ticker);
-    return asset.compliance.requirements.get();
   }
 
   public async findTrustedClaimIssuers(ticker: string): Promise<DefaultTrustedClaimIssuer[]> {

@@ -5,14 +5,7 @@ import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
-import {
-  ClaimType,
-  ConditionType,
-  ErrorCode,
-  KnownTokenType,
-  ScopeType,
-  TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, ErrorCode, KnownTokenType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';

@@ -12,6 +12,7 @@ import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
+  MockAssetService,
   MockCheckpoint,
   MockCheckpointSchedule,
   MockRelayerAccountsService,
@@ -27,9 +28,7 @@ jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
 
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 

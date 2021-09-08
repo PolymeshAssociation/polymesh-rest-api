@@ -8,10 +8,11 @@ import {
   ScopeType,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmptyObject, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ScopeDto } from '~/claims/dto/scope.dto';
-import { IssuerDto } from '~/compliance/dto/issuer.dto';
+import { IsCddId } from '~/common/decorators/validation';
+import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
 
 export class ClaimDto {
   @ApiProperty({
@@ -48,7 +49,7 @@ export class ClaimDto {
 
   @ApiPropertyOptional({
     description: 'cddId for `CustomerDueDiligence` and `InvestorUniqueness` type Claims',
-    example: 'ABC123',
+    example: '0x60000000000000000000000000000000',
   })
   @ValidateIf(({ type }) =>
     [
@@ -57,16 +58,14 @@ export class ClaimDto {
       ClaimType.CustomerDueDiligence,
     ].includes(type)
   )
-  @IsString()
+  @IsCddId()
   cddId?: string;
 
   @ApiPropertyOptional({
-    description: 'Optional Issuers to trust for this Claim. Defaults to all',
+    description: 'Optional Identities to trust for this Claim. Defaults to all',
     isArray: true,
-    enum: IssuerDto,
-    example: [],
   })
   @ValidateNested({ each: true })
-  @Type(() => IssuerDto)
-  issuers?: IssuerDto[];
+  @Type(() => TrustedClaimIssuerDto)
+  trustedClaimIssuers?: TrustedClaimIssuerDto[];
 }

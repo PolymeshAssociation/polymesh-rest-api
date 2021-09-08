@@ -8,22 +8,25 @@ import {
   isSingleClaimCondition,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
-import { IsDid } from '~/common/decorators/validation';
-import { IssuerDto } from '~/compliance/dto/issuer.dto';
+import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
+
+import { IdentityDto } from '../../identities/dto/identity.dto';
 
 export class ConditionDto {
   @ApiProperty({
-    description: 'The target of the Condition. Note different types need different payloads',
+    description: 'Whether the Condition applies to the sender, the receiver, or both',
     enum: ConditionTarget,
+    example: ConditionTarget.Both,
   })
   @IsEnum(ConditionTarget)
   target: ConditionTarget;
 
   @ApiProperty({
-    description: 'The type of Condition',
+    description:
+      'The type of Condition. "IsPresent" requires the target(s) to have a specific Claim. "IsAbsent" is the opposite. "IsAnyOf" requires the target(s) to have at least one of a list of Claims. "IsNoneOf" is the opposite. "IsIdentity" requires the target(s) to be a specific Identity',
     enum: ConditionType,
     example: ConditionType.IsNoneOf,
   })
@@ -31,40 +34,40 @@ export class ConditionDto {
   type: ConditionType;
 
   @ApiPropertyOptional({
-    description: 'Optional Trusted Claim Providers for this condition. Defaults to all',
+    description: 'Optional Trusted Claim Provider Identities for this Condition. Defaults to all',
     isArray: true,
-    type: IssuerDto,
-    example: [],
+    type: TrustedClaimIssuerDto,
   })
   @ValidateNested({ each: true })
-  @Type(() => IssuerDto)
-  trustedClaimProviders?: IssuerDto[];
+  @Type(() => TrustedClaimIssuerDto)
+  trustedClaimIssuers?: TrustedClaimIssuerDto[];
 
   @ApiPropertyOptional({
-    description: 'The Claim for IsPresent or IsAbsent Conditions',
+    description: 'The Claim for "IsPresent" or "IsAbsent" Conditions',
     type: ClaimDto,
-    example: null,
   })
   @ValidateIf(isSingleClaimCondition)
+  @ValidateNested()
   @Type(() => ClaimDto)
   @IsNotEmptyObject()
   claim?: ClaimDto;
 
   @ApiPropertyOptional({
-    description: 'Claims for AnyOf or NoneOf Conditions',
+    description: 'Claims for "IsAnyOf" or "IsNoneOf" Conditions',
     isArray: true,
     type: ClaimDto,
   })
   @ValidateIf(isMultiClaimCondition)
   @ValidateNested({ each: true })
+  @IsNotEmpty()
   @Type(() => ClaimDto)
   claims?: ClaimDto[];
 
   @ApiPropertyOptional({
-    description: 'The identity for Identity Condition',
-    example: null,
+    description: 'The Identity for "IsIdentity" Condition',
   })
-  @ValidateIf(({ type }) => [ConditionType.IsIdentity].includes(type))
-  @IsDid()
-  identity?: string;
+  @ValidateIf(({ type }) => type === ConditionType.IsIdentity)
+  @Type(() => IdentityDto)
+  @ValidateNested()
+  identity?: IdentityDto;
 }

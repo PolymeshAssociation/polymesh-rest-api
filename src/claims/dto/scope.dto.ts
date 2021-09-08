@@ -1,22 +1,26 @@
 /* istanbul ignore file */
 
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { ScopeType } from '@polymathnetwork/polymesh-sdk/types';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
+
+import { IsValidScope } from '~/common/decorators/validation';
 
 export class ScopeDto {
-  @ApiPropertyOptional({
-    description: 'The type of Scope',
+  @ApiProperty({
+    description:
+      'The type of Scope. If `Identity` then `value` should be a DID. If `Ticker` then `value` should be a Ticker',
     enum: ScopeType,
     example: ScopeType.Identity,
   })
   @IsEnum(ScopeType)
   type: ScopeType;
 
-  @ApiPropertyOptional({
-    description: 'The value of the Scope',
+  @ApiProperty({
+    description:
+      'The value of the Scope. This is a hex prefixed 64 charcter string for `Identity`, 12 uppercase letters for Ticker',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @IsString()
+  @IsValidScope('type')
   value: string;
 }
