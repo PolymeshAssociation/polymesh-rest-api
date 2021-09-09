@@ -8,6 +8,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 
 export async function createPortfolioModel(
@@ -53,4 +54,10 @@ export async function createPortfolioModel(
     portfolioModelParams = { ...portfolioModelParams, custodian };
   }
   return new PortfolioModel(portfolioModelParams);
+}
+
+export function createPortfolioIdentifierModel(
+  portfolio: DefaultPortfolio | NumberedPortfolio
+): PortfolioIdentifierModel {
+  return new PortfolioIdentifierModel(portfolio.toJson());
 }

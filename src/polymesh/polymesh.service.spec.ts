@@ -2,20 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { MockPolymeshClass } from '~/test-utils/mocks';
+import { MockPolymesh } from '~/test-utils/mocks';
 
 import { PolymeshService } from './polymesh.service';
 
 describe('PolymeshService', () => {
   let service: PolymeshService;
-  let mockPolymeshApi: MockPolymeshClass;
+  let mockPolymeshApi: MockPolymesh;
 
   beforeAll(() => {
     jest.useFakeTimers();
   });
 
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
+    mockPolymeshApi = new MockPolymesh();
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [RelayerAccountsModule],

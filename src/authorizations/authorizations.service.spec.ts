@@ -3,7 +3,7 @@ import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesService } from '~/identities/identities.service';
-import { MockIdentityClass } from '~/test-utils/mocks';
+import { MockIdentity } from '~/test-utils/mocks';
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
@@ -27,7 +27,7 @@ describe('AuthorizationsService', () => {
   });
 
   describe('findPendingByDid', () => {
-    const mockIdentity = new MockIdentityClass();
+    const mockIdentity = new MockIdentity();
     const did = '0x6'.padEnd(66, '0');
     const mockAuthorizations = [
       {
@@ -67,7 +67,7 @@ describe('AuthorizationsService', () => {
   });
 
   describe('findIssuedByDid', () => {
-    const mockIdentity = new MockIdentityClass();
+    const mockIdentity = new MockIdentity();
     const did = '0x6'.padEnd(66, '0');
     const mockIssuedAuthorizations = {
       data: [

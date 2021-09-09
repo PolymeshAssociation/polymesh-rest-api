@@ -10,10 +10,10 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
-  MockIdentityClass,
+  MockIdentity,
   MockPortfolio,
   MockRelayerAccountsService,
-  MockTransactionQueueClass,
+  MockTransactionQueue,
 } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
@@ -51,7 +51,7 @@ describe('PortfoliosService', () => {
 
   describe('findAllByOwner', () => {
     it('should return a list of Portfolios for a given DID', async () => {
-      const mockIdentity = new MockIdentityClass();
+      const mockIdentity = new MockIdentity();
       const did = '0x6'.padEnd(66, '0');
       const mockPortfolios = [
         {
@@ -78,7 +78,7 @@ describe('PortfoliosService', () => {
   describe('findOne', () => {
     describe('if the Portfolio does not exist', () => {
       it('should throw a NotFoundException', async () => {
-        const mockIdentity = new MockIdentityClass();
+        const mockIdentity = new MockIdentity();
         const owner = '0x6000';
         mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
           throw new Error("The Portfolio doesn't exist");
@@ -98,7 +98,7 @@ describe('PortfoliosService', () => {
     describe('if there is a different error', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('foo');
-        const mockIdentity = new MockIdentityClass();
+        const mockIdentity = new MockIdentity();
         const owner = '0x6000';
         mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
           throw expectedError;
@@ -117,7 +117,7 @@ describe('PortfoliosService', () => {
 
     describe('otherwise', () => {
       it('should return the portfolio', async () => {
-        const mockIdentity = new MockIdentityClass();
+        const mockIdentity = new MockIdentity();
         const mockPortfolio = {
           name: 'Growth',
           id: new BigNumber(1),
@@ -149,7 +149,7 @@ describe('PortfoliosService', () => {
           tag: TxTags.portfolio.MovePortfolioFunds,
         },
       ];
-      const mockQueue = new MockTransactionQueueClass(transactions);
+      const mockQueue = new MockTransactionQueue(transactions);
       mockPortfolio.moveFunds.mockResolvedValue(mockQueue);
 
       const address = 'address';

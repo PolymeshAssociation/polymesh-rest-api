@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { MockSecurityTokenClass } from '~/test-utils/mocks';
-
-import { CorporateActionsService } from './corporate-actions.service';
+import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
+import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
+import { MockSecurityToken } from '~/test-utils/mocks';
 
 describe('CorporateActionsService', () => {
   let service: CorporateActionsService;
@@ -31,30 +30,9 @@ describe('CorporateActionsService', () => {
 
   describe('findDefaultsByTicker', () => {
     it('should return the Corporate Action defaults for an Asset', async () => {
-      const mockCorporateActionDefaults = {
-        targets: {
-          treatment: TargetTreatment.Include,
-          identities: [
-            {
-              did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-            },
-            {
-              did: '0x0611111111111111111111111111111111111111111111111111111111111111',
-            },
-          ],
-        },
-        defaultTaxWithholding: new BigNumber('0.0005'),
-        taxWithholdings: [
-          {
-            identity: {
-              did: '0x0611111111111111111111111111111111111111111111111111111111111111',
-            },
-            percentage: new BigNumber('0.0001'),
-          },
-        ],
-      };
+      const mockCorporateActionDefaults = new MockCorporateActionDefaults();
 
-      const mockSecurityToken = new MockSecurityTokenClass();
+      const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.corporateActions.getDefaults.mockResolvedValue(mockCorporateActionDefaults);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
@@ -62,6 +40,21 @@ describe('CorporateActionsService', () => {
       const result = await service.findDefaultsByTicker('TICKER');
 
       expect(result).toEqual(mockCorporateActionDefaults);
+    });
+  });
+
+  describe('findDistributionsByTicker', () => {
+    it('should return the Dividend Distributions associated with an Asset', async () => {
+      const mockDistributions = [new MockDistributionWithDetails()];
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.corporateActions.distributions.get.mockResolvedValue(mockDistributions);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.findDistributionsByTicker('TICKER');
+
+      expect(result).toEqual(mockDistributions);
     });
   });
 });

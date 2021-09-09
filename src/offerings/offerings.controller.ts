@@ -116,11 +116,12 @@ export class OfferingsController {
     @Param() { ticker, id }: OfferingParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<InvestmentModel>> {
-    const {
-      data,
-      count: total,
-      next,
-    } = await this.offeringsService.findInvestmentsByTicker(ticker, id, size, Number(start) || 0);
+    const { data, count: total, next } = await this.offeringsService.findInvestmentsByTicker(
+      ticker,
+      id,
+      size,
+      Number(start) || 0
+    );
     return new PaginatedResultsModel({
       results: data.map(({ investor, soldAmount, investedAmount }) => {
         return new InvestmentModel({

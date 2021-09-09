@@ -5,17 +5,17 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockIdentityClass, MockPolymeshClass } from '~/test-utils/mocks';
+import { MockIdentity, MockPolymesh } from '~/test-utils/mocks';
 
 import { IdentitiesService } from './identities.service';
 
 describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
-  let mockPolymeshApi: MockPolymeshClass;
+  let mockPolymeshApi: MockPolymesh;
 
   beforeEach(async () => {
-    mockPolymeshApi = new MockPolymeshClass();
+    mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
       providers: [IdentitiesService, mockPolymeshLoggerProvider],
@@ -76,7 +76,7 @@ describe('IdentitiesService', () => {
           ticker: 'FOO_TOKEN',
         },
       ];
-      const mockIdentity = new MockIdentityClass();
+      const mockIdentity = new MockIdentity();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

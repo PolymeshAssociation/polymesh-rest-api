@@ -1,16 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
+import { ResultsModel } from '~/common/models/results.model';
+import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-
-import { CorporateActionsController } from './corporate-actions.controller';
+import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
+import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
 
   const mockCorporateActionsService = {
     findDefaultsByTicker: jest.fn(),
+    findDistributionsByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -31,28 +33,7 @@ describe('CorporateActionsController', () => {
 
   describe('findDefaultsByTicker', () => {
     it('should return the Corporate Action defaults for an Asset', async () => {
-      const mockCorporateActionDefaults = {
-        targets: {
-          treatment: TargetTreatment.Include,
-          identities: [
-            {
-              did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-            },
-            {
-              did: '0x0611111111111111111111111111111111111111111111111111111111111111',
-            },
-          ],
-        },
-        defaultTaxWithholding: new BigNumber('0.0005'),
-        taxWithholdings: [
-          {
-            identity: {
-              did: '0x0611111111111111111111111111111111111111111111111111111111111111',
-            },
-            percentage: new BigNumber('0.0001'),
-          },
-        ],
-      };
+      const mockCorporateActionDefaults = new MockCorporateActionDefaults();
 
       mockCorporateActionsService.findDefaultsByTicker.mockResolvedValue(
         mockCorporateActionDefaults
@@ -61,6 +42,25 @@ describe('CorporateActionsController', () => {
       const result = await controller.getDefaults({ ticker: 'TICKER' });
 
       expect(result).toEqual(mockCorporateActionDefaults);
+    });
+  });
+
+  describe('getDividendDistributions', () => {
+    it('should return the Dividend Distributions associated with an Asset', async () => {
+      const mockDistributions = [new MockDistributionWithDetails()];
+
+      mockCorporateActionsService.findDistributionsByTicker.mockResolvedValue(mockDistributions);
+
+      const result = await controller.getDividendDistributions({ ticker: 'TICKER' });
+
+      expect(result).toEqual(
+        new ResultsModel({
+          results: mockDistributions.map(distributionWithDetails =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            createDividendDistributionModel(distributionWithDetails as any)
+          ),
+        })
+      );
     });
   });
 });

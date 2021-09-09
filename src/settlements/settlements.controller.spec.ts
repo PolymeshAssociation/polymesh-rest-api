@@ -13,9 +13,10 @@ import {
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { IdentitiesService } from '~/identities/identities.service';
+import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockInstructionClass } from '~/test-utils/mocks';
+import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -58,7 +59,7 @@ describe('SettlementsController', () => {
     it('should return the Instruction details', async () => {
       const date = new Date();
 
-      const mockInstruction = new MockInstructionClass();
+      const mockInstruction = new MockInstruction();
       const mockInstructionDetails = {
         venue: {
           id: new BigNumber('123'),
@@ -71,16 +72,8 @@ describe('SettlementsController', () => {
       const mockLegs = {
         data: [
           {
-            from: {
-              owner: {
-                did: '0x6'.padEnd(66, '0'),
-              },
-            },
-            to: {
-              owner: {
-                did: '0x6'.padEnd(66, '1'),
-              },
-            },
+            from: new MockPortfolio(),
+            to: new MockPortfolio(),
             amount: new BigNumber('100'),
             token: {
               ticker: 'TICKER',
@@ -99,8 +92,10 @@ describe('SettlementsController', () => {
         ...mockInstructionDetails,
         legs:
           mockLegs.data.map(({ from, to, amount, token: asset }) => ({
-            from,
-            to,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            from: createPortfolioIdentifierModel(from as any),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            to: createPortfolioIdentifierModel(to as any),
             amount,
             asset,
           })) || [],

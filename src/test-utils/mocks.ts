@@ -12,8 +12,8 @@ export type Mocked<T> = T &
 
 /* Polymesh SDK */
 
-export class MockPolymeshClass {
-  public static create = jest.fn().mockResolvedValue(new MockPolymeshClass());
+export class MockPolymesh {
+  public static create = jest.fn().mockResolvedValue(new MockPolymesh());
 
   public getSecurityTokens = jest.fn();
   public getSecurityToken = jest.fn();
@@ -35,7 +35,7 @@ export class MockPolymeshClass {
   };
 }
 
-export class MockSecurityTokenClass {
+export class MockSecurityToken {
   public details = jest.fn();
   public getIdentifiers = jest.fn();
   public tokenHolders = {
@@ -72,11 +72,14 @@ export class MockSecurityTokenClass {
   };
 
   public corporateActions = {
+    distributions: {
+      get: jest.fn(),
+    },
     getDefaults: jest.fn(),
   };
 }
 
-export class MockInstructionClass {
+export class MockInstruction {
   public getStatus = jest.fn();
   public affirm = jest.fn();
   public details = jest.fn();
@@ -84,19 +87,10 @@ export class MockInstructionClass {
   public getAffirmations = jest.fn();
 }
 
-export class MockVenueClass {
+export class MockVenue {
   public addInstruction = jest.fn();
   public details = jest.fn();
   public modify = jest.fn();
-}
-
-export class MockPortfolio {
-  id = new BigNumber(1);
-  public getName = jest.fn();
-  public getTokenBalances = jest.fn();
-  public isCustodiedBy = jest.fn();
-  public getCustodian = jest.fn();
-  public moveFunds = jest.fn();
 }
 
 export class MockIdentityAuthorization {
@@ -109,8 +103,8 @@ export class MockPortfolios {
   public getPortfolio = jest.fn();
 }
 
-export class MockIdentityClass {
-  did: string;
+export class MockIdentity {
+  did = '0x06'.padEnd(66, '0');
   portfolios = new MockPortfolios();
   authorizations = new MockIdentityAuthorization();
   public getPrimaryKey = jest.fn();
@@ -122,11 +116,22 @@ export class MockIdentityClass {
   public getTrustingTokens = jest.fn();
 }
 
+export class MockPortfolio {
+  id = new BigNumber(1);
+  owner = new MockIdentity();
+  public getName = jest.fn();
+  public getTokenBalances = jest.fn();
+  public isCustodiedBy = jest.fn();
+  public getCustodian = jest.fn();
+  public moveFunds = jest.fn();
+  public toJson = jest.fn();
+}
+
 export class MockTickerReservation {
   public createToken = jest.fn();
 }
 
-export class MockTransactionQueueClass {
+export class MockTransactionQueue {
   constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
 
   public run = jest.fn();

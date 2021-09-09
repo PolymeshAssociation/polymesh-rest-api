@@ -4,7 +4,7 @@ import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
-import { MockVenueClass } from '~/test-utils/mocks';
+import { MockVenue } from '~/test-utils/mocks';
 
 describe('processQueue', () => {
   describe('it should handle Polymesh errors', () => {
@@ -14,7 +14,7 @@ describe('processQueue', () => {
       [ErrorCode.FatalError, InternalServerErrorException],
     ];
     test.each(cases)('should transform %p into %p', async (code, expected) => {
-      const mockVenue = new MockVenueClass();
+      const mockVenue = new MockVenue();
       mockVenue.modify.mockImplementation(() => {
         throw new PolymeshError({ code });
       });
@@ -25,7 +25,7 @@ describe('processQueue', () => {
 
   describe('it should handle non polymesh errors', () => {
     it('should transform errors into InternalServerException', async () => {
-      const mockVenue = new MockVenueClass();
+      const mockVenue = new MockVenue();
       mockVenue.modify.mockImplementation(() => {
         throw new Error('Foo');
       });

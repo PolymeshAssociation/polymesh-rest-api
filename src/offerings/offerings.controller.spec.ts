@@ -11,6 +11,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { OfferingsController } from '~/offerings/offerings.controller';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
+import { MockPortfolio } from '~/test-utils/mocks';
 
 describe('OfferingsController', () => {
   let controller: OfferingsController;
@@ -54,12 +55,8 @@ describe('OfferingsController', () => {
               did: 'Ox6'.padEnd(66, '0'),
             },
             name: 'SERIES A',
-            offeringPortfolio: {
-              did: 'Ox6'.padEnd(66, '0'),
-            },
-            raisingPortfolio: {
-              did: 'Ox6'.padEnd(66, '0'),
-            },
+            offeringPortfolio: new MockPortfolio(),
+            raisingPortfolio: new MockPortfolio(),
             raisingCurrency: 'CURRENCY',
             venue: {
               id: new BigNumber('1'),
