@@ -64,6 +64,7 @@ describe('PortfoliosController', () => {
       const params = {
         signer: '0x6000',
         to: new BigNumber('2'),
+        from: new BigNumber('0'),
         items: [{ to: '3', ticker: 'TICKER', amount: new BigNumber('100') }],
       };
 

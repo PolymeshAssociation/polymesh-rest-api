@@ -157,6 +157,7 @@ describe('PortfoliosService', () => {
       const body = {
         signer: '0x6000',
         to: new BigNumber('2'),
+        from: new BigNumber('0'),
         items: [
           {
             ticker: 'TICKER',

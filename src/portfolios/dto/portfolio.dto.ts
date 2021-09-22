@@ -7,6 +7,7 @@ import { IsOptional } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsDid } from '~/common/decorators/validation';
+import { toPortfolioId } from '~/portfolios/portfolios.util';
 
 export class PortfolioDto {
   @ApiProperty({
@@ -26,11 +27,12 @@ export class PortfolioDto {
 
   public toPortfolioLike(): PortfolioLike {
     const { did, id } = this;
+    const portfolioId = toPortfolioId(id);
 
-    if (id) {
+    if (portfolioId) {
       return {
         identity: did,
-        id,
+        id: portfolioId,
       };
     }
 

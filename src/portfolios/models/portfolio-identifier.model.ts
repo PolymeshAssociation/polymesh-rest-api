@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class PortfolioIdentifierModel {
   @ApiProperty({
@@ -10,12 +10,12 @@ export class PortfolioIdentifierModel {
   })
   readonly did: string;
 
-  @ApiPropertyOptional({
-    description: 'Portfolio number. An empty value represents the Default Portfolio',
+  @ApiProperty({
+    description: 'Portfolio number. 0 represents the Default Portfolio',
     type: 'string',
     example: '123',
   })
-  readonly id?: string;
+  readonly id?: string = '0';
 
   constructor(model: PortfolioIdentifierModel) {
     Object.assign(this, model);

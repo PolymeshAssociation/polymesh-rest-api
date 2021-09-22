@@ -10,12 +10,12 @@ import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
 export class PortfolioModel {
   @ApiPropertyOptional({
-    description: 'Portfolio number. An empty value represents the Default Portfolio',
+    description: 'Portfolio number. 0 represents the Default Portfolio',
     type: 'string',
     example: '123',
   })
   @FromBigNumber()
-  readonly id?: BigNumber;
+  readonly id?: BigNumber = new BigNumber(0);
 
   @ApiProperty({
     description: 'Name of the Portfolio',

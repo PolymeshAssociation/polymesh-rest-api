@@ -7,6 +7,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { processQueue } from '~/common/utils/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
+import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()
@@ -44,11 +45,11 @@ export class PortfoliosService {
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): Promise<TransactionQueueModel> {
-    const { signer, to, items } = params;
-    const fromPortfolio = await this.findOne(owner, params.from);
+    const { signer, to, items, from } = params;
+    const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const args: MoveFundsParams = {
-      to,
+      to: toPortfolioId(to),
       items: items.map(({ ticker: token, amount, memo }) => {
         return {
           token,

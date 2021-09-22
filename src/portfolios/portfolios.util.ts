@@ -1,5 +1,6 @@
 /** istanbul ignore file */
 
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   DefaultPortfolio,
   Identity,
@@ -60,4 +61,11 @@ export function createPortfolioIdentifierModel(
   portfolio: DefaultPortfolio | NumberedPortfolio
 ): PortfolioIdentifierModel {
   return new PortfolioIdentifierModel(portfolio.toJson());
+}
+
+export function toPortfolioId(id?: BigNumber): BigNumber | undefined {
+  if (id === new BigNumber(0)) {
+    return undefined;
+  }
+  return id;
 }
