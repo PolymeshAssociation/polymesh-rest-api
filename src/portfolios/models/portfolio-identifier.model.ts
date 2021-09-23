@@ -2,6 +2,8 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
+import { FromPortfolioId } from '~/common/decorators/transformation';
+
 export class PortfolioIdentifierModel {
   @ApiProperty({
     description: 'The DID of the Portfolio owner',
@@ -15,7 +17,8 @@ export class PortfolioIdentifierModel {
     type: 'string',
     example: '123',
   })
-  readonly id?: string = '0';
+  @FromPortfolioId()
+  readonly id?: string;
 
   constructor(model: PortfolioIdentifierModel) {
     Object.assign(this, model);

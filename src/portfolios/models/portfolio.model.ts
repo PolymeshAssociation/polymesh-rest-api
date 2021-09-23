@@ -6,7 +6,7 @@ import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { FromEntity, FromPortfolioId } from '~/common/decorators/transformation';
 
 export class PortfolioModel {
   @ApiPropertyOptional({
@@ -14,8 +14,8 @@ export class PortfolioModel {
     type: 'string',
     example: '123',
   })
-  @FromBigNumber()
-  readonly id?: BigNumber = new BigNumber(0);
+  @FromPortfolioId()
+  readonly id?: BigNumber;
 
   @ApiProperty({
     description: 'Name of the Portfolio',
