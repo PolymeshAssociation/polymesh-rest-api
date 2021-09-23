@@ -9,7 +9,7 @@ import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { FromEntity, FromPortfolioId } from '~/common/decorators/transformation';
 
 export class PortfolioModel {
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Portfolio number. 0 represents the Default Portfolio',
     type: 'string',
     example: '123',
