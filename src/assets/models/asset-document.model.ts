@@ -17,12 +17,12 @@ export class AssetDocumentModel {
   })
   readonly uri: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Hash of the content in the document',
     type: 'string',
     example: '8743b52063cd84097a65d1633f5c74f5',
   })
-  readonly contentHash: string;
+  readonly contentHash?: string;
 
   @ApiPropertyOptional({
     description: 'Type of the document',

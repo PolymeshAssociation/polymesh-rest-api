@@ -18,12 +18,12 @@ export class AssetDocumentDto {
   @IsString()
   readonly uri: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The type of content hash',
     example: 'h512',
   })
   @IsString()
-  readonly contentHash: string;
+  readonly contentHash?: string;
 
   @ApiPropertyOptional({
     description: 'The type of document',

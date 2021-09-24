@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
+  ErrorCode,
   Instruction,
   InstructionAffirmation,
   isPolymeshError,
@@ -46,9 +47,9 @@ export class SettlementsService {
       });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
-        const { message } = err;
+        const { code } = err;
 
-        if (message.startsWith("The Instruction doesn't")) {
+        if (code === ErrorCode.ValidationError) {
           throw new NotFoundException(`There is no Instruction with ID ${id.toString()}`);
         }
       }
@@ -107,9 +108,9 @@ export class SettlementsService {
       });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
-        const { message } = err;
+        const { code, message } = err;
 
-        if (message.startsWith("The Venue doesn't")) {
+        if (code === ErrorCode.ValidationError && message.startsWith("The Venue doesn't")) {
           throw new NotFoundException(`There is no Venue with ID "${id.toString()}"`);
         }
       }

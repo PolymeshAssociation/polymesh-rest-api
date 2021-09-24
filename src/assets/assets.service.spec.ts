@@ -77,7 +77,10 @@ describe('AssetsService', () => {
     describe('if the Asset does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.getSecurityToken.mockImplementation(() => {
-          throw new Error('There is no Security Token with ticker');
+          throw new PolymeshError({
+            code: ErrorCode.DataUnavailable,
+            message: 'There is no Security Token with ticker',
+          });
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -325,7 +328,10 @@ describe('AssetsService', () => {
     describe('if the asset has already been created', () => {
       it('should throw a GoneException', async () => {
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
-          throw new Error('BRK.A token has been created');
+          throw new PolymeshError({
+            code: ErrorCode.FatalError,
+            message: 'BRK.A token has been created',
+          });
         });
         mockIsPolymeshError.mockReturnValue(true);
         let error;

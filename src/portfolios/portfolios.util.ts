@@ -63,8 +63,8 @@ export function createPortfolioIdentifierModel(
   return new PortfolioIdentifierModel(portfolio.toJson());
 }
 
-export function toPortfolioId(id?: BigNumber): BigNumber | undefined {
-  if (id === new BigNumber(0)) {
+export function toPortfolioId(id: BigNumber): BigNumber | undefined {
+  if (id.isEqualTo(new BigNumber(0))) {
     return undefined;
   }
   return id;

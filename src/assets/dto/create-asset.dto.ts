@@ -2,14 +2,14 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { KnownTokenType, TokenType } from '@polymathnetwork/polymesh-sdk/types';
+import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { AssetIdentifierDto } from '~/assets/dto/asset-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsAssetType, IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
 export class CreateAssetDto extends SignerDto {
@@ -49,8 +49,8 @@ export class CreateAssetDto extends SignerDto {
     enum: KnownTokenType,
     example: KnownTokenType.EquityCommon,
   })
-  @IsAssetType()
-  readonly assetType: TokenType;
+  @IsString()
+  readonly assetType: string;
 
   @ApiPropertyOptional({
     description: 'List of Asset Identifiers',

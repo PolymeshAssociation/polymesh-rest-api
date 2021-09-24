@@ -105,9 +105,9 @@ describe('IdentitiesController', () => {
 
       const mockIdentity = new MockIdentity();
       mockIdentity.did = did;
-      mockIdentity.getPrimaryKey.mockResolvedValue(
-        '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e'
-      );
+      mockIdentity.getPrimaryKey.mockResolvedValue({
+        address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+      });
       mockIdentity.areSecondaryKeysFrozen.mockResolvedValue(false);
       mockIdentity.getSecondaryKeys.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);

@@ -3,7 +3,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
-import { IsOptional } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsDid } from '~/common/decorators/validation';
@@ -18,12 +17,11 @@ export class PortfolioDto {
 
   @ApiPropertyOptional({
     example: '123',
-    description: 'Portfolio number, do not send any value for the Default Portfolio',
+    description: 'Portfolio number. Use 0 for the Default Portfolio',
   })
-  @IsOptional()
   @IsBigNumber()
   @ToBigNumber()
-  readonly id?: BigNumber;
+  readonly id: BigNumber;
 
   public toPortfolioLike(): PortfolioLike {
     const { did, id } = this;

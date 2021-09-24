@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { MoveFundsParams, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/internal';
-import { DefaultPortfolio, isPolymeshError } from '@polymathnetwork/polymesh-sdk/types';
+import { DefaultPortfolio, ErrorCode, isPolymeshError } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { processQueue } from '~/common/utils/utils';
@@ -35,8 +35,8 @@ export class PortfoliosService {
       }
     } catch (err) {
       if (isPolymeshError(err)) {
-        const { message } = err;
-        if (message.startsWith("The Portfolio doesn't")) {
+        const { code, message } = err;
+        if (code === ErrorCode.ValidationError && message.startsWith("The Portfolio doesn't")) {
           throw new NotFoundException(`There is no portfolio with ID: "${portfolioId}"`);
         }
       }
