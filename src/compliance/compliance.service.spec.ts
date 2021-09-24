@@ -58,7 +58,6 @@ describe('ComplianceService', () => {
       const mockSecurityToken = new MockSecurityToken();
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockRequirements);
 
       const result = await service.findComplianceRequirements('TICKER');
@@ -81,7 +80,6 @@ describe('ComplianceService', () => {
       const address = 'address';
       mockAsset.compliance.requirements.set.mockResolvedValue(mockQueue);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockRelayerAccountsService.findAddressByDid.mockResolvedValue('address');
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
       const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };

@@ -4,6 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ConditionTarget,
   ConditionType,
+  Identity,
   isMultiClaimCondition,
   isSingleClaimCondition,
 } from '@polymathnetwork/polymesh-sdk/types';
@@ -11,9 +12,8 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
+import { IsDid } from '~/common/decorators/validation';
 import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
-
-import { IdentityDto } from '../../identities/dto/identity.dto';
 
 export class ConditionDto {
   @ApiProperty({
@@ -22,7 +22,7 @@ export class ConditionDto {
     example: ConditionTarget.Both,
   })
   @IsEnum(ConditionTarget)
-  target: ConditionTarget;
+  readonly target: ConditionTarget;
 
   @ApiProperty({
     description:
@@ -31,16 +31,16 @@ export class ConditionDto {
     example: ConditionType.IsNoneOf,
   })
   @IsEnum(ConditionType)
-  type: ConditionType;
+  readonly type: ConditionType;
 
   @ApiPropertyOptional({
-    description: 'Optional Trusted Claim Provider Identities for this Condition. Defaults to all',
+    description: 'Optional Trusted Claim Issuer for this Condition. Defaults to all',
     isArray: true,
     type: TrustedClaimIssuerDto,
   })
   @ValidateNested({ each: true })
   @Type(() => TrustedClaimIssuerDto)
-  trustedClaimIssuers?: TrustedClaimIssuerDto[];
+  readonly trustedClaimIssuers?: TrustedClaimIssuerDto[];
 
   @ApiPropertyOptional({
     description: 'The Claim for "IsPresent" or "IsAbsent" Conditions',
@@ -50,7 +50,7 @@ export class ConditionDto {
   @ValidateNested()
   @Type(() => ClaimDto)
   @IsNotEmptyObject()
-  claim?: ClaimDto;
+  readonly claim?: ClaimDto;
 
   @ApiPropertyOptional({
     description: 'Claims for "IsAnyOf" or "IsNoneOf" Conditions',
@@ -61,13 +61,17 @@ export class ConditionDto {
   @ValidateNested({ each: true })
   @IsNotEmpty()
   @Type(() => ClaimDto)
-  claims?: ClaimDto[];
+  readonly claims?: ClaimDto[];
 
   @ApiPropertyOptional({
-    description: 'The Identity for "IsIdentity" Condition',
+    description: 'The did of the Identity for "IsIdentity" Condition',
   })
   @ValidateIf(({ type }) => type === ConditionType.IsIdentity)
-  @Type(() => IdentityDto)
-  @ValidateNested()
-  identity?: IdentityDto;
+  @IsDid()
+  readonly did?: string;
+
+  @ApiPropertyOptional({
+    description: 'Placeholder to write to',
+  })
+  identity: Identity; // should be set based on did
 }

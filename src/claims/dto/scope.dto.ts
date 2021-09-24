@@ -1,10 +1,16 @@
 /* istanbul ignore file */
 
+import { Scope } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
-import { IsValidScope } from '~/common/decorators/validation';
+import { IsValidScopeValue } from '~/common/decorators/validation';
+
+// No Custom scope types for now
+// export const { Custom, ...DefinedScopeTypeEnum } = ScopeType;
+// type excludedOptions = typeof ScopeType.Custom;
+// type DefinedScopeType = Exclude<typeof DefinedScopeTypeEnum, excludedOptions>;
 
 export class ScopeDto {
   @ApiProperty({
@@ -21,6 +27,6 @@ export class ScopeDto {
       'The value of the Scope. This is a hex prefixed 64 charcter string for `Identity`, 12 uppercase letters for Ticker',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @IsValidScope('type')
+  @IsValidScopeValue('type')
   value: string;
 }

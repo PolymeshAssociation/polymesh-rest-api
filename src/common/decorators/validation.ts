@@ -62,7 +62,7 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
     registerDecorator({
       name: 'isBigNumber',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: {
         validate(value: unknown) {
@@ -82,7 +82,7 @@ export function IsAssetType() {
     registerDecorator({
       name: 'isAssetType',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       validator: {
         validate(value: unknown) {
           if (typeof value === 'string') {
@@ -103,19 +103,19 @@ export function IsAssetType() {
   };
 }
 
-// export function IsMaybeTicker(property: string, validationOptions?: ValidationOptions) {
-//   return applyDecorators(ValidateIf(object[property] === ScopeType.Ticker));
-// }
-
-export function IsValidScope(property: string, validationOptions?: ValidationOptions) {
+/**
+ * Applies validation to a scope value field based on a scope type.
+ *   `property` specifies which field to use as the scope type (probably 'type').
+ */
+export function IsValidScopeValue(property: string, validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isValidScopeType',
+      name: 'isValidScopeValue',
       target: object.constructor,
       options: validationOptions,
       constraints: [property],
-      propertyName: propertyName,
+      propertyName,
       validator: {
         validate(value: unknown, args: ValidationArguments) {
           const [scopeTypeField] = args.constraints;
@@ -130,8 +130,6 @@ export function IsValidScope(property: string, validationOptions?: ValidationOpt
                 matches(value as string, /^0x.+/) &&
                 length(value, DID_LENGTH, undefined)
               );
-            case ScopeType.Custom:
-              return isHexadecimal(value);
             default:
               return true; // if the user gave a bad enum value then we can't meaningfully validate the value
           }

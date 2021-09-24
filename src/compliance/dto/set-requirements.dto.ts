@@ -11,7 +11,7 @@ import { ConditionDto } from '~/compliance/dto/condition.dto';
 export class SetRequirementsDto extends SignerDto {
   @ApiProperty({
     description:
-      'Asset transfers must comply with all of the rules with at least one `conditionSet`. Essentially each `conditionSet` has an *or* between them, while the inner elements have an *and* between them',
+      'Asset transfers must comply with all of the rules in one of the top level elements. Essentially each outer array element has an *or* between them, while the inner elements have an *and* between them',
     isArray: true,
     type: ConditionDto,
     example: [
@@ -38,9 +38,9 @@ export class SetRequirementsDto extends SignerDto {
           ],
           trustedClaimIssuers: [
             {
-              identity: {
-                did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-              },
+              // identity: {
+              did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+              // },
               trustedFor: [ClaimType.Blocked],
             },
           ],
@@ -63,9 +63,9 @@ export class SetRequirementsDto extends SignerDto {
         {
           target: 'Receiver',
           type: 'IsIdentity',
-          identity: {
-            did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-          },
+          // identity: {
+          did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+          // },
         },
       ],
     ],
@@ -74,5 +74,5 @@ export class SetRequirementsDto extends SignerDto {
   @IsNotEmpty()
   @IsArray({ each: true })
   @ValidateNested({ each: true })
-  requirements: ConditionDto[][];
+  readonly requirements: ConditionDto[][];
 }

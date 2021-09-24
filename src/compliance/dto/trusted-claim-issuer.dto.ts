@@ -1,17 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
-import { Type } from 'class-transformer';
-import { IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { ClaimType, Identity } from '@polymathnetwork/polymesh-sdk/types';
+import { IsEnum, IsOptional } from 'class-validator';
 
-import { IdentityDto } from '~/identities/dto/identity.dto';
+import { IsDid } from '~/common/decorators/validation';
 
 export class TrustedClaimIssuerDto {
   @ApiProperty({
-    description: 'The identity of the Issuer',
+    description: 'The DID of the Issuer',
   })
-  @Type(() => IdentityDto)
-  @ValidateNested()
-  identity: IdentityDto;
+  @IsDid()
+  readonly did: string;
 
   @ApiPropertyOptional({
     description:
@@ -21,5 +19,10 @@ export class TrustedClaimIssuerDto {
   })
   @IsOptional()
   @IsEnum(ClaimType, { each: true })
-  trustedFor?: ClaimType[];
+  readonly trustedFor?: ClaimType[];
+
+  @ApiPropertyOptional({
+    description: 'Placeholder to write to',
+  })
+  identity: Identity; // should be set based on did value
 }
