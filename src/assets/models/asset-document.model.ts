@@ -2,6 +2,8 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
+
 export class AssetDocumentModel {
   @ApiProperty({
     description: 'Name of the document',
@@ -20,7 +22,7 @@ export class AssetDocumentModel {
   @ApiPropertyOptional({
     description: 'Hash of the content in the document',
     type: 'string',
-    example: '0x'.padEnd(130, 'a'),
+    example: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
   })
   readonly contentHash?: string;
 

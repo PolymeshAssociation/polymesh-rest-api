@@ -8,6 +8,7 @@ import {
   TokenIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -122,7 +123,7 @@ describe('AssetsController', () => {
         {
           name: 'TEST-DOC',
           uri: 'URI',
-          contentHash: '0x'.padEnd(130, 'a'),
+          contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
         },
       ],
       next: '0xddddd',

@@ -21,7 +21,7 @@ export class AssetDocumentDto {
 
   @ApiPropertyOptional({
     description: 'The type of content hash',
-    example: '0x'.padEnd(130, 'a'),
+    example: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
   })
   @IsOptional()
   @IsHexadecimal({

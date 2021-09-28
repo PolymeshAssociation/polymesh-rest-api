@@ -14,6 +14,7 @@ import {
   TxTags,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -213,7 +214,7 @@ describe('AssetsService', () => {
         {
           name: 'TEST-DOC',
           uri: 'URI',
-          contentHash: '0x'.padEnd(130, 'a'),
+          contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
         },
       ],
       next: '0xddddd',
