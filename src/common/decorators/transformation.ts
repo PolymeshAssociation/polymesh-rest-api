@@ -72,6 +72,6 @@ export function FromBigNumber() {
 
 export function FromPortfolioId() {
   return applyDecorators(
-    Transform(({ value }: { value: BigNumber | string }) => (value || new BigNumber(0)).toString())
+    Transform(({ value }: { value?: BigNumber | string }) => (value || new BigNumber(0)).toString())
   );
 }

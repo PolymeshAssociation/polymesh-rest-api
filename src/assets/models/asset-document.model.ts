@@ -20,7 +20,7 @@ export class AssetDocumentModel {
   @ApiPropertyOptional({
     description: 'Hash of the content in the document',
     type: 'string',
-    example: '8743b52063cd84097a65d1633f5c74f5',
+    example: '0x'.padEnd(130, 'a'),
   })
   readonly contentHash?: string;
 

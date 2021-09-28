@@ -122,7 +122,7 @@ describe('AssetsController', () => {
         {
           name: 'TEST-DOC',
           uri: 'URI',
-          contentHash: 'None',
+          contentHash: '0x'.padEnd(130, 'a'),
         },
       ],
       next: '0xddddd',

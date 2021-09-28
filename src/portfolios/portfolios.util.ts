@@ -64,7 +64,7 @@ export function createPortfolioIdentifierModel(
 }
 
 export function toPortfolioId(id: BigNumber): BigNumber | undefined {
-  if (id.isEqualTo(new BigNumber(0))) {
+  if (id.eq(0)) {
     return undefined;
   }
   return id;

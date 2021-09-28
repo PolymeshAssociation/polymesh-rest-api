@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -15,7 +15,7 @@ export class PortfolioDto {
   @IsDid()
   readonly did: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: '123',
     description: 'Portfolio number. Use 0 for the Default Portfolio',
   })
