@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { IsOptional, ValidateNested } from 'class-validator';
+import { ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -11,23 +11,21 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { PortfolioMovementDto } from '~/portfolios/dto/portfolio-movement.dto';
 
 export class AssetMovementDto extends SignerDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: '2',
-    description: 'ID of the Portfolio to move the Asset from. Defaults to default Portfolio',
+    description: 'ID of the Portfolio to move the Asset from. Use 0 for default Portfolio',
   })
-  @IsOptional()
   @IsBigNumber()
   @ToBigNumber()
-  readonly from?: BigNumber;
+  readonly from: BigNumber;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: '1',
-    description: 'ID of the Portfolio to move the Asset to. Defaults to default Portfolio',
+    description: 'ID of the Portfolio to move the Asset to. Use 0 for default Portfolio',
   })
-  @IsOptional()
   @IsBigNumber()
   @ToBigNumber()
-  readonly to?: BigNumber;
+  readonly to: BigNumber;
 
   @ApiProperty({
     description: 'List of Assets and amounts to be moved',

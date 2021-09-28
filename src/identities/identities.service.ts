@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Identity, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  ErrorCode,
+  Identity,
+  isPolymeshError,
+  SecurityToken,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -20,16 +25,18 @@ export class IdentitiesService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-
-    const identity = polymeshApi.getIdentity({ did });
-    const isValid = await polymeshApi.isIdentityValid({ identity });
-
-    if (!isValid) {
-      this.logger.error(`No valid identity found for did "${did}"`);
-      throw new NotFoundException(`There is no Identity with DID "${did}"`);
+    try {
+      return await polymeshApi.getIdentity({ did });
+    } catch (err: unknown) {
+      if (isPolymeshError(err)) {
+        const { code } = err;
+        if (code === ErrorCode.DataUnavailable) {
+          this.logger.error(`No valid identity found for did "${did}"`);
+          throw new NotFoundException(`There is no Identity with DID "${did}"`);
+        }
+      }
+      throw err;
     }
-
-    return identity;
   }
 
   /**

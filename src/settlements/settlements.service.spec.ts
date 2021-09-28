@@ -4,8 +4,10 @@ const mockIsPolymeshError = jest.fn();
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   AffirmationStatus,
+  ErrorCode,
   TransferError,
   TxTags,
   VenueType,
@@ -105,7 +107,10 @@ describe('SettlementsService', () => {
     describe('if the instruction does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw new Error("The Instruction doesn't");
+          throw new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: "The Instruction doesn't",
+          });
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -164,7 +169,10 @@ describe('SettlementsService', () => {
     describe('if the Venue does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw new Error("The Venue doesn't");
+          throw new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: "The Venue doesn't",
+          });
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -242,8 +250,10 @@ describe('SettlementsService', () => {
       const params = {
         legs: [
           {
-            from: new PortfolioDto({ did: 'fromDid' }),
-            to: new PortfolioDto({ did: 'toDid' }),
+            from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
+            to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
+            amount: new BigNumber(100),
+            asset: 'TOKEN',
           },
         ],
       };
@@ -268,7 +278,16 @@ describe('SettlementsService', () => {
         ],
       });
       expect(mockVenue.addInstruction).toHaveBeenCalledWith(
-        { legs: [{ from: 'fromDid', to: 'toDid' }] },
+        {
+          legs: [
+            {
+              from: 'fromDid',
+              to: { identity: 'toDid', id: new BigNumber(1) },
+              amount: new BigNumber(100),
+              token: 'TOKEN',
+            },
+          ],
+        },
         { signer: address }
       );
       findVenueSpy.mockRestore();
@@ -358,7 +377,7 @@ describe('SettlementsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
-            tag: TxTags.settlement.UpdateVenue,
+            tag: TxTags.settlement.UpdateVenueType,
           },
         ];
         const mockQueue = new MockTransactionQueue(transactions);
@@ -380,7 +399,7 @@ describe('SettlementsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
-              transactionTag: TxTags.settlement.UpdateVenue,
+              transactionTag: TxTags.settlement.UpdateVenueType,
             },
           ],
         });
@@ -503,8 +522,8 @@ describe('SettlementsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
       const result = await service.canTransfer(
-        new PortfolioDto({ did: 'fromDid' }).toPortfolioLike(),
-        new PortfolioDto({ did: 'toDid' }).toPortfolioLike(),
+        new PortfolioDto({ did: 'fromDid', id: new BigNumber(1) }).toPortfolioLike(),
+        new PortfolioDto({ did: 'toDid', id: new BigNumber(2) }).toPortfolioLike(),
         'TICKER',
         new BigNumber('123')
       );

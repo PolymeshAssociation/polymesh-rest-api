@@ -20,7 +20,7 @@ export async function createIdentityModel(identity: Identity): Promise<IdentityM
   ]);
   return new IdentityModel({
     did: identity.did,
-    primaryKey,
+    primaryKey: primaryKey.address,
     secondaryKeysFrozen,
     secondaryKeys: secondaryKeys.map(
       ({ signer, permissions }) =>

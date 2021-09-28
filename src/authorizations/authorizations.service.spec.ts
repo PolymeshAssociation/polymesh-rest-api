@@ -34,7 +34,11 @@ describe('AuthorizationsService', () => {
         id: '1',
         expiry: null,
         data: {
-          type: AuthorizationType.NoData,
+          type: AuthorizationType.PortfolioCustody,
+          value: {
+            did: '0x6'.padEnd(66, '1a1a'),
+            id: '1',
+          },
         },
         issuer: {
           did: '0x6'.padEnd(66, '1a1a'),
@@ -61,7 +65,7 @@ describe('AuthorizationsService', () => {
 
     it('should return a list of pending Authorizations by authorization type', async () => {
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findPendingByDid(did, true, AuthorizationType.NoData);
+      const result = await service.findPendingByDid(did, true, AuthorizationType.PortfolioCustody);
       expect(result).toEqual(mockAuthorizations);
     });
   });

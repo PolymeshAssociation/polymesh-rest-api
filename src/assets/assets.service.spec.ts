@@ -14,6 +14,7 @@ import {
   TxTags,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -77,7 +78,10 @@ describe('AssetsService', () => {
     describe('if the Asset does not exist', () => {
       it('should throw a NotFoundException', async () => {
         mockPolymeshApi.getSecurityToken.mockImplementation(() => {
-          throw new Error('There is no Security Token with ticker');
+          throw new PolymeshError({
+            code: ErrorCode.DataUnavailable,
+            message: 'There is no Security Token with ticker',
+          });
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -210,7 +214,7 @@ describe('AssetsService', () => {
         {
           name: 'TEST-DOC',
           uri: 'URI',
-          contentHash: 'None',
+          contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
         },
       ],
       next: '0xddddd',
@@ -325,7 +329,10 @@ describe('AssetsService', () => {
     describe('if the asset has already been created', () => {
       it('should throw a GoneException', async () => {
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
-          throw new Error('BRK.A token has been created');
+          throw new PolymeshError({
+            code: ErrorCode.FatalError,
+            message: 'BRK.A token has been created',
+          });
         });
         mockIsPolymeshError.mockReturnValue(true);
         let error;

@@ -1,7 +1,8 @@
 /* istanbul ignore file */
-
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsHexadecimal, IsOptional, IsString, Length, Matches } from 'class-validator';
+
+import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 
 export class AssetDocumentDto {
   @ApiProperty({
@@ -18,19 +19,27 @@ export class AssetDocumentDto {
   @IsString()
   readonly uri: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The type of content hash',
-    example: 'h512',
+    example: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
   })
-  @IsString()
-  readonly contentHash: string;
+  @IsOptional()
+  @IsHexadecimal({
+    message: 'Content Hash must be a hexadecimal number',
+  })
+  @Matches(/^0x.+/, {
+    message: 'Content Hash must start with "0x"',
+  })
+  @Length(MAX_CONTENT_HASH_LENGTH, undefined, {
+    message: `Content Hash must be ${MAX_CONTENT_HASH_LENGTH} characters long`,
+  })
+  readonly contentHash?: string;
 
   @ApiPropertyOptional({
     description: 'The type of document',
     example: '10K',
   })
   @IsOptional()
-  @IsString()
   readonly type?: string;
 
   @ApiPropertyOptional({

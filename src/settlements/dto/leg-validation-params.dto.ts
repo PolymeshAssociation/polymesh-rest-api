@@ -1,8 +1,7 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { IsOptional } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
@@ -25,16 +24,15 @@ export class LegValidationParamsDto {
   @IsDid()
   readonly fromDid: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description:
-      'Portfolio ID of the sender from which Asset is to be transferred. Do not send any value for the Default Portfolio',
+      'Portfolio ID of the sender from which Asset is to be transferred. Use 0 for the Default Portfolio',
     type: 'string',
     example: '1',
   })
-  @IsOptional()
   @IsBigNumber()
   @ToBigNumber()
-  readonly fromPortfolio?: BigNumber;
+  readonly fromPortfolio: BigNumber;
 
   @ApiProperty({
     description: 'DID of the receiver',
@@ -44,16 +42,15 @@ export class LegValidationParamsDto {
   @IsDid()
   readonly toDid: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description:
-      'Portfolio ID of the receiver to which Asset is to be transferred. Do not send any value for the Default Portfolio',
+      'Portfolio ID of the receiver to which Asset is to be transferred. Use 0 for Default Portfolio',
     type: 'string',
     example: '2',
   })
-  @IsOptional()
   @IsBigNumber()
   @ToBigNumber()
-  readonly toPortfolio?: BigNumber;
+  readonly toPortfolio: BigNumber;
 
   @ApiProperty({
     description: 'Ticker of the Asset to be transferred',

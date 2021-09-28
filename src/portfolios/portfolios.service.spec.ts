@@ -4,7 +4,8 @@ const mockIsPolymeshError = jest.fn();
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { IdentitiesService } from '~/identities/identities.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
@@ -81,7 +82,10 @@ describe('PortfoliosService', () => {
         const mockIdentity = new MockIdentity();
         const owner = '0x6000';
         mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
-          throw new Error("The Portfolio doesn't exist");
+          throw new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: "The Portfolio doesn't exist",
+          });
         });
         mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
         mockIsPolymeshError.mockResolvedValue(true);
@@ -157,6 +161,7 @@ describe('PortfoliosService', () => {
       const body = {
         signer: '0x6000',
         to: new BigNumber('2'),
+        from: new BigNumber('0'),
         items: [
           {
             ticker: 'TICKER',

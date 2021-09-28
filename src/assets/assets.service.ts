@@ -2,6 +2,7 @@ import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSecurityTokenParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   DefaultTrustedClaimIssuer,
+  ErrorCode,
   IdentityBalance,
   isPolymeshError,
   Requirement,
@@ -33,8 +34,11 @@ export class AssetsService {
       return asset;
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
-        const { message } = err;
-        if (message.startsWith('There is no Security Token with ticker')) {
+        const { code, message } = err;
+        if (
+          code === ErrorCode.DataUnavailable &&
+          message.startsWith('There is no Security Token with ticker')
+        ) {
           throw new NotFoundException(`There is no Asset with ticker "${ticker}"`);
         }
       }
@@ -139,10 +143,10 @@ export class AssetsService {
       return reservation;
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
-        const { message } = err;
-        if (message.startsWith('There is no reservation for')) {
+        const { code, message } = err;
+        if (code === ErrorCode.FatalError && message.startsWith('There is no reservation for')) {
           throw new NotFoundException(`There is no reservation for "${ticker}"`);
-        } else if (message.endsWith('token has been created')) {
+        } else if (code === ErrorCode.FatalError && message.endsWith('token has been created')) {
           throw new GoneException(`${ticker} has already been created`);
         }
       }
