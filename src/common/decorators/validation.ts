@@ -130,8 +130,10 @@ export function IsValidScopeValue(property: string, validationOptions?: Validati
                 matches(value as string, /^0x.+/) &&
                 length(value, DID_LENGTH, undefined)
               );
+            case ScopeType.Custom:
+              return false;
             default:
-              return true; // if the user gave a bad enum value then we can't meaningfully validate the value
+              return true;
           }
         },
         defaultMessage(args: ValidationArguments) {
@@ -144,7 +146,7 @@ export function IsValidScopeValue(property: string, validationOptions?: Validati
             case ScopeType.Identity:
               return `value must be a hex string ${DID_LENGTH} characters long and prefixed with 0x`;
             case ScopeType.Custom:
-              return `value must be hex string for type: ${scopeType}`;
+              return 'ScopeType.Custom not currently supported';
           }
           return `value must be a valid scope value for ${property}: ${scopeType}`;
         },

@@ -241,42 +241,6 @@ describe('AssetsService', () => {
     });
   });
 
-  describe('findComplianceRequirements', () => {
-    it('should return the list of Asset compliance requirements', async () => {
-      const mockRequirements = [
-        {
-          id: 1,
-          conditions: [
-            {
-              type: ConditionType.IsPresent,
-              claim: {
-                type: ClaimType.Accredited,
-                scope: {
-                  type: ScopeType.Identity,
-                  value: 'Ox6'.padEnd(66, '0'),
-                },
-              },
-              target: 'Receiver',
-              trustedClaimIssuers: [],
-            },
-          ],
-        },
-      ];
-
-      const mockSecurityToken = new MockSecurityToken();
-
-      const findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockSecurityToken as any);
-      mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockRequirements);
-
-      const result = await service.findComplianceRequirements('TICKER');
-
-      expect(result).toEqual(mockRequirements);
-      findOneSpy.mockRestore();
-    });
-  });
-
   describe('findTrustedClaimIssuers', () => {
     it('should return the list of trusted Claim Issuers of an Asset', async () => {
       const mockClaimIssuers = [

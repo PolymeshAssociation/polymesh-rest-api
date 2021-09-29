@@ -4,7 +4,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ConditionTarget,
   ConditionType,
-  Identity,
   isMultiClaimCondition,
   isSingleClaimCondition,
 } from '@polymathnetwork/polymesh-sdk/types';
@@ -12,8 +11,8 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
-import { IsDid } from '~/common/decorators/validation';
 import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
+import { IdentityDto } from '~/identities/dto/identity.dto';
 
 export class ConditionDto {
   @ApiProperty({
@@ -64,14 +63,9 @@ export class ConditionDto {
   readonly claims?: ClaimDto[];
 
   @ApiPropertyOptional({
-    description: 'The did of the Identity for "IsIdentity" Condition',
+    description: 'The Identity for "IsIdentity" Condition',
   })
-  @ValidateIf(({ type }) => type === ConditionType.IsIdentity)
-  @IsDid()
-  readonly did?: string;
-
-  @ApiPropertyOptional({
-    description: 'Placeholder to write to',
-  })
-  identity: Identity; // should be set based on did
+  @ValidateNested()
+  @Type(() => IdentityDto)
+  readonly identity: IdentityDto;
 }

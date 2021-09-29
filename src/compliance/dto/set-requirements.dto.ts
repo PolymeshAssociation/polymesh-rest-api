@@ -38,9 +38,9 @@ export class SetRequirementsDto extends SignerDto {
           ],
           trustedClaimIssuers: [
             {
-              // identity: {
-              did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-              // },
+              identity: {
+                did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+              },
               trustedFor: [ClaimType.Blocked],
             },
           ],
@@ -63,9 +63,9 @@ export class SetRequirementsDto extends SignerDto {
         {
           target: 'Receiver',
           type: 'IsIdentity',
-          // identity: {
-          did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-          // },
+          identity: {
+            did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+          },
         },
       ],
     ],

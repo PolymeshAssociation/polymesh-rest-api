@@ -1,16 +1,10 @@
 /* istanbul ignore file */
 
-import { Scope } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 import { IsValidScopeValue } from '~/common/decorators/validation';
-
-// No Custom scope types for now
-// export const { Custom, ...DefinedScopeTypeEnum } = ScopeType;
-// type excludedOptions = typeof ScopeType.Custom;
-// type DefinedScopeType = Exclude<typeof DefinedScopeTypeEnum, excludedOptions>;
 
 export class ScopeDto {
   @ApiProperty({

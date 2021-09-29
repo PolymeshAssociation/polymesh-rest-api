@@ -8,7 +8,7 @@ import {
   ScopeType,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmptyObject, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ScopeDto } from '~/claims/dto/scope.dto';
 import { IsCddId } from '~/common/decorators/validation';
@@ -64,8 +64,10 @@ export class ClaimDto {
   @ApiPropertyOptional({
     description: 'Optional Identities to trust for this Claim. Defaults to all',
     isArray: true,
+    type: TrustedClaimIssuerDto,
   })
   @ValidateNested({ each: true })
+  @IsOptional()
   @Type(() => TrustedClaimIssuerDto)
   trustedClaimIssuers?: TrustedClaimIssuerDto[];
 }
