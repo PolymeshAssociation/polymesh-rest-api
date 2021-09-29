@@ -14,7 +14,7 @@ export class InstructionStatusDto {
   readonly status: string;
 
   @ApiProperty({
-    nullable: true,
+    required: false,
     description:
       'Identifies the event where the Instruction execution was attempted. This value will not be present for a "Pending" Instruction',
   })

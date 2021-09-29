@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          cache: 'yarn'
+      - name: install dependencies
+        run: yarn --frozen-lockfile
+      - name: lint
+        run: yarn lint
+
+  build:
+    name: Building
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          cache: 'yarn'
+      - name: install dependencies
+        run: yarn --frozen-lockfile
+      - name: build
+        run: yarn build
+
+  test:
+    name: Testing
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          cache: 'yarn'
+      - name: install dependencies
+        run: yarn --frozen-lockfile
+      - name: test
+        run: yarn test:cov
+      # TODO @monitz87: add SonarCloud step when the account confusion is sorted

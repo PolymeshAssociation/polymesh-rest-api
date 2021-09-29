@@ -3,10 +3,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, PortfolioLike, Venue } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity } from '@polymathnetwork/polymesh-sdk/types';
 import { Transform } from 'class-transformer';
+import { mapValues } from 'lodash';
 
-import { PortfolioDto } from '~/common/dto/portfolio.dto';
+import { Entity } from '~/common/types';
 
 /**
  * String -> BigNumber
@@ -16,41 +17,61 @@ export function ToBigNumber() {
 }
 
 /**
- * PortfolioDto -> PortfolioLike
+ * Entity -> POJO
  */
-export function ToPortfolioLike() {
+export function FromEntity() {
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toJson()));
+}
+
+/**
+ * Transforms every Entity in an array to its POJO version
+ */
+export function FromMaybeEntityArray() {
   return applyDecorators(
-    Transform(
-      ({ value: { did, id } }: { value: PortfolioDto }): PortfolioLike => {
-        if (id) {
-          return {
-            identity: did,
-            id: new BigNumber(id),
-          };
+    Transform(({ value }: { value: unknown[] }) =>
+      value.map(val => {
+        if (isEntity(val)) {
+          return val.toJson();
         }
-        return did;
-      }
+
+        return val;
+      })
     )
   );
 }
-
 /**
- * Venue -> string
+ * Transform all SDK Entities in the object/array into their serialized versions,
+ *   or serialize the value if it is an SDK Entity in
  */
-export function FromVenue() {
-  return applyDecorators(Transform(({ value: { id } }: { value: Venue }) => id.toString()));
+export function FromEntityObject() {
+  return applyDecorators(Transform(({ value }: { value: unknown }) => toJsonObject(value)));
 }
 
-/**
- * Identity -> string
- */
-export function FromIdentity() {
-  return applyDecorators(Transform(({ value: { did } }: { value: Identity }) => did));
+function toJsonObject(obj: unknown): unknown {
+  if (isEntity(obj)) {
+    return obj.toJson();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(toJsonObject);
+  }
+
+  if (obj && typeof obj === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return mapValues(obj as any, val => toJsonObject(val));
+  }
+  return obj;
 }
 
 /**
  * BigNumber -> string
  */
 export function FromBigNumber() {
-  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value.toString()));
+  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
+}
+
+export function FromPortfolioId() {
+  return applyDecorators(
+    Transform(({ value }: { value?: BigNumber | string }) => (value || new BigNumber(0)).toString())
+  );
 }

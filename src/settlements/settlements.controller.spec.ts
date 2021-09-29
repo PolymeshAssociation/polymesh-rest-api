@@ -3,11 +3,20 @@ const mockIsPolymeshError = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { InstructionStatus } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  AffirmationStatus,
+  InstructionStatus,
+  InstructionType,
+  TransferError,
+  VenueType,
+} from '@polymathnetwork/polymesh-sdk/types';
 
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { IdentitiesService } from '~/identities/identities.service';
+import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -20,6 +29,11 @@ describe('SettlementsController', () => {
     findInstruction: jest.fn(),
     createInstruction: jest.fn(),
     affirmInstruction: jest.fn(),
+    findVenueDetails: jest.fn(),
+    findAffirmations: jest.fn(),
+    createVenue: jest.fn(),
+    modifyVenue: jest.fn(),
+    canTransfer: jest.fn(),
   };
   const mockIdentitiesService = {};
 
@@ -42,21 +56,50 @@ describe('SettlementsController', () => {
   });
 
   describe('getInstruction', () => {
-    it('should return the instruction status', async () => {
+    it('should return the Instruction details', async () => {
       const date = new Date();
-      const mockStatus = {
-        status: InstructionStatus.Executed,
-        eventIdentifier: {
-          blockNumber: new BigNumber('123'),
-          blockDate: date,
-          eventIndex: 3,
+
+      const mockInstruction = new MockInstruction();
+      const mockInstructionDetails = {
+        venue: {
+          id: new BigNumber('123'),
         },
+        status: InstructionStatus.Pending,
+        createdAt: date,
+        type: InstructionType.SettleOnBlock,
+        endBlock: new BigNumber('1000000'),
       };
-      mockSettlementsService.findInstruction.mockResolvedValue(mockStatus);
+      const mockLegs = {
+        data: [
+          {
+            from: new MockPortfolio(),
+            to: new MockPortfolio(),
+            amount: new BigNumber('100'),
+            token: {
+              ticker: 'TICKER',
+            },
+          },
+        ],
+        next: null,
+      };
+      mockInstruction.details.mockResolvedValue(mockInstructionDetails);
+      mockInstruction.getStatus.mockResolvedValue({ status: InstructionStatus.Pending });
+      mockInstruction.getLegs.mockResolvedValue(mockLegs);
+      mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
+      const result = await controller.getInstruction({ id: new BigNumber('3') });
 
-      const result = await controller.getInstruction({ id: '3' });
-
-      expect(result).toEqual(mockStatus);
+      expect(result).toEqual({
+        ...mockInstructionDetails,
+        legs:
+          mockLegs.data.map(({ from, to, amount, token: asset }) => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            from: createPortfolioIdentifierModel(from as any),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            to: createPortfolioIdentifierModel(to as any),
+            amount,
+            asset,
+          })) || [],
+      });
     });
   });
 
@@ -64,16 +107,16 @@ describe('SettlementsController', () => {
     it('should create an instruction and return the data returned by the service', async () => {
       const transactions = ['transaction'];
       const mockData = {
-        result: { id: 'id' },
+        result: 'fakeInstruction',
         transactions,
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.createInstruction({ id: '3' }, {} as any);
+      const result = await controller.createInstruction({ id: new BigNumber('3') }, {} as any);
 
       expect(result).toEqual({
-        instructionId: 'id',
+        instructionId: 'fakeInstruction',
         transactions,
       });
     });
@@ -88,11 +131,122 @@ describe('SettlementsController', () => {
       mockSettlementsService.affirmInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.affirmInstruction({ id: '3' }, {} as any);
+      const result = await controller.affirmInstruction({ id: new BigNumber('3') }, {} as any);
 
       expect(result).toEqual({
         transactions,
       });
+    });
+  });
+
+  describe('getAffirmations', () => {
+    it('should return the list of affirmations generated for a Instruction', async () => {
+      const mockAffirmations = {
+        data: [
+          {
+            identity: {
+              did: '0x6'.padEnd(66, '0'),
+            },
+            status: AffirmationStatus.Pending,
+          },
+        ],
+        next: null,
+      };
+      mockSettlementsService.findAffirmations.mockResolvedValue(mockAffirmations);
+
+      const result = await controller.getAffirmations({ id: new BigNumber('3') }, { size: 10 });
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: mockAffirmations.data,
+          next: null,
+        })
+      );
+    });
+  });
+
+  describe('getVenueDetails', () => {
+    it('should return the details of the Venue', async () => {
+      const mockVenueDetails = {
+        owner: {
+          did: '0x6'.padEnd(66, '0'),
+        },
+        description: 'Venue desc',
+        type: VenueType.Distribution,
+      };
+      mockSettlementsService.findVenueDetails.mockResolvedValue(mockVenueDetails);
+
+      const result = await controller.getVenueDetails({ id: new BigNumber('3') });
+
+      expect(result).toEqual(mockVenueDetails);
+    });
+  });
+
+  describe('createVenue', () => {
+    it('should create a Venue and return the data returned by the service', async () => {
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        details: 'Generic Exchange',
+        type: VenueType.Exchange,
+      };
+      const transactions = ['transaction'];
+      const mockData = {
+        transactions,
+      };
+      mockSettlementsService.createVenue.mockResolvedValue(mockData);
+
+      const result = await controller.createVenue(body);
+
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('modifyVenue', () => {
+    it('should modify a venue and return the data returned by the service', async () => {
+      const transactions = ['transaction'];
+      const mockData = {
+        transactions,
+      };
+      mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
+
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        description: 'A generic exchange',
+        type: VenueType.Exchange,
+      };
+
+      const result = await controller.modifyVenue({ id: new BigNumber('3') }, body);
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
+
+  describe('validateLeg', () => {
+    it('should call the service and return the Leg validations', async () => {
+      const mockTransferBreakdown = {
+        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+        compliance: {
+          requirements: [],
+          complies: false,
+        },
+        restrictions: [],
+        result: false,
+      };
+
+      mockSettlementsService.canTransfer.mockResolvedValue(mockTransferBreakdown);
+
+      const result = await controller.validateLeg({
+        fromDid: 'fromDid',
+        fromPortfolio: new BigNumber('1'),
+        toDid: 'toDid',
+        toPortfolio: new BigNumber('1'),
+        asset: 'TICKER',
+        amount: new BigNumber('123'),
+      });
+
+      expect(result).toEqual(mockTransferBreakdown);
     });
   });
 });

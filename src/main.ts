@@ -1,9 +1,12 @@
 /* istanbul ignore file */
 
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 import { AppModule } from './app.module';
 
@@ -17,6 +20,11 @@ async function bootstrap() {
         enableImplicitConversion: true,
       },
     })
+  );
+  const logger = new PolymeshLogger();
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+    new LoggingInterceptor(logger)
   );
 
   // Swagger

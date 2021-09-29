@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prepare": "husky install",
     "postinstall": "rimraf node_modules/@polymathnetwork/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto}",
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -28,7 +29,7 @@
     "@nestjs/core": "7.6.15",
     "@nestjs/platform-express": "7.6.15",
     "@nestjs/swagger": "4.8.0",
-    "@polymathnetwork/polymesh-sdk": "6.0.0-beta.17",
+    "@polymathnetwork/polymesh-sdk": "11.0.0-alpha.1",
     "class-transformer": "0.4.0",
     "class-validator": "0.13.1",
     "joi": "17.4.0",
@@ -39,6 +40,7 @@
     "swagger-ui-express": "4.1.6"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "7.15.0",
     "@commitlint/cli": "12.1.4",
     "@commitlint/config-conventional": "12.1.4",
     "@nestjs/cli": "7.6.0",
@@ -72,31 +74,11 @@
     "ts-loader": "8.0.18",
     "ts-node": "9.1.1",
     "tsconfig-paths": "3.9.0",
-    "typescript": "4.2.3"
+    "typescript": "4.3.5"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "moduleNameMapper": {
-      "~/(.*)": "<rootDir>/$1"
-    },
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }
