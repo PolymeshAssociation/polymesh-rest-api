@@ -20,7 +20,8 @@ export class AssetDocumentDto {
   readonly uri: string;
 
   @ApiPropertyOptional({
-    description: 'The type of content hash',
+    description:
+      "Hash of the document's content. Used to verify the integrity of the document pointed at by the URL",
     example: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
   })
   @IsOptional()
