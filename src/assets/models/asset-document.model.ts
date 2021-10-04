@@ -26,7 +26,7 @@ export class AssetDocumentModel {
 
   @ApiPropertyOptional({
     description: 'Type of the document',
-    example: 'Word Document',
+    example: 'Private Placement Memorandum',
   })
   readonly type?: string;
 

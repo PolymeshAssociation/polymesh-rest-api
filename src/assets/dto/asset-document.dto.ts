@@ -37,8 +37,8 @@ export class AssetDocumentDto {
   readonly contentHash?: string;
 
   @ApiPropertyOptional({
-    description: 'The type of document',
-    example: '10K',
+    description: 'Type of the document',
+    example: 'Private Placement Memorandum',
   })
   @IsOptional()
   readonly type?: string;
