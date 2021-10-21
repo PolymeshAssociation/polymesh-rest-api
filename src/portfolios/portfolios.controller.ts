@@ -7,12 +7,13 @@ import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
+import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 
 @ApiTags('portfolios')
-@Controller('/identities/:did/portfolios')
+@Controller({})
 export class PortfoliosController {
   constructor(
     private readonly portfoliosService: PortfoliosService,
@@ -34,7 +35,7 @@ export class PortfoliosController {
     description: 'Return the list of all Portfolios of the given Identity',
     paginated: false,
   })
-  @Get('/')
+  @Get('/identities/:did/portfolios')
   async getPortfolios(@Param() { did }: DidDto): Promise<ResultsModel<PortfolioModel>> {
     this.logger.debug(`Fetching portfolios for ${did}`);
 
@@ -63,12 +64,28 @@ export class PortfoliosController {
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
-  @Post('/asset-movements')
+  @Post('/identities/:did/portfolios/asset-movements')
   public async moveAssets(
     @Param() { did }: DidDto,
     @Body() transferParams: AssetMovementDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.portfoliosService.moveAssets(did, transferParams);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Create a Portfolio',
+    description: 'This endpoint creates a Portfolio',
+  })
+  @ApiCreatedResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('/portfolios')
+  public async createPortfolio(
+    @Body() createPortfolioParams: CreatePortfolioDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.portfoliosService.createPortfolio(createPortfolioParams);
     return new TransactionQueueModel({ transactions });
   }
 }

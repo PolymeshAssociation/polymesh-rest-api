@@ -21,6 +21,7 @@ describe('PortfoliosController', () => {
   const mockPortfoliosService = {
     moveAssets: jest.fn(),
     findAllByOwner: jest.fn(),
+    createPortfolio: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -69,6 +70,21 @@ describe('PortfoliosController', () => {
       };
 
       const result = await controller.moveAssets({ did: '0x6000' }, params);
+
+      expect(result).toEqual({ transactions: ['transaction'] });
+    });
+  });
+
+  describe('createPortfolio', () => {
+    it('should return the transaction details', async () => {
+      const response = { transactions: ['transaction'] };
+      mockPortfoliosService.createPortfolio.mockResolvedValue(response);
+      const params = {
+        signer: '0x6000',
+        name: 'FOLIO-1',
+      };
+
+      const result = await controller.createPortfolio(params);
 
       expect(result).toEqual({ transactions: ['transaction'] });
     });
