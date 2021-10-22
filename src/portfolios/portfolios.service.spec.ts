@@ -209,6 +209,7 @@ describe('PortfoliosService', () => {
         },
       ];
       const mockQueue = new MockTransactionQueue(transactions);
+      mockQueue.run.mockResolvedValue({ id: new BigNumber(1) });
       mockIdentity.portfolios.create.mockResolvedValue(mockQueue);
 
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
@@ -222,7 +223,9 @@ describe('PortfoliosService', () => {
 
       const result = await service.createPortfolio(body);
       expect(result).toEqual({
-        result: undefined,
+        result: {
+          id: new BigNumber(1),
+        },
         transactions: [
           {
             blockHash: '0x1',

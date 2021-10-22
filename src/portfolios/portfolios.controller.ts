@@ -8,12 +8,13 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { PortfolioIdModel } from '~/portfolios/models/portfolio-id.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 
 @ApiTags('portfolios')
-@Controller({})
+@Controller()
 export class PortfoliosController {
   constructor(
     private readonly portfoliosService: PortfoliosService,
@@ -78,14 +79,20 @@ export class PortfoliosController {
     description: 'This endpoint creates a Portfolio',
   })
   @ApiCreatedResponse({
-    description: 'Information about the transaction',
-    type: TransactionQueueModel,
+    description: 'The ID of the newly created Portfolio',
+    type: PortfolioIdModel,
   })
   @Post('/portfolios')
   public async createPortfolio(
     @Body() createPortfolioParams: CreatePortfolioDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.portfoliosService.createPortfolio(createPortfolioParams);
-    return new TransactionQueueModel({ transactions });
+    const {
+      result: { id: portfolioId },
+      transactions,
+    } = await this.portfoliosService.createPortfolio(createPortfolioParams);
+    return new PortfolioIdModel({
+      portfolioId,
+      transactions,
+    });
   }
 }

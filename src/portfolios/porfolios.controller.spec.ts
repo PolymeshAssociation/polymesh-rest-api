@@ -77,7 +77,12 @@ describe('PortfoliosController', () => {
 
   describe('createPortfolio', () => {
     it('should return the transaction details', async () => {
-      const response = { transactions: ['transaction'] };
+      const response = {
+        result: {
+          id: new BigNumber(1),
+        },
+        transactions: ['transaction'],
+      };
       mockPortfoliosService.createPortfolio.mockResolvedValue(response);
       const params = {
         signer: '0x6000',
@@ -86,7 +91,7 @@ describe('PortfoliosController', () => {
 
       const result = await controller.createPortfolio(params);
 
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual({ portfolioId: new BigNumber(1), transactions: ['transaction'] });
     });
   });
 });
