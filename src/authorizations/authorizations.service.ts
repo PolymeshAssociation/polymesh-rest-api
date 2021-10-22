@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   AuthorizationRequest,
   AuthorizationType,
@@ -34,6 +35,14 @@ export class AuthorizationsService {
     return identity.authorizations.getSent({
       size,
       start,
+    });
+  }
+
+  public async findById(did: string, id: BigNumber): Promise<AuthorizationRequest> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return identity.authorizations.getOne({
+      id,
     });
   }
 }

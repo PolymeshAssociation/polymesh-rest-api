@@ -11,6 +11,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { AuthorizationDto } from '~/authorizations/dto/authorization.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
@@ -180,6 +181,39 @@ export class IdentitiesController {
       total: count,
       next: next,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Get a specific Authorization targeting an Identity',
+    description: 'This endpoint will return a specific Authorization targeting an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID whose targeting Authorizations are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiQuery({
+    name: 'id',
+    description: 'The id of the Authorization to be fetched',
+    type: 'number',
+    required: true,
+  })
+  @ApiArrayResponse(AuthorizationRequest, {
+    description: 'Authorization targeting the Identity',
+    paginated: false,
+  })
+  @Get(':did/authorization')
+  async getAuthorization(
+    @Param() { did }: DidDto,
+    @Query() { id }: AuthorizationDto
+  ): Promise<AuthorizationRequest> {
+    this.logger.debug(`Fetching requested authorization for ${did}`);
+
+    const auth = await this.authorizationsService.findById(did, id);
+
+    return auth;
   }
 
   @ApiTags('assets')
