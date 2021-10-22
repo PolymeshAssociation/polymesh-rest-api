@@ -1,14 +1,37 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { ScheduleWithDetails } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoints.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+
+class CheckpointScheduleParamsDto extends IdParamsDto {
+  @ApiProperty({
+    description: 'ID of the Schedule',
+    type: 'string',
+    example: '123',
+  })
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly id: BigNumber;
+
+  @ApiProperty({
+    description: 'The ticker to reserve',
+    example: 'BRK.A',
+  })
+  @IsTicker()
+  readonly ticker: string;
+}
 
 @ApiTags('checkpoints')
 @Controller('assets/:ticker/checkpoints')
@@ -102,6 +125,24 @@ export class CheckpointsController {
             ...details,
           })
       ),
+    });
+  }
+
+  @Get('schedule/:id')
+  public async getSchedule(
+    @Param() { ticker, id }: CheckpointScheduleParamsDto
+  ): Promise<CheckpointScheduleModel> {
+    const {
+      schedule: { id: scheduleId, period, start, complexity, expiryDate },
+      details,
+    }: ScheduleWithDetails = await this.checkpointsService.findScheduleByTicker(ticker, id);
+    return new CheckpointScheduleModel({
+      id: scheduleId,
+      period,
+      start,
+      complexity,
+      expiryDate,
+      ...details,
     });
   }
 }

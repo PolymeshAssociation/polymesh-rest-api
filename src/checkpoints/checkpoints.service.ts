@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   CheckpointWithData,
   ResultSet,
@@ -23,5 +24,10 @@ export class CheckpointsService {
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.checkpoints.schedules.get();
+  }
+
+  public async findScheduleByTicker(ticker: string, id: BigNumber): Promise<ScheduleWithDetails> {
+    const asset = await this.assetsService.findOne(ticker);
+    return asset.checkpoints.schedules.getOne({ id });
   }
 }
