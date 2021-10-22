@@ -1,8 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
@@ -74,5 +75,43 @@ export class CorporateActionsController {
         createDividendDistributionModel(distributionWithDetails)
       ),
     });
+  }
+
+  @ApiOperation({
+    summary: 'Fetch A Dividend Distribution',
+    description:
+      'This endpoint will provide the Dividend Distribution by its correspondent ID associated with an Asset ',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Dividend Distribution is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Dividend Distribution',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description:
+      'The Dividend Distribution associated with the specified Asset and Dividend Distribution ID',
+    type: DividendDistributionModel,
+  })
+  @Get('dividend-distribution/:id')
+  public async getDividendDistribution(
+    @Param() { ticker }: TickerParamsDto,
+    @Param() { id }: IdParamsDto
+  ): Promise<DividendDistributionModel> {
+    const result = await this.corporateActionsService.findDistribution(ticker, id);
+
+    if (!result) {
+      throw new NotFoundException(
+        `Dividdend Distribution with id:"${id}" for Asset "${ticker}" was not found`
+      );
+    }
+
+    return result;
   }
 }
