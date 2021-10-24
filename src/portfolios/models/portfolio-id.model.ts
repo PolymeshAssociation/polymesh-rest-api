@@ -1,19 +1,18 @@
 /* istanbul ignore file */
-
 import { ApiProperty } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Type } from 'class-transformer';
 
-import { FromPortfolioId } from '~/common/decorators/transformation';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+
+import { PortfolioIdentifierModel } from './portfolio-identifier.model';
 
 export class PortfolioIdModel extends TransactionQueueModel {
   @ApiProperty({
-    type: 'string',
-    description: 'ID of the newly created Portfolio',
-    example: '123',
+    description: 'Details of the newly created Portfolio',
+    type: PortfolioIdentifierModel,
   })
-  @FromPortfolioId()
-  readonly portfolioId: BigNumber;
+  @Type(() => PortfolioIdentifierModel)
+  readonly portfolioId: PortfolioIdentifierModel;
 
   constructor(model: PortfolioIdModel) {
     const { transactions, ...rest } = model;

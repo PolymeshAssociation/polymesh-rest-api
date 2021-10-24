@@ -11,7 +11,7 @@ import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioIdModel } from '~/portfolios/models/portfolio-id.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { createPortfolioModel } from '~/portfolios/portfolios.util';
+import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
 
 @ApiTags('portfolios')
 @Controller()
@@ -79,19 +79,18 @@ export class PortfoliosController {
     description: 'This endpoint creates a Portfolio',
   })
   @ApiCreatedResponse({
-    description: 'The ID of the newly created Portfolio',
+    description: 'Details of the newly created Portfolio',
     type: PortfolioIdModel,
   })
   @Post('/portfolios')
   public async createPortfolio(
     @Body() createPortfolioParams: CreatePortfolioDto
-  ): Promise<TransactionQueueModel> {
-    const {
-      result: { id: portfolioId },
-      transactions,
-    } = await this.portfoliosService.createPortfolio(createPortfolioParams);
+  ): Promise<PortfolioIdModel> {
+    const { result, transactions } = await this.portfoliosService.createPortfolio(
+      createPortfolioParams
+    );
     return new PortfolioIdModel({
-      portfolioId,
+      portfolioId: createPortfolioIdentifierModel(result),
       transactions,
     });
   }
