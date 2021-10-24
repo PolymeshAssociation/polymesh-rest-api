@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
 import { ClaimsModule } from '~/claims/claims.module';
+import { VaultModule } from '~/vault/vault.module';
 
 import { AssetsModule } from './assets/assets.module';
 import { AuthorizationsModule } from './authorizations/authorizations.module';
@@ -38,6 +39,7 @@ import { SettlementsModule } from './settlements/settlements.module';
     OfferingsModule,
     CheckpointsModule,
     CorporateActionsModule,
+    VaultModule,
   ],
 })
 export class AppModule {}
