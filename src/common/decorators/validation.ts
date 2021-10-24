@@ -33,8 +33,11 @@ export function IsDid() {
   );
 }
 
-export function IsTicker() {
-  return applyDecorators(MaxLength(MAX_TICKER_LENGTH), IsUppercase());
+export function IsTicker(validationOptions?: ValidationOptions) {
+  return applyDecorators(
+    MaxLength(MAX_TICKER_LENGTH, validationOptions),
+    IsUppercase(validationOptions)
+  );
 }
 
 export function IsBigNumber(validationOptions?: ValidationOptions) {

@@ -10,7 +10,9 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockIdentity, MockPolymesh } from '~/test-utils/mocks';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { MockIdentity, MockPolymesh, MockRelayerAccountsService } from '~/test-utils/mocks';
 
 import { IdentitiesService } from './identities.service';
 
@@ -23,15 +25,20 @@ describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
+  let mockRelayerAccountsService: MockRelayerAccountsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
+    mockRelayerAccountsService = new MockRelayerAccountsService();
+
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule],
+      imports: [PolymeshModule, RelayerAccountsModule],
       providers: [IdentitiesService, mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
+      .overrideProvider(RelayerAccountsService)
+      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<IdentitiesService>(IdentitiesService);

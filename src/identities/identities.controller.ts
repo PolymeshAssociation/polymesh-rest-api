@@ -1,5 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   AuthorizationType,
@@ -20,6 +28,8 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { InviteAccountParamsDto } from '~/identities/dto/invite-account-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -411,5 +421,23 @@ export class IdentitiesController {
   async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
     const results = await this.identitiesService.findTrustingTokens(did);
     return new ResultsModel({ results });
+  }
+
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The target Account already has a pending invitation to join this Identity',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The target Account is already part of an Identity',
+  })
+  @Post('/invite-account')
+  async inviteAccount(
+    @Body() inviteAccountParamsDto: InviteAccountParamsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.identitiesService.inviteAccount(inviteAccountParamsDto);
+    return new TransactionQueueModel({ transactions });
   }
 }

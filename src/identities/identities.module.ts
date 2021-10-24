@@ -8,6 +8,7 @@ import { ClaimsModule } from '~/claims/claims.module';
 import { LoggerModule } from '~/logger/logger.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
 
 import { IdentitiesController } from './identities.controller';
@@ -17,6 +18,7 @@ import { IdentitiesService } from './identities.service';
   imports: [
     PolymeshModule,
     LoggerModule,
+    RelayerAccountsModule,
     AssetsModule,
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),
