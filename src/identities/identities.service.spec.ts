@@ -123,97 +123,32 @@ describe('IdentitiesService', () => {
   });
 
   describe('inviteAccount', () => {
-    describe('if the targetAccount is not in SS58 format', () => {
-      it('should throw a InternalServerErrorException', async () => {
-        const mockIdentity = new MockIdentity();
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockIdentity as any);
-
-        mockIdentity.inviteAccount.mockImplementation(() => {
-          throw new PolymeshError({
+    describe('if there is a different error', () => {
+      const errors = [
+        [
+          new PolymeshError({
             code: ErrorCode.FatalError,
             message: "The supplied address is not encoded with the chain's SS58 format",
-          });
-        });
-
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          targetAccount: 'address',
-        };
-
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.inviteAccount(body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        mockIsPolymeshError.mockReset();
-        findOneSpy.mockRestore();
-      });
-    });
-
-    describe('if the targetAccount is already a part of some Identity', () => {
-      it('should throw a BadRequestException', async () => {
-        const mockIdentity = new MockIdentity();
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockIdentity as any);
-
-        mockIdentity.inviteAccount.mockImplementation(() => {
-          throw new PolymeshError({
+          }),
+          InternalServerErrorException,
+        ],
+        [
+          new PolymeshError({
             code: ErrorCode.ValidationError,
             message: 'The target Account is already part of an Identity',
-          });
-        });
-
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          targetAccount: 'address',
-        };
-
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.inviteAccount(body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(BadRequestException);
-        mockIsPolymeshError.mockReset();
-        findOneSpy.mockRestore();
-      });
-    });
-
-    describe('if targetAccount already has a pending invitation to join the given Identity', () => {
-      it('should throw a BadRequestException', async () => {
-        const mockIdentity = new MockIdentity();
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockIdentity as any);
-
-        mockIdentity.inviteAccount.mockImplementation(() => {
-          throw new PolymeshError({
+          }),
+          BadRequestException,
+        ],
+        [
+          new PolymeshError({
             code: ErrorCode.ValidationError,
             message: 'The target Account is already part of an Identity',
-          });
-        });
+          }),
+          BadRequestException,
+        ],
+      ];
 
+      it('should pass the error along the chain', async () => {
         const body = {
           signer: '0x6'.padEnd(66, '0'),
           targetAccount: 'address',
@@ -222,18 +157,28 @@ describe('IdentitiesService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        mockIsPolymeshError.mockReturnValue(true);
+        const findOneSpy = jest.spyOn(service, 'findOne');
 
-        let error;
-        try {
-          await service.inviteAccount(body);
-        } catch (err) {
-          error = err;
-        }
+        errors.forEach(async ([polymeshError, httpException]) => {
+          const mockIdentity = new MockIdentity();
+          mockIdentity.inviteAccount.mockImplementation(() => {
+            throw polymeshError;
+          });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          findOneSpy.mockResolvedValue(mockIdentity as any);
+          mockIsPolymeshError.mockReturnValue(true);
 
-        expect(error).toBeInstanceOf(BadRequestException);
-        mockIsPolymeshError.mockReset();
-        findOneSpy.mockRestore();
+          let error;
+          try {
+            await service.inviteAccount(body);
+          } catch (err) {
+            error = err;
+          }
+
+          expect(error).toBeInstanceOf(httpException);
+          mockIsPolymeshError.mockReset();
+          findOneSpy.mockRestore();
+        });
       });
     });
 
