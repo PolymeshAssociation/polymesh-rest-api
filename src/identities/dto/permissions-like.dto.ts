@@ -18,6 +18,7 @@ import { AssetSectionPermissionDto } from './asset-section-permission.dto';
 import { PortfolioSectionPermissionDto } from './portfolio-section-permission.dto';
 
 export class PermissionsLikeDto {
+  // DO NOT add description in the below property descriptions, as schema is not rendered properly for nesting of more than 3 levels
   @ApiPropertyOptional({
     type: AssetSectionPermissionDto,
   })
@@ -47,7 +48,7 @@ export class PermissionsLikeDto {
 
   @ApiPropertyOptional({
     description:
-      'Transaction Groups that the Secondary Key has permission to execute. A null value represents full permissions',
+      'Transaction Groups that `targetAccount` has permission to execute. A null value represents full permissions',
     isArray: true,
     enum: TxGroup,
     example: [TxGroup.PortfolioManagement],

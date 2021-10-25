@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
+import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
+import { KnownTokenType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 import {
   IsHexadecimal,
   IsUppercase,
@@ -14,7 +15,7 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { get } from 'lodash';
+import { flatten, get } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
@@ -81,6 +82,54 @@ export function IsAssetType() {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a Known type or object of type "{ custom: string }"`;
+        },
+      },
+    });
+  };
+}
+
+export function IsTxTag(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isTxTag',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          return flatten(Object.values(TxTags).map(txTag => Object.values(txTag))).includes(value);
+        },
+        defaultMessage(args: ValidationArguments) {
+          if (validationOptions?.each) {
+            return `${args.property} must have all valid enum values`;
+          }
+          return `${args.property} must be a valid enum value`;
+        },
+      },
+    });
+  };
+}
+
+export function IsTxTagOrModuleName(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isTxTagOrModuleName',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          const txTags = flatten(Object.values(TxTags).map(txTag => Object.values(txTag)));
+          const moduleNames = Object.values(ModuleName);
+          return flatten([moduleNames, txTags]).includes(value);
+        },
+        defaultMessage(args: ValidationArguments) {
+          if (validationOptions?.each) {
+            return `${args.property} must have all valid enum values from "ModuleName" or "TxTags"`;
+          }
+          return `${args.property} must be a valid enum value from "ModuleName" or "TxTags"`;
         },
       },
     });

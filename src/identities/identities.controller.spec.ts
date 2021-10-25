@@ -27,6 +27,7 @@ describe('IdentitiesController', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
     findTrustingTokens: jest.fn(),
+    inviteAccount: jest.fn(),
   };
 
   const mockAuthorizationsService = {
@@ -298,6 +299,25 @@ describe('IdentitiesController', () => {
       const result = await controller.getTrustingTokens({ did });
 
       expect(result).toEqual(new ResultsModel({ results: mockAssets }));
+    });
+  });
+
+  describe('inviteAccount', () => {
+    it('should return the transaction details on inviting an Account', async () => {
+      const transactions = ['transaction'];
+      const mockData = {
+        result: undefined,
+        transactions,
+      };
+      mockIdentitiesService.inviteAccount.mockResolvedValue(mockData);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await controller.inviteAccount({ signer: 'Ox60', targetAccount: '5xdd' });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions,
+      });
     });
   });
 });

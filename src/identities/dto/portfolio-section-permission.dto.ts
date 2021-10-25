@@ -9,7 +9,7 @@ import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
 export class PortfolioSectionPermissionDto extends PermissionTypeDto {
   @ApiProperty({
-    description: 'List of assets to be included or excluded in the permissions',
+    description: 'List of Portfolios to be included or excluded in the permissions',
     isArray: true,
     type: () => PortfolioDto,
   })

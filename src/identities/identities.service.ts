@@ -1,17 +1,14 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { InviteAccountParams } from '@polymathnetwork/polymesh-sdk/internal';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Params } from '@polymathnetwork/polymesh-sdk/api/procedures/inviteAccount';
 import {
   ErrorCode,
   Identity,
   isPolymeshError,
   SecurityToken,
-  SignerType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
-import { AccountSignerDto } from '~/identities/dto/account-signer.dto';
-import { IdentitySignerDto } from '~/identities/dto/identity-signer.dto';
 import { InviteAccountParamsDto } from '~/identities/dto/invite-account-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -59,42 +56,15 @@ export class IdentitiesService {
   public async inviteAccount(
     inviteAccountParamsDto: InviteAccountParamsDto
   ): Promise<QueueResult<void>> {
-    try {
-      const { signer, expiry, permissions, targetAccount } = inviteAccountParamsDto;
-      const identity = await this.findOne(signer);
-      const address = this.relayerAccountsService.findAddressByDid(signer);
-      const params = {
-        targetAccount:
-          targetAccount.signerType === SignerType.Identity
-            ? (targetAccount as IdentitySignerDto).did
-            : {
-                address: (targetAccount as AccountSignerDto).address,
-              },
-        permissions,
-        expiry,
-      } as InviteAccountParams;
-      return processQueue(identity.inviteAccount, params, { signer: address });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (
-          code === ErrorCode.ValidationError &&
-          message.startsWith('The target Account already has a pending invitation')
-        ) {
-          throw new UnprocessableEntityException(
-            'The target Account already has a pending invitation to join this Identity'
-          );
-        } else if (
-          code === ErrorCode.ValidationError &&
-          message.startsWith('The target Account is already part of an Identity')
-        ) {
-          throw new UnprocessableEntityException(
-            'The target Account is already part of an Identity'
-          );
-        }
-      }
-
-      throw err;
-    }
+    const { signer, expiry, permissions, targetAccount } = inviteAccountParamsDto;
+    const identity = await this.findOne(signer);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const params = {
+      targetAccount,
+      permissions,
+      expiry,
+      identity,
+    } as Params;
+    return processQueue(identity.inviteAccount, params, { signer: address });
   }
 }

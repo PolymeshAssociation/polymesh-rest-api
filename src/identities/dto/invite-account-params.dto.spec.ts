@@ -1,12 +1,13 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
-import { PermissionType, SignerType, TxGroup } from '@polymathnetwork/polymesh-sdk/types';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
+import { PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { InviteAccountParamsDto } from '~/identities/dto/invite-account-params.dto';
-import { DID_LENGTH } from '~/identities/identities.consts';
 
 type ValidInviteCase = [string, Record<string, unknown>];
 type InvalidInviteCase = [string, Record<string, unknown>, string[]];
+
 describe('inviteAccountParamsDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
   const signer = '0x6'.padEnd(66, '0');
@@ -20,30 +21,14 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite an Account',
         {
-          targetAccount: {
-            signerType: SignerType.Account,
-            address: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
-          },
-          signer,
-        },
-      ],
-      [
-        'Invite an Identity',
-        {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           signer,
         },
       ],
       [
         'Invite with tokens permissions',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             tokens: {
               values: ['TICKER123456', 'TICKER456789'],
@@ -56,10 +41,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with portfolios permissions',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: {
               values: [
@@ -81,10 +63,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with both tokens and portfolios permissions',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             tokens: {
               values: ['TICKER123456', 'TICKER456789'],
@@ -110,12 +89,49 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with transactionGroups permissions',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactionGroups: [TxGroup.PortfolioManagement, TxGroup.TokenManagement],
+          },
+          signer,
+        },
+      ],
+      [
+        'Invite with transactions permissions with TxTags and without exceptions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: {
+              type: PermissionType.Include,
+              values: [TxTags.identity.FreezeSecondaryKeys, TxTags.asset.RegisterTicker],
+            },
+          },
+          signer,
+        },
+      ],
+      [
+        'Invite with transactions permissions with ModuleNames along with TxTags and without exceptions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: {
+              type: PermissionType.Include,
+              values: [ModuleName.Identity, TxTags.asset.RegisterTicker],
+            },
+          },
+          signer,
+        },
+      ],
+      [
+        'Invite with transactions permissions with ModuleNames along with TxTags and with exceptions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: {
+              type: PermissionType.Include,
+              values: [ModuleName.Identity, TxTags.asset.RegisterTicker],
+              exceptions: [TxTags.identity.LeaveIdentityAsKey],
+            },
           },
           signer,
         },
@@ -131,69 +147,17 @@ describe('inviteAccountParamsDto', () => {
   describe('invalid account invites', () => {
     const cases: InvalidInviteCase[] = [
       [
-        'Invite with invalid Signer Type on targetAccount',
+        'Invite with incorrect targetAccount',
         {
-          targetAccount: {
-            signerType: 'Invalid Signer Type',
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: 123,
           signer,
         },
-        ['targetAccount.signerType must be a valid enum value'],
-      ],
-      [
-        'Invalid DID with signerType Identity',
-        {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x00',
-          },
-          signer,
-        },
-        [`targetAccount.DID must be ${DID_LENGTH} characters long`],
-      ],
-      [
-        'Invite without specifying did with signerType Identity',
-        {
-          targetAccount: {
-            signerType: SignerType.Identity,
-          },
-          signer,
-        },
-        [
-          'targetAccount.DID must be a hexadecimal number',
-          'targetAccount.DID must start with "0x"',
-          `targetAccount.DID must be ${DID_LENGTH} characters long`,
-        ],
-      ],
-      [
-        'Invite without specifying Account address with SignerType Account',
-        {
-          targetAccount: {
-            signerType: SignerType.Account,
-          },
-          signer,
-        },
-        ['targetAccount.address must be a string'],
-      ],
-      [
-        'Invite with incorrect Account address with SignerType Account',
-        {
-          targetAccount: {
-            signerType: SignerType.Account,
-            address: 12345,
-          },
-          signer,
-        },
-        ['targetAccount.address must be a string'],
+        ['targetAccount must be a string'],
       ],
       [
         'Invite with tokens permission with incorrect permission type',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             tokens: {
               values: ['TICKER', 'NEWTICKER'],
@@ -207,10 +171,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with tokens permission with no tickers',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             tokens: {
               values: [],
@@ -224,10 +185,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with tokens permission with incorrect ticker value',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             tokens: {
               values: ['invalid', 'TICKERVALUES'],
@@ -241,10 +199,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with portfolios permissions with no portfolio details',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: {
               values: [],
@@ -258,10 +213,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with portfolios permissions with incorrect DID',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: {
               values: [
@@ -289,10 +241,7 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with transactionGroups permissions with no groups',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactionGroups: [],
           },
@@ -303,16 +252,44 @@ describe('inviteAccountParamsDto', () => {
       [
         'Invite with transactionGroups permissions with incorrect groups',
         {
-          targetAccount: {
-            signerType: SignerType.Identity,
-            did: '0x1'.padEnd(66, '0'),
-          },
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactionGroups: ['Incorrect'],
           },
           signer,
         },
         ['permissions.each value in transactionGroups must be a valid enum value'],
+      ],
+      [
+        'Invite with transactions permissions with incorrect TxTags',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: {
+              type: PermissionType.Include,
+              values: [TxTags.asset],
+            },
+          },
+          signer,
+        },
+        [
+          'permissions.transactions.values must have all valid enum values from "ModuleName" or "TxTags"',
+        ],
+      ],
+      [
+        'Invite with transactions permissions with incorrect exceptions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: {
+              type: PermissionType.Include,
+              values: [ModuleName.Asset],
+              exceptions: [TxTags.asset],
+            },
+          },
+          signer,
+        },
+        ['permissions.transactions.exceptions must have all valid enum values'],
       ],
     ];
 

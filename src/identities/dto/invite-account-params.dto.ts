@@ -1,52 +1,32 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsNotEmptyObject, IsOptional, ValidateNested } from 'class-validator';
+import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { SignerDto } from '~/common/dto/signer.dto';
-import { AccountSignerDto } from '~/identities/dto/account-signer.dto';
-import { IdentitySignerDto } from '~/identities/dto/identity-signer.dto';
-import { PermissionTypeDto } from '~/identities/dto/permission-type.dto';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
-import { SignerTypeDto } from '~/identities/dto/signer-type.dto';
 
-import { AssetSectionPermissionDto } from './asset-section-permission.dto';
-
-@ApiExtraModels(AccountSignerDto, IdentitySignerDto, AssetSectionPermissionDto, PermissionTypeDto)
 export class InviteAccountParamsDto extends SignerDto {
   @ApiProperty({
-    description: 'Identity or Account to be invited',
-    oneOf: [{ $ref: getSchemaPath(AccountSignerDto) }, { $ref: getSchemaPath(IdentitySignerDto) }],
-    discriminator: {
-      propertyName: 'signerType',
-    },
+    description: 'Account address to be invited',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
   })
-  @IsNotEmptyObject()
-  @ValidateNested()
-  @Type(() => SignerTypeDto, {
-    keepDiscriminatorProperty: true,
-    discriminator: {
-      property: 'signerType',
-      subTypes: [
-        { value: AccountSignerDto, name: 'Account' },
-        { value: IdentitySignerDto, name: 'Identity' },
-      ],
-    },
-  })
-  readonly targetAccount: AccountSignerDto | IdentitySignerDto;
+  @IsString()
+  readonly targetAccount: string;
 
   @ApiProperty({
-    description: 'Permissions to grant to a Signer over an Identity',
+    description: 'Permissions to be granted to the `targetAccount`',
     type: () => PermissionsLikeDto,
   })
+  @IsOptional()
   @ValidateNested()
   @Type(() => PermissionsLikeDto)
-  @IsOptional()
   readonly permissions?: PermissionsLikeDto;
 
   @ApiPropertyOptional({
-    description: 'The expiry',
+    description: 'Expiry date of the `permissions`',
     example: new Date('05/23/2021').toISOString(),
     type: 'string',
   })

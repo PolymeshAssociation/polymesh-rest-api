@@ -1,10 +1,14 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
-import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -12,7 +16,12 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import { MockIdentity, MockPolymesh, MockRelayerAccountsService } from '~/test-utils/mocks';
+import {
+  MockIdentity,
+  MockPolymesh,
+  MockRelayerAccountsService,
+  MockTransactionQueue,
+} from '~/test-utils/mocks';
 
 import { IdentitiesService } from './identities.service';
 
@@ -110,6 +119,164 @@ describe('IdentitiesService', () => {
       expect(result).toEqual(mockTokens);
 
       findOneSpy.mockRestore();
+    });
+  });
+
+  describe('inviteAccount', () => {
+    describe('if the targetAccount is not in SS58 format', () => {
+      it('should throw a InternalServerErrorException', async () => {
+        const mockIdentity = new MockIdentity();
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockIdentity as any);
+
+        mockIdentity.inviteAccount.mockImplementation(() => {
+          throw new PolymeshError({
+            code: ErrorCode.FatalError,
+            message: "The supplied address is not encoded with the chain's SS58 format",
+          });
+        });
+
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          targetAccount: 'address',
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.inviteAccount(body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(InternalServerErrorException);
+        mockIsPolymeshError.mockReset();
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('if the targetAccount is already a part of some Identity', () => {
+      it('should throw a BadRequestException', async () => {
+        const mockIdentity = new MockIdentity();
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockIdentity as any);
+
+        mockIdentity.inviteAccount.mockImplementation(() => {
+          throw new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: 'The target Account is already part of an Identity',
+          });
+        });
+
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          targetAccount: 'address',
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.inviteAccount(body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(BadRequestException);
+        mockIsPolymeshError.mockReset();
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('if targetAccount already has a pending invitation to join the given Identity', () => {
+      it('should throw a BadRequestException', async () => {
+        const mockIdentity = new MockIdentity();
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockIdentity as any);
+
+        mockIdentity.inviteAccount.mockImplementation(() => {
+          throw new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: 'The target Account is already part of an Identity',
+          });
+        });
+
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          targetAccount: 'address',
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.inviteAccount(body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(BadRequestException);
+        mockIsPolymeshError.mockReset();
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const mockIdentity = new MockIdentity();
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockIdentity as any);
+
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.identity.JoinIdentityAsKey,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockIdentity.inviteAccount.mockResolvedValue(mockQueue);
+
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          targetAccount: 'address',
+        };
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.inviteAccount(body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.identity.JoinIdentityAsKey,
+            },
+          ],
+        });
+        expect(findOneSpy).toHaveBeenCalled();
+        findOneSpy.mockRestore();
+      });
     });
   });
 });
