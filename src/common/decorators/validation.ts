@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
-import { KnownTokenType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
 import {
   IsHexadecimal,
   IsUppercase,
@@ -15,10 +14,11 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { flatten, get } from 'lodash';
+import { get } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
+import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 
 export function IsDid() {
   return applyDecorators(
@@ -98,7 +98,7 @@ export function IsTxTag(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: unknown) {
-          return flatten(Object.values(TxTags).map(txTag => Object.values(txTag))).includes(value);
+          return typeof value === 'string' && getTxTags().includes(value);
         },
         defaultMessage(args: ValidationArguments) {
           if (validationOptions?.each) {
@@ -121,9 +121,7 @@ export function IsTxTagOrModuleName(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: unknown) {
-          const txTags = flatten(Object.values(TxTags).map(txTag => Object.values(txTag)));
-          const moduleNames = Object.values(ModuleName);
-          return flatten([moduleNames, txTags]).includes(value);
+          return typeof value === 'string' && getTxTagsWithModuleNames().includes(value);
         },
         defaultMessage(args: ValidationArguments) {
           if (validationOptions?.each) {

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
-  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
 import {
@@ -423,17 +424,22 @@ export class IdentitiesController {
     return new ResultsModel({ results });
   }
 
+  @ApiOperation({
+    summary: 'Invite an account',
+    description: 'This endpoint will send an invitation to an Account to join an Identity',
+  })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
-  @ApiUnprocessableEntityResponse({
-    description: 'The target Account already has a pending invitation to join this Identity',
+  @ApiInternalServerErrorResponse({
+    description: "The supplied address is not encoded with the chain's SS58 format",
   })
-  @ApiUnprocessableEntityResponse({
-    description: 'The target Account is already part of an Identity',
+  @ApiBadRequestResponse({
+    description:
+      'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
-  @Post('/invite-account')
+  @Post('/account-invites')
   async inviteAccount(
     @Body() inviteAccountParamsDto: InviteAccountParamsDto
   ): Promise<TransactionQueueModel> {

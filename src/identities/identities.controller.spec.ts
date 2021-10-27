@@ -311,7 +311,6 @@ describe('IdentitiesController', () => {
       };
       mockIdentitiesService.inviteAccount.mockResolvedValue(mockData);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await controller.inviteAccount({ signer: 'Ox60', targetAccount: '5xdd' });
 
       expect(result).toEqual({

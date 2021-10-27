@@ -10,7 +10,6 @@ import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 export class InviteAccountParamsDto extends SignerDto {
   @ApiProperty({
     description: 'Account address to be invited',
-    type: 'string',
     example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
   })
   @IsString()

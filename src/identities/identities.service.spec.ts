@@ -123,7 +123,7 @@ describe('IdentitiesService', () => {
   });
 
   describe('inviteAccount', () => {
-    describe('if there is a different error', () => {
+    describe('if there is an error', () => {
       const errors = [
         [
           new PolymeshError({
@@ -142,7 +142,7 @@ describe('IdentitiesService', () => {
         [
           new PolymeshError({
             code: ErrorCode.ValidationError,
-            message: 'The target Account is already part of an Identity',
+            message: 'The target Account already has a pending invitation to join this Identity',
           }),
           BadRequestException,
         ],
