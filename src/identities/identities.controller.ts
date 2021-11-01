@@ -200,9 +200,9 @@ export class IdentitiesController {
     type: 'number',
     required: true,
   })
-  @ApiArrayResponse(AuthorizationRequest, {
+  @ApiOkResponse({
     description: 'Authorization targeting the Identity',
-    paginated: false,
+    type: AuthorizationRequest,
   })
   @Get(':did/authorization')
   async getAuthorization(
@@ -211,9 +211,7 @@ export class IdentitiesController {
   ): Promise<AuthorizationRequest> {
     this.logger.debug(`Fetching requested authorization for ${did}`);
 
-    const auth = await this.authorizationsService.findById(did, id);
-
-    return auth;
+    return await this.authorizationsService.findById(did, id);
   }
 
   @ApiTags('assets')
