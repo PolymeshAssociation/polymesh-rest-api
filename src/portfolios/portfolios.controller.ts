@@ -109,7 +109,7 @@ export class PortfoliosController {
 
   @ApiOperation({
     summary: 'Delete a Portfolio',
-    description: 'This endpoint creates a Portfolio',
+    description: 'This endpoint deletes a Portfolio',
   })
   @ApiParam({
     name: 'id',
@@ -122,8 +122,7 @@ export class PortfoliosController {
     type: TransactionQueueModel,
   })
   @ApiBadRequestResponse({
-    description:
-      "The Portfolio doesn't exist, You cannot delete a Portfolio that contains any assets",
+    description: "Either the Portfolio doesn't exist or contains assets",
   })
   @ApiInternalServerErrorResponse({
     description: 'The Portfolio was removed and no longer exists',
