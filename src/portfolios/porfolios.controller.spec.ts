@@ -22,6 +22,7 @@ describe('PortfoliosController', () => {
     moveAssets: jest.fn(),
     findAllByOwner: jest.fn(),
     createPortfolio: jest.fn(),
+    deletePortfolio: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -95,6 +96,24 @@ describe('PortfoliosController', () => {
           id: '1',
           did: '0x06'.padEnd(66, '0'),
         },
+        transactions: ['transaction'],
+      });
+    });
+  });
+
+  describe('deletePortfolio', () => {
+    it('should return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
+
+      const result = await controller.deletePortfolio(
+        { id: new BigNumber(1) },
+        { did: '0x6'.padEnd(66, '0'), signer: '0x6'.padEnd(66, '0') }
+      );
+
+      expect(result).toEqual({
         transactions: ['transaction'],
       });
     });

@@ -102,6 +102,7 @@ export class MockPortfolios {
   public getPortfolios = jest.fn();
   public getPortfolio = jest.fn();
   public create = jest.fn();
+  public delete = jest.fn();
 }
 
 export class MockIdentity {
