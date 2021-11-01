@@ -28,7 +28,7 @@ import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
 
 @ApiTags('settlements')
-@Controller({})
+@Controller()
 export class SettlementsController {
   constructor(private readonly settlementsService: SettlementsService) {}
 
