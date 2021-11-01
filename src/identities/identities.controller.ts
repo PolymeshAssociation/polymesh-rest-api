@@ -211,7 +211,7 @@ export class IdentitiesController {
   ): Promise<AuthorizationRequest> {
     this.logger.debug(`Fetching requested authorization for ${did}`);
 
-    return await this.authorizationsService.findById(did, id);
+    return this.authorizationsService.findById(did, id);
   }
 
   @ApiTags('assets')
