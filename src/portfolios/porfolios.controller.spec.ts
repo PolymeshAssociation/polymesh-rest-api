@@ -6,6 +6,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -109,8 +110,8 @@ describe('PortfoliosController', () => {
       mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
 
       const result = await controller.deletePortfolio(
-        { id: new BigNumber(1) },
-        { did: '0x6'.padEnd(66, '0'), signer: '0x6'.padEnd(66, '0') }
+        new PortfolioDto({ id: new BigNumber(1), did: '0x6'.padEnd(66, '0') }),
+        { signer: '0x6'.padEnd(66, '0') }
       );
 
       expect(result).toEqual({

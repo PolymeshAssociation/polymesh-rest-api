@@ -78,11 +78,10 @@ export class PortfoliosService {
     signer: string
   ): Promise<QueueResult<void>> {
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const owner = portfolio.did || signer;
-    const identity = await this.identitiesService.findOne(owner);
+    const identity = await this.identitiesService.findOne(portfolio.did);
     return processQueue(
       identity.portfolios.delete,
-      { portfolio: portfolio.toPortfolioLike() as NumberedPortfolio },
+      { portfolio: portfolio.id },
       { signer: address }
     );
   }
