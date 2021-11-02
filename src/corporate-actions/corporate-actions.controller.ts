@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -80,7 +80,7 @@ export class CorporateActionsController {
   @ApiOperation({
     summary: 'Fetch A Dividend Distribution',
     description:
-      'This endpoint will provide the Dividend Distribution by its correspondent ID associated with an Asset ',
+      'This endpoint will provide a specific Dividend Distribution associated with an Asset',
   })
   @ApiParam({
     name: 'ticker',
@@ -95,23 +95,14 @@ export class CorporateActionsController {
     example: '123',
   })
   @ApiOkResponse({
-    description:
-      'The Dividend Distribution associated with the specified Asset and Dividend Distribution ID',
+    description: 'The details of the Dividend Distribution',
     type: DividendDistributionModel,
   })
-  @Get('dividend-distribution/:id')
+  @Get('dividend-distributions/:id')
   public async getDividendDistribution(
-    @Param() { ticker }: TickerParamsDto,
-    @Param() { id }: IdParamsDto
+    @Param() { ticker, id }: TickerParamsDto & IdParamsDto
   ): Promise<DividendDistributionModel> {
     const result = await this.corporateActionsService.findDistribution(ticker, id);
-
-    if (!result) {
-      throw new NotFoundException(
-        `Dividdend Distribution with id:"${id}" for Asset "${ticker}" was not found`
-      );
-    }
-
-    return result;
+    return createDividendDistributionModel(result);
   }
 }
