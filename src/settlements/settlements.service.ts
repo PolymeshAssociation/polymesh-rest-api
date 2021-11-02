@@ -143,7 +143,7 @@ export class SettlementsService {
       type,
     };
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const identity = await this.identitiesService.findOne(signer);
+    const identity = await this.identitiesService.findOneByAddress(address);
     return processQueue(identity.createVenue, params, { signer: address });
   }
 

@@ -18,6 +18,7 @@ export class MockPolymesh {
   public getSecurityTokens = jest.fn();
   public getSecurityToken = jest.fn();
   public getIdentity = jest.fn();
+  public getAccount = jest.fn();
   public getLatestBlock = jest.fn();
   public isIdentityValid = jest.fn();
   public disconnect = jest.fn();
@@ -143,10 +144,19 @@ export class MockTransactionQueue {
   public run = jest.fn();
 }
 
+export class MockAccount {
+  getIdentity = jest.fn();
+}
+
 /* Services */
 
 export class MockRelayerAccountsService {
   public findAddressByDid = jest.fn();
 
   public findAll = jest.fn().mockReturnValue([]);
+}
+
+export class MockIdentitiesService {
+  public findOne = jest.fn();
+  public findOneByAddress = jest.fn();
 }

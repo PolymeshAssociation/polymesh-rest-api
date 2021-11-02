@@ -68,7 +68,7 @@ export class PortfoliosService {
   ): Promise<QueueResult<NumberedPortfolio>> {
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const identity = await this.identitiesService.findOne(signer);
+    const identity = await this.identitiesService.findOneByAddress(address);
     return processQueue(identity.portfolios.create, rest, { signer: address });
   }
 }

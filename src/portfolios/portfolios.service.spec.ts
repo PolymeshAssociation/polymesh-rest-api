@@ -11,6 +11,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
+  MockIdentitiesService,
   MockIdentity,
   MockPortfolio,
   MockRelayerAccountsService,
@@ -24,9 +25,7 @@ jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
 
 describe('PortfoliosService', () => {
   let service: PortfoliosService;
-  const mockIdentitiesService = {
-    findOne: jest.fn(),
-  };
+  const mockIdentitiesService = new MockIdentitiesService();
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 
   beforeEach(async () => {
@@ -213,7 +212,7 @@ describe('PortfoliosService', () => {
       mockQueue.run.mockResolvedValue(mockPortfolio);
       mockIdentity.portfolios.create.mockResolvedValue(mockQueue);
 
-      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+      mockIdentitiesService.findOneByAddress.mockReturnValue(mockIdentity);
 
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);

@@ -45,6 +45,7 @@ describe('SettlementsService', () => {
   let mockPolymeshApi: MockPolymesh;
   const mockIdentitiesService = {
     findOne: jest.fn(),
+    findOneByAddress: jest.fn(),
   };
   const mockAssetsService = {
     findOne: jest.fn(),
@@ -307,7 +308,7 @@ describe('SettlementsService', () => {
       ];
       const mockQueue = new MockTransactionQueue(transactions);
       mockIdentity.createVenue.mockResolvedValue(mockQueue);
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentitiesService.findOneByAddress.mockResolvedValue(mockIdentity);
 
       const body = {
         signer: '0x6'.padEnd(66, '0'),

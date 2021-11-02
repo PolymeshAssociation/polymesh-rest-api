@@ -10,7 +10,7 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockIdentity, MockPolymesh } from '~/test-utils/mocks';
+import { MockAccount, MockIdentity, MockPolymesh } from '~/test-utils/mocks';
 
 import { IdentitiesService } from './identities.service';
 
@@ -77,6 +77,41 @@ describe('IdentitiesService', () => {
 
         const result = await service.findOne('realDid');
 
+        expect(result).toBe(fakeResult);
+      });
+    });
+  });
+
+  describe('findOneByAddress', () => {
+    describe('if the Identity does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        const mockAccount = new MockAccount();
+        mockAccount.getIdentity.mockReturnValue(null);
+        mockPolymeshApi.getAccount.mockImplementation(() => {
+          return mockAccount;
+        });
+
+        let error;
+        try {
+          await service.findOneByAddress('5abc');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the Identity', async () => {
+        const fakeResult = 'identity';
+        const mockAccount = new MockAccount();
+        mockAccount.getIdentity.mockReturnValue(fakeResult);
+        mockPolymeshApi.getAccount.mockImplementation(() => {
+          return mockAccount;
+        });
+
+        const result = await service.findOneByAddress('5abc');
         expect(result).toBe(fakeResult);
       });
     });
