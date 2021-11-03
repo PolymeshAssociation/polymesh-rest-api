@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
@@ -13,6 +14,7 @@ describe('CorporateActionsController', () => {
   const mockCorporateActionsService = {
     findDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
+    findDistribution: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -61,6 +63,22 @@ describe('CorporateActionsController', () => {
           ),
         })
       );
+    });
+  });
+
+  describe('findDistribution', () => {
+    it('should return a specific Dividend Distribution associated with an Asset', async () => {
+      const mockDistributions = new MockDistributionWithDetails();
+
+      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistributions);
+
+      const result = await controller.getDividendDistribution({
+        ticker: 'TICKER',
+        id: new BigNumber('1'),
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(result).toEqual(createDividendDistributionModel(mockDistributions as any));
     });
   });
 });

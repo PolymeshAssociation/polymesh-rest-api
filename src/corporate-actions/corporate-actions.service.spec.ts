@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import BigNumber from 'bignumber.js';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -53,6 +54,21 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
       const result = await service.findDistributionsByTicker('TICKER');
+
+      expect(result).toEqual(mockDistributions);
+    });
+  });
+
+  describe('findDistribution', () => {
+    it('should return a specific Dividend Distribution associated with an Asset', async () => {
+      const mockDistributions = new MockDistributionWithDetails();
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.corporateActions.distributions.getOne.mockResolvedValue(mockDistributions);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.findDistribution('TICKER', new BigNumber('1'));
 
       expect(result).toEqual(mockDistributions);
     });
