@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Params } from '@polymathnetwork/polymesh-sdk/api/procedures/inviteAccount';
 import {
   ErrorCode,
   Identity,
