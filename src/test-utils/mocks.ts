@@ -101,6 +101,7 @@ export class MockIdentityAuthorization {
 export class MockPortfolios {
   public getPortfolios = jest.fn();
   public getPortfolio = jest.fn();
+  public create = jest.fn();
 }
 
 export class MockIdentity {
@@ -125,7 +126,12 @@ export class MockPortfolio {
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
   public moveFunds = jest.fn();
-  public toJson = jest.fn();
+  public toJson = jest.fn().mockImplementation(() => {
+    return {
+      id: '1',
+      did: '0x06'.padEnd(66, '0'),
+    };
+  });
 }
 
 export class MockTickerReservation {

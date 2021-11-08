@@ -197,4 +197,49 @@ describe('PortfoliosService', () => {
       findOneSpy.mockRestore();
     });
   });
+
+  describe('createPortfolio', () => {
+    it('should create a Portfolio and return the queue results', async () => {
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.portfolio.CreatePortfolio,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(transactions);
+      mockQueue.run.mockResolvedValue(mockPortfolio);
+      mockIdentity.portfolios.create.mockResolvedValue(mockQueue);
+
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      const body = {
+        signer: '0x6000',
+        name: 'FOLIO-1',
+      };
+
+      const result = await service.createPortfolio(body);
+      expect(result).toEqual({
+        result: mockPortfolio,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.portfolio.CreatePortfolio,
+          },
+        ],
+      });
+      expect(mockIdentity.portfolios.create).toHaveBeenCalledWith(
+        {
+          name: body.name,
+        },
+        { signer: address }
+      );
+      expect(mockIdentitiesService.findOne).toHaveBeenCalledWith(body.signer);
+    });
+  });
 });
