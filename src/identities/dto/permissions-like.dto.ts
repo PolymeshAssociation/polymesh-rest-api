@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { TxGroup } from '@polymathnetwork/polymesh-sdk/types';
+import { PermissionsLike, TxGroup } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -58,4 +58,24 @@ export class PermissionsLikeDto {
   @IsEnum(TxGroup, { each: true })
   @IsOptional()
   readonly transactionGroups?: TxGroup[];
+
+  public toPermissionLike(): PermissionsLike {
+    const { tokens, portfolios, transactions, transactionGroups } = this;
+
+    let permissionLike: PermissionsLike = {
+      tokens: tokens?.toSectionPermissions(),
+      portfolios: portfolios?.toSectionPermissions(),
+    };
+    if (transactions) {
+      permissionLike = { ...permissionLike, transactions: transactions.toTransactionPermissions() };
+    } else if (transactionGroups) {
+      permissionLike = { ...permissionLike, transactionGroups };
+    }
+
+    return permissionLike;
+  }
+
+  constructor(dto: Omit<PermissionsLikeDto, 'toPermissionLike'>) {
+    Object.assign(this, dto);
+  }
 }

@@ -17,7 +17,7 @@ export class InviteAccountParamsDto extends SignerDto {
 
   @ApiProperty({
     description: 'Permissions to be granted to the `targetAccount`',
-    type: () => PermissionsLikeDto,
+    type: PermissionsLikeDto,
   })
   @IsOptional()
   @ValidateNested()

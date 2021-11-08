@@ -56,5 +56,5 @@ export function getTxTags(): string[] {
 export function getTxTagsWithModuleNames(): string[] {
   const txTags = getTxTags();
   const moduleNames = Object.values(ModuleName);
-  return flatten([moduleNames, txTags]);
+  return [...moduleNames, ...txTags];
 }

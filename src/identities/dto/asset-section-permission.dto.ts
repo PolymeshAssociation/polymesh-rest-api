@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { SectionPermissions } from '@polymathnetwork/polymesh-sdk/types';
 import { ArrayNotEmpty, IsArray } from 'class-validator';
 
 import { IsTicker } from '~/common/decorators/validation';
@@ -17,4 +18,22 @@ export class AssetSectionPermissionDto extends PermissionTypeDto {
   @ArrayNotEmpty()
   @IsTicker({ each: true })
   readonly values: string[];
+
+  public toSectionPermissions(): SectionPermissions<string> | null {
+    const { values, type } = this;
+
+    if (type) {
+      return {
+        values,
+        type,
+      };
+    }
+
+    return null;
+  }
+
+  constructor(dto: Omit<AssetSectionPermissionDto, 'toSectionPermissions'>) {
+    super();
+    Object.assign(this, dto);
+  }
 }

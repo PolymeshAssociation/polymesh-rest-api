@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { PortfolioLike, SectionPermissions } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 
@@ -18,4 +19,22 @@ export class PortfolioSectionPermissionDto extends PermissionTypeDto {
   @ValidateNested({ each: true })
   @Type(() => PortfolioDto)
   readonly values: PortfolioDto[];
+
+  public toSectionPermissions(): SectionPermissions<PortfolioLike> | null {
+    const { values, type } = this;
+
+    if (type) {
+      return {
+        values: values.map(portfolio => portfolio.toPortfolioLike()),
+        type,
+      };
+    }
+
+    return null;
+  }
+
+  constructor(dto: Omit<PortfolioSectionPermissionDto, 'toSectionPermissions'>) {
+    super();
+    Object.assign(this, dto);
+  }
 }
