@@ -32,18 +32,21 @@ import { VaultService } from '~/vault/vault.service';
         relayerAccountsService: RelayerAccountsService,
         logger: PolymeshLogger
       ): Promise<Polymesh> => {
-        // To use a custom signer, the SDK instance still needs the address in its keyring. This can only be done during initialization.
+        // To use a custom signer, the SDK instance needs the address in its keyring. Currently this can only be done during initialization.
         // Once the SDK has support for adding custom signers dynamically this code can be cleaned up.
-        const vaultKeys = vaultService.listKeys();
-        const vaultConfiged = Object.keys(vaultKeys).length > 0;
-        if (vaultConfiged) {
-          /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
-          configureKeyring(vaultKeys, relayerAccountsService, configuration.keyring!);
+        if (vaultService.isConfigured()) {
+          configureKeyring(
+            vaultService.listKeys(),
+            relayerAccountsService,
+            /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
+            configuration.keyring!,
+            logger
+          );
         } else {
           delete configuration.keyring;
         }
         const polymeshApi = await Polymesh.connect(configuration);
-        if (vaultConfiged) {
+        if (vaultService.isConfigured()) {
           const promiseApi = polymeshApi._polkadotApi;
           const vaultSigner = new VaultSigner(vaultService, polymeshApi._polkadotApi);
           promiseApi.setSigner(vaultSigner);
@@ -67,9 +70,11 @@ export class PolymeshModule {}
 function configureKeyring(
   vaultKeys: Record<string, string>,
   relayerAccountsService: RelayerAccountsService,
-  keyring: Keyring
+  keyring: Keyring,
+  logger: PolymeshLogger
 ): void {
   for (const key in vaultKeys) {
+    logger.debug(`Setting vault key: "${vaultKeys[key]}" with address: "${key}"`);
     keyring.addFromAddress(key);
     relayerAccountsService.setAddress(vaultKeys[key], key);
   }

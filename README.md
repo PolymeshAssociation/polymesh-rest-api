@@ -78,30 +78,13 @@ Only one singer can be used at a time. If both sets of variables are set Vault s
 
 ### Vault Signer Dev
 
-For local development vault can be downloaded [here](https://www.vaultproject.io/downloads) and started with `vault server -dev`. This will server an admin page on `localhost:8200`. The printed root token can be used to log in, and then enable new engine, and then select "transit".
+For local development vault can be downloaded [here](https://www.vaultproject.io/downloads) and started with `vault server -dev`. The root token will be printed and is also saved in `~/.vault_token`.
 
-A new keypair can be created by selecting the engine and choosing to generate a `ed25519` type pair.
+There will be an admin page at `localhost:8200`, here you will need to enable the `transit` engine and generate a new `ed25519` key. The key name should be set in the env var `VAULT_KEYS`.
 
-To get the public key hex encoded, this bash command can be used.
+When the server starts up, it will print each key with its corresponding address in the logs. Copy the address and visit [app.polymesh.live](https://app.polymesh.live/) on the proper netowork. Go to Account > Address Book to add the addres. Then go to Developer > Extrinisics, select `testUils/mockCddRegisterDid`. Use Alice to sign the extrinsic targeting the account. Then use Accounts > Transfer to send the account some POLYX.
 
-```sh
-curl -s --header "X-Vault-Token: $VAULT_TOKEN" "http://localhost:8200/v1/transit/keys/$KEY" |
-  jq '.data.keys | .["1"].public_key' |
-  sed 's/"//g' |
-  base64 -d | \
-  hexdump -e '16/1 "%02x"'
-```
-
-This result can then be encoded with a util function from polkadot/util.
-
-```ts
-const { decodeAddress, encodeAddress } = require('@polkadot/keyring');
-const { hexToU8a, isHex } = require('@polkadot/util');
-
-const hexAddr = '0xe12ec5af5ee2d2d334af5f50407d7a7a3165488c94f6b4e8aecb66f28567349a'; // result with prepended 0x
-const address = encodeAddress(hexToU8a(hexAddr));
-console.log('address: ', address);
-```
+Once these steps are complete the key should be ready to sign transactions by specifying its name in the `signer` field.
 
 ## License
 

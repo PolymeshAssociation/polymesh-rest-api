@@ -40,31 +40,20 @@ export class IdentitiesService {
   }
 
   /**
-   *
-   * @param address
+   * Method to fetch the Identity associated with an address
+   * @param address SS58 encoded address
    * @returns Promise<Identity>
    */
   public async findOneByAddress(address: string): Promise<Identity> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    try {
-      const account = polymeshApi.getAccount({ address });
-      const identity = await account.getIdentity();
-      if (identity === null) {
-        throw new NotFoundException(`There is no Identity with DID "${address}`);
-      } else {
-        return identity;
-      }
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          this.logger.error(`No valid identity found for address "${address}"`);
-          throw new NotFoundException(`There is no Identity with DID "${address}"`);
-        }
-      }
-      throw err;
+    const account = polymeshApi.getAccount({ address });
+    const identity = await account.getIdentity();
+    if (identity === null) {
+      throw new NotFoundException(`There is no Identity with DID "${address}`);
+    } else {
+      return identity;
     }
   }
 

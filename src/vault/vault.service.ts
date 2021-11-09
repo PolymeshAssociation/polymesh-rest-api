@@ -66,6 +66,10 @@ export class VaultService {
     return this.addressToNameMap;
   }
 
+  isConfigured(): boolean {
+    return Object.keys(this.addressToNameMap).length > 0;
+  }
+
   async sign(body: SignPayload, address: string, id: number): Promise<SignerResult> {
     const name = this.addressToNameMap[address];
     return this.client.post<SignResponse>(`/sign/${name}`, body).then(response => {
