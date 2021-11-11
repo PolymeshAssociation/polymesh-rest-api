@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { Checkpoint } from '@polymathnetwork/polymesh-sdk/internal';
 

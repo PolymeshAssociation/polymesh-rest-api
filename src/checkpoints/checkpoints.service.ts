@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Checkpoint } from '@polymathnetwork/polymesh-sdk/internal';
 import {
+  CheckpointSchedule,
   CheckpointWithData,
   ResultSet,
   ScheduleWithDetails,
@@ -11,6 +12,8 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+
+import { CreateCheckpointScheduleDto } from './dto/create-checkpoint-schedule.dto';
 
 @Injectable()
 export class CheckpointsService {
@@ -41,5 +44,15 @@ export class CheckpointsService {
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(asset.checkpoints.create, undefined, { signer: address });
+  }
+
+  public async createScheduleByTicker(
+    ticker: string,
+    createCheckpointScheduleDto: CreateCheckpointScheduleDto
+  ): Promise<QueueResult<CheckpointSchedule>> {
+    const { signer, ...rest } = createCheckpointScheduleDto;
+    const asset = await this.assetsService.findOne(ticker);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(asset.checkpoints.schedules.create, rest, { signer: address });
   }
 }

@@ -6,7 +6,7 @@ import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { MockCheckpoint } from '~/test-utils/mocks';
+import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -15,6 +15,7 @@ describe('CheckpointsController', () => {
     findAllByTicker: jest.fn(),
     findSchedulesByTicker: jest.fn(),
     createByTicker: jest.fn(),
+    createScheduleByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -130,6 +131,7 @@ describe('CheckpointsController', () => {
       const mockResult = [
         {
           id: new BigNumber('1'),
+          ticker: 'TICKER',
           period: {
             unit: CalendarUnit.Month,
             amount: 3,
@@ -143,6 +145,30 @@ describe('CheckpointsController', () => {
       ];
 
       expect(result).toEqual(new ResultsModel({ results: mockResult }));
+    });
+  });
+
+  describe('createSchedule', () => {
+    it('should return the details of newly created Checkpoint Schedule', async () => {
+      const mockCheckpointSchedule = new MockCheckpointSchedule();
+      const response = {
+        result: mockCheckpointSchedule,
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
+      const body = {
+        signer: 'signer',
+        start: new Date(),
+        period: { unit: CalendarUnit.Month, amount: 3 },
+        repetitions: 2,
+      };
+
+      const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual({
+        schedule: mockCheckpointSchedule,
+        transactions: ['transaction'],
+      });
     });
   });
 });
