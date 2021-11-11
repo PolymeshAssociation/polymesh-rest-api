@@ -7,6 +7,7 @@ import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
   MockCheckpoint,
+  MockCheckpointSchedule,
   MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
@@ -145,6 +146,59 @@ describe('CheckpointsService', () => {
       expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(undefined, {
         signer: address,
       });
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+    });
+  });
+
+  describe('createScheduleByTicker', () => {
+    it('should create a Checkpoint Schedule and return the queue results', async () => {
+      const mockCheckpointSchedule = new MockCheckpointSchedule();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.checkpoint.CreateSchedule,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(transactions);
+      mockQueue.run.mockResolvedValue(mockCheckpointSchedule);
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.schedules.create.mockResolvedValue(mockQueue);
+
+      mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      const mockDate = new Date();
+      const params = {
+        signer: 'signer',
+        start: mockDate,
+        period: { unit: CalendarUnit.Month, amount: 3 },
+        repetitions: 2,
+      };
+
+      const result = await service.createScheduleByTicker('TICKER', params);
+      expect(result).toEqual({
+        result: mockCheckpointSchedule,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.checkpoint.CreateSchedule,
+          },
+        ],
+      });
+      expect(mockSecurityToken.checkpoints.schedules.create).toHaveBeenCalledWith(
+        {
+          start: mockDate,
+          period: { unit: CalendarUnit.Month, amount: 3 },
+          repetitions: 2,
+        },
+        {
+          signer: address,
+        }
+      );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
   });

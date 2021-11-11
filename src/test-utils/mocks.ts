@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -69,6 +69,7 @@ export class MockSecurityToken {
 
     schedules: {
       get: jest.fn(),
+      create: jest.fn(),
     },
   };
 
@@ -139,6 +140,15 @@ export class MockPortfolio {
 export class MockCheckpoint {
   id = new BigNumber(1);
   ticker = 'TICKER';
+}
+
+export class MockCheckpointSchedule {
+  id = new BigNumber(1);
+  ticker = 'TICKER';
+  period = { unit: CalendarUnit.Month, amount: 3 };
+  start = new Date('10/14/1987');
+  expiryDate = new Date('10/14/2000');
+  complexity = 4;
 }
 
 export class MockTickerReservation {

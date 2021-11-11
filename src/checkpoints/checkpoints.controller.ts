@@ -1,16 +1,26 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
-import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
+import { CheckpointScheduleDetailsModel } from '~/checkpoints/models/checkpoint-schedule-details.model';
 import { CheckpointModel } from '~/checkpoints/models/checkpoint.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+
+import { ScheduleDetailsModel } from './models/schedule-details.model';
 
 @ApiTags('checkpoints')
 @Controller('assets/:ticker/checkpoints')
@@ -45,6 +55,9 @@ export class CheckpointsController {
   @ApiArrayResponse(CheckpointDetailsModel, {
     description: 'List of Checkpoints created on this Asset',
     paginated: true,
+  })
+  @ApiBadRequestResponse({
+    description: 'Schedule start date must be in the future',
   })
   @Get()
   public async getCheckpoints(
@@ -111,20 +124,21 @@ export class CheckpointsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiArrayResponse(CheckpointScheduleModel, {
+  @ApiArrayResponse(CheckpointScheduleDetailsModel, {
     description: 'List of active Schedules which create Checkpoints for a specific Asset',
     paginated: false,
   })
   @Get('schedules')
   public async getSchedules(
     @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<CheckpointScheduleModel>> {
+  ): Promise<ResultsModel<CheckpointScheduleDetailsModel>> {
     const schedules = await this.checkpointsService.findSchedulesByTicker(ticker);
     return new ResultsModel({
       results: schedules.map(
         ({ schedule: { id, period, start, complexity, expiryDate }, details }) =>
-          new CheckpointScheduleModel({
+          new CheckpointScheduleDetailsModel({
             id,
+            ticker,
             period,
             start,
             complexity,
@@ -132,6 +146,43 @@ export class CheckpointsController {
             ...details,
           })
       ),
+    });
+  }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Create Schedule',
+    description: 'This endpoint will create a schedule for Checkpoint creation',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which the Checkpoint creation is to be scheduled',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details of the newly created Checkpoint schedule',
+    type: ScheduleDetailsModel,
+  })
+  @Post('schedules')
+  public async createSchedule(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() createCheckpointScheduleDto: CreateCheckpointScheduleDto
+  ): Promise<ScheduleDetailsModel> {
+    const {
+      result: { id, period, start, complexity, expiryDate },
+      transactions,
+    } = await this.checkpointsService.createScheduleByTicker(ticker, createCheckpointScheduleDto);
+    return new ScheduleDetailsModel({
+      schedule: {
+        id,
+        ticker,
+        period,
+        start,
+        complexity,
+        expiryDate,
+      },
+      transactions,
     });
   }
 }
