@@ -1,12 +1,14 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
-import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoints.model';
+import { CheckpointModel } from '~/checkpoints/models/checkpoint.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 
@@ -67,6 +69,34 @@ export class CheckpointsController {
       total,
       next,
     });
+  }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Create Checkpoint',
+    description:
+      'This endpoint will create a snapshot of Asset holders and their respective balances at that moment',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which the Checkpoint is to be created',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details of the newly created Checkpoint',
+    type: CheckpointModel,
+  })
+  @Post()
+  public async createCheckpoint(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() signerDto: SignerDto
+  ): Promise<CheckpointModel> {
+    const { result, transactions } = await this.checkpointsService.createByTicker(
+      ticker,
+      signerDto
+    );
+    return new CheckpointModel({ checkpoint: result, transactions });
   }
 
   @ApiTags('assets')

@@ -1,11 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
+import { CalendarUnit, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
-import { MockSecurityToken } from '~/test-utils/mocks';
-
-import { AssetsService } from './../assets/assets.service';
-import { CheckpointsService } from './checkpoints.service';
+import { AssetsService } from '~/assets/assets.service';
+import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import {
+  MockCheckpoint,
+  MockRelayerAccountsService,
+  MockSecurityToken,
+  MockTransactionQueue,
+} from '~/test-utils/mocks';
 
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
@@ -14,12 +19,16 @@ describe('CheckpointsService', () => {
     findOne: jest.fn(),
   };
 
+  const mockRelayerAccountsService = new MockRelayerAccountsService();
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CheckpointsService, AssetsService],
+      providers: [CheckpointsService, AssetsService, RelayerAccountsService],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
+      .overrideProvider(RelayerAccountsService)
+      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
@@ -95,6 +104,48 @@ describe('CheckpointsService', () => {
       const result = await service.findSchedulesByTicker('TICKER');
 
       expect(result).toEqual(mockSchedules);
+    });
+  });
+
+  describe('createByTicker', () => {
+    it('should create a Checkpoint and return the queue results', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.checkpoint.CreateCheckpoint,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(transactions);
+      mockQueue.run.mockResolvedValue(mockCheckpoint);
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.create.mockResolvedValue(mockQueue);
+
+      mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      const body = {
+        signer: 'signer',
+      };
+
+      const result = await service.createByTicker('TICKER', body);
+      expect(result).toEqual({
+        result: mockCheckpoint,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.checkpoint.CreateCheckpoint,
+          },
+        ],
+      });
+      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(undefined, {
+        signer: address,
+      });
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
   });
 });
