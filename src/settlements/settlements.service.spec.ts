@@ -454,7 +454,7 @@ describe('SettlementsService', () => {
   });
 
   describe('rejectInstruction', () => {
-    it('should run an reject procedure and return the queue data', async () => {
+    it('should run a reject procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
       const transactions = [
         {
