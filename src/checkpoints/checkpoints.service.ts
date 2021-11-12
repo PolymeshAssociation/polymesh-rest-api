@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Checkpoint } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   CheckpointSchedule,
@@ -54,5 +55,15 @@ export class CheckpointsService {
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(asset.checkpoints.schedules.create, rest, { signer: address });
+  }
+
+  public async deleteScheduleByTicker(
+    ticker: string,
+    id: BigNumber,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const asset = await this.assetsService.findOne(ticker);
+    return processQueue(asset.checkpoints.schedules.remove, { schedule: id }, { signer: address });
   }
 }
