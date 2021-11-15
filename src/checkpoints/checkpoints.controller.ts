@@ -208,7 +208,7 @@ export class CheckpointsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'Schedule number to be deleted',
+    description: 'Schedule ID to be deleted',
     type: 'string',
     example: '1',
   })
