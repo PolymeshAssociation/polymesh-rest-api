@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
 import { TransactionPermissions, TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';

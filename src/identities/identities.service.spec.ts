@@ -151,7 +151,7 @@ describe('IdentitiesService', () => {
       it('should pass the error along the chain', async () => {
         const body = {
           signer: '0x6'.padEnd(66, '0'),
-          targetAccount: 'address',
+          secondaryKey: 'address',
         };
 
         const address = 'address';
@@ -170,7 +170,7 @@ describe('IdentitiesService', () => {
 
           let error;
           try {
-            await service.inviteAccount(body);
+            await service.addSecondaryKeys(body);
           } catch (err) {
             error = err;
           }
@@ -202,13 +202,13 @@ describe('IdentitiesService', () => {
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
-          targetAccount: 'address',
+          secondaryKey: 'address',
         };
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const result = await service.inviteAccount(body);
+        const result = await service.addSecondaryKeys(body);
         expect(result).toEqual({
           result: undefined,
           transactions: [

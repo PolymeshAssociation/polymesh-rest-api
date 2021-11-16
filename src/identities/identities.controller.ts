@@ -30,7 +30,7 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { InviteAccountParamsDto } from '~/identities/dto/invite-account-params.dto';
+import { AddSecondaryKeysParamsDto } from '~/identities/dto/add-secondary-keys-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -426,8 +426,9 @@ export class IdentitiesController {
 
   // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
   @ApiOperation({
-    summary: 'Invite an account',
-    description: 'This endpoint will send an invitation to an Account to join an Identity',
+    summary: 'Add Secondary Key',
+    description:
+      'This endpoint will send an invitation to an Secondary Key to join an Identity. It also defines set of permissions the Secondary Keys will have.',
   })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
@@ -440,11 +441,13 @@ export class IdentitiesController {
     description:
       'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
-  @Post('/account-invites')
-  async inviteAccount(
-    @Body() inviteAccountParamsDto: InviteAccountParamsDto
+  @Post('/secondary-keys')
+  async addSecondaryKeys(
+    @Body() addSecondaryKeysParamsDto: AddSecondaryKeysParamsDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.identitiesService.inviteAccount(inviteAccountParamsDto);
+    const { transactions } = await this.identitiesService.addSecondaryKeys(
+      addSecondaryKeysParamsDto
+    );
     return new TransactionQueueModel({ transactions });
   }
 }

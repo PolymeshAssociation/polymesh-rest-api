@@ -5,22 +5,20 @@ import { PermissionsLike, TxGroup } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, ValidateNested } from 'class-validator';
 
+import { AssetSectionPermissionDto } from '~/identities/dto/asset-section-permission.dto';
+import { PortfolioSectionPermissionDto } from '~/identities/dto/portfolio-section-permission.dto';
 import { TransactionPermissionsDto } from '~/identities/dto/transaction-permissions.dto';
-
-import { AssetSectionPermissionDto } from './asset-section-permission.dto';
-import { PortfolioSectionPermissionDto } from './portfolio-section-permission.dto';
 
 export class PermissionsLikeDto {
   @ApiPropertyOptional({
-    description:
-      'Security Tokens on which to grant permissions. A null value represents full permissions',
+    description: 'Assets on which to grant permissions. A null value represents full permissions',
     type: AssetSectionPermissionDto,
     nullable: true,
   })
   @IsOptional()
   @ValidateNested()
   @Type(() => AssetSectionPermissionDto)
-  readonly tokens?: AssetSectionPermissionDto | null;
+  readonly assets?: AssetSectionPermissionDto | null;
 
   @ApiPropertyOptional({
     description:
@@ -35,7 +33,7 @@ export class PermissionsLikeDto {
 
   @ApiPropertyOptional({
     description:
-      'Transactions that the `targetAccount` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactionGroups`.',
+      'Transactions that the `secondaryKey` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactionGroups`.',
     type: TransactionPermissionsDto,
     nullable: true,
   })
@@ -46,7 +44,7 @@ export class PermissionsLikeDto {
 
   @ApiPropertyOptional({
     description:
-      'Transaction Groups that `targetAccount` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactions`.',
+      'Transaction Groups that `secondaryKey` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactions`.',
     isArray: true,
     enum: TxGroup,
     example: [TxGroup.PortfolioManagement],
@@ -57,22 +55,25 @@ export class PermissionsLikeDto {
   readonly transactionGroups?: TxGroup[];
 
   public toPermissionsLike(): PermissionsLike {
-    const { tokens, portfolios, transactions, transactionGroups } = this;
+    const { assets, portfolios, transactions, transactionGroups } = this;
 
-    let permissionLike: PermissionsLike = {
-      tokens: tokens == null ? null : tokens.toSectionPermissions(),
+    let permissionsLike: PermissionsLike = {
+      tokens: assets == null ? null : assets.toSectionPermissions(),
       portfolios: portfolios == null ? null : portfolios?.toSectionPermissions(),
     };
 
     if (transactions === null) {
-      permissionLike = { ...permissionLike, transactions: null };
+      permissionsLike = { ...permissionsLike, transactions: null };
     } else if (transactions) {
-      permissionLike = { ...permissionLike, transactions: transactions.toTransactionPermissions() };
+      permissionsLike = {
+        ...permissionsLike,
+        transactions: transactions.toTransactionPermissions(),
+      };
     } else if (transactionGroups) {
-      permissionLike = { ...permissionLike, transactionGroups };
+      permissionsLike = { ...permissionsLike, transactionGroups };
     }
 
-    return permissionLike;
+    return permissionsLike;
   }
 
   constructor(dto: Omit<PermissionsLikeDto, 'toPermissionLike'>) {
