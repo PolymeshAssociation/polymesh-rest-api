@@ -88,6 +88,30 @@ export function IsAssetType() {
   };
 }
 
+export function IsPermissionsLike() {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isPermissionsLike',
+      target: object.constructor,
+      propertyName: propertyName,
+      validator: {
+        validate(value: unknown) {
+          if (typeof value === 'object' && value) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return !('transactions' in (value as any) && 'transactionGroups' in (value as any));
+          }
+          return false;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} can have either 'transactions' or 'transactionGroups'`;
+        },
+      },
+    });
+  };
+}
+
+// TODO @prashantasdeveloper Reduce the below code from two decorators if possible - IsTxTag and IsTxTagOrModuleName
 export function IsTxTag(validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {

@@ -424,6 +424,7 @@ export class IdentitiesController {
     return new ResultsModel({ results });
   }
 
+  // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
   @ApiOperation({
     summary: 'Invite an account',
     description: 'This endpoint will send an invitation to an Account to join an Identity',

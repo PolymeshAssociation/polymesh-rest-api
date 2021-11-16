@@ -4,6 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
+import { IsPermissionsLike } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 
@@ -22,6 +23,7 @@ export class InviteAccountParamsDto extends SignerDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => PermissionsLikeDto)
+  @IsPermissionsLike()
   readonly permissions?: PermissionsLikeDto;
 
   @ApiPropertyOptional({

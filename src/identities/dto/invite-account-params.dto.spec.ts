@@ -39,6 +39,26 @@ describe('inviteAccountParamsDto', () => {
         },
       ],
       [
+        'Invite with full tokens permissions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            tokens: null,
+          },
+          signer,
+        },
+      ],
+      [
+        'Invite with full portfolios permissions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            portfolios: null,
+          },
+          signer,
+        },
+      ],
+      [
         'Invite with portfolios permissions',
         {
           targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
@@ -82,6 +102,17 @@ describe('inviteAccountParamsDto', () => {
               ],
               type: PermissionType.Exclude,
             },
+          },
+          signer,
+        },
+      ],
+      [
+        'Invite with full tokens and portfolios permissions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            tokens: null,
+            portfolios: null,
           },
           signer,
         },
@@ -169,20 +200,6 @@ describe('inviteAccountParamsDto', () => {
         ['permissions.tokens.type must be a valid enum value'],
       ],
       [
-        'Invite with tokens permission with no tickers',
-        {
-          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
-          permissions: {
-            tokens: {
-              values: [],
-              type: PermissionType.Include,
-            },
-          },
-          signer,
-        },
-        ['permissions.tokens.values should not be empty'],
-      ],
-      [
         'Invite with tokens permission with incorrect ticker value',
         {
           targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
@@ -239,17 +256,6 @@ describe('inviteAccountParamsDto', () => {
         ],
       ],
       [
-        'Invite with transactionGroups permissions with no groups',
-        {
-          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
-          permissions: {
-            transactionGroups: [],
-          },
-          signer,
-        },
-        ['permissions.transactionGroups should not be empty'],
-      ],
-      [
         'Invite with transactionGroups permissions with incorrect groups',
         {
           targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
@@ -290,6 +296,46 @@ describe('inviteAccountParamsDto', () => {
           signer,
         },
         ['permissions.transactions.exceptions must have all valid enum values'],
+      ],
+      [
+        'Invite with transactions permissions with empty transactionGroups',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: {
+              type: PermissionType.Include,
+              values: [ModuleName.Asset],
+              exceptions: [TxTags.asset.RegisterTicker],
+            },
+            transactionGroups: [],
+          },
+          signer,
+        },
+        ["permissions can have either 'transactions' or 'transactionGroups'"],
+      ],
+      [
+        'Invite with transactionGroups permissions and null transactions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: null,
+            transactionGroups: [TxGroup.PortfolioManagement],
+          },
+          signer,
+        },
+        ["permissions can have either 'transactions' or 'transactionGroups'"],
+      ],
+      [
+        'Invite with null transactions & empty transactionGroups permissions',
+        {
+          targetAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          permissions: {
+            transactions: null,
+            transactionGroups: [],
+          },
+          signer,
+        },
+        ["permissions can have either 'transactions' or 'transactionGroups'"],
       ],
     ];
 

@@ -60,7 +60,7 @@ export class IdentitiesService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {
       targetAccount,
-      permissions: permissions?.toPermissionLike(),
+      permissions: permissions?.toPermissionsLike(),
       expiry,
     };
     return processQueue(identity.inviteAccount, params, { signer: address });

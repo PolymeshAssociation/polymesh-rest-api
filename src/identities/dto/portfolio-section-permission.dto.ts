@@ -23,14 +23,10 @@ export class PortfolioSectionPermissionDto extends PermissionTypeDto {
   public toSectionPermissions(): SectionPermissions<PortfolioLike> | null {
     const { values, type } = this;
 
-    if (type) {
-      return {
-        values: values.map(portfolio => portfolio.toPortfolioLike()),
-        type,
-      };
-    }
-
-    return null;
+    return {
+      values: values.map(portfolio => portfolio.toPortfolioLike()),
+      type,
+    };
   }
 
   constructor(dto: Omit<PortfolioSectionPermissionDto, 'toSectionPermissions'>) {

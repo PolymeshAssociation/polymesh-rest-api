@@ -36,15 +36,11 @@ export class TransactionPermissionsDto extends PermissionTypeDto {
   public toTransactionPermissions(): TransactionPermissions | null {
     const { values, type, exceptions } = this;
 
-    if (type) {
-      return {
-        values,
-        type,
-        exceptions,
-      };
-    }
-
-    return null;
+    return {
+      values,
+      type,
+      exceptions,
+    };
   }
 
   constructor(dto: Omit<TransactionPermissionsDto, 'toSectionPermissions'>) {
