@@ -1,13 +1,18 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { IdentitiesService } from '~/identities/identities.service';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
@@ -240,6 +245,104 @@ describe('PortfoliosService', () => {
         { signer: address }
       );
       expect(mockIdentitiesService.findOne).toHaveBeenCalledWith(body.signer);
+    });
+  });
+
+  describe('deletePortfolio', () => {
+    describe('if there is a error', () => {
+      const errors = [
+        [
+          new PolymeshError({
+            code: ErrorCode.DataUnavailable,
+            message: 'The Portfolio was removed and no longer exists',
+          }),
+          InternalServerErrorException,
+        ],
+        [
+          new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: 'You cannot delete a Portfolio that contains any assets',
+          }),
+          BadRequestException,
+        ],
+        [
+          new PolymeshError({
+            code: ErrorCode.ValidationError,
+            message: "The Portfolio doesn't exist",
+          }),
+          BadRequestException,
+        ],
+      ];
+      it('should pass the error along the chain', async () => {
+        const signer = '0x6'.padEnd(66, '0');
+        const portfolio = new PortfolioDto({
+          id: new BigNumber(1),
+          did: '0x6'.padEnd(66, '0'),
+        });
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+
+        errors.forEach(async ([polymeshError, httpException]) => {
+          const mockIdentity = new MockIdentity();
+          mockIdentity.portfolios.delete.mockImplementation(() => {
+            throw polymeshError;
+          });
+          mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+          mockIsPolymeshError.mockReturnValue(true);
+
+          let error;
+          try {
+            await service.deletePortfolio(portfolio, signer);
+          } catch (err) {
+            error = err;
+          }
+          expect(error).toBeInstanceOf(httpException);
+
+          mockIsPolymeshError.mockReset();
+          findOneSpy.mockRestore();
+        });
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.portfolio.DeletePortfolio,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const mockIdentity = new MockIdentity();
+        mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+        mockIdentity.portfolios.delete.mockResolvedValue(mockQueue);
+
+        const signer = '0x6'.padEnd(66, '0');
+        const portfolio = new PortfolioDto({
+          id: new BigNumber(1),
+          did: '0x6'.padEnd(66, '0'),
+        });
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.deletePortfolio(portfolio, signer);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.portfolio.DeletePortfolio,
+            },
+          ],
+        });
+      });
     });
   });
 });
