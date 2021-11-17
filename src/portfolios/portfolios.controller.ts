@@ -1,13 +1,23 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { DidDto } from '~/common/dto/params.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfolioIdModel } from '~/portfolios/models/portfolio-id.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
@@ -93,5 +103,41 @@ export class PortfoliosController {
       portfolioId: createPortfolioIdentifierModel(result),
       transactions,
     });
+  }
+
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  // TODO @prashantasdeveloper: Move the signer to headers
+  @ApiOperation({
+    summary: 'Delete a Portfolio',
+    description: 'This endpoint deletes a Portfolio',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Portfolio number to be deleted',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description: "Either the Portfolio doesn't exist or contains assets",
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'The Portfolio was removed and no longer exists',
+  })
+  @Delete('/identities/:did/portfolios/:id')
+  public async deletePortfolio(
+    @Param() portfolio: PortfolioDto,
+    @Query() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.portfoliosService.deletePortfolio(portfolio, signer);
+    return new TransactionQueueModel({ transactions });
   }
 }
