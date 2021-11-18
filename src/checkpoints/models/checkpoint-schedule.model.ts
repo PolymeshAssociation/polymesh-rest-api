@@ -17,7 +17,7 @@ export class CheckpointScheduleModel {
   readonly id: BigNumber;
 
   @ApiProperty({
-    description: 'Ticker of the Asset whose Checkpoint will be created with this Schedule',
+    description: 'Ticker of the Asset whose Checkpoints will be created with this Schedule',
     type: 'string',
     example: 'TICKER',
   })
@@ -55,6 +55,20 @@ export class CheckpointScheduleModel {
     example: 1,
   })
   readonly complexity: number;
+
+  @ApiProperty({
+    description: 'Number of Checkpoints left to be created by the Schedule',
+    type: 'number',
+    example: 10,
+  })
+  readonly remainingCheckpoints: number;
+
+  @ApiProperty({
+    description: 'Date when the next Checkpoint will be created',
+    type: 'string',
+    example: new Date('10/14/1987').toISOString(),
+  })
+  readonly nextCheckpointDate: Date;
 
   constructor(model: CheckpointScheduleModel) {
     Object.assign(this, model);

@@ -1,9 +1,15 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { CalendarUnit, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import { CalendarUnit, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
   MockCheckpoint,
@@ -12,6 +18,11 @@ import {
   MockSecurityToken,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+
+jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+  isPolymeshError: mockIsPolymeshError,
+}));
 
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
@@ -24,7 +35,12 @@ describe('CheckpointsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CheckpointsService, AssetsService, RelayerAccountsService],
+      providers: [
+        CheckpointsService,
+        AssetsService,
+        RelayerAccountsService,
+        mockPolymeshLoggerProvider,
+      ],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
@@ -105,6 +121,64 @@ describe('CheckpointsService', () => {
       const result = await service.findSchedulesByTicker('TICKER');
 
       expect(result).toEqual(mockSchedules);
+    });
+  });
+
+  describe('findScheduleById', () => {
+    let mockSecurityToken: MockSecurityToken;
+    const ticker = 'TICKER';
+    const id = new BigNumber(1);
+
+    beforeEach(() => {
+      mockSecurityToken = new MockSecurityToken();
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+    });
+
+    describe('if the Schedule does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        mockSecurityToken.checkpoints.schedules.getOne.mockImplementation(() => {
+          throw new PolymeshError({
+            code: ErrorCode.DataUnavailable,
+            message: 'The Schedule does not exist',
+          });
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.findScheduleById(ticker, id);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+        mockIsPolymeshError.mockReset();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the Schedule', async () => {
+        const mockScheduleWithDetails = {
+          schedule: new MockCheckpointSchedule(),
+          details: {
+            remainingCheckpoints: 1,
+            nextCheckpointDate: new Date(),
+          },
+        };
+        mockSecurityToken.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
+
+        const result = await service.findScheduleById(ticker, id);
+
+        expect(result).toEqual(mockScheduleWithDetails);
+      });
+    });
+
+    afterEach(() => {
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      expect(mockSecurityToken.checkpoints.schedules.getOne).toHaveBeenCalledWith({
+        id,
+      });
     });
   });
 

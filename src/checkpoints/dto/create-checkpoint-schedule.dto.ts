@@ -10,7 +10,7 @@ import { SignerDto } from '~/common/dto/signer.dto';
 export class CreateCheckpointScheduleDto extends SignerDto {
   @ApiProperty({
     description:
-      'Date from which Schedule will start creating Checkpoints. A null value means the Checkpoint creation starts now.',
+      'Date from which the Schedule will start creating Checkpoints. A null value means the first Checkpoint will be created immediately',
     type: 'string',
     example: new Date('05/23/2021').toISOString(),
     nullable: true,
@@ -22,7 +22,7 @@ export class CreateCheckpointScheduleDto extends SignerDto {
 
   @ApiProperty({
     description:
-      'Period in which the Schedule creates a Checkpoint. A null value means this Schedule creates a single Checkpoint and then expires',
+      'Periodic interval between Checkpoints. For example, a period of 2 weeks means that a Checkpoint will be created every 2 weeks. A null value means this Schedule creates a single Checkpoint and then expires',
     type: CalendarPeriodDto,
     nullable: true,
   })
@@ -33,7 +33,7 @@ export class CreateCheckpointScheduleDto extends SignerDto {
 
   @ApiProperty({
     description:
-      'Number of repetitions of the Checkpoint creations. A null value means this Schedule creates a single Checkpoint and then expires',
+      'Number of Checkpoints that should be created by this Schedule. A null or 0 value means infinite Checkpoints (the Schedule never expires)',
     type: 'number',
     example: 12,
     nullable: true,

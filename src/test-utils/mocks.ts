@@ -69,6 +69,7 @@ export class MockSecurityToken {
 
     schedules: {
       get: jest.fn(),
+      getOne: jest.fn(),
       create: jest.fn(),
     },
   };

@@ -6,15 +6,15 @@ import { Type } from 'class-transformer';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
-export class ScheduleDetailsModel extends TransactionQueueModel {
+export class CreatedCheckpointScheduleModel extends TransactionQueueModel {
   @ApiProperty({
-    description: 'Details of the newly created Schedule',
+    description: 'Static data (and identifiers) of the newly created Schedule',
     type: CheckpointScheduleModel,
   })
   @Type(() => CheckpointScheduleModel)
   readonly schedule: CheckpointScheduleModel;
 
-  constructor(model: ScheduleDetailsModel) {
+  constructor(model: CreatedCheckpointScheduleModel) {
     const { transactions, ...rest } = model;
     super({ transactions });
 
