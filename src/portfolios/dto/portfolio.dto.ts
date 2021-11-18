@@ -19,7 +19,6 @@ export class PortfolioDto {
   @ApiProperty({
     description: 'Portfolio number. Use 0 for the Default Portfolio',
     example: '123',
-    type: 'string',
   })
   @IsBigNumber()
   @ToBigNumber()

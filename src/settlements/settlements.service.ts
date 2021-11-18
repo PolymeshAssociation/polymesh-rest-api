@@ -95,6 +95,19 @@ export class SettlementsService {
     return processQueue(instruction.affirm, undefined, { signer: address });
   }
 
+  public async rejectInstruction(
+    id: BigNumber,
+    signerDto: SignerDto
+  ): Promise<QueueResult<Instruction>> {
+    const { signer } = signerDto;
+
+    const instruction = await this.findInstruction(id);
+
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+
+    return processQueue(instruction.reject, undefined, { signer: address });
+  }
+
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
     const identity = await this.identitiesService.findOne(did);
     return identity.getVenues();

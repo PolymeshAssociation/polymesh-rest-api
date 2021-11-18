@@ -9,6 +9,7 @@ import { processQueue } from '~/common/utils/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
@@ -70,5 +71,18 @@ export class PortfoliosService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const identity = await this.identitiesService.findOne(signer);
     return processQueue(identity.portfolios.create, rest, { signer: address });
+  }
+
+  public async deletePortfolio(
+    portfolio: PortfolioDto,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const identity = await this.identitiesService.findOne(portfolio.did);
+    return processQueue(
+      identity.portfolios.delete,
+      { portfolio: portfolio.id },
+      { signer: address }
+    );
   }
 }
