@@ -4,9 +4,10 @@ import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { MockCheckpoint } from '~/test-utils/mocks';
+import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -14,7 +15,9 @@ describe('CheckpointsController', () => {
   const mockCheckpointsService = {
     findAllByTicker: jest.fn(),
     findSchedulesByTicker: jest.fn(),
+    findScheduleById: jest.fn(),
     createByTicker: jest.fn(),
+    createScheduleByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -130,6 +133,7 @@ describe('CheckpointsController', () => {
       const mockResult = [
         {
           id: new BigNumber('1'),
+          ticker: 'TICKER',
           period: {
             unit: CalendarUnit.Month,
             amount: 3,
@@ -143,6 +147,46 @@ describe('CheckpointsController', () => {
       ];
 
       expect(result).toEqual(new ResultsModel({ results: mockResult }));
+    });
+  });
+
+  describe('createSchedule', () => {
+    it('should return the details of newly created Checkpoint Schedule', async () => {
+      const mockDate = new Date();
+
+      const mockCheckpointSchedule = new MockCheckpointSchedule();
+      const response = {
+        result: mockCheckpointSchedule,
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
+
+      const mockScheduleWithDetails = {
+        schedule: new MockCheckpointSchedule(),
+        details: {
+          remainingCheckpoints: 1,
+          nextCheckpointDate: mockDate,
+        },
+      };
+      mockCheckpointsService.findScheduleById.mockResolvedValue(mockScheduleWithDetails);
+
+      const body = {
+        signer: 'signer',
+        start: mockDate,
+        period: { unit: CalendarUnit.Month, amount: 3 },
+        repetitions: 2,
+      };
+
+      const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
+
+      const mockCreatedSchedule = new CheckpointScheduleModel({
+        ...mockScheduleWithDetails.schedule,
+        ...mockScheduleWithDetails.details,
+      });
+      expect(result).toEqual({
+        schedule: mockCreatedSchedule,
+        transactions: ['transaction'],
+      });
     });
   });
 });
