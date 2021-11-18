@@ -170,7 +170,7 @@ describe('IdentitiesService', () => {
 
           let error;
           try {
-            await service.addSecondaryKeys(body);
+            await service.addSecondaryKey(body);
           } catch (err) {
             error = err;
           }
@@ -208,7 +208,7 @@ describe('IdentitiesService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const result = await service.addSecondaryKeys(body);
+        const result = await service.addSecondaryKey(body);
         expect(result).toEqual({
           result: undefined,
           transactions: [

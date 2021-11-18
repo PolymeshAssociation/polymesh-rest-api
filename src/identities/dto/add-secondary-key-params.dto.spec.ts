@@ -3,23 +3,23 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
 import { PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
-import { AddSecondaryKeysParamsDto } from '~/identities/dto/add-secondary-keys-params.dto';
+import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 
 type ValidInviteCase = [string, Record<string, unknown>];
 type InvalidInviteCase = [string, Record<string, unknown>, string[]];
 
-describe('addSecondaryKeysParamsDto', () => {
+describe('addSecondaryKeyParamsDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
   const signer = '0x6'.padEnd(66, '0');
   const metadata: ArgumentMetadata = {
     type: 'body',
-    metatype: AddSecondaryKeysParamsDto,
+    metatype: AddSecondaryKeyParamsDto,
     data: '',
   };
   describe('valid invites', () => {
     const cases: ValidInviteCase[] = [
       [
-        'Invite an Secondary Key',
+        'Invite a Secondary Key',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           signer,
@@ -39,7 +39,7 @@ describe('addSecondaryKeysParamsDto', () => {
         },
       ],
       [
-        'Invite with full tokens permissions',
+        'Invite with full assets permissions',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
@@ -81,7 +81,7 @@ describe('addSecondaryKeysParamsDto', () => {
         },
       ],
       [
-        'Invite with both tokens and portfolios permissions',
+        'Invite with both assets and portfolios permissions',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
@@ -107,7 +107,7 @@ describe('addSecondaryKeysParamsDto', () => {
         },
       ],
       [
-        'Invite with full tokens and portfolios permissions',
+        'Invite with full assets and portfolios permissions',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
@@ -186,7 +186,7 @@ describe('addSecondaryKeysParamsDto', () => {
         ['secondaryKey must be a string'],
       ],
       [
-        'Invite with tokens permission with incorrect permission type',
+        'Invite with assets permission with incorrect permission type',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
@@ -200,7 +200,7 @@ describe('addSecondaryKeysParamsDto', () => {
         ['permissions.assets.type must be a valid enum value'],
       ],
       [
-        'Invite with tokens permission with incorrect ticker value',
+        'Invite with assets permission with incorrect ticker value',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {

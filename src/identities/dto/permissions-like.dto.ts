@@ -44,7 +44,7 @@ export class PermissionsLikeDto {
 
   @ApiPropertyOptional({
     description:
-      'Transaction Groups that `secondaryKey` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactions`.',
+      'Transaction Groups that `secondaryKey` has permission to execute. This value should not be passed along with the `transactions`.',
     isArray: true,
     enum: TxGroup,
     example: [TxGroup.PortfolioManagement],
@@ -58,8 +58,8 @@ export class PermissionsLikeDto {
     const { assets, portfolios, transactions, transactionGroups } = this;
 
     let permissionsLike: PermissionsLike = {
-      tokens: assets == null ? null : assets.toSectionPermissions(),
-      portfolios: portfolios == null ? null : portfolios?.toSectionPermissions(),
+      tokens: assets === null ? null : assets?.toSectionPermissions(),
+      portfolios: portfolios === null ? null : portfolios?.toSectionPermissions(),
     };
 
     if (transactions === null) {

@@ -8,7 +8,7 @@ import {
 
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
-import { AddSecondaryKeysParamsDto } from '~/identities/dto/add-secondary-keys-params.dto';
+import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -52,10 +52,10 @@ export class IdentitiesService {
     return identity.getTrustingTokens();
   }
 
-  public async addSecondaryKeys(
-    addSecondaryKeysParamsDto: AddSecondaryKeysParamsDto
+  public async addSecondaryKey(
+    addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
   ): Promise<QueueResult<void>> {
-    const { signer, expiry, permissions, secondaryKey } = addSecondaryKeysParamsDto;
+    const { signer, expiry, permissions, secondaryKey } = addSecondaryKeyParamsDto;
     const identity = await this.findOne(signer);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {

@@ -8,7 +8,7 @@ import { IsPermissionsLike } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 
-export class AddSecondaryKeysParamsDto extends SignerDto {
+export class AddSecondaryKeyParamsDto extends SignerDto {
   @ApiProperty({
     description: 'Account address to be invited',
     example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',

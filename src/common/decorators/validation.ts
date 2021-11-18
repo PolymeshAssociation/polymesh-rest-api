@@ -47,7 +47,7 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
     registerDecorator({
       name: 'isBigNumber',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: {
         validate(value: unknown) {
@@ -67,7 +67,7 @@ export function IsAssetType() {
     registerDecorator({
       name: 'isAssetType',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       validator: {
         validate(value: unknown) {
           if (typeof value === 'string') {
@@ -94,12 +94,11 @@ export function IsPermissionsLike() {
     registerDecorator({
       name: 'isPermissionsLike',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       validator: {
         validate(value: unknown) {
           if (typeof value === 'object' && value) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return !('transactions' in (value as any) && 'transactionGroups' in (value as any));
+            return !('transactions' in value && 'transactionGroups' in value);
           }
           return false;
         },
@@ -118,7 +117,7 @@ export function IsTxTag(validationOptions?: ValidationOptions) {
     registerDecorator({
       name: 'isTxTag',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: {
         validate(value: unknown) {
@@ -141,7 +140,7 @@ export function IsTxTagOrModuleName(validationOptions?: ValidationOptions) {
     registerDecorator({
       name: 'isTxTagOrModuleName',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: {
         validate(value: unknown) {

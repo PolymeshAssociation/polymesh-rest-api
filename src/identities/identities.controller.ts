@@ -30,7 +30,7 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { AddSecondaryKeysParamsDto } from '~/identities/dto/add-secondary-keys-params.dto';
+import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -428,7 +428,7 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Add Secondary Key',
     description:
-      'This endpoint will send an invitation to an Secondary Key to join an Identity. It also defines set of permissions the Secondary Keys will have.',
+      'This endpoint will send an invitation to a Secondary Key to join an Identity. It also defines the set of permissions the Secondary Key will have.',
   })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
@@ -442,12 +442,10 @@ export class IdentitiesController {
       'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
   @Post('/secondary-keys')
-  async addSecondaryKeys(
-    @Body() addSecondaryKeysParamsDto: AddSecondaryKeysParamsDto
+  async addSecondaryKey(
+    @Body() addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.identitiesService.addSecondaryKeys(
-      addSecondaryKeysParamsDto
-    );
+    const { transactions } = await this.identitiesService.addSecondaryKey(addSecondaryKeyParamsDto);
     return new TransactionQueueModel({ transactions });
   }
 }
