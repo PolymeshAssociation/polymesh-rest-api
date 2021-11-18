@@ -201,14 +201,16 @@ export class CheckpointsController {
     });
   }
 
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  // TODO @prashantasdeveloper: Move the signer to headers
   @ApiTags('assets')
   @ApiOperation({
     summary: 'Delete Schedule',
-    description: 'This endpoint will delete an existing schedule for Checkpoint creation',
+    description: 'This endpoint will delete an existing Schedule for Checkpoint creation',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset for which the schedule is to be deleted',
+    description: 'The ticker of the Asset for which the Schedule is to be deleted',
     type: 'string',
     example: 'TICKER',
   })
@@ -223,7 +225,7 @@ export class CheckpointsController {
     type: TransactionQueueModel,
   })
   @ApiBadRequestResponse({
-    description: 'Schedule no longer exists. It was either removed or it expired',
+    description: "Schedule doesn't exist. It may have expired, been removed, or never been created",
   })
   @Delete('schedules/:id')
   public async deleteSchedule(

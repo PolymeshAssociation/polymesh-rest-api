@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { BadRequestException,NotFoundException  } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
@@ -281,17 +281,17 @@ describe('CheckpointsService', () => {
     describe('if there is a error', () => {
       const errors = [
         [
-          new PolymeshError({
+          {
             code: ErrorCode.ValidationError,
             message: 'Schedule no longer exists. It was either removed or it expired',
-          }),
+          },
           BadRequestException,
         ],
         [
-          new PolymeshError({
+          {
             code: ErrorCode.ValidationError,
             message: 'You cannot remove this Schedule',
-          }),
+          },
           BadRequestException,
         ],
       ];
