@@ -65,6 +65,7 @@ export class MockSecurityToken {
 
   public checkpoints = {
     get: jest.fn(),
+    create: jest.fn(),
 
     schedules: {
       get: jest.fn(),
@@ -133,6 +134,11 @@ export class MockPortfolio {
       did: '0x06'.padEnd(66, '0'),
     };
   });
+}
+
+export class MockCheckpoint {
+  id = new BigNumber(1);
+  ticker = 'TICKER';
 }
 
 export class MockTickerReservation {

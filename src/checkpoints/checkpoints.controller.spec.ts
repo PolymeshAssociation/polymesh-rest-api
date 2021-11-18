@@ -6,6 +6,7 @@ import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { MockCheckpoint } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -13,6 +14,7 @@ describe('CheckpointsController', () => {
   const mockCheckpointsService = {
     findAllByTicker: jest.fn(),
     findSchedulesByTicker: jest.fn(),
+    createByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -75,6 +77,27 @@ describe('CheckpointsController', () => {
       );
 
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('createCheckpoint', () => {
+    it('should return the details of newly created Checkpoint', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      const response = {
+        result: mockCheckpoint,
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.createByTicker.mockResolvedValue(response);
+      const body = {
+        signer: 'signer',
+      };
+
+      const result = await controller.createCheckpoint({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual({
+        checkpoint: mockCheckpoint,
+        transactions: ['transaction'],
+      });
     });
   });
 
