@@ -29,6 +29,7 @@ describe('SettlementsController', () => {
     findInstruction: jest.fn(),
     createInstruction: jest.fn(),
     affirmInstruction: jest.fn(),
+    rejectInstruction: jest.fn(),
     findVenueDetails: jest.fn(),
     findAffirmations: jest.fn(),
     createVenue: jest.fn(),
@@ -132,6 +133,25 @@ describe('SettlementsController', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await controller.affirmInstruction({ id: new BigNumber('3') }, {} as any);
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
+
+  describe('rejectInstruction', () => {
+    it('should reject an instruction and return the data returned by the service', async () => {
+      const transactions = ['transaction'];
+      const mockData = {
+        transactions,
+      };
+      mockSettlementsService.rejectInstruction.mockResolvedValue(mockData);
+
+      const result = await controller.affirmInstruction(
+        { id: new BigNumber('3') },
+        { signer: 'signer' }
+      );
 
       expect(result).toEqual({
         transactions,
