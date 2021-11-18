@@ -83,6 +83,7 @@ export class MockSecurityToken {
 export class MockInstruction {
   public getStatus = jest.fn();
   public affirm = jest.fn();
+  public reject = jest.fn();
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();

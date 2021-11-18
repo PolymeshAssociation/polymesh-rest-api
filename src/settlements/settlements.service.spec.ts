@@ -453,6 +453,45 @@ describe('SettlementsService', () => {
     });
   });
 
+  describe('rejectInstruction', () => {
+    it('should run a reject procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.settlement.RejectInstruction,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(transactions);
+      mockInstruction.reject.mockResolvedValue(mockQueue);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+      const result = await service.rejectInstruction(new BigNumber('123'), {
+        signer: 'signer',
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.settlement.RejectInstruction,
+          },
+        ],
+      });
+      expect(mockInstruction.reject).toHaveBeenCalledWith(undefined, { signer: address });
+      findInstructionSpy.mockRestore();
+    });
+  });
+
   describe('findVenueDetails', () => {
     it('should return the Venue details', async () => {
       const mockDetails = {
