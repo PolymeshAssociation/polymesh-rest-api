@@ -5,10 +5,10 @@ import {
   CheckpointSchedule,
   CheckpointWithData,
   ErrorCode,
-  isPolymeshError,
   ResultSet,
   ScheduleWithDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';

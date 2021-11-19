@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { MoveFundsParams, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/internal';
-import { DefaultPortfolio, ErrorCode, isPolymeshError } from '@polymathnetwork/polymesh-sdk/types';
+import { DefaultPortfolio, ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { QueueResult } from '~/common/types';

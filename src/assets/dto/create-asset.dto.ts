@@ -52,6 +52,12 @@ export class CreateAssetDto extends SignerDto {
   @IsString()
   readonly assetType: string;
 
+  @ApiProperty({
+    description: 'Specifies if the investor must be unique',
+  })
+  @IsBoolean()
+  readonly requireInvestorUniquness: boolean;
+
   @ApiPropertyOptional({
     description: 'List of Asset Identifiers',
     isArray: true,

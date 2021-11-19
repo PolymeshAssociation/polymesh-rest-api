@@ -312,7 +312,7 @@ describe('AssetsService', () => {
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
           throw new PolymeshError({
             message: 'There is no reservation for',
-            code: ErrorCode.FatalError,
+            code: ErrorCode.UnmetPrerequisite,
           });
         });
         mockIsPolymeshError.mockReturnValue(true);
@@ -329,7 +329,7 @@ describe('AssetsService', () => {
       it('should throw a GoneException', async () => {
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
           throw new PolymeshError({
-            code: ErrorCode.FatalError,
+            code: ErrorCode.UnmetPrerequisite,
             message: 'BRK.A token has been created',
           });
         });
@@ -390,6 +390,7 @@ describe('AssetsService', () => {
           ticker: 'BRK.A',
           isDivisible: false,
           assetType: KnownTokenType.EquityCommon,
+          requireInvestorUniquness: false,
         };
 
         const address = 'address';
@@ -428,6 +429,7 @@ describe('AssetsService', () => {
           ticker: 'BRK.A',
           isDivisible: false,
           assetType: KnownTokenType.EquityCommon,
+          requireInvestorUniquness: false,
         };
 
         const address = 'address';
@@ -485,6 +487,7 @@ describe('AssetsService', () => {
         ticker: 'BRK.A',
         isDivisible: false,
         assetType: KnownTokenType.EquityCommon,
+        requireInvestorUniquness: false,
       };
 
       const address = 'address';
@@ -562,7 +565,7 @@ describe('AssetsService', () => {
         ];
 
         const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.reserveTicker.mockResolvedValue(mockQueue);
+        mockPolymeshApi.currentIdentity.reserveTicker.mockResolvedValue(mockQueue);
 
         const body = {
           signer: '0x6000',

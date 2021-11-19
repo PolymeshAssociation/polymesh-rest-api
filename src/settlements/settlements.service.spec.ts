@@ -305,12 +305,12 @@ describe('SettlementsService', () => {
         },
       ];
       const mockQueue = new MockTransactionQueue(transactions);
-      mockIdentity.createVenue.mockResolvedValue(mockQueue);
+      mockPolymeshApi.currentIdentity.createVenue.mockResolvedValue(mockQueue);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        details: 'A generic exchange',
+        description: 'A generic exchange',
         type: VenueType.Exchange,
       };
       const address = 'address';
@@ -328,8 +328,8 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockIdentity.createVenue).toHaveBeenCalledWith(
-        { details: body.details, type: body.type },
+      expect(mockPolymeshApi.currentIdentity.createVenue).toHaveBeenCalledWith(
+        { description: body.description, type: body.type },
         { signer: address }
       );
     });

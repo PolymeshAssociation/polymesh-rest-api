@@ -1,10 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  ErrorCode,
-  Identity,
-  isPolymeshError,
-  SecurityToken,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, Identity, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
