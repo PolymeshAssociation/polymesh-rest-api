@@ -371,6 +371,14 @@ describe('AssetsService', () => {
     });
   });
   describe('createAsset', () => {
+    const createBody = {
+      signer: '0x6000',
+      name: 'Berkshire Class A',
+      ticker: 'BRK.A',
+      isDivisible: false,
+      assetType: KnownTokenType.EquityCommon,
+      requireInvestorUniqueness: false,
+    };
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
         const expectedError = new Error('Some error');
@@ -384,20 +392,11 @@ describe('AssetsService', () => {
           throw expectedError;
         });
 
-        const body = {
-          signer: '0x6000',
-          name: 'Berkshire Class A',
-          ticker: 'BRK.A',
-          isDivisible: false,
-          assetType: KnownTokenType.EquityCommon,
-          requireInvestorUniqueness: false,
-        };
-
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
         let error;
         try {
-          await service.createAsset(body);
+          await service.createAsset(createBody);
         } catch (err) {
           error = err;
         }
@@ -423,18 +422,9 @@ describe('AssetsService', () => {
         const mockQueue = new MockTransactionQueue(transactions);
         mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
-        const body = {
-          signer: '0x6000',
-          name: 'Berkshire Class A',
-          ticker: 'BRK.A',
-          isDivisible: false,
-          assetType: KnownTokenType.EquityCommon,
-          requireInvestorUniqueness: false,
-        };
-
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-        const result = await service.createAsset(body);
+        const result = await service.createAsset(createBody);
         expect(result).toEqual({
           result: undefined,
           transactions: [
@@ -481,18 +471,9 @@ describe('AssetsService', () => {
       const mockQueue = new MockTransactionQueue(transactions);
       mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
-      const body = {
-        signer: '0x6000',
-        name: 'Berkshire Class A',
-        ticker: 'BRK.A',
-        isDivisible: false,
-        assetType: KnownTokenType.EquityCommon,
-        requireInvestorUniqueness: false,
-      };
-
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-      const result = await service.createAsset(body);
+      const result = await service.createAsset(createBody);
       expect(result).toEqual({
         result: undefined,
         transactions: [
@@ -515,7 +496,7 @@ describe('AssetsService', () => {
   });
 
   describe('issueAsset', () => {
-    const body = {
+    const issueBody = {
       signer: '0x6000',
       amount: new BigNumber(1000),
     };
@@ -538,7 +519,7 @@ describe('AssetsService', () => {
 
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-      const result = await service.issue('TICKER', body);
+      const result = await service.issue('TICKER', issueBody);
       expect(result).toEqual({
         result: undefined,
         transactions: [
@@ -567,14 +548,14 @@ describe('AssetsService', () => {
         const mockQueue = new MockTransactionQueue(transactions);
         mockPolymeshApi.currentIdentity.reserveTicker.mockResolvedValue(mockQueue);
 
-        const body = {
+        const registerBody = {
           signer: '0x6000',
           ticker: 'BRK.A',
         };
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-        const result = await service.registerTicker(body);
+        const result = await service.registerTicker(registerBody);
         expect(result).toEqual({
           result: undefined,
           transactions: [
