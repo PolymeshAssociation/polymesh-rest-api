@@ -19,15 +19,18 @@ import { get } from 'lodash';
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
 
-export function IsDid() {
+export function IsDid(validationOptions?: ValidationOptions) {
   return applyDecorators(
     IsHexadecimal({
+      ...validationOptions,
       message: 'DID must be a hexadecimal number',
     }),
     Matches(/^0x.+/, {
+      ...validationOptions,
       message: 'DID must start with "0x"',
     }),
     Length(DID_LENGTH, undefined, {
+      ...validationOptions,
       message: `DID must be ${DID_LENGTH} characters long`,
     })
   );

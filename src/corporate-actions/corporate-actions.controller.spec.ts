@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
@@ -12,6 +13,7 @@ describe('CorporateActionsController', () => {
 
   const mockCorporateActionsService = {
     findDefaultsByTicker: jest.fn(),
+    updateDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
   };
 
@@ -31,7 +33,7 @@ describe('CorporateActionsController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findDefaultsByTicker', () => {
+  describe('getDefaults', () => {
     it('should return the Corporate Action defaults for an Asset', async () => {
       const mockCorporateActionDefaults = new MockCorporateActionDefaults();
 
@@ -42,6 +44,29 @@ describe('CorporateActionsController', () => {
       const result = await controller.getDefaults({ ticker: 'TICKER' });
 
       expect(result).toEqual(mockCorporateActionDefaults);
+    });
+  });
+
+  describe('updateDefaults', () => {
+    it('should update the Corporate Action defaults and return the details of transaction', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.updateDefaultsByTicker.mockResolvedValue(response);
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        defaultTaxWithholding: new BigNumber('25'),
+      };
+
+      const result = await controller.updateDefaults({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.updateDefaultsByTicker).toHaveBeenCalledWith(
+        'TICKER',
+        body
+      );
     });
   });
 
