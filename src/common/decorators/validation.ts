@@ -19,7 +19,7 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { get } from 'lodash';
+import { get, isString } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { CDD_ID_LENGTH, DID_LENGTH } from '~/identities/identities.consts';
@@ -127,7 +127,8 @@ export function IsValidScopeValue(property: string, validationOptions?: Validati
             case ScopeType.Identity:
               return (
                 isHexadecimal(value) &&
-                matches(value as string, /^0x.+/) &&
+                isString(value) &&
+                matches(value, /^0x.+/) &&
                 length(value, DID_LENGTH, undefined)
               );
             case ScopeType.Custom:
