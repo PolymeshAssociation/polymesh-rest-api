@@ -67,7 +67,7 @@ export class CheckpointsService {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.checkpoints.create, undefined, { signer: address });
+    return processQueue(asset.checkpoints.create, { signer: address }, {});
   }
 
   public async createScheduleByTicker(

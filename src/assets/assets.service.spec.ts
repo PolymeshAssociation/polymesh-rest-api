@@ -390,7 +390,7 @@ describe('AssetsService', () => {
           ticker: 'BRK.A',
           isDivisible: false,
           assetType: KnownTokenType.EquityCommon,
-          requireInvestorUniquness: false,
+          requireInvestorUniqueness: false,
         };
 
         const address = 'address';
@@ -429,7 +429,7 @@ describe('AssetsService', () => {
           ticker: 'BRK.A',
           isDivisible: false,
           assetType: KnownTokenType.EquityCommon,
-          requireInvestorUniquness: false,
+          requireInvestorUniqueness: false,
         };
 
         const address = 'address';
@@ -487,7 +487,7 @@ describe('AssetsService', () => {
         ticker: 'BRK.A',
         isDivisible: false,
         assetType: KnownTokenType.EquityCommon,
-        requireInvestorUniquness: false,
+        requireInvestorUniqueness: false,
       };
 
       const address = 'address';

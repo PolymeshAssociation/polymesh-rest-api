@@ -217,9 +217,12 @@ describe('CheckpointsService', () => {
           },
         ],
       });
-      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(undefined, {
-        signer: address,
-      });
+      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(
+        {
+          signer: address,
+        },
+        {}
+      );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
   });

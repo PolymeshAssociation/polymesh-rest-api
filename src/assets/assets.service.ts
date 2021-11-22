@@ -119,7 +119,7 @@ export class AssetsService {
       tokenIdentifiers: rest.identifiers,
       fundingRound: rest.fundingRound,
       documents: rest.documents,
-      requireInvestorUniqueness: rest.requireInvestorUniquness,
+      requireInvestorUniqueness: rest.requireInvestorUniqueness,
     };
     const res = await processQueue(reservation.createToken, args, { signer: address });
     // prepend the reserve transaction if nessesary

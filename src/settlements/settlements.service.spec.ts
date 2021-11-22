@@ -447,7 +447,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.affirm).toHaveBeenCalledWith(undefined, { signer: address });
+      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signer: address }, {});
       findInstructionSpy.mockRestore();
     });
   });
@@ -486,7 +486,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.reject).toHaveBeenCalledWith(undefined, { signer: address });
+      expect(mockInstruction.reject).toHaveBeenCalledWith({ signer: address }, {});
       findInstructionSpy.mockRestore();
     });
   });

@@ -234,7 +234,7 @@ describe('AssetsController', () => {
           ticker: 'BRK.A',
           isDivisible: false,
           assetType: KnownTokenType.EquityCommon,
-          requireInvestorUniquness: false,
+          requireInvestorUniqueness: false,
         };
         const response = {
           transactions: [

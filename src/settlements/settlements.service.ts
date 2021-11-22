@@ -92,7 +92,7 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    return processQueue(instruction.affirm, undefined, { signer: address });
+    return processQueue(instruction.affirm, { signer: address }, {});
   }
 
   public async rejectInstruction(
@@ -105,7 +105,7 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    return processQueue(instruction.reject, undefined, { signer: address });
+    return processQueue(instruction.reject, { signer: address }, {});
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
