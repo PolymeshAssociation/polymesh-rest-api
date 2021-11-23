@@ -15,12 +15,8 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import {
-  MockIdentity,
-  MockPortfolio,
-  MockRelayerAccountsService,
-  MockTransactionQueue,
-} from '~/test-utils/mocks';
+import { MockIdentity, MockPortfolio, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),

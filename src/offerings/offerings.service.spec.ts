@@ -9,7 +9,8 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { OfferingsService } from '~/offerings/offerings.service';
-import { MockAssetService, MockPortfolio, MockSecurityToken } from '~/test-utils/mocks';
+import { MockPortfolio, MockSecurityToken } from '~/test-utils/mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 describe('OfferingsService', () => {
   let service: OfferingsService;

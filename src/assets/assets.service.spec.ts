@@ -15,11 +15,11 @@ import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.modul
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
   MockPolymesh,
-  MockRelayerAccountsService,
   MockSecurityToken,
   MockTickerReservation,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 import { AssetsService } from './assets.service';
 

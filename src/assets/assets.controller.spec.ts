@@ -10,7 +10,8 @@ import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { MockAssetService, MockSecurityToken } from '~/test-utils/mocks';
+import { MockSecurityToken } from '~/test-utils/mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;

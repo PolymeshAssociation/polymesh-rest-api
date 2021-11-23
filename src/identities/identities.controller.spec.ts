@@ -10,7 +10,8 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockAssetService, MockIdentity } from '~/test-utils/mocks';
+import { MockIdentity } from '~/test-utils/mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 import { IdentitiesController } from './identities.controller';
 

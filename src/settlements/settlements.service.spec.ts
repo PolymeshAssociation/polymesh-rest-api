@@ -26,11 +26,11 @@ import {
   MockIdentity,
   MockInstruction,
   MockPolymesh,
-  MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 import { SettlementsService } from './settlements.service';
 

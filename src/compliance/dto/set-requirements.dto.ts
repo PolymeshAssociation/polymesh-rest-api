@@ -30,8 +30,8 @@ export class SetRequirementsDto extends SignerDto {
             {
               type: 'Jurisdiction',
               scope: {
-                type: 'Identity',
-                value: '0x0600000000000000000000000000000000000000000000000000000000000000',
+                type: 'Ticker',
+                value: 'TICKER',
               },
               code: CountryCode.Us,
             },
@@ -53,8 +53,8 @@ export class SetRequirementsDto extends SignerDto {
           claim: {
             type: 'Accredited',
             scope: {
-              type: 'Identity',
-              value: '0x0600000000000000000000000000000000000000000000000000000000000000',
+              type: 'Ticker',
+              value: 'TICKER',
             },
           },
         },

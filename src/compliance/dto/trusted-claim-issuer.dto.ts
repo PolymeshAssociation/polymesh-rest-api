@@ -18,6 +18,7 @@ export class TrustedClaimIssuerDto {
 
   @ApiPropertyOptional({
     description: 'The Identity of the Claim Issuerer',
+    type: IdentityDto,
   })
   @ValidateNested()
   @Type(() => IdentityDto)

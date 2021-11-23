@@ -12,13 +12,12 @@ import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
-  MockAssetService,
   MockCheckpoint,
   MockCheckpointSchedule,
-  MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),

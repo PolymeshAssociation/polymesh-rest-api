@@ -4,7 +4,8 @@ import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
-import { MockAssetService, MockSecurityToken } from '~/test-utils/mocks';
+import { MockSecurityToken } from '~/test-utils/mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 describe('CorporateActionsService', () => {
   let service: CorporateActionsService;

@@ -5,7 +5,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { ComplianceController } from '~/compliance/compliance.controller';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
-import { MockComplianceService } from '~/test-utils/mocks';
+import { MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('ComplianceController', () => {
   let controller: ComplianceController;

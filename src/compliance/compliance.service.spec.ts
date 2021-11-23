@@ -4,12 +4,8 @@ import { ClaimType, ConditionType, ScopeType, TxTags } from '@polymathnetwork/po
 import { AssetsService } from '~/assets/assets.service';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import {
-  MockAssetService,
-  MockRelayerAccountsService,
-  MockSecurityToken,
-  MockTransactionQueue,
-} from '~/test-utils/mocks';
+import { MockSecurityToken, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 describe('ComplianceService', () => {
   let service: ComplianceService;
