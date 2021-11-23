@@ -213,7 +213,8 @@ describe('CorporateActionsService', () => {
           },
         ];
         const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(new MockDistribution());
+        const mockDistribution = new MockDistribution();
+        mockQueue.run.mockResolvedValue(mockDistribution);
         mockSecurityToken.corporateActions.distributions.configureDividendDistribution.mockResolvedValue(
           mockQueue
         );
@@ -235,7 +236,7 @@ describe('CorporateActionsService', () => {
         const result = await service.createDividendDistributionByTicker(ticker, body);
 
         expect(result).toEqual({
-          result: new MockDistribution(),
+          result: mockDistribution,
           transactions: [
             {
               blockHash: '0x1',
