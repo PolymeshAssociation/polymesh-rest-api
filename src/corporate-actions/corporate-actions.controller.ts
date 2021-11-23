@@ -1,17 +1,30 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
+import {
+  createDividendDistributionDetailsModel,
+  createDividendDistributionModel,
+} from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
 import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
-import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
+import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
+import { DividendDistributionDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
+
+import { DividendDistributionDto } from './dto/dividend-distribution.dto';
 
 @ApiTags('corporate-actions')
 @Controller('assets/:ticker/corporate-actions')
@@ -92,19 +105,56 @@ export class CorporateActionsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiArrayResponse(DividendDistributionModel, {
+  @ApiArrayResponse(DividendDistributionDetailsModel, {
     description: 'List of Dividend Distributions associated with the specified Asset',
     paginated: false,
   })
   @Get('dividend-distributions')
   public async getDividendDistributions(
     @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<DividendDistributionModel>> {
+  ): Promise<ResultsModel<DividendDistributionDetailsModel>> {
     const results = await this.corporateActionsService.findDistributionsByTicker(ticker);
     return new ResultsModel({
       results: results.map(distributionWithDetails =>
-        createDividendDistributionModel(distributionWithDetails)
+        createDividendDistributionDetailsModel(distributionWithDetails)
       ),
+    });
+  }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Configure Dividend Distributions',
+    description:
+      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which a Dividend Distribution is to be created',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details of the newly created Dividend Distribution',
+    type: CreatedDividendDistributionModel,
+  })
+  @ApiBadRequestResponse({
+    description: 'Origin Portfolio free balance is not enough to cover the distribution amount',
+  })
+  @Post('dividend-distributions')
+  public async createDividendDistribution(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() dividendDistributionDto: DividendDistributionDto
+  ): Promise<CreatedDividendDistributionModel> {
+    const {
+      result,
+      transactions,
+    } = await this.corporateActionsService.createDividendDistributionByTicker(
+      ticker,
+      dividendDistributionDto
+    );
+    return new CreatedDividendDistributionModel({
+      dividendDistribution: createDividendDistributionModel(result),
+      transactions,
     });
   }
 }

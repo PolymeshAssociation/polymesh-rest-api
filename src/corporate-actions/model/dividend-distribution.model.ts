@@ -55,22 +55,6 @@ export class DividendDistributionModel extends CorporateActionModel {
   })
   readonly paymentDate: Date;
 
-  @ApiProperty({
-    description: 'Amount of remaining funds',
-    type: 'string',
-    example: '1000',
-  })
-  @FromBigNumber()
-  readonly remainingFunds: BigNumber;
-
-  @ApiProperty({
-    description:
-      'Indicates whether the unclaimed funds have been reclaimed by the Corporate Actions Agent',
-    type: 'boolean',
-    example: false,
-  })
-  readonly fundsReclaimed: boolean;
-
   constructor(model: DividendDistributionModel) {
     const {
       id,

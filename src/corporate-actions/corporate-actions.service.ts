@@ -2,13 +2,17 @@ import { Injectable } from '@nestjs/common';
 import {
   CorporateActionDefaults,
   DistributionWithDetails,
+  DividendDistribution,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+
+import { DividendDistributionDto } from './dto/dividend-distribution.dto';
 
 @Injectable()
 export class CorporateActionsService {
@@ -37,5 +41,24 @@ export class CorporateActionsService {
   public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.corporateActions.distributions.get();
+  }
+
+  public async createDividendDistributionByTicker(
+    ticker: string,
+    dividendDistributionDto: DividendDistributionDto
+  ): Promise<QueueResult<DividendDistribution>> {
+    const { signer, originPortfolio, ...rest } = dividendDistributionDto;
+    const asset = await this.assetsService.findOne(ticker);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      asset.corporateActions.distributions.configureDividendDistribution,
+      {
+        originPortfolio: toPortfolioId(originPortfolio),
+        ...rest,
+      },
+      {
+        signer: address,
+      }
+    );
   }
 }
