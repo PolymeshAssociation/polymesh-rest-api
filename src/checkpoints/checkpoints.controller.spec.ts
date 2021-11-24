@@ -4,6 +4,7 @@ import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckpointAssetBalanceModel } from '~/checkpoints/models/checkpoint-asset-balance.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -18,6 +19,7 @@ describe('CheckpointsController', () => {
     findScheduleById: jest.fn(),
     createByTicker: jest.fn(),
     createScheduleByTicker: jest.fn(),
+    getAssetBalance: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -187,6 +189,32 @@ describe('CheckpointsController', () => {
         schedule: mockCreatedSchedule,
         transactions: ['transaction'],
       });
+    });
+  });
+
+  describe('getAssetBalance', () => {
+    it('should return the balance of an Asset for an Identity at a given Checkpoint', async () => {
+      const balance = new BigNumber(10);
+      const ticker = 'TICKER';
+      const did = '0x0600';
+      const id = new BigNumber(1);
+
+      mockCheckpointsService.getAssetBalance.mockResolvedValue(balance);
+
+      const result = await controller.getAssetBalance({
+        ticker,
+        did,
+        id,
+      });
+
+      const expectedBalance = new CheckpointAssetBalanceModel({
+        ticker,
+        did,
+        balance,
+        checkpointId: id,
+      });
+
+      expect(result).toEqual(expectedBalance);
     });
   });
 });

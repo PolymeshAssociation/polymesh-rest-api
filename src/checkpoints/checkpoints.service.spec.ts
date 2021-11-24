@@ -276,4 +276,24 @@ describe('CheckpointsService', () => {
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
   });
+
+  describe('getAssetBalance', () => {
+    it('should fetch the Asset balance for an Identity at a given Checkpoint', async () => {
+      const id = new BigNumber(1);
+      const balance = new BigNumber(10);
+      const mockCheckpoint = new MockCheckpoint();
+      const did = '0x6000';
+      mockCheckpoint.balance.mockResolvedValue(balance);
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.getAssetBalance('TICKER', did, id);
+      expect(result).toEqual(balance);
+      expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+    });
+  });
 });

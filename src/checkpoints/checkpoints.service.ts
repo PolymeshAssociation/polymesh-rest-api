@@ -79,4 +79,14 @@ export class CheckpointsService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(asset.checkpoints.schedules.create, rest, { signer: address });
   }
+
+  public async getAssetBalance(
+    ticker: string,
+    did: string,
+    checkpointId: BigNumber
+  ): Promise<BigNumber> {
+    const asset = await this.assetsService.findOne(ticker);
+    const checkpoint = await asset.checkpoints.getOne({ id: checkpointId });
+    return checkpoint.balance({ identity: did });
+  }
 }
