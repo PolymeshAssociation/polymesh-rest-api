@@ -2,10 +2,9 @@
 
 import { DistributionWithDetails, DividendDistribution } from '@polymathnetwork/polymesh-sdk/types';
 
+import { DividendDistributionDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
-
-import { DividendDistributionDetailsModel } from './model/dividend-distribution-details.model';
 
 export function createDividendDistributionModel(
   distribution: DividendDistribution

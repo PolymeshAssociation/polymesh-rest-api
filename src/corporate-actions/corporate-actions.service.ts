@@ -9,10 +9,9 @@ import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-
-import { DividendDistributionDto } from './dto/dividend-distribution.dto';
 
 @Injectable()
 export class CorporateActionsService {

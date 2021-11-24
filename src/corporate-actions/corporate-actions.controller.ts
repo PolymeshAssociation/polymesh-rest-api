@@ -18,13 +18,12 @@ import {
   createDividendDistributionModel,
 } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
-
-import { DividendDistributionDto } from './dto/dividend-distribution.dto';
 
 @ApiTags('corporate-actions')
 @Controller('assets/:ticker/corporate-actions')
