@@ -13,7 +13,7 @@ import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
 
-class DividendDistributionParams extends IdParamsDto {
+class DividendDistributionParamsDto extends IdParamsDto {
   @IsTicker()
   readonly ticker: string;
 }
@@ -84,7 +84,7 @@ export class CorporateActionsController {
   }
 
   @ApiOperation({
-    summary: 'Fetch A Dividend Distribution',
+    summary: 'Fetch a Dividend Distribution',
     description:
       'This endpoint will provide a specific Dividend Distribution associated with an Asset',
   })
@@ -106,7 +106,7 @@ export class CorporateActionsController {
   })
   @Get('dividend-distributions/:id')
   public async getDividendDistribution(
-    @Param() { ticker, id }: DividendDistributionParams
+    @Param() { ticker, id }: DividendDistributionParamsDto
   ): Promise<DividendDistributionModel> {
     const result = await this.corporateActionsService.findDistribution(ticker, id);
     return createDividendDistributionModel(result);
