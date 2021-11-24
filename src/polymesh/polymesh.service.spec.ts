@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
+import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { MockPolymesh } from '~/test-utils/mocks';
-
-import { PolymeshService } from './polymesh.service';
 
 describe('PolymeshService', () => {
   let service: PolymeshService;
