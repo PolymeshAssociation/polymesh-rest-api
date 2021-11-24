@@ -30,13 +30,10 @@ export class CorporateActionsService {
       return await asset.corporateActions.distributions.getOne({ id });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (
-          code === ErrorCode.DataUnavailable &&
-          message.startsWith('The Dividend Distribution does not exist')
-        ) {
+        const { code } = err;
+        if (code === ErrorCode.DataUnavailable) {
           throw new NotFoundException(
-            `The Dividend Distribution does not exist for ticker: "${ticker}"`
+            `The Dividend Distribution with id: "${id.toString()}" does not exist for ticker: "${ticker}"`
           );
         }
       }

@@ -1,11 +1,22 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockSecurityToken } from '~/test-utils/mocks';
+
+jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+  isPolymeshError: mockIsPolymeshError,
+}));
 
 describe('CorporateActionsService', () => {
   let service: CorporateActionsService;
@@ -60,17 +71,73 @@ describe('CorporateActionsService', () => {
   });
 
   describe('findDistribution', () => {
-    it('should return a specific Dividend Distribution associated with an Asset', async () => {
-      const mockDistributions = new MockDistributionWithDetails();
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+    });
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.corporateActions.distributions.getOne.mockResolvedValue(mockDistributions);
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+    describe('if the Dividend Distribution does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
+          throw new PolymeshError({
+            code: ErrorCode.DataUnavailable,
+            message: 'The Dividend Distribution does not exist',
+          });
+        });
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
-      const result = await service.findDistribution('TICKER', new BigNumber('1'));
+        mockIsPolymeshError.mockReturnValue(true);
 
-      expect(result).toEqual(mockDistributions);
+        let error;
+        try {
+          await service.findDistribution('TICKER', new BigNumber('1'));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('foo');
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        let error;
+        try {
+          await service.findDistribution('TICKER', new BigNumber('1'));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(expectedError);
+      });
+    });
+    describe('otherwise', () => {
+      it('should return a specific Dividend Distribution associated with an Asset', async () => {
+        const mockDistributions = new MockDistributionWithDetails();
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockResolvedValue(
+          mockDistributions
+        );
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        const result = await service.findDistribution('TICKER', new BigNumber('1'));
+
+        expect(result).toEqual(mockDistributions);
+      });
     });
   });
 });
