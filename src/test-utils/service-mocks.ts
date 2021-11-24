@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 export class MockAssetService {
   findOne = jest.fn();
   findHolders = jest.fn();
