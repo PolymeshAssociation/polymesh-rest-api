@@ -60,4 +60,20 @@ export class CorporateActionsService {
       throw err;
     }
   }
+
+  public async removeByTicker(
+    ticker: string,
+    corporateAction: BigNumber,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const asset = await this.assetsService.findOne(ticker);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      asset.corporateActions.remove,
+      { corporateAction },
+      {
+        signer: address,
+      }
+    );
+  }
 }
