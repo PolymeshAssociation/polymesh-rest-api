@@ -2,27 +2,10 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
+import { CalendarPeriodModel } from '~/checkpoints/models/calendar-period.model';
 import { FromBigNumber } from '~/common/decorators/transformation';
-
-class CalendarPeriodModel {
-  @ApiProperty({
-    description: 'Unit of the period',
-    type: 'string',
-    enum: CalendarUnit,
-    example: CalendarUnit.Month,
-  })
-  readonly unit: CalendarUnit;
-
-  @ApiProperty({
-    description: 'Number of units',
-    type: 'number',
-    example: 3,
-  })
-  readonly amount: number;
-}
 
 export class CheckpointScheduleModel {
   @ApiProperty({
@@ -32,6 +15,13 @@ export class CheckpointScheduleModel {
   })
   @FromBigNumber()
   readonly id: BigNumber;
+
+  @ApiProperty({
+    description: 'Ticker of the Asset whose Checkpoints will be created with this Schedule',
+    type: 'string',
+    example: 'TICKER',
+  })
+  readonly ticker: string;
 
   @ApiProperty({
     description: 'Date at which first Checkpoint was created',

@@ -13,14 +13,15 @@ export class AssetDocumentDto {
   readonly name: string;
 
   @ApiProperty({
-    description: 'The URI of the document',
+    description: 'URI (Uniform Resource Identifier) of the document',
     example: 'https://example.com/sec/10k-05-23-2021.htm',
   })
   @IsString()
   readonly uri: string;
 
   @ApiPropertyOptional({
-    description: 'The type of content hash',
+    description:
+      "Hash of the document's content. Used to verify the integrity of the document pointed at by the URI",
     example: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
   })
   @IsOptional()
@@ -36,14 +37,14 @@ export class AssetDocumentDto {
   readonly contentHash?: string;
 
   @ApiPropertyOptional({
-    description: 'The type of document',
-    example: '10K',
+    description: 'Type of the document',
+    example: 'Private Placement Memorandum',
   })
   @IsOptional()
   readonly type?: string;
 
   @ApiPropertyOptional({
-    description: 'The time the document was filed',
+    description: 'Date at which the document was filed',
     example: new Date('05/23/2021').toISOString(),
     type: 'string',
   })
