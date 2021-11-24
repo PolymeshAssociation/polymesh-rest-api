@@ -3,6 +3,7 @@ import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -11,6 +12,11 @@ import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporat
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
+
+class DividendDistributionParams extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
 
 @ApiTags('corporate-actions')
 @Controller('assets/:ticker/corporate-actions')
@@ -100,7 +106,7 @@ export class CorporateActionsController {
   })
   @Get('dividend-distributions/:id')
   public async getDividendDistribution(
-    @Param() { ticker, id }: TickerParamsDto & IdParamsDto
+    @Param() { ticker, id }: DividendDistributionParams
   ): Promise<DividendDistributionModel> {
     const result = await this.corporateActionsService.findDistribution(ticker, id);
     return createDividendDistributionModel(result);
