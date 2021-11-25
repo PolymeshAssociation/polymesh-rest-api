@@ -22,6 +22,7 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SettlementsService } from '~/settlements/settlements.service';
 import {
   MockIdentity,
   MockInstruction,
@@ -31,8 +32,6 @@ import {
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
-
-import { SettlementsService } from './settlements.service';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),

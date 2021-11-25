@@ -10,6 +10,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -22,8 +23,6 @@ import {
   MockRelayerAccountsService,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-
-import { IdentitiesService } from './identities.service';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
