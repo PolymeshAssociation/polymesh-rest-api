@@ -22,6 +22,7 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SettlementsService } from '~/settlements/settlements.service';
 import {
   MockIdentity,
   MockInstruction,
@@ -31,8 +32,6 @@ import {
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
-
-import { SettlementsService } from './settlements.service';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -306,12 +305,12 @@ describe('SettlementsService', () => {
         },
       ];
       const mockQueue = new MockTransactionQueue(transactions);
-      mockIdentity.createVenue.mockResolvedValue(mockQueue);
+      mockPolymeshApi.currentIdentity.createVenue.mockResolvedValue(mockQueue);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        details: 'A generic exchange',
+        description: 'A generic exchange',
         type: VenueType.Exchange,
       };
       const address = 'address';
@@ -329,8 +328,8 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockIdentity.createVenue).toHaveBeenCalledWith(
-        { details: body.details, type: body.type },
+      expect(mockPolymeshApi.currentIdentity.createVenue).toHaveBeenCalledWith(
+        { description: body.description, type: body.type },
         { signer: address }
       );
     });
@@ -448,7 +447,46 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.affirm).toHaveBeenCalledWith(undefined, { signer: address });
+      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signer: address }, {});
+      findInstructionSpy.mockRestore();
+    });
+  });
+
+  describe('rejectInstruction', () => {
+    it('should run a reject procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.settlement.RejectInstruction,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(transactions);
+      mockInstruction.reject.mockResolvedValue(mockQueue);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+      const result = await service.rejectInstruction(new BigNumber('123'), {
+        signer: 'signer',
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.settlement.RejectInstruction,
+          },
+        ],
+      });
+      expect(mockInstruction.reject).toHaveBeenCalledWith({ signer: address }, {});
       findInstructionSpy.mockRestore();
     });
   });

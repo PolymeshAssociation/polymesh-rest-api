@@ -1,12 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClaimData, ClaimType, ResultSet } from '@polymathnetwork/polymesh-sdk/types';
 
+import { ClaimsService } from '~/claims/claims.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { MockPolymesh } from '~/test-utils/mocks';
-
-import { ClaimsService } from './claims.service';
 
 describe('ClaimsService', () => {
   let claimsService: ClaimsService;

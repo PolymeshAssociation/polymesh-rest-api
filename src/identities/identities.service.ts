@@ -1,19 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  ErrorCode,
-  Identity,
-  isPolymeshError,
-  SecurityToken,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, Identity, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { QueueResult } from '~/common/types';
+import { processQueue } from '~/common/utils/utils';
+import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()
 export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly logger: PolymeshLogger
+    private readonly logger: PolymeshLogger,
+    private readonly relayerAccountsService: RelayerAccountsService
   ) {
     this.logger.setContext(IdentitiesService.name);
   }
@@ -45,5 +46,19 @@ export class IdentitiesService {
   public async findTrustingTokens(did: string): Promise<SecurityToken[]> {
     const identity = await this.findOne(did);
     return identity.getTrustingTokens();
+  }
+
+  public async addSecondaryKey(
+    addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
+  ): Promise<QueueResult<void>> {
+    const { signer, expiry, permissions, secondaryKey } = addSecondaryKeyParamsDto;
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const params = {
+      targetAccount: secondaryKey,
+      permissions: permissions?.toPermissionsLike(),
+      expiry,
+    };
+    const inviteAccount = this.polymeshService.polymeshApi.currentIdentity.inviteAccount;
+    return processQueue(inviteAccount, params, { signer: address });
   }
 }

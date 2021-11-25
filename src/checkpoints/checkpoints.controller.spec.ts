@@ -4,8 +4,10 @@ import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -13,6 +15,10 @@ describe('CheckpointsController', () => {
   const mockCheckpointsService = {
     findAllByTicker: jest.fn(),
     findSchedulesByTicker: jest.fn(),
+    findScheduleById: jest.fn(),
+    createByTicker: jest.fn(),
+    createScheduleByTicker: jest.fn(),
+    deleteScheduleByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -78,6 +84,27 @@ describe('CheckpointsController', () => {
     });
   });
 
+  describe('createCheckpoint', () => {
+    it('should return the details of newly created Checkpoint', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      const response = {
+        result: mockCheckpoint,
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.createByTicker.mockResolvedValue(response);
+      const body = {
+        signer: 'signer',
+      };
+
+      const result = await controller.createCheckpoint({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual({
+        checkpoint: mockCheckpoint,
+        transactions: ['transaction'],
+      });
+    });
+  });
+
   describe('getSchedules', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
       const mockDate = new Date();
@@ -107,6 +134,7 @@ describe('CheckpointsController', () => {
       const mockResult = [
         {
           id: new BigNumber('1'),
+          ticker: 'TICKER',
           period: {
             unit: CalendarUnit.Month,
             amount: 3,
@@ -120,6 +148,64 @@ describe('CheckpointsController', () => {
       ];
 
       expect(result).toEqual(new ResultsModel({ results: mockResult }));
+    });
+  });
+
+  describe('createSchedule', () => {
+    it('should return the details of newly created Checkpoint Schedule', async () => {
+      const mockDate = new Date();
+
+      const mockCheckpointSchedule = new MockCheckpointSchedule();
+      const response = {
+        result: mockCheckpointSchedule,
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
+
+      const mockScheduleWithDetails = {
+        schedule: new MockCheckpointSchedule(),
+        details: {
+          remainingCheckpoints: 1,
+          nextCheckpointDate: mockDate,
+        },
+      };
+      mockCheckpointsService.findScheduleById.mockResolvedValue(mockScheduleWithDetails);
+
+      const body = {
+        signer: 'signer',
+        start: mockDate,
+        period: { unit: CalendarUnit.Month, amount: 3 },
+        repetitions: 2,
+      };
+
+      const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
+
+      const mockCreatedSchedule = new CheckpointScheduleModel({
+        ...mockScheduleWithDetails.schedule,
+        ...mockScheduleWithDetails.details,
+      });
+      expect(result).toEqual({
+        schedule: mockCreatedSchedule,
+        transactions: ['transaction'],
+      });
+    });
+  });
+
+  describe('deleteSchedule', () => {
+    it('should return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(response);
+
+      const result = await controller.deleteSchedule(
+        { id: new BigNumber(1), ticker: 'TICKER' },
+        { signer: '0x6'.padEnd(66, '0') }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
     });
   });
 });

@@ -9,4 +9,5 @@ RUN yarn --frozen-lockfile
 COPY --chown=node:node . /home/node
 
 USER node
+RUN yarn build
 ENTRYPOINT ["/bin/bash", "./docker-entrypoint.sh"]

@@ -22,6 +22,10 @@ export class LegDto {
   @ApiProperty({
     description: 'Portfolio of the sender',
     type: () => PortfolioDto,
+    example: {
+      did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+      id: 1,
+    },
   })
   @ValidateNested()
   @Type(() => PortfolioDto)
@@ -30,6 +34,10 @@ export class LegDto {
   @ApiProperty({
     description: 'Portfolio of the receiver',
     type: () => PortfolioDto,
+    example: {
+      did: '0x0111111111111111111111111111111111111111111111111111111111111111',
+      id: 0,
+    },
   })
   @ValidateNested()
   @Type(() => PortfolioDto)

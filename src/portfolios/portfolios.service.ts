@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { MoveFundsParams, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/internal';
-import { DefaultPortfolio, ErrorCode, isPolymeshError } from '@polymathnetwork/polymesh-sdk/types';
+import { DefaultPortfolio, ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
+import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
@@ -59,5 +63,27 @@ export class PortfoliosService {
       }),
     };
     return processQueue(fromPortfolio.moveFunds, args, { signer: address });
+  }
+
+  public async createPortfolio(
+    params: CreatePortfolioDto
+  ): Promise<QueueResult<NumberedPortfolio>> {
+    const { signer, ...rest } = params;
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const identity = await this.identitiesService.findOne(signer);
+    return processQueue(identity.portfolios.create, rest, { signer: address });
+  }
+
+  public async deletePortfolio(
+    portfolio: PortfolioDto,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const identity = await this.identitiesService.findOne(portfolio.did);
+    return processQueue(
+      identity.portfolios.delete,
+      { portfolio: portfolio.id },
+      { signer: address }
+    );
   }
 }
