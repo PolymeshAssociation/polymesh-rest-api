@@ -155,7 +155,7 @@ export class AssetsService {
           code === ErrorCode.UnmetPrerequisite &&
           message.endsWith('token has been created')
         ) {
-          throw new GoneException(`${ticker} has already been created`);
+          throw new GoneException(`Asset ${ticker} has already been created`);
         }
       }
 
