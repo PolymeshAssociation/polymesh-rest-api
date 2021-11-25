@@ -118,6 +118,7 @@ export class MockIdentity {
   public areSecondaryKeysFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
   public getVenues = jest.fn();
+  public inviteAccount = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryKeys = jest.fn();
   public getTrustingTokens = jest.fn();

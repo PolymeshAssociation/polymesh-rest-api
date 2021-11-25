@@ -26,6 +26,7 @@ describe('IdentitiesController', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
     findTrustingTokens: jest.fn(),
+    addSecondaryKey: jest.fn(),
   };
 
   const mockAuthorizationsService = {
@@ -297,6 +298,24 @@ describe('IdentitiesController', () => {
       const result = await controller.getTrustingTokens({ did });
 
       expect(result).toEqual(new ResultsModel({ results: mockAssets }));
+    });
+  });
+
+  describe('addSecondaryKey', () => {
+    it('should return the transaction details on adding a Secondary Key', async () => {
+      const transactions = ['transaction'];
+      const mockData = {
+        result: undefined,
+        transactions,
+      };
+      mockIdentitiesService.addSecondaryKey.mockResolvedValue(mockData);
+
+      const result = await controller.addSecondaryKey({ signer: 'Ox60', secondaryKey: '5xdd' });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions,
+      });
     });
   });
 });
