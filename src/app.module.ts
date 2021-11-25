@@ -4,18 +4,17 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
+import { AssetsModule } from '~/assets/assets.module';
+import { AuthorizationsModule } from '~/authorizations/authorizations.module';
+import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
-
-import { AssetsModule } from './assets/assets.module';
-import { AuthorizationsModule } from './authorizations/authorizations.module';
-import { CheckpointsModule } from './checkpoints/checkpoints.module';
-import { CorporateActionsModule } from './corporate-actions/corporate-actions.module';
-import { IdentitiesModule } from './identities/identities.module';
-import { OfferingsModule } from './offerings/offerings.module';
-import { PolymeshModule } from './polymesh/polymesh.module';
-import { PortfoliosModule } from './portfolios/portfolios.module';
-import { RelayerAccountsModule } from './relayer-accounts/relayer-accounts.module';
-import { SettlementsModule } from './settlements/settlements.module';
+import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.module';
+import { IdentitiesModule } from '~/identities/identities.module';
+import { OfferingsModule } from '~/offerings/offerings.module';
+import { PolymeshModule } from '~/polymesh/polymesh.module';
+import { PortfoliosModule } from '~/portfolios/portfolios.module';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { SettlementsModule } from '~/settlements/settlements.module';
 
 @Module({
   imports: [

@@ -18,7 +18,7 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { PortfolioIdModel } from '~/portfolios/models/portfolio-id.model';
+import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -90,17 +90,17 @@ export class PortfoliosController {
   })
   @ApiCreatedResponse({
     description: 'Details of the newly created Portfolio',
-    type: PortfolioIdModel,
+    type: CreatedPortfolioModel,
   })
   @Post('/portfolios')
   public async createPortfolio(
     @Body() createPortfolioParams: CreatePortfolioDto
-  ): Promise<PortfolioIdModel> {
+  ): Promise<CreatedPortfolioModel> {
     const { result, transactions } = await this.portfoliosService.createPortfolio(
       createPortfolioParams
     );
-    return new PortfolioIdModel({
-      portfolioId: createPortfolioIdentifierModel(result),
+    return new CreatedPortfolioModel({
+      portfolio: createPortfolioIdentifierModel(result),
       transactions,
     });
   }

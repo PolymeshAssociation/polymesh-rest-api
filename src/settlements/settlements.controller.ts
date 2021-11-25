@@ -19,8 +19,8 @@ import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
+import { CreatedInstructionModel } from '~/settlements/model/created-instruction.model';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
-import { InstructionIdModel } from '~/settlements/model/instruction-id.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { TransferBreakdownModel } from '~/settlements/model/transfer-breakdown.model';
 import { VenueDetailsModel } from '~/settlements/model/venue-details.model';
@@ -65,20 +65,20 @@ export class SettlementsController {
   })
   @ApiOkResponse({
     description: 'The ID of the newly created Instruction',
-    type: InstructionIdModel,
+    type: CreatedInstructionModel,
   })
   @Post('venues/:id/instructions')
   public async createInstruction(
     @Param() { id }: IdParamsDto,
     @Body() createInstructionDto: CreateInstructionDto
-  ): Promise<InstructionIdModel> {
-    const { result: instructionId, transactions } = await this.settlementsService.createInstruction(
+  ): Promise<CreatedInstructionModel> {
+    const { result: instruction, transactions } = await this.settlementsService.createInstruction(
       id,
       createInstructionDto
     );
 
-    return new InstructionIdModel({
-      instructionId,
+    return new CreatedInstructionModel({
+      instruction,
       transactions,
     });
   }

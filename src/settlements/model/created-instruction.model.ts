@@ -1,23 +1,21 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Checkpoint } from '@polymathnetwork/polymesh-sdk/internal';
+import { Instruction } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
-export class CheckpointModel extends TransactionQueueModel {
+export class CreatedInstructionModel extends TransactionQueueModel {
   @ApiProperty({
-    description: 'Identifiers of the newly created Checkpoint',
-    example: {
-      id: '1',
-      ticker: 'TICKER',
-    },
+    type: 'string',
+    description: 'ID of the newly created settlement Instruction',
+    example: '123',
   })
   @FromEntity()
-  readonly checkpoint: Checkpoint;
+  readonly instruction: Instruction;
 
-  constructor(model: CheckpointModel) {
+  constructor(model: CreatedInstructionModel) {
     const { transactions, ...rest } = model;
     super({ transactions });
 

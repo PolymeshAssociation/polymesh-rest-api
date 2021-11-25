@@ -14,8 +14,8 @@ import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
-import { CheckpointModel } from '~/checkpoints/models/checkpoint.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
+import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
@@ -106,18 +106,18 @@ export class CheckpointsController {
   })
   @ApiCreatedResponse({
     description: 'Details of the newly created Checkpoint',
-    type: CheckpointModel,
+    type: CreatedCheckpointModel,
   })
   @Post()
   public async createCheckpoint(
     @Param() { ticker }: TickerParamsDto,
     @Body() signerDto: SignerDto
-  ): Promise<CheckpointModel> {
-    const { result, transactions } = await this.checkpointsService.createByTicker(
+  ): Promise<CreatedCheckpointModel> {
+    const { result: checkpoint, transactions } = await this.checkpointsService.createByTicker(
       ticker,
       signerDto
     );
-    return new CheckpointModel({ checkpoint: result, transactions });
+    return new CreatedCheckpointModel({ checkpoint, transactions });
   }
 
   @ApiTags('assets')
