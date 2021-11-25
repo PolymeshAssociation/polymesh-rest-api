@@ -20,6 +20,7 @@ describe('CheckpointsController', () => {
     createByTicker: jest.fn(),
     createScheduleByTicker: jest.fn(),
     getAssetBalance: jest.fn(),
+    deleteScheduleByTicker: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -215,6 +216,24 @@ describe('CheckpointsController', () => {
       });
 
       expect(result).toEqual(expectedBalance);
+    });
+  });
+
+  describe('deleteSchedule', () => {
+    it('should return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(response);
+
+      const result = await controller.deleteSchedule(
+        { id: new BigNumber(1), ticker: 'TICKER' },
+        { signer: '0x6'.padEnd(66, '0') }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
     });
   });
 });

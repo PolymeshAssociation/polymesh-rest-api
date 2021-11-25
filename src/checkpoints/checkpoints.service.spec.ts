@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
@@ -19,8 +19,8 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -217,9 +217,12 @@ describe('CheckpointsService', () => {
           },
         ],
       });
-      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(undefined, {
-        signer: address,
-      });
+      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(
+        {
+          signer: address,
+        },
+        {}
+      );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
   });
@@ -294,6 +297,98 @@ describe('CheckpointsService', () => {
       expect(result).toEqual(balance);
       expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+    });
+  });
+
+  describe('deleteScheduleByTicker', () => {
+    describe('if there is a error', () => {
+      const errors = [
+        [
+          {
+            code: ErrorCode.ValidationError,
+            message: 'Schedule no longer exists. It was either removed or it expired',
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.ValidationError,
+            message: 'You cannot remove this Schedule',
+          },
+          BadRequestException,
+        ],
+      ];
+      it('should pass the error along the chain', async () => {
+        const signer = '0x6'.padEnd(66, '0');
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        errors.forEach(async ([polymeshError, httpException]) => {
+          const mockSecurityToken = new MockSecurityToken();
+          mockSecurityToken.checkpoints.schedules.remove.mockImplementation(() => {
+            throw polymeshError;
+          });
+          mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+          mockIsPolymeshError.mockReturnValue(true);
+
+          let error;
+          try {
+            await service.deleteScheduleByTicker('TICKER', new BigNumber('1'), signer);
+          } catch (err) {
+            error = err;
+          }
+          expect(error).toBeInstanceOf(httpException);
+
+          mockIsPolymeshError.mockReset();
+        });
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.checkpoint.RemoveSchedule,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.checkpoints.schedules.remove.mockResolvedValue(mockQueue);
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        const signer = '0x6'.padEnd(66, '0');
+        const ticker = 'TICKER';
+        const id = new BigNumber('1');
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.deleteScheduleByTicker(ticker, id, signer);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.checkpoint.RemoveSchedule,
+            },
+          ],
+        });
+        expect(mockSecurityToken.checkpoints.schedules.remove).toHaveBeenCalledWith(
+          {
+            schedule: id,
+          },
+          {
+            signer: address,
+          }
+        );
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
     });
   });
 });
