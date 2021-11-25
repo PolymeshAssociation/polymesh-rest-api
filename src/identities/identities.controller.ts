@@ -1,5 +1,14 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   AuthorizationType,
@@ -20,6 +29,8 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -411,5 +422,30 @@ export class IdentitiesController {
   async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
     const results = await this.identitiesService.findTrustingTokens(did);
     return new ResultsModel({ results });
+  }
+
+  // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
+  @ApiOperation({
+    summary: 'Add Secondary Key',
+    description:
+      'This endpoint will send an invitation to a Secondary Key to join an Identity. It also defines the set of permissions the Secondary Key will have.',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: "The supplied address is not encoded with the chain's SS58 format",
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
+  })
+  @Post('/secondary-keys')
+  async addSecondaryKey(
+    @Body() addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.identitiesService.addSecondaryKey(addSecondaryKeyParamsDto);
+    return new TransactionQueueModel({ transactions });
   }
 }

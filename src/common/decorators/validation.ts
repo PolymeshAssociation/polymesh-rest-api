@@ -18,6 +18,7 @@ import { get } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
+import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 
 export function IsDid() {
   return applyDecorators(
@@ -33,8 +34,11 @@ export function IsDid() {
   );
 }
 
-export function IsTicker() {
-  return applyDecorators(MaxLength(MAX_TICKER_LENGTH), IsUppercase());
+export function IsTicker(validationOptions?: ValidationOptions) {
+  return applyDecorators(
+    MaxLength(MAX_TICKER_LENGTH, validationOptions),
+    IsUppercase(validationOptions)
+  );
 }
 
 export function IsBigNumber(validationOptions?: ValidationOptions) {
@@ -43,7 +47,7 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
     registerDecorator({
       name: 'isBigNumber',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
       validator: {
         validate(value: unknown) {
@@ -63,7 +67,7 @@ export function IsAssetType() {
     registerDecorator({
       name: 'isAssetType',
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       validator: {
         validate(value: unknown) {
           if (typeof value === 'string') {
@@ -78,6 +82,75 @@ export function IsAssetType() {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a Known type or object of type "{ custom: string }"`;
+        },
+      },
+    });
+  };
+}
+
+export function IsPermissionsLike() {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isPermissionsLike',
+      target: object.constructor,
+      propertyName,
+      validator: {
+        validate(value: unknown) {
+          if (typeof value === 'object' && value) {
+            return !('transactions' in value && 'transactionGroups' in value);
+          }
+          return false;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} can have either 'transactions' or 'transactionGroups'`;
+        },
+      },
+    });
+  };
+}
+
+// TODO @prashantasdeveloper Reduce the below code from two decorators if possible - IsTxTag and IsTxTagOrModuleName
+export function IsTxTag(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isTxTag',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          return typeof value === 'string' && getTxTags().includes(value);
+        },
+        defaultMessage(args: ValidationArguments) {
+          if (validationOptions?.each) {
+            return `${args.property} must have all valid enum values`;
+          }
+          return `${args.property} must be a valid enum value`;
+        },
+      },
+    });
+  };
+}
+
+export function IsTxTagOrModuleName(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isTxTagOrModuleName',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          return typeof value === 'string' && getTxTagsWithModuleNames().includes(value);
+        },
+        defaultMessage(args: ValidationArguments) {
+          if (validationOptions?.each) {
+            return `${args.property} must have all valid enum values from "ModuleName" or "TxTags"`;
+          }
+          return `${args.property} must be a valid enum value from "ModuleName" or "TxTags"`;
         },
       },
     });
