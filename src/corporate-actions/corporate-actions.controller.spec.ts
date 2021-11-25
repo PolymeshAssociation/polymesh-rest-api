@@ -15,6 +15,7 @@ describe('CorporateActionsController', () => {
     findDefaultsByTicker: jest.fn(),
     updateDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
+    findDistribution: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -86,6 +87,22 @@ describe('CorporateActionsController', () => {
           ),
         })
       );
+    });
+  });
+
+  describe('findDistribution', () => {
+    it('should return a specific Dividend Distribution associated with an Asset', async () => {
+      const mockDistributions = new MockDistributionWithDetails();
+
+      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistributions);
+
+      const result = await controller.getDividendDistribution({
+        ticker: 'TICKER',
+        id: new BigNumber('1'),
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(result).toEqual(createDividendDistributionModel(mockDistributions as any));
     });
   });
 });

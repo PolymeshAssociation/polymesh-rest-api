@@ -3,6 +3,8 @@ import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { IsTicker } from '~/common/decorators/validation';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -12,6 +14,11 @@ import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporat
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
+
+class DividendDistributionParamsDto extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
 
 @ApiTags('corporate-actions')
 @Controller('assets/:ticker/corporate-actions')
@@ -106,5 +113,34 @@ export class CorporateActionsController {
         createDividendDistributionModel(distributionWithDetails)
       ),
     });
+  }
+
+  @ApiOperation({
+    summary: 'Fetch a Dividend Distribution',
+    description:
+      'This endpoint will provide a specific Dividend Distribution associated with an Asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Dividend Distribution is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Dividend Distribution',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'The details of the Dividend Distribution',
+    type: DividendDistributionModel,
+  })
+  @Get('dividend-distributions/:id')
+  public async getDividendDistribution(
+    @Param() { ticker, id }: DividendDistributionParamsDto
+  ): Promise<DividendDistributionModel> {
+    const result = await this.corporateActionsService.findDistribution(ticker, id);
+    return createDividendDistributionModel(result);
   }
 }

@@ -1,9 +1,11 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
+import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -15,6 +17,11 @@ import {
   MockSecurityToken,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+
+jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+  isPolymeshError: mockIsPolymeshError,
+}));
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
@@ -152,6 +159,77 @@ describe('CorporateActionsService', () => {
       const result = await service.findDistributionsByTicker('TICKER');
 
       expect(result).toEqual(mockDistributions);
+    });
+  });
+
+  describe('findDistribution', () => {
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+    });
+
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
+    describe('if the Dividend Distribution does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
+          throw new PolymeshError({
+            code: ErrorCode.DataUnavailable,
+            message: 'The Dividend Distribution does not exist',
+          });
+        });
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.findDistribution('TICKER', new BigNumber('1'));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('foo');
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        let error;
+        try {
+          await service.findDistribution('TICKER', new BigNumber('1'));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(expectedError);
+      });
+    });
+    describe('otherwise', () => {
+      it('should return a specific Dividend Distribution associated with an Asset', async () => {
+        const mockDistributions = new MockDistributionWithDetails();
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockResolvedValue(
+          mockDistributions
+        );
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        const result = await service.findDistribution('TICKER', new BigNumber('1'));
+
+        expect(result).toEqual(mockDistributions);
+      });
     });
   });
 });
