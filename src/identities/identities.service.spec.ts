@@ -156,15 +156,10 @@ describe('IdentitiesService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const findOneSpy = jest.spyOn(service, 'findOne');
-
         errors.forEach(async ([polymeshError, httpException]) => {
-          const mockIdentity = new MockIdentity();
-          mockIdentity.inviteAccount.mockImplementation(() => {
+          mockPolymeshApi.currentIdentity.inviteAccount.mockImplementation(() => {
             throw polymeshError;
           });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          findOneSpy.mockResolvedValue(mockIdentity as any);
           mockIsPolymeshError.mockReturnValue(true);
 
           let error;
@@ -175,20 +170,14 @@ describe('IdentitiesService', () => {
           }
 
           expect(error).toBeInstanceOf(httpException);
+          expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
           mockIsPolymeshError.mockReset();
-          findOneSpy.mockRestore();
         });
       });
     });
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const mockIdentity = new MockIdentity();
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockIdentity as any);
-
         const transactions = [
           {
             blockHash: '0x1',
@@ -197,7 +186,7 @@ describe('IdentitiesService', () => {
           },
         ];
         const mockQueue = new MockTransactionQueue(transactions);
-        mockIdentity.inviteAccount.mockResolvedValue(mockQueue);
+        mockPolymeshApi.currentIdentity.inviteAccount.mockResolvedValue(mockQueue);
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
@@ -218,8 +207,7 @@ describe('IdentitiesService', () => {
             },
           ],
         });
-        expect(findOneSpy).toHaveBeenCalled();
-        findOneSpy.mockRestore();
+        expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
       });
     });
   });

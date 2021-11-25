@@ -4,8 +4,8 @@ import {
   CorporateActionDefaults,
   DistributionWithDetails,
   ErrorCode,
-  isPolymeshError,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
