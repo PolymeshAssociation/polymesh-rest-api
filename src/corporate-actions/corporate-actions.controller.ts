@@ -20,12 +20,11 @@ class DividendDistributionParamsDto extends IdParamsDto {
   readonly ticker: string;
 }
 
-@ApiTags('corporate-actions')
+@ApiTags('corporate-actions', 'assets')
 @Controller('assets/:ticker/corporate-actions')
 export class CorporateActionsController {
   constructor(private readonly corporateActionsService: CorporateActionsService) {}
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Fetch Corporate Action defaults',
     description:
@@ -59,7 +58,6 @@ export class CorporateActionsController {
     });
   }
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Update Corporate Action defaults',
     description:
@@ -87,7 +85,6 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Fetch Dividend Distributions',
     description:

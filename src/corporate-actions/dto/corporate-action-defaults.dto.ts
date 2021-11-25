@@ -26,7 +26,7 @@ export class CorporateActionDefaultsDto extends SignerDto {
 
   @ApiPropertyOptional({
     description:
-      "Tax withholding percentage(0-100) that applies to Identities that don't have a specific percentage assigned to them",
+      "Tax withholding percentage (0-100) that applies to Identities that don't have a specific percentage assigned to them",
     type: 'string',
     example: '25',
   })
@@ -48,7 +48,7 @@ export class CorporateActionDefaultsDto extends SignerDto {
     ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultsDto) =>
       !!taxWithholdings || (!targets && !defaultTaxWithholding)
   )
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => TaxWithholdingDto)
   readonly taxWithholdings?: TaxWithholdingDto[];
 }
