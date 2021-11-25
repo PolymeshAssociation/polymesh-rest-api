@@ -5,10 +5,10 @@ import {
   CheckpointSchedule,
   CheckpointWithData,
   ErrorCode,
-  isPolymeshError,
   ResultSet,
   ScheduleWithDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
@@ -67,7 +67,7 @@ export class CheckpointsService {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.checkpoints.create, undefined, { signer: address });
+    return processQueue(asset.checkpoints.create, { signer: address }, {});
   }
 
   public async createScheduleByTicker(
