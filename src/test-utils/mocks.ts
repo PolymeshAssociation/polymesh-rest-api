@@ -71,6 +71,7 @@ export class MockSecurityToken {
       get: jest.fn(),
       getOne: jest.fn(),
       create: jest.fn(),
+      remove: jest.fn(),
     },
   };
 
@@ -118,6 +119,7 @@ export class MockIdentity {
   public areSecondaryKeysFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
   public getVenues = jest.fn();
+  public inviteAccount = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryKeys = jest.fn();
   public getTrustingTokens = jest.fn();
