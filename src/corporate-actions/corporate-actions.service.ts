@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   CorporateActionDefaults,
   DistributionWithDetails,
+  ErrorCode,
+  isPolymeshError,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -18,5 +21,24 @@ export class CorporateActionsService {
   public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.corporateActions.distributions.get();
+  }
+
+  public async findDistribution(ticker: string, id: BigNumber): Promise<DistributionWithDetails> {
+    const asset = await this.assetsService.findOne(ticker);
+
+    try {
+      return await asset.corporateActions.distributions.getOne({ id });
+    } catch (err: unknown) {
+      if (isPolymeshError(err)) {
+        const { code } = err;
+        if (code === ErrorCode.DataUnavailable) {
+          throw new NotFoundException(
+            `The Dividend Distribution with id: "${id.toString()}" does not exist for ticker: "${ticker}"`
+          );
+        }
+      }
+
+      throw err;
+    }
   }
 }
