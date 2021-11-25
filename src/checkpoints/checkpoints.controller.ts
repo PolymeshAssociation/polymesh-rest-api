@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -16,10 +17,18 @@ import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedul
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { IsTicker } from '~/common/decorators/validation';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+
+export class DeleteCheckpointScheduleParams extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
 
 @ApiTags('checkpoints')
 @Controller('assets/:ticker/checkpoints')
@@ -190,5 +199,44 @@ export class CheckpointsController {
       }),
       transactions,
     });
+  }
+
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  // TODO @prashantasdeveloper: Move the signer to headers
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Delete Schedule',
+    description: 'This endpoint will delete an existing Schedule for Checkpoint creation',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which the Schedule is to be deleted',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Schedule ID to be deleted',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description: "Schedule doesn't exist. It may have expired, been removed, or never been created",
+  })
+  @Delete('schedules/:id')
+  public async deleteSchedule(
+    @Param() { ticker, id }: DeleteCheckpointScheduleParams,
+    @Query() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.checkpointsService.deleteScheduleByTicker(
+      ticker,
+      id,
+      signer
+    );
+    return new TransactionQueueModel({ transactions });
   }
 }

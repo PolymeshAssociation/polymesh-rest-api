@@ -71,6 +71,7 @@ export class MockSecurityToken {
       get: jest.fn(),
       getOne: jest.fn(),
       create: jest.fn(),
+      remove: jest.fn(),
     },
   };
 
