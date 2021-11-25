@@ -15,6 +15,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
+import { AssetsService } from '~/assets/assets.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -27,8 +28,6 @@ import {
   MockTickerReservation,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-
-import { AssetsService } from './assets.service';
 
 jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),

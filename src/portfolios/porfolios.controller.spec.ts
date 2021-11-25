@@ -93,7 +93,7 @@ describe('PortfoliosController', () => {
       const result = await controller.createPortfolio(params);
 
       expect(result).toEqual({
-        portfolioId: {
+        portfolio: {
           id: '1',
           did: '0x06'.padEnd(66, '0'),
         },

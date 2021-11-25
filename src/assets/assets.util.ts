@@ -2,7 +2,7 @@
 
 import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
 
-import { AssetDetailsModel } from './models/asset-details.model';
+import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 
 /**
  * Fetch and assemble data for an Asset
