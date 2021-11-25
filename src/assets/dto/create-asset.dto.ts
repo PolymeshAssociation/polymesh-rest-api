@@ -53,7 +53,8 @@ export class CreateAssetDto extends SignerDto {
   readonly assetType: string;
 
   @ApiProperty({
-    description: 'Specifies if the investor must be unique',
+    description:
+      'Specifies whether Identities must have an Investor Uniqueness Claim in order to be able to hold this Asset. More info [here](https://developers.polymesh.live/introduction/identity#polymesh-unique-identity-system-puis)',
     example: true,
   })
   @IsBoolean()
