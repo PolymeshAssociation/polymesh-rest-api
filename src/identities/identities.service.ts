@@ -52,13 +52,13 @@ export class IdentitiesService {
     addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
   ): Promise<QueueResult<void>> {
     const { signer, expiry, permissions, secondaryKey } = addSecondaryKeyParamsDto;
-    const identity = await this.findOne(signer);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {
       targetAccount: secondaryKey,
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
-    return processQueue(identity.inviteAccount, params, { signer: address });
+    const inviteAccount = this.polymeshService.polymeshApi.currentIdentity.inviteAccount;
+    return processQueue(inviteAccount, params, { signer: address });
   }
 }

@@ -3,11 +3,12 @@
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
-export type Mocked<T> = T & {
-  [K in keyof T]: T[K] extends (...args: infer Args) => unknown
-    ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
-    : T[K];
-};
+export type Mocked<T> = T &
+  {
+    [K in keyof T]: T[K] extends (...args: infer Args) => unknown
+      ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
+      : T[K];
+  };
 
 /* Polymesh SDK */
 
@@ -35,6 +36,7 @@ export class MockPolymesh {
   public currentIdentity = {
     reserveTicker: jest.fn(),
     createVenue: jest.fn(),
+    inviteAccount: jest.fn(),
   };
 }
 
@@ -121,7 +123,6 @@ export class MockIdentity {
   public areSecondaryKeysFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
   public getVenues = jest.fn();
-  public inviteAccount = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryKeys = jest.fn();
   public getTrustingTokens = jest.fn();
