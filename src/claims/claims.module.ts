@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 
+import { ClaimsService } from '~/claims/claims.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-
-import { ClaimsService } from './claims.service';
 
 @Module({
   imports: [PolymeshModule],

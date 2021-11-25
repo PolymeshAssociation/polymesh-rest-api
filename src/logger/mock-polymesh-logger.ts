@@ -2,7 +2,7 @@
 
 import { LoggerService } from '@nestjs/common';
 
-import { PolymeshLogger } from './polymesh-logger.service';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 class MockPolymeshLogger implements LoggerService {
   log = jest.fn();

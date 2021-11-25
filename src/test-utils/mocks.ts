@@ -71,12 +71,14 @@ export class MockSecurityToken {
       get: jest.fn(),
       getOne: jest.fn(),
       create: jest.fn(),
+      remove: jest.fn(),
     },
   };
 
   public corporateActions = {
     distributions: {
       get: jest.fn(),
+      getOne: jest.fn(),
     },
     getDefaults: jest.fn(),
   };
@@ -117,6 +119,7 @@ export class MockIdentity {
   public areSecondaryKeysFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
   public getVenues = jest.fn();
+  public inviteAccount = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryKeys = jest.fn();
   public getTrustingTokens = jest.fn();
