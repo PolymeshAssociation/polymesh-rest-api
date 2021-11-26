@@ -179,7 +179,3 @@ export class MockRelayerAccountsService {
 
   public findAll = jest.fn().mockReturnValue([]);
 }
-
-export class MockIdentitiesService {
-  findOne = jest.fn();
-}

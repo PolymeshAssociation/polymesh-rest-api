@@ -3,11 +3,13 @@ import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesService } from '~/identities/identities.service';
-import { MockIdentitiesService, MockIdentity } from '~/test-utils/mocks';
+import { MockIdentity } from '~/test-utils/mocks';
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
-  const mockIdentitiesService = new MockIdentitiesService();
+  const mockIdentitiesService = {
+    findOne: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

@@ -271,6 +271,10 @@ export class CheckpointsController {
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
   // TODO @prashantasdeveloper: Move the signer to headers
+  @ApiOperation({
+    summary: 'Delete Schedule',
+    description: 'This endpoint will delete an existing Schedule for Checkpoint creation',
+  })
   @ApiParam({
     name: 'ticker',
     description: 'The ticker of the Asset for which the Schedule is to be deleted',
@@ -282,10 +286,6 @@ export class CheckpointsController {
     description: 'Schedule ID to be deleted',
     type: 'string',
     example: '1',
-  })
-  @ApiOperation({
-    summary: 'Delete Schedule',
-    description: 'This endpoint will delete an existing Schedule for Checkpoint creation',
   })
   @ApiOkResponse({
     description: 'Information about the transaction',
