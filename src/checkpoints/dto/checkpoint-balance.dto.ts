@@ -1,18 +1,11 @@
 /* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-
-import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
-
-export class CheckPointBalanceParamsDto {
+import { IsDid, IsTicker } from '~/common/decorators/validation';
+import { IdParamsDto } from '~/common/dto/id-params.dto';
+export class CheckPointBalanceParamsDto extends IdParamsDto {
   @IsTicker()
   readonly ticker: string;
 
   @IsDid()
   readonly did: string;
-
-  @ToBigNumber()
-  @IsBigNumber()
-  readonly id: BigNumber;
 }

@@ -11,6 +11,7 @@ import {
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
+import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { QueueResult } from '~/common/types';
@@ -35,6 +36,11 @@ export class CheckpointsService {
   ): Promise<ResultSet<CheckpointWithData>> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.checkpoints.get({ start, size });
+  }
+
+  public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
+    const asset = await this.assetsService.findOne(ticker);
+    return asset.checkpoints.getOne({ id });
   }
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
@@ -84,10 +90,10 @@ export class CheckpointsService {
     ticker: string,
     did: string,
     checkpointId: BigNumber
-  ): Promise<BigNumber> {
-    const asset = await this.assetsService.findOne(ticker);
-    const checkpoint = await asset.checkpoints.getOne({ id: checkpointId });
-    return checkpoint.balance({ identity: did });
+  ): Promise<IdentityBalanceModel> {
+    const checkpoint = await this.findOne(ticker, checkpointId);
+    const balance = await checkpoint.balance({ identity: did });
+    return new IdentityBalanceModel({ identity: did, balance });
   }
 
   public async deleteScheduleByTicker(

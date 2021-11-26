@@ -9,11 +9,14 @@ import { CalendarUnit, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/t
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
   MockCheckpoint,
   MockCheckpointSchedule,
+  MockIdentitiesService,
+  MockIdentity,
   MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
@@ -32,12 +35,14 @@ describe('CheckpointsService', () => {
   };
 
   const mockRelayerAccountsService = new MockRelayerAccountsService();
+  const mockIdentitiesService = new MockIdentitiesService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CheckpointsService,
         AssetsService,
+        IdentitiesService,
         RelayerAccountsService,
         mockPolymeshLoggerProvider,
       ],
@@ -46,6 +51,8 @@ describe('CheckpointsService', () => {
       .useValue(mockAssetsService)
       .overrideProvider(RelayerAccountsService)
       .useValue(mockRelayerAccountsService)
+      .overrideProvider(IdentitiesService)
+      .useValue(mockIdentitiesService)
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
@@ -89,6 +96,19 @@ describe('CheckpointsService', () => {
       const result = await service.findAllByTicker('TICKER', 1, 'START_KEY');
 
       expect(result).toEqual(mockCheckpoints);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a checkpoint given a ticker and id', async () => {
+      const mockSecurityToken = new MockSecurityToken();
+      const mockCheckpoint = new MockCheckpoint();
+      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.findOne('TICKER', new BigNumber(1));
+      expect(result).toEqual(mockCheckpoint);
+      expect(mockAssetsService.findOne).toBeCalledWith('TICKER');
     });
   });
 
@@ -285,18 +305,25 @@ describe('CheckpointsService', () => {
       const id = new BigNumber(1);
       const balance = new BigNumber(10);
       const mockCheckpoint = new MockCheckpoint();
+      const mockIdentity = new MockIdentity();
       const did = '0x6000';
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
       mockCheckpoint.balance.mockResolvedValue(balance);
 
       const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const result = await service.getAssetBalance('TICKER', did, id);
-      expect(result).toEqual(balance);
+      expect(result).toEqual({ balance, identity: did });
       expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+
+      findOneSpy.mockRestore();
     });
   });
 

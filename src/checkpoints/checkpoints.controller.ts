@@ -11,10 +11,10 @@ import {
 } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckPointBalanceParamsDto } from '~/checkpoints/dto/checkpoint-balance.dto';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
-import { CheckpointAssetBalanceModel } from '~/checkpoints/models/checkpoint-asset-balance.model';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
@@ -229,17 +229,16 @@ export class CheckpointsController {
   })
   @ApiOkResponse({
     description: 'The amount of the Asset the Identity held at a given Checkpoint',
-    type: CheckpointAssetBalanceModel,
+    type: IdentityBalanceModel,
   })
   @ApiNotFoundResponse({
     description: 'The asset was not found',
   })
-  @Get(':id/identity/:did/balance')
+  @Get(':id/identities/:did/balance')
   public async getAssetBalance(
     @Param() { ticker, did, id }: CheckPointBalanceParamsDto
-  ): Promise<CheckpointAssetBalanceModel> {
-    const balance = await this.checkpointsService.getAssetBalance(ticker, did, id);
-    return new CheckpointAssetBalanceModel({ ticker, did, balance, checkpointId: id });
+  ): Promise<IdentityBalanceModel> {
+    return await this.checkpointsService.getAssetBalance(ticker, did, id);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes

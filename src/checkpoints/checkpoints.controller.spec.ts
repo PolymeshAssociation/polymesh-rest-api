@@ -2,13 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
+import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
-import { CheckpointAssetBalanceModel } from '~/checkpoints/models/checkpoint-asset-balance.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
+import { MockCheckpoint, MockCheckpointSchedule, MockIdentity } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -200,7 +200,11 @@ describe('CheckpointsController', () => {
       const did = '0x0600';
       const id = new BigNumber(1);
 
-      mockCheckpointsService.getAssetBalance.mockResolvedValue(balance);
+      const mockIdentity = new MockIdentity();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const balanceModel = new IdentityBalanceModel({ balance, identity: mockIdentity as any });
+
+      mockCheckpointsService.getAssetBalance.mockResolvedValue(balanceModel);
 
       const result = await controller.getAssetBalance({
         ticker,
@@ -208,14 +212,7 @@ describe('CheckpointsController', () => {
         id,
       });
 
-      const expectedBalance = new CheckpointAssetBalanceModel({
-        ticker,
-        did,
-        balance,
-        checkpointId: id,
-      });
-
-      expect(result).toEqual(expectedBalance);
+      expect(result).toEqual(balanceModel);
     });
   });
 
