@@ -20,6 +20,7 @@ import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { CreatedInstructionModel } from '~/settlements/model/created-instruction.model';
+import { CreatedVenueModel } from '~/settlements/model/created-venue.model';
 import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
 import { InstructionModel } from '~/settlements/model/instruction.model';
 import { TransferBreakdownModel } from '~/settlements/model/transfer-breakdown.model';
@@ -212,13 +213,15 @@ export class SettlementsController {
     description: 'This endpoint creates a new Venue',
   })
   @ApiCreatedResponse({
-    description: 'Details about the transaction',
+    description: 'Details about the newly created Venue',
     type: TransactionQueueModel,
   })
   @Post('/venues')
   public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<TransactionQueueModel> {
-    const { transactions } = await this.settlementsService.createVenue(createVenueDto);
-    return new TransactionQueueModel({ transactions });
+    const { result: venue, transactions } = await this.settlementsService.createVenue(
+      createVenueDto
+    );
+    return new CreatedVenueModel({ venue, transactions });
   }
 
   @ApiTags('venues')
