@@ -9,7 +9,6 @@ import {
   ScheduleWithDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
-import { check } from 'prettier';
 
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
