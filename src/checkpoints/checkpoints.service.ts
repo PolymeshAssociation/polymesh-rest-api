@@ -9,6 +9,7 @@ import {
   ScheduleWithDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+import { check } from 'prettier';
 
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
@@ -40,7 +41,21 @@ export class CheckpointsService {
 
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
     const asset = await this.assetsService.findOne(ticker);
-    return asset.checkpoints.getOne({ id });
+    try {
+      const checkpoint = await asset.checkpoints.getOne({ id });
+      return checkpoint;
+    } catch (err) {
+      if (isPolymeshError(err)) {
+        const { code } = err;
+        if (code === ErrorCode.DataUnavailable) {
+          this.logger.warn(`No Checkpoint exists for ticker "${ticker}" with ID "${id}"`);
+          throw new NotFoundException(
+            `There is no Checkpoint for ticker "${ticker}" with ID "${id}"`
+          );
+        }
+      }
+      throw err;
+    }
   }
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
@@ -56,7 +71,7 @@ export class CheckpointsService {
       if (isPolymeshError(err)) {
         const { code } = err;
         if (code === ErrorCode.DataUnavailable) {
-          this.logger.error(`No Schedule exists for ticker "${ticker}" with ID "${id}"`);
+          this.logger.warn(`No Schedule exists for ticker "${ticker}" with ID "${id}"`);
           throw new NotFoundException(
             `There is no Schedule for ticker "${ticker}" with ID "${id}"`
           );

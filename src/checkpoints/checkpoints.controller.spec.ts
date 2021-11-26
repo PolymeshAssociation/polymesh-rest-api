@@ -5,6 +5,7 @@ import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -21,6 +22,7 @@ describe('CheckpointsController', () => {
     createScheduleByTicker: jest.fn(),
     getAssetBalance: jest.fn(),
     deleteScheduleByTicker: jest.fn(),
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -37,6 +39,25 @@ describe('CheckpointsController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getCheckpoint', () => {
+    it('should return the Checkpoint data', async () => {
+      const createdAt = new Date();
+      const totalSupply = new BigNumber(1000);
+      const id = new BigNumber(1);
+      const ticker = 'TICKER';
+      const mockCheckpoint = {
+        id,
+        createdAt: () => Promise.resolve(createdAt),
+        totalSupply: () => Promise.resolve(totalSupply),
+      };
+
+      mockCheckpointsService.findOne.mockResolvedValue(mockCheckpoint);
+
+      const result = await controller.getCheckpoint({ ticker, id });
+      expect(result).toEqual(new CheckpointDetailsModel({ id, totalSupply, createdAt }));
+    });
   });
 
   describe('getCheckpoints', () => {

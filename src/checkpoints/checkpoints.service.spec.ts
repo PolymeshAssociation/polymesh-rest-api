@@ -100,6 +100,42 @@ describe('CheckpointsService', () => {
   });
 
   describe('findOne', () => {
+    it('should return NotFoundException if the asset does not exist', async () => {
+      mockAssetsService.findOne.mockImplementation(() => {
+        throw new NotFoundException('Asset does not exist');
+      });
+
+      let error;
+      try {
+        await service.findOne('TICKER', new BigNumber(1));
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(NotFoundException);
+    });
+
+    it('should return NotFoundException if the checkpoint does not exist', async () => {
+      mockIsPolymeshError.mockReturnValue(true);
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.getOne.mockImplementation(() => {
+        throw new PolymeshError({
+          code: ErrorCode.DataUnavailable,
+          message: 'The checkpoint was not found',
+        });
+      });
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      let error;
+      try {
+        await service.findOne('TICKER', new BigNumber(1));
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(NotFoundException);
+    });
+
     it('should return a checkpoint given a ticker and id', async () => {
       const mockSecurityToken = new MockSecurityToken();
       const mockCheckpoint = new MockCheckpoint();
