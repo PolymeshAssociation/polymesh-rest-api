@@ -41,8 +41,7 @@ export class CheckpointsService {
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
     const asset = await this.assetsService.findOne(ticker);
     try {
-      const checkpoint = await asset.checkpoints.getOne({ id });
-      return checkpoint;
+      return await asset.checkpoints.getOne({ id });
     } catch (err) {
       if (isPolymeshError(err)) {
         const { code } = err;

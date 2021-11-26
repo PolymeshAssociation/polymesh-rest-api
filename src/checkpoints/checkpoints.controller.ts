@@ -266,7 +266,7 @@ export class CheckpointsController {
   public async getAssetBalance(
     @Param() { ticker, did, id }: CheckPointBalanceParamsDto
   ): Promise<IdentityBalanceModel> {
-    return await this.checkpointsService.getAssetBalance(ticker, did, id);
+    return this.checkpointsService.getAssetBalance(ticker, did, id);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
