@@ -235,6 +235,63 @@ export class CheckpointsController {
   }
 
   @ApiOperation({
+    summary: 'Get the holders of an Asset at a given Checkpoint',
+    description: 'This endpoint returns the holders of an Asset at a paticular Checkpoint',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to fetch holders for',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint to fetch Asset holders for',
+    type: 'number',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of Asset holders to be fetched',
+    type: 'number',
+    required: false,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start key from which Asset holders are to be fetched',
+    type: 'string',
+    required: false,
+    example: 'START_KEY',
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint was not found',
+  })
+  @ApiArrayResponse(IdentityBalanceModel, {
+    description: 'List of Asset holders at the Checkpoint',
+    paginated: true,
+  })
+  @Get(':id/holders')
+  public async getCheckpointHolders(
+    @Param() { ticker, id }: GetCheckPointParamsDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
+    const { data, count: total, next } = await this.checkpointsService.getCheckpointHolders(
+      ticker,
+      id,
+      size,
+      start?.toString()
+    );
+    return new PaginatedResultsModel({
+      results: data.map(
+        ({ identity, balance }) => new IdentityBalanceModel({ identity: identity.did, balance })
+      ),
+      total,
+      next,
+    });
+  }
+
+  @ApiOperation({
     summary: 'Get Asset balance at a Checkpoint',
     description:
       'This endpoint returns the asset balance an identity has at a paticular checkpoint',

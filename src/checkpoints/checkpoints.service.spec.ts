@@ -329,6 +329,54 @@ describe('CheckpointsService', () => {
     });
   });
 
+  describe('getCheckpointHolders', () => {
+    const mockHolders = {
+      data: [
+        {
+          identity: {
+            did: '0x06000',
+            balance: new BigNumber(1000),
+          },
+        },
+      ],
+      next: '0xddddd',
+      count: 1,
+    };
+    it('should return the list of Asset holders at a Checkpoint', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.allBalances.mockResolvedValue(mockHolders);
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
+
+      const result = await service.getCheckpointHolders('TICKER', new BigNumber(1), 1);
+
+      expect(result).toEqual(mockHolders);
+      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({ size: 1, start: undefined });
+      findOneSpy.mockRestore();
+    });
+
+    it('should return the list of Assets holders at a Checkpoint from a start key', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.allBalances.mockResolvedValue(mockHolders);
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
+
+      const result = await service.getCheckpointHolders(
+        'TICKER',
+        new BigNumber(1),
+        10,
+        'START_KEY'
+      );
+
+      expect(result).toEqual(mockHolders);
+      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({ start: 'START_KEY', size: 10 });
+      findOneSpy.mockRestore();
+    });
+  });
+
   describe('getAssetBalance', () => {
     it('should fetch the Asset balance for an Identity at a given Checkpoint', async () => {
       const id = new BigNumber(1);
