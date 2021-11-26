@@ -9,14 +9,11 @@ import { CalendarUnit, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/t
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
-import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
   MockCheckpoint,
   MockCheckpointSchedule,
-  MockIdentitiesService,
-  MockIdentity,
   MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
@@ -35,14 +32,12 @@ describe('CheckpointsService', () => {
   };
 
   const mockRelayerAccountsService = new MockRelayerAccountsService();
-  const mockIdentitiesService = new MockIdentitiesService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CheckpointsService,
         AssetsService,
-        IdentitiesService,
         RelayerAccountsService,
         mockPolymeshLoggerProvider,
       ],
@@ -51,8 +46,6 @@ describe('CheckpointsService', () => {
       .useValue(mockAssetsService)
       .overrideProvider(RelayerAccountsService)
       .useValue(mockRelayerAccountsService)
-      .overrideProvider(IdentitiesService)
-      .useValue(mockIdentitiesService)
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
@@ -341,7 +334,6 @@ describe('CheckpointsService', () => {
       const id = new BigNumber(1);
       const balance = new BigNumber(10);
       const mockCheckpoint = new MockCheckpoint();
-      const mockIdentity = new MockIdentity();
       const did = '0x6000';
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -352,7 +344,6 @@ describe('CheckpointsService', () => {
       mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
-      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const result = await service.getAssetBalance('TICKER', did, id);
       expect(result).toEqual({ balance, identity: did });

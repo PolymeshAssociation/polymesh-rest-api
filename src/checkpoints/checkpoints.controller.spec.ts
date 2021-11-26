@@ -9,7 +9,7 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { MockCheckpoint, MockCheckpointSchedule, MockIdentity } from '~/test-utils/mocks';
+import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -221,9 +221,7 @@ describe('CheckpointsController', () => {
       const did = '0x0600';
       const id = new BigNumber(1);
 
-      const mockIdentity = new MockIdentity();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const balanceModel = new IdentityBalanceModel({ balance, identity: mockIdentity as any });
+      const balanceModel = new IdentityBalanceModel({ balance, identity: did });
 
       mockCheckpointsService.getAssetBalance.mockResolvedValue(balanceModel);
 
@@ -234,6 +232,7 @@ describe('CheckpointsController', () => {
       });
 
       expect(result).toEqual(balanceModel);
+      expect(mockCheckpointsService.getAssetBalance).toHaveBeenCalledWith(ticker, did, id);
     });
   });
 

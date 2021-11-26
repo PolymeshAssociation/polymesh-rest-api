@@ -107,7 +107,7 @@ export class CheckpointsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the Checkpoint to fetch',
+    description: 'The ID of the Checkpoint to be fetched',
     type: 'string',
     example: '1',
   })
