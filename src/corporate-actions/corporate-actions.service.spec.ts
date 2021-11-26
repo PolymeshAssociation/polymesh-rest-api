@@ -73,6 +73,10 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
     });
 
+    afterEach(() => {
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+    });
+
     describe('if there is an error while modifying the defaults for Corporate Actions', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('New targets are the same as the current ones');
@@ -135,10 +139,6 @@ describe('CorporateActionsService', () => {
           { signer: address }
         );
       });
-    });
-
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
     });
   });
 
@@ -237,6 +237,10 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
     });
 
+    afterEach(() => {
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+    });
+
     describe('if there is an error while deleting a Corporate Action', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error("The Corporate Action doesn't exist");
@@ -287,10 +291,6 @@ describe('CorporateActionsService', () => {
           ],
         });
       });
-    });
-
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
     });
   });
 });
