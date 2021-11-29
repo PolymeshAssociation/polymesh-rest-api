@@ -4,7 +4,6 @@ const mockIsPolymeshError = jest.fn();
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { CalendarUnit, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -136,11 +135,12 @@ describe('CheckpointsService', () => {
 
     describe('if the Schedule does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Schedule does not exist',
+        };
         mockSecurityToken.checkpoints.schedules.getOne.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'The Schedule does not exist',
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);

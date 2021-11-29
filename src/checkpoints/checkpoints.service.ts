@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Checkpoint } from '@polymathnetwork/polymesh-sdk/internal';
 import {
+  Checkpoint,
   CheckpointSchedule,
   CheckpointWithData,
   ErrorCode,

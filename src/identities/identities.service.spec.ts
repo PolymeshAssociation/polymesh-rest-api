@@ -7,7 +7,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { IdentitiesService } from '~/identities/identities.service';
@@ -24,8 +23,8 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -64,11 +63,12 @@ describe('IdentitiesService', () => {
   describe('findOne', () => {
     describe('if the Identity does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Identity does not exist',
+        };
         mockPolymeshApi.getIdentity.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'The Identity does not exist',
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -125,24 +125,24 @@ describe('IdentitiesService', () => {
     describe('if there is an error', () => {
       const errors = [
         [
-          new PolymeshError({
+          {
             code: ErrorCode.FatalError,
             message: "The supplied address is not encoded with the chain's SS58 format",
-          }),
+          },
           InternalServerErrorException,
         ],
         [
-          new PolymeshError({
+          {
             code: ErrorCode.ValidationError,
             message: 'The target Account is already part of an Identity',
-          }),
+          },
           BadRequestException,
         ],
         [
-          new PolymeshError({
+          {
             code: ErrorCode.ValidationError,
             message: 'The target Account already has a pending invitation to join this Identity',
-          }),
+          },
           BadRequestException,
         ],
       ];

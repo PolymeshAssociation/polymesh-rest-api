@@ -1,8 +1,8 @@
 /** istanbul ignore file */
 
-import { Account } from '@polymathnetwork/polymesh-sdk/internal';
 import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
 import { Identity, Signer, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { isAccount } from '@polymathnetwork/polymesh-sdk/utils';
 import { flatten } from 'lodash';
 
 import { AccountModel } from '~/identities/models/account.model';
@@ -39,7 +39,7 @@ export async function createIdentityModel(identity: Identity): Promise<IdentityM
  */
 export function createSignerModel(signer: Signer): SignerModel {
   // TODO @monitz87: replace with typeguard when they are exported from the SDK
-  if (signer instanceof Account) {
+  if (isAccount(signer)) {
     return new AccountModel({
       address: signer.address,
     });
