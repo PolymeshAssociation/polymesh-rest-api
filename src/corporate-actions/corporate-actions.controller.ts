@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Put } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
