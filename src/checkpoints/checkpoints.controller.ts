@@ -240,13 +240,13 @@ export class CheckpointsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset to fetch holder balances for',
+    description: 'The ticker of the Asset for which to fetch holder balances',
     type: 'string',
     example: 'TICKER',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the Checkpoint to fetch Asset balances for',
+    description: 'The ID of the Checkpoint for which to fetch Asset balances',
     type: 'number',
     example: 1,
   })
@@ -272,11 +272,11 @@ export class CheckpointsController {
     paginated: true,
   })
   @Get(':id/balances')
-  public async getCheckpointHolders(
+  public async getHolders(
     @Param() { ticker, id }: GetCheckPointParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.checkpointsService.getCheckpointHolders(
+    const { data, count: total, next } = await this.checkpointsService.getHolders(
       ticker,
       id,
       size,
@@ -294,7 +294,7 @@ export class CheckpointsController {
   @ApiOperation({
     summary: 'Get Asset balance at a Checkpoint for an Identity',
     description:
-      'This endpoint returns the asset balance an Identity has at a paticular Checkpoint',
+      'This endpoint returns the Asset balance an Identity has at a particular Checkpoint',
   })
   @ApiParam({
     name: 'ticker',

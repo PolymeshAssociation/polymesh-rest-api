@@ -110,7 +110,7 @@ export class CheckpointsService {
     return new IdentityBalanceModel({ identity: did, balance });
   }
 
-  public async getCheckpointHolders(
+  public async getHolders(
     ticker: string,
     checkpointId: BigNumber,
     size: number,

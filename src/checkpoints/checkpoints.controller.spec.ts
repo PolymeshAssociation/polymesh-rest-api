@@ -21,7 +21,7 @@ describe('CheckpointsController', () => {
     createByTicker: jest.fn(),
     createScheduleByTicker: jest.fn(),
     getAssetBalance: jest.fn(),
-    getCheckpointHolders: jest.fn(),
+    getHolders: jest.fn(),
     deleteScheduleByTicker: jest.fn(),
     findOne: jest.fn(),
   };
@@ -215,7 +215,7 @@ describe('CheckpointsController', () => {
     });
   });
 
-  describe('getCheckpointHolders', () => {
+  describe('getHolders', () => {
     const mockAssetHolders = {
       data: [
         {
@@ -246,9 +246,9 @@ describe('CheckpointsController', () => {
       next: '0xddddd',
     });
     it('should return the holders of an Asset at a given Checkpoint', async () => {
-      mockCheckpointsService.getCheckpointHolders.mockResolvedValue(mockAssetHolders);
+      mockCheckpointsService.getHolders.mockResolvedValue(mockAssetHolders);
 
-      const result = await controller.getCheckpointHolders(
+      const result = await controller.getHolders(
         {
           ticker: 'TICKER',
           id: new BigNumber(1),
@@ -256,7 +256,7 @@ describe('CheckpointsController', () => {
         { size: 10 }
       );
       expect(result).toEqual(mockResult);
-      expect(mockCheckpointsService.getCheckpointHolders).toBeCalled();
+      expect(mockCheckpointsService.getHolders).toBeCalled();
     });
   });
 
