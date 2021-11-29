@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -10,6 +10,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
@@ -139,5 +140,39 @@ export class CorporateActionsController {
   ): Promise<DividendDistributionModel> {
     const result = await this.corporateActionsService.findDistribution(ticker, id);
     return createDividendDistributionModel(result);
+  }
+
+  @ApiOperation({
+    summary: 'Link documents to a Corporate Action',
+    description:
+      'This endpoint links a list of documents to the Corporate Action. Any previous links are removed in favor of the new list. All the documents to be linked should already be linked to the Asset of the Corporate Action.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose the Corporate Action is referred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Corporate Action',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: DividendDistributionModel,
+  })
+  @Put(':id/documents')
+  public async linkDocuments(
+    @Param() { ticker, id }: DividendDistributionParamsDto,
+    @Body() linkDocumentsDto: LinkDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.linkDocuments(
+      ticker,
+      id,
+      linkDocumentsDto
+    );
+    return new TransactionQueueModel({ transactions });
   }
 }

@@ -11,6 +11,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()
@@ -59,5 +60,22 @@ export class CorporateActionsService {
 
       throw err;
     }
+  }
+
+  public async linkDocuments(
+    ticker: string,
+    id: BigNumber,
+    linkDocumentsDto: LinkDocumentsDto
+  ): Promise<QueueResult<void>> {
+    const { signer, documents } = linkDocumentsDto;
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      distribution.linkDocuments,
+      { documents },
+      {
+        signer: address,
+      }
+    );
   }
 }
