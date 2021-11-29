@@ -47,12 +47,10 @@ describe('CheckpointsController', () => {
       const totalSupply = new BigNumber(1000);
       const id = new BigNumber(1);
       const ticker = 'TICKER';
-      const mockCheckpoint = {
-        id,
-        createdAt: () => Promise.resolve(createdAt),
-        totalSupply: () => Promise.resolve(totalSupply),
-      };
 
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.createdAt.mockResolvedValue(createdAt);
+      mockCheckpoint.totalSupply.mockResolvedValue(totalSupply);
       mockCheckpointsService.findOne.mockResolvedValue(mockCheckpoint);
 
       const result = await controller.getCheckpoint({ ticker, id });

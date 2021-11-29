@@ -151,6 +151,8 @@ export class MockCheckpoint {
   id = new BigNumber(1);
   ticker = 'TICKER';
   balance = jest.fn();
+  createdAt = jest.fn();
+  totalSupply = jest.fn();
 }
 
 export class MockCheckpointSchedule {
