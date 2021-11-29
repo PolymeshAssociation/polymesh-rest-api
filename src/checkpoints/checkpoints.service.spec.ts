@@ -335,8 +335,8 @@ describe('CheckpointsService', () => {
         {
           identity: {
             did: '0x06000',
-            balance: new BigNumber(1000),
           },
+          balance: new BigNumber(1000),
         },
       ],
       next: '0xddddd',

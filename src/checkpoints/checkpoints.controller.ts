@@ -235,18 +235,18 @@ export class CheckpointsController {
   }
 
   @ApiOperation({
-    summary: 'Get the holders of an Asset at a given Checkpoint',
-    description: 'This endpoint returns the holders of an Asset at a paticular Checkpoint',
+    summary: 'Get the Asset balance of the holders at a given Checkpoint',
+    description: 'This endpoint returns the Asset balance of holders at a given Checkpoint',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset to fetch holders for',
+    description: 'The ticker of the Asset to fetch holder balances for',
     type: 'string',
     example: 'TICKER',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the Checkpoint to fetch Asset holders for',
+    description: 'The ID of the Checkpoint to fetch Asset balances for',
     type: 'number',
     example: 1,
   })
@@ -268,10 +268,10 @@ export class CheckpointsController {
     description: 'Either the Asset or the Checkpoint was not found',
   })
   @ApiArrayResponse(IdentityBalanceModel, {
-    description: 'List of Asset holders at the Checkpoint',
+    description: 'List of balances of the Asset holders at the Checkpoint',
     paginated: true,
   })
-  @Get(':id/holders')
+  @Get(':id/balances')
   public async getCheckpointHolders(
     @Param() { ticker, id }: GetCheckPointParamsDto,
     @Query() { size, start }: PaginatedParamsDto
@@ -292,9 +292,9 @@ export class CheckpointsController {
   }
 
   @ApiOperation({
-    summary: 'Get Asset balance at a Checkpoint',
+    summary: 'Get Asset balance at a Checkpoint for an Identity',
     description:
-      'This endpoint returns the asset balance an identity has at a paticular checkpoint',
+      'This endpoint returns the asset balance an Identity has at a paticular checkpoint',
   })
   @ApiParam({
     name: 'ticker',
@@ -313,13 +313,13 @@ export class CheckpointsController {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
-    description: 'The amount of the Asset the Identity held at a given Checkpoint',
+    description: 'The balance of the Asset the Identity held at a given Checkpoint',
     type: IdentityBalanceModel,
   })
   @ApiNotFoundResponse({
     description: 'The Asset or Checkpoint was not found',
   })
-  @Get(':id/identities/:did/balance')
+  @Get(':id/balances/:did')
   public async getAssetBalance(
     @Param() { ticker, did, id }: CheckPointBalanceParamsDto
   ): Promise<IdentityBalanceModel> {
