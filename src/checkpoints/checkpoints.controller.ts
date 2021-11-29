@@ -237,7 +237,7 @@ export class CheckpointsController {
   }
 
   @ApiOperation({
-    summary: 'Get Asset balance at a Checkpoint',
+    summary: 'Get the Asset balance for an Identity at a Checkpoint',
     description:
       'This endpoint returns the Asset balance an Identity has at a particular Checkpoint',
   })
