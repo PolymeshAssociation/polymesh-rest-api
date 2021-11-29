@@ -14,7 +14,7 @@ import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckPointBalanceParamsDto } from '~/checkpoints/dto/checkpoint-balance.dto';
-import { CheckPointParamsDto } from '~/checkpoints/dto/checkpoint.dto';
+import { CheckpointParamsDto } from '~/checkpoints/dto/checkpoint.dto';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
@@ -119,14 +119,13 @@ export class CheckpointsController {
   })
   @Get('/:id')
   public async getCheckpoint(
-    @Param() { ticker, id }: CheckPointParamsDto
+    @Param() { ticker, id }: CheckpointParamsDto
   ): Promise<CheckpointDetailsModel> {
     const checkpoint = await this.checkpointsService.findOne(ticker, id);
     const [createdAt, totalSupply] = await Promise.all([
       checkpoint.createdAt(),
       checkpoint.totalSupply(),
     ]);
-    console.log(createdAt, totalSupply);
     return new CheckpointDetailsModel({ id, createdAt, totalSupply });
   }
 
