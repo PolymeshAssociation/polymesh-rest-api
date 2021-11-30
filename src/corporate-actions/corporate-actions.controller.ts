@@ -1,10 +1,17 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -16,6 +23,11 @@ import { DividendDistributionModel } from '~/corporate-actions/model/dividend-di
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
 
 class DividendDistributionParamsDto extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
+
+class DeleteCorporateActionParamsDto extends IdParamsDto {
   @IsTicker()
   readonly ticker: string;
 }
@@ -139,5 +151,39 @@ export class CorporateActionsController {
   ): Promise<DividendDistributionModel> {
     const result = await this.corporateActionsService.findDistribution(ticker, id);
     return createDividendDistributionModel(result);
+  }
+
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  // TODO @prashantasdeveloper: Move the signer to headers
+  @ApiOperation({
+    summary: 'Delete a Corporate Action',
+    description: 'This endpoint deletes a Corporate Action of a specific Asset',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Corporate Action number to be deleted',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Corporate Action is to be deleted',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description: "The Corporate Action doesn't exist",
+  })
+  @Delete(':id')
+  public async deleteCorporateAction(
+    @Param() { id, ticker }: DeleteCorporateActionParamsDto,
+    @Query() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.remove(ticker, id, signer);
+    return new TransactionQueueModel({ transactions });
   }
 }

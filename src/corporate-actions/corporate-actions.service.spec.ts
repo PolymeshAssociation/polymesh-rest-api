@@ -95,6 +95,7 @@ describe('CorporateActionsService', () => {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
     describe('otherwise', () => {
@@ -133,11 +134,8 @@ describe('CorporateActionsService', () => {
           { defaultTaxWithholding: new BigNumber('25') },
           { signer: address }
         );
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
-    });
-
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
     });
   });
 
@@ -224,6 +222,66 @@ describe('CorporateActionsService', () => {
         const result = await service.findDistribution('TICKER', new BigNumber('1'));
 
         expect(result).toEqual(mockDistributions);
+      });
+    });
+  });
+
+  describe('removeByTicker', () => {
+    let mockSecurityToken: MockSecurityToken;
+    const ticker = 'TICKER';
+
+    beforeEach(() => {
+      mockSecurityToken = new MockSecurityToken();
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+    });
+
+    describe('if there is an error while deleting a Corporate Action', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error("The Corporate Action doesn't exist");
+
+        mockSecurityToken.corporateActions.remove.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error = null;
+        try {
+          await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
+    });
+    describe('otherwise', () => {
+      it('should run a remove procedure and return the delete the Corporate Action', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.RemoveCa,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockSecurityToken.corporateActions.remove.mockResolvedValue(mockQueue);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+
+        expect(result).toEqual({
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.RemoveCa,
+            },
+          ],
+        });
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
   });
