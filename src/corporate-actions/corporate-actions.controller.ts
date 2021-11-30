@@ -1,5 +1,11 @@
 import { Body, Controller, Get, Param, Patch, Put } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
@@ -142,6 +148,7 @@ export class CorporateActionsController {
     return createDividendDistributionModel(result);
   }
 
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
   @ApiOperation({
     summary: 'Link documents to a Corporate Action',
     description:
@@ -162,6 +169,9 @@ export class CorporateActionsController {
   @ApiOkResponse({
     description: 'Details of the transaction',
     type: DividendDistributionModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Some of the provided documents are not associated with the Security Token',
   })
   @Put(':id/documents')
   public async linkDocuments(

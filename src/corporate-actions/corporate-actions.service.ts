@@ -70,12 +70,11 @@ export class CorporateActionsService {
     const { signer, documents } = linkDocumentsDto;
     const { distribution } = await this.findDistribution(ticker, id);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(
-      distribution.linkDocuments,
-      { documents },
-      {
-        signer: address,
-      }
-    );
+    const params = {
+      documents: documents.map(document => document.toTokenDocument()),
+    };
+    return processQueue(distribution.linkDocuments, params, {
+      signer: address,
+    });
   }
 }

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -16,6 +18,7 @@ describe('CorporateActionsController', () => {
     updateDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
+    linkDocuments: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -103,6 +106,40 @@ describe('CorporateActionsController', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(result).toEqual(createDividendDistributionModel(mockDistributions as any));
+    });
+  });
+
+  describe('linkDocuments', () => {
+    it('should call the service and return the results', async () => {
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.corporateAction.LinkCaDoc,
+        },
+      ];
+
+      const body = {
+        documents: [
+          new AssetDocumentDto({
+            name: 'DOC_NAME',
+            uri: 'DOC_URI',
+            type: 'DOC_TYPE',
+          }),
+        ],
+        signer: '0x6'.padEnd(66, '0'),
+      };
+
+      mockCorporateActionsService.linkDocuments.mockResolvedValue({ transactions });
+
+      const result = await controller.linkDocuments(
+        { ticker: 'TICKER', id: new BigNumber('1') },
+        body
+      );
+
+      expect(result).toEqual({
+        transactions,
+      });
     });
   });
 });

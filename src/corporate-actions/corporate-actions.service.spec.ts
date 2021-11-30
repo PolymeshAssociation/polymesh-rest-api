@@ -1,13 +1,14 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
@@ -224,6 +225,136 @@ describe('CorporateActionsService', () => {
         const result = await service.findDistribution('TICKER', new BigNumber('1'));
 
         expect(result).toEqual(mockDistributions);
+      });
+    });
+  });
+
+  describe('linkDocuments', () => {
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+    });
+
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
+    describe('if some of provided documents are not associated with Asset of the Corporate Action', () => {
+      it('should throw a InternalServerErrorException', async () => {
+        const mockError = {
+          code: ErrorCode.UnmetPrerequisite,
+          message: 'Some of the provided documents are not associated with the Security Token',
+        };
+
+        const mockDistributionWithDetails = new MockDistributionWithDetails();
+        mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
+          throw mockError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+
+        const body = {
+          documents: [
+            new AssetDocumentDto({
+              name: 'DOC_NAME',
+              uri: 'DOC_URI',
+              type: 'DOC_TYPE',
+            }),
+          ],
+          signer: '0x6'.padEnd(66, '0'),
+        };
+        let error;
+        try {
+          await service.linkDocuments('TICKER', new BigNumber('1'), body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(InternalServerErrorException);
+      });
+    });
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('foo');
+
+        const mockDistributionWithDetails = new MockDistributionWithDetails();
+        mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+
+        const body = {
+          documents: [
+            new AssetDocumentDto({
+              name: 'DOC_NAME',
+              uri: 'DOC_URI',
+              type: 'DOC_TYPE',
+            }),
+          ],
+          signer: '0x6'.padEnd(66, '0'),
+        };
+        let error;
+        try {
+          await service.linkDocuments('TICKER', new BigNumber('1'), body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(expectedError);
+      });
+    });
+    describe('otherwise', () => {
+      it('should run the linkDocuments procedure and return the queue results', async () => {
+        const mockDistributionWithDetails = new MockDistributionWithDetails();
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.LinkCaDoc,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockQueue);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const body = {
+          documents: [
+            new AssetDocumentDto({
+              name: 'DOC_NAME',
+              uri: 'DOC_URI',
+              type: 'DOC_TYPE',
+            }),
+          ],
+          signer: '0x6'.padEnd(66, '0'),
+        };
+
+        const result = await service.linkDocuments('TICKER', new BigNumber('1'), body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.LinkCaDoc,
+            },
+          ],
+        });
+        findDistributionSpy.mockRestore();
       });
     });
   });
