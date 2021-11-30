@@ -88,6 +88,7 @@ export class MockSecurityToken {
     },
     getDefaults: jest.fn(),
     setDefaults: jest.fn(),
+    remove: jest.fn(),
   };
 }
 
