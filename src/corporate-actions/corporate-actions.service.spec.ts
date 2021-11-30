@@ -10,6 +10,7 @@ import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sd
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -230,8 +231,21 @@ describe('CorporateActionsService', () => {
   });
 
   describe('linkDocuments', () => {
+    let mockDistributionWithDetails: MockDistributionWithDetails;
+    const body = {
+      documents: [
+        new AssetDocumentDto({
+          name: 'DOC_NAME',
+          uri: 'DOC_URI',
+          type: 'DOC_TYPE',
+        }),
+      ],
+      signer: '0x6'.padEnd(66, '0'),
+    };
+
     beforeEach(() => {
       mockIsPolymeshError.mockReturnValue(false);
+      mockDistributionWithDetails = new MockDistributionWithDetails();
     });
 
     afterAll(() => {
@@ -244,28 +258,15 @@ describe('CorporateActionsService', () => {
           code: ErrorCode.UnmetPrerequisite,
           message: 'Some of the provided documents are not associated with the Security Token',
         };
-
-        const mockDistributionWithDetails = new MockDistributionWithDetails();
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
         mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
           throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
 
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
-
-        const body = {
-          documents: [
-            new AssetDocumentDto({
-              name: 'DOC_NAME',
-              uri: 'DOC_URI',
-              type: 'DOC_TYPE',
-            }),
-          ],
-          signer: '0x6'.padEnd(66, '0'),
-        };
         let error;
         try {
           await service.linkDocuments('TICKER', new BigNumber('1'), body);
@@ -279,28 +280,15 @@ describe('CorporateActionsService', () => {
     describe('if there is a different error', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('foo');
-
-        const mockDistributionWithDetails = new MockDistributionWithDetails();
         mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
           throw expectedError;
         });
 
-        mockIsPolymeshError.mockReturnValue(true);
-
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+        mockIsPolymeshError.mockReturnValue(true);
 
-        const body = {
-          documents: [
-            new AssetDocumentDto({
-              name: 'DOC_NAME',
-              uri: 'DOC_URI',
-              type: 'DOC_TYPE',
-            }),
-          ],
-          signer: '0x6'.padEnd(66, '0'),
-        };
         let error;
         try {
           await service.linkDocuments('TICKER', new BigNumber('1'), body);
@@ -313,12 +301,6 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run the linkDocuments procedure and return the queue results', async () => {
-        const mockDistributionWithDetails = new MockDistributionWithDetails();
-
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
-
         const transactions = [
           {
             blockHash: '0x1',
@@ -328,6 +310,10 @@ describe('CorporateActionsService', () => {
         ];
         const mockQueue = new MockTransactionQueue(transactions);
         mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -354,7 +340,6 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
-        findDistributionSpy.mockRestore();
       });
     });
   });
