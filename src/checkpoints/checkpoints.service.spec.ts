@@ -92,6 +92,55 @@ describe('CheckpointsService', () => {
     });
   });
 
+  describe('findOne', () => {
+    it('should return NotFoundException if the asset does not exist', async () => {
+      mockAssetsService.findOne.mockImplementation(() => {
+        throw new NotFoundException('Asset does not exist');
+      });
+
+      let error;
+      try {
+        await service.findOne('TICKER', new BigNumber(1));
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(NotFoundException);
+    });
+
+    it('should return NotFoundException if the checkpoint does not exist', async () => {
+      mockIsPolymeshError.mockReturnValue(true);
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.getOne.mockImplementation(() => {
+        throw new PolymeshError({
+          code: ErrorCode.DataUnavailable,
+          message: 'The checkpoint was not found',
+        });
+      });
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      let error;
+      try {
+        await service.findOne('TICKER', new BigNumber(1));
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(NotFoundException);
+    });
+
+    it('should return a checkpoint given a ticker and id', async () => {
+      const mockSecurityToken = new MockSecurityToken();
+      const mockCheckpoint = new MockCheckpoint();
+      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.findOne('TICKER', new BigNumber(1));
+      expect(result).toEqual(mockCheckpoint);
+      expect(mockAssetsService.findOne).toBeCalledWith('TICKER');
+    });
+  });
+
   describe('findSchedulesByTicker', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
       const mockSchedules = [
@@ -277,6 +326,31 @@ describe('CheckpointsService', () => {
         }
       );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+    });
+  });
+
+  describe('getAssetBalance', () => {
+    it('should fetch the Asset balance for an Identity at a given Checkpoint', async () => {
+      const id = new BigNumber(1);
+      const balance = new BigNumber(10);
+      const mockCheckpoint = new MockCheckpoint();
+      const did = '0x6000';
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
+      mockCheckpoint.balance.mockResolvedValue(balance);
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.getAssetBalance('TICKER', did, id);
+      expect(result).toEqual({ balance, identity: did });
+      expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+
+      findOneSpy.mockRestore();
     });
   });
 
