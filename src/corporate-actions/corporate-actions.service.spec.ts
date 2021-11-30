@@ -10,7 +10,6 @@ import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sd
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -317,17 +316,6 @@ describe('CorporateActionsService', () => {
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-
-        const body = {
-          documents: [
-            new AssetDocumentDto({
-              name: 'DOC_NAME',
-              uri: 'DOC_URI',
-              type: 'DOC_TYPE',
-            }),
-          ],
-          signer: '0x6'.padEnd(66, '0'),
-        };
 
         const result = await service.linkDocuments('TICKER', new BigNumber('1'), body);
         expect(result).toEqual({
