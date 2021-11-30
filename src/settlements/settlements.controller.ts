@@ -214,10 +214,10 @@ export class SettlementsController {
   })
   @ApiCreatedResponse({
     description: 'Details about the newly created Venue',
-    type: TransactionQueueModel,
+    type: CreatedVenueModel,
   })
   @Post('/venues')
-  public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<TransactionQueueModel> {
+  public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<CreatedVenueModel> {
     const { result: venue, transactions } = await this.settlementsService.createVenue(
       createVenueDto
     );
