@@ -7,6 +7,7 @@ import {
   NumberedPortfolio,
   PortfolioBalance,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isNumberedPortfolio } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
@@ -21,8 +22,7 @@ export async function createPortfolioModel(
   let name = 'default';
 
   let portfolioId;
-  // TODO @monitz87: replace with typeguard when they are implemented in the SDK
-  if ((<NumberedPortfolio>portfolio).getName) {
+  if (isNumberedPortfolio(portfolio)) {
     const numberedPortfolio = <NumberedPortfolio>portfolio;
     portfolioId = numberedPortfolio.id;
     [tokenBalances, custodian, name] = await Promise.all([

@@ -8,6 +8,7 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -121,10 +122,10 @@ describe('IdentitiesController', () => {
   describe('getPendingAuthorizations', () => {
     it('should return list of pending authorizations received by identity', async () => {
       const did = '0x6'.padEnd(66, '0');
+      const targetDid = '0x1'.padEnd(66, '0');
       const pendingAuthorization = {
         authId: new BigNumber(2236),
         issuer: {
-          primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
           did,
         },
         data: {
@@ -132,11 +133,28 @@ describe('IdentitiesController', () => {
           value: 'FOO',
         },
         expiry: null,
+        target: {
+          did: targetDid,
+        },
       };
 
       mockAuthorizationsService.findPendingByDid.mockResolvedValue([pendingAuthorization]);
       const result = await controller.getPendingAuthorizations({ did }, {});
-      expect(result).toEqual(new ResultsModel({ results: [pendingAuthorization] }));
+      expect(result).toEqual(
+        new ResultsModel({
+          results: [
+            {
+              id: pendingAuthorization.authId,
+              issuer: {
+                did: pendingAuthorization.issuer.did,
+              },
+              data: pendingAuthorization.data,
+              expiry: null,
+              target: new IdentitySignerModel({ did: targetDid }),
+            },
+          ],
+        })
+      );
     });
 
     it('should support filtering pending authorizations by authorization type', async () => {

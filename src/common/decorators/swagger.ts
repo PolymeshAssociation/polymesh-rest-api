@@ -44,6 +44,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
                 items,
                 example,
                 examples,
+                description,
               },
             },
           },

@@ -1,6 +1,3 @@
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
@@ -17,11 +14,6 @@ import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
-
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
-  isPolymeshError: mockIsPolymeshError,
-}));
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;

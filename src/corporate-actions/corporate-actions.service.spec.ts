@@ -4,7 +4,6 @@ const mockIsPolymeshError = jest.fn();
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -167,11 +166,12 @@ describe('CorporateActionsService', () => {
     describe('if the Dividend Distribution does not exist', () => {
       it('should throw a NotFoundException', async () => {
         const mockSecurityToken = new MockSecurityToken();
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Dividend Distribution does not exist',
+        };
         mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'The Dividend Distribution does not exist',
-          });
+          throw mockError;
         });
         mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 

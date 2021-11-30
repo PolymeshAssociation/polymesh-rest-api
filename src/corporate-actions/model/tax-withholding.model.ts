@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity } from '@polymathnetwork/polymesh-sdk/internal';
+import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
