@@ -21,6 +21,7 @@ describe('CheckpointsController', () => {
     createByTicker: jest.fn(),
     createScheduleByTicker: jest.fn(),
     getAssetBalance: jest.fn(),
+    getHolders: jest.fn(),
     deleteScheduleByTicker: jest.fn(),
     findOne: jest.fn(),
   };
@@ -209,6 +210,51 @@ describe('CheckpointsController', () => {
         schedule: mockCreatedSchedule,
         transactions: ['transaction'],
       });
+    });
+  });
+
+  describe('getHolders', () => {
+    const mockAssetHolders = {
+      data: [
+        {
+          identity: { did: '0xe2dd3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2' },
+          balance: new BigNumber(627880),
+        },
+        {
+          identity: { did: '0x666d3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2' },
+          balance: new BigNumber(1000),
+        },
+      ],
+      next: '0xddddd',
+      count: 2,
+    };
+
+    const mockResult = new PaginatedResultsModel({
+      results: [
+        new IdentityBalanceModel({
+          identity: '0xe2dd3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2',
+          balance: new BigNumber(627880),
+        }),
+        new IdentityBalanceModel({
+          identity: '0x666d3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2',
+          balance: new BigNumber(1000),
+        }),
+      ],
+      total: 2,
+      next: '0xddddd',
+    });
+    it('should return the holders of an Asset at a given Checkpoint', async () => {
+      mockCheckpointsService.getHolders.mockResolvedValue(mockAssetHolders);
+
+      const result = await controller.getHolders(
+        {
+          ticker: 'TICKER',
+          id: new BigNumber(1),
+        },
+        { size: 10 }
+      );
+      expect(result).toEqual(mockResult);
+      expect(mockCheckpointsService.getHolders).toBeCalled();
     });
   });
 

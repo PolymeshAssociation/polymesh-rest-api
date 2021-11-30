@@ -236,6 +236,63 @@ export class CheckpointsController {
   }
 
   @ApiOperation({
+    summary: 'Get the Asset balance of the holders at a given Checkpoint',
+    description: 'This endpoint returns the Asset balance of holders at a given Checkpoint',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which to fetch holder balances',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint for which to fetch Asset balances',
+    type: 'number',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of Asset holders to be fetched',
+    type: 'number',
+    required: false,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start key from which Asset holders are to be fetched',
+    type: 'string',
+    required: false,
+    example: 'START_KEY',
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint was not found',
+  })
+  @ApiArrayResponse(IdentityBalanceModel, {
+    description: 'List of balances of the Asset holders at the Checkpoint',
+    paginated: true,
+  })
+  @Get(':id/balances')
+  public async getHolders(
+    @Param() { ticker, id }: CheckpointParamsDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
+    const { data, count: total, next } = await this.checkpointsService.getHolders(
+      ticker,
+      id,
+      size,
+      start?.toString()
+    );
+    return new PaginatedResultsModel({
+      results: data.map(
+        ({ identity, balance }) => new IdentityBalanceModel({ identity: identity.did, balance })
+      ),
+      total,
+      next,
+    });
+  }
+
+  @ApiOperation({
     summary: 'Get the Asset balance for an Identity at a Checkpoint',
     description:
       'This endpoint returns the Asset balance an Identity has at a particular Checkpoint',
@@ -257,7 +314,7 @@ export class CheckpointsController {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
-    description: 'The amount of the Asset the Identity held at the given Checkpoint',
+    description: 'The balance of the Asset the Identity held at a given Checkpoint',
     type: IdentityBalanceModel,
   })
   @ApiNotFoundResponse({

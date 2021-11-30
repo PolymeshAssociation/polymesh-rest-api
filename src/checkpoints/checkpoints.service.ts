@@ -5,6 +5,7 @@ import {
   CheckpointSchedule,
   CheckpointWithData,
   ErrorCode,
+  IdentityBalance,
   ResultSet,
   ScheduleWithDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
@@ -107,6 +108,16 @@ export class CheckpointsService {
     const checkpoint = await this.findOne(ticker, checkpointId);
     const balance = await checkpoint.balance({ identity: did });
     return new IdentityBalanceModel({ identity: did, balance });
+  }
+
+  public async getHolders(
+    ticker: string,
+    checkpointId: BigNumber,
+    size: number,
+    start?: string
+  ): Promise<ResultSet<IdentityBalance>> {
+    const checkpoint = await this.findOne(ticker, checkpointId);
+    return checkpoint.allBalances({ start, size });
   }
 
   public async deleteScheduleByTicker(
