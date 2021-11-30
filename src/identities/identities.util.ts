@@ -38,7 +38,6 @@ export async function createIdentityModel(identity: Identity): Promise<IdentityM
  * Create signer based on account/identity
  */
 export function createSignerModel(signer: Signer): SignerModel {
-  // TODO @monitz87: replace with typeguard when they are exported from the SDK
   if (isAccount(signer)) {
     return new AccountModel({
       address: signer.address,

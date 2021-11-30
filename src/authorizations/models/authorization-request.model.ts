@@ -27,19 +27,32 @@ export class AuthorizationRequestModel {
   readonly expiry: Date | null;
 
   @ApiProperty({
-    description: 'Authorization Request data corresponding to type of Authorization',
-    examples: [
-      {
-        type: 'PortfolioCustody',
-        value: {
-          did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-          id: '1',
-        },
+    description:
+      'Data corresponding to the type of Authorization Request' +
+      '<table>' +
+      '<thead>' +
+      '<th>Type</th><th>Data</th>' +
+      '</thead>' +
+      '<tbody>' +
+      '<tr><td>Add Relayer Paying Key</td><td>Beneficiary, Relayer, Allowance</td></tr>' +
+      '<tr><td>Become Agent</td><td>Permission Group</td></tr>' +
+      '<tr><td>Attest Primary Key Rotation</td><td>DID</td></tr>' +
+      '<tr><td>Rotate Primary Key</td><td>DID</td></tr>' +
+      '<tr><td>Transfer Ticker</td><td>Ticker</td></tr>' +
+      '<tr><td>Add MultiSig Signer</td><td>Account</td></tr>' +
+      '<tr><td>Transfer Token Ownership</td><td>Ticker</td></tr>' +
+      '<tr><td>Join Identity</td><td>DID   </td></tr>' +
+      '<tr><td>Portfolio Custody</td><td>Portfolio</td></tr>' +
+      '</tbody>' +
+      '</table>',
+    type: 'AuthorizationRequest',
+    examples: {
+      type: 'PortfolioCustody',
+      value: {
+        did: '0x0600000000000000000000000000000000000000000000000000000000000000',
+        id: '1',
       },
-      {
-        type: 'NoData',
-      },
-    ],
+    },
   })
   @FromEntityObject()
   readonly data: Authorization;
