@@ -45,7 +45,7 @@ export class AuthorizationRequestModel {
       '<tr><td>Portfolio Custody</td><td>Portfolio</td></tr>' +
       '</tbody>' +
       '</table>',
-    type: 'AuthorizationRequest',
+    type: 'Authorization',
     examples: {
       type: 'PortfolioCustody',
       value: {
