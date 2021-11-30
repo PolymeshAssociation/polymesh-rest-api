@@ -61,7 +61,7 @@ export class CorporateActionsService {
     }
   }
 
-  public async removeByTicker(
+  public async remove(
     ticker: string,
     corporateAction: BigNumber,
     signer: string

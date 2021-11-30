@@ -16,7 +16,7 @@ describe('CorporateActionsController', () => {
     updateDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
-    removeByTicker: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -112,7 +112,7 @@ describe('CorporateActionsController', () => {
       const response = {
         transactions: ['transaction'],
       };
-      mockCorporateActionsService.removeByTicker.mockResolvedValue(response);
+      mockCorporateActionsService.remove.mockResolvedValue(response);
 
       const result = await controller.deleteCorporateAction(
         { id: new BigNumber(1), ticker: 'TICKER' },
@@ -122,7 +122,7 @@ describe('CorporateActionsController', () => {
       expect(result).toEqual({
         transactions: ['transaction'],
       });
-      expect(mockCorporateActionsService.removeByTicker).toHaveBeenCalledWith(
+      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
         '0x6'.padEnd(66, '0')

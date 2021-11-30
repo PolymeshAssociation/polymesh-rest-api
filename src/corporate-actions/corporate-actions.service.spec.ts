@@ -73,10 +73,6 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
     });
 
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
-    });
-
     describe('if there is an error while modifying the defaults for Corporate Actions', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('New targets are the same as the current ones');
@@ -100,6 +96,7 @@ describe('CorporateActionsService', () => {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
     describe('otherwise', () => {
@@ -138,6 +135,7 @@ describe('CorporateActionsService', () => {
           { defaultTaxWithholding: new BigNumber('25') },
           { signer: address }
         );
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
   });
@@ -237,10 +235,6 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
     });
 
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
-    });
-
     describe('if there is an error while deleting a Corporate Action', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error("The Corporate Action doesn't exist");
@@ -253,11 +247,12 @@ describe('CorporateActionsService', () => {
 
         let error = null;
         try {
-          await service.removeByTicker(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+          await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
         } catch (err) {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
     describe('otherwise', () => {
@@ -275,11 +270,7 @@ describe('CorporateActionsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const result = await service.removeByTicker(
-          ticker,
-          new BigNumber(1),
-          '0x6'.padEnd(66, '0')
-        );
+        const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
 
         expect(result).toEqual({
           transactions: [
@@ -290,6 +281,7 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
   });

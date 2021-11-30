@@ -183,7 +183,7 @@ export class CorporateActionsController {
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
     @Query() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.removeByTicker(ticker, id, signer);
+    const { transactions } = await this.corporateActionsService.remove(ticker, id, signer);
     return new TransactionQueueModel({ transactions });
   }
 }
