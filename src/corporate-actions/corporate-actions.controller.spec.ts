@@ -16,6 +16,7 @@ describe('CorporateActionsController', () => {
     updateDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -103,6 +104,29 @@ describe('CorporateActionsController', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(result).toEqual(createDividendDistributionModel(mockDistributions as any));
+    });
+  });
+
+  describe('deleteCorporateAction', () => {
+    it('should call the service and return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.remove.mockResolvedValue(response);
+
+      const result = await controller.deleteCorporateAction(
+        { id: new BigNumber(1), ticker: 'TICKER' },
+        { signer: '0x6'.padEnd(66, '0') }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
+        'TICKER',
+        new BigNumber(1),
+        '0x6'.padEnd(66, '0')
+      );
     });
   });
 });
