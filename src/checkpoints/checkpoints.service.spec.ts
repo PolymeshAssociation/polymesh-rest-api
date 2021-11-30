@@ -110,11 +110,12 @@ describe('CheckpointsService', () => {
     it('should return NotFoundException if the checkpoint does not exist', async () => {
       mockIsPolymeshError.mockReturnValue(true);
       const mockSecurityToken = new MockSecurityToken();
+      const mockError = {
+        code: ErrorCode.DataUnavailable,
+        message: 'The checkpoint was not found',
+      };
       mockSecurityToken.checkpoints.getOne.mockImplementation(() => {
-        throw new PolymeshError({
-          code: ErrorCode.DataUnavailable,
-          message: 'The checkpoint was not found',
-        });
+        throw mockError;
       });
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
