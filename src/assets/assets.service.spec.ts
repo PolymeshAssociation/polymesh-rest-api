@@ -1,3 +1,6 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
 import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
@@ -18,8 +21,6 @@ import {
   MockTickerReservation,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
