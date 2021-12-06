@@ -1,20 +1,11 @@
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-
 import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import {
-  ClaimType,
-  ConditionType,
-  ErrorCode,
-  KnownTokenType,
-  ScopeType,
-  TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, ErrorCode, KnownTokenType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
+import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -27,6 +18,8 @@ import {
   MockTickerReservation,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -249,36 +242,18 @@ describe('AssetsService', () => {
 
   describe('findComplianceRequirements', () => {
     it('should return the list of Asset compliance requirements', async () => {
-      const mockRequirements = [
-        {
-          id: 1,
-          conditions: [
-            {
-              type: ConditionType.IsPresent,
-              claim: {
-                type: ClaimType.Accredited,
-                scope: {
-                  type: ScopeType.Identity,
-                  value: 'Ox6'.padEnd(66, '0'),
-                },
-              },
-              target: 'Receiver',
-              trustedClaimIssuers: [],
-            },
-          ],
-        },
-      ];
+      const mockComplianceRequirements = new MockComplianceRequirements();
 
       const mockSecurityToken = new MockSecurityToken();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockSecurityToken as any);
-      mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockRequirements);
+      mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockComplianceRequirements);
 
       const result = await service.findComplianceRequirements('TICKER');
 
-      expect(result).toEqual(mockRequirements);
+      expect(result).toEqual(mockComplianceRequirements);
       findOneSpy.mockRestore();
     });
   });

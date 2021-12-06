@@ -11,13 +11,13 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
 
-export class CorporateActionDefaultsDto extends SignerDto {
+export class CorporateActionDefaultConfigDto extends SignerDto {
   @ApiPropertyOptional({
     description: 'Identities that will be affected by the Corporate Actions',
     type: CorporateActionTargetsDto,
   })
   @ValidateIf(
-    ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultsDto) =>
+    ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultConfigDto) =>
       !!targets || (!taxWithholdings && !defaultTaxWithholding)
   )
   @ValidateNested()
@@ -31,7 +31,7 @@ export class CorporateActionDefaultsDto extends SignerDto {
     example: '25',
   })
   @ValidateIf(
-    ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultsDto) =>
+    ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultConfigDto) =>
       !!defaultTaxWithholding || (!targets && !taxWithholdings)
   )
   @ToBigNumber()
@@ -45,7 +45,7 @@ export class CorporateActionDefaultsDto extends SignerDto {
     isArray: true,
   })
   @ValidateIf(
-    ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultsDto) =>
+    ({ targets, defaultTaxWithholding, taxWithholdings }: CorporateActionDefaultConfigDto) =>
       !!taxWithholdings || (!targets && !defaultTaxWithholding)
   )
   @ValidateNested({ each: true })
