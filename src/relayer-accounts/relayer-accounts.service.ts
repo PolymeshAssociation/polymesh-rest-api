@@ -2,9 +2,9 @@
 
 // TODO @monitz87: replace with actual database/vault
 
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { forEach, map } from 'lodash';
+import { add, forEach, map } from 'lodash';
 
 import relayerAccountsConfig from '~/relayer-accounts/config/relayer-accounts.config';
 
@@ -37,8 +37,11 @@ export class RelayerAccountsService {
   }
 
   public findAddressByDid(did: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.accounts[did].address!;
+    const signer = this.accounts[did];
+    if (!signer) {
+      throw new BadRequestException(`A signer was not found by "${did}"`);
+    }
+    return signer.address;
   }
 
   public findAll(): { mnemonic: string; address: string; did: string }[] {
