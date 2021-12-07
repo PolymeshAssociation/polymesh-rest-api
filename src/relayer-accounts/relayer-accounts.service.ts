@@ -4,7 +4,7 @@
 
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { add, forEach, map } from 'lodash';
+import { forEach, map } from 'lodash';
 
 import relayerAccountsConfig from '~/relayer-accounts/config/relayer-accounts.config';
 
