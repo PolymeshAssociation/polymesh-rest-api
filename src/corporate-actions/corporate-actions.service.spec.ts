@@ -291,7 +291,7 @@ describe('CorporateActionsService', () => {
       signer: '0x6'.padEnd(66, '0'),
       targets: ['0x6'.padEnd(66, '1')],
     };
-    describe('if there is a error', () => {
+    describe('if there is an error', () => {
       const errors = [
         [
           {

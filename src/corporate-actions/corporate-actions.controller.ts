@@ -195,12 +195,12 @@ export class CorporateActionsController {
 
   @ApiOperation({
     summary: 'Pay dividends for a Dividend Distribution',
-    description:
-      'This endpoint transfers the corresponding share of the dividends to a list of target Identities',
+    description: 'This endpoint transfers unclaimed dividends to a list of target Identities',
   })
   @ApiParam({
     name: 'id',
-    description: 'Corporate Action number for the the Dividend Distribution',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
     type: 'string',
     example: '1',
   })
@@ -223,7 +223,7 @@ export class CorporateActionsController {
       '<li>Some of the supplied Identities are not included in this Distribution</li>' +
       '</ul>',
   })
-  @Post(':id/pay-dividends')
+  @Post(':id/payments')
   public async payDividends(
     @Param() { id, ticker }: DistributeFundsParamsDto,
     @Body() payDividendsDto: PayDividendsDto
