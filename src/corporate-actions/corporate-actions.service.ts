@@ -76,4 +76,16 @@ export class CorporateActionsService {
       }
     );
   }
+
+  public async claimDividends(
+    ticker: string,
+    id: BigNumber,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(distribution.claim, undefined, {
+      signer: address,
+    });
+  }
 }
