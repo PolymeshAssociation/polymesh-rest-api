@@ -1,7 +1,11 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
@@ -310,7 +314,7 @@ describe('CorporateActionsService', () => {
     });
 
     describe('if some of the provided documents are not associated with the Asset of the Corporate Action', () => {
-      it('should throw a UnprocessableEntityException', async () => {
+      it('should throw an UnprocessableEntityException', async () => {
         const mockError = {
           code: ErrorCode.UnmetPrerequisite,
           message: 'Some of the provided documents are not associated with the Security Token',
@@ -332,10 +336,14 @@ describe('CorporateActionsService', () => {
         }
 
         expect(error).toBeInstanceOf(UnprocessableEntityException);
+        expect((error as UnprocessableEntityException).message).toEqual(
+          'Some of the provided documents are not associated with the Asset'
+        );
       });
     });
+
     describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
+      it('should throw an InternalServerException', async () => {
         const expectedError = new Error('foo');
         mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
           throw expectedError;
@@ -353,9 +361,11 @@ describe('CorporateActionsService', () => {
           error = err;
         }
 
-        expect(error).toEqual(expectedError);
+        expect(error).toBeInstanceOf(InternalServerErrorException);
+        expect((error as InternalServerErrorException).message).toEqual(expectedError.message);
       });
     });
+
     describe('otherwise', () => {
       it('should run the linkDocuments procedure and return the queue results', async () => {
         const transactions = [

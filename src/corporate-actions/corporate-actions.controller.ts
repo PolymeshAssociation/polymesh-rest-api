@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Patch, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -211,8 +211,8 @@ export class CorporateActionsController {
     description: 'Details of the transaction',
     type: TransactionQueueModel,
   })
-  @ApiInternalServerErrorResponse({
-    description: 'Some of the provided documents are not associated with the Security Token',
+  @ApiUnprocessableEntityResponse({
+    description: 'Some of the provided documents are not associated with the Asset',
   })
   @Put(':id/documents')
   public async linkDocuments(
