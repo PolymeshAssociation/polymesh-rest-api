@@ -1,5 +1,4 @@
 import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSecurityTokenParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   DefaultTrustedClaimIssuer,
   ErrorCode,
@@ -111,7 +110,7 @@ export class AssetsService {
       }
     }
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const args: CreateSecurityTokenParams = {
+    const args = {
       name: rest.name,
       totalSupply: rest.totalSupply,
       isDivisible: rest.isDivisible,

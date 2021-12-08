@@ -1,10 +1,9 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -97,6 +96,7 @@ describe('CorporateActionsService', () => {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
     describe('otherwise', () => {
@@ -135,11 +135,8 @@ describe('CorporateActionsService', () => {
           { defaultTaxWithholding: new BigNumber('25') },
           { signer: address }
         );
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
-    });
-
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
     });
   });
 
@@ -170,11 +167,12 @@ describe('CorporateActionsService', () => {
     describe('if the Dividend Distribution does not exist', () => {
       it('should throw a NotFoundException', async () => {
         const mockSecurityToken = new MockSecurityToken();
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Dividend Distribution does not exist',
+        };
         mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'The Dividend Distribution does not exist',
-          });
+          throw mockError;
         });
         mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
@@ -229,6 +227,66 @@ describe('CorporateActionsService', () => {
     });
   });
 
+  describe('removeByTicker', () => {
+    let mockSecurityToken: MockSecurityToken;
+    const ticker = 'TICKER';
+
+    beforeEach(() => {
+      mockSecurityToken = new MockSecurityToken();
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+    });
+
+    describe('if there is an error while deleting a Corporate Action', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error("The Corporate Action doesn't exist");
+
+        mockSecurityToken.corporateActions.remove.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error = null;
+        try {
+          await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
+    });
+    describe('otherwise', () => {
+      it('should run a remove procedure and return the delete the Corporate Action', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.RemoveCa,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockSecurityToken.corporateActions.remove.mockResolvedValue(mockQueue);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+
+        expect(result).toEqual({
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.RemoveCa,
+            },
+          ],
+        });
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
+    });
+  });
+
   describe('linkDocuments', () => {
     let mockDistributionWithDetails: MockDistributionWithDetails;
     const body = {
@@ -251,8 +309,8 @@ describe('CorporateActionsService', () => {
       mockIsPolymeshError.mockReset();
     });
 
-    describe('if some of provided documents are not associated with Asset of the Corporate Action', () => {
-      it('should throw a InternalServerErrorException', async () => {
+    describe('if some of the provided documents are not associated with the Asset of the Corporate Action', () => {
+      it('should throw a UnprocessableEntityException', async () => {
         const mockError = {
           code: ErrorCode.UnmetPrerequisite,
           message: 'Some of the provided documents are not associated with the Security Token',
@@ -273,7 +331,7 @@ describe('CorporateActionsService', () => {
           error = err;
         }
 
-        expect(error).toBeInstanceOf(InternalServerErrorException);
+        expect(error).toBeInstanceOf(UnprocessableEntityException);
       });
     });
     describe('if there is a different error', () => {

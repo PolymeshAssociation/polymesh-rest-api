@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { MoveFundsParams, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/internal';
-import { DefaultPortfolio, ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  DefaultPortfolio,
+  ErrorCode,
+  NumberedPortfolio,
+} from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -52,7 +55,7 @@ export class PortfoliosService {
     const { signer, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const args: MoveFundsParams = {
+    const args = {
       to: toPortfolioId(to),
       items: items.map(({ ticker: token, amount, memo }) => {
         return {

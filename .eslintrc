@@ -20,6 +20,10 @@
     "no-restricted-imports": ["error", { "patterns": [{
       "group": [".*"], 
       "message": "Please use absolute imports instead" 
+      }],
+      "paths": [{
+        "name": "@polymathnetwork/polymesh-sdk/internal",
+        "message": "polymesh-sdk/internal should not be used"
       }]
     }]
   },

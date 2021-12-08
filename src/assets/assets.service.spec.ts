@@ -4,7 +4,6 @@ const mockIsPolymeshError = jest.fn();
 import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   ClaimType,
   ConditionType,
@@ -29,8 +28,8 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -76,11 +75,12 @@ describe('AssetsService', () => {
 
     describe('if the Asset does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'There is no Security Token with ticker',
+        };
         mockPolymeshApi.getSecurityToken.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'There is no Security Token with ticker',
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -309,37 +309,45 @@ describe('AssetsService', () => {
   describe('findTickerReservation', () => {
     describe('if the reservation does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          message: 'There is no reservation for',
+          code: ErrorCode.UnmetPrerequisite,
+        };
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
-          throw new PolymeshError({
-            message: 'There is no reservation for',
-            code: ErrorCode.UnmetPrerequisite,
-          });
+          throw mockError;
         });
+
         mockIsPolymeshError.mockReturnValue(true);
+
         let error;
         try {
           await service.findTickerReservation('BRK.A');
         } catch (err) {
           error = err;
         }
+
         expect(error).toBeInstanceOf(NotFoundException);
       });
     });
     describe('if the asset has already been created', () => {
       it('should throw a GoneException', async () => {
+        const mockError = {
+          code: ErrorCode.UnmetPrerequisite,
+          message: 'BRK.A token has been created',
+        };
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'BRK.A token has been created',
-          });
+          throw mockError;
         });
+
         mockIsPolymeshError.mockReturnValue(true);
+
         let error;
         try {
           await service.findTickerReservation('BRK.A');
         } catch (err) {
           error = err;
         }
+
         expect(error).toBeInstanceOf(GoneException);
       });
     });

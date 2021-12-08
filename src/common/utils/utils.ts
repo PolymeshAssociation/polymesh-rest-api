@@ -1,4 +1,8 @@
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ErrorCode, ProcedureMethod, ProcedureOpts } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
@@ -30,6 +34,8 @@ export async function processQueue<MethodArgs, ReturnType>(
       switch (code) {
         case ErrorCode.ValidationError:
           throw new BadRequestException(message);
+        case ErrorCode.UnmetPrerequisite:
+          throw new UnprocessableEntityException(message);
         default:
           throw new InternalServerErrorException(message);
       }

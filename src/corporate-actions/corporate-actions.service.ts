@@ -62,6 +62,22 @@ export class CorporateActionsService {
     }
   }
 
+  public async remove(
+    ticker: string,
+    corporateAction: BigNumber,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const asset = await this.assetsService.findOne(ticker);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      asset.corporateActions.remove,
+      { corporateAction },
+      {
+        signer: address,
+      }
+    );
+  }
+
   public async linkDocuments(
     ticker: string,
     id: BigNumber,
