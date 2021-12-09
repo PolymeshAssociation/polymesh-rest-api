@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -184,6 +185,49 @@ export class CorporateActionsController {
     @Query() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.corporateActionsService.remove(ticker, id, signer);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  @ApiOperation({
+    summary: 'Reclaim dividends for a Dividend Distribution',
+    description:
+      'This endpoint allows the target Identities of a Dividend distribution to reclaim their unclaimed Dividends once the distribution has expired',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be reclaimed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      '<li>The Distribution must be expired</li>' +
+      '<li>Distribution funds have already been reclaimed</li>' +
+      '</ul>',
+  })
+  @Post(':id/payments/reclaim')
+  public async reclaimDividends(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.reclaimDividends(
+      ticker,
+      id,
+      signer
+    );
     return new TransactionQueueModel({ transactions });
   }
 }

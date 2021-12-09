@@ -17,6 +17,7 @@ describe('CorporateActionsController', () => {
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
     remove: jest.fn(),
+    reclaimDividends: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -126,6 +127,33 @@ describe('CorporateActionsController', () => {
         'TICKER',
         new BigNumber(1),
         '0x6'.padEnd(66, '0')
+      );
+    });
+  });
+
+  describe('reclaimDividends', () => {
+    it('should call the service and return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.reclaimDividends.mockResolvedValue(response);
+
+      const signer = '0x6'.padEnd(66, '0');
+      const result = await controller.reclaimDividends(
+        {
+          id: new BigNumber(1),
+          ticker: 'TICKER',
+        },
+        { signer }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.reclaimDividends).toHaveBeenCalledWith(
+        'TICKER',
+        new BigNumber(1),
+        signer
       );
     });
   });
