@@ -190,9 +190,9 @@ export class CorporateActionsController {
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
   @ApiOperation({
-    summary: 'Reclaim dividends for a Dividend Distribution',
+    summary: 'Reclaim dividend payment for a Dividend Distribution',
     description:
-      'This endpoint allows the target Identities of a Dividend distribution to reclaim their unclaimed Dividends once the distribution has expired',
+      'This endpoint allows a target Identity of a Dividend distribution to reclaim their unclaimed Dividends once the distribution has expired',
   })
   @ApiParam({
     name: 'id',
