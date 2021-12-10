@@ -21,7 +21,7 @@ import {
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
-import { AuthorizationDto } from '~/authorizations/dto/authorization.dto';
+import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
@@ -176,29 +176,27 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose targeting Authorizations are to be fetched',
+    description: 'The Identity whose targeting Authorization is to be fetched',
     type: 'string',
     required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'id',
-    description: 'The id of the Authorization to be fetched',
+    description: 'The ID of the Authorization to be fetched',
     type: 'number',
     required: true,
   })
   @ApiOkResponse({
-    description: 'Authorization targeting the Identity',
-    type: AuthorizationRequest,
+    description: 'Details of the Authorization',
+    type: AuthorizationRequestModel,
   })
-  @Get(':did/authorization')
-  async getAuthorization(
-    @Param() { did }: DidDto,
-    @Query() { id }: AuthorizationDto
-  ): Promise<AuthorizationRequest> {
-    this.logger.debug(`Fetching requested authorization for ${did}`);
-
-    return this.authorizationsService.findById(did, id);
+  @Get(':did/pending-authorizations/:id')
+  async getPendingAuthorization(
+    @Param() { did, id }: AuthorizationParamsDto
+  ): Promise<AuthorizationRequestModel> {
+    const authorizationRequest = await this.authorizationsService.findOne(did, id);
+    return createAuthorizationRequestModel(authorizationRequest);
   }
 
   @ApiTags('assets')

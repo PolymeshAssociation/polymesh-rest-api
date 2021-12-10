@@ -1,9 +1,19 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthorizationType } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { AuthorizationType, ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesService } from '~/identities/identities.service';
-import { MockIdentity } from '~/test-utils/mocks';
+import { MockAuthorizationRequest, MockIdentity } from '~/test-utils/mocks';
+
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+  isPolymeshError: mockIsPolymeshError,
+}));
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
@@ -106,6 +116,71 @@ describe('AuthorizationsService', () => {
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
       const result = await service.findIssuedByDid(did, 1, '0x41bc3');
       expect(result).toEqual(mockIssuedAuthorizations);
+    });
+  });
+
+  describe('findOne', () => {
+    let mockIdentity: MockIdentity;
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+      mockIdentity = new MockIdentity();
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+    });
+
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
+    describe('if the AuthorizationRequest does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Authorization Request does not exist',
+        };
+
+        mockIdentity.authorizations.getOne.mockImplementation(() => {
+          throw mockError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.findOne('TICKER', new BigNumber(1));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const mockError = new Error('foo');
+        mockIdentity.authorizations.getOne.mockImplementation(() => {
+          throw mockError;
+        });
+
+        let error;
+        try {
+          await service.findOne('TICKER', new BigNumber(1));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(mockError);
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the AuthorizationRequest details', async () => {
+        const mockAuthorization = new MockAuthorizationRequest();
+        mockIdentity.authorizations.getOne.mockResolvedValue(mockAuthorization);
+
+        const result = await service.findOne('0x6'.padEnd(66, '0'), new BigNumber(1));
+        expect(result).toEqual(mockAuthorization);
+      });
     });
   });
 });

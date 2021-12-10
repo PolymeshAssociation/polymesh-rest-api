@@ -1,7 +1,6 @@
 /* istanbul ignore file */
-
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationType, CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -110,6 +109,7 @@ export class MockVenue {
 export class MockIdentityAuthorization {
   public getSent = jest.fn();
   public getReceived = jest.fn();
+  public getOne = jest.fn();
 }
 
 export class MockPortfolios {
@@ -164,6 +164,23 @@ export class MockCheckpointSchedule {
   start = new Date('10/14/1987');
   expiryDate = new Date('10/14/2000');
   complexity = 4;
+}
+
+export class MockAuthorizationRequest {
+  authId = new BigNumber(1);
+  expiry = null;
+  data = {
+    type: AuthorizationType.PortfolioCustody,
+    value: {
+      did: '0x6'.padEnd(66, '1a1a'),
+      id: new BigNumber(1),
+    },
+  };
+
+  issuer = new MockIdentity();
+  target = {
+    did: '0x6'.padEnd(66, '1a1a'),
+  };
 }
 
 export class MockTickerReservation {

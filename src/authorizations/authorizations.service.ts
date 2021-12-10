@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   AuthorizationRequest,
   AuthorizationType,
+  ErrorCode,
   ResultSet,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { IdentitiesService } from '~/identities/identities.service';
 
@@ -38,9 +40,20 @@ export class AuthorizationsService {
     });
   }
 
-  public async findById(did: string, id: BigNumber): Promise<AuthorizationRequest> {
+  public async findOne(did: string, id: BigNumber): Promise<AuthorizationRequest> {
     const identity = await this.identitiesService.findOne(did);
-
-    return identity.authorizations.getOne({ id });
+    try {
+      return identity.authorizations.getOne({ id });
+    } catch (err: unknown) {
+      if (isPolymeshError(err)) {
+        const { code } = err;
+        if (code === ErrorCode.DataUnavailable) {
+          throw new NotFoundException(
+            `There is no pending Authorization with ID "${id.toString()}"`
+          );
+        }
+      }
+      throw err;
+    }
   }
 }
