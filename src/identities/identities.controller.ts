@@ -21,6 +21,7 @@ import {
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
@@ -167,6 +168,35 @@ export class IdentitiesController {
       total: count,
       next: next,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Get a specific Authorization targeting an Identity',
+    description: 'This endpoint will return a specific Authorization targeting an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The Identity whose targeting Authorization is to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Authorization to be fetched',
+    type: 'number',
+    required: true,
+  })
+  @ApiOkResponse({
+    description: 'Details of the Authorization',
+    type: AuthorizationRequestModel,
+  })
+  @Get(':did/pending-authorizations/:id')
+  async getPendingAuthorization(
+    @Param() { did, id }: AuthorizationParamsDto
+  ): Promise<AuthorizationRequestModel> {
+    const authorizationRequest = await this.authorizationsService.findOne(did, id);
+    return createAuthorizationRequestModel(authorizationRequest);
   }
 
   @ApiTags('assets')
