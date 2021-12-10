@@ -2,8 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 
+import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -18,7 +20,10 @@ describe('CheckpointsController', () => {
     findScheduleById: jest.fn(),
     createByTicker: jest.fn(),
     createScheduleByTicker: jest.fn(),
+    getAssetBalance: jest.fn(),
+    getHolders: jest.fn(),
     deleteScheduleByTicker: jest.fn(),
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -35,6 +40,23 @@ describe('CheckpointsController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getCheckpoint', () => {
+    it('should return the Checkpoint data', async () => {
+      const createdAt = new Date();
+      const totalSupply = new BigNumber(1000);
+      const id = new BigNumber(1);
+      const ticker = 'TICKER';
+
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.createdAt.mockResolvedValue(createdAt);
+      mockCheckpoint.totalSupply.mockResolvedValue(totalSupply);
+      mockCheckpointsService.findOne.mockResolvedValue(mockCheckpoint);
+
+      const result = await controller.getCheckpoint({ ticker, id });
+      expect(result).toEqual(new CheckpointDetailsModel({ id, totalSupply, createdAt }));
+    });
   });
 
   describe('getCheckpoints', () => {
@@ -151,6 +173,28 @@ describe('CheckpointsController', () => {
     });
   });
 
+  describe('getSchedule', () => {
+    it('should call the service and return the Checkpoint Schedule details', async () => {
+      const mockDate = new Date();
+      const mockScheduleWithDetails = {
+        schedule: new MockCheckpointSchedule(),
+        details: {
+          remainingCheckpoints: 1,
+          nextCheckpointDate: mockDate,
+        },
+      };
+      mockCheckpointsService.findScheduleById.mockResolvedValue(mockScheduleWithDetails);
+
+      const result = await controller.getSchedule({ ticker: 'TICKER', id: new BigNumber(1) });
+
+      const mockResult = new CheckpointScheduleModel({
+        ...mockScheduleWithDetails.schedule,
+        ...mockScheduleWithDetails.details,
+      });
+      expect(result).toEqual(mockResult);
+    });
+  });
+
   describe('createSchedule', () => {
     it('should return the details of newly created Checkpoint Schedule', async () => {
       const mockDate = new Date();
@@ -188,6 +232,73 @@ describe('CheckpointsController', () => {
         schedule: mockCreatedSchedule,
         transactions: ['transaction'],
       });
+    });
+  });
+
+  describe('getHolders', () => {
+    const mockAssetHolders = {
+      data: [
+        {
+          identity: { did: '0xe2dd3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2' },
+          balance: new BigNumber(627880),
+        },
+        {
+          identity: { did: '0x666d3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2' },
+          balance: new BigNumber(1000),
+        },
+      ],
+      next: '0xddddd',
+      count: 2,
+    };
+
+    const mockResult = new PaginatedResultsModel({
+      results: [
+        new IdentityBalanceModel({
+          identity: '0xe2dd3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2',
+          balance: new BigNumber(627880),
+        }),
+        new IdentityBalanceModel({
+          identity: '0x666d3f2cec45168793b700056404c88e17e2a4cd87060aa39a22f856be5c4fe2',
+          balance: new BigNumber(1000),
+        }),
+      ],
+      total: 2,
+      next: '0xddddd',
+    });
+    it('should return the holders of an Asset at a given Checkpoint', async () => {
+      mockCheckpointsService.getHolders.mockResolvedValue(mockAssetHolders);
+
+      const result = await controller.getHolders(
+        {
+          ticker: 'TICKER',
+          id: new BigNumber(1),
+        },
+        { size: 10 }
+      );
+      expect(result).toEqual(mockResult);
+      expect(mockCheckpointsService.getHolders).toBeCalled();
+    });
+  });
+
+  describe('getAssetBalance', () => {
+    it('should return the balance of an Asset for an Identity at a given Checkpoint', async () => {
+      const balance = new BigNumber(10);
+      const ticker = 'TICKER';
+      const did = '0x0600';
+      const id = new BigNumber(1);
+
+      const balanceModel = new IdentityBalanceModel({ balance, identity: did });
+
+      mockCheckpointsService.getAssetBalance.mockResolvedValue(balanceModel);
+
+      const result = await controller.getAssetBalance({
+        ticker,
+        did,
+        id,
+      });
+
+      expect(result).toEqual(balanceModel);
+      expect(mockCheckpointsService.getAssetBalance).toHaveBeenCalledWith(ticker, did, id);
     });
   });
 

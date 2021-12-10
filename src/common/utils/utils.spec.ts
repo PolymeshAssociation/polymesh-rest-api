@@ -1,10 +1,17 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
 import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { MockVenue } from '~/test-utils/mocks';
+
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+  isPolymeshError: mockIsPolymeshError,
+}));
 
 describe('processQueue', () => {
   describe('it should handle Polymesh errors', () => {
@@ -15,11 +22,18 @@ describe('processQueue', () => {
     ];
     test.each(cases)('should transform %p into %p', async (code, expected) => {
       const mockVenue = new MockVenue();
+
+      const mockError = { code };
       mockVenue.modify.mockImplementation(() => {
-        throw new PolymeshError({ code });
+        throw mockError;
       });
+
+      mockIsPolymeshError.mockReturnValue(true);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(processQueue(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(expected);
+
+      mockIsPolymeshError.mockReset();
     });
   });
 

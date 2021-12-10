@@ -2,28 +2,25 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber, IsDid } from '~/common/decorators/validation';
 
-export class TaxWithholdingModel {
+export class TaxWithholdingDto {
   @ApiProperty({
-    description: 'DID for which the tax withholding percentage is overridden',
+    description: 'DID for which the tax withholding percentage is to be overridden',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @FromEntity()
-  readonly identity: Identity;
+  @IsDid()
+  readonly identity: string;
 
   @ApiProperty({
     description: 'Tax withholding percentage (from 0 to 100)',
     type: 'string',
     example: '67.25',
   })
-  @FromBigNumber()
+  @ToBigNumber()
+  @IsBigNumber()
   readonly percentage: BigNumber;
-
-  constructor(model: TaxWithholdingModel) {
-    Object.assign(this, model);
-  }
 }

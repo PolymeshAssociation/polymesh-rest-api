@@ -4,7 +4,6 @@ const mockIsPolymeshError = jest.fn();
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   AffirmationStatus,
   ErrorCode,
@@ -33,8 +32,8 @@ import {
   MockVenue,
 } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -105,11 +104,12 @@ describe('SettlementsService', () => {
   describe('findInstruction', () => {
     describe('if the instruction does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.ValidationError,
+          message: "The Instruction doesn't",
+        };
         mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.ValidationError,
-            message: "The Instruction doesn't",
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -167,11 +167,12 @@ describe('SettlementsService', () => {
   describe('findVenue', () => {
     describe('if the Venue does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.ValidationError,
+          message: "The Venue doesn't",
+        };
         mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.ValidationError,
-            message: "The Venue doesn't",
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);

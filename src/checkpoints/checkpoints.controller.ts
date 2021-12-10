@@ -2,26 +2,26 @@ import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/commo
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiProperty,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ScheduleWithDetails } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CheckPointBalanceParamsDto } from '~/checkpoints/dto/checkpoint-balance.dto';
+import { CheckpointParamsDto } from '~/checkpoints/dto/checkpoint.dto';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -35,29 +35,15 @@ export class DeleteCheckpointScheduleParams extends IdParamsDto {
 }
 
 class CheckpointScheduleParamsDto extends IdParamsDto {
-  @ApiProperty({
-    description: 'ID of the Schedule',
-    type: 'string',
-    example: '123',
-  })
-  @IsBigNumber()
-  @ToBigNumber()
-  readonly id: BigNumber;
-
-  @ApiProperty({
-    description: 'The ticker to reserve',
-    example: 'BRK.A',
-  })
   @IsTicker()
   readonly ticker: string;
 }
 
-@ApiTags('checkpoints')
+@ApiTags('assets', 'checkpoints')
 @Controller('assets/:ticker/checkpoints')
 export class CheckpointsController {
   constructor(private readonly checkpointsService: CheckpointsService) {}
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Fetch Asset Checkpoints',
     description: 'This endpoint will provide the list of Checkpoints created on this Asset',
@@ -114,7 +100,40 @@ export class CheckpointsController {
     });
   }
 
-  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Fetch details of an Asset Checkpoint',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Checkpoint is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint to be fetched',
+    type: 'string',
+    example: '1',
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint was not found',
+  })
+  @ApiOkResponse({
+    description: 'The Checkpoint details',
+    type: CheckpointDetailsModel,
+  })
+  @Get('/:id')
+  public async getCheckpoint(
+    @Param() { ticker, id }: CheckpointParamsDto
+  ): Promise<CheckpointDetailsModel> {
+    const checkpoint = await this.checkpointsService.findOne(ticker, id);
+    const [createdAt, totalSupply] = await Promise.all([
+      checkpoint.createdAt(),
+      checkpoint.totalSupply(),
+    ]);
+    return new CheckpointDetailsModel({ id, createdAt, totalSupply });
+  }
+
   @ApiOperation({
     summary: 'Create Checkpoint',
     description:
@@ -142,7 +161,6 @@ export class CheckpointsController {
     return new CreatedCheckpointModel({ checkpoint, transactions });
   }
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Fetch all active Checkpoint Schedules',
     description:
@@ -179,16 +197,39 @@ export class CheckpointsController {
     });
   }
 
-  @Get('schedule/:id')
+  @ApiOperation({
+    summary: 'Fetch details of an Asset Checkpoint Schedule',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Checkpoint Schedule is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint Schedule to be fetched',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'The Checkpoint Schedule details',
+    type: CheckpointScheduleModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint Schedule does not exists',
+  })
+  @Get('schedules/:id')
   public async getSchedule(
     @Param() { ticker, id }: CheckpointScheduleParamsDto
   ): Promise<CheckpointScheduleModel> {
     const {
-      schedule: { id: scheduleId, period, start, complexity, expiryDate },
+      schedule: { period, start, complexity, expiryDate },
       details,
-    }: ScheduleWithDetails = await this.checkpointsService.findScheduleByTicker(ticker, id);
+    } = await this.checkpointsService.findScheduleById(ticker, id);
+
     return new CheckpointScheduleModel({
-      id: scheduleId,
+      id,
       period,
       start,
       ticker,
@@ -198,7 +239,6 @@ export class CheckpointsController {
     });
   }
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Create Schedule',
     description: 'This endpoint will create a Schedule that creates Checkpoints periodically',
@@ -242,9 +282,100 @@ export class CheckpointsController {
     });
   }
 
+  @ApiOperation({
+    summary: 'Get the Asset balance of the holders at a given Checkpoint',
+    description: 'This endpoint returns the Asset balance of holders at a given Checkpoint',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which to fetch holder balances',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint for which to fetch Asset balances',
+    type: 'number',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of Asset holders to be fetched',
+    type: 'number',
+    required: false,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start key from which Asset holders are to be fetched',
+    type: 'string',
+    required: false,
+    example: 'START_KEY',
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint was not found',
+  })
+  @ApiArrayResponse(IdentityBalanceModel, {
+    description: 'List of balances of the Asset holders at the Checkpoint',
+    paginated: true,
+  })
+  @Get(':id/balances')
+  public async getHolders(
+    @Param() { ticker, id }: CheckpointParamsDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
+    const { data, count: total, next } = await this.checkpointsService.getHolders(
+      ticker,
+      id,
+      size,
+      start?.toString()
+    );
+    return new PaginatedResultsModel({
+      results: data.map(
+        ({ identity, balance }) => new IdentityBalanceModel({ identity: identity.did, balance })
+      ),
+      total,
+      next,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get the Asset balance for an Identity at a Checkpoint',
+    description:
+      'This endpoint returns the Asset balance an Identity has at a particular Checkpoint',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which the balance is to be fetched',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The Checkpoint ID to from which to fetch the balance',
+    type: 'number',
+    example: '2',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The Identity for which to fetch the Asset balance',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'The balance of the Asset the Identity held at a given Checkpoint',
+    type: IdentityBalanceModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset or Checkpoint was not found',
+  })
+  @Get(':id/balances/:did')
+  public async getAssetBalance(
+    @Param() { ticker, did, id }: CheckPointBalanceParamsDto
+  ): Promise<IdentityBalanceModel> {
+    return this.checkpointsService.getAssetBalance(ticker, did, id);
+  }
+
   // TODO @prashantasdeveloper: Update error responses post handling error codes
   // TODO @prashantasdeveloper: Move the signer to headers
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Delete Schedule',
     description: 'This endpoint will delete an existing Schedule for Checkpoint creation',

@@ -1,6 +1,3 @@
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
@@ -16,12 +13,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
-
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
-  isPolymeshError: mockIsPolymeshError,
-}));
+import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -210,14 +202,19 @@ describe('SettlementsController', () => {
         type: VenueType.Exchange,
       };
       const transactions = ['transaction'];
+      const mockVenue = new MockVenue();
       const mockData = {
+        result: mockVenue,
         transactions,
       };
       mockSettlementsService.createVenue.mockResolvedValue(mockData);
 
       const result = await controller.createVenue(body);
 
-      expect(result).toEqual(mockData);
+      expect(result).toEqual({
+        venue: mockVenue,
+        transactions,
+      });
     });
   });
 

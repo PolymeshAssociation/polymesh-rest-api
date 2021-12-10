@@ -71,6 +71,7 @@ export class MockSecurityToken {
   public checkpoints = {
     get: jest.fn(),
     create: jest.fn(),
+    getOne: jest.fn(),
 
     schedules: {
       get: jest.fn(),
@@ -86,6 +87,8 @@ export class MockSecurityToken {
       getOne: jest.fn(),
     },
     getDefaults: jest.fn(),
+    setDefaults: jest.fn(),
+    remove: jest.fn(),
   };
 }
 
@@ -148,6 +151,10 @@ export class MockPortfolio {
 export class MockCheckpoint {
   id = new BigNumber(1);
   ticker = 'TICKER';
+  balance = jest.fn();
+  allBalances = jest.fn();
+  createdAt = jest.fn();
+  totalSupply = jest.fn();
 }
 
 export class MockCheckpointSchedule {

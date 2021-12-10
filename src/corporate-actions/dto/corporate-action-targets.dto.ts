@@ -1,17 +1,19 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Identity, TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
+import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
+import { IsEnum } from 'class-validator';
 
-import { FromMaybeEntityArray } from '~/common/decorators/transformation';
+import { IsDid } from '~/common/decorators/validation';
 
-export class CorporateActionTargetsModel {
+export class CorporateActionTargetsDto {
   @ApiProperty({
     description: 'Indicates how the `identities` are to be treated',
     type: 'string',
     enum: TargetTreatment,
     example: TargetTreatment.Include,
   })
+  @IsEnum(TargetTreatment)
   readonly treatment: TargetTreatment;
 
   @ApiProperty({
@@ -24,10 +26,6 @@ export class CorporateActionTargetsModel {
       '0x0611111111111111111111111111111111111111111111111111111111111111',
     ],
   })
-  @FromMaybeEntityArray()
-  readonly identities: Identity[];
-
-  constructor(model: CorporateActionTargetsModel) {
-    Object.assign(this, model);
-  }
+  @IsDid({ each: true })
+  readonly identities: string[];
 }

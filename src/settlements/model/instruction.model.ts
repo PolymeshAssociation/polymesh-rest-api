@@ -2,11 +2,11 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Venue } from '@polymathnetwork/polymesh-sdk/internal';
 import {
   EventIdentifier,
   InstructionStatus,
   InstructionType,
+  Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
