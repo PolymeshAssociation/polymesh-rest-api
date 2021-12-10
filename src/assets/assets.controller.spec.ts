@@ -2,17 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   ClaimType,
-  ConditionType,
   KnownTokenType,
-  ScopeType,
   TokenIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
+import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
+import { ComplianceRequirementsModel } from '~/assets/models/compliance-requirements.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { ResultsModel } from '~/common/models/results.model';
 import { MockSecurityToken } from '~/test-utils/mocks';
 
 describe('AssetsController', () => {
@@ -171,30 +170,13 @@ describe('AssetsController', () => {
 
   describe('getComplianceRequirements', () => {
     it('should return the list of all compliance requirements of an Asset', async () => {
-      const mockRequirements = [
-        {
-          id: 1,
-          conditions: [
-            {
-              type: ConditionType.IsPresent,
-              claim: {
-                type: ClaimType.Accredited,
-                scope: {
-                  type: ScopeType.Identity,
-                  value: 'Ox6'.padEnd(66, '0'),
-                },
-              },
-              target: 'Receiver',
-              trustedClaimIssuers: [],
-            },
-          ],
-        },
-      ];
-      mockAssetsService.findComplianceRequirements.mockResolvedValue(mockRequirements);
+      const mockComplianceRequirements = new MockComplianceRequirements();
+      mockAssetsService.findComplianceRequirements.mockResolvedValue(mockComplianceRequirements);
 
       const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual(new ResultsModel({ results: mockRequirements }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
     });
   });
 
