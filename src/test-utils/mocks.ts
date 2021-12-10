@@ -172,14 +172,14 @@ export class MockAuthorizationRequest {
   data = {
     type: AuthorizationType.PortfolioCustody,
     value: {
-      did: '0x6'.padEnd(66, '1a1a'),
+      did: '0x6'.padEnd(66, '1a'),
       id: new BigNumber(1),
     },
   };
 
   issuer = new MockIdentity();
   target = {
-    did: '0x6'.padEnd(66, '1a1a'),
+    did: '0x6'.padEnd(66, '1a'),
   };
 }
 
