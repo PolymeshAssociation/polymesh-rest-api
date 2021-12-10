@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { isEntity } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity } from '@polymathnetwork/polymesh-sdk/utils';
 import { Transform } from 'class-transformer';
 import { mapValues } from 'lodash';
 

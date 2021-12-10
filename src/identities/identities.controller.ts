@@ -1,18 +1,29 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   AuthorizationType,
   Claim,
   ClaimType,
   Instruction,
   SecurityToken,
+  Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { AuthorizationDto } from '~/authorizations/dto/authorization.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
+import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/model/claim.model';
@@ -21,6 +32,8 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -88,34 +101,24 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse(AuthorizationRequest, {
+  @ApiArrayResponse(AuthorizationRequestModel, {
     description: 'List of all pending authorizations received by the Identity',
     paginated: false,
-    example: [
-      {
-        id: '1',
-        expiry: null,
-        data: {
-          type: 'NoData',
-        },
-        issuer: '0x6'.padEnd(66, '1a1a'),
-        target: {
-          type: 'Identity',
-          value: '0x0600000000000000000000000000000000000000000000000000000000000000',
-        },
-      },
-    ],
   })
   @Get(':did/pending-authorizations')
   async getPendingAuthorizations(
     @Param() { did }: DidDto,
     @Query() { type, includeExpired }: AuthorizationsFilterDto
-  ): Promise<ResultsModel<AuthorizationRequest>> {
+  ): Promise<ResultsModel<AuthorizationRequestModel>> {
     this.logger.debug(`Fetching pending authorization received by did ${did}`);
 
     const results = await this.authorizationsService.findPendingByDid(did, includeExpired, type);
 
-    return new ResultsModel({ results });
+    return new ResultsModel({
+      results: results.map(authorizationRequest =>
+        createAuthorizationRequestModel(authorizationRequest)
+      ),
+    });
   }
 
   @ApiOperation({
@@ -141,33 +144,15 @@ export class IdentitiesController {
     type: 'string',
     required: false,
   })
-  @ApiArrayResponse(AuthorizationRequest, {
+  @ApiArrayResponse(AuthorizationRequestModel, {
     description: 'List of all Authorizations issued by the Identity',
     paginated: true,
-    example: [
-      {
-        id: '2',
-        expiry: null,
-        data: {
-          type: 'PortfolioCustody',
-          value: {
-            did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-            id: '1',
-          },
-        },
-        issuer: '0x0600000000000000000000000000000000000000000000000000000000000000',
-        target: {
-          type: 'Identity',
-          value: '0x6'.padEnd(66, '1a1a'),
-        },
-      },
-    ],
   })
   @Get(':did/issued-authorizations')
   async getIssuedAuthorizations(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto
-  ): Promise<PaginatedResultsModel<AuthorizationRequest>> {
+  ): Promise<PaginatedResultsModel<AuthorizationRequestModel>> {
     this.logger.debug(`Fetching requested authorizations for ${did} from start`);
 
     const { data, count, next } = await this.authorizationsService.findIssuedByDid(
@@ -176,8 +161,10 @@ export class IdentitiesController {
       start?.toString()
     );
 
-    return new PaginatedResultsModel<AuthorizationRequest>({
-      results: data,
+    return new PaginatedResultsModel<AuthorizationRequestModel>({
+      results: data.map(authorizationRequest =>
+        createAuthorizationRequestModel(authorizationRequest)
+      ),
       total: count,
       next: next,
     });
@@ -443,5 +430,30 @@ export class IdentitiesController {
   async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
     const results = await this.identitiesService.findTrustingTokens(did);
     return new ResultsModel({ results });
+  }
+
+  // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
+  @ApiOperation({
+    summary: 'Add Secondary Key',
+    description:
+      'This endpoint will send an invitation to a Secondary Key to join an Identity. It also defines the set of permissions the Secondary Key will have.',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: "The supplied address is not encoded with the chain's SS58 format",
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
+  })
+  @Post('/secondary-keys')
+  async addSecondaryKey(
+    @Body() addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.identitiesService.addSecondaryKey(addSecondaryKeyParamsDto);
+    return new TransactionQueueModel({ transactions });
   }
 }

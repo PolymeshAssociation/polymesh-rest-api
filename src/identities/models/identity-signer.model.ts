@@ -1,7 +1,9 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { SignerType } from '@polymathnetwork/polymesh-sdk/types';
 
-import { SignerModel } from './signer.model';
+import { SignerModel } from '~/identities/models/signer.model';
 
 export class IdentitySignerModel extends SignerModel {
   @ApiProperty({

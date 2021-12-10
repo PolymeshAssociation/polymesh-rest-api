@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -22,7 +22,6 @@ export class MockPolymesh {
   public isIdentityValid = jest.fn();
   public disconnect = jest.fn();
   public addSigner = jest.fn();
-  public reserveTicker = jest.fn();
   public getTickerReservation = jest.fn();
   public settlements = {
     getInstruction: jest.fn(),
@@ -32,6 +31,12 @@ export class MockPolymesh {
   public claims = {
     getIssuedClaims: jest.fn(),
     getIdentitiesWithClaims: jest.fn(),
+  };
+
+  public currentIdentity = {
+    reserveTicker: jest.fn(),
+    createVenue: jest.fn(),
+    inviteAccount: jest.fn(),
   };
 }
 
@@ -65,23 +70,32 @@ export class MockSecurityToken {
 
   public checkpoints = {
     get: jest.fn(),
+    create: jest.fn(),
+    getOne: jest.fn(),
 
     schedules: {
       get: jest.fn(),
+      getOne: jest.fn(),
+      create: jest.fn(),
+      remove: jest.fn(),
     },
   };
 
   public corporateActions = {
     distributions: {
       get: jest.fn(),
+      getOne: jest.fn(),
     },
     getDefaults: jest.fn(),
+    setDefaults: jest.fn(),
+    remove: jest.fn(),
   };
 }
 
 export class MockInstruction {
   public getStatus = jest.fn();
   public affirm = jest.fn();
+  public reject = jest.fn();
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
@@ -102,6 +116,7 @@ export class MockPortfolios {
   public getPortfolios = jest.fn();
   public getPortfolio = jest.fn();
   public create = jest.fn();
+  public delete = jest.fn();
 }
 
 export class MockIdentity {
@@ -131,6 +146,24 @@ export class MockPortfolio {
       did: '0x06'.padEnd(66, '0'),
     };
   });
+}
+
+export class MockCheckpoint {
+  id = new BigNumber(1);
+  ticker = 'TICKER';
+  balance = jest.fn();
+  allBalances = jest.fn();
+  createdAt = jest.fn();
+  totalSupply = jest.fn();
+}
+
+export class MockCheckpointSchedule {
+  id = new BigNumber(1);
+  ticker = 'TICKER';
+  period = { unit: CalendarUnit.Month, amount: 3 };
+  start = new Date('10/14/1987');
+  expiryDate = new Date('10/14/2000');
+  complexity = 4;
 }
 
 export class MockTickerReservation {

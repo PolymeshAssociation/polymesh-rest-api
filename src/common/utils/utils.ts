@@ -1,10 +1,6 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import {
-  ErrorCode,
-  isPolymeshError,
-  ProcedureMethod,
-  ProcedureOpts,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, ProcedureMethod, ProcedureOpts } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { QueueResult } from '~/common/types';
 

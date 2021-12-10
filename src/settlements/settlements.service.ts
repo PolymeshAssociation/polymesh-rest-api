@@ -4,13 +4,13 @@ import {
   ErrorCode,
   Instruction,
   InstructionAffirmation,
-  isPolymeshError,
   PortfolioLike,
   ResultSet,
   TransferBreakdown,
   Venue,
   VenueDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -92,7 +92,20 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    return processQueue(instruction.affirm, undefined, { signer: address });
+    return processQueue(instruction.affirm, { signer: address }, {});
+  }
+
+  public async rejectInstruction(
+    id: BigNumber,
+    signerDto: SignerDto
+  ): Promise<QueueResult<Instruction>> {
+    const { signer } = signerDto;
+
+    const instruction = await this.findInstruction(id);
+
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+
+    return processQueue(instruction.reject, { signer: address }, {});
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -137,14 +150,14 @@ export class SettlementsService {
   }
 
   public async createVenue(createVenueDto: CreateVenueDto): Promise<QueueResult<Venue>> {
-    const { signer, details, type } = createVenueDto;
+    const { signer, description, type } = createVenueDto;
     const params = {
-      details,
+      description,
       type,
     };
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const identity = await this.identitiesService.findOne(signer);
-    return processQueue(identity.createVenue, params, { signer: address });
+    const method = this.polymeshService.polymeshApi.currentIdentity.createVenue;
+    return processQueue(method, params, { signer: address });
   }
 
   public async modifyVenue(

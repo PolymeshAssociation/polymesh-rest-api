@@ -10,14 +10,15 @@ import { toPortfolioId } from '~/portfolios/portfolios.util';
 
 export class PortfolioDto {
   @ApiProperty({
+    description: 'The DID of the Portfolio owner',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @IsDid()
   readonly did: string;
 
   @ApiProperty({
-    example: '123',
     description: 'Portfolio number. Use 0 for the Default Portfolio',
+    example: '123',
   })
   @IsBigNumber()
   @ToBigNumber()

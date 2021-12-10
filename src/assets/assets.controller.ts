@@ -95,7 +95,7 @@ export class AssetsController {
       results: data.map(
         ({ identity, balance }) =>
           new IdentityBalanceModel({
-            identity,
+            identity: identity.did,
             balance,
           })
       ),

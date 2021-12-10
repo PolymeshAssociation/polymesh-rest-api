@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
@@ -12,7 +13,11 @@ describe('CorporateActionsController', () => {
 
   const mockCorporateActionsService = {
     findDefaultsByTicker: jest.fn(),
+    updateDefaultsByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
+    findDistribution: jest.fn(),
+    remove: jest.fn(),
+    payDividends: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -31,7 +36,7 @@ describe('CorporateActionsController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findDefaultsByTicker', () => {
+  describe('getDefaults', () => {
     it('should return the Corporate Action defaults for an Asset', async () => {
       const mockCorporateActionDefaults = new MockCorporateActionDefaults();
 
@@ -42,6 +47,29 @@ describe('CorporateActionsController', () => {
       const result = await controller.getDefaults({ ticker: 'TICKER' });
 
       expect(result).toEqual(mockCorporateActionDefaults);
+    });
+  });
+
+  describe('updateDefaults', () => {
+    it('should update the Corporate Action defaults and return the details of transaction', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.updateDefaultsByTicker.mockResolvedValue(response);
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        defaultTaxWithholding: new BigNumber('25'),
+      };
+
+      const result = await controller.updateDefaults({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.updateDefaultsByTicker).toHaveBeenCalledWith(
+        'TICKER',
+        body
+      );
     });
   });
 
@@ -60,6 +88,75 @@ describe('CorporateActionsController', () => {
             createDividendDistributionModel(distributionWithDetails as any)
           ),
         })
+      );
+    });
+  });
+
+  describe('findDistribution', () => {
+    it('should return a specific Dividend Distribution associated with an Asset', async () => {
+      const mockDistributions = new MockDistributionWithDetails();
+
+      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistributions);
+
+      const result = await controller.getDividendDistribution({
+        ticker: 'TICKER',
+        id: new BigNumber('1'),
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(result).toEqual(createDividendDistributionModel(mockDistributions as any));
+    });
+  });
+
+  describe('deleteCorporateAction', () => {
+    it('should call the service and return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.remove.mockResolvedValue(response);
+
+      const result = await controller.deleteCorporateAction(
+        { id: new BigNumber(1), ticker: 'TICKER' },
+        { signer: '0x6'.padEnd(66, '0') }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
+        'TICKER',
+        new BigNumber(1),
+        '0x6'.padEnd(66, '0')
+      );
+    });
+  });
+
+  describe('payDividends', () => {
+    it('should call the service and return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.payDividends.mockResolvedValue(response);
+
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        targets: ['0x6'.padEnd(66, '0')],
+      };
+      const result = await controller.payDividends(
+        {
+          id: new BigNumber(1),
+          ticker: 'TICKER',
+        },
+        body
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.payDividends).toHaveBeenCalledWith(
+        'TICKER',
+        new BigNumber(1),
+        body
       );
     });
   });

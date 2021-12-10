@@ -6,13 +6,13 @@ import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
+import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockIdentity } from '~/test-utils/mocks';
-
-import { IdentitiesController } from './identities.controller';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -27,6 +27,7 @@ describe('IdentitiesController', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
     findTrustingTokens: jest.fn(),
+    addSecondaryKey: jest.fn(),
   };
 
   const mockAuthorizationsService = {
@@ -121,10 +122,10 @@ describe('IdentitiesController', () => {
   describe('getPendingAuthorizations', () => {
     it('should return list of pending authorizations received by identity', async () => {
       const did = '0x6'.padEnd(66, '0');
+      const targetDid = '0x1'.padEnd(66, '0');
       const pendingAuthorization = {
         authId: new BigNumber(2236),
         issuer: {
-          primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
           did,
         },
         data: {
@@ -132,11 +133,28 @@ describe('IdentitiesController', () => {
           value: 'FOO',
         },
         expiry: null,
+        target: {
+          did: targetDid,
+        },
       };
 
       mockAuthorizationsService.findPendingByDid.mockResolvedValue([pendingAuthorization]);
       const result = await controller.getPendingAuthorizations({ did }, {});
-      expect(result).toEqual(new ResultsModel({ results: [pendingAuthorization] }));
+      expect(result).toEqual(
+        new ResultsModel({
+          results: [
+            {
+              id: pendingAuthorization.authId,
+              issuer: {
+                did: pendingAuthorization.issuer.did,
+              },
+              data: pendingAuthorization.data,
+              expiry: null,
+              target: new IdentitySignerModel({ did: targetDid }),
+            },
+          ],
+        })
+      );
     });
 
     it('should support filtering pending authorizations by authorization type', async () => {
@@ -298,6 +316,24 @@ describe('IdentitiesController', () => {
       const result = await controller.getTrustingTokens({ did });
 
       expect(result).toEqual(new ResultsModel({ results: mockAssets }));
+    });
+  });
+
+  describe('addSecondaryKey', () => {
+    it('should return the transaction details on adding a Secondary Key', async () => {
+      const transactions = ['transaction'];
+      const mockData = {
+        result: undefined,
+        transactions,
+      };
+      mockIdentitiesService.addSecondaryKey.mockResolvedValue(mockData);
+
+      const result = await controller.addSecondaryKey({ signer: 'Ox60', secondaryKey: '5xdd' });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions,
+      });
     });
   });
 });

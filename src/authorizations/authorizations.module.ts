@@ -2,9 +2,8 @@
 
 import { forwardRef, Module } from '@nestjs/common';
 
+import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesModule } from '~/identities/identities.module';
-
-import { AuthorizationsService } from './authorizations.service';
 
 @Module({
   imports: [forwardRef(() => IdentitiesModule)],

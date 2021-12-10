@@ -6,13 +6,14 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { MockPortfolio } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -22,6 +23,7 @@ describe('PortfoliosController', () => {
     moveAssets: jest.fn(),
     findAllByOwner: jest.fn(),
     createPortfolio: jest.fn(),
+    deletePortfolio: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -91,10 +93,28 @@ describe('PortfoliosController', () => {
       const result = await controller.createPortfolio(params);
 
       expect(result).toEqual({
-        portfolioId: {
+        portfolio: {
           id: '1',
           did: '0x06'.padEnd(66, '0'),
         },
+        transactions: ['transaction'],
+      });
+    });
+  });
+
+  describe('deletePortfolio', () => {
+    it('should return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
+
+      const result = await controller.deletePortfolio(
+        new PortfolioDto({ id: new BigNumber(1), did: '0x6'.padEnd(66, '0') }),
+        { signer: '0x6'.padEnd(66, '0') }
+      );
+
+      expect(result).toEqual({
         transactions: ['transaction'],
       });
     });

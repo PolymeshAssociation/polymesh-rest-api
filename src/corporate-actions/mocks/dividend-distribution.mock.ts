@@ -12,8 +12,10 @@ export class MockDistribution extends MockCorporateActionDefaults {
   maxAmount = new BigNumber('2100.1');
   expiryDate = null;
   paymentDate = new Date('10/14/1987');
-  ticker = 'TOKEN4';
+  token = { ticker: 'TOKEN4' };
   id = new BigNumber('1');
   declarationDate = new Date('10/14/1987');
   description = 'Mock Description';
+
+  public pay = jest.fn();
 }

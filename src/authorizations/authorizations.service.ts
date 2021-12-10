@@ -41,8 +41,6 @@ export class AuthorizationsService {
   public async findById(did: string, id: BigNumber): Promise<AuthorizationRequest> {
     const identity = await this.identitiesService.findOne(did);
 
-    return identity.authorizations.getOne({
-      id,
-    });
+    return identity.authorizations.getOne({ id });
   }
 }
