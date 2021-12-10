@@ -217,7 +217,7 @@ export class CheckpointsController {
     type: CheckpointScheduleModel,
   })
   @ApiNotFoundResponse({
-    description: 'Either the Asset or the Checkpoint Schedule does not exists',
+    description: 'Either the Asset or the Checkpoint Schedule does not exist',
   })
   @Get('schedules/:id')
   public async getSchedule(
