@@ -17,5 +17,6 @@ export class MockDistribution extends MockCorporateActionDefaults {
   declarationDate = new Date('10/14/1987');
   description = 'Mock Description';
 
+  public pay = jest.fn();
   public linkDocuments = jest.fn();
 }

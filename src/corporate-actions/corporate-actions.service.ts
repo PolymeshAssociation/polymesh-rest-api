@@ -12,6 +12,7 @@ import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
+import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()
@@ -72,6 +73,23 @@ export class CorporateActionsService {
     return processQueue(
       asset.corporateActions.remove,
       { corporateAction },
+      {
+        signer: address,
+      }
+    );
+  }
+
+  public async payDividends(
+    ticker: string,
+    id: BigNumber,
+    payDividendsDto: PayDividendsDto
+  ): Promise<QueueResult<void>> {
+    const { signer, targets } = payDividendsDto;
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      distribution.pay,
+      { targets },
       {
         signer: address,
       }
