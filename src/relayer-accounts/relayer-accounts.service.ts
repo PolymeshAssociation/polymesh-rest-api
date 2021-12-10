@@ -2,7 +2,7 @@
 
 // TODO @monitz87: replace with actual database/vault
 
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { forEach, map } from 'lodash';
 
