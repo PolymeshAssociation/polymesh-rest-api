@@ -5,15 +5,15 @@ import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
-import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
 
   const mockCorporateActionsService = {
-    findDefaultsByTicker: jest.fn(),
-    updateDefaultsByTicker: jest.fn(),
+    findDefaultConfigByTicker: jest.fn(),
+    updateDefaultConfigByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
     remove: jest.fn(),
@@ -36,37 +36,37 @@ describe('CorporateActionsController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('getDefaults', () => {
-    it('should return the Corporate Action defaults for an Asset', async () => {
-      const mockCorporateActionDefaults = new MockCorporateActionDefaults();
+  describe('getDefaultConfig', () => {
+    it('should return the Corporate Action Default Config for an Asset', async () => {
+      const mockCorporateActionDefaultConfig = new MockCorporateActionDefaultConfig();
 
-      mockCorporateActionsService.findDefaultsByTicker.mockResolvedValue(
-        mockCorporateActionDefaults
+      mockCorporateActionsService.findDefaultConfigByTicker.mockResolvedValue(
+        mockCorporateActionDefaultConfig
       );
 
-      const result = await controller.getDefaults({ ticker: 'TICKER' });
+      const result = await controller.getDefaultConfig({ ticker: 'TICKER' });
 
-      expect(result).toEqual(mockCorporateActionDefaults);
+      expect(result).toEqual(mockCorporateActionDefaultConfig);
     });
   });
 
-  describe('updateDefaults', () => {
-    it('should update the Corporate Action defaults and return the details of transaction', async () => {
+  describe('updateDefaultConfig', () => {
+    it('should update the Corporate Action Default Config and return the details of transaction', async () => {
       const response = {
         transactions: ['transaction'],
       };
-      mockCorporateActionsService.updateDefaultsByTicker.mockResolvedValue(response);
+      mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(response);
       const body = {
         signer: '0x6'.padEnd(66, '0'),
         defaultTaxWithholding: new BigNumber('25'),
       };
 
-      const result = await controller.updateDefaults({ ticker: 'TICKER' }, body);
+      const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
 
       expect(result).toEqual({
         transactions: ['transaction'],
       });
-      expect(mockCorporateActionsService.updateDefaultsByTicker).toHaveBeenCalledWith(
+      expect(mockCorporateActionsService.updateDefaultConfigByTicker).toHaveBeenCalledWith(
         'TICKER',
         body
       );

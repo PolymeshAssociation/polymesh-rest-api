@@ -1,9 +1,9 @@
 import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  ComplianceRequirements,
   DefaultTrustedClaimIssuer,
   ErrorCode,
   IdentityBalance,
-  Requirement,
   ResultSet,
   SecurityToken,
   TickerReservation,
@@ -77,7 +77,7 @@ export class AssetsService {
     return asset.documents.get({ size, start });
   }
 
-  public async findComplianceRequirements(ticker: string): Promise<Requirement[]> {
+  public async findComplianceRequirements(ticker: string): Promise<ComplianceRequirements> {
     const asset = await this.findOne(ticker);
     return asset.compliance.requirements.get();
   }
