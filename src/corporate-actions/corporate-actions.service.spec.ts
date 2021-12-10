@@ -1,8 +1,7 @@
-import { BadRequestException , NotFoundException } from '@nestjs/common';
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';

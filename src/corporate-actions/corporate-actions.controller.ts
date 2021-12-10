@@ -189,9 +189,9 @@ export class CorporateActionsController {
   }
 
   @ApiOperation({
-    summary: 'Claim dividends for a Dividend Distribution',
+    summary: 'Claim dividend payment for a Dividend Distribution',
     description:
-      'This endpoint allows the target Identities of a Dividend distribution to claim their unclaimed Dividends',
+      'This endpoint allows a target Identity of a Dividend distribution to claim their unclaimed Dividends',
   })
   @ApiParam({
     name: 'id',
