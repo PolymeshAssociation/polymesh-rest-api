@@ -2,7 +2,7 @@
 
 // TODO @monitz87: replace with actual database/vault
 
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { forEach, map } from 'lodash';
 
@@ -39,7 +39,7 @@ export class RelayerAccountsService {
   public findAddressByDid(did: string): string {
     const signer = this.accounts[did];
     if (!signer) {
-      throw new BadRequestException(`A signer was not found by "${did}"`);
+      throw new NotFoundException(`There is no signer associated to DID "${did}"`);
     }
     return signer.address;
   }

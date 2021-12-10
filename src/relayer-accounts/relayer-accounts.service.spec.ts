@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import relayerAccountsConfig from '~/relayer-accounts/config/relayer-accounts.config';
@@ -27,8 +27,8 @@ describe('RelayerAccountsService', () => {
   });
 
   describe('findAddressByDid', () => {
-    it('should throw BadRequestException if address is not found', async () => {
-      const expectedError = new BadRequestException('A signer was not found by "fake"');
+    it('should throw NotFoundException if address is not found', async () => {
+      const expectedError = new NotFoundException('There is no signer associated to DID "fake"');
       let error;
       try {
         service.findAddressByDid('fake');
