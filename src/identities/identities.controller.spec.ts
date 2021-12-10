@@ -12,7 +12,7 @@ import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentity } from '~/test-utils/mocks';
+import { MockAuthorizationRequest, MockIdentity } from '~/test-utils/mocks';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -33,6 +33,7 @@ describe('IdentitiesController', () => {
   const mockAuthorizationsService = {
     findPendingByDid: jest.fn(),
     findIssuedByDid: jest.fn(),
+    findOne: jest.fn(),
   };
 
   const mockClaimsService = {
@@ -185,6 +186,30 @@ describe('IdentitiesController', () => {
       });
       const result = await controller.getIssuedAuthorizations({ did }, { size: 1 });
       expect(result).toEqual(mockRequestedAuthorizations);
+    });
+  });
+
+  describe('getPendingAuthorization', () => {
+    it('should call the service and return the AuthorizationRequest details', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      mockAuthorizationsService.findOne.mockResolvedValue(mockAuthorization);
+      const result = await controller.getPendingAuthorization({
+        did: '0x6'.padEnd(66, '0'),
+        id: new BigNumber(1),
+      });
+      expect(result).toEqual({
+        id: mockAuthorization.authId,
+        expiry: null,
+        data: {
+          type: 'PortfolioCustody',
+          value: {
+            did: mockAuthorization.data.value.did,
+            id: new BigNumber(1),
+          },
+        },
+        issuer: mockAuthorization.issuer,
+        target: new IdentitySignerModel({ did: mockAuthorization.target.did }),
+      });
     });
   });
 
