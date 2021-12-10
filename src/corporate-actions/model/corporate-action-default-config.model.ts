@@ -8,7 +8,7 @@ import { FromBigNumber } from '~/common/decorators/transformation';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
 
-export class CorporateActionDefaultsModel {
+export class CorporateActionDefaultConfigModel {
   @ApiProperty({
     description: 'Identities that will be affected by the Corporate Actions',
     type: CorporateActionTargetsModel,
@@ -34,7 +34,7 @@ export class CorporateActionDefaultsModel {
   @Type(() => TaxWithholdingModel)
   readonly taxWithholdings: TaxWithholdingModel[];
 
-  constructor(model: CorporateActionDefaultsModel) {
+  constructor(model: CorporateActionDefaultConfigModel) {
     Object.assign(this, model);
   }
 }
