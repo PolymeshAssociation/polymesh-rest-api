@@ -160,7 +160,7 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Fetch Compliance Requirements for an Asset',
+    summary: 'Fetch Compliance Requirements of an Asset',
     description:
       'This endpoint will provide the list of all compliance requirements of an Asset along with Default Trusted Claim Issuers',
   })
@@ -173,6 +173,7 @@ export class AssetsController {
   @ApiOkResponse({
     description:
       'List of Compliance Requirements of the Asset along with Default Trusted Claim Issuers',
+    type: ComplianceRequirementsModel,
   })
   @Get(':ticker/compliance-requirements')
   public async getComplianceRequirements(
@@ -186,7 +187,7 @@ export class AssetsController {
     return new ComplianceRequirementsModel({
       requirements,
       defaultTrustedClaimIssuers: defaultTrustedClaimIssuers.map(
-        ({ identity, trustedFor }) => new TrustedClaimIssuerModel({ did: identity.did, trustedFor })
+        ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
       ),
     });
   }

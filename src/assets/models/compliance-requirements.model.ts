@@ -8,7 +8,7 @@ import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.mo
 
 export class ComplianceRequirementsModel {
   @ApiProperty({
-    description: 'List of Assets compliance requirements',
+    description: "List of an Asset's compliance requirements",
     type: RequirementModel,
     isArray: true,
   })
@@ -17,7 +17,7 @@ export class ComplianceRequirementsModel {
 
   @ApiProperty({
     description:
-      'List of default trusted Claim issuers. This is used for conditions where no trusted Claim issuers were specified',
+      'List of default Trusted Claim Issuers. This is used for conditions where no trusted Claim issuers were specified (i.e. where `trustedClaimIssuers` is undefined)',
     type: TrustedClaimIssuerModel,
     isArray: true,
   })

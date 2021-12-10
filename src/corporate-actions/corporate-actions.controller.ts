@@ -44,7 +44,7 @@ export class CorporateActionsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action Default Config are to be fetched',
+    description: 'The ticker of the Asset whose Corporate Action Default Config is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -77,7 +77,7 @@ export class CorporateActionsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action Default Config are to be updated',
+    description: 'The ticker of the Asset whose Corporate Action Default Config is to be updated',
     type: 'string',
     example: 'TICKER',
   })
