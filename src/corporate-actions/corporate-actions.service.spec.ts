@@ -286,6 +286,127 @@ describe('CorporateActionsService', () => {
     });
   });
 
+  describe('payDividends', () => {
+    const body = {
+      signer: '0x6'.padEnd(66, '0'),
+      targets: ['0x6'.padEnd(66, '1')],
+    };
+    describe('if there is an error', () => {
+      const errors = [
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: "The Distribution's payment date hasn't been reached",
+            data: { paymentDate: new Date() },
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The Distribution has already expired',
+            data: {
+              expiryDate: new Date(),
+            },
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message:
+              'Some of the supplied Identities have already either been paid or claimed their share of the Distribution',
+            data: {
+              targets: body.targets,
+            },
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'Some of the supplied Identities are not included in this Distribution',
+            data: {
+              excluded: body.targets,
+            },
+          },
+          BadRequestException,
+        ],
+      ];
+      it('should pass the error along the chain', async () => {
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        errors.forEach(async ([polymeshError, httpException]) => {
+          const distubutionWithDetails = new MockDistributionWithDetails();
+          distubutionWithDetails.distribution.pay.mockImplementation(() => {
+            throw polymeshError;
+          });
+          mockIsPolymeshError.mockReturnValue(true);
+
+          const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+          let error;
+          try {
+            await service.payDividends('TICKER', new BigNumber('1'), body);
+          } catch (err) {
+            error = err;
+          }
+          expect(error).toBeInstanceOf(httpException);
+
+          mockIsPolymeshError.mockReset();
+          findDistributionSpy.mockRestore();
+        });
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.capitalDistribution.PushBenefit,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.pay.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.payDividends('TICKER', new BigNumber(1), body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.capitalDistribution.PushBenefit,
+            },
+          ],
+        });
+        expect(distubutionWithDetails.distribution.pay).toHaveBeenCalledWith(
+          {
+            targets: body.targets,
+          },
+          {
+            signer: address,
+          }
+        );
+        findDistributionSpy.mockRestore();
+      });
+    });
+  });
+
   describe('claimDividends', () => {
     const signer = '0x6'.padEnd(66, '0');
 

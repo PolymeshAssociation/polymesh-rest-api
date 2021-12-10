@@ -18,6 +18,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
@@ -29,6 +30,11 @@ class DividendDistributionParamsDto extends IdParamsDto {
 }
 
 class DeleteCorporateActionParamsDto extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
+
+class DistributeFundsParamsDto extends IdParamsDto {
   @IsTicker()
   readonly ticker: string;
 }
@@ -185,6 +191,49 @@ export class CorporateActionsController {
     @Query() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.corporateActionsService.remove(ticker, id, signer);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Pay dividends for a Dividend Distribution',
+    description: 'This endpoint transfers unclaimed dividends to a list of target Identities',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be transferred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      '<ul>' +
+      "<li>The Distribution's payment date hasn't been reached</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '<li>Some of the supplied Identities have already either been paid or claimed their share of the Distribution</li>' +
+      '<li>Some of the supplied Identities are not included in this Distribution</li>' +
+      '</ul>',
+  })
+  @Post(':id/payments')
+  public async payDividends(
+    @Param() { id, ticker }: DistributeFundsParamsDto,
+    @Body() payDividendsDto: PayDividendsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.payDividends(
+      ticker,
+      id,
+      payDividendsDto
+    );
     return new TransactionQueueModel({ transactions });
   }
 
