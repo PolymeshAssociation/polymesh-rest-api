@@ -1,17 +1,17 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
-import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
+import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 
 type ValidCase = [string, Record<string, unknown>];
 type InvalidCase = [string, Record<string, unknown>, string[]];
 
-describe('corporateActionDefaultsDto', () => {
+describe('corporateActionDefaultConfigDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
   const signer = '0x6'.padEnd(66, '0');
   const metadata: ArgumentMetadata = {
     type: 'body',
-    metatype: CorporateActionDefaultsDto,
+    metatype: CorporateActionDefaultConfigDto,
     data: '',
   };
   describe('valid Corporate Action Default values', () => {

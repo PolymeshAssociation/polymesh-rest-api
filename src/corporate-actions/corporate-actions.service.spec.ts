@@ -9,7 +9,7 @@ import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sd
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
@@ -49,22 +49,24 @@ describe('CorporateActionsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findDefaultsByTicker', () => {
-    it('should return the Corporate Action defaults for an Asset', async () => {
-      const mockCorporateActionDefaults = new MockCorporateActionDefaults();
+  describe('findDefaultConfigByTicker', () => {
+    it('should return the Corporate Action Default Config for an Asset', async () => {
+      const mockCorporateActionDefaultConfig = new MockCorporateActionDefaultConfig();
 
       const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.corporateActions.getDefaults.mockResolvedValue(mockCorporateActionDefaults);
+      mockSecurityToken.corporateActions.getDefaultConfig.mockResolvedValue(
+        mockCorporateActionDefaultConfig
+      );
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
-      const result = await service.findDefaultsByTicker('TICKER');
+      const result = await service.findDefaultConfigByTicker('TICKER');
 
-      expect(result).toEqual(mockCorporateActionDefaults);
+      expect(result).toEqual(mockCorporateActionDefaultConfig);
     });
   });
 
-  describe('updateDefaultsByTicker', () => {
+  describe('updateDefaultConfigByTicker', () => {
     let mockSecurityToken: MockSecurityToken;
     const ticker = 'TICKER';
 
@@ -73,7 +75,7 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
     });
 
-    describe('if there is an error while modifying the defaults for Corporate Actions', () => {
+    describe('if there is an error while modifying the Corporate Action Default Config', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('New targets are the same as the current ones');
         const body = {
@@ -83,7 +85,7 @@ describe('CorporateActionsService', () => {
             identities: [],
           },
         };
-        mockSecurityToken.corporateActions.setDefaults.mockImplementation(() => {
+        mockSecurityToken.corporateActions.setDefaultConfig.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -91,7 +93,7 @@ describe('CorporateActionsService', () => {
 
         let error = null;
         try {
-          await service.updateDefaultsByTicker(ticker, body);
+          await service.updateDefaultConfigByTicker(ticker, body);
         } catch (err) {
           error = err;
         }
@@ -100,7 +102,7 @@ describe('CorporateActionsService', () => {
       });
     });
     describe('otherwise', () => {
-      it('should run a setDefaults procedure and return the queue data', async () => {
+      it('should run a setDefaultConfig procedure and return the queue data', async () => {
         const transactions = [
           {
             blockHash: '0x1',
@@ -110,7 +112,7 @@ describe('CorporateActionsService', () => {
         ];
         const mockQueue = new MockTransactionQueue(transactions);
 
-        mockSecurityToken.corporateActions.setDefaults.mockResolvedValue(mockQueue);
+        mockSecurityToken.corporateActions.setDefaultConfig.mockResolvedValue(mockQueue);
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -119,7 +121,7 @@ describe('CorporateActionsService', () => {
           signer: '0x6'.padEnd(66, '0'),
           defaultTaxWithholding: new BigNumber('25'),
         };
-        const result = await service.updateDefaultsByTicker(ticker, body);
+        const result = await service.updateDefaultConfigByTicker(ticker, body);
 
         expect(result).toEqual({
           result: undefined,
@@ -131,7 +133,7 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
-        expect(mockSecurityToken.corporateActions.setDefaults).toHaveBeenCalledWith(
+        expect(mockSecurityToken.corporateActions.setDefaultConfig).toHaveBeenCalledWith(
           { defaultTaxWithholding: new BigNumber('25') },
           { signer: address }
         );
