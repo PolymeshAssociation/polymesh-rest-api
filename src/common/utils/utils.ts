@@ -29,6 +29,7 @@ export async function processQueue<MethodArgs, ReturnType>(
       const { message, code } = err;
       switch (code) {
         case ErrorCode.ValidationError:
+        case ErrorCode.UnmetPrerequisite:
           throw new BadRequestException(message);
         default:
           throw new InternalServerErrorException(message);

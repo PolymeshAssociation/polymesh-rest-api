@@ -339,16 +339,16 @@ describe('CorporateActionsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        errors.forEach(async ([polymeshError, httpException]) => {
-          const distubutionWithDetails = new MockDistributionWithDetails();
-          distubutionWithDetails.distribution.pay.mockImplementation(() => {
+        for (const [polymeshError, httpException] of errors) {
+          const distributionWithDetails = new MockDistributionWithDetails();
+          distributionWithDetails.distribution.pay.mockImplementation(() => {
             throw polymeshError;
           });
           mockIsPolymeshError.mockReturnValue(true);
 
           const findDistributionSpy = jest.spyOn(service, 'findDistribution');
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+          findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
           let error;
           try {
@@ -360,7 +360,7 @@ describe('CorporateActionsService', () => {
 
           mockIsPolymeshError.mockReset();
           findDistributionSpy.mockRestore();
-        });
+        }
       });
     });
 
