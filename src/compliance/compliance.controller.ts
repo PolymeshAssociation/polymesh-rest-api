@@ -33,10 +33,12 @@ export class ComplianceController {
   public async getComplianceRequirements(
     @Param() { ticker }: TickerParamsDto
   ): Promise<ResultsModel<RequirementModel>> {
-    const results = await this.complianceService.findComplianceRequirements(ticker);
+    const result = await this.complianceService.findComplianceRequirements(ticker);
 
     return new ResultsModel({
-      results: results.map(({ id, conditions }) => new RequirementModel({ id, conditions })),
+      results: result.requirements.map(
+        ({ id, conditions }) => new RequirementModel({ id, conditions })
+      ),
     });
   }
 

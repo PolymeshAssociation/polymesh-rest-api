@@ -67,7 +67,7 @@ describe('ComplianceController', () => {
           ],
         },
       ];
-      mockService.findComplianceRequirements.mockResolvedValue(mockRequirements);
+      mockService.findComplianceRequirements.mockResolvedValue({ requirements: mockRequirements });
 
       const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
 

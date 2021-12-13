@@ -4,10 +4,11 @@ const mockIsPolymeshError = jest.fn();
 import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ClaimType, ErrorCode, KnownTokenType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
+import { AssetsService } from '~/assets/assets.service';
+import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -21,10 +22,8 @@ import {
 } from '~/test-utils/mocks';
 import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
-import { AssetsService } from './assets.service';
-
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -70,11 +69,12 @@ describe('AssetsService', () => {
 
     describe('if the Asset does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'There is no Security Token with ticker',
+        };
         mockPolymeshApi.getSecurityToken.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'There is no Security Token with ticker',
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -241,6 +241,24 @@ describe('AssetsService', () => {
     });
   });
 
+  describe('findComplianceRequirements', () => {
+    it('should return the list of Asset compliance requirements', async () => {
+      const mockComplianceRequirements = new MockComplianceRequirements();
+
+      const mockSecurityToken = new MockSecurityToken();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockSecurityToken as any);
+      mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockComplianceRequirements);
+
+      const result = await service.findComplianceRequirements('TICKER');
+
+      expect(result).toEqual(mockComplianceRequirements);
+      findOneSpy.mockRestore();
+    });
+  });
+
   describe('findTrustedClaimIssuers', () => {
     it('should return the list of trusted Claim Issuers of an Asset', async () => {
       const mockClaimIssuers = [
@@ -267,37 +285,45 @@ describe('AssetsService', () => {
   describe('findTickerReservation', () => {
     describe('if the reservation does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          message: 'There is no reservation for',
+          code: ErrorCode.UnmetPrerequisite,
+        };
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
-          throw new PolymeshError({
-            message: 'There is no reservation for',
-            code: ErrorCode.FatalError,
-          });
+          throw mockError;
         });
+
         mockIsPolymeshError.mockReturnValue(true);
+
         let error;
         try {
           await service.findTickerReservation('BRK.A');
         } catch (err) {
           error = err;
         }
+
         expect(error).toBeInstanceOf(NotFoundException);
       });
     });
     describe('if the asset has already been created', () => {
       it('should throw a GoneException', async () => {
+        const mockError = {
+          code: ErrorCode.UnmetPrerequisite,
+          message: 'BRK.A token has been created',
+        };
         mockPolymeshApi.getTickerReservation.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.FatalError,
-            message: 'BRK.A token has been created',
-          });
+          throw mockError;
         });
+
         mockIsPolymeshError.mockReturnValue(true);
+
         let error;
         try {
           await service.findTickerReservation('BRK.A');
         } catch (err) {
           error = err;
         }
+
         expect(error).toBeInstanceOf(GoneException);
       });
     });
@@ -329,6 +355,14 @@ describe('AssetsService', () => {
     });
   });
   describe('createAsset', () => {
+    const createBody = {
+      signer: '0x6000',
+      name: 'Berkshire Class A',
+      ticker: 'BRK.A',
+      isDivisible: false,
+      assetType: KnownTokenType.EquityCommon,
+      requireInvestorUniqueness: false,
+    };
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
         const expectedError = new Error('Some error');
@@ -342,19 +376,11 @@ describe('AssetsService', () => {
           throw expectedError;
         });
 
-        const body = {
-          signer: '0x6000',
-          name: 'Berkshire Class A',
-          ticker: 'BRK.A',
-          isDivisible: false,
-          assetType: KnownTokenType.EquityCommon,
-        };
-
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
         let error;
         try {
-          await service.createAsset(body);
+          await service.createAsset(createBody);
         } catch (err) {
           error = err;
         }
@@ -380,17 +406,9 @@ describe('AssetsService', () => {
         const mockQueue = new MockTransactionQueue(transactions);
         mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
-        const body = {
-          signer: '0x6000',
-          name: 'Berkshire Class A',
-          ticker: 'BRK.A',
-          isDivisible: false,
-          assetType: KnownTokenType.EquityCommon,
-        };
-
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-        const result = await service.createAsset(body);
+        const result = await service.createAsset(createBody);
         expect(result).toEqual({
           result: undefined,
           transactions: [
@@ -437,17 +455,9 @@ describe('AssetsService', () => {
       const mockQueue = new MockTransactionQueue(transactions);
       mockTickerReservation.createToken.mockResolvedValue(mockQueue);
 
-      const body = {
-        signer: '0x6000',
-        name: 'Berkshire Class A',
-        ticker: 'BRK.A',
-        isDivisible: false,
-        assetType: KnownTokenType.EquityCommon,
-      };
-
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-      const result = await service.createAsset(body);
+      const result = await service.createAsset(createBody);
       expect(result).toEqual({
         result: undefined,
         transactions: [
@@ -470,7 +480,7 @@ describe('AssetsService', () => {
   });
 
   describe('issueAsset', () => {
-    const body = {
+    const issueBody = {
       signer: '0x6000',
       amount: new BigNumber(1000),
     };
@@ -493,7 +503,7 @@ describe('AssetsService', () => {
 
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-      const result = await service.issue('TICKER', body);
+      const result = await service.issue('TICKER', issueBody);
       expect(result).toEqual({
         result: undefined,
         transactions: [
@@ -520,16 +530,16 @@ describe('AssetsService', () => {
         ];
 
         const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.reserveTicker.mockResolvedValue(mockQueue);
+        mockPolymeshApi.currentIdentity.reserveTicker.mockResolvedValue(mockQueue);
 
-        const body = {
+        const registerBody = {
           signer: '0x6000',
           ticker: 'BRK.A',
         };
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-        const result = await service.registerTicker(body);
+        const result = await service.registerTicker(registerBody);
         expect(result).toEqual({
           result: undefined,
           transactions: [

@@ -1,8 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Identity } from '@polymathnetwork/polymesh-sdk/internal';
-import { VenueType } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, VenueType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 

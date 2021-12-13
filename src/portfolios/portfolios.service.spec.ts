@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { IdentitiesService } from '~/identities/identities.service';
@@ -18,8 +17,8 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 import { MockIdentity, MockPortfolio, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -82,20 +81,26 @@ describe('PortfoliosService', () => {
       it('should throw a NotFoundException', async () => {
         const mockIdentity = new MockIdentity();
         const owner = '0x6000';
+
+        const mockError = {
+          code: ErrorCode.ValidationError,
+          message: "The Portfolio doesn't exist",
+        };
         mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.ValidationError,
-            message: "The Portfolio doesn't exist",
-          });
+          throw mockError;
         });
+
         mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-        mockIsPolymeshError.mockResolvedValue(true);
+
+        mockIsPolymeshError.mockReturnValue(true);
+
         let error;
         try {
           await service.findOne(owner, new BigNumber('1'));
         } catch (err) {
           error = err;
         }
+
         expect(error).toBeInstanceOf(NotFoundException);
       });
     });
@@ -108,14 +113,18 @@ describe('PortfoliosService', () => {
         mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
           throw expectedError;
         });
+
         mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
         mockIsPolymeshError.mockReturnValue(false);
+
         let error;
         try {
           await service.findOne(owner, new BigNumber('2'));
         } catch (err) {
           error = err;
         }
+
         expect(error).toEqual(expectedError);
       });
     });
@@ -248,24 +257,24 @@ describe('PortfoliosService', () => {
     describe('if there is a error', () => {
       const errors = [
         [
-          new PolymeshError({
+          {
             code: ErrorCode.DataUnavailable,
             message: 'The Portfolio was removed and no longer exists',
-          }),
+          },
           InternalServerErrorException,
         ],
         [
-          new PolymeshError({
+          {
             code: ErrorCode.ValidationError,
             message: 'You cannot delete a Portfolio that contains any assets',
-          }),
+          },
           BadRequestException,
         ],
         [
-          new PolymeshError({
+          {
             code: ErrorCode.ValidationError,
             message: "The Portfolio doesn't exist",
-          }),
+          },
           BadRequestException,
         ],
       ];

@@ -4,6 +4,7 @@ export class MockAssetService {
   findHolders = jest.fn();
   findDocuments = jest.fn();
   findTrustedClaimIssuers = jest.fn();
+  findComplianceRequirements = jest.fn();
   findAllByOwner = jest.fn();
   registerTicker = jest.fn();
   createAsset = jest.fn();

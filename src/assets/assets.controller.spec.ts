@@ -9,6 +9,8 @@ import {
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
+import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
+import { ComplianceRequirementsModel } from '~/assets/models/compliance-requirements.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { MockSecurityToken } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
@@ -66,7 +68,7 @@ describe('AssetsController', () => {
     const mockHolders = {
       data: [
         {
-          identity: '0x6'.padEnd(66, '0'),
+          identity: { did: '0x6'.padEnd(66, '0') },
           balance: new BigNumber(1),
         },
       ],
@@ -78,10 +80,13 @@ describe('AssetsController', () => {
       mockAssetsService.findHolders.mockResolvedValue(mockHolders);
 
       const result = await controller.getHolders({ ticker: 'SOME_TICKER' }, { size: 1 });
+      const expectedResults = mockHolders.data.map(holder => {
+        return { identity: holder.identity.did, balance: holder.balance };
+      });
 
       expect(result).toEqual(
         new PaginatedResultsModel({
-          results: mockHolders.data,
+          results: expectedResults,
           total: mockHolders.count,
           next: mockHolders.next,
         })
@@ -96,9 +101,13 @@ describe('AssetsController', () => {
         { size: 1, start: 'SOME_START_KEY' }
       );
 
+      const expectedResults = mockHolders.data.map(holder => {
+        return { identity: holder.identity.did, balance: holder.balance };
+      });
+
       expect(result).toEqual(
         new PaginatedResultsModel({
-          results: mockHolders.data,
+          results: expectedResults,
           total: mockHolders.count,
           next: mockHolders.next,
         })
@@ -151,6 +160,18 @@ describe('AssetsController', () => {
     });
   });
 
+  describe('getComplianceRequirements', () => {
+    it('should return the list of all compliance requirements of an Asset', async () => {
+      const mockComplianceRequirements = new MockComplianceRequirements();
+      mockAssetsService.findComplianceRequirements.mockResolvedValue(mockComplianceRequirements);
+
+      const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
+    });
+  });
+
   describe('getTrustedClaimIssuers', () => {
     it('should return the list of all trusted Claim Issuers of an Asset', async () => {
       const mockClaimIssuers = [
@@ -194,6 +215,7 @@ describe('AssetsController', () => {
           ticker: 'BRK.A',
           isDivisible: false,
           assetType: KnownTokenType.EquityCommon,
+          requireInvestorUniqueness: false,
         };
         const response = {
           transactions: [

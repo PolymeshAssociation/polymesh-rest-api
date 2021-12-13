@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { SetAssetRequirementsParams } from '@polymathnetwork/polymesh-sdk/internal';
+import { SetAssetRequirementsParams } from '@polymathnetwork/polymesh-sdk/api/procedures/setAssetRequirements';
 import {
+  ComplianceRequirements,
   DefaultTrustedClaimIssuer,
-  Requirement,
   SecurityToken,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -20,7 +20,7 @@ export class ComplianceService {
     private readonly relayerAccountsService: RelayerAccountsService
   ) {}
 
-  public async findComplianceRequirements(ticker: string): Promise<Requirement[]> {
+  public async findComplianceRequirements(ticker: string): Promise<ComplianceRequirements> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.compliance.requirements.get();
   }

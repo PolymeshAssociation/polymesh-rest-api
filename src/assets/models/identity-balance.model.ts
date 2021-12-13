@@ -2,9 +2,8 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class IdentityBalanceModel {
   @ApiProperty({
@@ -12,8 +11,7 @@ export class IdentityBalanceModel {
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @FromEntity()
-  readonly identity: Identity;
+  readonly identity: string;
 
   @ApiProperty({
     description: 'Balance held by the Identity',

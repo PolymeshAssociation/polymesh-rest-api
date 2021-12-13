@@ -1,15 +1,15 @@
 import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSecurityTokenParams } from '@polymathnetwork/polymesh-sdk/internal';
 import {
+  ComplianceRequirements,
   DefaultTrustedClaimIssuer,
   ErrorCode,
   IdentityBalance,
-  isPolymeshError,
   ResultSet,
   SecurityToken,
   TickerReservation,
   TokenDocument,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
@@ -77,6 +77,11 @@ export class AssetsService {
     return asset.documents.get({ size, start });
   }
 
+  public async findComplianceRequirements(ticker: string): Promise<ComplianceRequirements> {
+    const asset = await this.findOne(ticker);
+    return asset.compliance.requirements.get();
+  }
+
   public async findTrustedClaimIssuers(ticker: string): Promise<DefaultTrustedClaimIssuer[]> {
     const asset = await this.findOne(ticker);
     return asset.compliance.trustedClaimIssuers.get();
@@ -85,7 +90,8 @@ export class AssetsService {
   public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(this.polymeshService.polymeshApi.reserveTicker, rest, { signer: address });
+    const reserveTicker = this.polymeshService.polymeshApi.currentIdentity.reserveTicker;
+    return processQueue(reserveTicker, rest, { signer: address });
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<SecurityToken>> {
@@ -104,7 +110,7 @@ export class AssetsService {
       }
     }
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const args: CreateSecurityTokenParams = {
+    const args = {
       name: rest.name,
       totalSupply: rest.totalSupply,
       isDivisible: rest.isDivisible,
@@ -112,6 +118,7 @@ export class AssetsService {
       tokenIdentifiers: rest.identifiers,
       fundingRound: rest.fundingRound,
       documents: rest.documents,
+      requireInvestorUniqueness: rest.requireInvestorUniqueness,
     };
     const res = await processQueue(reservation.createToken, args, { signer: address });
     // prepend the reserve transaction if nessesary
@@ -138,10 +145,16 @@ export class AssetsService {
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code, message } = err;
-        if (code === ErrorCode.FatalError && message.startsWith('There is no reservation for')) {
+        if (
+          code === ErrorCode.UnmetPrerequisite &&
+          message.startsWith('There is no reservation for')
+        ) {
           throw new NotFoundException(`There is no reservation for "${ticker}"`);
-        } else if (code === ErrorCode.FatalError && message.endsWith('token has been created')) {
-          throw new GoneException(`${ticker} has already been created`);
+        } else if (
+          code === ErrorCode.UnmetPrerequisite &&
+          message.endsWith('token has been created')
+        ) {
+          throw new GoneException(`Asset ${ticker} has already been created`);
         }
       }
 
