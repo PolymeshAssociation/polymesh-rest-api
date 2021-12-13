@@ -1,6 +1,8 @@
 ## Description
 
-REST API that communicates with the Polymesh blockchain
+A REST API wrapper for the Polymesh blockchain.
+
+This version is compatible with chain version 4.1.x
 
 ## Setup
 
