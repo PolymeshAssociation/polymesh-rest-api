@@ -1,16 +1,18 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { FromBigNumber, ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsBigNumber, IsCaCheckpoint } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
+import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
 
+@ApiExtraModels(CorporateActionCheckpointDto)
 export class DividendDistributionDto extends SignerDto {
   @ApiProperty({
     description: 'Brief description of the Corporate Action',
@@ -63,9 +65,13 @@ export class DividendDistributionDto extends SignerDto {
   @ApiProperty({
     description:
       'Checkpoint to be used to calculate Dividends. If a Schedule is passed, the next Checkpoint it creates will be used. If a Date is passed, a Checkpoint will be created at that date and used',
+    oneOf: [
+      { $ref: getSchemaPath(CorporateActionCheckpointDto) },
+      { type: 'string', example: new Date('10/14/1987').toISOString() },
+    ],
   })
-  @IsDate()
-  readonly checkpoint: Date;
+  @IsCaCheckpoint()
+  readonly checkpoint: CorporateActionCheckpointDto | Date;
 
   @ApiPropertyOptional({
     description:
@@ -106,7 +112,6 @@ export class DividendDistributionDto extends SignerDto {
     example: new Date('10/14/1987').toISOString(),
   })
   @IsDate()
-  @Type(() => Date)
   readonly paymentDate: Date;
 
   @ApiPropertyOptional({

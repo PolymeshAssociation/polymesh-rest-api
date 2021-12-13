@@ -10,7 +10,7 @@ import { DividendDistributionModel } from '~/corporate-actions/model/dividend-di
 export class DividendDistributionDetailsModel {
   @ApiProperty({
     description:
-      'Corporate Action via which a Asset issuer wishes to distribute dividends between a subset of the Asset holders (`targets`)',
+      'Corporate Action where an Asset issuer distributes dividends between a subset of Asset holders (`targets`)',
     type: DividendDistributionModel,
   })
   @Type(() => DividendDistributionModel)

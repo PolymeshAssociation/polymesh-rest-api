@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/polkadot';
+import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
@@ -167,6 +167,7 @@ describe('CorporateActionsController', () => {
       );
     });
   });
+
   describe('createDividendDistributionByTicker', () => {
     it('should call the service and return the results', async () => {
       const mockDistribution = new MockDistribution();

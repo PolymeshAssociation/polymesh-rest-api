@@ -340,7 +340,7 @@ describe('CorporateActionsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        errors.forEach(async ([polymeshError, httpException]) => {
+        for (const [polymeshError, httpException] of errors) {
           const distubutionWithDetails = new MockDistributionWithDetails();
           distubutionWithDetails.distribution.pay.mockImplementation(() => {
             throw polymeshError;
@@ -361,7 +361,7 @@ describe('CorporateActionsService', () => {
 
           mockIsPolymeshError.mockReset();
           findDistributionSpy.mockRestore();
-        });
+        }
       });
     });
 

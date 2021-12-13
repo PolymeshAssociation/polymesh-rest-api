@@ -245,7 +245,7 @@ export class CorporateActionsController {
 
   @ApiTags('assets')
   @ApiOperation({
-    summary: 'Configure Dividend Distributions',
+    summary: 'Create a Dividend Distribution',
     description:
       'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint.',
   })
