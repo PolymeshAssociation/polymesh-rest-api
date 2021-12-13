@@ -8,14 +8,7 @@ import {
   isSingleClaimCondition,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsOptional,
-  ValidateIf,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 import { IsDid } from '~/common/decorators/validation';
@@ -75,5 +68,5 @@ export class ConditionDto {
   })
   @ValidateIf(({ type }) => type === ConditionType.IsIdentity)
   @IsDid()
-  readonly identity: string;
+  readonly identity?: string;
 }
