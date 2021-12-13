@@ -5,7 +5,7 @@ import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MockIdentity } from '~/test-utils/mocks';
 
-export class MockCorporateActionDefaults {
+export class MockCorporateActionDefaultConfig {
   defaultTaxWithholding = new BigNumber('25');
   taxWithholdings = [
     {

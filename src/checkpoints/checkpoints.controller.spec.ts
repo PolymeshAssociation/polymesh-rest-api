@@ -173,6 +173,28 @@ describe('CheckpointsController', () => {
     });
   });
 
+  describe('getSchedule', () => {
+    it('should call the service and return the Checkpoint Schedule details', async () => {
+      const mockDate = new Date();
+      const mockScheduleWithDetails = {
+        schedule: new MockCheckpointSchedule(),
+        details: {
+          remainingCheckpoints: 1,
+          nextCheckpointDate: mockDate,
+        },
+      };
+      mockCheckpointsService.findScheduleById.mockResolvedValue(mockScheduleWithDetails);
+
+      const result = await controller.getSchedule({ ticker: 'TICKER', id: new BigNumber(1) });
+
+      const mockResult = new CheckpointScheduleModel({
+        ...mockScheduleWithDetails.schedule,
+        ...mockScheduleWithDetails.details,
+      });
+      expect(result).toEqual(mockResult);
+    });
+  });
+
   describe('createSchedule', () => {
     it('should return the details of newly created Checkpoint Schedule', async () => {
       const mockDate = new Date();
