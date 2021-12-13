@@ -5,10 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { AppModule } from '~/app.module';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-
-import { AppModule } from './app.module';
 
 async function bootstrap() {
   // App setup
@@ -19,6 +18,8 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      whitelist: true,
+      forbidNonWhitelisted: true,
     })
   );
   const logger = new PolymeshLogger();

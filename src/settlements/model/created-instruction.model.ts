@@ -6,16 +6,16 @@ import { Instruction } from '@polymathnetwork/polymesh-sdk/types';
 import { FromEntity } from '~/common/decorators/transformation';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
-export class InstructionIdModel extends TransactionQueueModel {
+export class CreatedInstructionModel extends TransactionQueueModel {
   @ApiProperty({
     type: 'string',
     description: 'ID of the newly created settlement Instruction',
     example: '123',
   })
   @FromEntity()
-  readonly instructionId: Instruction;
+  readonly instruction: Instruction;
 
-  constructor(model: InstructionIdModel) {
+  constructor(model: CreatedInstructionModel) {
     const { transactions, ...rest } = model;
     super({ transactions });
 

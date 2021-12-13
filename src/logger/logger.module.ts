@@ -2,7 +2,7 @@
 
 import { Module } from '@nestjs/common';
 
-import { PolymeshLogger } from './polymesh-logger.service';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 @Module({
   providers: [PolymeshLogger],

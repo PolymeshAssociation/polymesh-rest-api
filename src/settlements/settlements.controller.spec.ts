@@ -1,6 +1,3 @@
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
@@ -16,12 +13,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
-
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
-  isPolymeshError: mockIsPolymeshError,
-}));
+import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -117,7 +109,7 @@ describe('SettlementsController', () => {
       const result = await controller.createInstruction({ id: new BigNumber('3') }, {} as any);
 
       expect(result).toEqual({
-        instructionId: 'fakeInstruction',
+        instruction: 'fakeInstruction',
         transactions,
       });
     });
@@ -206,18 +198,23 @@ describe('SettlementsController', () => {
     it('should create a Venue and return the data returned by the service', async () => {
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        details: 'Generic Exchange',
+        description: 'Generic Exchange',
         type: VenueType.Exchange,
       };
       const transactions = ['transaction'];
+      const mockVenue = new MockVenue();
       const mockData = {
+        result: mockVenue,
         transactions,
       };
       mockSettlementsService.createVenue.mockResolvedValue(mockData);
 
       const result = await controller.createVenue(body);
 
-      expect(result).toEqual(mockData);
+      expect(result).toEqual({
+        venue: mockVenue,
+        transactions,
+      });
     });
   });
 

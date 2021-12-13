@@ -12,7 +12,7 @@ export class CreateVenueDto extends SignerDto {
     example: 'A place to exchange commodity Assets',
   })
   @IsString()
-  readonly details: string;
+  readonly description: string;
 
   @ApiProperty({
     description: 'The type of Venue',

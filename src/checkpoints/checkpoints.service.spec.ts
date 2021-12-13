@@ -1,10 +1,9 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { CalendarUnit, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -19,8 +18,8 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -92,6 +91,56 @@ describe('CheckpointsService', () => {
     });
   });
 
+  describe('findOne', () => {
+    it('should return NotFoundException if the asset does not exist', async () => {
+      mockAssetsService.findOne.mockImplementation(() => {
+        throw new NotFoundException('Asset does not exist');
+      });
+
+      let error;
+      try {
+        await service.findOne('TICKER', new BigNumber(1));
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(NotFoundException);
+    });
+
+    it('should return NotFoundException if the checkpoint does not exist', async () => {
+      mockIsPolymeshError.mockReturnValue(true);
+      const mockSecurityToken = new MockSecurityToken();
+      const mockError = {
+        code: ErrorCode.DataUnavailable,
+        message: 'The checkpoint was not found',
+      };
+      mockSecurityToken.checkpoints.getOne.mockImplementation(() => {
+        throw mockError;
+      });
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      let error;
+      try {
+        await service.findOne('TICKER', new BigNumber(1));
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(NotFoundException);
+    });
+
+    it('should return a checkpoint given a ticker and id', async () => {
+      const mockSecurityToken = new MockSecurityToken();
+      const mockCheckpoint = new MockCheckpoint();
+      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.findOne('TICKER', new BigNumber(1));
+      expect(result).toEqual(mockCheckpoint);
+      expect(mockAssetsService.findOne).toBeCalledWith('TICKER');
+    });
+  });
+
   describe('findSchedulesByTicker', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
       const mockSchedules = [
@@ -136,11 +185,12 @@ describe('CheckpointsService', () => {
 
     describe('if the Schedule does not exist', () => {
       it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Schedule does not exist',
+        };
         mockSecurityToken.checkpoints.schedules.getOne.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'The Schedule does not exist',
-          });
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -217,9 +267,12 @@ describe('CheckpointsService', () => {
           },
         ],
       });
-      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(undefined, {
-        signer: address,
-      });
+      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(
+        {
+          signer: address,
+        },
+        {}
+      );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
   });
@@ -274,6 +327,166 @@ describe('CheckpointsService', () => {
         }
       );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+    });
+  });
+
+  describe('getHolders', () => {
+    const mockHolders = {
+      data: [
+        {
+          identity: {
+            did: '0x06000',
+          },
+          balance: new BigNumber(1000),
+        },
+      ],
+      next: '0xddddd',
+      count: 1,
+    };
+    it('should return the list of Asset holders at a Checkpoint', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.allBalances.mockResolvedValue(mockHolders);
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
+
+      const result = await service.getHolders('TICKER', new BigNumber(1), 1);
+
+      expect(result).toEqual(mockHolders);
+      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({ size: 1, start: undefined });
+      findOneSpy.mockRestore();
+    });
+
+    it('should return the list of Asset holders at a Checkpoint from a start key', async () => {
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.allBalances.mockResolvedValue(mockHolders);
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
+
+      const result = await service.getHolders('TICKER', new BigNumber(1), 10, 'START_KEY');
+
+      expect(result).toEqual(mockHolders);
+      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({ start: 'START_KEY', size: 10 });
+      findOneSpy.mockRestore();
+    });
+  });
+
+  describe('getAssetBalance', () => {
+    it('should fetch the Asset balance for an Identity at a given Checkpoint', async () => {
+      const id = new BigNumber(1);
+      const balance = new BigNumber(10);
+      const mockCheckpoint = new MockCheckpoint();
+      const did = '0x6000';
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockCheckpoint as any);
+      mockCheckpoint.balance.mockResolvedValue(balance);
+
+      const mockSecurityToken = new MockSecurityToken();
+      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+      const result = await service.getAssetBalance('TICKER', did, id);
+      expect(result).toEqual({ balance, identity: did });
+      expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+
+      findOneSpy.mockRestore();
+    });
+  });
+
+  describe('deleteScheduleByTicker', () => {
+    describe('if there is a error', () => {
+      const errors = [
+        [
+          {
+            code: ErrorCode.ValidationError,
+            message: 'Schedule no longer exists. It was either removed or it expired',
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.ValidationError,
+            message: 'You cannot remove this Schedule',
+          },
+          BadRequestException,
+        ],
+      ];
+      it('should pass the error along the chain', async () => {
+        const signer = '0x6'.padEnd(66, '0');
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        errors.forEach(async ([polymeshError, httpException]) => {
+          const mockSecurityToken = new MockSecurityToken();
+          mockSecurityToken.checkpoints.schedules.remove.mockImplementation(() => {
+            throw polymeshError;
+          });
+          mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+          mockIsPolymeshError.mockReturnValue(true);
+
+          let error;
+          try {
+            await service.deleteScheduleByTicker('TICKER', new BigNumber('1'), signer);
+          } catch (err) {
+            error = err;
+          }
+          expect(error).toBeInstanceOf(httpException);
+
+          mockIsPolymeshError.mockReset();
+        });
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.checkpoint.RemoveSchedule,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.checkpoints.schedules.remove.mockResolvedValue(mockQueue);
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        const signer = '0x6'.padEnd(66, '0');
+        const ticker = 'TICKER';
+        const id = new BigNumber('1');
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.deleteScheduleByTicker(ticker, id, signer);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.checkpoint.RemoveSchedule,
+            },
+          ],
+        });
+        expect(mockSecurityToken.checkpoints.schedules.remove).toHaveBeenCalledWith(
+          {
+            schedule: id,
+          },
+          {
+            signer: address,
+          }
+        );
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
     });
   });
 });

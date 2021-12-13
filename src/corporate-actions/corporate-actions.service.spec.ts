@@ -1,13 +1,14 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -17,8 +18,8 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 
@@ -48,22 +49,24 @@ describe('CorporateActionsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findDefaultsByTicker', () => {
-    it('should return the Corporate Action defaults for an Asset', async () => {
-      const mockCorporateActionDefaults = new MockCorporateActionDefaults();
+  describe('findDefaultConfigByTicker', () => {
+    it('should return the Corporate Action Default Config for an Asset', async () => {
+      const mockCorporateActionDefaultConfig = new MockCorporateActionDefaultConfig();
 
       const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.corporateActions.getDefaults.mockResolvedValue(mockCorporateActionDefaults);
+      mockSecurityToken.corporateActions.getDefaultConfig.mockResolvedValue(
+        mockCorporateActionDefaultConfig
+      );
 
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
-      const result = await service.findDefaultsByTicker('TICKER');
+      const result = await service.findDefaultConfigByTicker('TICKER');
 
-      expect(result).toEqual(mockCorporateActionDefaults);
+      expect(result).toEqual(mockCorporateActionDefaultConfig);
     });
   });
 
-  describe('updateDefaultsByTicker', () => {
+  describe('updateDefaultConfigByTicker', () => {
     let mockSecurityToken: MockSecurityToken;
     const ticker = 'TICKER';
 
@@ -72,7 +75,7 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
     });
 
-    describe('if there is an error while modifying the defaults for Corporate Actions', () => {
+    describe('if there is an error while modifying the Corporate Action Default Config', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('New targets are the same as the current ones');
         const body = {
@@ -82,7 +85,7 @@ describe('CorporateActionsService', () => {
             identities: [],
           },
         };
-        mockSecurityToken.corporateActions.setDefaults.mockImplementation(() => {
+        mockSecurityToken.corporateActions.setDefaultConfig.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -90,15 +93,16 @@ describe('CorporateActionsService', () => {
 
         let error = null;
         try {
-          await service.updateDefaultsByTicker(ticker, body);
+          await service.updateDefaultConfigByTicker(ticker, body);
         } catch (err) {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
     describe('otherwise', () => {
-      it('should run a setDefaults procedure and return the queue data', async () => {
+      it('should run a setDefaultConfig procedure and return the queue data', async () => {
         const transactions = [
           {
             blockHash: '0x1',
@@ -108,7 +112,7 @@ describe('CorporateActionsService', () => {
         ];
         const mockQueue = new MockTransactionQueue(transactions);
 
-        mockSecurityToken.corporateActions.setDefaults.mockResolvedValue(mockQueue);
+        mockSecurityToken.corporateActions.setDefaultConfig.mockResolvedValue(mockQueue);
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -117,7 +121,7 @@ describe('CorporateActionsService', () => {
           signer: '0x6'.padEnd(66, '0'),
           defaultTaxWithholding: new BigNumber('25'),
         };
-        const result = await service.updateDefaultsByTicker(ticker, body);
+        const result = await service.updateDefaultConfigByTicker(ticker, body);
 
         expect(result).toEqual({
           result: undefined,
@@ -129,15 +133,12 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
-        expect(mockSecurityToken.corporateActions.setDefaults).toHaveBeenCalledWith(
+        expect(mockSecurityToken.corporateActions.setDefaultConfig).toHaveBeenCalledWith(
           { defaultTaxWithholding: new BigNumber('25') },
           { signer: address }
         );
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
-    });
-
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
     });
   });
 
@@ -153,6 +154,259 @@ describe('CorporateActionsService', () => {
       const result = await service.findDistributionsByTicker('TICKER');
 
       expect(result).toEqual(mockDistributions);
+    });
+  });
+
+  describe('findDistribution', () => {
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+    });
+
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
+    describe('if the Dividend Distribution does not exist', () => {
+      it('should throw a NotFoundException', async () => {
+        const mockSecurityToken = new MockSecurityToken();
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Dividend Distribution does not exist',
+        };
+        mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
+          throw mockError;
+        });
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.findDistribution('TICKER', new BigNumber('1'));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+      });
+    });
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('foo');
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        let error;
+        try {
+          await service.findDistribution('TICKER', new BigNumber('1'));
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(expectedError);
+      });
+    });
+    describe('otherwise', () => {
+      it('should return a specific Dividend Distribution associated with an Asset', async () => {
+        const mockDistributions = new MockDistributionWithDetails();
+
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.corporateActions.distributions.getOne.mockResolvedValue(
+          mockDistributions
+        );
+
+        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+
+        const result = await service.findDistribution('TICKER', new BigNumber('1'));
+
+        expect(result).toEqual(mockDistributions);
+      });
+    });
+  });
+
+  describe('removeByTicker', () => {
+    let mockSecurityToken: MockSecurityToken;
+    const ticker = 'TICKER';
+
+    beforeEach(() => {
+      mockSecurityToken = new MockSecurityToken();
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+    });
+
+    describe('if there is an error while deleting a Corporate Action', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error("The Corporate Action doesn't exist");
+
+        mockSecurityToken.corporateActions.remove.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error = null;
+        try {
+          await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
+    });
+    describe('otherwise', () => {
+      it('should run a remove procedure and return the delete the Corporate Action', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.RemoveCa,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockSecurityToken.corporateActions.remove.mockResolvedValue(mockQueue);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+
+        expect(result).toEqual({
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.RemoveCa,
+            },
+          ],
+        });
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
+    });
+  });
+
+  describe('payDividends', () => {
+    const body = {
+      signer: '0x6'.padEnd(66, '0'),
+      targets: ['0x6'.padEnd(66, '1')],
+    };
+    describe('if there is an error', () => {
+      const errors = [
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: "The Distribution's payment date hasn't been reached",
+            data: { paymentDate: new Date() },
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The Distribution has already expired',
+            data: {
+              expiryDate: new Date(),
+            },
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message:
+              'Some of the supplied Identities have already either been paid or claimed their share of the Distribution',
+            data: {
+              targets: body.targets,
+            },
+          },
+          BadRequestException,
+        ],
+        [
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'Some of the supplied Identities are not included in this Distribution',
+            data: {
+              excluded: body.targets,
+            },
+          },
+          BadRequestException,
+        ],
+      ];
+      it('should pass the error along the chain', async () => {
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        errors.forEach(async ([polymeshError, httpException]) => {
+          const distubutionWithDetails = new MockDistributionWithDetails();
+          distubutionWithDetails.distribution.pay.mockImplementation(() => {
+            throw polymeshError;
+          });
+          mockIsPolymeshError.mockReturnValue(true);
+
+          const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+          let error;
+          try {
+            await service.payDividends('TICKER', new BigNumber('1'), body);
+          } catch (err) {
+            error = err;
+          }
+          expect(error).toBeInstanceOf(httpException);
+
+          mockIsPolymeshError.mockReset();
+          findDistributionSpy.mockRestore();
+        });
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.capitalDistribution.PushBenefit,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.pay.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.payDividends('TICKER', new BigNumber(1), body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.capitalDistribution.PushBenefit,
+            },
+          ],
+        });
+        expect(distubutionWithDetails.distribution.pay).toHaveBeenCalledWith(
+          {
+            targets: body.targets,
+          },
+          {
+            signer: address,
+          }
+        );
+        findDistributionSpy.mockRestore();
+      });
     });
   });
 
@@ -196,6 +450,7 @@ describe('CorporateActionsService', () => {
           error = err;
         }
         expect(error).toEqual(expectedError);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
     });
     describe('otherwise', () => {
@@ -250,11 +505,8 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
-    });
-
-    afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
     });
   });
 });

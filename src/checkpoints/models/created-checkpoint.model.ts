@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Checkpoint } from '@polymathnetwork/polymesh-sdk/internal';
+import { Checkpoint } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
-export class CheckpointModel extends TransactionQueueModel {
+export class CreatedCheckpointModel extends TransactionQueueModel {
   @ApiProperty({
     description: 'Identifiers of the newly created Checkpoint',
     example: {
@@ -17,7 +17,7 @@ export class CheckpointModel extends TransactionQueueModel {
   @FromEntity()
   readonly checkpoint: Checkpoint;
 
-  constructor(model: CheckpointModel) {
+  constructor(model: CreatedCheckpointModel) {
     const { transactions, ...rest } = model;
     super({ transactions });
 

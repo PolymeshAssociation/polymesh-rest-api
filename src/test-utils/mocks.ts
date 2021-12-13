@@ -1,7 +1,6 @@
 /* istanbul ignore file */
-
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationType, CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -22,7 +21,6 @@ export class MockPolymesh {
   public isIdentityValid = jest.fn();
   public disconnect = jest.fn();
   public addSigner = jest.fn();
-  public reserveTicker = jest.fn();
   public getTickerReservation = jest.fn();
   public settlements = {
     getInstruction: jest.fn(),
@@ -32,6 +30,12 @@ export class MockPolymesh {
   public claims = {
     getIssuedClaims: jest.fn(),
     getIdentitiesWithClaims: jest.fn(),
+  };
+
+  public currentIdentity = {
+    reserveTicker: jest.fn(),
+    createVenue: jest.fn(),
+    inviteAccount: jest.fn(),
   };
 }
 
@@ -66,21 +70,25 @@ export class MockSecurityToken {
   public checkpoints = {
     get: jest.fn(),
     create: jest.fn(),
+    getOne: jest.fn(),
 
     schedules: {
       get: jest.fn(),
       getOne: jest.fn(),
       create: jest.fn(),
+      remove: jest.fn(),
     },
   };
 
   public corporateActions = {
     distributions: {
       get: jest.fn(),
+      getOne: jest.fn(),
       configureDividendDistribution: jest.fn(),
     },
-    getDefaults: jest.fn(),
-    setDefaults: jest.fn(),
+    getDefaultConfig: jest.fn(),
+    setDefaultConfig: jest.fn(),
+    remove: jest.fn(),
   };
 }
 
@@ -102,6 +110,7 @@ export class MockVenue {
 export class MockIdentityAuthorization {
   public getSent = jest.fn();
   public getReceived = jest.fn();
+  public getOne = jest.fn();
 }
 
 export class MockPortfolios {
@@ -143,6 +152,10 @@ export class MockPortfolio {
 export class MockCheckpoint {
   id = new BigNumber(1);
   ticker = 'TICKER';
+  balance = jest.fn();
+  allBalances = jest.fn();
+  createdAt = jest.fn();
+  totalSupply = jest.fn();
 }
 
 export class MockCheckpointSchedule {
@@ -152,6 +165,23 @@ export class MockCheckpointSchedule {
   start = new Date('10/14/1987');
   expiryDate = new Date('10/14/2000');
   complexity = 4;
+}
+
+export class MockAuthorizationRequest {
+  authId = new BigNumber(1);
+  expiry = null;
+  data = {
+    type: AuthorizationType.PortfolioCustody,
+    value: {
+      did: '0x6'.padEnd(66, '1a'),
+      id: new BigNumber(1),
+    },
+  };
+
+  issuer = new MockIdentity();
+  target = {
+    did: '0x6'.padEnd(66, '1a'),
+  };
 }
 
 export class MockTickerReservation {
