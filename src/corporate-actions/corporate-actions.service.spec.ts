@@ -3,11 +3,13 @@ const mockIsPolymeshError = jest.fn();
 
 import {
   BadRequestException,
+  HttpException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -297,10 +299,13 @@ describe('CorporateActionsService', () => {
       signer: '0x6'.padEnd(66, '0'),
       targets: ['0x6'.padEnd(66, '1')],
     };
+    type ErrorCase = [string, PolymeshError, unknown];
     describe('if there is an error', () => {
-      const errors = [
+      const cases: ErrorCase[] = [
         [
+          'The Distributions date has not been reached',
           {
+            name: 'Date not reached',
             code: ErrorCode.UnmetPrerequisite,
             message: "The Distribution's payment date hasn't been reached",
             data: { paymentDate: new Date() },
@@ -308,7 +313,9 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
+          'The Distribution is expired',
           {
+            name: 'Expired',
             code: ErrorCode.UnmetPrerequisite,
             message: 'The Distribution has already expired',
             data: {
@@ -318,7 +325,9 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
+          'Identities already claimed their Distribution',
           {
+            name: 'Already paid',
             code: ErrorCode.UnmetPrerequisite,
             message:
               'Some of the supplied Identities have already either been paid or claimed their share of the Distribution',
@@ -329,7 +338,9 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
+          'Supplied Identities are not included',
           {
+            name: 'Not included',
             code: ErrorCode.UnmetPrerequisite,
             message: 'Some of the supplied Identities are not included in this Distribution',
             data: {
@@ -339,32 +350,30 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
       ];
-      it('should pass the error along the chain', async () => {
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        for (const [polymeshError, httpException] of errors) {
-          const distributionWithDetails = new MockDistributionWithDetails();
-          distributionWithDetails.distribution.pay.mockImplementation(() => {
-            throw polymeshError;
-          });
-          mockIsPolymeshError.mockReturnValue(true);
+        const distributionWithDetails = new MockDistributionWithDetails();
+        distributionWithDetails.distribution.pay.mockImplementation(() => {
+          throw polymeshError;
+        });
+        mockIsPolymeshError.mockReturnValue(true);
 
-          const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
-          let error;
-          try {
-            await service.payDividends('TICKER', new BigNumber('1'), body);
-          } catch (err) {
-            error = err;
-          }
-          expect(error).toBeInstanceOf(httpException);
-
-          mockIsPolymeshError.mockReset();
-          findDistributionSpy.mockRestore();
+        let error;
+        try {
+          await service.payDividends('TICKER', new BigNumber('1'), body);
+        } catch (err) {
+          error = err;
         }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
+        findDistributionSpy.mockRestore();
       });
     });
 
