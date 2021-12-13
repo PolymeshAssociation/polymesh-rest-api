@@ -1,9 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
-import { Type } from 'class-transformer';
-import { IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 
-import { IdentityDto } from '~/identities/dto/identity.dto';
+import { IsDid } from '~/common/decorators/validation';
 
 export class TrustedClaimIssuerDto {
   @ApiPropertyOptional({
@@ -17,10 +16,10 @@ export class TrustedClaimIssuerDto {
   readonly trustedFor?: ClaimType[];
 
   @ApiPropertyOptional({
-    description: 'The Identity of the Claim Issuerer',
-    type: IdentityDto,
+    description: 'The Identity of the Claim Issuer',
+    type: 'string',
   })
-  @ValidateNested()
-  @Type(() => IdentityDto)
-  readonly identity: IdentityDto;
+  @IsOptional()
+  @IsDid()
+  readonly identity: string;
 }

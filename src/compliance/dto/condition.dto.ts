@@ -8,11 +8,18 @@ import {
   isSingleClaimCondition,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsOptional,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
+import { IsDid } from '~/common/decorators/validation';
 import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
-import { IdentityDto } from '~/identities/dto/identity.dto';
 
 export class ConditionDto {
   @ApiProperty({
@@ -63,9 +70,10 @@ export class ConditionDto {
   readonly claims?: ClaimDto[];
 
   @ApiPropertyOptional({
-    description: 'The Identity for "IsIdentity" Condition',
+    description: 'The DID of the Identity for "IsIdentity" Conditions',
+    type: 'string',
   })
-  @ValidateNested()
-  @Type(() => IdentityDto)
-  readonly identity: IdentityDto;
+  @IsOptional()
+  @IsDid()
+  readonly identity: string;
 }

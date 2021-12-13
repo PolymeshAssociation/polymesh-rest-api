@@ -56,7 +56,7 @@ describe('conditionDto', () => {
         {
           type: ConditionType.IsIdentity,
           target: ConditionTarget.Sender,
-          identity: { did: address },
+          identity: address,
         },
       ],
       [
@@ -67,7 +67,7 @@ describe('conditionDto', () => {
           claim: validClaim,
           trustedClaimIssuers: [
             {
-              identity: { did: address },
+              identity: address,
             },
           ],
         },
@@ -119,14 +119,14 @@ describe('conditionDto', () => {
           claim: validClaim,
           trustedClaimIssuers: [
             {
-              identity: { did: 123 },
+              identity: 123,
             },
           ],
         },
         [
-          'trustedClaimIssuers.0.identity.DID must be a hexadecimal number',
-          'trustedClaimIssuers.0.identity.DID must start with "0x"',
-          'trustedClaimIssuers.0.identity.DID must be 66 characters long',
+          'trustedClaimIssuers.0.DID must be a hexadecimal number',
+          'trustedClaimIssuers.0.DID must start with "0x"',
+          'trustedClaimIssuers.0.DID must be 66 characters long',
         ],
       ],
     ];

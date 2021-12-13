@@ -188,9 +188,7 @@ describe('claimsDto', () => {
           scope,
           trustedClaimIssuers: [
             {
-              identity: {
-                did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-              },
+              identity: '0x0600000000000000000000000000000000000000000000000000000000000000',
               trustedFor: ['Bad Claims'],
             },
           ],
