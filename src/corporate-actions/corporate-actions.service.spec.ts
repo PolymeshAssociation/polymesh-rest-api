@@ -1,7 +1,11 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
@@ -301,7 +305,7 @@ describe('CorporateActionsService', () => {
             message: "The Distribution's payment date hasn't been reached",
             data: { paymentDate: new Date() },
           },
-          BadRequestException,
+          UnprocessableEntityException,
         ],
         [
           {
@@ -311,7 +315,7 @@ describe('CorporateActionsService', () => {
               expiryDate: new Date(),
             },
           },
-          BadRequestException,
+          UnprocessableEntityException,
         ],
         [
           {
@@ -322,7 +326,7 @@ describe('CorporateActionsService', () => {
               targets: body.targets,
             },
           },
-          BadRequestException,
+          UnprocessableEntityException,
         ],
         [
           {
@@ -332,7 +336,7 @@ describe('CorporateActionsService', () => {
               excluded: body.targets,
             },
           },
-          BadRequestException,
+          UnprocessableEntityException,
         ],
       ];
       it('should pass the error along the chain', async () => {
