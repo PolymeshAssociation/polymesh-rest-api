@@ -73,7 +73,7 @@ export class ConditionDto {
     description: 'The DID of the Identity for "IsIdentity" Conditions',
     type: 'string',
   })
-  @IsOptional()
+  @ValidateIf(({ type }) => type === ConditionType.IsIdentity)
   @IsDid()
   readonly identity: string;
 }
