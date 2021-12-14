@@ -298,7 +298,7 @@ describe('CorporateActionsService', () => {
     describe('errors', () => {
       const cases: ErrorCase[] = [
         [
-          'The Distributions date has not been reached',
+          "The Distribution's date has not been reached",
           {
             code: ErrorCode.UnmetPrerequisite,
             message: "The Distribution's payment date hasn't been reached",
