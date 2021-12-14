@@ -11,6 +11,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
@@ -93,5 +94,33 @@ export class CorporateActionsService {
         signer: address,
       }
     );
+  }
+
+  public async linkDocuments(
+    ticker: string,
+    id: BigNumber,
+    linkDocumentsDto: LinkDocumentsDto
+  ): Promise<QueueResult<void>> {
+    const { signer, documents } = linkDocumentsDto;
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const params = {
+      documents: documents.map(document => document.toTokenDocument()),
+    };
+    return processQueue(distribution.linkDocuments, params, {
+      signer: address,
+    });
+  }
+
+  public async claimDividends(
+    ticker: string,
+    id: BigNumber,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(distribution.claim, undefined, {
+      signer: address,
+    });
   }
 }

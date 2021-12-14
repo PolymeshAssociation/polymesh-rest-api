@@ -7,6 +7,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
@@ -408,6 +409,202 @@ describe('CorporateActionsService', () => {
             signer: address,
           }
         );
+        findDistributionSpy.mockRestore();
+      });
+    });
+  });
+
+  describe('linkDocuments', () => {
+    let mockDistributionWithDetails: MockDistributionWithDetails;
+    const body = {
+      documents: [
+        new AssetDocumentDto({
+          name: 'DOC_NAME',
+          uri: 'DOC_URI',
+          type: 'DOC_TYPE',
+        }),
+      ],
+      signer: '0x6'.padEnd(66, '0'),
+    };
+
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+      mockDistributionWithDetails = new MockDistributionWithDetails();
+    });
+
+    afterAll(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
+    describe('if some of the provided documents are not associated with the Asset of the Corporate Action', () => {
+      it('should throw an UnprocessableEntityException', async () => {
+        const mockError = {
+          code: ErrorCode.UnmetPrerequisite,
+          message: 'Some of the provided documents are not associated with the Security Token',
+        };
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+        mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
+          throw mockError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.linkDocuments('TICKER', new BigNumber('1'), body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(UnprocessableEntityException);
+        expect((error as UnprocessableEntityException).message).toEqual(
+          'Some of the provided documents are not associated with the Asset'
+        );
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should run the linkDocuments procedure and return the queue results', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.LinkCaDoc,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.linkDocuments('TICKER', new BigNumber('1'), body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.LinkCaDoc,
+            },
+          ],
+        });
+      });
+    });
+  });
+
+  describe('claimDividends', () => {
+    const signer = '0x6'.padEnd(66, '0');
+
+    type ErrorCase = [string, Record<string, unknown>, unknown];
+    describe('errors', () => {
+      const cases: ErrorCase[] = [
+        [
+          "Distribution's payment date hasn't been reached",
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: "The Distribution's payment date hasn't been reached",
+            data: { paymentDate: new Date() },
+          },
+          UnprocessableEntityException,
+        ],
+        [
+          'Distribution is expired',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The Distribution has already expired',
+            data: {
+              expiryDate: new Date(),
+            },
+          },
+          UnprocessableEntityException,
+        ],
+        [
+          'Target Identity is not included in the Distribution',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The current Identity is not included in this Distribution',
+          },
+          UnprocessableEntityException,
+        ],
+        [
+          'Target Identity has already claimed dividends',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The current Identity has already claimed dividends',
+          },
+          UnprocessableEntityException,
+        ],
+      ];
+
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.claim.mockImplementation(() => {
+          throw polymeshError;
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        let error;
+        try {
+          await service.claimDividends('TICKER', new BigNumber('1'), signer);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
+        findDistributionSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.capitalDistribution.Claim,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.claim.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.claimDividends('TICKER', new BigNumber(1), signer);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.capitalDistribution.Claim,
+            },
+          ],
+        });
+        expect(distubutionWithDetails.distribution.claim).toHaveBeenCalledWith(undefined, {
+          signer: address,
+        });
         findDistributionSpy.mockRestore();
       });
     });
