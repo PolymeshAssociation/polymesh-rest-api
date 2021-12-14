@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -17,6 +18,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultConfigModel } from '~/corporate-actions/model/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
@@ -232,6 +234,44 @@ export class CorporateActionsController {
       ticker,
       id,
       payDividendsDto
+    );
+    return new TransactionQueueModel({ transactions });
+  }
+
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  @ApiOperation({
+    summary: 'Link documents to a Corporate Action',
+    description:
+      'This endpoint links a list of documents to the Corporate Action. Any previous links are removed in favor of the new list. All the documents to be linked should already be linked to the Asset of the Corporate Action.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to which the documents are attached',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Corporate Action',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Some of the provided documents are not associated with the Asset',
+  })
+  @Put(':id/documents')
+  public async linkDocuments(
+    @Param() { ticker, id }: DividendDistributionParamsDto,
+    @Body() linkDocumentsDto: LinkDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.linkDocuments(
+      ticker,
+      id,
+      linkDocumentsDto
     );
     return new TransactionQueueModel({ transactions });
   }

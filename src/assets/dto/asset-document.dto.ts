@@ -1,6 +1,8 @@
 /* istanbul ignore file */
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDate, IsHexadecimal, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { TokenDocument } from '@polymathnetwork/polymesh-sdk/types';
+import { IsDate, IsHexadecimal, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 
@@ -31,7 +33,7 @@ export class AssetDocumentDto {
   @Matches(/^0x.+/, {
     message: 'Content Hash must start with "0x"',
   })
-  @Length(MAX_CONTENT_HASH_LENGTH, undefined, {
+  @MaxLength(MAX_CONTENT_HASH_LENGTH, {
     message: `Content Hash must be ${MAX_CONTENT_HASH_LENGTH} characters long`,
   })
   readonly contentHash?: string;
@@ -41,6 +43,7 @@ export class AssetDocumentDto {
     example: 'Private Placement Memorandum',
   })
   @IsOptional()
+  @IsString()
   readonly type?: string;
 
   @ApiPropertyOptional({
@@ -51,4 +54,12 @@ export class AssetDocumentDto {
   @IsOptional()
   @IsDate()
   readonly filedAt?: Date;
+
+  public toTokenDocument(): TokenDocument {
+    return { ...this };
+  }
+
+  constructor(dto: Omit<AssetDocumentDto, 'toTokenDocument'>) {
+    Object.assign(this, dto);
+  }
 }

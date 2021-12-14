@@ -1,7 +1,12 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
@@ -18,12 +23,13 @@ describe('processQueue', () => {
     type Case = [ErrorCode, Class<HttpException>];
     const cases: Case[] = [
       [ErrorCode.ValidationError, BadRequestException],
+      [ErrorCode.UnmetPrerequisite, UnprocessableEntityException],
       [ErrorCode.FatalError, InternalServerErrorException],
     ];
     test.each(cases)('should transform %p into %p', async (code, expected) => {
       const mockVenue = new MockVenue();
 
-      const mockError = { code };
+      const mockError = { code, message: 'Error message' };
       mockVenue.modify.mockImplementation(() => {
         throw mockError;
       });
