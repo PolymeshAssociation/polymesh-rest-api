@@ -278,7 +278,7 @@ describe('PortfoliosService', () => {
           BadRequestException,
         ],
         [
-          "The Portfolio doesn't exists",
+          "Portfolio doesn't exist",
           {
             code: ErrorCode.ValidationError,
             message: "The Portfolio doesn't exist",
