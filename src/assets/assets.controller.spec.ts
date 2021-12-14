@@ -13,20 +13,12 @@ import { MockComplianceRequirements } from '~/assets/mocks/compliance-requiremen
 import { ComplianceRequirementsModel } from '~/assets/models/compliance-requirements.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { MockSecurityToken } from '~/test-utils/mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;
 
-  const mockAssetsService = {
-    findOne: jest.fn(),
-    findHolders: jest.fn(),
-    findDocuments: jest.fn(),
-    findComplianceRequirements: jest.fn(),
-    findTrustedClaimIssuers: jest.fn(),
-    registerTicker: jest.fn(),
-    createAsset: jest.fn(),
-    issue: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

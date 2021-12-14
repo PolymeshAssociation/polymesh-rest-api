@@ -12,11 +12,8 @@ import { CorporateActionsService } from '~/corporate-actions/corporate-actions.s
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import {
-  MockRelayerAccountsService,
-  MockSecurityToken,
-  MockTransactionQueue,
-} from '~/test-utils/mocks';
+import { MockSecurityToken, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -26,9 +23,7 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 describe('CorporateActionsService', () => {
   let service: CorporateActionsService;
 
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 
