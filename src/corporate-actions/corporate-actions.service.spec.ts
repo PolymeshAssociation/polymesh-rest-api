@@ -18,6 +18,8 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 
+type ErrorCase = [string, Record<string, unknown>, unknown];
+
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
@@ -295,8 +297,7 @@ describe('CorporateActionsService', () => {
       targets: ['0x6'.padEnd(66, '1')],
     };
 
-    type ErrorCase = [string, Record<string, unknown>, unknown];
-    describe('errors', () => {
+    describe('distribution.pay errors', () => {
       const cases: ErrorCase[] = [
         [
           "The Distribution's date has not been reached",
@@ -502,8 +503,7 @@ describe('CorporateActionsService', () => {
   describe('claimDividends', () => {
     const signer = '0x6'.padEnd(66, '0');
 
-    type ErrorCase = [string, Record<string, unknown>, unknown];
-    describe('errors', () => {
+    describe('distribution.claim errors', () => {
       const cases: ErrorCase[] = [
         [
           "Distribution's payment date hasn't been reached",
