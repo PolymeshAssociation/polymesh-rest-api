@@ -275,4 +275,44 @@ export class CorporateActionsController {
     );
     return new TransactionQueueModel({ transactions });
   }
+
+  @ApiOperation({
+    summary: 'Claim dividend payment for a Dividend Distribution',
+    description:
+      'This endpoint allows a target Identity of a Dividend distribution to claim their unclaimed Dividends',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be claimed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      "<li>The Distribution's payment date hasn't been reached</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '<li>The current Identity is not included in this Distribution</li>' +
+      '<li>The current Identity has already claimed dividends</li>' +
+      '</ul>',
+  })
+  @Post(':id/payments/claim')
+  public async claimDividends(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.claimDividends(ticker, id, signer);
+    return new TransactionQueueModel({ transactions });
+  }
 }
