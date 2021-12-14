@@ -539,7 +539,6 @@ describe('CorporateActionsService', () => {
         ],
       ];
 
-      test.each(cases);
 
       test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const address = 'address';
