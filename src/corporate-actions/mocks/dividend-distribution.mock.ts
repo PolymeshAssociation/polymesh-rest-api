@@ -18,4 +18,5 @@ export class MockDistribution extends MockCorporateActionDefaultConfig {
   description = 'Mock Description';
 
   public pay = jest.fn();
+  public linkDocuments = jest.fn();
 }
