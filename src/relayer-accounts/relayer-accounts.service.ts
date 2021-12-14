@@ -2,7 +2,7 @@
 
 // TODO @monitz87: replace with actual database/vault
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { forEach, map } from 'lodash';
 
@@ -37,8 +37,11 @@ export class RelayerAccountsService {
   }
 
   public findAddressByDid(did: string): string {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.accounts[did].address!;
+    const signer = this.accounts[did];
+    if (!signer) {
+      throw new NotFoundException(`There is no signer associated to DID "${did}"`);
+    }
+    return signer.address;
   }
 
   public findAll(): { mnemonic: string; address: string; did: string }[] {
