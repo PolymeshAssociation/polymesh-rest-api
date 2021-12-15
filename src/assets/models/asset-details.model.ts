@@ -58,6 +58,13 @@ export class AssetDetailsModel {
   @FromEntityObject()
   readonly identifiers: TokenIdentifier[];
 
+  @ApiProperty({
+    description: 'Current funding round of the Asset',
+    type: 'string',
+    example: 'Series A',
+  })
+  readonly fundingRound: string;
+
   constructor(model: AssetDetailsModel) {
     Object.assign(this, model);
   }
