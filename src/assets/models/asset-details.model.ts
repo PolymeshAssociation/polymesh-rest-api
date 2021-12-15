@@ -63,7 +63,7 @@ export class AssetDetailsModel {
     type: 'string',
     example: 'Series A',
   })
-  readonly fundingRound: string;
+  readonly fundingRound?: string;
 
   constructor(model: AssetDetailsModel) {
     Object.assign(this, model);
