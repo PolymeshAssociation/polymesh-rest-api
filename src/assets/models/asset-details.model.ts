@@ -58,7 +58,7 @@ export class AssetDetailsModel {
   @FromEntityObject()
   readonly identifiers: TokenIdentifier[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current funding round of the Asset',
     type: 'string',
     example: 'Series A',
