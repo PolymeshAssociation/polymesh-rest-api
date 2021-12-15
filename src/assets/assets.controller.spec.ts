@@ -56,11 +56,21 @@ describe('AssetsController', () => {
       const mockSecurityToken = new MockSecurityToken();
       mockSecurityToken.details.mockResolvedValue(mockTokenDetails);
       mockSecurityToken.getIdentifiers.mockResolvedValue(mockIdentifiers);
+
+      const mockFundingRound = 'Series A';
+      mockSecurityToken.currentFundingRound.mockResolvedValue(mockFundingRound);
+
       mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
 
       const result = await controller.getDetails({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual({ ...mockTokenDetails, identifiers: mockIdentifiers });
+      const mockResult = {
+        ...mockTokenDetails,
+        identifiers: mockIdentifiers,
+        fundingRound: mockFundingRound,
+      };
+
+      expect(result).toEqual(mockResult);
     });
   });
 

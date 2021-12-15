@@ -42,6 +42,7 @@ export class MockPolymesh {
 export class MockSecurityToken {
   public details = jest.fn();
   public getIdentifiers = jest.fn();
+  public currentFundingRound = jest.fn();
   public tokenHolders = {
     get: jest.fn(),
   };
