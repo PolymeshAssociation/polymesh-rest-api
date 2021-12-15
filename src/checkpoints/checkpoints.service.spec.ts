@@ -13,10 +13,10 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 import {
   MockCheckpoint,
   MockCheckpointSchedule,
-  MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -26,9 +26,7 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
 
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 

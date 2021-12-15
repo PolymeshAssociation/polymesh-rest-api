@@ -42,6 +42,7 @@ export class MockPolymesh {
 export class MockSecurityToken {
   public details = jest.fn();
   public getIdentifiers = jest.fn();
+  public currentFundingRound = jest.fn();
   public tokenHolders = {
     get: jest.fn(),
   };
@@ -57,6 +58,7 @@ export class MockSecurityToken {
   public compliance = {
     requirements: {
       get: jest.fn(),
+      set: jest.fn(),
     },
     trustedClaimIssuers: {
       get: jest.fn(),
@@ -191,12 +193,4 @@ export class MockTransactionQueue {
   constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
 
   public run = jest.fn();
-}
-
-/* Services */
-
-export class MockRelayerAccountsService {
-  public findAddressByDid = jest.fn();
-
-  public findAll = jest.fn().mockReturnValue([]);
 }
