@@ -382,9 +382,9 @@ export class CorporateActionsController {
   }
 
   @ApiOperation({
-    summary: 'Modify Checkpoint of a Dividend Distribution',
+    summary: 'Modify the Checkpoint of a Dividend Distribution',
     description:
-      'This endpoint modifies the Checkpoint of a Dividend Distribution. The Checkpoint can modified only if the Dividend Distribution has not yet expired and the payment period for the Distribution has not yet started. ',
+      'This endpoint modifies the Checkpoint of a Dividend Distribution. The Checkpoint can modified only if the Dividend Distribution has not yet expired and the payment period for the Distribution has not yet started',
   })
   @ApiParam({
     name: 'ticker',
@@ -404,7 +404,7 @@ export class CorporateActionsController {
     type: TransactionQueueModel,
   })
   @ApiBadRequestResponse({
-    description: 'Checkpoint date must be in the future',
+    description: 'The Checkpoint date must be in the future',
   })
   @ApiUnprocessableEntityResponse({
     description:
