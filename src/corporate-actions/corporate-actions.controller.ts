@@ -227,7 +227,6 @@ export class CorporateActionsController {
     });
   }
 
-  // TODO @prashantasdeveloper: Update error responses post handling error codes
   // TODO @prashantasdeveloper: Move the signer to headers
   @ApiOperation({
     summary: 'Delete a Corporate Action',

@@ -374,7 +374,6 @@ export class CheckpointsController {
     return this.checkpointsService.getAssetBalance(ticker, did, id);
   }
 
-  // TODO @prashantasdeveloper: Update error responses post handling error codes
   // TODO @prashantasdeveloper: Move the signer to headers
   @ApiOperation({
     summary: 'Delete Schedule',
@@ -396,7 +395,7 @@ export class CheckpointsController {
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
-  @ApiBadRequestResponse({
+  @ApiNotFoundResponse({
     description: "Schedule doesn't exist. It may have expired, been removed, or never been created",
   })
   @Delete('schedules/:id')

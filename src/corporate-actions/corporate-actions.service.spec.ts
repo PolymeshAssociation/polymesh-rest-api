@@ -278,6 +278,15 @@ describe('CorporateActionsService', () => {
           },
           BadRequestException,
         ],
+
+        [
+          "Checkpoint Schedule doesn't exist",
+          {
+            code: ErrorCode.DataUnavailable,
+            message: "Checkpoint Schedule doesn't exist",
+          },
+          NotFoundException,
+        ],
         [
           'Distribution expires before the payment date',
           {
@@ -303,6 +312,14 @@ describe('CorporateActionsService', () => {
           BadRequestException,
         ],
         [
+          "Checkpoint doesn't exist",
+          {
+            code: ErrorCode.DataUnavailable,
+            message: "Checkpoint doesn't exist",
+          },
+          NotFoundException,
+        ],
+        [
           'Corporate Action expires before Checkpoint Date',
           {
             code: ErrorCode.ValidationError,
@@ -317,22 +334,6 @@ describe('CorporateActionsService', () => {
             message: 'Checkpoint date must be in the future',
           },
           BadRequestException,
-        ],
-        [
-          "Checkpoint doesn't exist",
-          {
-            code: ErrorCode.DataUnavailable,
-            message: "Checkpoint doesn't exist",
-          },
-          NotFoundException,
-        ],
-        [
-          "Checkpoint Schedule doesn't exist",
-          {
-            code: ErrorCode.DataUnavailable,
-            message: "Checkpoint Schedule doesn't exist",
-          },
-          NotFoundException,
         ],
       ];
       test.each(cases)('%s', async (_, polymeshError, httpException) => {
@@ -363,6 +364,7 @@ describe('CorporateActionsService', () => {
         }
         expect(error).toBeInstanceOf(httpException);
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+        mockIsPolymeshError.mockReset();
       });
     });
     describe('otherwise', () => {
@@ -449,6 +451,7 @@ describe('CorporateActionsService', () => {
         }
         expect(error).toEqual(expectedError);
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+        mockIsPolymeshError.mockReset();
       });
     });
     describe('otherwise', () => {

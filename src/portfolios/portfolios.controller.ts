@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/commo
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -129,7 +129,7 @@ export class PortfoliosController {
   @ApiBadRequestResponse({
     description: "Either the Portfolio doesn't exist or contains assets",
   })
-  @ApiInternalServerErrorResponse({
+  @ApiNotFoundResponse({
     description: 'The Portfolio was removed and no longer exists',
   })
   @Delete('/identities/:did/portfolios/:id')

@@ -1,11 +1,7 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
@@ -263,7 +259,7 @@ describe('PortfoliosService', () => {
             code: ErrorCode.DataUnavailable,
             message: 'The Portfolio was removed and no longer exists',
           },
-          InternalServerErrorException,
+          NotFoundException,
         ],
         [
           'Portfolio contains assets',
