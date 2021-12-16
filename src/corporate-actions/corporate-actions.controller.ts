@@ -318,22 +318,22 @@ export class CorporateActionsController {
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
   @ApiOperation({
-    summary: 'Reclaim dividend payment for a Dividend Distribution',
+    summary: 'Reclaim remaining funds of a Dividend Distribution',
     description:
-      'This endpoint allows a target Identity of a Dividend distribution to reclaim their unclaimed Dividends once the distribution has expired',
-  })
-  @ApiParam({
-    name: 'id',
-    description:
-      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
-    type: 'string',
-    example: '1',
+      'This endpoint reclaim any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired.',
   })
   @ApiParam({
     name: 'ticker',
     description: 'The ticker of the Asset for which dividends are to be reclaimed',
     type: 'string',
     example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the expired Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
   })
   @ApiOkResponse({
     description: 'Information about the transaction',
