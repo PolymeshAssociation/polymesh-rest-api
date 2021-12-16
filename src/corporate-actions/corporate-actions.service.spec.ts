@@ -1,11 +1,11 @@
+/* eslint-disable import/first */
+const mockIsPolymeshError = jest.fn();
+
 import {
   BadRequestException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
@@ -263,51 +263,10 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
-          'Using the Corporate Action Asset as the payout currency',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Cannot distribute Dividends using the Security Token as currency',
-          },
-          BadRequestException,
-        ],
-        [
-          'Payment date has already passed',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Payment date must be in the future',
-          },
-          BadRequestException,
-        ],
-
-        [
-          "Checkpoint Schedule doesn't exist",
-          {
-            code: ErrorCode.DataUnavailable,
-            message: "Checkpoint Schedule doesn't exist",
-          },
-          NotFoundException,
-        ],
-        [
           'Distribution expires before the payment date',
           {
             code: ErrorCode.ValidationError,
             message: 'Expiry date must be after payment date',
-          },
-          BadRequestException,
-        ],
-        [
-          'Declaration date is not in the past',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Declaration date must be in the past',
-          },
-          BadRequestException,
-        ],
-        [
-          'Payment date before Checkpoint date',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Payment date must be after the Checkpoint date',
           },
           BadRequestException,
         ],
@@ -318,22 +277,6 @@ describe('CorporateActionsService', () => {
             message: "Checkpoint doesn't exist",
           },
           NotFoundException,
-        ],
-        [
-          'Corporate Action expires before Checkpoint Date',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Expiry date must be after the Checkpoint date',
-          },
-          BadRequestException,
-        ],
-        [
-          'Checkpoint Date has already passed',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Checkpoint date must be in the future',
-          },
-          BadRequestException,
         ],
       ];
       test.each(cases)('%s', async (_, polymeshError, httpException) => {
