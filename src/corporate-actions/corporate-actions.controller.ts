@@ -193,8 +193,7 @@ export class CorporateActionsController {
       '<li>Declaration date must be in the past</li>' +
       '<li>Payment date must be after the Checkpoint date</li>' +
       '<li>Expiry date must be after the Checkpoint date</li>' +
-      '<li>PCheckpoint date must be in the future</li>' +
-      '<li>Payment date must be after the Checkpoint date</li>' +
+      '<li>Checkpoint date must be in the future</li>' +
       '</ul>',
   })
   @ApiUnprocessableEntityResponse({
