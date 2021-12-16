@@ -15,6 +15,8 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 import { MockSecurityToken, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
+type ErrorCase = [string, Record<string, unknown>, unknown];
+
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
@@ -289,9 +291,11 @@ describe('CorporateActionsService', () => {
       signer: '0x6'.padEnd(66, '0'),
       targets: ['0x6'.padEnd(66, '1')],
     };
-    describe('if there is an error', () => {
-      const errors = [
+
+    describe('distribution.pay errors', () => {
+      const cases: ErrorCase[] = [
         [
+          "The Distribution's date has not been reached",
           {
             code: ErrorCode.UnmetPrerequisite,
             message: "The Distribution's payment date hasn't been reached",
@@ -300,6 +304,7 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
+          'The Distribution is expired',
           {
             code: ErrorCode.UnmetPrerequisite,
             message: 'The Distribution has already expired',
@@ -310,6 +315,7 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
+          'Identities already claimed their Distribution',
           {
             code: ErrorCode.UnmetPrerequisite,
             message:
@@ -321,6 +327,7 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
         [
+          'Supplied Identities are not included',
           {
             code: ErrorCode.UnmetPrerequisite,
             message: 'Some of the supplied Identities are not included in this Distribution',
@@ -331,32 +338,30 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
       ];
-      it('should pass the error along the chain', async () => {
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        errors.forEach(async ([polymeshError, httpException]) => {
-          const distubutionWithDetails = new MockDistributionWithDetails();
-          distubutionWithDetails.distribution.pay.mockImplementation(() => {
-            throw polymeshError;
-          });
-          mockIsPolymeshError.mockReturnValue(true);
-
-          const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
-
-          let error;
-          try {
-            await service.payDividends('TICKER', new BigNumber('1'), body);
-          } catch (err) {
-            error = err;
-          }
-          expect(error).toBeInstanceOf(httpException);
-
-          mockIsPolymeshError.mockReset();
-          findDistributionSpy.mockRestore();
+        const distributionWithDetails = new MockDistributionWithDetails();
+        distributionWithDetails.distribution.pay.mockImplementation(() => {
+          throw polymeshError;
         });
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
+
+        let error;
+        try {
+          await service.payDividends('TICKER', new BigNumber('1'), body);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
+        findDistributionSpy.mockRestore();
       });
     });
 
@@ -371,12 +376,12 @@ describe('CorporateActionsService', () => {
         ];
         const mockQueue = new MockTransactionQueue(transactions);
 
-        const distubutionWithDetails = new MockDistributionWithDetails();
-        distubutionWithDetails.distribution.pay.mockResolvedValue(mockQueue);
+        const distributionWithDetails = new MockDistributionWithDetails();
+        distributionWithDetails.distribution.pay.mockResolvedValue(mockQueue);
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+        findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -392,7 +397,7 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
-        expect(distubutionWithDetails.distribution.pay).toHaveBeenCalledWith(
+        expect(distributionWithDetails.distribution.pay).toHaveBeenCalledWith(
           {
             targets: body.targets,
           },
@@ -493,8 +498,7 @@ describe('CorporateActionsService', () => {
   describe('claimDividends', () => {
     const signer = '0x6'.padEnd(66, '0');
 
-    type ErrorCase = [string, Record<string, unknown>, unknown];
-    describe('errors', () => {
+    describe('distribution.claim errors', () => {
       const cases: ErrorCase[] = [
         [
           "Distribution's payment date hasn't been reached",
@@ -533,7 +537,6 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
       ];
-
 
       test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const address = 'address';
