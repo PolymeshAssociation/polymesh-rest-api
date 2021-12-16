@@ -320,7 +320,7 @@ export class CorporateActionsController {
   @ApiOperation({
     summary: 'Reclaim remaining funds of a Dividend Distribution',
     description:
-      'This endpoint reclaim any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired.',
+      'This endpoint reclaim any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired',
   })
   @ApiParam({
     name: 'ticker',
