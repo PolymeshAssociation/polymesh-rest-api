@@ -8,6 +8,7 @@ import { AssetsModule } from '~/assets/assets.module';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
+import { ComplianceModule } from '~/compliance/compliance.module';
 import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.module';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
@@ -37,6 +38,7 @@ import { SettlementsModule } from '~/settlements/settlements.module';
     OfferingsModule,
     CheckpointsModule,
     CorporateActionsModule,
+    ComplianceModule,
   ],
 })
 export class AppModule {}

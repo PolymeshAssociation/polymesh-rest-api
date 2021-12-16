@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -22,6 +24,7 @@ import {
 } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultConfigModel } from '~/corporate-actions/model/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
@@ -166,6 +169,64 @@ export class CorporateActionsController {
     return createDividendDistributionDetailsModel(result);
   }
 
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Create a Dividend Distribution',
+    description:
+      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which a Dividend Distribution is to be created',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details of the newly created Dividend Distribution',
+    type: CreatedDividendDistributionModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      '<ul>' +
+      '<li>Payment date must be in the future</li>' +
+      '<li>Expiry date must be after payment date</li>' +
+      '<li>Declaration date must be in the past</li>' +
+      '<li>Payment date must be after the Checkpoint date</li>' +
+      '<li>Expiry date must be after the Checkpoint date</li>' +
+      '<li>PCheckpoint date must be in the future</li>' +
+      '<li>Payment date must be after the Checkpoint date</li>' +
+      '</ul>',
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      "<li>The origin Portfolio's free balance is not enough to cover the Distribution amount</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '</ul>',
+  })
+  @ApiNotFoundResponse({
+    description:
+      '<ul>' +
+      "<li>Checkpoint doesn't exist</li>" +
+      "<li>Checkpoint Schedule doesn't exist</li>" +
+      '<li>Cannot distribute Dividends using the Asset as currency</li>' +
+      '</ul>',
+  })
+  @Post('dividend-distributions')
+  public async createDividendDistribution(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() dividendDistributionDto: DividendDistributionDto
+  ): Promise<CreatedDividendDistributionModel> {
+    const { result, transactions } = await this.corporateActionsService.createDividendDistribution(
+      ticker,
+      dividendDistributionDto
+    );
+    return new CreatedDividendDistributionModel({
+      dividendDistribution: createDividendDistributionModel(result),
+      transactions,
+    });
+  }
+
   // TODO @prashantasdeveloper: Update error responses post handling error codes
   // TODO @prashantasdeveloper: Move the signer to headers
   @ApiOperation({
@@ -243,40 +304,81 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
-  @ApiTags('assets')
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
   @ApiOperation({
-    summary: 'Create a Dividend Distribution',
+    summary: 'Link documents to a Corporate Action',
     description:
-      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint.',
+      'This endpoint links a list of documents to the Corporate Action. Any previous links are removed in favor of the new list. All the documents to be linked should already be linked to the Asset of the Corporate Action.',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset for which a Dividend Distribution is to be created',
+    description: 'The ticker of the Asset to which the documents are attached',
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedResponse({
-    description: 'Details of the newly created Dividend Distribution',
-    type: CreatedDividendDistributionModel,
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Corporate Action',
+    type: 'string',
+    example: '123',
   })
-  @ApiBadRequestResponse({
-    description: 'Origin Portfolio free balance is not enough to cover the distribution amount',
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
   })
-  @Post('dividend-distributions')
-  public async createDividendDistribution(
-    @Param() { ticker }: TickerParamsDto,
-    @Body() dividendDistributionDto: DividendDistributionDto
-  ): Promise<CreatedDividendDistributionModel> {
-    const {
-      result,
-      transactions,
-    } = await this.corporateActionsService.createDividendDistributionByTicker(
+  @ApiUnprocessableEntityResponse({
+    description: 'Some of the provided documents are not associated with the Asset',
+  })
+  @Put(':id/documents')
+  public async linkDocuments(
+    @Param() { ticker, id }: DividendDistributionParamsDto,
+    @Body() linkDocumentsDto: LinkDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.linkDocuments(
       ticker,
-      dividendDistributionDto
+      id,
+      linkDocumentsDto
     );
-    return new CreatedDividendDistributionModel({
-      dividendDistribution: createDividendDistributionModel(result),
-      transactions,
-    });
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Claim dividend payment for a Dividend Distribution',
+    description:
+      'This endpoint allows a target Identity of a Dividend distribution to claim their unclaimed Dividends',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be claimed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      "<li>The Distribution's payment date hasn't been reached</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '<li>The current Identity is not included in this Distribution</li>' +
+      '<li>The current Identity has already claimed dividends</li>' +
+      '</ul>',
+  })
+  @Post(':id/payments/claim')
+  public async claimDividends(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.claimDividends(ticker, id, signer);
+    return new TransactionQueueModel({ transactions });
   }
 }

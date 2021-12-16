@@ -16,11 +16,11 @@ import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.modul
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
   MockPolymesh,
-  MockRelayerAccountsService,
   MockSecurityToken,
   MockTickerReservation,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),

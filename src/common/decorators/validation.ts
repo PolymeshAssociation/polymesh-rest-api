@@ -2,24 +2,29 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
+import { KnownTokenType, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 import { plainToClass } from 'class-transformer';
 import {
   IsHexadecimal,
+  isHexadecimal,
   IsUppercase,
+  isUppercase,
   Length,
+  length,
   Matches,
+  matches,
   MaxLength,
+  maxLength,
   registerDecorator,
   validate as validateClass,
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { get, isDate } from 'lodash';
+import { get, isDate, isString } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
-import { DID_LENGTH } from '~/identities/identities.consts';
+import { CDD_ID_LENGTH, DID_LENGTH } from '~/identities/identities.consts';
 import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 
 export function IsDid(validationOptions?: ValidationOptions) {
@@ -43,6 +48,20 @@ export function IsTicker(validationOptions?: ValidationOptions) {
   return applyDecorators(
     MaxLength(MAX_TICKER_LENGTH, validationOptions),
     IsUppercase(validationOptions)
+  );
+}
+
+export function IsCddId() {
+  return applyDecorators(
+    IsHexadecimal({
+      message: 'cddId must be a hexadecimal number',
+    }),
+    Matches(/^0x.+/, {
+      message: 'cddId must start with "0x"',
+    }),
+    Length(CDD_ID_LENGTH, undefined, {
+      message: `cddId must be ${CDD_ID_LENGTH} characters long`,
+    })
   );
 }
 
@@ -87,6 +106,59 @@ export function IsAssetType() {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a Known type or object of type "{ custom: string }"`;
+        },
+      },
+    });
+  };
+}
+
+/**
+ * Applies validation to a scope value field based on a scope type.
+ *   `property` specifies which field to use as the scope type (probably 'type').
+ */
+export function IsValidScopeValue(property: string, validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isValidScopeValue',
+      target: object.constructor,
+      options: validationOptions,
+      constraints: [property],
+      propertyName,
+      validator: {
+        validate(value: unknown, args: ValidationArguments) {
+          const [scopeTypeField] = args.constraints;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const scopeType = (args.object as any)[scopeTypeField];
+          switch (scopeType) {
+            case ScopeType.Ticker:
+              return maxLength(value, MAX_TICKER_LENGTH) && isUppercase(value);
+            case ScopeType.Identity:
+              return (
+                isHexadecimal(value) &&
+                isString(value) &&
+                matches(value, /^0x.+/) &&
+                length(value, DID_LENGTH, undefined)
+              );
+            case ScopeType.Custom:
+              return false;
+            default:
+              return true;
+          }
+        },
+        defaultMessage(args: ValidationArguments) {
+          const [scopeTypeField] = args.constraints;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const scopeType = (args.object as any)[scopeTypeField];
+          switch (scopeType) {
+            case ScopeType.Ticker:
+              return `value must be all uppercase and no longer than 12 characters for type: ${scopeType}`;
+            case ScopeType.Identity:
+              return `value must be a hex string ${DID_LENGTH} characters long and prefixed with 0x`;
+            case ScopeType.Custom:
+              return 'ScopeType.Custom not currently supported';
+          }
+          return `value must be a valid scope value for ${property}: ${scopeType}`;
         },
       },
     });

@@ -16,12 +16,8 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import {
-  MockIdentity,
-  MockPolymesh,
-  MockRelayerAccountsService,
-  MockTransactionQueue,
-} from '~/test-utils/mocks';
+import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -122,9 +118,11 @@ describe('IdentitiesService', () => {
   });
 
   describe('inviteAccount', () => {
-    describe('if there is an error', () => {
-      const errors = [
+    describe('errors', () => {
+      type ErrorCase = [string, Record<string, unknown>, unknown];
+      const cases: ErrorCase[] = [
         [
+          'Invalid SS58 format',
           {
             code: ErrorCode.FatalError,
             message: "The supplied address is not encoded with the chain's SS58 format",
@@ -132,6 +130,7 @@ describe('IdentitiesService', () => {
           InternalServerErrorException,
         ],
         [
+          'Target already belongs to an Identity',
           {
             code: ErrorCode.ValidationError,
             message: 'The target Account is already part of an Identity',
@@ -139,6 +138,7 @@ describe('IdentitiesService', () => {
           BadRequestException,
         ],
         [
+          'The target Account has a pending invite',
           {
             code: ErrorCode.ValidationError,
             message: 'The target Account already has a pending invitation to join this Identity',
@@ -147,7 +147,7 @@ describe('IdentitiesService', () => {
         ],
       ];
 
-      it('should pass the error along the chain', async () => {
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const body = {
           signer: '0x6'.padEnd(66, '0'),
           secondaryKey: 'address',
@@ -156,23 +156,21 @@ describe('IdentitiesService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        errors.forEach(async ([polymeshError, httpException]) => {
-          mockPolymeshApi.currentIdentity.inviteAccount.mockImplementation(() => {
-            throw polymeshError;
-          });
-          mockIsPolymeshError.mockReturnValue(true);
-
-          let error;
-          try {
-            await service.addSecondaryKey(body);
-          } catch (err) {
-            error = err;
-          }
-
-          expect(error).toBeInstanceOf(httpException);
-          expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
-          mockIsPolymeshError.mockReset();
+        mockPolymeshApi.currentIdentity.inviteAccount.mockImplementation(() => {
+          throw polymeshError;
         });
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.addSecondaryKey(body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(httpException);
+        expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
+        mockIsPolymeshError.mockReset();
       });
     });
 

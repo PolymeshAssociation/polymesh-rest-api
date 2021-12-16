@@ -13,10 +13,10 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 import {
   MockCheckpoint,
   MockCheckpointSchedule,
-  MockRelayerAccountsService,
   MockSecurityToken,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
+import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -26,9 +26,7 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
 
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
   const mockRelayerAccountsService = new MockRelayerAccountsService();
 
@@ -400,8 +398,10 @@ describe('CheckpointsService', () => {
 
   describe('deleteScheduleByTicker', () => {
     describe('if there is a error', () => {
-      const errors = [
+      type ErrorCase = [string, Record<string, unknown>, unknown];
+      const cases: ErrorCase[] = [
         [
+          'Schedule does not exist',
           {
             code: ErrorCode.ValidationError,
             message: 'Schedule no longer exists. It was either removed or it expired',
@@ -409,6 +409,7 @@ describe('CheckpointsService', () => {
           BadRequestException,
         ],
         [
+          'Schedule cannot be removed',
           {
             code: ErrorCode.ValidationError,
             message: 'You cannot remove this Schedule',
@@ -416,30 +417,28 @@ describe('CheckpointsService', () => {
           BadRequestException,
         ],
       ];
-      it('should pass the error along the chain', async () => {
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const signer = '0x6'.padEnd(66, '0');
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        errors.forEach(async ([polymeshError, httpException]) => {
-          const mockSecurityToken = new MockSecurityToken();
-          mockSecurityToken.checkpoints.schedules.remove.mockImplementation(() => {
-            throw polymeshError;
-          });
-          mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
-          mockIsPolymeshError.mockReturnValue(true);
-
-          let error;
-          try {
-            await service.deleteScheduleByTicker('TICKER', new BigNumber('1'), signer);
-          } catch (err) {
-            error = err;
-          }
-          expect(error).toBeInstanceOf(httpException);
-
-          mockIsPolymeshError.mockReset();
+        const mockSecurityToken = new MockSecurityToken();
+        mockSecurityToken.checkpoints.schedules.remove.mockImplementation(() => {
+          throw polymeshError;
         });
+        mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.deleteScheduleByTicker('TICKER', new BigNumber('1'), signer);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
       });
     });
 

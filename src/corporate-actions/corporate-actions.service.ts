@@ -13,6 +13,7 @@ import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -65,6 +66,25 @@ export class CorporateActionsService {
     }
   }
 
+  public async createDividendDistribution(
+    ticker: string,
+    dividendDistributionDto: DividendDistributionDto
+  ): Promise<QueueResult<DividendDistribution>> {
+    const { signer, originPortfolio, ...rest } = dividendDistributionDto;
+    const asset = await this.assetsService.findOne(ticker);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      asset.corporateActions.distributions.configureDividendDistribution,
+      {
+        originPortfolio: toPortfolioId(originPortfolio),
+        ...rest,
+      },
+      {
+        signer: address,
+      }
+    );
+  }
+
   public async remove(
     ticker: string,
     corporateAction: BigNumber,
@@ -98,22 +118,31 @@ export class CorporateActionsService {
     );
   }
 
-  public async createDividendDistributionByTicker(
+  public async linkDocuments(
     ticker: string,
-    dividendDistributionDto: DividendDistributionDto
-  ): Promise<QueueResult<DividendDistribution>> {
-    const { signer, originPortfolio, ...rest } = dividendDistributionDto;
-    const asset = await this.assetsService.findOne(ticker);
+    id: BigNumber,
+    linkDocumentsDto: LinkDocumentsDto
+  ): Promise<QueueResult<void>> {
+    const { signer, documents } = linkDocumentsDto;
+    const { distribution } = await this.findDistribution(ticker, id);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(
-      asset.corporateActions.distributions.configureDividendDistribution,
-      {
-        originPortfolio: toPortfolioId(originPortfolio),
-        ...rest,
-      },
-      {
-        signer: address,
-      }
-    );
+    const params = {
+      documents: documents.map(document => document.toTokenDocument()),
+    };
+    return processQueue(distribution.linkDocuments, params, {
+      signer: address,
+    });
+  }
+
+  public async claimDividends(
+    ticker: string,
+    id: BigNumber,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(distribution.claim, undefined, {
+      signer: address,
+    });
   }
 }

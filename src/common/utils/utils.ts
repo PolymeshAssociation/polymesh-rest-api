@@ -1,4 +1,9 @@
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ErrorCode, ProcedureMethod, ProcedureOpts } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
@@ -27,11 +32,17 @@ export async function processQueue<MethodArgs, ReturnType>(
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     if (isPolymeshError(err)) {
       const { message, code } = err;
+      const errorMessage = message.replace(/Security Token/g, 'Asset');
       switch (code) {
         case ErrorCode.ValidationError:
-          throw new BadRequestException(message);
+          throw new BadRequestException(errorMessage);
+        case ErrorCode.InsufficientBalance:
+        case ErrorCode.UnmetPrerequisite:
+          throw new UnprocessableEntityException(errorMessage);
+        case ErrorCode.DataUnavailable:
+          throw new NotFoundException(errorMessage);
         default:
-          throw new InternalServerErrorException(message);
+          throw new InternalServerErrorException(errorMessage);
       }
     }
     throw new InternalServerErrorException(err.message);

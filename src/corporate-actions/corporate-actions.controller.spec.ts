@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -22,9 +23,11 @@ describe('CorporateActionsController', () => {
     updateDefaultConfigByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
+    createDividendDistribution: jest.fn(),
     remove: jest.fn(),
     payDividends: jest.fn(),
-    createDividendDistributionByTicker: jest.fn(),
+    claimDividends: jest.fn(),
+    linkDocuments: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -115,6 +118,64 @@ describe('CorporateActionsController', () => {
     });
   });
 
+  describe('createDividendDistribution', () => {
+    it('should call the service and return the results', async () => {
+      const mockDistribution = new MockDistribution();
+      const response = {
+        result: mockDistribution,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
+          },
+          {
+            blockHash: '0x3',
+            transactionHash: '0x4',
+            transactionTag: TxTags.capitalDistribution.Distribute,
+          },
+        ],
+      };
+      mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
+      const mockDate = new Date();
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        description: 'Corporate Action description',
+        checkpoint: mockDate,
+        originPortfolio: new BigNumber(0),
+        currency: 'TICKER',
+        perShare: new BigNumber(2),
+        maxAmount: new BigNumber(1000),
+        paymentDate: mockDate,
+      };
+
+      const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual(
+        new CreatedDividendDistributionModel({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          dividendDistribution: createDividendDistributionModel(mockDistribution as any),
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
+            },
+            {
+              blockHash: '0x3',
+              transactionHash: '0x4',
+              transactionTag: TxTags.capitalDistribution.Distribute,
+            },
+          ],
+        })
+      );
+      expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
+        'TICKER',
+        body
+      );
+    });
+  });
+
   describe('deleteCorporateAction', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
@@ -168,60 +229,63 @@ describe('CorporateActionsController', () => {
     });
   });
 
-  describe('createDividendDistributionByTicker', () => {
+  describe('linkDocuments', () => {
     it('should call the service and return the results', async () => {
-      const mockDistribution = new MockDistribution();
-      const response = {
-        result: mockDistribution,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
-          },
-          {
-            blockHash: '0x3',
-            transactionHash: '0x4',
-            transactionTag: TxTags.capitalDistribution.Distribute,
-          },
-        ],
-      };
-      mockCorporateActionsService.createDividendDistributionByTicker.mockResolvedValue(response);
-      const mockDate = new Date();
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          tag: TxTags.corporateAction.LinkCaDoc,
+        },
+      ];
+
       const body = {
+        documents: [
+          new AssetDocumentDto({
+            name: 'DOC_NAME',
+            uri: 'DOC_URI',
+            type: 'DOC_TYPE',
+          }),
+        ],
         signer: '0x6'.padEnd(66, '0'),
-        description: 'Corporate Action description',
-        checkpoint: mockDate,
-        originPortfolio: new BigNumber(0),
-        currency: 'TICKER',
-        perShare: new BigNumber(2),
-        maxAmount: new BigNumber(1000),
-        paymentDate: mockDate,
       };
 
-      const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
+      mockCorporateActionsService.linkDocuments.mockResolvedValue({ transactions });
 
-      expect(result).toEqual(
-        new CreatedDividendDistributionModel({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dividendDistribution: createDividendDistributionModel(mockDistribution as any),
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
-            },
-            {
-              blockHash: '0x3',
-              transactionHash: '0x4',
-              transactionTag: TxTags.capitalDistribution.Distribute,
-            },
-          ],
-        })
-      );
-      expect(mockCorporateActionsService.createDividendDistributionByTicker).toHaveBeenCalledWith(
-        'TICKER',
+      const result = await controller.linkDocuments(
+        { ticker: 'TICKER', id: new BigNumber('1') },
         body
+      );
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
+
+  describe('claimDividends', () => {
+    it('should call the service and return the transaction details', async () => {
+      const response = {
+        transactions: ['transaction'],
+      };
+      mockCorporateActionsService.claimDividends.mockResolvedValue(response);
+
+      const signer = '0x6'.padEnd(66, '0');
+      const result = await controller.claimDividends(
+        {
+          id: new BigNumber(1),
+          ticker: 'TICKER',
+        },
+        { signer }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
+      expect(mockCorporateActionsService.claimDividends).toHaveBeenCalledWith(
+        'TICKER',
+        new BigNumber(1),
+        signer
       );
     });
   });
