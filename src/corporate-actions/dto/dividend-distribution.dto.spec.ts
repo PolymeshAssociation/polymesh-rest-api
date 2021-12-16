@@ -73,10 +73,26 @@ describe('dividendDistributionDto', () => {
   describe('invalid invites', () => {
     const cases: InvalidCase[] = [
       [
-        "'checkpoint' neither as 'date' nor object of type 'CorporateActionCheckpointDto'",
+        "'checkpoint' as random string",
         {
           description: 'Corporate Action description',
-          checkpoint: '1',
+          checkpoint: 'abc',
+          originPortfolio: '1',
+          currency: 'TICKER',
+          perShare: '2',
+          maxAmount: '1000',
+          paymentDate: mockDate,
+          signer,
+        },
+        ["checkpoint must be a valid 'Date' or object of type 'CorporateActionCheckpointDto'"],
+      ],
+      [
+        "'checkpoint' as random JSON",
+        {
+          description: 'Corporate Action description',
+          checkpoint: {
+            xyz: 'abc',
+          },
           originPortfolio: '1',
           currency: 'TICKER',
           perShare: '2',

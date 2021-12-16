@@ -5,9 +5,10 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-import { FromBigNumber, ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsCaCheckpoint } from '~/common/decorators/validation';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
+import { IsCaCheckpoint, ToCaCheckpoint } from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
@@ -70,6 +71,7 @@ export class DividendDistributionDto extends SignerDto {
       { type: 'string', example: new Date('10/14/1987').toISOString() },
     ],
   })
+  @ToCaCheckpoint()
   @IsCaCheckpoint()
   readonly checkpoint: CorporateActionCheckpointDto | Date;
 
@@ -88,6 +90,7 @@ export class DividendDistributionDto extends SignerDto {
     type: 'string',
     example: 'TICKER',
   })
+  @IsTicker()
   readonly currency: string;
 
   @ApiProperty({
@@ -95,7 +98,8 @@ export class DividendDistributionDto extends SignerDto {
     type: 'string',
     example: '100',
   })
-  @FromBigNumber()
+  @ToBigNumber()
+  @IsBigNumber()
   readonly perShare: BigNumber;
 
   @ApiProperty({
@@ -103,7 +107,8 @@ export class DividendDistributionDto extends SignerDto {
     type: 'string',
     example: '1000',
   })
-  @FromBigNumber()
+  @ToBigNumber()
+  @IsBigNumber()
   readonly maxAmount: BigNumber;
 
   @ApiProperty({

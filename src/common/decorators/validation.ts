@@ -1,9 +1,9 @@
 /* istanbul ignore file */
+
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { KnownTokenType, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
-import { plainToClass } from 'class-transformer';
 import {
   IsHexadecimal,
   isHexadecimal,
@@ -16,14 +16,12 @@ import {
   MaxLength,
   maxLength,
   registerDecorator,
-  validate as validateClass,
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { get, isDate, isString } from 'lodash';
+import { get, isString } from 'lodash';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
-import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
 import { CDD_ID_LENGTH, DID_LENGTH } from '~/identities/identities.consts';
 import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 
@@ -228,32 +226,6 @@ export function IsTxTagOrModuleName(validationOptions?: ValidationOptions) {
             return `${args.property} must have all valid enum values from "ModuleName" or "TxTags"`;
           }
           return `${args.property} must be a valid enum value from "ModuleName" or "TxTags"`;
-        },
-      },
-    });
-  };
-}
-
-export function IsCaCheckpoint() {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  return function (object: Object, propertyName: string) {
-    registerDecorator({
-      name: 'isCaCheckpoint',
-      target: object.constructor,
-      propertyName,
-      validator: {
-        async validate(value: unknown) {
-          if (typeof value === 'string') {
-            return isDate(value);
-          }
-          if (typeof value === 'object') {
-            const caCheckpointValue = plainToClass(CorporateActionCheckpointDto, value);
-            return (await validateClass(caCheckpointValue)).length === 0;
-          }
-          return false;
-        },
-        defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a valid 'Date' or object of type 'CorporateActionCheckpointDto'`;
         },
       },
     });
