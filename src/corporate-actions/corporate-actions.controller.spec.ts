@@ -28,6 +28,7 @@ describe('CorporateActionsController', () => {
     payDividends: jest.fn(),
     claimDividends: jest.fn(),
     linkDocuments: jest.fn(),
+    modifyCheckpoint: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -286,6 +287,33 @@ describe('CorporateActionsController', () => {
         'TICKER',
         new BigNumber(1),
         signer
+      );
+    });
+  });
+
+  describe('modifyCheckpoint', () => {
+    it('should call the service and return the results', async () => {
+      const transactions = ['transactions'];
+
+      const body = {
+        checkpoint: new Date(),
+        signer: '0x6'.padEnd(66, '0'),
+      };
+
+      mockCorporateActionsService.modifyCheckpoint.mockResolvedValue({ transactions });
+
+      const result = await controller.modifyDistributionCheckpoint(
+        { ticker: 'TICKER', id: new BigNumber('1') },
+        body
+      );
+
+      expect(result).toEqual({
+        transactions,
+      });
+      expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
+        'TICKER',
+        new BigNumber(1),
+        body
       );
     });
   });

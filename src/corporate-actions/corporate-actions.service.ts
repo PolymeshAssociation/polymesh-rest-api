@@ -14,6 +14,7 @@ import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
+import { ModifyDistributionCheckpointDto } from '~/corporate-actions/dto/modify-distribution-checkpoint.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -144,5 +145,22 @@ export class CorporateActionsService {
     return processQueue(distribution.claim, undefined, {
       signer: address,
     });
+  }
+
+  public async modifyCheckpoint(
+    ticker: string,
+    id: BigNumber,
+    modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
+  ): Promise<QueueResult<void>> {
+    const { signer, checkpoint } = modifyDistributionCheckpointDto;
+    const { distribution } = await this.findDistribution(ticker, id);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      distribution.modifyCheckpoint,
+      { checkpoint },
+      {
+        signer: address,
+      }
+    );
   }
 }
