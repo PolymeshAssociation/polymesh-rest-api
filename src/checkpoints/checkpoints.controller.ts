@@ -29,7 +29,12 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
-export class DeleteCheckpointScheduleParams extends IdParamsDto {
+class DeleteCheckpointScheduleParamsDto extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
+
+class CheckpointScheduleParamsDto extends IdParamsDto {
   @IsTicker()
   readonly ticker: string;
 }
@@ -189,6 +194,48 @@ export class CheckpointsController {
             ...details,
           })
       ),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Fetch details of an Asset Checkpoint Schedule',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Checkpoint Schedule is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint Schedule to be fetched',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'The Checkpoint Schedule details',
+    type: CheckpointScheduleModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint Schedule does not exist',
+  })
+  @Get('schedules/:id')
+  public async getSchedule(
+    @Param() { ticker, id }: CheckpointScheduleParamsDto
+  ): Promise<CheckpointScheduleModel> {
+    const {
+      schedule: { period, start, complexity, expiryDate },
+      details,
+    } = await this.checkpointsService.findScheduleById(ticker, id);
+
+    return new CheckpointScheduleModel({
+      id,
+      period,
+      start,
+      ticker,
+      complexity,
+      expiryDate,
+      ...details,
     });
   }
 
@@ -354,7 +401,7 @@ export class CheckpointsController {
   })
   @Delete('schedules/:id')
   public async deleteSchedule(
-    @Param() { ticker, id }: DeleteCheckpointScheduleParams,
+    @Param() { ticker, id }: DeleteCheckpointScheduleParamsDto,
     @Query() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.checkpointsService.deleteScheduleByTicker(

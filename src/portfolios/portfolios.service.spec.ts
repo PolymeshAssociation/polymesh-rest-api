@@ -14,12 +14,8 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import {
-  MockIdentity,
-  MockPortfolio,
-  MockRelayerAccountsService,
-  MockTransactionQueue,
-} from '~/test-utils/mocks';
+import { MockIdentity, MockPortfolio, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -258,9 +254,11 @@ describe('PortfoliosService', () => {
   });
 
   describe('deletePortfolio', () => {
-    describe('if there is a error', () => {
-      const errors = [
+    describe('errors', () => {
+      type ErrorCase = [string, Record<string, unknown>, unknown];
+      const cases: ErrorCase[] = [
         [
+          'Portfolio no longer exists',
           {
             code: ErrorCode.DataUnavailable,
             message: 'The Portfolio was removed and no longer exists',
@@ -268,6 +266,7 @@ describe('PortfoliosService', () => {
           InternalServerErrorException,
         ],
         [
+          'Portfolio contains assets',
           {
             code: ErrorCode.ValidationError,
             message: 'You cannot delete a Portfolio that contains any assets',
@@ -275,6 +274,7 @@ describe('PortfoliosService', () => {
           BadRequestException,
         ],
         [
+          "Portfolio doesn't exist",
           {
             code: ErrorCode.ValidationError,
             message: "The Portfolio doesn't exist",
@@ -282,7 +282,7 @@ describe('PortfoliosService', () => {
           BadRequestException,
         ],
       ];
-      it('should pass the error along the chain', async () => {
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const signer = '0x6'.padEnd(66, '0');
         const portfolio = new PortfolioDto({
           id: new BigNumber(1),
@@ -294,25 +294,23 @@ describe('PortfoliosService', () => {
 
         const findOneSpy = jest.spyOn(service, 'findOne');
 
-        errors.forEach(async ([polymeshError, httpException]) => {
-          const mockIdentity = new MockIdentity();
-          mockIdentity.portfolios.delete.mockImplementation(() => {
-            throw polymeshError;
-          });
-          mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-          mockIsPolymeshError.mockReturnValue(true);
-
-          let error;
-          try {
-            await service.deletePortfolio(portfolio, signer);
-          } catch (err) {
-            error = err;
-          }
-          expect(error).toBeInstanceOf(httpException);
-
-          mockIsPolymeshError.mockReset();
-          findOneSpy.mockRestore();
+        const mockIdentity = new MockIdentity();
+        mockIdentity.portfolios.delete.mockImplementation(() => {
+          throw polymeshError;
         });
+        mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.deletePortfolio(portfolio, signer);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
+        findOneSpy.mockRestore();
       });
     });
 

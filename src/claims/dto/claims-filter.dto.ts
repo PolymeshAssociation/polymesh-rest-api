@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum, IsOptional } from 'class-validator';
 

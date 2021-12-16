@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -17,8 +17,10 @@ import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
-import { CorporateActionDefaultsDto } from '~/corporate-actions/dto/corporate-action-defaults.dto';
-import { CorporateActionDefaultsModel } from '~/corporate-actions/model/corporate-action-defaults.model';
+import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
+import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
+import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
+import { CorporateActionDefaultConfigModel } from '~/corporate-actions/model/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
@@ -33,36 +35,41 @@ class DeleteCorporateActionParamsDto extends IdParamsDto {
   readonly ticker: string;
 }
 
+class DistributeFundsParamsDto extends IdParamsDto {
+  @IsTicker()
+  readonly ticker: string;
+}
+
 @ApiTags('corporate-actions', 'assets')
 @Controller('assets/:ticker/corporate-actions')
 export class CorporateActionsController {
   constructor(private readonly corporateActionsService: CorporateActionsService) {}
 
   @ApiOperation({
-    summary: 'Fetch Corporate Action defaults',
+    summary: 'Fetch Corporate Action Default Config',
     description:
       "This endpoint will provide the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action defaults are to be fetched',
+    description: 'The ticker of the Asset whose Corporate Action Default Config is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
   @ApiOkResponse({
-    description: 'Corporate Action defaults for the specified Asset',
-    type: CorporateActionDefaultsModel,
+    description: 'Corporate Action Default Config for the specified Asset',
+    type: CorporateActionDefaultConfigModel,
   })
-  @Get('defaults')
-  public async getDefaults(
+  @Get('default-config')
+  public async getDefaultConfig(
     @Param() { ticker }: TickerParamsDto
-  ): Promise<CorporateActionDefaultsModel> {
+  ): Promise<CorporateActionDefaultConfigModel> {
     const {
       targets,
       defaultTaxWithholding,
       taxWithholdings,
-    } = await this.corporateActionsService.findDefaultsByTicker(ticker);
-    return new CorporateActionDefaultsModel({
+    } = await this.corporateActionsService.findDefaultConfigByTicker(ticker);
+    return new CorporateActionDefaultConfigModel({
       targets: new CorporateActionTargetsModel(targets),
       defaultTaxWithholding,
       taxWithholdings: taxWithholdings.map(
@@ -72,13 +79,13 @@ export class CorporateActionsController {
   }
 
   @ApiOperation({
-    summary: 'Update Corporate Action defaults',
+    summary: 'Update Corporate Action Default Config',
     description:
       "This endpoint updates the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action defaults are to be updated',
+    description: 'The ticker of the Asset whose Corporate Action Default Config is to be updated',
     type: 'string',
     example: 'TICKER',
   })
@@ -86,14 +93,14 @@ export class CorporateActionsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
-  @Patch('defaults')
-  public async updateDefaults(
+  @Patch('default-config')
+  public async updateDefaultConfig(
     @Param() { ticker }: TickerParamsDto,
-    @Body() corporateActionDefaultsDto: CorporateActionDefaultsDto
+    @Body() corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.updateDefaultsByTicker(
+    const { transactions } = await this.corporateActionsService.updateDefaultConfigByTicker(
       ticker,
-      corporateActionDefaultsDto
+      corporateActionDefaultConfigDto
     );
     return new TransactionQueueModel({ transactions });
   }
@@ -188,6 +195,127 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiOperation({
+    summary: 'Pay dividends for a Dividend Distribution',
+    description: 'This endpoint transfers unclaimed dividends to a list of target Identities',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be transferred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      '<ul>' +
+      "<li>The Distribution's payment date hasn't been reached</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '<li>Some of the supplied Identities have already either been paid or claimed their share of the Distribution</li>' +
+      '<li>Some of the supplied Identities are not included in this Distribution</li>' +
+      '</ul>',
+  })
+  @Post(':id/payments')
+  public async payDividends(
+    @Param() { id, ticker }: DistributeFundsParamsDto,
+    @Body() payDividendsDto: PayDividendsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.payDividends(
+      ticker,
+      id,
+      payDividendsDto
+    );
+    return new TransactionQueueModel({ transactions });
+  }
+
+  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  @ApiOperation({
+    summary: 'Link documents to a Corporate Action',
+    description:
+      'This endpoint links a list of documents to the Corporate Action. Any previous links are removed in favor of the new list. All the documents to be linked should already be linked to the Asset of the Corporate Action.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to which the documents are attached',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Corporate Action',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Some of the provided documents are not associated with the Asset',
+  })
+  @Put(':id/documents')
+  public async linkDocuments(
+    @Param() { ticker, id }: DividendDistributionParamsDto,
+    @Body() linkDocumentsDto: LinkDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.linkDocuments(
+      ticker,
+      id,
+      linkDocumentsDto
+    );
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Claim dividend payment for a Dividend Distribution',
+    description:
+      'This endpoint allows a target Identity of a Dividend distribution to claim their unclaimed Dividends',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be claimed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      "<li>The Distribution's payment date hasn't been reached</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '<li>The current Identity is not included in this Distribution</li>' +
+      '<li>The current Identity has already claimed dividends</li>' +
+      '</ul>',
+  })
+  @Post(':id/payments/claim')
+  public async claimDividends(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.claimDividends(ticker, id, signer);
+    return new TransactionQueueModel({ transactions });
+  }
+
   // TODO @prashantasdeveloper: Update error responses post handling error codes
   @ApiOperation({
     summary: 'Reclaim dividend payment for a Dividend Distribution',
@@ -218,12 +346,12 @@ export class CorporateActionsController {
       '<li>Distribution funds have already been reclaimed</li>' +
       '</ul>',
   })
-  @Post(':id/payments/reclaim')
-  public async reclaimDividends(
+  @Post(':id/reclaim-funds')
+  public async reclaimRemainingFunds(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.reclaimDividends(
+    const { transactions } = await this.corporateActionsService.reclaimRemainingFunds(
       ticker,
       id,
       signer

@@ -1,7 +1,6 @@
 /* istanbul ignore file */
-
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationType, CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -43,6 +42,7 @@ export class MockPolymesh {
 export class MockSecurityToken {
   public details = jest.fn();
   public getIdentifiers = jest.fn();
+  public currentFundingRound = jest.fn();
   public tokenHolders = {
     get: jest.fn(),
   };
@@ -58,6 +58,7 @@ export class MockSecurityToken {
   public compliance = {
     requirements: {
       get: jest.fn(),
+      set: jest.fn(),
     },
     trustedClaimIssuers: {
       get: jest.fn(),
@@ -86,8 +87,8 @@ export class MockSecurityToken {
       get: jest.fn(),
       getOne: jest.fn(),
     },
-    getDefaults: jest.fn(),
-    setDefaults: jest.fn(),
+    getDefaultConfig: jest.fn(),
+    setDefaultConfig: jest.fn(),
     remove: jest.fn(),
   };
 }
@@ -110,6 +111,7 @@ export class MockVenue {
 export class MockIdentityAuthorization {
   public getSent = jest.fn();
   public getReceived = jest.fn();
+  public getOne = jest.fn();
 }
 
 export class MockPortfolios {
@@ -166,6 +168,23 @@ export class MockCheckpointSchedule {
   complexity = 4;
 }
 
+export class MockAuthorizationRequest {
+  authId = new BigNumber(1);
+  expiry = null;
+  data = {
+    type: AuthorizationType.PortfolioCustody,
+    value: {
+      did: '0x6'.padEnd(66, '1a'),
+      id: new BigNumber(1),
+    },
+  };
+
+  issuer = new MockIdentity();
+  target = {
+    did: '0x6'.padEnd(66, '1a'),
+  };
+}
+
 export class MockTickerReservation {
   public createToken = jest.fn();
 }
@@ -174,12 +193,4 @@ export class MockTransactionQueue {
   constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
 
   public run = jest.fn();
-}
-
-/* Services */
-
-export class MockRelayerAccountsService {
-  public findAddressByDid = jest.fn();
-
-  public findAll = jest.fn().mockReturnValue([]);
 }

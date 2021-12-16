@@ -2,10 +2,10 @@
 
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
-import { MockCorporateActionDefaults } from '~/corporate-actions/mocks/corporate-action-defaults.mock';
+import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockPortfolio } from '~/test-utils/mocks';
 
-export class MockDistribution extends MockCorporateActionDefaults {
+export class MockDistribution extends MockCorporateActionDefaultConfig {
   origin = new MockPortfolio();
   currency = 'TOKEN2';
   perShare = new BigNumber('0.1');
@@ -17,5 +17,8 @@ export class MockDistribution extends MockCorporateActionDefaults {
   declarationDate = new Date('10/14/1987');
   description = 'Mock Description';
 
+  public pay = jest.fn();
+  public claim = jest.fn();
+  public linkDocuments = jest.fn();
   public reclaimFunds = jest.fn();
 }

@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Identity, KnownTokenType, TokenIdentifier } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -57,6 +57,13 @@ export class AssetDetailsModel {
   })
   @FromEntityObject()
   readonly identifiers: TokenIdentifier[];
+
+  @ApiPropertyOptional({
+    description: 'Current funding round of the Asset',
+    type: 'string',
+    example: 'Series A',
+  })
+  readonly fundingRound?: string;
 
   constructor(model: AssetDetailsModel) {
     Object.assign(this, model);
