@@ -20,4 +20,5 @@ export class MockDistribution extends MockCorporateActionDefaultConfig {
   public pay = jest.fn();
   public claim = jest.fn();
   public linkDocuments = jest.fn();
+  public reclaimFunds = jest.fn();
 }

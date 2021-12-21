@@ -379,4 +379,46 @@ export class CorporateActionsController {
     const { transactions } = await this.corporateActionsService.claimDividends(ticker, id, signer);
     return new TransactionQueueModel({ transactions });
   }
+
+  @ApiOperation({
+    summary: 'Reclaim remaining funds of a Dividend Distribution',
+    description:
+      'This endpoint reclaims any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be reclaimed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the expired Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      '<li>The Distribution must be expired</li>' +
+      '<li>Distribution funds have already been reclaimed</li>' +
+      '</ul>',
+  })
+  @Post(':id/reclaim-funds')
+  public async reclaimRemainingFunds(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.reclaimRemainingFunds(
+      ticker,
+      id,
+      signer
+    );
+    return new TransactionQueueModel({ transactions });
+  }
 }
