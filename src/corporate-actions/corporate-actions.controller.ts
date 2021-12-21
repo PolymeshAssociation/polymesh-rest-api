@@ -113,6 +113,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Fetch Dividend Distributions',
     description:
@@ -140,6 +141,7 @@ export class CorporateActionsController {
     });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Fetch a Dividend Distribution',
     description:
@@ -169,7 +171,7 @@ export class CorporateActionsController {
     return createDividendDistributionDetailsModel(result);
   }
 
-  @ApiTags('assets')
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Create a Dividend Distribution',
     description:
@@ -259,6 +261,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Pay dividends for a Dividend Distribution',
     description: 'This endpoint transfers unclaimed dividends to a list of target Identities',
@@ -340,6 +343,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Claim dividend payment for a Dividend Distribution',
     description:
@@ -380,6 +384,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Reclaim remaining funds of a Dividend Distribution',
     description:
