@@ -47,7 +47,7 @@ export function createDividendDistributionDetailsModel(
   const { distribution, details } = distributionWithDetails;
 
   return new DividendDistributionDetailsModel({
-    distribution: createDividendDistributionModel(distribution),
+    ...createDividendDistributionModel(distribution),
     ...details,
   });
 }
