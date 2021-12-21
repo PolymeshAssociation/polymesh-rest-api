@@ -2,9 +2,7 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
 
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
-
-type ValidCase = [string, Record<string, unknown>];
-type InvalidCase = [string, Record<string, unknown>, string[]];
+import { InvalidCase, ValidCase } from '~/test-utils/types';
 
 describe('corporateActionDefaultConfigDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });

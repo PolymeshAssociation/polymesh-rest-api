@@ -104,9 +104,9 @@ describe('CorporateActionsController', () => {
 
   describe('findDistribution', () => {
     it('should return a specific Dividend Distribution associated with an Asset', async () => {
-      const mockDistributions = new MockDistributionWithDetails();
+      const mockDistribution = new MockDistributionWithDetails();
 
-      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistributions);
+      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistribution);
 
       const result = await controller.getDividendDistribution({
         ticker: 'TICKER',
@@ -114,7 +114,7 @@ describe('CorporateActionsController', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(result).toEqual(createDividendDistributionDetailsModel(mockDistributions as any));
+      expect(result).toEqual(createDividendDistributionDetailsModel(mockDistribution as any));
     });
   });
 
@@ -127,7 +127,7 @@ describe('CorporateActionsController', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
-            transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
+            transactionTag: TxTags.corporateAction.InitiateCorporateAction,
           },
           {
             blockHash: '0x3',
@@ -159,7 +159,7 @@ describe('CorporateActionsController', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
-              transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
+              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
             },
             {
               blockHash: '0x3',

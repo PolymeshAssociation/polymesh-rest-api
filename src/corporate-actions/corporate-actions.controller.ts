@@ -173,7 +173,7 @@ export class CorporateActionsController {
   @ApiOperation({
     summary: 'Create a Dividend Distribution',
     description:
-      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint.',
+      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint',
   })
   @ApiParam({
     name: 'ticker',
@@ -191,9 +191,9 @@ export class CorporateActionsController {
       '<li>Payment date must be in the future</li>' +
       '<li>Expiry date must be after payment date</li>' +
       '<li>Declaration date must be in the past</li>' +
-      '<li>Payment date must be after the Checkpoint date</li>' +
-      '<li>Expiry date must be after the Checkpoint date</li>' +
-      '<li>Checkpoint date must be in the future</li>' +
+      '<li>Payment date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Expiry date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Checkpoint date must be in the future when passing a Date instead of an existing Checkpoint</li>' +
       '</ul>',
   })
   @ApiUnprocessableEntityResponse({

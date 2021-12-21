@@ -8,7 +8,7 @@ import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { IsCaCheckpoint, ToCaCheckpoint } from '~/corporate-actions/corporate-actions.util';
+import { IsCaCheckpoint, ToCaCheckpoint } from '~/corporate-actions/decorators/ca-checkpoint';
 import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';

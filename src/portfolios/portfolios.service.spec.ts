@@ -12,6 +12,7 @@ import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockIdentity, MockPortfolio, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -251,7 +252,6 @@ describe('PortfoliosService', () => {
 
   describe('deletePortfolio', () => {
     describe('errors', () => {
-      type ErrorCase = [string, Record<string, unknown>, unknown];
       const cases: ErrorCase[] = [
         [
           'Portfolio no longer exists',
@@ -278,7 +278,7 @@ describe('PortfoliosService', () => {
           BadRequestException,
         ],
       ];
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const signer = '0x6'.padEnd(66, '0');
         const portfolio = new PortfolioDto({
           id: new BigNumber(1),
@@ -303,7 +303,7 @@ describe('PortfoliosService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
 
         mockIsPolymeshError.mockReset();
         findOneSpy.mockRestore();

@@ -25,8 +25,7 @@ export class DividendDistributionDetailsModel {
   readonly remainingFunds: BigNumber;
 
   @ApiProperty({
-    description:
-      'Indicates whether the unclaimed funds have been reclaimed by the Corporate Actions Agent',
+    description: 'Indicates whether the unclaimed funds have been reclaimed by an Agent',
     type: 'boolean',
     example: false,
   })

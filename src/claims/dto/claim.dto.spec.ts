@@ -2,10 +2,7 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { ClaimType, CountryCode, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
-
-// message, input, expected
-type ValidCase = [string, Record<string, unknown>];
-type InvalidCase = [string, Record<string, unknown>, string[]];
+import { InvalidCase, ValidCase } from '~/test-utils/types';
 
 describe('claimsDto', () => {
   const scope = {
