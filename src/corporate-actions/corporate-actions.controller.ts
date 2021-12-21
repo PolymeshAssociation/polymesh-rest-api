@@ -146,7 +146,7 @@ export class CorporateActionsController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Dividend Distribution',
-    type: 'number',
+    type: 'string',
     example: '123',
   })
   @ApiOkResponse({
@@ -170,7 +170,7 @@ export class CorporateActionsController {
   @ApiParam({
     name: 'id',
     description: 'Corporate Action number to be deleted',
-    type: 'number',
+    type: 'string',
     example: '1',
   })
   @ApiParam({
@@ -203,7 +203,7 @@ export class CorporateActionsController {
     name: 'id',
     description:
       'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
-    type: 'number',
+    type: 'string',
     example: '1',
   })
   @ApiParam({
@@ -253,7 +253,7 @@ export class CorporateActionsController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Corporate Action',
-    type: 'number',
+    type: 'string',
     example: '123',
   })
   @ApiOkResponse({
@@ -285,7 +285,7 @@ export class CorporateActionsController {
     name: 'id',
     description:
       'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
-    type: 'number',
+    type: 'string',
     example: '1',
   })
   @ApiParam({
@@ -331,7 +331,7 @@ export class CorporateActionsController {
     name: 'id',
     description:
       'The Corporate Action number for the expired Dividend Distribution (Dividend Distribution ID)',
-    type: 'number',
+    type: 'string',
     example: '1',
   })
   @ApiOkResponse({
