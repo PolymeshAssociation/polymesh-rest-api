@@ -146,7 +146,7 @@ export class CorporateActionsController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Dividend Distribution',
-    type: 'string',
+    type: 'number',
     example: '123',
   })
   @ApiOkResponse({
@@ -170,7 +170,7 @@ export class CorporateActionsController {
   @ApiParam({
     name: 'id',
     description: 'Corporate Action number to be deleted',
-    type: 'string',
+    type: 'number',
     example: '1',
   })
   @ApiParam({
@@ -203,7 +203,7 @@ export class CorporateActionsController {
     name: 'id',
     description:
       'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
-    type: 'string',
+    type: 'number',
     example: '1',
   })
   @ApiParam({
@@ -253,7 +253,7 @@ export class CorporateActionsController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Corporate Action',
-    type: 'string',
+    type: 'number',
     example: '123',
   })
   @ApiOkResponse({
@@ -285,7 +285,7 @@ export class CorporateActionsController {
     name: 'id',
     description:
       'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
-    type: 'string',
+    type: 'number',
     example: '1',
   })
   @ApiParam({
@@ -316,11 +316,10 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
-  // TODO @prashantasdeveloper: Update error responses post handling error codes
   @ApiOperation({
     summary: 'Reclaim remaining funds of a Dividend Distribution',
     description:
-      'This endpoint reclaim any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired',
+      'This endpoint reclaims any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired',
   })
   @ApiParam({
     name: 'ticker',
@@ -332,7 +331,7 @@ export class CorporateActionsController {
     name: 'id',
     description:
       'The Corporate Action number for the expired Dividend Distribution (Dividend Distribution ID)',
-    type: 'string',
+    type: 'number',
     example: '1',
   })
   @ApiOkResponse({
