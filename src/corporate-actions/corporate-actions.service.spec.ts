@@ -604,4 +604,96 @@ describe('CorporateActionsService', () => {
       });
     });
   });
+
+  describe('reclaimRemainingFunds', () => {
+    const signer = '0x6'.padEnd(66, '0');
+
+    describe('distribution.reclaimFunds errors', () => {
+      const cases: ErrorCase[] = [
+        [
+          'Distribution is expired',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The Distribution must be expired',
+            data: {
+              expiryDate: new Date(),
+            },
+          },
+          UnprocessableEntityException,
+        ],
+        [
+          'Distribution funds already reclaimed',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'Distribution funds have already been reclaimed',
+          },
+          UnprocessableEntityException,
+        ],
+      ];
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.reclaimFunds.mockImplementation(() => {
+          throw polymeshError;
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        let error;
+        try {
+          await service.reclaimRemainingFunds('TICKER', new BigNumber('1'), signer);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
+        findDistributionSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.capitalDistribution.Reclaim,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.reclaimFunds.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.reclaimRemainingFunds('TICKER', new BigNumber(1), signer);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.capitalDistribution.Reclaim,
+            },
+          ],
+        });
+        expect(distubutionWithDetails.distribution.reclaimFunds).toHaveBeenCalledWith(undefined, {
+          signer: address,
+        });
+        findDistributionSpy.mockRestore();
+      });
+    });
+  });
 });
