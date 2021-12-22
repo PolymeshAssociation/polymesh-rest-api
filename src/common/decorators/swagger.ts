@@ -68,15 +68,10 @@ export const ApiArrayResponse = <TModel extends Type | string>(
 
 type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {
   union: (Omit<SchemaObject, 'oneOf'> | Type)[];
-  isOptional?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const ApiPropertyOneOf = ({
-  union,
-  isOptional = false,
-  ...apiPropertyOptions
-}: ApiPropertyOneOfOptions) => {
+export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOneOfOptions) => {
   // eslint-disable-next-line @typescript-eslint/ban-types
   const extraModels: Function[] = [];
   const oneOfItems: (SchemaObject | ReferenceObject)[] = [];
@@ -89,11 +84,8 @@ export const ApiPropertyOneOf = ({
     }
   });
 
-  const propertyOptions = { ...apiPropertyOptions, oneOf: oneOfItems };
-
-  if (isOptional) {
-    return applyDecorators(ApiPropertyOptional(propertyOptions), ApiExtraModels(...extraModels));
-  }
-
-  return applyDecorators(ApiProperty(propertyOptions), ApiExtraModels(...extraModels));
+  return applyDecorators(
+    ApiProperty({ ...apiPropertyOptions, oneOf: oneOfItems }),
+    ApiExtraModels(...extraModels)
+  );
 };
