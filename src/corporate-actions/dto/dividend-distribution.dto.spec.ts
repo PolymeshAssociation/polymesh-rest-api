@@ -2,9 +2,7 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { CaCheckpointType } from '@polymathnetwork/polymesh-sdk/types';
 
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
-
-type ValidCase = [string, Record<string, unknown>];
-type InvalidCase = [string, Record<string, unknown>, string[]];
+import { InvalidCase, ValidCase } from '~/test-utils/types';
 
 describe('dividendDistributionDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });

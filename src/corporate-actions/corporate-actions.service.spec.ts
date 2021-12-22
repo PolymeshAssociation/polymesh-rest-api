@@ -24,8 +24,7 @@ import { MockDistribution } from '~/corporate-actions/mocks/dividend-distributio
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockSecurityToken, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
-
-type ErrorCase = [string, Record<string, unknown>, unknown];
+import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -239,6 +238,17 @@ describe('CorporateActionsService', () => {
   describe('createDividendDistribution', () => {
     let mockSecurityToken: MockSecurityToken;
     const ticker = 'TICKER';
+    const mockDate = new Date();
+    const body = {
+      signer: '0x6'.padEnd(66, '0'),
+      description: 'Corporate Action description',
+      checkpoint: mockDate,
+      originPortfolio: new BigNumber(0),
+      currency: 'TICKER',
+      perShare: new BigNumber(2),
+      maxAmount: new BigNumber(1000),
+      paymentDate: mockDate,
+    };
 
     beforeEach(() => {
       mockSecurityToken = new MockSecurityToken();
@@ -248,7 +258,7 @@ describe('CorporateActionsService', () => {
     describe('distributions.configureDividendDistribution errors', () => {
       const cases: ErrorCase[] = [
         [
-          "Origin Portfolio doesn't exists",
+          "Origin Portfolio doesn't exist",
           {
             code: ErrorCode.DataUnavailable,
             message: "The origin Portfolio doesn't exist",
@@ -284,18 +294,7 @@ describe('CorporateActionsService', () => {
           NotFoundException,
         ],
       ];
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
-        const mockDate = new Date();
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          description: 'Corporate Action description',
-          checkpoint: mockDate,
-          originPortfolio: new BigNumber(0),
-          currency: 'TICKER',
-          perShare: new BigNumber(2),
-          maxAmount: new BigNumber(1000),
-          paymentDate: mockDate,
-        };
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         mockSecurityToken.corporateActions.distributions.configureDividendDistribution.mockImplementation(
           () => {
             throw polymeshError;
@@ -310,7 +309,7 @@ describe('CorporateActionsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
         mockIsPolymeshError.mockReset();
       });
@@ -339,17 +338,6 @@ describe('CorporateActionsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const mockDate = new Date();
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          description: 'Corporate Action description',
-          checkpoint: mockDate,
-          originPortfolio: new BigNumber(0),
-          currency: 'TICKER',
-          perShare: new BigNumber(2),
-          maxAmount: new BigNumber(1000),
-          paymentDate: mockDate,
-        };
         const result = await service.createDividendDistribution(ticker, body);
 
         expect(result).toEqual({
@@ -485,7 +473,7 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
       ];
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
@@ -505,7 +493,7 @@ describe('CorporateActionsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
 
         mockIsPolymeshError.mockReset();
         findDistributionSpy.mockRestore();
@@ -687,7 +675,7 @@ describe('CorporateActionsService', () => {
         ],
       ];
 
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
@@ -707,7 +695,7 @@ describe('CorporateActionsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
 
         mockIsPolymeshError.mockReset();
         findDistributionSpy.mockRestore();
@@ -754,6 +742,98 @@ describe('CorporateActionsService', () => {
     });
   });
 
+  describe('reclaimRemainingFunds', () => {
+    const signer = '0x6'.padEnd(66, '0');
+
+    describe('distribution.reclaimFunds errors', () => {
+      const cases: ErrorCase[] = [
+        [
+          'Distribution is expired',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'The Distribution must be expired',
+            data: {
+              expiryDate: new Date(),
+            },
+          },
+          UnprocessableEntityException,
+        ],
+        [
+          'Distribution funds already reclaimed',
+          {
+            code: ErrorCode.UnmetPrerequisite,
+            message: 'Distribution funds have already been reclaimed',
+          },
+          UnprocessableEntityException,
+        ],
+      ];
+      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.reclaimFunds.mockImplementation(() => {
+          throw polymeshError;
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        let error;
+        try {
+          await service.reclaimRemainingFunds('TICKER', new BigNumber('1'), signer);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(httpException);
+
+        mockIsPolymeshError.mockReset();
+        findDistributionSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.capitalDistribution.Reclaim,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const distubutionWithDetails = new MockDistributionWithDetails();
+        distubutionWithDetails.distribution.reclaimFunds.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(distubutionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.reclaimRemainingFunds('TICKER', new BigNumber(1), signer);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.capitalDistribution.Reclaim,
+            },
+          ],
+        });
+        expect(distubutionWithDetails.distribution.reclaimFunds).toHaveBeenCalledWith(undefined, {
+          signer: address,
+        });
+        findDistributionSpy.mockRestore();
+      });
+    });
+  });
+
   describe('modifyCheckpoint', () => {
     let mockDistributionWithDetails: MockDistributionWithDetails;
     const body = {
@@ -773,8 +853,8 @@ describe('CorporateActionsService', () => {
       mockIsPolymeshError.mockReset();
     });
 
-    describe('if provided Checkpoint does not exists', () => {
-      it('should throw an UnprocessableEntityException', async () => {
+    describe('if provided Checkpoint does not exist', () => {
+      it('should throw an NotFoundException', async () => {
         const mockError = {
           code: ErrorCode.DataUnavailable,
           message: "Checkpoint doesn't exist",

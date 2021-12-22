@@ -114,6 +114,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Fetch Dividend Distributions',
     description:
@@ -141,6 +142,7 @@ export class CorporateActionsController {
     });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Fetch a Dividend Distribution',
     description:
@@ -170,11 +172,11 @@ export class CorporateActionsController {
     return createDividendDistributionDetailsModel(result);
   }
 
-  @ApiTags('assets')
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Create a Dividend Distribution',
     description:
-      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint.',
+      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint',
   })
   @ApiParam({
     name: 'ticker',
@@ -192,9 +194,9 @@ export class CorporateActionsController {
       '<li>Payment date must be in the future</li>' +
       '<li>Expiry date must be after payment date</li>' +
       '<li>Declaration date must be in the past</li>' +
-      '<li>Payment date must be after the Checkpoint date</li>' +
-      '<li>Expiry date must be after the Checkpoint date</li>' +
-      '<li>Checkpoint date must be in the future</li>' +
+      '<li>Payment date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Expiry date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Checkpoint date must be in the future when passing a Date instead of an existing Checkpoint</li>' +
       '</ul>',
   })
   @ApiUnprocessableEntityResponse({
@@ -260,6 +262,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Pay dividends for a Dividend Distribution',
     description: 'This endpoint transfers unclaimed dividends to a list of target Identities',
@@ -341,6 +344,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Claim dividend payment for a Dividend Distribution',
     description:
@@ -381,10 +385,54 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
+  @ApiOperation({
+    summary: 'Reclaim remaining funds of a Dividend Distribution',
+    description:
+      'This endpoint reclaims any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which dividends are to be reclaimed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the expired Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      '<li>The Distribution must be expired</li>' +
+      '<li>Distribution funds have already been reclaimed</li>' +
+      '</ul>',
+  })
+  @Post(':id/reclaim-funds')
+  public async reclaimRemainingFunds(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() { signer }: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.reclaimRemainingFunds(
+      ticker,
+      id,
+      signer
+    );
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiTags('dividend-distributions', 'checkpoints')
   @ApiOperation({
     summary: 'Modify the Checkpoint of a Dividend Distribution',
     description:
-      'This endpoint modifies the Checkpoint of a Dividend Distribution. The Checkpoint can modified only if the Dividend Distribution has not yet expired and the payment period for the Distribution has not yet started',
+      'This endpoint modifies the Checkpoint of a Dividend Distribution. The Checkpoint can be modified only if the payment period for the Distribution has not yet started',
   })
   @ApiParam({
     name: 'ticker',
@@ -411,8 +459,8 @@ export class CorporateActionsController {
       '<ul>' +
       '<li>Distribution has already expired</li>' +
       '<li>Distribution is already in its payment period</li>' +
-      '<li>Payment date must be after the Checkpoint date</li>' +
-      '<li>Expiry date must be after the Checkpoint date</li>' +
+      '<li>Payment date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Expiry date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
       '</ul>',
   })
   @ApiNotFoundResponse({

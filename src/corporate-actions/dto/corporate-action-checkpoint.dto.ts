@@ -6,10 +6,11 @@ import { CaCheckpointType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class CorporateActionCheckpointDto {
   @ApiProperty({
-    description: 'Type of the checkpoint',
+    description: 'Whether the Checkpoint already exists or will be created by a Schedule',
     enum: CaCheckpointType,
     example: CaCheckpointType.Existing,
   })
@@ -17,10 +18,15 @@ export class CorporateActionCheckpointDto {
   readonly type: CaCheckpointType;
 
   @ApiProperty({
-    description: 'Unique identifier for the checkpoint entity as specified by `type`',
+    description: 'ID of the Checkpoint/Schedule (depending on `type`)',
     type: 'string',
     example: '1',
   })
   @ToBigNumber()
+  @IsBigNumber()
   readonly id: BigNumber;
+
+  constructor(dto: CorporateActionCheckpointDto) {
+    Object.assign(this, dto);
+  }
 }
