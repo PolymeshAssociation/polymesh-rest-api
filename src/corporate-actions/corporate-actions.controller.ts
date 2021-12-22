@@ -452,7 +452,8 @@ export class CorporateActionsController {
     type: TransactionQueueModel,
   })
   @ApiBadRequestResponse({
-    description: 'The Checkpoint date must be in the future',
+    description:
+      'The Checkpoint date must be in the future when passing a Date instead of an existing Checkpoint',
   })
   @ApiUnprocessableEntityResponse({
     description:
