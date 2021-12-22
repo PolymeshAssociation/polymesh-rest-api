@@ -5,6 +5,7 @@ import {
   BadRequestException,
   HttpException,
   InternalServerErrorException,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
@@ -24,6 +25,8 @@ describe('processQueue', () => {
     const cases: Case[] = [
       [ErrorCode.ValidationError, BadRequestException],
       [ErrorCode.UnmetPrerequisite, UnprocessableEntityException],
+      [ErrorCode.InsufficientBalance, UnprocessableEntityException],
+      [ErrorCode.DataUnavailable, NotFoundException],
       [ErrorCode.FatalError, InternalServerErrorException],
     ];
     test.each(cases)('should transform %p into %p', async (code, expected) => {

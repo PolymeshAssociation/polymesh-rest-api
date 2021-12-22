@@ -6,9 +6,14 @@ import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
+import {
+  createDividendDistributionDetailsModel,
+  createDividendDistributionModel,
+} from '~/corporate-actions/corporate-actions.util';
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
+import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
+import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -18,6 +23,7 @@ describe('CorporateActionsController', () => {
     updateDefaultConfigByTicker: jest.fn(),
     findDistributionsByTicker: jest.fn(),
     findDistribution: jest.fn(),
+    createDividendDistribution: jest.fn(),
     remove: jest.fn(),
     payDividends: jest.fn(),
     claimDividends: jest.fn(),
@@ -90,7 +96,7 @@ describe('CorporateActionsController', () => {
         new ResultsModel({
           results: mockDistributions.map(distributionWithDetails =>
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            createDividendDistributionModel(distributionWithDetails as any)
+            createDividendDistributionDetailsModel(distributionWithDetails as any)
           ),
         })
       );
@@ -99,9 +105,9 @@ describe('CorporateActionsController', () => {
 
   describe('findDistribution', () => {
     it('should return a specific Dividend Distribution associated with an Asset', async () => {
-      const mockDistributions = new MockDistributionWithDetails();
+      const mockDistribution = new MockDistributionWithDetails();
 
-      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistributions);
+      mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistribution);
 
       const result = await controller.getDividendDistribution({
         ticker: 'TICKER',
@@ -109,7 +115,65 @@ describe('CorporateActionsController', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(result).toEqual(createDividendDistributionModel(mockDistributions as any));
+      expect(result).toEqual(createDividendDistributionDetailsModel(mockDistribution as any));
+    });
+  });
+
+  describe('createDividendDistribution', () => {
+    it('should call the service and return the results', async () => {
+      const mockDistribution = new MockDistribution();
+      const response = {
+        result: mockDistribution,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            transactionTag: TxTags.corporateAction.InitiateCorporateAction,
+          },
+          {
+            blockHash: '0x3',
+            transactionHash: '0x4',
+            transactionTag: TxTags.capitalDistribution.Distribute,
+          },
+        ],
+      };
+      mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
+      const mockDate = new Date();
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        description: 'Corporate Action description',
+        checkpoint: mockDate,
+        originPortfolio: new BigNumber(0),
+        currency: 'TICKER',
+        perShare: new BigNumber(2),
+        maxAmount: new BigNumber(1000),
+        paymentDate: mockDate,
+      };
+
+      const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
+
+      expect(result).toEqual(
+        new CreatedDividendDistributionModel({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          dividendDistribution: createDividendDistributionModel(mockDistribution as any),
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
+            },
+            {
+              blockHash: '0x3',
+              transactionHash: '0x4',
+              transactionTag: TxTags.capitalDistribution.Distribute,
+            },
+          ],
+        })
+      );
+      expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
+        'TICKER',
+        body
+      );
     });
   });
 

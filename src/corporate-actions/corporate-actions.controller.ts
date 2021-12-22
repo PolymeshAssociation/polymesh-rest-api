@@ -1,6 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -16,12 +18,18 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { createDividendDistributionModel } from '~/corporate-actions/corporate-actions.util';
+import {
+  createDividendDistributionDetailsModel,
+  createDividendDistributionModel,
+} from '~/corporate-actions/corporate-actions.util';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
+import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultConfigModel } from '~/corporate-actions/model/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
+import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
+import { DividendDistributionDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
 import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
 
@@ -105,6 +113,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Fetch Dividend Distributions',
     description:
@@ -116,22 +125,23 @@ export class CorporateActionsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiArrayResponse(DividendDistributionModel, {
+  @ApiArrayResponse(DividendDistributionDetailsModel, {
     description: 'List of Dividend Distributions associated with the specified Asset',
     paginated: false,
   })
   @Get('dividend-distributions')
   public async getDividendDistributions(
     @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<DividendDistributionModel>> {
+  ): Promise<ResultsModel<DividendDistributionDetailsModel>> {
     const results = await this.corporateActionsService.findDistributionsByTicker(ticker);
     return new ResultsModel({
       results: results.map(distributionWithDetails =>
-        createDividendDistributionModel(distributionWithDetails)
+        createDividendDistributionDetailsModel(distributionWithDetails)
       ),
     });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Fetch a Dividend Distribution',
     description:
@@ -156,12 +166,68 @@ export class CorporateActionsController {
   @Get('dividend-distributions/:id')
   public async getDividendDistribution(
     @Param() { ticker, id }: DividendDistributionParamsDto
-  ): Promise<DividendDistributionModel> {
+  ): Promise<DividendDistributionDetailsModel> {
     const result = await this.corporateActionsService.findDistribution(ticker, id);
-    return createDividendDistributionModel(result);
+    return createDividendDistributionDetailsModel(result);
   }
 
-  // TODO @prashantasdeveloper: Update error responses post handling error codes
+  @ApiTags('dividend-distributions')
+  @ApiOperation({
+    summary: 'Create a Dividend Distribution',
+    description:
+      'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which a Dividend Distribution is to be created',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details of the newly created Dividend Distribution',
+    type: CreatedDividendDistributionModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      '<ul>' +
+      '<li>Payment date must be in the future</li>' +
+      '<li>Expiry date must be after payment date</li>' +
+      '<li>Declaration date must be in the past</li>' +
+      '<li>Payment date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Expiry date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Checkpoint date must be in the future when passing a Date instead of an existing Checkpoint</li>' +
+      '</ul>',
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      "<li>The origin Portfolio's free balance is not enough to cover the Distribution amount</li>" +
+      '<li>The Distribution has already expired</li>' +
+      '</ul>',
+  })
+  @ApiNotFoundResponse({
+    description:
+      '<ul>' +
+      "<li>Checkpoint doesn't exist</li>" +
+      "<li>Checkpoint Schedule doesn't exist</li>" +
+      '<li>Cannot distribute Dividends using the Asset as currency</li>' +
+      '</ul>',
+  })
+  @Post('dividend-distributions')
+  public async createDividendDistribution(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() dividendDistributionDto: DividendDistributionDto
+  ): Promise<CreatedDividendDistributionModel> {
+    const { result, transactions } = await this.corporateActionsService.createDividendDistribution(
+      ticker,
+      dividendDistributionDto
+    );
+    return new CreatedDividendDistributionModel({
+      dividendDistribution: createDividendDistributionModel(result),
+      transactions,
+    });
+  }
+
   // TODO @prashantasdeveloper: Move the signer to headers
   @ApiOperation({
     summary: 'Delete a Corporate Action',
@@ -195,6 +261,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Pay dividends for a Dividend Distribution',
     description: 'This endpoint transfers unclaimed dividends to a list of target Identities',
@@ -276,6 +343,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Claim dividend payment for a Dividend Distribution',
     description:
@@ -316,6 +384,7 @@ export class CorporateActionsController {
     return new TransactionQueueModel({ transactions });
   }
 
+  @ApiTags('dividend-distributions')
   @ApiOperation({
     summary: 'Reclaim remaining funds of a Dividend Distribution',
     description:
