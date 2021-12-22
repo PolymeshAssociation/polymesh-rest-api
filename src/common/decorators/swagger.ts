@@ -5,7 +5,6 @@ import {
   ApiExtraModels,
   ApiOkResponse,
   ApiProperty,
-  ApiPropertyOptional,
   ApiPropertyOptions,
   getSchemaPath,
 } from '@nestjs/swagger';
