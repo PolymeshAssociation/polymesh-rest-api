@@ -1,7 +1,11 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
@@ -11,11 +15,11 @@ import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
+import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockSecurityToken, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
-
-type ErrorCase = [string, Record<string, unknown>, unknown];
+import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -226,7 +230,132 @@ describe('CorporateActionsService', () => {
     });
   });
 
-  describe('removeByTicker', () => {
+  describe('createDividendDistribution', () => {
+    let mockSecurityToken: MockSecurityToken;
+    const ticker = 'TICKER';
+    const mockDate = new Date();
+    const body = {
+      signer: '0x6'.padEnd(66, '0'),
+      description: 'Corporate Action description',
+      checkpoint: mockDate,
+      originPortfolio: new BigNumber(0),
+      currency: 'TICKER',
+      perShare: new BigNumber(2),
+      maxAmount: new BigNumber(1000),
+      paymentDate: mockDate,
+    };
+
+    beforeEach(() => {
+      mockSecurityToken = new MockSecurityToken();
+      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+    });
+
+    describe('distributions.configureDividendDistribution errors', () => {
+      const cases: ErrorCase[] = [
+        [
+          "Origin Portfolio doesn't exist",
+          {
+            code: ErrorCode.DataUnavailable,
+            message: "The origin Portfolio doesn't exist",
+          },
+          NotFoundException,
+        ],
+        [
+          'The Distribution is expired',
+          {
+            code: ErrorCode.InsufficientBalance,
+            message:
+              "The origin Portfolio's free balance is not enough to cover the Distribution amount",
+            data: {
+              free: new BigNumber(1),
+            },
+          },
+          UnprocessableEntityException,
+        ],
+        [
+          'Distribution expires before the payment date',
+          {
+            code: ErrorCode.ValidationError,
+            message: 'Expiry date must be after payment date',
+          },
+          BadRequestException,
+        ],
+        [
+          "Checkpoint doesn't exist",
+          {
+            code: ErrorCode.DataUnavailable,
+            message: "Checkpoint doesn't exist",
+          },
+          NotFoundException,
+        ],
+      ];
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
+        mockSecurityToken.corporateActions.distributions.configureDividendDistribution.mockImplementation(
+          () => {
+            throw polymeshError;
+          }
+        );
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error = null;
+        try {
+          await service.createDividendDistribution(ticker, body);
+        } catch (err) {
+          error = err;
+        }
+        expect(error).toBeInstanceOf(HttpException);
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+        mockIsPolymeshError.mockReset();
+      });
+    });
+    describe('otherwise', () => {
+      it('should run a configureDividendDistribution procedure and return the created Dividend Distribution', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.InitiateCorporateAction,
+          },
+          {
+            blockHash: '0x3',
+            txHash: '0x4',
+            tag: TxTags.capitalDistribution.Distribute,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        const mockDistribution = new MockDistribution();
+        mockQueue.run.mockResolvedValue(mockDistribution);
+        mockSecurityToken.corporateActions.distributions.configureDividendDistribution.mockResolvedValue(
+          mockQueue
+        );
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.createDividendDistribution(ticker, body);
+
+        expect(result).toEqual({
+          result: mockDistribution,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
+            },
+            {
+              blockHash: '0x3',
+              transactionHash: '0x4',
+              transactionTag: TxTags.capitalDistribution.Distribute,
+            },
+          ],
+        });
+        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      });
+    });
+  });
+
+  describe('remove', () => {
     let mockSecurityToken: MockSecurityToken;
     const ticker = 'TICKER';
 
@@ -253,6 +382,7 @@ describe('CorporateActionsService', () => {
         }
         expect(error).toEqual(expectedError);
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+        mockIsPolymeshError.mockReset();
       });
     });
     describe('otherwise', () => {
@@ -338,7 +468,7 @@ describe('CorporateActionsService', () => {
           UnprocessableEntityException,
         ],
       ];
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
@@ -358,7 +488,7 @@ describe('CorporateActionsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
 
         mockIsPolymeshError.mockReset();
         findDistributionSpy.mockRestore();
@@ -538,7 +668,7 @@ describe('CorporateActionsService', () => {
         ],
       ];
 
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
@@ -558,7 +688,7 @@ describe('CorporateActionsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
 
         mockIsPolymeshError.mockReset();
         findDistributionSpy.mockRestore();

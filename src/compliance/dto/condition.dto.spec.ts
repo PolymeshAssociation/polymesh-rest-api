@@ -8,11 +8,7 @@ import {
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 import { ConditionDto } from '~/compliance/dto/condition.dto';
-
-// message, input
-type ValidCase = [string, Record<string, unknown>];
-// message, input, expected
-type InvalidCase = [string, Record<string, unknown>, string[]];
+import { InvalidCase, ValidCase } from '~/test-utils/types';
 
 const address = '0x0600000000000000000000000000000000000000000000000000000000000000';
 const validClaim: ClaimDto = {

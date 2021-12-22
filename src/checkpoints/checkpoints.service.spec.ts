@@ -17,6 +17,7 @@ import {
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -398,7 +399,6 @@ describe('CheckpointsService', () => {
 
   describe('deleteScheduleByTicker', () => {
     describe('if there is a error', () => {
-      type ErrorCase = [string, Record<string, unknown>, unknown];
       const cases: ErrorCase[] = [
         [
           'Schedule does not exist',
@@ -417,7 +417,7 @@ describe('CheckpointsService', () => {
           BadRequestException,
         ],
       ];
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const signer = '0x6'.padEnd(66, '0');
 
         const address = 'address';
@@ -436,7 +436,7 @@ describe('CheckpointsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
 
         mockIsPolymeshError.mockReset();
       });

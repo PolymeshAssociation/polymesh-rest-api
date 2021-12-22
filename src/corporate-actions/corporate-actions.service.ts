@@ -3,6 +3,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   CorporateActionDefaultConfig,
   DistributionWithDetails,
+  DividendDistribution,
   ErrorCode,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
@@ -11,8 +12,10 @@ import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
+import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
+import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()
@@ -61,6 +64,25 @@ export class CorporateActionsService {
 
       throw err;
     }
+  }
+
+  public async createDividendDistribution(
+    ticker: string,
+    dividendDistributionDto: DividendDistributionDto
+  ): Promise<QueueResult<DividendDistribution>> {
+    const { signer, originPortfolio, ...rest } = dividendDistributionDto;
+    const asset = await this.assetsService.findOne(ticker);
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    return processQueue(
+      asset.corporateActions.distributions.configureDividendDistribution,
+      {
+        originPortfolio: toPortfolioId(originPortfolio),
+        ...rest,
+      },
+      {
+        signer: address,
+      }
+    );
   }
 
   public async remove(

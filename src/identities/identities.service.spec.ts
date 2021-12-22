@@ -18,6 +18,7 @@ import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.modul
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -119,7 +120,6 @@ describe('IdentitiesService', () => {
 
   describe('inviteAccount', () => {
     describe('errors', () => {
-      type ErrorCase = [string, Record<string, unknown>, unknown];
       const cases: ErrorCase[] = [
         [
           'Invalid SS58 format',
@@ -147,7 +147,7 @@ describe('IdentitiesService', () => {
         ],
       ];
 
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const body = {
           signer: '0x6'.padEnd(66, '0'),
           secondaryKey: 'address',
@@ -168,7 +168,7 @@ describe('IdentitiesService', () => {
           error = err;
         }
 
-        expect(error).toBeInstanceOf(httpException);
+        expect(error).toBeInstanceOf(HttpException);
         expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
         mockIsPolymeshError.mockReset();
       });

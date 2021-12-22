@@ -86,6 +86,7 @@ export class MockSecurityToken {
     distributions: {
       get: jest.fn(),
       getOne: jest.fn(),
+      configureDividendDistribution: jest.fn(),
     },
     getDefaultConfig: jest.fn(),
     setDefaultConfig: jest.fn(),
