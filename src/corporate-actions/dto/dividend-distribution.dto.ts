@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -15,7 +15,6 @@ import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
 
-@ApiExtraModels(CorporateActionCheckpointDto)
 export class DividendDistributionDto extends SignerDto {
   @ApiProperty({
     description: 'Brief description of the Corporate Action',
