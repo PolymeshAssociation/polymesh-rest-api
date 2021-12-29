@@ -1,10 +1,11 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
+import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -14,7 +15,6 @@ import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
 
-@ApiExtraModels(CorporateActionCheckpointDto)
 export class DividendDistributionDto extends SignerDto {
   @ApiProperty({
     description: 'Brief description of the Corporate Action',
@@ -64,11 +64,11 @@ export class DividendDistributionDto extends SignerDto {
   @Type(() => TaxWithholdingDto)
   readonly taxWithholdings?: TaxWithholdingDto[];
 
-  @ApiProperty({
+  @ApiPropertyOneOf({
     description:
       'Checkpoint to be used to calculate Dividends. If a Schedule is passed, the next Checkpoint it creates will be used. If a Date is passed, a Checkpoint will be created at that date and used',
-    oneOf: [
-      { $ref: getSchemaPath(CorporateActionCheckpointDto) },
+    union: [
+      CorporateActionCheckpointDto,
       { type: 'string', example: new Date('10/14/1987').toISOString() },
     ],
   })
