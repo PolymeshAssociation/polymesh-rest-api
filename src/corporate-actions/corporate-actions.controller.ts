@@ -458,7 +458,6 @@ export class CorporateActionsController {
   @ApiUnprocessableEntityResponse({
     description:
       '<ul>' +
-      '<li>Distribution has already expired</li>' +
       '<li>Distribution is already in its payment period</li>' +
       '<li>Payment date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
       '<li>Expiry date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
