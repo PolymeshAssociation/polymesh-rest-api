@@ -1,7 +1,17 @@
 /* istanbul ignore file */
 
 import { applyDecorators, Type } from '@nestjs/common';
-import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiProperty,
+  ApiPropertyOptions,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import {
+  ReferenceObject,
+  SchemaObject,
+} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -52,5 +62,29 @@ export const ApiArrayResponse = <TModel extends Type | string>(
       },
     }),
     ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
+  );
+};
+
+type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {
+  union: (Omit<SchemaObject, 'oneOf'> | Type)[];
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOneOfOptions) => {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  const extraModels: Function[] = [];
+  const oneOfItems: (SchemaObject | ReferenceObject)[] = [];
+  union.forEach(item => {
+    if (typeof item === 'object') {
+      oneOfItems.push(item);
+    } else {
+      oneOfItems.push({ $ref: getSchemaPath(item) });
+      extraModels.push(item);
+    }
+  });
+
+  return applyDecorators(
+    ApiProperty({ ...apiPropertyOptions, oneOf: oneOfItems }),
+    ApiExtraModels(...extraModels)
   );
 };
