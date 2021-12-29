@@ -5,7 +5,7 @@ import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
 import { TransactionPermissions, TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 
-import { IsTxTag, IsTxTagOrModuleName } from '~/common/decorators/validation';
+import { IsTxTag, IsTxTagOrModuleName } from '~/identities/decorators/validation';
 import { PermissionTypeDto } from '~/identities/dto/permission-type.dto';
 import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 

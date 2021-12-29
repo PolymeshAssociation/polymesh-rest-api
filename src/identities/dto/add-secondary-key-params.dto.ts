@@ -4,8 +4,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-import { IsPermissionsLike } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
+import { IsPermissionsLike } from '~/identities/decorators/validation';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 
 export class AddSecondaryKeyParamsDto extends SignerDto {
