@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
-import { FromPortfolioId } from '~/common/decorators/transformation';
+import { FromPortfolioId } from '~/portfolios/decorators/transformation';
 
 export class PortfolioIdentifierModel {
   @ApiProperty({
