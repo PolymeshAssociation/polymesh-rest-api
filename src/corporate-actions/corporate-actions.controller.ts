@@ -25,6 +25,7 @@ import {
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
+import { ModifyDistributionCheckpointDto } from '~/corporate-actions/dto/modify-distribution-checkpoint.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultConfigModel } from '~/corporate-actions/model/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
@@ -423,6 +424,61 @@ export class CorporateActionsController {
       ticker,
       id,
       signer
+    );
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiTags('dividend-distributions', 'checkpoints')
+  @ApiOperation({
+    summary: 'Modify the Checkpoint of a Dividend Distribution',
+    description:
+      'This endpoint modifies the Checkpoint of a Dividend Distribution. The Checkpoint can be modified only if the payment period for the Distribution has not yet started',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Dividend Distribution Checkpoint is to be modified',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The Checkpoint date must be in the future when passing a Date instead of an existing Checkpoint',
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      '<li>Distribution is already in its payment period</li>' +
+      '<li>Payment date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '<li>Expiry date must be after the Checkpoint date when passing a Date instead of an existing Checkpoint</li>' +
+      '</ul>',
+  })
+  @ApiNotFoundResponse({
+    description:
+      '<ul>' +
+      "<li>Checkpoint doesn't exist</li>" +
+      "<li>Checkpoint Schedule doesn't exist</li>" +
+      '</ul>',
+  })
+  @Put(':id/checkpoint')
+  public async modifyDistributionCheckpoint(
+    @Param() { id, ticker }: DividendDistributionParamsDto,
+    @Body() modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.corporateActionsService.modifyCheckpoint(
+      ticker,
+      id,
+      modifyDistributionCheckpointDto
     );
     return new TransactionQueueModel({ transactions });
   }
