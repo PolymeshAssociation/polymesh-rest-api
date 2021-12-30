@@ -8,7 +8,12 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ErrorCode, TargetTreatment, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  CaCheckpointType,
+  ErrorCode,
+  TargetTreatment,
+  TxTags,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
@@ -588,6 +593,7 @@ describe('CorporateActionsService', () => {
         expect((error as UnprocessableEntityException).message).toEqual(
           'Some of the provided documents are not associated with the Asset'
         );
+        findDistributionSpy.mockRestore();
       });
     });
 
@@ -621,6 +627,7 @@ describe('CorporateActionsService', () => {
             },
           ],
         });
+        findDistributionSpy.mockRestore();
       });
     });
   });
@@ -821,6 +828,87 @@ describe('CorporateActionsService', () => {
         });
         expect(distubutionWithDetails.distribution.reclaimFunds).toHaveBeenCalledWith(undefined, {
           signer: address,
+        });
+        findDistributionSpy.mockRestore();
+      });
+    });
+  });
+
+  describe('modifyCheckpoint', () => {
+    let mockDistributionWithDetails: MockDistributionWithDetails;
+    const body = {
+      checkpoint: {
+        id: new BigNumber(1),
+        type: CaCheckpointType.Existing,
+      },
+      signer: '0x6'.padEnd(66, '0'),
+    };
+
+    beforeEach(() => {
+      mockIsPolymeshError.mockReturnValue(false);
+      mockDistributionWithDetails = new MockDistributionWithDetails();
+    });
+
+    afterEach(() => {
+      mockIsPolymeshError.mockReset();
+    });
+
+    describe('if provided Checkpoint does not exist', () => {
+      it('should throw an NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: "Checkpoint doesn't exist",
+        };
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+        mockDistributionWithDetails.distribution.modifyCheckpoint.mockImplementation(() => {
+          throw mockError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.modifyCheckpoint('TICKER', new BigNumber('1'), body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(NotFoundException);
+        findDistributionSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should run the modifyCheckpoint procedure and return the queue results', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            tag: TxTags.corporateAction.ChangeRecordDate,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockDistributionWithDetails.distribution.modifyCheckpoint.mockResolvedValue(mockQueue);
+
+        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+
+        const address = 'address';
+        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+        const result = await service.modifyCheckpoint('TICKER', new BigNumber('1'), body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              transactionTag: TxTags.corporateAction.ChangeRecordDate,
+            },
+          ],
         });
         findDistributionSpy.mockRestore();
       });
