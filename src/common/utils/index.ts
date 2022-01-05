@@ -21,7 +21,6 @@ export async function processQueue<MethodArgs, ReturnType>(
   args: MethodArgs,
   opts: ProcedureOpts
 ): Promise<QueueResult<ReturnType>> {
-  // TODO @monitz87: Improve error handling
   try {
     const queue = await method(args, opts);
     const result = await queue.run();
