@@ -11,7 +11,7 @@ import {
 import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
-import { processQueue } from '~/common/utils/utils';
+import { processQueue } from '~/common/utils';
 import { MockVenue } from '~/test-utils/mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({

@@ -3,7 +3,7 @@ import { ErrorCode, Identity, SecurityToken } from '@polymathnetwork/polymesh-sd
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils/utils';
+import { processQueue } from '~/common/utils';
 import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';

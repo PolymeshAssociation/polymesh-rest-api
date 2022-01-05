@@ -15,8 +15,8 @@ import {
 } from 'class-validator';
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
+import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';
 import { DID_LENGTH } from '~/identities/identities.consts';
-import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 
 export function IsDid(validationOptions?: ValidationOptions) {
   return applyDecorators(

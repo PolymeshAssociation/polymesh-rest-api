@@ -4,8 +4,15 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { ErrorCode, ProcedureMethod, ProcedureOpts } from '@polymathnetwork/polymesh-sdk/types';
+import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
+import {
+  ErrorCode,
+  ProcedureMethod,
+  ProcedureOpts,
+  TxTags,
+} from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+import { flatten } from 'lodash';
 
 import { QueueResult } from '~/common/types';
 
@@ -47,4 +54,16 @@ export async function processQueue<MethodArgs, ReturnType>(
     }
     throw new InternalServerErrorException(err.message);
   }
+}
+
+/* istanbul ignore next */
+export function getTxTags(): string[] {
+  return flatten(Object.values(TxTags).map(txTag => Object.values(txTag)));
+}
+
+/* istanbul ignore next */
+export function getTxTagsWithModuleNames(): string[] {
+  const txTags = getTxTags();
+  const moduleNames = Object.values(ModuleName);
+  return [...moduleNames, ...txTags];
 }

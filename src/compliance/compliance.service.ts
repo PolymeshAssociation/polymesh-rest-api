@@ -8,9 +8,8 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils/utils';
+import { processQueue } from '~/common/utils';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
-import {} from '~/identities/identities.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()

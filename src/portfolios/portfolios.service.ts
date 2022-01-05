@@ -9,7 +9,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils/utils';
+import { processQueue } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';

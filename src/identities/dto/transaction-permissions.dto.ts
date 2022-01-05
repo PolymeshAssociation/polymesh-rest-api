@@ -6,8 +6,8 @@ import { TransactionPermissions, TxTag, TxTags } from '@polymathnetwork/polymesh
 import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 
 import { IsTxTag, IsTxTagOrModuleName } from '~/common/decorators/validation';
+import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';
 import { PermissionTypeDto } from '~/identities/dto/permission-type.dto';
-import { getTxTags, getTxTagsWithModuleNames } from '~/identities/identities.util';
 
 export class TransactionPermissionsDto extends PermissionTypeDto {
   @ApiProperty({
