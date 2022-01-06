@@ -69,9 +69,3 @@ function toJsonObject(obj: unknown): unknown {
 export function FromBigNumber() {
   return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
 }
-
-export function FromPortfolioId() {
-  return applyDecorators(
-    Transform(({ value }: { value?: BigNumber | string }) => (value || new BigNumber(0)).toString())
-  );
-}

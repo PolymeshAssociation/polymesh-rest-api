@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
-import { IsValidScopeValue } from '~/common/decorators/validation';
+import { IsValidScopeValue } from '~/claims/decorators/validation';
 
 export class ScopeDto {
   @ApiProperty({

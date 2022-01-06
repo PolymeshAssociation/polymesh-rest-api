@@ -1,7 +1,6 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
-import { PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ModuleName, PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 

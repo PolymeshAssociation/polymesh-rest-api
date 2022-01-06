@@ -24,6 +24,9 @@
       "paths": [{
         "name": "@polymathnetwork/polymesh-sdk/internal",
         "message": "polymesh-sdk/internal should not be used"
+      }, {
+        "name": "@polymathnetwork/polymesh-sdk/polkadot",
+        "message": "polymesh-sdk/polkadot should not be used"
       }]
     }]
   },

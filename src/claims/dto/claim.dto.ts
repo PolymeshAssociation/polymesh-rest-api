@@ -10,8 +10,8 @@ import {
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmptyObject, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 
+import { IsCddId } from '~/claims/decorators/validation';
 import { ScopeDto } from '~/claims/dto/scope.dto';
-import { IsCddId } from '~/common/decorators/validation';
 import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
 
 export class ClaimDto {
