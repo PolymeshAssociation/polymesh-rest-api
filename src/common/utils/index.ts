@@ -4,9 +4,9 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
 import {
   ErrorCode,
+  ModuleName,
   ProcedureMethod,
   ProcedureOpts,
   TxTags,

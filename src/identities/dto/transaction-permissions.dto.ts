@@ -1,8 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { ModuleName } from '@polymathnetwork/polymesh-sdk/polkadot';
-import { TransactionPermissions, TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  ModuleName,
+  TransactionPermissions,
+  TxTag,
+  TxTags,
+} from '@polymathnetwork/polymesh-sdk/types';
 import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 
 import { IsTxTag, IsTxTagOrModuleName } from '~/common/decorators/validation';
