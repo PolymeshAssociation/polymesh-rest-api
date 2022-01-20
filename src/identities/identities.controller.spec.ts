@@ -4,6 +4,7 @@ import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/type
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesController } from '~/identities/identities.controller';
@@ -346,8 +347,9 @@ describe('IdentitiesController', () => {
   describe('addSecondaryKey', () => {
     it('should return the transaction details on adding a Secondary Key', async () => {
       const transactions = ['transaction'];
+      const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
-        result: undefined,
+        result: mockAuthorization,
         transactions,
       };
       mockIdentitiesService.addSecondaryKey.mockResolvedValue(mockData);
@@ -355,7 +357,8 @@ describe('IdentitiesController', () => {
       const result = await controller.addSecondaryKey({ signer: 'Ox60', secondaryKey: '5xdd' });
 
       expect(result).toEqual({
-        result: undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
         transactions,
       });
     });

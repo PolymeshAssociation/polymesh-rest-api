@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ErrorCode, Identity, SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  AuthorizationRequest,
+  ErrorCode,
+  Identity,
+  SecurityToken,
+} from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { QueueResult } from '~/common/types';
@@ -50,7 +55,7 @@ export class IdentitiesService {
 
   public async addSecondaryKey(
     addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<QueueResult<AuthorizationRequest>> {
     const { signer, expiry, permissions, secondaryKey } = addSecondaryKeyParamsDto;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {

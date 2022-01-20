@@ -24,6 +24,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import { GeneratedAuthorizationRequestModel } from '~/authorizations/models/generated-authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/model/claim.model';
@@ -450,8 +451,13 @@ export class IdentitiesController {
   @Post('/secondary-keys')
   async addSecondaryKey(
     @Body() addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.identitiesService.addSecondaryKey(addSecondaryKeyParamsDto);
-    return new TransactionQueueModel({ transactions });
+  ): Promise<GeneratedAuthorizationRequestModel> {
+    const { transactions, result } = await this.identitiesService.addSecondaryKey(
+      addSecondaryKeyParamsDto
+    );
+    return new GeneratedAuthorizationRequestModel({
+      transactions,
+      authorizationRequest: createAuthorizationRequestModel(result),
+    });
   }
 }

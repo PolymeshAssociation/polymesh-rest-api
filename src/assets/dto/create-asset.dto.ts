@@ -28,14 +28,14 @@ export class CreateAssetDto extends SignerDto {
   readonly ticker: string;
 
   @ApiPropertyOptional({
-    description: 'The total supply count of the Asset',
+    description: 'The initial supply count of the Asset',
     example: '627880',
     type: BigNumber,
   })
   @IsOptional()
   @ToBigNumber()
   @IsBigNumber()
-  readonly totalSupply?: BigNumber;
+  readonly initialSupply?: BigNumber;
 
   @ApiProperty({
     description: 'Specifies if the Asset token can be divided',

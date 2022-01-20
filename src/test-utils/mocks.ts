@@ -36,6 +36,7 @@ export class MockPolymesh {
     reserveTicker: jest.fn(),
     createVenue: jest.fn(),
     inviteAccount: jest.fn(),
+    createToken: jest.fn(),
   };
 }
 

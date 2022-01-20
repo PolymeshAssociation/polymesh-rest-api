@@ -96,39 +96,13 @@ export class AssetsService {
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<SecurityToken>> {
     const { signer, ...rest } = params;
-    let reservation: TickerReservation;
-    let reserveResponse: QueueResult<TickerReservation> | undefined;
-    // if the asset isn't already reserved we will attempt to reserve it for the user
-    try {
-      reservation = await this.findTickerReservation(params.ticker);
-    } catch (err) {
-      if (err instanceof NotFoundException) {
-        reserveResponse = await this.registerTicker({ signer, ticker: params.ticker });
-        reservation = reserveResponse.result;
-      } else {
-        throw err;
-      }
-    }
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const args = {
-      name: rest.name,
-      totalSupply: rest.totalSupply,
-      isDivisible: rest.isDivisible,
+      ...rest,
       tokenType: rest.assetType,
-      tokenIdentifiers: rest.identifiers,
-      fundingRound: rest.fundingRound,
-      documents: rest.documents,
-      requireInvestorUniqueness: rest.requireInvestorUniqueness,
     };
-    const res = await processQueue(reservation.createToken, args, { signer: address });
-    // prepend the reserve transaction if nessesary
-    if (reserveResponse) {
-      return {
-        ...res,
-        transactions: [...reserveResponse.transactions, ...res.transactions],
-      };
-    }
-    return res;
+    const createToken = this.polymeshService.polymeshApi.currentIdentity.createToken;
+    return processQueue(createToken, args, { signer: address });
   }
 
   public async issue(ticker: string, params: IssueDto): Promise<QueueResult<SecurityToken>> {
