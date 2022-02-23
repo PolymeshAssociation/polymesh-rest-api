@@ -1,18 +1,20 @@
 /* istanbul ignore file */
 
-import { StoWithDetails } from '@polymathnetwork/polymesh-sdk/types';
+import { OfferingWithDetails } from '@polymathnetwork/polymesh-sdk/types';
 
 import { OfferingDetailsModel } from '~/offerings/models/offering-details.model';
 import { TierModel } from '~/offerings/models/tier.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 
-export function createOfferingDetailsModel(stoWithDetails: StoWithDetails): OfferingDetailsModel {
+export function createOfferingDetailsModel(
+  offeringWithDetails: OfferingWithDetails
+): OfferingDetailsModel {
   const {
-    sto,
+    offering: { id },
     details: { tiers, raisingPortfolio, offeringPortfolio, ...rest },
-  } = stoWithDetails;
+  } = offeringWithDetails;
   return new OfferingDetailsModel({
-    id: sto.id,
+    id,
     tiers: tiers.map(tier => new TierModel(tier)),
     offeringPortfolio: createPortfolioIdentifierModel(offeringPortfolio),
     raisingPortfolio: createPortfolioIdentifierModel(raisingPortfolio),

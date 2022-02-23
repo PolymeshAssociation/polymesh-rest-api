@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  Asset,
   AuthorizationRequest,
   ErrorCode,
   Identity,
-  SecurityToken,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
@@ -32,7 +32,7 @@ export class IdentitiesService {
       polymeshService: { polymeshApi },
     } = this;
     try {
-      return await polymeshApi.getIdentity({ did });
+      return await polymeshApi.identities.getIdentity({ did });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code } = err;
@@ -46,11 +46,11 @@ export class IdentitiesService {
   }
 
   /**
-   * Method to get trusting tokens for a specific did
+   * Method to get trusting Assets for a specific did
    */
-  public async findTrustingTokens(did: string): Promise<SecurityToken[]> {
+  public async findTrustingAssets(did: string): Promise<Asset[]> {
     const identity = await this.findOne(did);
-    return identity.getTrustingTokens();
+    return identity.getTrustingAssets();
   }
 
   public async addSecondaryKey(
@@ -63,7 +63,7 @@ export class IdentitiesService {
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
-    const inviteAccount = this.polymeshService.polymeshApi.currentIdentity.inviteAccount;
+    const inviteAccount = this.polymeshService.polymeshApi.accountManagement.inviteAccount;
     return processQueue(inviteAccount, params, { signer: address });
   }
 }

@@ -46,7 +46,7 @@ describe('claimsDto', () => {
         },
       ],
       [
-        'CustomerDueDilidence with `cddId`',
+        'CustomerDueDiligence with `cddId`',
         {
           type: ClaimType.CustomerDueDiligence,
           cddId: '0x60000000000000000000000000000000',

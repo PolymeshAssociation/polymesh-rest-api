@@ -214,7 +214,7 @@ export class AssetsController {
     const results = await this.assetsService.findTrustedClaimIssuers(ticker);
     return new ResultsModel({
       results: results.map(
-        ({ did, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
+        ({ trustedFor }) => new TrustedClaimIssuerModel({ did: '0x0600', trustedFor })
       ),
     });
   }

@@ -1,13 +1,18 @@
 /* istanbul ignore file */
 
-import { IsNumber, IsOptional, Max, ValidateIf } from 'class-validator';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { IsOptional, Max, ValidateIf } from 'class-validator';
+
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class PaginatedParamsDto {
   @ValidateIf(({ start }: PaginatedParamsDto) => !!start)
-  @IsNumber()
+  @IsBigNumber()
+  @ToBigNumber()
   @Max(30)
-  readonly size: number = 10;
+  readonly size: BigNumber = new BigNumber(10);
 
   @IsOptional()
-  readonly start?: string | number;
+  readonly start?: string | BigNumber;
 }

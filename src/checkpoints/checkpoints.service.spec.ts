@@ -11,9 +11,9 @@ import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
+  MockAsset,
   MockCheckpoint,
   MockCheckpointSchedule,
-  MockSecurityToken,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
@@ -65,26 +65,26 @@ describe('CheckpointsService', () => {
         },
       ],
       next: '0xddddd',
-      count: 2,
+      count: new BigNumber(2),
     };
     it('should return the list of Checkpoints created on an Asset', async () => {
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.checkpoints.get.mockResolvedValue(mockCheckpoints);
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.get.mockResolvedValue(mockCheckpoints);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const result = await service.findAllByTicker('TICKER', 1);
+      const result = await service.findAllByTicker('TICKER', new BigNumber(1));
 
       expect(result).toEqual(mockCheckpoints);
     });
 
     it('should return the list of Checkpoints created on an Asset from start key', async () => {
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.checkpoints.get.mockResolvedValue(mockCheckpoints);
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.get.mockResolvedValue(mockCheckpoints);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const result = await service.findAllByTicker('TICKER', 1, 'START_KEY');
+      const result = await service.findAllByTicker('TICKER', new BigNumber(1), 'START_KEY');
 
       expect(result).toEqual(mockCheckpoints);
     });
@@ -108,15 +108,15 @@ describe('CheckpointsService', () => {
 
     it('should return NotFoundException if the checkpoint does not exist', async () => {
       mockIsPolymeshError.mockReturnValue(true);
-      const mockSecurityToken = new MockSecurityToken();
+      const mockAsset = new MockAsset();
       const mockError = {
         code: ErrorCode.DataUnavailable,
         message: 'The checkpoint was not found',
       };
-      mockSecurityToken.checkpoints.getOne.mockImplementation(() => {
+      mockAsset.checkpoints.getOne.mockImplementation(() => {
         throw mockError;
       });
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       let error;
       try {
@@ -129,10 +129,10 @@ describe('CheckpointsService', () => {
     });
 
     it('should return a checkpoint given a ticker and id', async () => {
-      const mockSecurityToken = new MockSecurityToken();
+      const mockAsset = new MockAsset();
       const mockCheckpoint = new MockCheckpoint();
-      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAsset.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await service.findOne('TICKER', new BigNumber(1));
       expect(result).toEqual(mockCheckpoint);
@@ -145,26 +145,26 @@ describe('CheckpointsService', () => {
       const mockSchedules = [
         {
           schedule: {
-            id: new BigNumber('1'),
+            id: new BigNumber(1),
             period: {
               unit: CalendarUnit.Month,
-              amount: 3,
+              amount: new BigNumber(3),
             },
             start: new Date(),
-            complexity: 4,
+            complexity: new BigNumber(4),
             expiryDate: null,
           },
           details: {
-            remainingCheckpoints: 1,
+            remainingCheckpoints: new BigNumber(1),
             nextCheckpointDate: new Date(),
           },
         },
       ];
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await service.findSchedulesByTicker('TICKER');
 
@@ -173,13 +173,13 @@ describe('CheckpointsService', () => {
   });
 
   describe('findScheduleById', () => {
-    let mockSecurityToken: MockSecurityToken;
+    let mockAsset: MockAsset;
     const ticker = 'TICKER';
     const id = new BigNumber(1);
 
     beforeEach(() => {
-      mockSecurityToken = new MockSecurityToken();
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAsset = new MockAsset();
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
     });
 
     describe('if the Schedule does not exist', () => {
@@ -188,7 +188,7 @@ describe('CheckpointsService', () => {
           code: ErrorCode.DataUnavailable,
           message: 'The Schedule does not exist',
         };
-        mockSecurityToken.checkpoints.schedules.getOne.mockImplementation(() => {
+        mockAsset.checkpoints.schedules.getOne.mockImplementation(() => {
           throw mockError;
         });
 
@@ -215,7 +215,7 @@ describe('CheckpointsService', () => {
             nextCheckpointDate: new Date(),
           },
         };
-        mockSecurityToken.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
+        mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
 
         const result = await service.findScheduleById(ticker, id);
 
@@ -225,7 +225,7 @@ describe('CheckpointsService', () => {
 
     afterEach(() => {
       expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
-      expect(mockSecurityToken.checkpoints.schedules.getOne).toHaveBeenCalledWith({
+      expect(mockAsset.checkpoints.schedules.getOne).toHaveBeenCalledWith({
         id,
       });
     });
@@ -244,10 +244,10 @@ describe('CheckpointsService', () => {
       const mockQueue = new MockTransactionQueue(transactions);
       mockQueue.run.mockResolvedValue(mockCheckpoint);
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.checkpoints.create.mockResolvedValue(mockQueue);
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.create.mockResolvedValue(mockQueue);
 
-      mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+      mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -266,7 +266,7 @@ describe('CheckpointsService', () => {
           },
         ],
       });
-      expect(mockSecurityToken.checkpoints.create).toHaveBeenCalledWith(
+      expect(mockAsset.checkpoints.create).toHaveBeenCalledWith(
         {
           signer: address,
         },
@@ -289,10 +289,10 @@ describe('CheckpointsService', () => {
       const mockQueue = new MockTransactionQueue(transactions);
       mockQueue.run.mockResolvedValue(mockCheckpointSchedule);
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.checkpoints.schedules.create.mockResolvedValue(mockQueue);
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.schedules.create.mockResolvedValue(mockQueue);
 
-      mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+      mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -300,8 +300,8 @@ describe('CheckpointsService', () => {
       const params = {
         signer: 'signer',
         start: mockDate,
-        period: { unit: CalendarUnit.Month, amount: 3 },
-        repetitions: 2,
+        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
+        repetitions: new BigNumber(2),
       };
 
       const result = await service.createScheduleByTicker('TICKER', params);
@@ -315,11 +315,11 @@ describe('CheckpointsService', () => {
           },
         ],
       });
-      expect(mockSecurityToken.checkpoints.schedules.create).toHaveBeenCalledWith(
+      expect(mockAsset.checkpoints.schedules.create).toHaveBeenCalledWith(
         {
           start: mockDate,
-          period: { unit: CalendarUnit.Month, amount: 3 },
-          repetitions: 2,
+          period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
+          repetitions: new BigNumber(2),
         },
         {
           signer: address,
@@ -340,7 +340,7 @@ describe('CheckpointsService', () => {
         },
       ],
       next: '0xddddd',
-      count: 1,
+      count: new BigNumber(1),
     };
     it('should return the list of Asset holders at a Checkpoint', async () => {
       const mockCheckpoint = new MockCheckpoint();
@@ -350,10 +350,13 @@ describe('CheckpointsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockCheckpoint as any);
 
-      const result = await service.getHolders('TICKER', new BigNumber(1), 1);
+      const result = await service.getHolders('TICKER', new BigNumber(1), new BigNumber(1));
 
       expect(result).toEqual(mockHolders);
-      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({ size: 1, start: undefined });
+      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({
+        size: new BigNumber(1),
+        start: undefined,
+      });
       findOneSpy.mockRestore();
     });
 
@@ -364,10 +367,18 @@ describe('CheckpointsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockCheckpoint as any);
 
-      const result = await service.getHolders('TICKER', new BigNumber(1), 10, 'START_KEY');
+      const result = await service.getHolders(
+        'TICKER',
+        new BigNumber(1),
+        new BigNumber(10),
+        'START_KEY'
+      );
 
       expect(result).toEqual(mockHolders);
-      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({ start: 'START_KEY', size: 10 });
+      expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({
+        start: 'START_KEY',
+        size: new BigNumber(10),
+      });
       findOneSpy.mockRestore();
     });
   });
@@ -383,10 +394,10 @@ describe('CheckpointsService', () => {
       findOneSpy.mockResolvedValue(mockCheckpoint as any);
       mockCheckpoint.balance.mockResolvedValue(balance);
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await service.getAssetBalance('TICKER', did, id);
       expect(result).toEqual({ balance, identity: did });
@@ -423,16 +434,16 @@ describe('CheckpointsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const mockSecurityToken = new MockSecurityToken();
-        mockSecurityToken.checkpoints.schedules.remove.mockImplementation(() => {
+        const mockAsset = new MockAsset();
+        mockAsset.checkpoints.schedules.remove.mockImplementation(() => {
           throw polymeshError;
         });
-        mockAssetsService.findOne.mockReturnValue(mockSecurityToken);
+        mockAssetsService.findOne.mockReturnValue(mockAsset);
         mockIsPolymeshError.mockReturnValue(true);
 
         let error;
         try {
-          await service.deleteScheduleByTicker('TICKER', new BigNumber('1'), signer);
+          await service.deleteScheduleByTicker('TICKER', new BigNumber(1), signer);
         } catch (err) {
           error = err;
         }
@@ -453,14 +464,14 @@ describe('CheckpointsService', () => {
         ];
         const mockQueue = new MockTransactionQueue(transactions);
 
-        const mockSecurityToken = new MockSecurityToken();
-        mockSecurityToken.checkpoints.schedules.remove.mockResolvedValue(mockQueue);
+        const mockAsset = new MockAsset();
+        mockAsset.checkpoints.schedules.remove.mockResolvedValue(mockQueue);
 
-        mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+        mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
         const signer = '0x6'.padEnd(66, '0');
         const ticker = 'TICKER';
-        const id = new BigNumber('1');
+        const id = new BigNumber(1);
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
@@ -476,7 +487,7 @@ describe('CheckpointsService', () => {
             },
           ],
         });
-        expect(mockSecurityToken.checkpoints.schedules.remove).toHaveBeenCalledWith(
+        expect(mockAsset.checkpoints.schedules.remove).toHaveBeenCalledWith(
           {
             schedule: id,
           },

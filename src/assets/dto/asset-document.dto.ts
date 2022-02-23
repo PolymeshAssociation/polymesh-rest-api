@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TokenDocument } from '@polymathnetwork/polymesh-sdk/types';
+import { AssetDocument } from '@polymathnetwork/polymesh-sdk/types';
 import { IsDate, IsHexadecimal, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
@@ -55,11 +55,11 @@ export class AssetDocumentDto {
   @IsDate()
   readonly filedAt?: Date;
 
-  public toTokenDocument(): TokenDocument {
+  public toAssetDocument(): AssetDocument {
     return { ...this };
   }
 
-  constructor(dto: Omit<AssetDocumentDto, 'toTokenDocument'>) {
+  constructor(dto: Omit<AssetDocumentDto, 'toAssetDocument'>) {
     Object.assign(this, dto);
   }
 }

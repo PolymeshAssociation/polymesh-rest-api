@@ -11,6 +11,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
+import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
@@ -20,6 +21,7 @@ import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.serv
 @Injectable()
 export class PortfoliosService {
   constructor(
+    private readonly polymeshService: PolymeshService,
     private readonly identitiesService: IdentitiesService,
     private readonly relayerAccountsService: RelayerAccountsService
   ) {}
@@ -57,9 +59,9 @@ export class PortfoliosService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const args = {
       to: toPortfolioId(to),
-      items: items.map(({ ticker: token, amount, memo }) => {
+      items: items.map(({ ticker: asset, amount, memo }) => {
         return {
-          token,
+          asset,
           amount: new BigNumber(amount),
           memo,
         };
@@ -71,10 +73,12 @@ export class PortfoliosService {
   public async createPortfolio(
     params: CreatePortfolioDto
   ): Promise<QueueResult<NumberedPortfolio>> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const identity = await this.identitiesService.findOne(signer);
-    return processQueue(identity.portfolios.create, rest, { signer: address });
+    return processQueue(polymeshApi.identities.createPortfolio, rest, { signer: address });
   }
 
   public async deletePortfolio(

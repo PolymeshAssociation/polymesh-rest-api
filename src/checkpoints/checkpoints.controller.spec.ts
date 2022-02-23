@@ -72,7 +72,7 @@ describe('CheckpointsController', () => {
         },
       ],
       next: '0xddddd',
-      count: 2,
+      count: new BigNumber(2),
     };
 
     const mockResult = new PaginatedResultsModel({
@@ -83,13 +83,16 @@ describe('CheckpointsController', () => {
           totalSupply: new BigNumber('10000'),
         },
       ],
-      total: 2,
+      total: new BigNumber(2),
       next: '0xddddd',
     });
     it('should return the list of Checkpoints created on an Asset', async () => {
       mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
 
-      const result = await controller.getCheckpoints({ ticker: 'TICKER' }, { size: 1 });
+      const result = await controller.getCheckpoints(
+        { ticker: 'TICKER' },
+        { size: new BigNumber(1) }
+      );
 
       expect(result).toEqual(mockResult);
     });
@@ -99,7 +102,7 @@ describe('CheckpointsController', () => {
 
       const result = await controller.getCheckpoints(
         { ticker: 'TICKER' },
-        { size: 1, start: 'START_KEY' }
+        { size: new BigNumber(1), start: 'START_KEY' }
       );
 
       expect(result).toEqual(mockResult);
@@ -133,17 +136,17 @@ describe('CheckpointsController', () => {
       const mockSchedules = [
         {
           schedule: {
-            id: new BigNumber('1'),
+            id: new BigNumber(1),
             period: {
               unit: CalendarUnit.Month,
-              amount: 3,
+              amount: new BigNumber(3),
             },
             start: mockDate,
-            complexity: 4,
+            complexity: new BigNumber(4),
             expiryDate: null,
           },
           details: {
-            remainingCheckpoints: 1,
+            remainingCheckpoints: new BigNumber(1),
             nextCheckpointDate: mockDate,
           },
         },
@@ -155,16 +158,16 @@ describe('CheckpointsController', () => {
 
       const mockResult = [
         {
-          id: new BigNumber('1'),
+          id: new BigNumber(1),
           ticker: 'TICKER',
           period: {
             unit: CalendarUnit.Month,
-            amount: 3,
+            amount: new BigNumber(3),
           },
           start: mockDate,
-          complexity: 4,
+          complexity: new BigNumber(4),
           expiryDate: null,
-          remainingCheckpoints: 1,
+          remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
         },
       ];
@@ -179,7 +182,7 @@ describe('CheckpointsController', () => {
       const mockScheduleWithDetails = {
         schedule: new MockCheckpointSchedule(),
         details: {
-          remainingCheckpoints: 1,
+          remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
         },
       };
@@ -209,7 +212,7 @@ describe('CheckpointsController', () => {
       const mockScheduleWithDetails = {
         schedule: new MockCheckpointSchedule(),
         details: {
-          remainingCheckpoints: 1,
+          remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
         },
       };
@@ -218,8 +221,8 @@ describe('CheckpointsController', () => {
       const body = {
         signer: 'signer',
         start: mockDate,
-        period: { unit: CalendarUnit.Month, amount: 3 },
-        repetitions: 2,
+        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
+        repetitions: new BigNumber(2),
       };
 
       const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
@@ -248,7 +251,7 @@ describe('CheckpointsController', () => {
         },
       ],
       next: '0xddddd',
-      count: 2,
+      count: new BigNumber(2),
     };
 
     const mockResult = new PaginatedResultsModel({
@@ -262,7 +265,7 @@ describe('CheckpointsController', () => {
           balance: new BigNumber(1000),
         }),
       ],
-      total: 2,
+      total: new BigNumber(2),
       next: '0xddddd',
     });
     it('should return the holders of an Asset at a given Checkpoint', async () => {
@@ -273,7 +276,7 @@ describe('CheckpointsController', () => {
           ticker: 'TICKER',
           id: new BigNumber(1),
         },
-        { size: 10 }
+        { size: new BigNumber(10) }
       );
       expect(result).toEqual(mockResult);
       expect(mockCheckpointsService.getHolders).toBeCalled();

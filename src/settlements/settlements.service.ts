@@ -73,7 +73,7 @@ export class SettlementsService {
       ...rest,
       legs: rest.legs.map(({ amount, asset, from, to }) => ({
         amount,
-        token: asset,
+        asset,
         from: from.toPortfolioLike(),
         to: to.toPortfolioLike(),
       })),
@@ -141,7 +141,7 @@ export class SettlementsService {
 
   public async findAffirmations(
     id: BigNumber,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<InstructionAffirmation>> {
     const instruction = await this.findInstruction(id);
@@ -156,7 +156,7 @@ export class SettlementsService {
       type,
     };
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const method = this.polymeshService.polymeshApi.currentIdentity.createVenue;
+    const method = this.polymeshService.polymeshApi.settlements.createVenue;
     return processQueue(method, params, { signer: address });
   }
 

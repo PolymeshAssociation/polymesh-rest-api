@@ -1,8 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
-import { IsEnum, IsNumber } from 'class-validator';
+import { IsEnum } from 'class-validator';
+
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class CalendarPeriodDto {
   @ApiProperty({
@@ -19,6 +23,7 @@ export class CalendarPeriodDto {
     type: 'number',
     example: 3,
   })
-  @IsNumber()
-  readonly amount: number;
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly amount: BigNumber;
 }

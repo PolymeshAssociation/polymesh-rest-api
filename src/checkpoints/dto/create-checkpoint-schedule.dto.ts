@@ -1,10 +1,13 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber, IsOptional, ValidateNested } from 'class-validator';
+import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
 import { CalendarPeriodDto } from '~/checkpoints/dto/calendar-period.dto';
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
 export class CreateCheckpointScheduleDto extends SignerDto {
@@ -39,6 +42,7 @@ export class CreateCheckpointScheduleDto extends SignerDto {
     nullable: true,
   })
   @IsOptional()
-  @IsNumber()
-  readonly repetitions: number | null;
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly repetitions: BigNumber | null;
 }

@@ -112,7 +112,7 @@ describe('CorporateActionsController', () => {
 
       const result = await controller.getDividendDistribution({
         ticker: 'TICKER',
-        id: new BigNumber('1'),
+        id: new BigNumber(1),
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -255,7 +255,7 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.linkDocuments.mockResolvedValue({ transactions });
 
       const result = await controller.linkDocuments(
-        { ticker: 'TICKER', id: new BigNumber('1') },
+        { ticker: 'TICKER', id: new BigNumber(1) },
         body
       );
 
@@ -331,7 +331,7 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.modifyCheckpoint.mockResolvedValue({ transactions });
 
       const result = await controller.modifyDistributionCheckpoint(
-        { ticker: 'TICKER', id: new BigNumber('1') },
+        { ticker: 'TICKER', id: new BigNumber(1) },
         body
       );
 

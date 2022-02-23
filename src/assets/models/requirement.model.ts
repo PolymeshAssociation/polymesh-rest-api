@@ -1,17 +1,19 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Condition } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromEntityObject } from '~/common/decorators/transformation';
+import { FromBigNumber, FromEntityObject } from '~/common/decorators/transformation';
 
 export class RequirementModel {
   @ApiProperty({
     description: 'Unique ID of the Requirement',
-    type: 'number',
+    type: 'string',
     example: '1',
   })
-  readonly id: number;
+  @FromBigNumber()
+  readonly id: BigNumber;
 
   @ApiProperty({
     description: 'List of Conditions',

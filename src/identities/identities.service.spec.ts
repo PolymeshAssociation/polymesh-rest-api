@@ -64,7 +64,7 @@ describe('IdentitiesService', () => {
           code: ErrorCode.DataUnavailable,
           message: 'The Identity does not exist',
         };
-        mockPolymeshApi.getIdentity.mockImplementation(() => {
+        mockPolymeshApi.identities.getIdentity.mockImplementation(() => {
           throw mockError;
         });
 
@@ -85,7 +85,7 @@ describe('IdentitiesService', () => {
       it('should return the Identity', async () => {
         const fakeResult = 'identity';
 
-        mockPolymeshApi.getIdentity.mockReturnValue(fakeResult);
+        mockPolymeshApi.identities.getIdentity.mockReturnValue(fakeResult);
 
         const result = await service.findOne('realDid');
 
@@ -94,14 +94,14 @@ describe('IdentitiesService', () => {
     });
   });
 
-  describe('findTrustingTokens', () => {
+  describe('findTrustingAssets', () => {
     it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
-      const mockTokens = [
+      const mockAssets = [
         {
-          ticker: 'BAR_TOKEN',
+          ticker: 'FAKE_TICKER',
         },
         {
-          ticker: 'FOO_TOKEN',
+          ticker: 'RANDOM_TICKER',
         },
       ];
       const mockIdentity = new MockIdentity();
@@ -109,10 +109,10 @@ describe('IdentitiesService', () => {
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockIdentity as any);
-      mockIdentity.getTrustingTokens.mockResolvedValue(mockTokens);
+      mockIdentity.getTrustingAssets.mockResolvedValue(mockAssets);
 
-      const result = await service.findTrustingTokens('TICKER');
-      expect(result).toEqual(mockTokens);
+      const result = await service.findTrustingAssets('TICKER');
+      expect(result).toEqual(mockAssets);
 
       findOneSpy.mockRestore();
     });
@@ -156,7 +156,7 @@ describe('IdentitiesService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        mockPolymeshApi.currentIdentity.inviteAccount.mockImplementation(() => {
+        mockPolymeshApi.accountManagement.inviteAccount.mockImplementation(() => {
           throw polymeshError;
         });
         mockIsPolymeshError.mockReturnValue(true);
@@ -169,7 +169,7 @@ describe('IdentitiesService', () => {
         }
 
         expect(error).toBeInstanceOf(HttpException);
-        expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
+        expect(mockPolymeshApi.accountManagement.inviteAccount).toHaveBeenCalled();
         mockIsPolymeshError.mockReset();
       });
     });
@@ -184,7 +184,7 @@ describe('IdentitiesService', () => {
           },
         ];
         const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.currentIdentity.inviteAccount.mockResolvedValue(mockQueue);
+        mockPolymeshApi.accountManagement.inviteAccount.mockResolvedValue(mockQueue);
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
@@ -205,7 +205,7 @@ describe('IdentitiesService', () => {
             },
           ],
         });
-        expect(mockPolymeshApi.currentIdentity.inviteAccount).toHaveBeenCalled();
+        expect(mockPolymeshApi.accountManagement.inviteAccount).toHaveBeenCalled();
       });
     });
   });

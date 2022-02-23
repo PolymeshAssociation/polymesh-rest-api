@@ -5,23 +5,23 @@ import { Permissions } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { FromEntityObject } from '~/common/decorators/transformation';
-import { SignerModel } from '~/identities/models/signer.model';
+import { AccountModel } from '~/identities/models/account.model';
 
-export class SecondaryKeyModel {
+export class PermissionedAccountModel {
   @ApiProperty({
-    description: 'Signer details',
-    type: () => SignerModel,
+    description: 'Account details',
+    type: () => AccountModel,
   })
-  @Type(() => SignerModel)
-  readonly signer: SignerModel;
+  @Type(() => AccountModel)
+  readonly account: AccountModel;
 
   @ApiProperty({
-    description: 'Permissions present with this secondary key',
+    description: 'Permissions present with this Secondary Account',
   })
   @FromEntityObject()
   readonly permissions: Permissions;
 
-  constructor(model: SecondaryKeyModel) {
+  constructor(model: PermissionedAccountModel) {
     Object.assign(this, model);
   }
 }

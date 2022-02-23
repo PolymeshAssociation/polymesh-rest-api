@@ -32,7 +32,7 @@ export class CheckpointsService {
 
   public async findAllByTicker(
     ticker: string,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<CheckpointWithData>> {
     const asset = await this.assetsService.findOne(ticker);
@@ -113,7 +113,7 @@ export class CheckpointsService {
   public async getHolders(
     ticker: string,
     checkpointId: BigNumber,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<IdentityBalance>> {
     const checkpoint = await this.findOne(ticker, checkpointId);

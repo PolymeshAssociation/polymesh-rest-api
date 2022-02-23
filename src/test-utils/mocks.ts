@@ -14,37 +14,48 @@ export type Mocked<T> = T &
 export class MockPolymesh {
   public static create = jest.fn().mockResolvedValue(new MockPolymesh());
 
-  public getSecurityTokens = jest.fn();
-  public getSecurityToken = jest.fn();
-  public getIdentity = jest.fn();
-  public getLatestBlock = jest.fn();
-  public isIdentityValid = jest.fn();
   public disconnect = jest.fn();
   public addSigner = jest.fn();
-  public getTickerReservation = jest.fn();
+
+  public network = {
+    getLatestBlock: jest.fn(),
+  };
+
+  public assets = {
+    getAsset: jest.fn(),
+    getAssets: jest.fn(),
+    reserveTicker: jest.fn(),
+    createAsset: jest.fn(),
+    getTickerReservation: jest.fn(),
+  };
+
+  public accountManagement = {
+    inviteAccount: jest.fn(),
+  };
+
+  public identities = {
+    isIdentityValid: jest.fn(),
+    getIdentity: jest.fn(),
+    createPortfolio: jest.fn(),
+  };
+
   public settlements = {
     getInstruction: jest.fn(),
     getVenue: jest.fn(),
+    createVenue: jest.fn(),
   };
 
   public claims = {
     getIssuedClaims: jest.fn(),
     getIdentitiesWithClaims: jest.fn(),
   };
-
-  public currentIdentity = {
-    reserveTicker: jest.fn(),
-    createVenue: jest.fn(),
-    inviteAccount: jest.fn(),
-    createToken: jest.fn(),
-  };
 }
 
-export class MockSecurityToken {
+export class MockAsset {
   public details = jest.fn();
   public getIdentifiers = jest.fn();
   public currentFundingRound = jest.fn();
-  public tokenHolders = {
+  public assetHolders = {
     get: jest.fn(),
   };
 
@@ -127,20 +138,20 @@ export class MockIdentity {
   did = '0x06'.padEnd(66, '0');
   portfolios = new MockPortfolios();
   authorizations = new MockIdentityAuthorization();
-  public getPrimaryKey = jest.fn();
-  public areSecondaryKeysFrozen = jest.fn();
+  public getPrimaryAccount = jest.fn();
+  public areSecondaryAccountsFrozen = jest.fn();
   public getPendingInstructions = jest.fn();
   public getVenues = jest.fn();
   public createVenue = jest.fn();
-  public getSecondaryKeys = jest.fn();
-  public getTrustingTokens = jest.fn();
+  public getSecondaryAccounts = jest.fn();
+  public getTrustingAssets = jest.fn();
 }
 
 export class MockPortfolio {
   id = new BigNumber(1);
   owner = new MockIdentity();
   public getName = jest.fn();
-  public getTokenBalances = jest.fn();
+  public getAssetBalances = jest.fn();
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
   public moveFunds = jest.fn();
@@ -164,10 +175,10 @@ export class MockCheckpoint {
 export class MockCheckpointSchedule {
   id = new BigNumber(1);
   ticker = 'TICKER';
-  period = { unit: CalendarUnit.Month, amount: 3 };
+  period = { unit: CalendarUnit.Month, amount: new BigNumber(3) };
   start = new Date('10/14/1987');
   expiryDate = new Date('10/14/2000');
-  complexity = 4;
+  complexity = new BigNumber(4);
 }
 
 export class MockAuthorizationRequest {
@@ -185,10 +196,6 @@ export class MockAuthorizationRequest {
   target = {
     did: '0x6'.padEnd(66, '1a'),
   };
-}
-
-export class MockTickerReservation {
-  public createToken = jest.fn();
 }
 
 export class MockTransactionQueue {

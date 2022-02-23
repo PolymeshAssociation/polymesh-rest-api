@@ -58,7 +58,7 @@ export class PermissionsLikeDto {
     const { assets, portfolios, transactions, transactionGroups } = this;
 
     let permissionsLike: PermissionsLike = {
-      tokens: assets === null ? null : assets?.toSectionPermissions(),
+      assets: assets === null ? null : assets?.toSectionPermissions(),
       portfolios: portfolios === null ? null : portfolios?.toSectionPermissions(),
     };
 

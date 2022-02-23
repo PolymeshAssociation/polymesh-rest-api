@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
-  StoBalanceStatus,
-  StoSaleStatus,
-  StoTimingStatus,
+  OfferingBalanceStatus,
+  OfferingSaleStatus,
+  OfferingTimingStatus,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -40,14 +40,14 @@ describe('OfferingsController', () => {
     it('should return the list of Offerings for an Asset', async () => {
       const mockOfferings = [
         {
-          sto: {
-            id: new BigNumber('1'),
+          offering: {
+            id: new BigNumber(1),
           },
           details: {
             tiers: [
               {
                 amount: new BigNumber('1000'),
-                price: new BigNumber('1'),
+                price: new BigNumber(1),
                 remaining: new BigNumber('1000'),
               },
             ],
@@ -59,16 +59,16 @@ describe('OfferingsController', () => {
             raisingPortfolio: new MockPortfolio(),
             raisingCurrency: 'CURRENCY',
             venue: {
-              id: new BigNumber('1'),
+              id: new BigNumber(1),
             },
             start: new Date(),
             end: null,
             status: {
-              timing: StoTimingStatus.Started,
-              balance: StoBalanceStatus.Available,
-              sale: StoSaleStatus.Live,
+              timing: OfferingTimingStatus.Started,
+              balance: OfferingBalanceStatus.Available,
+              sale: OfferingSaleStatus.Live,
             },
-            minInvestment: new BigNumber('1'),
+            minInvestment: new BigNumber(1),
             totalAmount: new BigNumber('1000'),
             totalRemaining: new BigNumber('1000'),
           },
@@ -79,7 +79,7 @@ describe('OfferingsController', () => {
 
       const result = await controller.getOfferings(
         { ticker: 'SOME_TICKER' },
-        { timing: StoTimingStatus.Started }
+        { timing: OfferingTimingStatus.Started }
       );
 
       const mockResult = new ResultsModel({
@@ -101,20 +101,20 @@ describe('OfferingsController', () => {
         },
       ],
       next: '10',
-      count: 2,
+      count: new BigNumber(2),
     };
     it('should return a paginated list of Investments made in an Offering', async () => {
       mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
 
       const result = await controller.getInvestments(
-        { ticker: 'TICKER', id: new BigNumber('1') },
-        { start: 0, size: 10 }
+        { ticker: 'TICKER', id: new BigNumber(1) },
+        { start: new BigNumber(0), size: new BigNumber(10) }
       );
 
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: mockInvestments.data,
-          total: mockInvestments.count,
+          total: new BigNumber(mockInvestments.count),
           next: mockInvestments.next,
         })
       );

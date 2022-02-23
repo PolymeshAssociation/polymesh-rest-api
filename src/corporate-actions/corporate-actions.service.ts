@@ -128,7 +128,7 @@ export class CorporateActionsService {
     const { distribution } = await this.findDistribution(ticker, id);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {
-      documents: documents.map(document => document.toTokenDocument()),
+      documents: documents.map(document => document.toAssetDocument()),
     };
     return processQueue(distribution.linkDocuments, params, {
       signer: address,

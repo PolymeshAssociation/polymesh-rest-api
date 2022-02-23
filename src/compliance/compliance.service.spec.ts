@@ -4,7 +4,7 @@ import { ClaimType, ConditionType, ScopeType, TxTags } from '@polymathnetwork/po
 import { AssetsService } from '~/assets/assets.service';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
-import { MockSecurityToken, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 describe('ComplianceService', () => {
@@ -51,10 +51,10 @@ describe('ComplianceService', () => {
         },
       ];
 
-      const mockSecurityToken = new MockSecurityToken();
+      const mockAsset = new MockAsset();
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
-      mockSecurityToken.compliance.requirements.get.mockResolvedValue(mockRequirements);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAsset.compliance.requirements.get.mockResolvedValue(mockRequirements);
 
       const result = await service.findComplianceRequirements('TICKER');
 
@@ -64,7 +64,7 @@ describe('ComplianceService', () => {
 
   describe('setRequirements', () => {
     it('should run a set rules procedure and return the queue data', async () => {
-      const mockAsset = new MockSecurityToken();
+      const mockAsset = new MockAsset();
       const transactions = [
         {
           blockHash: '0x1',

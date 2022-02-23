@@ -25,7 +25,7 @@ describe('addSecondaryKeyParamsDto', () => {
         },
       ],
       [
-        'Invite with tokens permissions',
+        'Invite with Asset permissions',
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
@@ -121,7 +121,7 @@ describe('addSecondaryKeyParamsDto', () => {
         {
           secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
-            transactionGroups: [TxGroup.PortfolioManagement, TxGroup.TokenManagement],
+            transactionGroups: [TxGroup.PortfolioManagement, TxGroup.AssetManagement],
           },
           signer,
         },

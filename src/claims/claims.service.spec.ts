@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ClaimData, ClaimType, ResultSet } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ClaimsService } from '~/claims/claims.service';
@@ -39,7 +40,7 @@ describe('ClaimsService', () => {
       const claimsResult = {
         data: [],
         next: null,
-        count: 0,
+        count: new BigNumber(0),
       } as ResultSet<ClaimData>;
       mockPolymeshApi.claims.getIssuedClaims.mockResolvedValue(claimsResult);
       const result = await claimsService.findIssuedByDid('did');
@@ -80,14 +81,14 @@ describe('ClaimsService', () => {
           },
         ],
         next: null,
-        count: 1,
+        count: new BigNumber(1),
       };
       mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
       const result = await claimsService.findAssociatedByDid(did);
       expect(result).toStrictEqual({
         data: mockAssociatedClaims,
         next: null,
-        count: 1,
+        count: new BigNumber(1),
       });
     });
   });

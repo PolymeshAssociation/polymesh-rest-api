@@ -13,7 +13,7 @@ export class PolymeshService {
     relayerAccountsService: RelayerAccountsService
   ) {
     this.heartbeatInterval = setInterval(() => {
-      polymeshApi.getLatestBlock();
+      polymeshApi.network.getLatestBlock();
     }, 10000);
 
     const accounts = relayerAccountsService.findAll();

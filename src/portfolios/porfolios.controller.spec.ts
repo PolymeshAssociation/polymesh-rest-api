@@ -46,7 +46,7 @@ describe('PortfoliosController', () => {
     it('should return list of all portfolios of an identity', async () => {
       const did = '0x6'.padEnd(66, '0');
       const mockPortfolio = new MockPortfolio();
-      mockPortfolio.getTokenBalances.mockResolvedValue([]);
+      mockPortfolio.getAssetBalances.mockResolvedValue([]);
       mockPortfolio.getCustodian.mockResolvedValue({ did });
       mockPortfolio.getName.mockResolvedValue('P-1');
       mockPortfoliosService.findAllByOwner.mockResolvedValue([mockPortfolio]);
@@ -66,8 +66,8 @@ describe('PortfoliosController', () => {
       mockPortfoliosService.moveAssets.mockResolvedValue(response);
       const params = {
         signer: '0x6000',
-        to: new BigNumber('2'),
-        from: new BigNumber('0'),
+        to: new BigNumber(2),
+        from: new BigNumber(0),
         items: [{ to: '3', ticker: 'TICKER', amount: new BigNumber('100') }],
       };
 

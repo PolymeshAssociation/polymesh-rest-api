@@ -27,7 +27,8 @@ export async function processQueue<MethodArgs, ReturnType>(
 
     return {
       result,
-      transactions: queue.transactions.map(({ blockHash, txHash, tag }) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transactions: (queue.transactions as any[]).map(({ blockHash, txHash, tag }) => ({
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         blockHash: blockHash!,
         transactionHash: txHash!,
@@ -38,17 +39,16 @@ export async function processQueue<MethodArgs, ReturnType>(
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     if (isPolymeshError(err)) {
       const { message, code } = err;
-      const errorMessage = message.replace(/Security Token/g, 'Asset');
       switch (code) {
         case ErrorCode.ValidationError:
-          throw new BadRequestException(errorMessage);
+          throw new BadRequestException(message);
         case ErrorCode.InsufficientBalance:
         case ErrorCode.UnmetPrerequisite:
-          throw new UnprocessableEntityException(errorMessage);
+          throw new UnprocessableEntityException(message);
         case ErrorCode.DataUnavailable:
-          throw new NotFoundException(errorMessage);
+          throw new NotFoundException(message);
         default:
-          throw new InternalServerErrorException(errorMessage);
+          throw new InternalServerErrorException(message);
       }
     }
     throw new InternalServerErrorException(err.message);

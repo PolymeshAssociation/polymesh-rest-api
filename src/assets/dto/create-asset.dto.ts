@@ -2,12 +2,12 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
+import { KnownAssetType } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { AssetIdentifierDto } from '~/assets/dto/asset-identifier.dto';
+import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -38,7 +38,7 @@ export class CreateAssetDto extends SignerDto {
   readonly initialSupply?: BigNumber;
 
   @ApiProperty({
-    description: 'Specifies if the Asset token can be divided',
+    description: 'Specifies if the Asset can be divided',
     example: 'false',
   })
   @IsBoolean()
@@ -46,8 +46,8 @@ export class CreateAssetDto extends SignerDto {
 
   @ApiProperty({
     description: 'The type of Asset',
-    enum: KnownTokenType,
-    example: KnownTokenType.EquityCommon,
+    enum: KnownAssetType,
+    example: KnownAssetType.EquityCommon,
   })
   @IsString()
   readonly assetType: string;
@@ -61,13 +61,13 @@ export class CreateAssetDto extends SignerDto {
   readonly requireInvestorUniqueness: boolean;
 
   @ApiPropertyOptional({
-    description: 'List of Asset Identifiers',
+    description: "List of Asset's Security Identifiers",
     isArray: true,
-    type: AssetIdentifierDto,
+    type: SecurityIdentifierDto,
   })
   @ValidateNested({ each: true })
-  @Type(() => AssetIdentifierDto)
-  readonly identifiers?: AssetIdentifierDto[];
+  @Type(() => SecurityIdentifierDto)
+  readonly identifiers?: SecurityIdentifierDto[];
 
   @ApiPropertyOptional({
     description: 'The current funding round of the Asset',

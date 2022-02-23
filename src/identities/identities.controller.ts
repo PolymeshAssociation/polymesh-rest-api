@@ -9,12 +9,13 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
+  Asset,
   AuthorizationType,
   Claim,
   ClaimType,
   Instruction,
-  SecurityToken,
   Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -213,10 +214,10 @@ export class IdentitiesController {
   })
   @ApiArrayResponse('string', {
     paginated: false,
-    example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
+    example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
   })
   @Get(':did/assets')
-  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
+  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
     const results = await this.assetsService.findAllByOwner(did);
     return new ResultsModel({ results });
   }
@@ -317,7 +318,7 @@ export class IdentitiesController {
       did,
       includeExpired,
       size,
-      Number(start)
+      start ? new BigNumber(start) : new BigNumber(0)
     );
 
     const claimsData = claimsResultSet.data.map(
@@ -393,7 +394,7 @@ export class IdentitiesController {
       claimTypes,
       includeExpired,
       size,
-      Number(start)
+      start ? new BigNumber(start) : new BigNumber(0)
     );
     const results = claimsResultSet.data.map(
       ({ issuedAt, expiry, claim, target, issuer }) =>
@@ -423,11 +424,11 @@ export class IdentitiesController {
   @ApiArrayResponse('string', {
     description: 'List of Assets for which the Identity is a trusted Claim Issuer',
     paginated: false,
-    example: ['BAR_TOKEN', 'FOO_TOKEN'],
+    example: ['SOME_TICKER', 'RANDOM_TICKER'],
   })
-  @Get(':did/trusting-tokens')
-  async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
-    const results = await this.identitiesService.findTrustingTokens(did);
+  @Get(':did/trusting-assets')
+  async getTrustingAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
+    const results = await this.identitiesService.findTrustingAssets(did);
     return new ResultsModel({ results });
   }
 

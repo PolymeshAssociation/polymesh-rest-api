@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, KnownTokenType, TokenIdentifier } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, KnownAssetType, SecurityIdentifier } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromBigNumber, FromEntity, FromEntityObject } from '~/common/decorators/transformation';
 
@@ -18,15 +18,15 @@ export class AssetDetailsModel {
   @ApiProperty({
     description: 'Type of the Asset',
     type: 'string',
-    enum: KnownTokenType,
-    example: KnownTokenType.EquityCommon,
+    enum: KnownAssetType,
+    example: KnownAssetType.EquityCommon,
   })
   readonly assetType: string;
 
   @ApiProperty({
     description: 'Name of the Asset',
     type: 'string',
-    example: 'MyToken',
+    example: 'MyAsset',
   })
   readonly name: string;
 
@@ -56,7 +56,7 @@ export class AssetDetailsModel {
     ],
   })
   @FromEntityObject()
-  readonly identifiers: TokenIdentifier[];
+  readonly identifiers: SecurityIdentifier[];
 
   @ApiProperty({
     description: 'Current funding round of the Asset',

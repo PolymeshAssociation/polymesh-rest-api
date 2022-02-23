@@ -23,10 +23,10 @@ import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.modul
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import {
+  MockAsset,
   MockIdentity,
   MockInstruction,
   MockPolymesh,
-  MockSecurityToken,
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
@@ -253,7 +253,7 @@ describe('SettlementsService', () => {
             from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
             to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
             amount: new BigNumber(100),
-            asset: 'TOKEN',
+            asset: 'FAKE_TICKER',
           },
         ],
       };
@@ -284,7 +284,7 @@ describe('SettlementsService', () => {
               from: 'fromDid',
               to: { identity: 'toDid', id: new BigNumber(1) },
               amount: new BigNumber(100),
-              token: 'TOKEN',
+              asset: 'FAKE_TICKER',
             },
           ],
         },
@@ -306,7 +306,7 @@ describe('SettlementsService', () => {
         },
       ];
       const mockQueue = new MockTransactionQueue(transactions);
-      mockPolymeshApi.currentIdentity.createVenue.mockResolvedValue(mockQueue);
+      mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockQueue);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const body = {
@@ -329,7 +329,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockPolymeshApi.currentIdentity.createVenue).toHaveBeenCalledWith(
+      expect(mockPolymeshApi.settlements.createVenue).toHaveBeenCalledWith(
         { description: body.description, type: body.type },
         { signer: address }
       );
@@ -536,7 +536,7 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const result = await service.findAffirmations(new BigNumber('123'), 10);
+      const result = await service.findAffirmations(new BigNumber(123), new BigNumber(10));
 
       expect(result).toEqual(mockAffirmations);
       findInstructionSpy.mockRestore();
@@ -555,10 +555,10 @@ describe('SettlementsService', () => {
         result: false,
       };
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
+      const mockAsset = new MockAsset();
+      mockAsset.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await service.canTransfer(
         new PortfolioDto({ did: 'fromDid', id: new BigNumber(1) }).toPortfolioLike(),

@@ -35,7 +35,7 @@ export class DividendDistributionDto extends SignerDto {
   readonly declarationDate?: Date;
 
   @ApiPropertyOptional({
-    description: 'Token holder Identities that will be affected by the Corporate Actions',
+    description: 'Asset holder Identities that will be affected by the Corporate Actions',
     type: CorporateActionTargetsDto,
   })
   @IsOptional()
@@ -113,7 +113,7 @@ export class DividendDistributionDto extends SignerDto {
   readonly maxAmount: BigNumber;
 
   @ApiProperty({
-    description: 'Date starting from which token holders can claim their dividends',
+    description: 'Date starting from which Asset holders can claim their dividends',
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
   })

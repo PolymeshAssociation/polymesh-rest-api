@@ -68,7 +68,7 @@ describe('SettlementsController', () => {
             from: new MockPortfolio(),
             to: new MockPortfolio(),
             amount: new BigNumber('100'),
-            token: {
+            asset: {
               ticker: 'TICKER',
             },
           },
@@ -79,12 +79,12 @@ describe('SettlementsController', () => {
       mockInstruction.getStatus.mockResolvedValue({ status: InstructionStatus.Pending });
       mockInstruction.getLegs.mockResolvedValue(mockLegs);
       mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
-      const result = await controller.getInstruction({ id: new BigNumber('3') });
+      const result = await controller.getInstruction({ id: new BigNumber(3) });
 
       expect(result).toEqual({
         ...mockInstructionDetails,
         legs:
-          mockLegs.data.map(({ from, to, amount, token: asset }) => ({
+          mockLegs.data.map(({ from, to, amount, asset }) => ({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             from: createPortfolioIdentifierModel(from as any),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,7 +106,7 @@ describe('SettlementsController', () => {
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.createInstruction({ id: new BigNumber('3') }, {} as any);
+      const result = await controller.createInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
         instruction: 'fakeInstruction',
@@ -124,7 +124,7 @@ describe('SettlementsController', () => {
       mockSettlementsService.affirmInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.affirmInstruction({ id: new BigNumber('3') }, {} as any);
+      const result = await controller.affirmInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
         transactions,
@@ -141,7 +141,7 @@ describe('SettlementsController', () => {
       mockSettlementsService.rejectInstruction.mockResolvedValue(mockData);
 
       const result = await controller.affirmInstruction(
-        { id: new BigNumber('3') },
+        { id: new BigNumber(3) },
         { signer: 'signer' }
       );
 
@@ -166,7 +166,10 @@ describe('SettlementsController', () => {
       };
       mockSettlementsService.findAffirmations.mockResolvedValue(mockAffirmations);
 
-      const result = await controller.getAffirmations({ id: new BigNumber('3') }, { size: 10 });
+      const result = await controller.getAffirmations(
+        { id: new BigNumber(3) },
+        { size: new BigNumber(10) }
+      );
 
       expect(result).toEqual(
         new PaginatedResultsModel({
@@ -188,7 +191,7 @@ describe('SettlementsController', () => {
       };
       mockSettlementsService.findVenueDetails.mockResolvedValue(mockVenueDetails);
 
-      const result = await controller.getVenueDetails({ id: new BigNumber('3') });
+      const result = await controller.getVenueDetails({ id: new BigNumber(3) });
 
       expect(result).toEqual(mockVenueDetails);
     });
@@ -232,7 +235,7 @@ describe('SettlementsController', () => {
         type: VenueType.Exchange,
       };
 
-      const result = await controller.modifyVenue({ id: new BigNumber('3') }, body);
+      const result = await controller.modifyVenue({ id: new BigNumber(3) }, body);
 
       expect(result).toEqual({
         transactions,
@@ -256,9 +259,9 @@ describe('SettlementsController', () => {
 
       const result = await controller.validateLeg({
         fromDid: 'fromDid',
-        fromPortfolio: new BigNumber('1'),
+        fromPortfolio: new BigNumber(1),
         toDid: 'toDid',
-        toPortfolio: new BigNumber('1'),
+        toPortfolio: new BigNumber(1),
         asset: 'TICKER',
         amount: new BigNumber('123'),
       });

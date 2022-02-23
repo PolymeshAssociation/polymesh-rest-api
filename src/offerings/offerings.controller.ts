@@ -1,9 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
-  StoBalanceStatus,
-  StoSaleStatus,
-  StoTimingStatus,
+  OfferingBalanceStatus,
+  OfferingSaleStatus,
+  OfferingTimingStatus,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -31,8 +32,8 @@ export class OfferingsController {
 
   @ApiTags('assets')
   @ApiOperation({
-    summary: 'Fetch Token Offerings for an Asset',
-    description: 'This endpoint will provide the list of all Token Offerings for an Asset',
+    summary: 'Fetch Asset Offerings for an Asset',
+    description: 'This endpoint will provide the list of all Asset Offerings for an Asset',
   })
   @ApiParam({
     name: 'ticker',
@@ -43,23 +44,23 @@ export class OfferingsController {
   @ApiQuery({
     name: 'timing',
     description: 'Timing status by which to filter Offerings',
-    enum: StoTimingStatus,
+    enum: OfferingTimingStatus,
     required: false,
   })
   @ApiQuery({
     name: 'balance',
     description: 'Balance status by which to filter Offerings',
-    enum: StoBalanceStatus,
+    enum: OfferingBalanceStatus,
     required: false,
   })
   @ApiQuery({
     name: 'sale',
     description: 'Sale status by which to filter Offerings',
-    enum: StoSaleStatus,
+    enum: OfferingSaleStatus,
     required: false,
   })
   @ApiArrayResponse(OfferingDetailsModel, {
-    description: 'List of Token Offerings for this Asset',
+    description: 'List of Offerings for this Asset',
     paginated: false,
   })
   @Get()
@@ -120,7 +121,7 @@ export class OfferingsController {
       ticker,
       id,
       size,
-      Number(start) || 0
+      start ? new BigNumber(start) : new BigNumber(0)
     );
     return new PaginatedResultsModel({
       results: data.map(({ investor, soldAmount, investedAmount }) => {

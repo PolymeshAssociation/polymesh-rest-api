@@ -24,7 +24,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
     type,
     legs:
       legsResultSet.data?.map(
-        ({ from, to, amount, token: asset }) =>
+        ({ from, to, amount, asset }) =>
           new LegModel({
             from: createPortfolioIdentifierModel(from),
             to: createPortfolioIdentifierModel(to),

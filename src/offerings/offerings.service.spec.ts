@@ -2,14 +2,14 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
-  StoBalanceStatus,
-  StoSaleStatus,
-  StoTimingStatus,
+  OfferingBalanceStatus,
+  OfferingSaleStatus,
+  OfferingTimingStatus,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { OfferingsService } from '~/offerings/offerings.service';
-import { MockPortfolio, MockSecurityToken } from '~/test-utils/mocks';
+import { MockAsset, MockPortfolio } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 
 describe('OfferingsService', () => {
@@ -35,14 +35,14 @@ describe('OfferingsService', () => {
     it('should return the list of Offerings for an Asset', async () => {
       const mockOfferings = [
         {
-          sto: {
-            id: new BigNumber('1'),
+          offering: {
+            id: new BigNumber(1),
           },
           details: {
             tiers: [
               {
                 amount: new BigNumber('1000'),
-                price: new BigNumber('1'),
+                price: new BigNumber(1),
                 remaining: new BigNumber('1000'),
               },
             ],
@@ -54,27 +54,29 @@ describe('OfferingsService', () => {
             raisingPortfolio: new MockPortfolio(),
             raisingCurrency: 'CURRENCY',
             venue: {
-              id: new BigNumber('1'),
+              id: new BigNumber(1),
             },
             start: new Date(),
             end: null,
             status: {
-              timing: StoTimingStatus.Started,
-              balance: StoBalanceStatus.Available,
-              sale: StoSaleStatus.Live,
+              timing: OfferingTimingStatus.Started,
+              balance: OfferingBalanceStatus.Available,
+              sale: OfferingSaleStatus.Live,
             },
-            minInvestment: new BigNumber('1'),
+            minInvestment: new BigNumber(1),
             totalAmount: new BigNumber('1000'),
             totalRemaining: new BigNumber('1000'),
           },
         },
       ];
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.offerings.get.mockResolvedValue(mockOfferings);
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      const mockAsset = new MockAsset();
+      mockAsset.offerings.get.mockResolvedValue(mockOfferings);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const result = await service.findAllByTicker('TICKER', { timing: StoTimingStatus.Started });
+      const result = await service.findAllByTicker('TICKER', {
+        timing: OfferingTimingStatus.Started,
+      });
 
       expect(result).toEqual(mockOfferings);
     });
@@ -89,20 +91,22 @@ describe('OfferingsService', () => {
         },
       ],
       next: '10',
-      count: 2,
+      count: new BigNumber(2),
     };
     const offering = {
-      sto: {
-        id: new BigNumber(1),
-        getInvestments: jest.fn().mockReturnValue(mockInvestments),
-      },
+      id: new BigNumber(1),
+      getInvestments: jest.fn().mockReturnValue(mockInvestments),
     };
     it('should return a list of investments', async () => {
       const findSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findSpy.mockResolvedValue(offering as any);
+      findSpy.mockResolvedValue({ offering } as any);
 
-      const result = await service.findInvestmentsByTicker('TICKER', new BigNumber('1'), 0);
+      const result = await service.findInvestmentsByTicker(
+        'TICKER',
+        new BigNumber(1),
+        new BigNumber(0)
+      );
 
       expect(result).toEqual({
         data: mockInvestments.data,
@@ -122,11 +126,11 @@ describe('OfferingsService', () => {
         },
       ],
       next: '10',
-      count: 2,
+      count: new BigNumber(2),
     };
     const offerings = [
       {
-        sto: {
+        offering: {
           id: new BigNumber(1),
           getInvestments: jest.fn().mockReturnValue(mockInvestments),
         },
@@ -140,7 +144,7 @@ describe('OfferingsService', () => {
 
         let error;
         try {
-          await service.findInvestmentsByTicker('TICKER', new BigNumber('99'), 0);
+          await service.findInvestmentsByTicker('TICKER', new BigNumber('99'), new BigNumber(0));
         } catch (err) {
           error = err;
         }
@@ -154,7 +158,7 @@ describe('OfferingsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findSpy.mockResolvedValue(offerings as any);
 
-        const result = await service.findOne('TICKER', new BigNumber('1'));
+        const result = await service.findOne('TICKER', new BigNumber(1));
         expect(result).toEqual(offerings[0]);
         findSpy.mockRestore();
       });

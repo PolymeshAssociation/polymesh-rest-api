@@ -3,7 +3,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
-import { FromBigNumber } from '~/common/decorators/transformation';
+import { FromBigNumber, ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class EventIdentifierDto {
   @ApiProperty({
@@ -22,9 +23,11 @@ export class EventIdentifierDto {
   readonly blockDate: Date;
 
   @ApiProperty({
-    type: 'number',
     description: 'Index of the event within the block',
+    type: 'string',
     example: 10,
   })
-  readonly eventIndex: number;
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly eventIndex: BigNumber;
 }
