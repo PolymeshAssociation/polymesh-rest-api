@@ -1,17 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import {
-  OfferingBalanceStatus,
-  OfferingSaleStatus,
-  OfferingTimingStatus,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { OfferingTimingStatus } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { MockOfferingWithDetails } from '~/offerings/mocks/offering-with-details.mock';
 import { OfferingsController } from '~/offerings/offerings.controller';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
-import { MockPortfolio } from '~/test-utils/mocks';
 
 describe('OfferingsController', () => {
   let controller: OfferingsController;
@@ -38,42 +34,7 @@ describe('OfferingsController', () => {
 
   describe('getOfferings', () => {
     it('should return the list of Offerings for an Asset', async () => {
-      const mockOfferings = [
-        {
-          offering: {
-            id: new BigNumber(1),
-          },
-          details: {
-            tiers: [
-              {
-                amount: new BigNumber('1000'),
-                price: new BigNumber(1),
-                remaining: new BigNumber('1000'),
-              },
-            ],
-            creator: {
-              did: 'Ox6'.padEnd(66, '0'),
-            },
-            name: 'SERIES A',
-            offeringPortfolio: new MockPortfolio(),
-            raisingPortfolio: new MockPortfolio(),
-            raisingCurrency: 'CURRENCY',
-            venue: {
-              id: new BigNumber(1),
-            },
-            start: new Date(),
-            end: null,
-            status: {
-              timing: OfferingTimingStatus.Started,
-              balance: OfferingBalanceStatus.Available,
-              sale: OfferingSaleStatus.Live,
-            },
-            minInvestment: new BigNumber(1),
-            totalAmount: new BigNumber('1000'),
-            totalRemaining: new BigNumber('1000'),
-          },
-        },
-      ];
+      const mockOfferings = [new MockOfferingWithDetails()];
 
       mockOfferingsService.findAllByTicker.mockResolvedValue(mockOfferings);
 
@@ -91,6 +52,7 @@ describe('OfferingsController', () => {
       expect(result).toEqual(mockResult);
     });
   });
+
   describe('getInvestments', () => {
     const mockInvestments = {
       data: [
