@@ -27,9 +27,7 @@ export class AssetsService {
 
   public async findOne(ticker: string): Promise<Asset> {
     try {
-      const asset = await this.polymeshService.polymeshApi.assets.getAsset({ ticker });
-
-      return asset;
+      return this.polymeshService.polymeshApi.assets.getAsset({ ticker });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code, message } = err;
@@ -99,10 +97,9 @@ export class AssetsService {
 
   public async findTickerReservation(ticker: string): Promise<TickerReservation> {
     try {
-      const reservation = await this.polymeshService.polymeshApi.assets.getTickerReservation({
+      return this.polymeshService.polymeshApi.assets.getTickerReservation({
         ticker,
       });
-      return reservation;
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code, message } = err;
