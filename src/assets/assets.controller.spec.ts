@@ -9,24 +9,26 @@ import {
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
-import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
-import { ComplianceRequirementsModel } from '~/assets/models/compliance-requirements.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ComplianceService } from '~/compliance/compliance.service';
 import { MockAsset } from '~/test-utils/mocks';
-import { MockAssetService } from '~/test-utils/service-mocks';
+import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;
 
   const mockAssetsService = new MockAssetService();
+  const mockComplianceService = new MockComplianceService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AssetsController],
-      providers: [AssetsService],
+      providers: [AssetsService, ComplianceService],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
+      .overrideProvider(ComplianceService)
+      .useValue(mockComplianceService)
       .compile();
 
     controller = module.get<AssetsController>(AssetsController);
@@ -176,31 +178,28 @@ describe('AssetsController', () => {
     });
   });
 
-  describe('getComplianceRequirements', () => {
-    it('should return the list of all compliance requirements of an Asset', async () => {
-      const mockComplianceRequirements = new MockComplianceRequirements();
-      mockAssetsService.findComplianceRequirements.mockResolvedValue(mockComplianceRequirements);
-
-      const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
-    });
-  });
-
   describe('getTrustedClaimIssuers', () => {
     it('should return the list of all trusted Claim Issuers of an Asset', async () => {
       const mockClaimIssuers = [
         {
-          did: 'Ox6'.padEnd(66, '0'),
+          identity: {
+            did: 'Ox6'.padEnd(66, '0'),
+          },
           trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
         },
       ];
-      mockAssetsService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
+      mockComplianceService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
 
       const result = await controller.getTrustedClaimIssuers({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual({ results: mockClaimIssuers });
+      expect(result).toEqual({
+        results: [
+          {
+            did: 'Ox6'.padEnd(66, '0'),
+            trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+          },
+        ],
+      });
     });
   });
 

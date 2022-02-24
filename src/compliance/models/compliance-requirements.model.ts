@@ -3,8 +3,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-import { RequirementModel } from '~/assets/models/requirement.model';
-import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.model';
+import { RequirementModel } from '~/compliance/models/requirement.model';
+import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 export class ComplianceRequirementsModel {
   @ApiProperty({

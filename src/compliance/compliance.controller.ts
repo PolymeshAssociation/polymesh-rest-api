@@ -1,48 +1,57 @@
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
-import { RequirementModel } from '~/assets/models/requirement.model';
-import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
+import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
+import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
-@ApiTags('compliance')
+@ApiTags('assets', 'compliance')
 @Controller('/assets/:ticker/compliance-requirements')
 export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}
 
-  @ApiTags('assets')
   @ApiOperation({
-    summary: 'Fetch compliance requirements for an Asset',
-    description: 'This endpoint will provide the list of all compliance requirements of an Asset',
+    summary: 'Fetch Compliance Requirements of an Asset',
+    description:
+      'This endpoint will provide the list of all compliance requirements of an Asset along with Default Trusted Claim Issuers',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be fetched',
+    description: 'The ticker of the Asset whose Compliance Requirements are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
-  @ApiArrayResponse(RequirementModel, {
-    description: 'List of compliance requirements of the Asset',
-    paginated: false,
+  @ApiOkResponse({
+    description:
+      'List of Compliance Requirements of the Asset along with Default Trusted Claim Issuers',
+    type: ComplianceRequirementsModel,
   })
   @Get()
   public async getComplianceRequirements(
     @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<RequirementModel>> {
-    const result = await this.complianceService.findComplianceRequirements(ticker);
+  ): Promise<ComplianceRequirementsModel> {
+    const {
+      requirements,
+      defaultTrustedClaimIssuers,
+    } = await this.complianceService.findComplianceRequirements(ticker);
 
-    return new ResultsModel({
-      results: result.requirements.map(
-        ({ id, conditions }) => new RequirementModel({ id, conditions })
+    return new ComplianceRequirementsModel({
+      requirements,
+      defaultTrustedClaimIssuers: defaultTrustedClaimIssuers.map(
+        ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
       ),
     });
   }
 
-  @ApiTags('assets')
   @ApiOperation({
     summary: 'Set Compliance requirements for an Asset',
     description:

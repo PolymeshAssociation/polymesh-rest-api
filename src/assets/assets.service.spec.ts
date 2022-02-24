@@ -4,11 +4,10 @@ const mockIsPolymeshError = jest.fn();
 import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ClaimType, ErrorCode, KnownAssetType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, KnownAssetType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
-import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -232,47 +231,6 @@ describe('AssetsService', () => {
 
       const result = await service.findDocuments('TICKER', new BigNumber(10), 'NEXT_KEY');
       expect(result).toEqual(mockAssetDocuments);
-      findOneSpy.mockRestore();
-    });
-  });
-
-  describe('findComplianceRequirements', () => {
-    it('should return the list of Asset compliance requirements', async () => {
-      const mockComplianceRequirements = new MockComplianceRequirements();
-
-      const mockAsset = new MockAsset();
-
-      const findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockAsset as any);
-      mockAsset.compliance.requirements.get.mockResolvedValue(mockComplianceRequirements);
-
-      const result = await service.findComplianceRequirements('TICKER');
-
-      expect(result).toEqual(mockComplianceRequirements);
-      findOneSpy.mockRestore();
-    });
-  });
-
-  describe('findTrustedClaimIssuers', () => {
-    it('should return the list of trusted Claim Issuers of an Asset', async () => {
-      const mockClaimIssuers = [
-        {
-          did: 'Ox6'.padEnd(66, '0'),
-          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
-        },
-      ];
-
-      const mockAsset = new MockAsset();
-
-      const findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockAsset as any);
-      mockAsset.compliance.trustedClaimIssuers.get.mockResolvedValue(mockClaimIssuers);
-
-      const result = await service.findTrustedClaimIssuers('TICKER');
-
-      expect(result).toEqual(mockClaimIssuers);
       findOneSpy.mockRestore();
     });
   });

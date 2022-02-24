@@ -52,8 +52,8 @@ describe('SettlementsService', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [IdentitiesModule, PolymeshModule, RelayerAccountsModule],
-      providers: [SettlementsService, AssetsService],
+      imports: [PolymeshModule, RelayerAccountsModule],
+      providers: [SettlementsService, AssetsService, IdentitiesService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)

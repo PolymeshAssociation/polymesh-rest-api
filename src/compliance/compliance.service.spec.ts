@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClaimType, ConditionType, ScopeType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { ComplianceService } from '~/compliance/compliance.service';
+import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
@@ -31,34 +32,36 @@ describe('ComplianceService', () => {
 
   describe('findComplianceRequirements', () => {
     it('should return the list of Asset compliance requirements', async () => {
-      const mockRequirements = [
-        {
-          id: 1,
-          conditions: [
-            {
-              type: ConditionType.IsPresent,
-              claim: {
-                type: ClaimType.Accredited,
-                scope: {
-                  type: ScopeType.Identity,
-                  value: 'Ox6'.padEnd(66, '0'),
-                },
-              },
-              target: 'Receiver',
-              trustedClaimIssuers: [],
-            },
-          ],
-        },
-      ];
+      const mockRequirements = new MockComplianceRequirements();
 
       const mockAsset = new MockAsset();
-
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
       mockAsset.compliance.requirements.get.mockResolvedValue(mockRequirements);
 
       const result = await service.findComplianceRequirements('TICKER');
 
       expect(result).toEqual(mockRequirements);
+    });
+  });
+
+  describe('findTrustedClaimIssuers', () => {
+    it('should return the list of trusted Claim Issuers of an Asset', async () => {
+      const mockClaimIssuers = [
+        {
+          did: 'Ox6'.padEnd(66, '0'),
+          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+        },
+      ];
+
+      const mockAsset = new MockAsset();
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      mockAsset.compliance.trustedClaimIssuers.get.mockResolvedValue(mockClaimIssuers);
+
+      const result = await service.findTrustedClaimIssuers('TICKER');
+
+      expect(result).toEqual(mockClaimIssuers);
     });
   });
 

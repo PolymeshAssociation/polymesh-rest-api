@@ -3,12 +3,10 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   Asset,
   AssetDocument,
-  ComplianceRequirements,
   ErrorCode,
   IdentityBalance,
   ResultSet,
   TickerReservation,
-  TrustedClaimIssuer,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
@@ -76,16 +74,6 @@ export class AssetsService {
   ): Promise<ResultSet<AssetDocument>> {
     const asset = await this.findOne(ticker);
     return asset.documents.get({ size, start });
-  }
-
-  public async findComplianceRequirements(ticker: string): Promise<ComplianceRequirements> {
-    const asset = await this.findOne(ticker);
-    return asset.compliance.requirements.get();
-  }
-
-  public async findTrustedClaimIssuers(ticker: string): Promise<TrustedClaimIssuer<true>[]> {
-    const asset = await this.findOne(ticker);
-    return asset.compliance.trustedClaimIssuers.get();
   }
 
   public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
