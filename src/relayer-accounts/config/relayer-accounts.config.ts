@@ -5,10 +5,8 @@ import { registerAs } from '@nestjs/config';
 export default registerAs('relayer-accounts', () => {
   const { RELAYER_DIDS, RELAYER_MNEMONICS } = process.env;
 
-  /* eslint-disable @typescript-eslint/no-non-null-assertion */
-  const dids = RELAYER_DIDS?.split(',') || [];
-  const mnemonics = RELAYER_MNEMONICS?.split(',') || [];
-  /* eslint-enable @typescript-eslint/no-non-null-assertion */
+  const dids = RELAYER_DIDS?.split(',').map(d => d.trim()) || [];
+  const mnemonics = RELAYER_MNEMONICS?.split(',').map(m => m.trim()) || [];
 
   const accounts: Record<string, string> = {};
 
