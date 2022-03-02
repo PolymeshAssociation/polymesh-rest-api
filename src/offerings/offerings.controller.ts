@@ -98,15 +98,16 @@ export class OfferingsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Investments to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
     description: 'Starting offset for pagination',
-    type: 'number',
+    type: 'string',
     required: false,
-    example: 0,
+    example: '0',
   })
   @ApiArrayResponse(InvestmentModel, {
     description: 'A List of Investments',
@@ -121,7 +122,7 @@ export class OfferingsController {
       ticker,
       id,
       size,
-      start ? new BigNumber(start) : new BigNumber(0)
+      new BigNumber(start || 0)
     );
     return new PaginatedResultsModel({
       results: data.map(({ investor, soldAmount, investedAmount }) => {

@@ -253,7 +253,7 @@ describe('AssetsController', () => {
       it('should call the service and return the results', async () => {
         const signer = '0x6000';
         const ticker = 'TICKER';
-        const amount = new BigNumber('1000');
+        const amount = new BigNumber(1000);
         const response = {
           transactions: [
             {

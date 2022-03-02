@@ -33,7 +33,7 @@ export class ClaimDto {
     },
   })
   @ValidateIf(
-    scope => !isNoDataClaim(scope) && !isCddClaim(scope) && !isInvestorUniquenessV2Claim(scope)
+    claim => !isNoDataClaim(claim) && !isCddClaim(claim) && !isInvestorUniquenessV2Claim(claim)
   )
   @ValidateNested()
   @Type(() => ScopeDto)

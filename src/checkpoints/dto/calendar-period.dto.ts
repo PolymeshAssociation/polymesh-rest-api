@@ -20,8 +20,8 @@ export class CalendarPeriodDto {
 
   @ApiProperty({
     description: 'Number of units',
-    type: 'number',
-    example: 3,
+    type: 'string',
+    example: '3',
   })
   @IsBigNumber()
   @ToBigNumber()

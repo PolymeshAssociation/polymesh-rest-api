@@ -116,6 +116,7 @@ export class MockInstruction {
 }
 
 export class MockVenue {
+  id = new BigNumber(1);
   public addInstruction = jest.fn();
   public details = jest.fn();
   public modify = jest.fn();
@@ -202,4 +203,10 @@ export class MockTransactionQueue {
   constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
 
   public run = jest.fn();
+}
+
+export class MockOffering {
+  id = new BigNumber(1);
+  ticker = 'TICKER';
+  public getInvestments = jest.fn();
 }

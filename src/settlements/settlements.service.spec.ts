@@ -13,7 +13,6 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { IdentitiesModule } from '~/identities/identities.module';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -116,7 +115,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findInstruction(new BigNumber('123'));
+          await service.findInstruction(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -133,7 +132,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findInstruction(new BigNumber('123'));
+          await service.findInstruction(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -146,7 +145,7 @@ describe('SettlementsService', () => {
 
         error = null;
         try {
-          await service.findInstruction(new BigNumber('123'));
+          await service.findInstruction(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -158,7 +157,7 @@ describe('SettlementsService', () => {
       it('should return the Instruction entity', async () => {
         const mockInstruction = new MockInstruction();
         mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
-        const result = await service.findInstruction(new BigNumber('123'));
+        const result = await service.findInstruction(new BigNumber(123));
         expect(result).toEqual(mockInstruction);
       });
     });
@@ -179,7 +178,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findVenue(new BigNumber('123'));
+          await service.findVenue(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -196,7 +195,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findVenue(new BigNumber('123'));
+          await service.findVenue(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -209,7 +208,7 @@ describe('SettlementsService', () => {
 
         error = null;
         try {
-          await service.findVenue(new BigNumber('123'));
+          await service.findVenue(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -221,7 +220,7 @@ describe('SettlementsService', () => {
       it('should return the Venue entity', async () => {
         const mockVenue = new MockVenue();
         mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
-        const result = await service.findVenue(new BigNumber('123'));
+        const result = await service.findVenue(new BigNumber(123));
         expect(result).toEqual(mockVenue);
       });
     });
@@ -265,7 +264,7 @@ describe('SettlementsService', () => {
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.createInstruction(new BigNumber('123'), body as any);
+      const result = await service.createInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: mockInstruction,
@@ -357,7 +356,7 @@ describe('SettlementsService', () => {
 
         let error = null;
         try {
-          await service.modifyVenue(new BigNumber('123'), body);
+          await service.modifyVenue(new BigNumber(123), body);
         } catch (err) {
           error = err;
         }
@@ -391,7 +390,7 @@ describe('SettlementsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const result = await service.modifyVenue(new BigNumber('123'), body);
+        const result = await service.modifyVenue(new BigNumber(123), body);
 
         expect(result).toEqual({
           result: undefined,
@@ -436,7 +435,7 @@ describe('SettlementsService', () => {
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.affirmInstruction(new BigNumber('123'), body as any);
+      const result = await service.affirmInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: undefined,
@@ -473,7 +472,7 @@ describe('SettlementsService', () => {
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-      const result = await service.rejectInstruction(new BigNumber('123'), {
+      const result = await service.rejectInstruction(new BigNumber(123), {
         signer: 'signer',
       });
 
@@ -508,7 +507,7 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findVenueSpy.mockResolvedValue(mockVenue as any);
 
-      const result = await service.findVenueDetails(new BigNumber('123'));
+      const result = await service.findVenueDetails(new BigNumber(123));
 
       expect(result).toEqual(mockDetails);
       findVenueSpy.mockRestore();
@@ -564,7 +563,7 @@ describe('SettlementsService', () => {
         new PortfolioDto({ did: 'fromDid', id: new BigNumber(1) }).toPortfolioLike(),
         new PortfolioDto({ did: 'toDid', id: new BigNumber(2) }).toPortfolioLike(),
         'TICKER',
-        new BigNumber('123')
+        new BigNumber(123)
       );
 
       expect(result).toEqual(mockTransferBreakdown);

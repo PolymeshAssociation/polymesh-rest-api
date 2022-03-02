@@ -56,7 +56,7 @@ describe('ComplianceController', () => {
       const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
+      expect(result).toEqual(mockComplianceRequirements as ComplianceRequirementsModel);
     });
   });
 

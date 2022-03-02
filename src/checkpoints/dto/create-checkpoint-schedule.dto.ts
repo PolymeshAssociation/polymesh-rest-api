@@ -37,8 +37,8 @@ export class CreateCheckpointScheduleDto extends SignerDto {
   @ApiProperty({
     description:
       'Number of Checkpoints that should be created by this Schedule. A null or 0 value means infinite Checkpoints (the Schedule never expires)',
-    type: 'number',
-    example: 12,
+    type: 'string',
+    example: '12',
     nullable: true,
   })
   @IsOptional()

@@ -70,8 +70,9 @@ export class AssetsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Asset holders to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -120,9 +121,9 @@ export class AssetsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of documents to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
-    example: 10,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',

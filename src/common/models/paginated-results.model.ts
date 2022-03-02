@@ -10,7 +10,7 @@ export class PaginatedResultsModel<DataType> extends ResultsModel<DataType> {
   @ApiProperty({
     type: 'string',
     description: 'Total number of results possible for paginated output',
-    example: 10,
+    example: '10',
   })
   @FromBigNumber()
   readonly total?: BigNumber;

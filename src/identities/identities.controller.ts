@@ -137,8 +137,9 @@ export class IdentitiesController {
   @ApiQuery({
     name: 'size',
     description: 'The number of issued Authorizations to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -186,8 +187,9 @@ export class IdentitiesController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Authorization to be fetched',
-    type: 'number',
+    type: 'string',
     required: true,
+    example: '1',
   })
   @ApiOkResponse({
     description: 'Details of the Authorization',
@@ -285,14 +287,16 @@ export class IdentitiesController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Claims to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
     description: 'Start index from which Claims are to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '0',
   })
   @ApiQuery({
     name: 'includeExpired',
@@ -318,7 +322,7 @@ export class IdentitiesController {
       did,
       includeExpired,
       size,
-      start ? new BigNumber(start) : new BigNumber(0)
+      new BigNumber(start || 0)
     );
 
     const claimsData = claimsResultSet.data.map(
@@ -354,8 +358,9 @@ export class IdentitiesController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Claims to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -394,7 +399,7 @@ export class IdentitiesController {
       claimTypes,
       includeExpired,
       size,
-      start ? new BigNumber(start) : new BigNumber(0)
+      new BigNumber(start || 0)
     );
     const results = claimsResultSet.data.map(
       ({ issuedAt, expiry, claim, target, issuer }) =>

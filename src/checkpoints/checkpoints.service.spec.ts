@@ -61,7 +61,7 @@ describe('CheckpointsService', () => {
             id: new BigNumber(1),
           },
           createdAt: new Date(),
-          totalSupply: new BigNumber('10000'),
+          totalSupply: new BigNumber(10000),
         },
       ],
       next: '0xddddd',

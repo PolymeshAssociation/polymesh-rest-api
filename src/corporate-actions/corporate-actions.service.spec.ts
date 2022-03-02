@@ -125,7 +125,7 @@ describe('CorporateActionsService', () => {
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
-          defaultTaxWithholding: new BigNumber('25'),
+          defaultTaxWithholding: new BigNumber(25),
         };
         const result = await service.updateDefaultConfigByTicker(ticker, body);
 
@@ -140,7 +140,7 @@ describe('CorporateActionsService', () => {
           ],
         });
         expect(mockAsset.corporateActions.setDefaultConfig).toHaveBeenCalledWith(
-          { defaultTaxWithholding: new BigNumber('25') },
+          { defaultTaxWithholding: new BigNumber(25) },
           { signer: address }
         );
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);

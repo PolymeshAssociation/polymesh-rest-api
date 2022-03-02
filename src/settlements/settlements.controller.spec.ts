@@ -55,19 +55,19 @@ describe('SettlementsController', () => {
       const mockInstruction = new MockInstruction();
       const mockInstructionDetails = {
         venue: {
-          id: new BigNumber('123'),
+          id: new BigNumber(123),
         },
         status: InstructionStatus.Pending,
         createdAt: date,
         type: InstructionType.SettleOnBlock,
-        endBlock: new BigNumber('1000000'),
+        endBlock: new BigNumber(1000000),
       };
       const mockLegs = {
         data: [
           {
             from: new MockPortfolio(),
             to: new MockPortfolio(),
-            amount: new BigNumber('100'),
+            amount: new BigNumber(100),
             asset: {
               ticker: 'TICKER',
             },
@@ -263,7 +263,7 @@ describe('SettlementsController', () => {
         toDid: 'toDid',
         toPortfolio: new BigNumber(1),
         asset: 'TICKER',
-        amount: new BigNumber('123'),
+        amount: new BigNumber(123),
       });
 
       expect(result).toEqual(mockTransferBreakdown);

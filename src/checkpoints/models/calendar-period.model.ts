@@ -18,7 +18,7 @@ export class CalendarPeriodModel {
   @ApiProperty({
     description: 'Number of units',
     type: 'string',
-    example: 3,
+    example: '3',
   })
   @FromBigNumber()
   readonly amount: BigNumber;

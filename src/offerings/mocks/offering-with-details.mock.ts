@@ -7,19 +7,17 @@ import {
   OfferingTimingStatus,
 } from '@polymathnetwork/polymesh-sdk/types';
 
-import { MockPortfolio } from '~/test-utils/mocks';
+import { MockOffering, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 
 export class MockOfferingWithDetails {
-  offering = {
-    id: new BigNumber(1),
-  };
+  offering = new MockOffering();
 
   details = {
     tiers: [
       {
-        amount: new BigNumber('1000'),
+        amount: new BigNumber(1000),
         price: new BigNumber(1),
-        remaining: new BigNumber('1000'),
+        remaining: new BigNumber(1000),
       },
     ],
     creator: {
@@ -29,9 +27,7 @@ export class MockOfferingWithDetails {
     offeringPortfolio: new MockPortfolio(),
     raisingPortfolio: new MockPortfolio(),
     raisingCurrency: 'CURRENCY',
-    venue: {
-      id: new BigNumber(1),
-    },
+    venue: new MockVenue(),
     start: new Date(),
     end: null,
     status: {
@@ -40,7 +36,7 @@ export class MockOfferingWithDetails {
       sale: OfferingSaleStatus.Live,
     },
     minInvestment: new BigNumber(1),
-    totalAmount: new BigNumber('1000'),
-    totalRemaining: new BigNumber('1000'),
+    totalAmount: new BigNumber(1000),
+    totalRemaining: new BigNumber(1000),
   };
 }

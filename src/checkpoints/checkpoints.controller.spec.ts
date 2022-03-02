@@ -68,7 +68,7 @@ describe('CheckpointsController', () => {
             id: new BigNumber(1),
           },
           createdAt: mockDate,
-          totalSupply: new BigNumber('10000'),
+          totalSupply: new BigNumber(10000),
         },
       ],
       next: '0xddddd',
@@ -80,7 +80,7 @@ describe('CheckpointsController', () => {
         {
           id: new BigNumber(1),
           createdAt: mockDate,
-          totalSupply: new BigNumber('10000'),
+          totalSupply: new BigNumber(10000),
         },
       ],
       total: new BigNumber(2),

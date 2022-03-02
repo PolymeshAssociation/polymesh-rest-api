@@ -57,9 +57,9 @@ export class CheckpointsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Checkpoints to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
-    example: 10,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -295,15 +295,15 @@ export class CheckpointsController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Checkpoint for which to fetch Asset balances',
-    type: 'number',
-    example: 1,
+    type: 'string',
+    example: '1',
   })
   @ApiQuery({
     name: 'size',
     description: 'The number of Asset holders to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
-    example: 10,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -351,7 +351,7 @@ export class CheckpointsController {
   @ApiParam({
     name: 'id',
     description: 'The Checkpoint ID to from which to fetch the balance',
-    type: 'number',
+    type: 'string',
     example: '2',
   })
   @ApiParam({

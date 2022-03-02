@@ -25,7 +25,7 @@ export class EventIdentifierDto {
   @ApiProperty({
     description: 'Index of the event within the block',
     type: 'string',
-    example: 10,
+    example: '10',
   })
   @IsBigNumber()
   @ToBigNumber()

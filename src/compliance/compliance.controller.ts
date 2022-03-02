@@ -12,6 +12,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
+import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 @ApiTags('assets', 'compliance')
@@ -45,7 +46,9 @@ export class ComplianceController {
     } = await this.complianceService.findComplianceRequirements(ticker);
 
     return new ComplianceRequirementsModel({
-      requirements,
+      requirements: requirements.map(
+        ({ id, conditions }) => new RequirementModel({ id, conditions })
+      ),
       defaultTrustedClaimIssuers: defaultTrustedClaimIssuers.map(
         ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
       ),

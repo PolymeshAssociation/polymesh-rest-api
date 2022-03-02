@@ -70,7 +70,7 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(response);
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        defaultTaxWithholding: new BigNumber('25'),
+        defaultTaxWithholding: new BigNumber(25),
       };
 
       const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
