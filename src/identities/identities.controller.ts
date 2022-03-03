@@ -35,6 +35,7 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { createTransactionQueueModal } from '~/common/utils';
 import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
@@ -462,7 +463,7 @@ export class IdentitiesController {
       addSecondaryKeyParamsDto
     );
     return new GeneratedAuthorizationRequestModel({
-      transactions,
+      transactions: createTransactionQueueModal(transactions),
       authorizationRequest: createAuthorizationRequestModel(result),
     });
   }

@@ -7,7 +7,6 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
-import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -53,7 +52,7 @@ export class PortfoliosService {
     }
   }
 
-  public async moveAssets(owner: string, params: AssetMovementDto): Promise<TransactionQueueModel> {
+  public async moveAssets(owner: string, params: AssetMovementDto): Promise<QueueResult<void>> {
     const { signer, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
     const address = this.relayerAccountsService.findAddressByDid(signer);

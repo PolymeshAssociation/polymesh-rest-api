@@ -1,12 +1,22 @@
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
+
+export type Transaction = {
+  blockHash: string;
+  transactionHash: string;
+  blockNumber: BigNumber;
+} & (
+  | {
+      transactionTag: TxTag;
+    }
+  | {
+      transactionTags: TxTag[];
+    }
+);
 
 export type QueueResult<T> = {
   result: T;
-  transactions: {
-    blockHash: string;
-    transactionHash: string;
-    transactionTag: TxTag;
-  }[];
+  transactions: Transaction[];
 };
 
 export interface Entity<Serialized> {

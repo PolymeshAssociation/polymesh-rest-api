@@ -11,10 +11,16 @@ import {
   ProcedureOpts,
   TxTags,
 } from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+import {
+  isPolymeshError,
+  isPolymeshTransaction,
+  isPolymeshTransactionBatch,
+} from '@polymathnetwork/polymesh-sdk/utils';
 import { flatten } from 'lodash';
 
-import { QueueResult } from '~/common/types';
+import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
+import { TransactionModel } from '~/common/models/transaction.model';
+import { QueueResult, Transaction } from '~/common/types';
 
 export async function processQueue<MethodArgs, ReturnType>(
   method: ProcedureMethod<MethodArgs, unknown, ReturnType>,
@@ -25,16 +31,36 @@ export async function processQueue<MethodArgs, ReturnType>(
     const queue = await method(args, opts);
     const result = await queue.run();
 
+    const assembleTransaction = (transaction: unknown) => {
+      if (isPolymeshTransaction(transaction)) {
+        const { blockHash, txHash, blockNumber, tag } = transaction;
+        return {
+          /* eslint-disable @typescript-eslint/no-non-null-assertion */
+          blockHash: blockHash!,
+          transactionHash: txHash!,
+          blockNumber: blockNumber!,
+          transactionTag: tag,
+          /* eslint-enable @typescript-eslint/no-non-null-assertion */
+        };
+      } else if (isPolymeshTransactionBatch(transaction)) {
+        const { blockHash, txHash, blockNumber, transactions } = transaction;
+        return {
+          /* eslint-disable @typescript-eslint/no-non-null-assertion */
+          blockHash: blockHash!,
+          transactionHash: txHash!,
+          blockNumber: blockNumber!,
+          transactionTags: transactions.map(({ tag }) => tag),
+          /* eslint-enable @typescript-eslint/no-non-null-assertion */
+        };
+      }
+      throw new Error(
+        'Unsupported transaction details received. Please report this issue to the Polymath team'
+      );
+    };
+
     return {
       result,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      transactions: (queue.transactions as any[]).map(({ blockHash, txHash, tag }) => ({
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        blockHash: blockHash!,
-        transactionHash: txHash!,
-        transactionTag: tag,
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      })),
+      transactions: queue.transactions.map(assembleTransaction),
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     if (isPolymeshError(err)) {
@@ -65,4 +91,15 @@ export function getTxTagsWithModuleNames(): string[] {
   const txTags = getTxTags();
   const moduleNames = Object.values(ModuleName);
   return [...moduleNames, ...txTags];
+}
+
+export function createTransactionQueueModal(
+  transactions: Transaction[]
+): (TransactionModel | BatchTransactionModel)[] {
+  return transactions.map(transaction => {
+    if ('transactionTag' in transaction) {
+      return new TransactionModel(transaction);
+    }
+    return new BatchTransactionModel(transaction);
+  });
 }

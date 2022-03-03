@@ -28,6 +28,7 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { createTransactionQueueModal } from '~/common/utils';
 
 class DeleteCheckpointScheduleParamsDto extends IdParamsDto {
   @IsTicker()
@@ -158,7 +159,10 @@ export class CheckpointsController {
       ticker,
       signerDto
     );
-    return new CreatedCheckpointModel({ checkpoint, transactions });
+    return new CreatedCheckpointModel({
+      checkpoint,
+      transactions: createTransactionQueueModal(transactions),
+    });
   }
 
   @ApiOperation({
@@ -278,7 +282,7 @@ export class CheckpointsController {
         expiryDate,
         ...details,
       }),
-      transactions,
+      transactions: createTransactionQueueModal(transactions),
     });
   }
 
@@ -408,6 +412,6 @@ export class CheckpointsController {
       id,
       signer
     );
-    return new TransactionQueueModel({ transactions });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
   }
 }

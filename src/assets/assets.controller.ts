@@ -25,6 +25,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { createTransactionQueueModal } from '~/common/utils';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
@@ -210,7 +211,7 @@ export class AssetsController {
     @Body() params: IssueDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.issue(ticker, params);
-    return new TransactionQueueModel({ transactions });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
   }
 
   @ApiOperation({
@@ -227,7 +228,7 @@ export class AssetsController {
   @Post('/reservations/tickers')
   public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.registerTicker(params);
-    return new TransactionQueueModel({ transactions });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
   }
 
   @ApiOperation({
@@ -247,6 +248,6 @@ export class AssetsController {
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
-    return new TransactionQueueModel({ transactions });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
   }
 }
