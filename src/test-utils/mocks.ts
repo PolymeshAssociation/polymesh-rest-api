@@ -30,6 +30,7 @@ export class MockPolymesh {
   };
 
   public accountManagement = {
+    getAccountBalance: jest.fn(),
     inviteAccount: jest.fn(),
   };
 

@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
+import { AccountsModule } from '~/accounts/accounts.module';
 import { AssetsModule } from '~/assets/assets.module';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
@@ -39,6 +40,7 @@ import { SettlementsModule } from '~/settlements/settlements.module';
     CheckpointsModule,
     CorporateActionsModule,
     ComplianceModule,
+    AccountsModule,
   ],
 })
 export class AppModule {}
