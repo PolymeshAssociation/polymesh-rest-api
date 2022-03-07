@@ -158,7 +158,7 @@ describe('IdentitiesService', () => {
       test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const body = {
           signer: '0x6'.padEnd(66, '0'),
-          secondaryKey: 'address',
+          secondaryAccount: 'address',
         };
 
         const address = 'address';
@@ -171,7 +171,7 @@ describe('IdentitiesService', () => {
 
         let error;
         try {
-          await service.addSecondaryKey(body);
+          await service.addSecondaryAccount(body);
         } catch (err) {
           error = err;
         }
@@ -197,13 +197,13 @@ describe('IdentitiesService', () => {
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
-          secondaryKey: 'address',
+          secondaryAccount: 'address',
         };
 
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const result = await service.addSecondaryKey(body);
+        const result = await service.addSecondaryAccount(body);
         expect(result).toEqual({
           result: undefined,
           transactions: [

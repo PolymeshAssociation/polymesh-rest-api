@@ -33,7 +33,7 @@ export class PermissionsLikeDto {
 
   @ApiPropertyOptional({
     description:
-      'Transactions that the `secondaryKey` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactionGroups`.',
+      'Transactions that the `secondaryAccount` has permission to execute. A null value represents full permissions. This value should not be passed along with the `transactionGroups`.',
     type: TransactionPermissionsDto,
     nullable: true,
   })
@@ -44,7 +44,7 @@ export class PermissionsLikeDto {
 
   @ApiPropertyOptional({
     description:
-      'Transaction Groups that `secondaryKey` has permission to execute. This value should not be passed along with the `transactions`.',
+      'Transaction Groups that `secondaryAccount` has permission to execute. This value should not be passed along with the `transactions`.',
     isArray: true,
     enum: TxGroup,
     example: [TxGroup.PortfolioManagement],

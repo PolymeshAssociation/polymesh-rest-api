@@ -2,32 +2,32 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ModuleName, PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
-import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
+import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 
 type ValidInviteCase = [string, Record<string, unknown>];
 type InvalidInviteCase = [string, Record<string, unknown>, string[]];
 
-describe('addSecondaryKeyParamsDto', () => {
+describe('addSecondaryAccountParamsDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
   const signer = '0x6'.padEnd(66, '0');
   const metadata: ArgumentMetadata = {
     type: 'body',
-    metatype: AddSecondaryKeyParamsDto,
+    metatype: AddSecondaryAccountParamsDto,
     data: '',
   };
   describe('valid invites', () => {
     const cases: ValidInviteCase[] = [
       [
-        'Invite a Secondary Key',
+        'Invite a Secondary Account',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           signer,
         },
       ],
       [
         'Invite with Asset permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             assets: {
               values: ['TICKER123456', 'TICKER456789'],
@@ -40,7 +40,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with full assets permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             assets: null,
           },
@@ -50,7 +50,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with full portfolios permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: null,
           },
@@ -60,7 +60,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with portfolios permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: {
               values: [
@@ -82,7 +82,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with both assets and portfolios permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             assets: {
               values: ['TICKER123456', 'TICKER456789'],
@@ -108,7 +108,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with full assets and portfolios permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             assets: null,
             portfolios: null,
@@ -119,7 +119,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactionGroups permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactionGroups: [TxGroup.PortfolioManagement, TxGroup.AssetManagement],
           },
@@ -129,7 +129,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactions permissions with TxTags and without exceptions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: {
               type: PermissionType.Include,
@@ -142,7 +142,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactions permissions with ModuleNames along with TxTags and without exceptions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: {
               type: PermissionType.Include,
@@ -155,7 +155,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactions permissions with ModuleNames along with TxTags and with exceptions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: {
               type: PermissionType.Include,
@@ -177,17 +177,17 @@ describe('addSecondaryKeyParamsDto', () => {
   describe('invalid invites', () => {
     const cases: InvalidInviteCase[] = [
       [
-        'Invite with incorrect secondaryKey',
+        'Invite with incorrect secondaryAccount',
         {
-          secondaryKey: 123,
+          secondaryAccount: 123,
           signer,
         },
-        ['secondaryKey must be a string'],
+        ['secondaryAccount must be a string'],
       ],
       [
         'Invite with assets permission with incorrect permission type',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             assets: {
               values: ['TICKER', 'NEWTICKER'],
@@ -201,7 +201,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with assets permission with incorrect ticker value',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             assets: {
               values: ['invalid', 'TICKERVALUES'],
@@ -215,7 +215,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with portfolios permissions with no portfolio details',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: {
               values: [],
@@ -229,7 +229,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with portfolios permissions with incorrect DID',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             portfolios: {
               values: [
@@ -257,7 +257,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactionGroups permissions with incorrect groups',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactionGroups: ['Incorrect'],
           },
@@ -268,7 +268,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactions permissions with incorrect TxTags',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: {
               type: PermissionType.Include,
@@ -284,7 +284,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactions permissions with incorrect exceptions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: {
               type: PermissionType.Include,
@@ -299,7 +299,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactions permissions with empty transactionGroups',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: {
               type: PermissionType.Include,
@@ -315,7 +315,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with transactionGroups permissions and null transactions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: null,
             transactionGroups: [TxGroup.PortfolioManagement],
@@ -327,7 +327,7 @@ describe('addSecondaryKeyParamsDto', () => {
       [
         'Invite with null transactions & empty transactionGroups permissions',
         {
-          secondaryKey: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
+          secondaryAccount: '5G9cwcbnffjh9nBnRF1mjr5su78GRcP6tbqrRkVCFhRn1URv',
           permissions: {
             transactions: null,
             transactionGroups: [],

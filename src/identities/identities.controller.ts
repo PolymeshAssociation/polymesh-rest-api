@@ -36,7 +36,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { createTransactionQueueModel } from '~/common/utils';
-import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
+import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -440,9 +440,9 @@ export class IdentitiesController {
 
   // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
   @ApiOperation({
-    summary: 'Add Secondary Key',
+    summary: 'Add Secondary Account',
     description:
-      'This endpoint will send an invitation to a Secondary Key to join an Identity. It also defines the set of permissions the Secondary Key will have.',
+      'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
   })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
@@ -455,12 +455,12 @@ export class IdentitiesController {
     description:
       'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
-  @Post('/secondary-keys')
-  async addSecondaryKey(
-    @Body() addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
+  @Post('/secondary-accounts')
+  async addSecondaryAccount(
+    @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): Promise<GeneratedAuthorizationRequestModel> {
-    const { transactions, result } = await this.identitiesService.addSecondaryKey(
-      addSecondaryKeyParamsDto
+    const { transactions, result } = await this.identitiesService.addSecondaryAccount(
+      addSecondaryAccountParamsDto
     );
     return new GeneratedAuthorizationRequestModel({
       transactions: createTransactionQueueModel(transactions),

@@ -46,7 +46,7 @@ export class AssetDetailsModel {
   readonly isDivisible: boolean;
 
   @ApiProperty({
-    description: 'List of Asset identifiers',
+    description: "List of Asset's Security Identifiers",
     isArray: true,
     example: [
       {
@@ -56,7 +56,7 @@ export class AssetDetailsModel {
     ],
   })
   @FromEntityObject()
-  readonly identifiers: SecurityIdentifier[];
+  readonly securityIdentifiers: SecurityIdentifier[];
 
   @ApiProperty({
     description: 'Current funding round of the Asset',

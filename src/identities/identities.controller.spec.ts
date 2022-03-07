@@ -33,7 +33,7 @@ describe('IdentitiesController', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
     findTrustingAssets: jest.fn(),
-    addSecondaryKey: jest.fn(),
+    addSecondaryAccount: jest.fn(),
   };
 
   const mockAuthorizationsService = {
@@ -372,16 +372,19 @@ describe('IdentitiesController', () => {
     });
   });
 
-  describe('addSecondaryKey', () => {
-    it('should return the transaction details on adding a Secondary Key', async () => {
+  describe('addSecondaryAccount', () => {
+    it('should return the transaction details on adding a Secondary Account', async () => {
       const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
         result: mockAuthorization,
         transactions: mockTransactions,
       };
-      mockIdentitiesService.addSecondaryKey.mockResolvedValue(mockData);
+      mockIdentitiesService.addSecondaryAccount.mockResolvedValue(mockData);
 
-      const result = await controller.addSecondaryKey({ signer: 'Ox60', secondaryKey: '5xdd' });
+      const result = await controller.addSecondaryAccount({
+        signer: 'Ox60',
+        secondaryAccount: '5xdd',
+      });
 
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

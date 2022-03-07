@@ -67,7 +67,7 @@ export class CreateAssetDto extends SignerDto {
   })
   @ValidateNested({ each: true })
   @Type(() => SecurityIdentifierDto)
-  readonly identifiers?: SecurityIdentifierDto[];
+  readonly securityIdentifiers?: SecurityIdentifierDto[];
 
   @ApiPropertyOptional({
     description: 'The current funding round of the Asset',

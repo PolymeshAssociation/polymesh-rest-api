@@ -9,7 +9,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { QueueResult } from '~/common/types';
 import { processQueue } from '~/common/utils';
-import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
+import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -53,13 +53,13 @@ export class IdentitiesService {
     return identity.getTrustingAssets();
   }
 
-  public async addSecondaryKey(
-    addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
+  public async addSecondaryAccount(
+    addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): Promise<QueueResult<AuthorizationRequest>> {
-    const { signer, expiry, permissions, secondaryKey } = addSecondaryKeyParamsDto;
+    const { signer, expiry, permissions, secondaryAccount } = addSecondaryAccountParamsDto;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {
-      targetAccount: secondaryKey,
+      targetAccount: secondaryAccount,
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
