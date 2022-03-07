@@ -10,7 +10,7 @@ import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetailsModel> {
   const [
     { owner, assetType, name, totalSupply, isDivisible },
-    identifiers,
+    securityIdentifiers,
     fundingRound,
   ] = await Promise.all([asset.details(), asset.getIdentifiers(), asset.currentFundingRound()]);
 
@@ -20,7 +20,7 @@ export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetail
     name,
     totalSupply,
     isDivisible,
-    identifiers,
+    securityIdentifiers,
     fundingRound,
   });
 }
