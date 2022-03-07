@@ -23,4 +23,5 @@ export class MockRelayerAccountsService {
 
 export class MockAccountsService {
   getAccountBalance = jest.fn();
+  transferPolyx = jest.fn();
 }

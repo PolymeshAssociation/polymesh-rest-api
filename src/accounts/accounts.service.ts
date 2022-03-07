@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { AccountBalance } from '@polymathnetwork/polymesh-sdk/types';
 
+import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import { QueueResult } from '~/common/types';
+import { processQueue } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
 @Injectable()
 export class AccountsService {
-  constructor(private readonly polymeshService: PolymeshService) {}
+  constructor(
+    private readonly polymeshService: PolymeshService,
+    private readonly relayerAccountsService: RelayerAccountsService
+  ) {}
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {
     const {
@@ -13,5 +20,12 @@ export class AccountsService {
     } = this;
 
     return polymeshApi.accountManagement.getAccountBalance({ account });
+  }
+
+  public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
+    const { signer, ...rest } = params;
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const transferPolyx = this.polymeshService.polymeshApi.network.transferPolyx;
+    return processQueue(transferPolyx, rest, { signer: address });
   }
 }

@@ -19,6 +19,7 @@ export class MockPolymesh {
 
   public network = {
     getLatestBlock: jest.fn(),
+    transferPolyx: jest.fn(),
   };
 
   public assets = {
