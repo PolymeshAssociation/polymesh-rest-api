@@ -200,7 +200,14 @@ export class MockAuthorizationRequest {
 }
 
 export class MockTransactionQueue {
-  constructor(public readonly transactions: { blockHash: string; txHash: string; tag: TxTag }[]) {}
+  constructor(
+    public readonly transactions: {
+      blockHash: string;
+      txHash: string;
+      tag: TxTag;
+      blockNumber: BigNumber;
+    }[]
+  ) {}
 
   public run = jest.fn();
 }
@@ -210,3 +217,16 @@ export class MockOffering {
   ticker = 'TICKER';
   public getInvestments = jest.fn();
 }
+
+export const mockTransactions = [
+  {
+    transactionTag: 'transaction',
+  },
+];
+
+export const mockTransactionsResult = [
+  {
+    transactionTag: 'transaction',
+    type: 'single',
+  },
+];

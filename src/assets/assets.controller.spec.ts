@@ -11,7 +11,7 @@ import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
-import { MockAsset } from '~/test-utils/mocks';
+import { MockAsset, mockTransactions, mockTransactionsResult } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
@@ -206,19 +206,12 @@ describe('AssetsController', () => {
   describe('reserveTicker', () => {
     it('should call the service and return the results', async () => {
       const input = { ticker: 'SOME_TICKER', signer: '0x6000' };
-      const response = {
-        transactions: [
-          {
-            blockHash: '0xfb3f745444ae63e66240d57eb9d769b0152af23214600425fe7c01f02512d960',
-            transactionHash: '0xe16c51097d10e712b9f6ff572ca0c8c77ffcab0af8a8cb0598f8b891ab3ce46a',
-            transactionTag: 'asset.reserveTicker',
-          },
-        ],
-      };
-      mockAssetsService.registerTicker.mockResolvedValue(response);
+      mockAssetsService.registerTicker.mockResolvedValue({ transactions: mockTransactions });
 
       const result = await controller.registerTicker(input);
-      expect(result).toEqual(response);
+      expect(result).toEqual({
+        transactions: mockTransactionsResult,
+      });
       expect(mockAssetsService.registerTicker).toHaveBeenCalledWith(input);
     });
 
@@ -232,19 +225,10 @@ describe('AssetsController', () => {
           assetType: KnownAssetType.EquityCommon,
           requireInvestorUniqueness: false,
         };
-        const response = {
-          transactions: [
-            {
-              blockHash: '0xfb3f745444ae63e66240d57eb9d769b0152af23214600425fe7c01f02512d960',
-              transactionHash: '0xe16c51097d10e712b9f6ff572ca0c8c77ffcab0af8a8cb0598f8b891ab3ce46a',
-              transactionTag: 'asset.createAsset',
-            },
-          ],
-        };
-        mockAssetsService.createAsset.mockResolvedValue(response);
+        mockAssetsService.createAsset.mockResolvedValue({ transactions: mockTransactions });
 
         const result = await controller.createAsset(input);
-        expect(result).toEqual(response);
+        expect(result).toEqual({ transactions: mockTransactionsResult });
         expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
       });
     });
@@ -254,19 +238,10 @@ describe('AssetsController', () => {
         const signer = '0x6000';
         const ticker = 'TICKER';
         const amount = new BigNumber(1000);
-        const response = {
-          transactions: [
-            {
-              blockHash: '0xfb3f745444ae63e66240d57eb9d769b0152af23214600425fe7c01f02512d960',
-              transactionHash: '0xe16c51097d10e712b9f6ff572ca0c8c77ffcab0af8a8cb0598f8b891ab3ce46a',
-              transactionTag: 'asset.issue',
-            },
-          ],
-        };
-        mockAssetsService.issue.mockResolvedValue(response);
+        mockAssetsService.issue.mockResolvedValue({ transactions: mockTransactions });
 
         const result = await controller.issue({ ticker }, { signer, amount });
-        expect(result).toEqual(response);
+        expect(result).toEqual({ transactions: mockTransactionsResult });
         expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
       });
     });

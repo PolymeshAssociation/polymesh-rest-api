@@ -32,30 +32,30 @@ export async function processQueue<MethodArgs, ReturnType>(
     const result = await queue.run();
 
     const assembleTransaction = (transaction: unknown) => {
+      let tagDetails;
       if (isPolymeshTransaction(transaction)) {
-        const { blockHash, txHash, blockNumber, tag } = transaction;
-        return {
-          /* eslint-disable @typescript-eslint/no-non-null-assertion */
-          blockHash: blockHash!,
-          transactionHash: txHash!,
-          blockNumber: blockNumber!,
-          transactionTag: tag,
-          /* eslint-enable @typescript-eslint/no-non-null-assertion */
-        };
+        const { tag } = transaction;
+        tagDetails = { transactionTag: tag };
       } else if (isPolymeshTransactionBatch(transaction)) {
-        const { blockHash, txHash, blockNumber, transactions } = transaction;
-        return {
-          /* eslint-disable @typescript-eslint/no-non-null-assertion */
-          blockHash: blockHash!,
-          transactionHash: txHash!,
-          blockNumber: blockNumber!,
+        const { transactions } = transaction;
+        tagDetails = {
           transactionTags: transactions.map(({ tag }) => tag),
-          /* eslint-enable @typescript-eslint/no-non-null-assertion */
         };
+      } else {
+        throw new Error(
+          'Unsupported transaction details received. Please report this issue to the Polymath team'
+        );
       }
-      throw new Error(
-        'Unsupported transaction details received. Please report this issue to the Polymath team'
-      );
+
+      const { blockHash, txHash, blockNumber } = transaction;
+      return {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+        blockHash: blockHash!,
+        transactionHash: txHash!,
+        blockNumber: blockNumber!,
+        ...tagDetails,
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
+      };
     };
 
     return {
@@ -93,7 +93,7 @@ export function getTxTagsWithModuleNames(): string[] {
   return [...moduleNames, ...txTags];
 }
 
-export function createTransactionQueueModal(
+export function createTransactionQueueModel(
   transactions: Transaction[]
 ): (TransactionModel | BatchTransactionModel)[] {
   return transactions.map(transaction => {

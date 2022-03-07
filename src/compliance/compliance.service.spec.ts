@@ -1,4 +1,8 @@
+/* eslint-disable import/first */
+const mockIsPolymeshTransaction = jest.fn();
+
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ClaimType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -7,6 +11,11 @@ import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requir
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
+
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+  isPolymeshTransaction: mockIsPolymeshTransaction,
+}));
 
 describe('ComplianceService', () => {
   let service: ComplianceService;
@@ -24,6 +33,12 @@ describe('ComplianceService', () => {
       .compile();
 
     service = module.get(ComplianceService);
+
+    mockIsPolymeshTransaction.mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   it('should be defined', () => {
@@ -72,6 +87,7 @@ describe('ComplianceService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.complianceManager.AddComplianceRequirement,
         },
       ];
@@ -91,6 +107,7 @@ describe('ComplianceService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.complianceManager.AddComplianceRequirement,
           },
         ],

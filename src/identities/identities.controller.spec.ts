@@ -14,7 +14,12 @@ import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockAuthorizationRequest, MockIdentity } from '~/test-utils/mocks';
+import {
+  MockAuthorizationRequest,
+  MockIdentity,
+  mockTransactions,
+  mockTransactionsResult,
+} from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 
 describe('IdentitiesController', () => {
@@ -369,11 +374,10 @@ describe('IdentitiesController', () => {
 
   describe('addSecondaryKey', () => {
     it('should return the transaction details on adding a Secondary Key', async () => {
-      const transactions = ['transaction'];
       const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
         result: mockAuthorization,
-        transactions,
+        transactions: mockTransactions,
       };
       mockIdentitiesService.addSecondaryKey.mockResolvedValue(mockData);
 
@@ -382,7 +386,7 @@ describe('IdentitiesController', () => {
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-        transactions,
+        transactions: mockTransactionsResult,
       });
     });
   });

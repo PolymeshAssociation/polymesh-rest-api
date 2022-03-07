@@ -3,6 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
+import { TransactionType } from '~/common/consts';
 import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class TransactionIdentifierModel {
@@ -31,10 +32,11 @@ export class TransactionIdentifierModel {
 
   @ApiProperty({
     description: 'Indicator to know if the transaction is a batch transaction or not',
-    type: 'boolean',
-    example: true,
+    enum: TransactionType,
+    type: 'string',
+    example: TransactionType.Single,
   })
-  readonly batchTransaction: boolean;
+  readonly type: TransactionType;
 
   constructor(model: TransactionIdentifierModel) {
     Object.assign(this, model);

@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
 import {
   BadRequestException,
@@ -29,6 +30,7 @@ import { ErrorCase } from '~/test-utils/types';
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
 describe('CorporateActionsService', () => {
@@ -49,10 +51,12 @@ describe('CorporateActionsService', () => {
       .compile();
 
     service = module.get<CorporateActionsService>(CorporateActionsService);
+
+    mockIsPolymeshTransaction.mockReturnValue(true);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   describe('findDefaultConfigByTicker', () => {
@@ -113,6 +117,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.corporateAction.SetDefaultWithholdingTax,
           },
         ];
@@ -135,6 +140,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
             },
           ],
@@ -318,11 +324,13 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.corporateAction.InitiateCorporateAction,
           },
           {
             blockHash: '0x3',
             txHash: '0x4',
+            blockNumber: new BigNumber(2),
             tag: TxTags.capitalDistribution.Distribute,
           },
         ];
@@ -344,11 +352,13 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.InitiateCorporateAction,
             },
             {
               blockHash: '0x3',
               transactionHash: '0x4',
+              blockNumber: new BigNumber(2),
               transactionTag: TxTags.capitalDistribution.Distribute,
             },
           ],
@@ -394,6 +404,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.corporateAction.RemoveCa,
           },
         ];
@@ -410,6 +421,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.RemoveCa,
             },
           ],
@@ -504,6 +516,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.capitalDistribution.PushBenefit,
           },
         ];
@@ -526,6 +539,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.capitalDistribution.PushBenefit,
             },
           ],
@@ -601,6 +615,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.corporateAction.LinkCaDoc,
           },
         ];
@@ -621,6 +636,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.LinkCaDoc,
             },
           ],
@@ -706,6 +722,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.capitalDistribution.Claim,
           },
         ];
@@ -728,6 +745,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.capitalDistribution.Claim,
             },
           ],
@@ -798,6 +816,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.capitalDistribution.Reclaim,
           },
         ];
@@ -820,6 +839,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.capitalDistribution.Reclaim,
             },
           ],
@@ -884,6 +904,7 @@ describe('CorporateActionsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.corporateAction.ChangeRecordDate,
           },
         ];
@@ -904,6 +925,7 @@ describe('CorporateActionsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.ChangeRecordDate,
             },
           ],

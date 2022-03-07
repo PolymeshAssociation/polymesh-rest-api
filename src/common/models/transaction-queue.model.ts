@@ -2,6 +2,7 @@
 
 import { Type } from 'class-transformer';
 
+import { TransactionType } from '~/common/consts';
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionIdentifierModel } from '~/common/models/transaction-identifier.model';
@@ -16,15 +17,15 @@ export class TransactionQueueModel {
   @Type(() => TransactionIdentifierModel, {
     keepDiscriminatorProperty: true,
     discriminator: {
-      property: 'batchTransaction',
+      property: 'type',
       subTypes: [
         {
           value: TransactionModel,
-          name: 'false',
+          name: TransactionType.Single,
         },
         {
           value: BatchTransactionModel,
-          name: 'true',
+          name: TransactionType.Batch,
         },
       ],
     },

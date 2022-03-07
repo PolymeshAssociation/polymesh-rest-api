@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -22,6 +23,7 @@ import { ErrorCase } from '~/test-utils/types';
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
 describe('CheckpointsService', () => {
@@ -47,6 +49,12 @@ describe('CheckpointsService', () => {
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
+
+    mockIsPolymeshTransaction.mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   it('should be defined', () => {
@@ -238,6 +246,7 @@ describe('CheckpointsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.checkpoint.CreateCheckpoint,
         },
       ];
@@ -262,6 +271,7 @@ describe('CheckpointsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.checkpoint.CreateCheckpoint,
           },
         ],
@@ -283,6 +293,7 @@ describe('CheckpointsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.checkpoint.CreateSchedule,
         },
       ];
@@ -311,6 +322,7 @@ describe('CheckpointsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.checkpoint.CreateSchedule,
           },
         ],
@@ -459,6 +471,7 @@ describe('CheckpointsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.checkpoint.RemoveSchedule,
           },
         ];
@@ -483,6 +496,7 @@ describe('CheckpointsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.checkpoint.RemoveSchedule,
             },
           ],

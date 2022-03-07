@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
 import {
   BadRequestException,
@@ -7,6 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { IdentitiesService } from '~/identities/identities.service';
@@ -23,6 +25,7 @@ import { ErrorCase } from '~/test-utils/types';
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
 describe('IdentitiesService', () => {
@@ -47,6 +50,11 @@ describe('IdentitiesService', () => {
 
     service = module.get<IdentitiesService>(IdentitiesService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+    mockIsPolymeshTransaction.mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   afterEach(async () => {
@@ -180,6 +188,7 @@ describe('IdentitiesService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.identity.JoinIdentityAsKey,
           },
         ];
@@ -201,6 +210,7 @@ describe('IdentitiesService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.identity.JoinIdentityAsKey,
             },
           ],

@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
 import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -19,6 +20,7 @@ import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
 describe('AssetsService', () => {
@@ -42,6 +44,12 @@ describe('AssetsService', () => {
 
     service = module.get<AssetsService>(AssetsService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+
+    mockIsPolymeshTransaction.mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   afterEach(async () => {
@@ -343,6 +351,7 @@ describe('AssetsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.asset.CreateAsset,
           },
         ];
@@ -359,6 +368,7 @@ describe('AssetsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.asset.CreateAsset,
             },
           ],
@@ -377,6 +387,7 @@ describe('AssetsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.asset.Issue,
         },
       ];
@@ -398,6 +409,7 @@ describe('AssetsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.asset.Issue,
           },
         ],
@@ -413,6 +425,7 @@ describe('AssetsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.asset.RegisterTicker,
           },
         ];
@@ -434,6 +447,7 @@ describe('AssetsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.asset.RegisterTicker,
             },
           ],

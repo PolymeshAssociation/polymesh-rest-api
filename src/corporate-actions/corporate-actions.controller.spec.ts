@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { ResultsModel } from '~/common/models/results.model';
@@ -13,7 +12,7 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
+import { mockTransactions, mockTransactionsResult } from '~/test-utils/mocks';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -65,7 +64,7 @@ describe('CorporateActionsController', () => {
   describe('updateDefaultConfig', () => {
     it('should update the Corporate Action Default Config and return the details of transaction', async () => {
       const response = {
-        transactions: ['transaction'],
+        transactions: mockTransactions,
       };
       mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(response);
       const body = {
@@ -76,7 +75,7 @@ describe('CorporateActionsController', () => {
       const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
 
       expect(result).toEqual({
-        transactions: ['transaction'],
+        transactions: mockTransactionsResult,
       });
       expect(mockCorporateActionsService.updateDefaultConfigByTicker).toHaveBeenCalledWith(
         'TICKER',
@@ -125,18 +124,7 @@ describe('CorporateActionsController', () => {
       const mockDistribution = new MockDistribution();
       const response = {
         result: mockDistribution,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            transactionTag: TxTags.corporateAction.InitiateCorporateAction,
-          },
-          {
-            blockHash: '0x3',
-            transactionHash: '0x4',
-            transactionTag: TxTags.capitalDistribution.Distribute,
-          },
-        ],
+        transactions: mockTransactions,
       };
       mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
       const mockDate = new Date();
@@ -153,24 +141,11 @@ describe('CorporateActionsController', () => {
 
       const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
 
-      expect(result).toEqual(
-        new CreatedDividendDistributionModel({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dividendDistribution: createDividendDistributionModel(mockDistribution as any),
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
-            },
-            {
-              blockHash: '0x3',
-              transactionHash: '0x4',
-              transactionTag: TxTags.capitalDistribution.Distribute,
-            },
-          ],
-        })
-      );
+      expect(result).toEqual({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dividendDistribution: createDividendDistributionModel(mockDistribution as any),
+        transactions: mockTransactionsResult,
+      });
       expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
         'TICKER',
         body
@@ -181,7 +156,7 @@ describe('CorporateActionsController', () => {
   describe('deleteCorporateAction', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: ['transaction'],
+        transactions: mockTransactions,
       };
       mockCorporateActionsService.remove.mockResolvedValue(response);
 
@@ -191,7 +166,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: ['transaction'],
+        transactions: mockTransactionsResult,
       });
       expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
         'TICKER',
@@ -204,7 +179,7 @@ describe('CorporateActionsController', () => {
   describe('payDividends', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: ['transaction'],
+        transactions: mockTransactions,
       };
       mockCorporateActionsService.payDividends.mockResolvedValue(response);
 
@@ -221,7 +196,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: ['transaction'],
+        transactions: mockTransactionsResult,
       });
       expect(mockCorporateActionsService.payDividends).toHaveBeenCalledWith(
         'TICKER',
@@ -233,13 +208,7 @@ describe('CorporateActionsController', () => {
 
   describe('linkDocuments', () => {
     it('should call the service and return the results', async () => {
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          tag: TxTags.corporateAction.LinkCaDoc,
-        },
-      ];
+      const transactions = mockTransactions;
 
       const body = {
         documents: [
@@ -260,7 +229,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions,
+        transactions: mockTransactionsResult,
       });
     });
   });
@@ -268,7 +237,7 @@ describe('CorporateActionsController', () => {
   describe('claimDividends', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: ['transaction'],
+        transactions: mockTransactions,
       };
       mockCorporateActionsService.claimDividends.mockResolvedValue(response);
 
@@ -282,7 +251,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: ['transaction'],
+        transactions: mockTransactionsResult,
       });
       expect(mockCorporateActionsService.claimDividends).toHaveBeenCalledWith(
         'TICKER',
@@ -295,7 +264,7 @@ describe('CorporateActionsController', () => {
   describe('reclaimDividends', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: ['transaction'],
+        transactions: mockTransactions,
       };
       mockCorporateActionsService.reclaimRemainingFunds.mockResolvedValue(response);
 
@@ -309,7 +278,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: ['transaction'],
+        transactions: mockTransactionsResult,
       });
       expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
         'TICKER',
@@ -321,7 +290,7 @@ describe('CorporateActionsController', () => {
 
   describe('modifyCheckpoint', () => {
     it('should call the service and return the results', async () => {
-      const transactions = ['transactions'];
+      const transactions = mockTransactions;
 
       const body = {
         checkpoint: new Date(),
@@ -336,7 +305,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions,
+        transactions: mockTransactionsResult,
       });
       expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
         'TICKER',

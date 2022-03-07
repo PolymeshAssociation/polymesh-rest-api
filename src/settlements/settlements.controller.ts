@@ -14,7 +14,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { createTransactionQueueModal } from '~/common/utils';
+import { createTransactionQueueModel } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
@@ -81,7 +81,7 @@ export class SettlementsController {
 
     return new CreatedInstructionModel({
       instruction,
-      transactions: createTransactionQueueModal(transactions),
+      transactions: createTransactionQueueModel(transactions),
     });
   }
 
@@ -108,7 +108,7 @@ export class SettlementsController {
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
 
-    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
   }
 
   @ApiTags('instructions')
@@ -133,7 +133,7 @@ export class SettlementsController {
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.rejectInstruction(id, signerDto);
 
-    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
   }
 
   @ApiTags('instructions')
@@ -225,7 +225,7 @@ export class SettlementsController {
     );
     return new CreatedVenueModel({
       venue,
-      transactions: createTransactionQueueModal(transactions),
+      transactions: createTransactionQueueModel(transactions),
     });
   }
 
@@ -243,7 +243,7 @@ export class SettlementsController {
     @Body() modifyVenueDto: ModifyVenueDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.settlementsService.modifyVenue(id, modifyVenueDto);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModal(transactions) });
+    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
   }
 
   @ApiTags('assets')
