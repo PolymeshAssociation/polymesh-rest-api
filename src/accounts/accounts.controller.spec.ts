@@ -28,7 +28,7 @@ describe('AccountsController', () => {
   });
 
   describe('getAccountBalance', () => {
-    it('should call the service and return the results', async () => {
+    it('should return the POLYX balance of an Account', async () => {
       const mockResult = {
         free: new BigNumber(10),
         locked: new BigNumber(1),

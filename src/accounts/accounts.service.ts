@@ -18,7 +18,6 @@ export class AccountsService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-
     return polymeshApi.accountManagement.getAccountBalance({ account });
   }
 

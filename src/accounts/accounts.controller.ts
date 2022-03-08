@@ -31,7 +31,7 @@ export class AccountsController {
     example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
   })
   @ApiOkResponse({
-    description: 'Returns free, locked and total POLYX balance',
+    description: 'Free, locked and total POLYX balance of the Account',
     type: BalanceModel,
   })
   @Get(':account/balance')

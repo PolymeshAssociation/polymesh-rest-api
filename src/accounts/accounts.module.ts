@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { Module } from '@nestjs/common';
 
 import { AccountsController } from '~/accounts/accounts.controller';

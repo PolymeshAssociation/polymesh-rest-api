@@ -61,7 +61,7 @@ describe('AccountsService', () => {
   });
 
   describe('getAccountBalance', () => {
-    it('should return the POLYX balance for an Account', async () => {
+    it('should return the POLYX balance of an Account', async () => {
       const fakeBalance = 'balance';
 
       mockPolymeshApi.accountManagement.getAccountBalance.mockReturnValue(fakeBalance);
