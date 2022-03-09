@@ -9,6 +9,7 @@ import { ErrorCode, KnownAssetType, TxTags } from '@polymathnetwork/polymesh-sdk
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
+import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -370,6 +371,7 @@ describe('AssetsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.asset.CreateAsset,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -411,6 +413,7 @@ describe('AssetsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.asset.Issue,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -449,6 +452,7 @@ describe('AssetsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.asset.RegisterTicker,
+              type: TransactionType.Single,
             },
           ],
         });

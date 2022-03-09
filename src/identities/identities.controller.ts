@@ -35,7 +35,6 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { createTransactionQueueModel } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
@@ -463,7 +462,7 @@ export class IdentitiesController {
       addSecondaryAccountParamsDto
     );
     return new GeneratedAuthorizationRequestModel({
-      transactions: createTransactionQueueModel(transactions),
+      transactions,
       authorizationRequest: createAuthorizationRequestModel(result),
     });
   }

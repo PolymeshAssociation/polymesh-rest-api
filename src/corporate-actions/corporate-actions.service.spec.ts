@@ -18,6 +18,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { TransactionType } from '~/common/types';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
@@ -142,6 +143,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -354,12 +356,14 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.InitiateCorporateAction,
+              type: TransactionType.Single,
             },
             {
               blockHash: '0x3',
               transactionHash: '0x4',
               blockNumber: new BigNumber(2),
               transactionTag: TxTags.capitalDistribution.Distribute,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -423,6 +427,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.RemoveCa,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -541,6 +546,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.capitalDistribution.PushBenefit,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -638,6 +644,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.LinkCaDoc,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -747,6 +754,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.capitalDistribution.Claim,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -841,6 +849,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.capitalDistribution.Reclaim,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -927,6 +936,7 @@ describe('CorporateActionsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.corporateAction.ChangeRecordDate,
+              type: TransactionType.Single,
             },
           ],
         });

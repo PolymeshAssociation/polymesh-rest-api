@@ -9,7 +9,7 @@ import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
-import { MockPortfolio, mockTransactions, mockTransactionsResult } from '~/test-utils/mocks';
+import { MockPortfolio } from '~/test-utils/mocks';
 
 describe('PortfoliosController', () => {
   let controller: PortfoliosController;
@@ -56,7 +56,7 @@ describe('PortfoliosController', () => {
 
   describe('moveAssets', () => {
     it('should return the transaction details', async () => {
-      const response = { transactions: mockTransactions };
+      const response = { transactions: ['transaction'] };
       mockPortfoliosService.moveAssets.mockResolvedValue(response);
       const params = {
         signer: '0x6000',
@@ -67,7 +67,7 @@ describe('PortfoliosController', () => {
 
       const result = await controller.moveAssets({ did: '0x6000' }, params);
 
-      expect(result).toEqual({ transactions: mockTransactionsResult });
+      expect(result).toEqual({ transactions: ['transaction'] });
     });
   });
 
@@ -76,7 +76,7 @@ describe('PortfoliosController', () => {
       const mockPortfolio = new MockPortfolio();
       const response = {
         result: mockPortfolio,
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockPortfoliosService.createPortfolio.mockResolvedValue(response);
       const params = {
@@ -91,7 +91,7 @@ describe('PortfoliosController', () => {
           id: '1',
           did: '0x06'.padEnd(66, '0'),
         },
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -99,7 +99,7 @@ describe('PortfoliosController', () => {
   describe('deletePortfolio', () => {
     it('should return the transaction details', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
 
@@ -109,7 +109,7 @@ describe('PortfoliosController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });

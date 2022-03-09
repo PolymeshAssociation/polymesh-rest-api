@@ -9,7 +9,6 @@ import {
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { createTransactionQueueModel } from '~/common/utils';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
@@ -77,6 +76,6 @@ export class ComplianceController {
     @Body() params: SetRequirementsDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.complianceService.setRequirements(ticker, params);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 }

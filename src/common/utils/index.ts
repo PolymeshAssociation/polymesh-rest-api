@@ -20,7 +20,7 @@ import { flatten } from 'lodash';
 
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
-import { QueueResult, Transaction } from '~/common/types';
+import { QueueResult } from '~/common/types';
 
 export async function processQueue<MethodArgs, ReturnType>(
   method: ProcedureMethod<MethodArgs, unknown, ReturnType>,
@@ -48,7 +48,7 @@ export async function processQueue<MethodArgs, ReturnType>(
       }
 
       const { blockHash, txHash, blockNumber } = transaction;
-      return {
+      const constructorParams = {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         blockHash: blockHash!,
         transactionHash: txHash!,
@@ -56,6 +56,11 @@ export async function processQueue<MethodArgs, ReturnType>(
         ...tagDetails,
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
       };
+
+      if ('transactionTag' in constructorParams) {
+        return new TransactionModel(constructorParams);
+      }
+      return new BatchTransactionModel(constructorParams);
     };
 
     return {
@@ -91,15 +96,4 @@ export function getTxTagsWithModuleNames(): string[] {
   const txTags = getTxTags();
   const moduleNames = Object.values(ModuleName);
   return [...moduleNames, ...txTags];
-}
-
-export function createTransactionQueueModel(
-  transactions: Transaction[]
-): (TransactionModel | BatchTransactionModel)[] {
-  return transactions.map(transaction => {
-    if ('transactionTag' in transaction) {
-      return new TransactionModel(transaction);
-    }
-    return new BatchTransactionModel(transaction);
-  });
 }

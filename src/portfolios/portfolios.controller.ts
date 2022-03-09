@@ -14,7 +14,6 @@ import { DidDto } from '~/common/dto/params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { createTransactionQueueModel } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
@@ -82,7 +81,7 @@ export class PortfoliosController {
     @Body() transferParams: AssetMovementDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.portfoliosService.moveAssets(did, transferParams);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiOperation({
@@ -102,7 +101,7 @@ export class PortfoliosController {
     );
     return new CreatedPortfolioModel({
       portfolio: createPortfolioIdentifierModel(result),
-      transactions: createTransactionQueueModel(transactions),
+      transactions,
     });
   }
 
@@ -139,6 +138,6 @@ export class PortfoliosController {
     @Query() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.portfoliosService.deletePortfolio(portfolio, signer);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 }

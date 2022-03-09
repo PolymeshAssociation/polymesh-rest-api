@@ -9,12 +9,7 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import {
-  MockCheckpoint,
-  MockCheckpointSchedule,
-  mockTransactions,
-  mockTransactionsResult,
-} from '~/test-utils/mocks';
+import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -119,7 +114,7 @@ describe('CheckpointsController', () => {
       const mockCheckpoint = new MockCheckpoint();
       const response = {
         result: mockCheckpoint,
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCheckpointsService.createByTicker.mockResolvedValue(response);
       const body = {
@@ -130,7 +125,7 @@ describe('CheckpointsController', () => {
 
       expect(result).toEqual({
         checkpoint: mockCheckpoint,
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -210,7 +205,7 @@ describe('CheckpointsController', () => {
       const mockCheckpointSchedule = new MockCheckpointSchedule();
       const response = {
         result: mockCheckpointSchedule,
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
 
@@ -238,7 +233,7 @@ describe('CheckpointsController', () => {
       });
       expect(result).toEqual({
         schedule: mockCreatedSchedule,
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -313,7 +308,7 @@ describe('CheckpointsController', () => {
   describe('deleteSchedule', () => {
     it('should return the transaction details', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(response);
 
@@ -323,7 +318,7 @@ describe('CheckpointsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });

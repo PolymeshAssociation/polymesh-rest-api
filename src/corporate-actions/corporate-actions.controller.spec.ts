@@ -12,7 +12,6 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { mockTransactions, mockTransactionsResult } from '~/test-utils/mocks';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -64,7 +63,7 @@ describe('CorporateActionsController', () => {
   describe('updateDefaultConfig', () => {
     it('should update the Corporate Action Default Config and return the details of transaction', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(response);
       const body = {
@@ -75,7 +74,7 @@ describe('CorporateActionsController', () => {
       const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.updateDefaultConfigByTicker).toHaveBeenCalledWith(
         'TICKER',
@@ -124,7 +123,7 @@ describe('CorporateActionsController', () => {
       const mockDistribution = new MockDistribution();
       const response = {
         result: mockDistribution,
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
       const mockDate = new Date();
@@ -144,7 +143,7 @@ describe('CorporateActionsController', () => {
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         dividendDistribution: createDividendDistributionModel(mockDistribution as any),
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
         'TICKER',
@@ -156,7 +155,7 @@ describe('CorporateActionsController', () => {
   describe('deleteCorporateAction', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.remove.mockResolvedValue(response);
 
@@ -166,7 +165,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
         'TICKER',
@@ -179,7 +178,7 @@ describe('CorporateActionsController', () => {
   describe('payDividends', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.payDividends.mockResolvedValue(response);
 
@@ -196,7 +195,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.payDividends).toHaveBeenCalledWith(
         'TICKER',
@@ -208,7 +207,7 @@ describe('CorporateActionsController', () => {
 
   describe('linkDocuments', () => {
     it('should call the service and return the results', async () => {
-      const transactions = mockTransactions;
+      const transactions = ['transaction'];
 
       const body = {
         documents: [
@@ -229,7 +228,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -237,7 +236,7 @@ describe('CorporateActionsController', () => {
   describe('claimDividends', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.claimDividends.mockResolvedValue(response);
 
@@ -251,7 +250,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.claimDividends).toHaveBeenCalledWith(
         'TICKER',
@@ -264,7 +263,7 @@ describe('CorporateActionsController', () => {
   describe('reclaimDividends', () => {
     it('should call the service and return the transaction details', async () => {
       const response = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.reclaimRemainingFunds.mockResolvedValue(response);
 
@@ -278,7 +277,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
         'TICKER',
@@ -290,7 +289,7 @@ describe('CorporateActionsController', () => {
 
   describe('modifyCheckpoint', () => {
     it('should call the service and return the results', async () => {
-      const transactions = mockTransactions;
+      const transactions = ['transaction'];
 
       const body = {
         checkpoint: new Date(),
@@ -305,7 +304,7 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
         'TICKER',
