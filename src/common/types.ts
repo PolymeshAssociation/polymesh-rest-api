@@ -1,29 +1,5 @@
 /* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
-
-import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
-import { TransactionModel } from '~/common/models/transaction.model';
-
-export type Transaction = {
-  blockHash: string;
-  transactionHash: string;
-  blockNumber: BigNumber;
-} & (
-  | {
-      transactionTag: TxTag;
-    }
-  | {
-      transactionTags: TxTag[];
-    }
-);
-
-export type QueueResult<T> = {
-  result: T;
-  transactions: (TransactionModel | BatchTransactionModel)[];
-};
-
 export interface Entity<Serialized> {
   uuid: string;
 

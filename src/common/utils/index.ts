@@ -20,7 +20,11 @@ import { flatten } from 'lodash';
 
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
-import { QueueResult } from '~/common/types';
+
+export type QueueResult<T> = {
+  result: T;
+  transactions: (TransactionModel | BatchTransactionModel)[];
+};
 
 export async function processQueue<MethodArgs, ReturnType>(
   method: ProcedureMethod<MethodArgs, unknown, ReturnType>,

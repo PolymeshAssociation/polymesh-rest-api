@@ -7,8 +7,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
