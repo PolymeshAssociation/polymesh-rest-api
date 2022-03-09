@@ -3,8 +3,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
-import { TransactionType } from '~/common/consts';
 import { FromBigNumber } from '~/common/decorators/transformation';
+import { TransactionType } from '~/common/types';
 
 export class TransactionIdentifierModel {
   @ApiProperty({

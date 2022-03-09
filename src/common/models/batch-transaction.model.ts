@@ -2,8 +2,8 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
-import { TransactionType } from '~/common/consts';
 import { TransactionIdentifierModel } from '~/common/models/transaction-identifier.model';
+import { TransactionType } from '~/common/types';
 
 export class BatchTransactionModel extends TransactionIdentifierModel {
   @ApiProperty({
@@ -14,6 +14,8 @@ export class BatchTransactionModel extends TransactionIdentifierModel {
     example: 'asset.registerTicker',
   })
   readonly transactionTags?: string[];
+
+  declare readonly type: TransactionType.Batch;
 
   constructor(model: Omit<BatchTransactionModel, 'type'>) {
     const { transactionTags, ...rest } = model;

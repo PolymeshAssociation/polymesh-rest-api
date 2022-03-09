@@ -2,11 +2,11 @@
 
 import { Type } from 'class-transformer';
 
-import { TransactionType } from '~/common/consts';
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionIdentifierModel } from '~/common/models/transaction-identifier.model';
 import { TransactionModel } from '~/common/models/transaction.model';
+import { TransactionType } from '~/common/types';
 
 export class TransactionQueueModel {
   @ApiPropertyOneOf({

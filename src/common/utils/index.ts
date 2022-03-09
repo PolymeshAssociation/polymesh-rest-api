@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   ErrorCode,
   ModuleName,
@@ -53,7 +52,7 @@ export async function processQueue<MethodArgs, ReturnType>(
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         blockHash: blockHash!,
         transactionHash: txHash!,
-        blockNumber: new BigNumber(blockNumber || 0),
+        blockNumber: blockNumber!,
         ...tagDetails,
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
       };
