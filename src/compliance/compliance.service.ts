@@ -36,7 +36,7 @@ export class ComplianceService {
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(asset.compliance.requirements.set, params as SetAssetRequirementsParams, {
-      signer: address,
+      signingAccount: address,
     });
   }
 }

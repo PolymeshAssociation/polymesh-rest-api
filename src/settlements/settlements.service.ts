@@ -78,7 +78,7 @@ export class SettlementsService {
       })),
     };
 
-    return processQueue(venue.addInstruction, params, { signer: address });
+    return processQueue(venue.addInstruction, params, { signingAccount: address });
   }
 
   public async affirmInstruction(
@@ -91,7 +91,7 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    return processQueue(instruction.affirm, { signer: address }, {});
+    return processQueue(instruction.affirm, { signingAccount: address }, {});
   }
 
   public async rejectInstruction(
@@ -104,7 +104,7 @@ export class SettlementsService {
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
 
-    return processQueue(instruction.reject, { signer: address }, {});
+    return processQueue(instruction.reject, { signingAccount: address }, {});
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -156,7 +156,7 @@ export class SettlementsService {
     };
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
-    return processQueue(method, params, { signer: address });
+    return processQueue(method, params, { signingAccount: address });
   }
 
   public async modifyVenue(
@@ -167,7 +167,7 @@ export class SettlementsService {
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(venue.modify, params, { signer: address });
+    return processQueue(venue.modify, params, { signingAccount: address });
   }
 
   public async canTransfer(

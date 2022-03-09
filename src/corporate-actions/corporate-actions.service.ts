@@ -38,7 +38,7 @@ export class CorporateActionsService {
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(asset.corporateActions.setDefaultConfig, rest as Required<typeof rest>, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -80,7 +80,7 @@ export class CorporateActionsService {
         ...rest,
       },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }
@@ -96,7 +96,7 @@ export class CorporateActionsService {
       asset.corporateActions.remove,
       { corporateAction },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }
@@ -113,7 +113,7 @@ export class CorporateActionsService {
       distribution.pay,
       { targets },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }
@@ -130,7 +130,7 @@ export class CorporateActionsService {
       documents: documents.map(document => document.toAssetDocument()),
     };
     return processQueue(distribution.linkDocuments, params, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -142,7 +142,7 @@ export class CorporateActionsService {
     const { distribution } = await this.findDistribution(ticker, id);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(distribution.claim, undefined, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -154,7 +154,7 @@ export class CorporateActionsService {
     const { distribution } = await this.findDistribution(ticker, id);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     return processQueue(distribution.reclaimFunds, undefined, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -170,7 +170,7 @@ export class CorporateActionsService {
       distribution.modifyCheckpoint,
       { checkpoint },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }

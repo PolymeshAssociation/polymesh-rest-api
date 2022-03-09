@@ -296,7 +296,7 @@ describe('SettlementsService', () => {
             },
           ],
         },
-        { signer: address }
+        { signingAccount: address }
       );
       findVenueSpy.mockRestore();
     });
@@ -342,7 +342,7 @@ describe('SettlementsService', () => {
       });
       expect(mockPolymeshApi.settlements.createVenue).toHaveBeenCalledWith(
         { description: body.description, type: body.type },
-        { signer: address }
+        { signingAccount: address }
       );
     });
   });
@@ -419,7 +419,7 @@ describe('SettlementsService', () => {
         });
         expect(mockVenue.modify).toHaveBeenCalledWith(
           { description: body.description, type: body.type },
-          { signer: address }
+          { signingAccount: address }
         );
         findVenueSpy.mockRestore();
       });
@@ -465,7 +465,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signer: address }, {});
+      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signingAccount: address }, {});
       findInstructionSpy.mockRestore();
     });
   });
@@ -507,7 +507,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.reject).toHaveBeenCalledWith({ signer: address }, {});
+      expect(mockInstruction.reject).toHaveBeenCalledWith({ signingAccount: address }, {});
       findInstructionSpy.mockRestore();
     });
   });

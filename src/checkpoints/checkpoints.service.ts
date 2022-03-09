@@ -86,7 +86,7 @@ export class CheckpointsService {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.checkpoints.create, { signer: address }, {});
+    return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
   }
 
   public async createScheduleByTicker(
@@ -96,7 +96,7 @@ export class CheckpointsService {
     const { signer, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.checkpoints.schedules.create, rest, { signer: address });
+    return processQueue(asset.checkpoints.schedules.create, rest, { signingAccount: address });
   }
 
   public async getAssetBalance(
@@ -126,6 +126,10 @@ export class CheckpointsService {
   ): Promise<QueueResult<void>> {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const asset = await this.assetsService.findOne(ticker);
-    return processQueue(asset.checkpoints.schedules.remove, { schedule: id }, { signer: address });
+    return processQueue(
+      asset.checkpoints.schedules.remove,
+      { schedule: id },
+      { signingAccount: address }
+    );
   }
 }

@@ -65,7 +65,7 @@ export class PortfoliosService {
         };
       }),
     };
-    return processQueue(fromPortfolio.moveFunds, args, { signer: address });
+    return processQueue(fromPortfolio.moveFunds, args, { signingAccount: address });
   }
 
   public async createPortfolio(
@@ -76,7 +76,7 @@ export class PortfoliosService {
     } = this;
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(polymeshApi.identities.createPortfolio, rest, { signer: address });
+    return processQueue(polymeshApi.identities.createPortfolio, rest, { signingAccount: address });
   }
 
   public async deletePortfolio(
@@ -88,7 +88,7 @@ export class PortfoliosService {
     return processQueue(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      { signer: address }
+      { signingAccount: address }
     );
   }
 }

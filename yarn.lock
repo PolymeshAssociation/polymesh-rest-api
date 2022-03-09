@@ -1098,14 +1098,14 @@
     "@types/websocket" "^1.0.3"
     websocket "^1.0.34"
 
-"@polymathnetwork/polymesh-sdk@13.0.0-alpha.31":
-  version "13.0.0-alpha.31"
-  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-13.0.0-alpha.31.tgz#b33e4fc0e3c5cd4b4a2b709cbdb38a333163df23"
-  integrity sha512-AOjAWe7wAXWjI/aRIDyT7pCS++96zabgier90UT1MjhP1CgadGbbiqOHvWjLW3NiZP3iL3ZSnDeaX+yi/5c9aw==
+"@polymathnetwork/polymesh-sdk@14.0.0-alpha.4":
+  version "14.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-14.0.0-alpha.4.tgz#ac13eac4e1d53c504e083ce3ceeb335835536a4d"
+  integrity sha512-xY4+FbrlP5/Ij3sTcgH26bQUKp4eAKBMrr6J8LLcsb7Y7EcjRWgE4HSb4EPCwQ7XR9QQiPcAG+K/aw74IuJqpA==
   dependencies:
     "@polkadot/api" "5.1.1"
-    "@polkadot/util" "7.0.2"
-    "@polkadot/util-crypto" "7.0.2"
+    "@polkadot/util" "^7.0.2"
+    "@polkadot/util-crypto" "^7.0.2"
     apollo-cache-inmemory "^1.6.6"
     apollo-client "^2.6.10"
     apollo-link "^1.2.14"

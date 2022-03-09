@@ -280,7 +280,7 @@ describe('CheckpointsService', () => {
       });
       expect(mockAsset.checkpoints.create).toHaveBeenCalledWith(
         {
-          signer: address,
+          signingAccount: address,
         },
         {}
       );
@@ -337,7 +337,7 @@ describe('CheckpointsService', () => {
           repetitions: new BigNumber(2),
         },
         {
-          signer: address,
+          signingAccount: address,
         }
       );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
@@ -510,7 +510,7 @@ describe('CheckpointsService', () => {
             schedule: id,
           },
           {
-            signer: address,
+            signingAccount: address,
           }
         );
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);

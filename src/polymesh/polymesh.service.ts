@@ -17,13 +17,16 @@ export class PolymeshService {
     }, 10000);
 
     const accounts = relayerAccountsService.findAll();
+    console.warn(
+      `Account signing is WIP. ${accounts.length} were supposed to be loaded but were not`
+    );
 
     /* istanbul ignore next: remove when this is replaced by a real service */
-    accounts.forEach(({ mnemonic, did }) => {
-      const { address: account } = polymeshApi.addSigner({ accountMnemonic: mnemonic });
+    // accounts.forEach(({ mnemonic, did }) => {
+    //   const { address: account } = polymeshApi.addSigner({ accountMnemonic: mnemonic });
 
-      relayerAccountsService.setAddress(did, account);
-    });
+    //   relayerAccountsService.setAddress(did, account);
+    // });
   }
 
   /* istanbul ignore next: not worth the trouble */

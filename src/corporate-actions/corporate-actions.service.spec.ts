@@ -149,7 +149,7 @@ describe('CorporateActionsService', () => {
         });
         expect(mockAsset.corporateActions.setDefaultConfig).toHaveBeenCalledWith(
           { defaultTaxWithholding: new BigNumber(25) },
-          { signer: address }
+          { signingAccount: address }
         );
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
@@ -555,7 +555,7 @@ describe('CorporateActionsService', () => {
             targets: body.targets,
           },
           {
-            signer: address,
+            signingAccount: address,
           }
         );
         findDistributionSpy.mockRestore();
@@ -759,7 +759,7 @@ describe('CorporateActionsService', () => {
           ],
         });
         expect(distributionWithDetails.distribution.claim).toHaveBeenCalledWith(undefined, {
-          signer: address,
+          signingAccount: address,
         });
         findDistributionSpy.mockRestore();
       });
@@ -854,7 +854,7 @@ describe('CorporateActionsService', () => {
           ],
         });
         expect(distributionWithDetails.distribution.reclaimFunds).toHaveBeenCalledWith(undefined, {
-          signer: address,
+          signingAccount: address,
         });
         findDistributionSpy.mockRestore();
       });

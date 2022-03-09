@@ -229,7 +229,7 @@ describe('PortfoliosService', () => {
             },
           ],
         },
-        { signer: address }
+        { signingAccount: address }
       );
       findOneSpy.mockRestore();
     });
@@ -275,7 +275,7 @@ describe('PortfoliosService', () => {
         {
           name: body.name,
         },
-        { signer: address }
+        { signingAccount: address }
       );
     });
   });

@@ -77,21 +77,21 @@ export class AssetsService {
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const reserveTicker = this.polymeshService.polymeshApi.assets.reserveTicker;
-    return processQueue(reserveTicker, rest, { signer: address });
+    return processQueue(reserveTicker, rest, { signingAccount: address });
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return processQueue(createAsset, rest, { signer: address });
+    return processQueue(createAsset, rest, { signingAccount: address });
   }
 
   public async issue(ticker: string, params: IssueDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.issuance.issue, rest, { signer: address });
+    return processQueue(asset.issuance.issue, rest, { signingAccount: address });
   }
 
   public async findTickerReservation(ticker: string): Promise<TickerReservation> {
