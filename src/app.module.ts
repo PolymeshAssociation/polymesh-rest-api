@@ -14,8 +14,8 @@ import { IdentitiesModule } from '~/identities/identities.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
+import { SignerModule } from '~/signer/signer.module';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { SettlementsModule } from '~/settlements/settlements.module';
     PolymeshModule,
     IdentitiesModule,
     SettlementsModule,
-    RelayerAccountsModule,
+    SignerModule,
     AuthorizationsModule,
     PortfoliosModule,
     ClaimsModule,

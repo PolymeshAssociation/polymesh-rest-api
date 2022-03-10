@@ -1098,6 +1098,13 @@
     "@types/websocket" "^1.0.3"
     websocket "^1.0.34"
 
+"@polymathnetwork/local-signing-manager@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/local-signing-manager/-/local-signing-manager-1.0.5.tgz#6d1878f78279266802bd7f418b62940b4b38a1f8"
+  integrity sha512-FatnaQ2neVReqaE/VaPbdwSKbMXVFhRoOVfGp2f0cIrpctg920JU55ggh5sqhj59I2v3aRsla5e+H468nYizWA==
+  dependencies:
+    "@polymathnetwork/signing-manager-types" "^1.0.3"
+
 "@polymathnetwork/polymesh-sdk@14.0.0-alpha.4":
   version "14.0.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-14.0.0-alpha.4.tgz#ac13eac4e1d53c504e083ce3ceeb335835536a4d"
@@ -1125,6 +1132,11 @@
     lodash "^4.17.15"
     semver "^7.3.5"
     websocket-as-promised "^2.0.1"
+
+"@polymathnetwork/signing-manager-types@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/signing-manager-types/-/signing-manager-types-1.0.3.tgz#80f8696c34e6e1a6a570e2d25ae967b614f5822a"
+  integrity sha512-4o0gxlvDAgS08MlnAkxqJJ6B9CGTj47/rhjUdPoH1GJ1AbnLAX3TCoZvr/qgBZe+7SLKPd8fur2o2x1m4KtSfw==
 
 "@schematics/schematics@0.1102.6":
   version "0.1102.6"

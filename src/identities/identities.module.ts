@@ -10,14 +10,14 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { LoggerModule } from '~/logger/logger.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
+import { SignerModule } from '~/signer/signer.module';
 
 @Module({
   imports: [
     PolymeshModule,
     LoggerModule,
-    RelayerAccountsModule,
+    SignerModule,
     forwardRef(() => AssetsModule),
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),

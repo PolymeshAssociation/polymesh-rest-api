@@ -2,7 +2,7 @@
 
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('relayer-accounts', () => {
+export default registerAs('signer-accounts', () => {
   const { RELAYER_DIDS, RELAYER_MNEMONICS } = process.env;
 
   const dids = RELAYER_DIDS?.split(',').map(d => d.trim()) || [];

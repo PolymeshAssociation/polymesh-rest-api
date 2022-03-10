@@ -14,14 +14,14 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SignerService } from '~/signer/signer.service';
 import {
   MockIdentity,
   MockPolymesh,
   MockPortfolio,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSignerService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -37,22 +37,22 @@ describe('PortfoliosService', () => {
   };
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSignerService: MockSignerService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSignerService = new MockSignerService();
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [PortfoliosService, IdentitiesService, RelayerAccountsService],
+      providers: [PortfoliosService, IdentitiesService, SignerService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
+      .overrideProvider(SignerService)
+      .useValue(mockSignerService)
       .compile();
 
     service = module.get<PortfoliosService>(PortfoliosService);
@@ -192,7 +192,7 @@ describe('PortfoliosService', () => {
       mockPortfolio.moveFunds.mockResolvedValue(mockQueue);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
       const body = {
         signer: '0x6000',
         to: new BigNumber(2),
@@ -252,7 +252,7 @@ describe('PortfoliosService', () => {
       mockPolymeshApi.identities.createPortfolio.mockResolvedValue(mockQueue);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
       const body = {
         signer: '0x6000',
         name: 'FOLIO-1',
@@ -316,7 +316,7 @@ describe('PortfoliosService', () => {
         });
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         const findOneSpy = jest.spyOn(service, 'findOne');
 
@@ -363,7 +363,7 @@ describe('PortfoliosService', () => {
         });
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         const result = await service.deletePortfolio(portfolio, signer);
         expect(result).toEqual({

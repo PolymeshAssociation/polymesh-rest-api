@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { MockPolymesh } from '~/test-utils/mocks';
 
 describe('PolymeshService', () => {
@@ -17,7 +16,6 @@ describe('PolymeshService', () => {
     mockPolymeshApi = new MockPolymesh();
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [RelayerAccountsModule],
       providers: [PolymeshService, { provide: POLYMESH_API, useValue: mockPolymeshApi }],
     }).compile();
 

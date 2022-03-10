@@ -11,14 +11,14 @@ import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { TransactionType } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SignerService } from '~/signer/signer.service';
 import {
   MockAsset,
   MockCheckpoint,
   MockCheckpointSchedule,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockAssetService, MockSignerService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -32,21 +32,16 @@ describe('CheckpointsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockRelayerAccountsService = new MockRelayerAccountsService();
+  const mockSignerService = new MockSignerService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CheckpointsService,
-        AssetsService,
-        RelayerAccountsService,
-        mockPolymeshLoggerProvider,
-      ],
+      providers: [CheckpointsService, AssetsService, SignerService, mockPolymeshLoggerProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
+      .overrideProvider(SignerService)
+      .useValue(mockSignerService)
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
@@ -260,7 +255,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
       const body = {
         signer: 'signer',
       };
@@ -308,7 +303,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
       const mockDate = new Date();
       const params = {
         signer: 'signer',
@@ -447,7 +442,7 @@ describe('CheckpointsService', () => {
         const signer = '0x6'.padEnd(66, '0');
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         const mockAsset = new MockAsset();
         mockAsset.checkpoints.schedules.remove.mockImplementation(() => {
@@ -490,7 +485,7 @@ describe('CheckpointsService', () => {
         const id = new BigNumber(1);
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         const result = await service.deleteScheduleByTicker(ticker, id, signer);
         expect(result).toEqual({

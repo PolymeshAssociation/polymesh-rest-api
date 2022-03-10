@@ -5,14 +5,14 @@ import { forwardRef, Module } from '@nestjs/common';
 import { AssetsModule } from '~/assets/assets.module';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { SignerModule } from '~/signer/signer.module';
 
 @Module({
   imports: [
+    SignerModule,
     forwardRef(() => IdentitiesModule),
-    RelayerAccountsModule,
     PolymeshModule,
     forwardRef(() => AssetsModule),
   ],

@@ -17,10 +17,10 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SignerModule } from '~/signer/signer.module';
+import { SignerService } from '~/signer/signer.service';
 import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSignerService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -33,20 +33,20 @@ describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSignerService: MockSignerService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSignerService = new MockSignerService();
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
+      imports: [PolymeshModule, SignerModule],
       providers: [IdentitiesService, mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
+      .overrideProvider(SignerService)
+      .useValue(mockSignerService)
       .compile();
 
     service = module.get<IdentitiesService>(IdentitiesService);
@@ -163,7 +163,7 @@ describe('IdentitiesService', () => {
         };
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         mockPolymeshApi.accountManagement.inviteAccount.mockImplementation(() => {
           throw polymeshError;
@@ -202,7 +202,7 @@ describe('IdentitiesService', () => {
         };
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         const result = await service.addSecondaryAccount(body);
         expect(result).toEqual({

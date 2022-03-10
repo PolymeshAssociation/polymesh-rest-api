@@ -17,17 +17,17 @@ import { SignerDto } from '~/common/dto/signer.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
+import { SignerService } from '~/signer/signer.service';
 
 @Injectable()
 export class SettlementsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService,
+    private readonly signerService: SignerService,
     private readonly assetsService: AssetsService
   ) {}
 
@@ -61,12 +61,12 @@ export class SettlementsService {
 
   public async createInstruction(
     venueId: BigNumber,
-    createInstructuionDto: CreateInstructionDto
+    createInstructionDto: CreateInstructionDto
   ): Promise<QueueResult<Instruction>> {
-    const { signer, ...rest } = createInstructuionDto;
+    const { signer, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = this.signerService.findAddressBySigner(signer);
 
     const params = {
       ...rest,
@@ -89,7 +89,7 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = this.signerService.findAddressBySigner(signer);
 
     return processQueue(instruction.affirm, { signingAccount: address }, {});
   }
@@ -102,7 +102,7 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = this.signerService.findAddressBySigner(signer);
 
     return processQueue(instruction.reject, { signingAccount: address }, {});
   }
@@ -154,7 +154,7 @@ export class SettlementsService {
       description,
       type,
     };
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = this.signerService.findAddressBySigner(signer);
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
     return processQueue(method, params, { signingAccount: address });
   }
@@ -166,7 +166,7 @@ export class SettlementsService {
     const { signer, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = this.signerService.findAddressBySigner(signer);
     return processQueue(venue.modify, params, { signingAccount: address });
   }
 

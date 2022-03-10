@@ -20,9 +20,9 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { SignerModule } from '~/signer/signer.module';
+import { SignerService } from '~/signer/signer.service';
 import {
   MockAsset,
   MockIdentity,
@@ -31,7 +31,7 @@ import {
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSignerService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -49,12 +49,12 @@ describe('SettlementsService', () => {
   const mockAssetsService = {
     findOne: jest.fn(),
   };
-  const mockRelayerAccountsService = new MockRelayerAccountsService();
+  const mockSignerService = new MockSignerService();
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
+      imports: [PolymeshModule, SignerModule],
       providers: [SettlementsService, AssetsService, IdentitiesService],
     })
       .overrideProvider(POLYMESH_API)
@@ -63,8 +63,8 @@ describe('SettlementsService', () => {
       .useValue(mockIdentitiesService)
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
+      .overrideProvider(SignerService)
+      .useValue(mockSignerService)
       .compile();
 
     service = module.get<SettlementsService>(SettlementsService);
@@ -268,7 +268,7 @@ describe('SettlementsService', () => {
         ...params,
       };
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.createInstruction(new BigNumber(123), body as any);
@@ -324,7 +324,7 @@ describe('SettlementsService', () => {
         type: VenueType.Exchange,
       };
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
 
       const result = await service.createVenue(body);
 
@@ -401,7 +401,7 @@ describe('SettlementsService', () => {
           type: VenueType.Exchange,
         };
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSignerService.findAddressBySigner.mockReturnValue(address);
 
         const result = await service.modifyVenue(new BigNumber(123), body);
 
@@ -448,7 +448,7 @@ describe('SettlementsService', () => {
         signer: 'signer',
       };
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.affirmInstruction(new BigNumber(123), body as any);
@@ -489,7 +489,7 @@ describe('SettlementsService', () => {
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSignerService.findAddressBySigner.mockReturnValue(address);
 
       const result = await service.rejectInstruction(new BigNumber(123), {
         signer: 'signer',

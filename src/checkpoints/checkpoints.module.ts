@@ -6,10 +6,10 @@ import { AssetsModule } from '~/assets/assets.module';
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { LoggerModule } from '~/logger/logger.module';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { SignerModule } from '~/signer/signer.module';
 
 @Module({
-  imports: [AssetsModule, RelayerAccountsModule, LoggerModule],
+  imports: [AssetsModule, SignerModule, LoggerModule],
   providers: [CheckpointsService],
   exports: [CheckpointsService],
   controllers: [CheckpointsController],
