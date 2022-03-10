@@ -217,3 +217,11 @@ export class MockOffering {
   ticker = 'TICKER';
   public getInvestments = jest.fn();
 }
+
+export class MockTickerReservation {
+  ticker = 'TICKER';
+
+  public transferOwnership = jest.fn();
+  public extend = jest.fn();
+  public details = jest.fn();
+}

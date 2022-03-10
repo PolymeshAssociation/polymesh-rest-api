@@ -34,7 +34,6 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
@@ -444,8 +443,8 @@ export class IdentitiesController {
       'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
   })
   @ApiCreatedResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
+    description: 'Newly generated Authorization request along with transaction details',
+    type: GeneratedAuthorizationRequestModel,
   })
   @ApiInternalServerErrorResponse({
     description: "The supplied address is not encoded with the chain's SS58 format",

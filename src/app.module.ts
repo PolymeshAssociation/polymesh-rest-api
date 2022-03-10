@@ -16,6 +16,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
+import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SettlementsModule } from '~/settlements/settlements.module';
       }).and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY'),
     }),
     AssetsModule,
+    TickerReservationsModule,
     PolymeshModule,
     IdentitiesModule,
     SettlementsModule,

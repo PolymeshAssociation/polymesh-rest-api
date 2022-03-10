@@ -203,47 +203,34 @@ describe('AssetsController', () => {
     });
   });
 
-  describe('reserveTicker', () => {
+  describe('createAsset', () => {
     it('should call the service and return the results', async () => {
-      const input = { ticker: 'SOME_TICKER', signer: '0x6000' };
-      mockAssetsService.registerTicker.mockResolvedValue({ transactions: ['transaction'] });
+      const input = {
+        signer: '0x6000',
+        name: 'Berkshire Class A',
+        ticker: 'BRK.A',
+        isDivisible: false,
+        assetType: KnownAssetType.EquityCommon,
+        requireInvestorUniqueness: false,
+      };
+      mockAssetsService.createAsset.mockResolvedValue({ transactions: ['transaction'] });
 
-      const result = await controller.registerTicker(input);
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
-      expect(mockAssetsService.registerTicker).toHaveBeenCalledWith(input);
+      const result = await controller.createAsset(input);
+      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
     });
+  });
 
-    describe('createAsset', () => {
-      it('should call the service and return the results', async () => {
-        const input = {
-          signer: '0x6000',
-          name: 'Berkshire Class A',
-          ticker: 'BRK.A',
-          isDivisible: false,
-          assetType: KnownAssetType.EquityCommon,
-          requireInvestorUniqueness: false,
-        };
-        mockAssetsService.createAsset.mockResolvedValue({ transactions: ['transaction'] });
+  describe('issueAsset', () => {
+    it('should call the service and return the results', async () => {
+      const signer = '0x6000';
+      const ticker = 'TICKER';
+      const amount = new BigNumber(1000);
+      mockAssetsService.issue.mockResolvedValue({ transactions: ['transaction'] });
 
-        const result = await controller.createAsset(input);
-        expect(result).toEqual({ transactions: ['transaction'] });
-        expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
-      });
-    });
-
-    describe('issueAsset', () => {
-      it('should call the service and return the results', async () => {
-        const signer = '0x6000';
-        const ticker = 'TICKER';
-        const amount = new BigNumber(1000);
-        mockAssetsService.issue.mockResolvedValue({ transactions: ['transaction'] });
-
-        const result = await controller.issue({ ticker }, { signer, amount });
-        expect(result).toEqual({ transactions: ['transaction'] });
-        expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
-      });
+      const result = await controller.issue({ ticker }, { signer, amount });
+      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
     });
   });
 });

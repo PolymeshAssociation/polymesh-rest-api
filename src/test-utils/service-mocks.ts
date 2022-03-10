@@ -20,3 +20,10 @@ export class MockRelayerAccountsService {
 
   public findAll = jest.fn().mockReturnValue([]);
 }
+
+export class MockTickerReservationsService {
+  findOne = jest.fn();
+  reserve = jest.fn();
+  transferOwnership = jest.fn();
+  extend = jest.fn();
+}

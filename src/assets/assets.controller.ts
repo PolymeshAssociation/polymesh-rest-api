@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiGoneResponse,
   ApiNotFoundResponse,
@@ -15,7 +14,6 @@ import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
-import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -210,23 +208,6 @@ export class AssetsController {
     @Body() params: IssueDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.issue(ticker, params);
-    return new TransactionQueueModel({ transactions });
-  }
-
-  @ApiOperation({
-    summary: 'Reserve a Ticker',
-    description: 'Reserves a ticker so that an Asset can be created with it later',
-  })
-  @ApiCreatedResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiBadRequestResponse({
-    description: 'The ticker has already been reserved',
-  })
-  @Post('/reservations/tickers')
-  public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
-    const { transactions } = await this.assetsService.registerTicker(params);
     return new TransactionQueueModel({ transactions });
   }
 
