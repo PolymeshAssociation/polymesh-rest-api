@@ -43,6 +43,7 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
+@ApiTags('identities')
 @Controller('identities')
 export class IdentitiesController {
   constructor(

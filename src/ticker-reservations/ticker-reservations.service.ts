@@ -62,7 +62,7 @@ export class TickerReservationsService {
   public async extend(ticker: string, signer: string): Promise<QueueResult<TickerReservation>> {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const { extend } = await this.findOne(ticker);
-    return processQueue(extend, {}, { signer: address });
+    return processQueue(extend, { signer: address }, {});
   }
 
   public async findAllByOwner(owner: string): Promise<TickerReservation[]> {
