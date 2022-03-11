@@ -1,18 +1,24 @@
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AuthorizationType, ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationType, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
-import { MockAuthorizationRequest, MockIdentity } from '~/test-utils/mocks';
+import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { MockAuthorizationRequest, MockIdentity, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
 describe('AuthorizationsService', () => {
@@ -20,16 +26,27 @@ describe('AuthorizationsService', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
   };
+  let mockRelayerAccountsService: MockRelayerAccountsService;
 
   beforeEach(async () => {
+    mockRelayerAccountsService = new MockRelayerAccountsService();
+
     const module: TestingModule = await Test.createTestingModule({
+      imports: [RelayerAccountsModule],
       providers: [AuthorizationsService, IdentitiesService],
     })
+      .overrideProvider(RelayerAccountsService)
+      .useValue(mockRelayerAccountsService)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
       .compile();
 
     service = module.get<AuthorizationsService>(AuthorizationsService);
+    mockIsPolymeshTransaction.mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   it('should be defined', () => {
@@ -180,6 +197,139 @@ describe('AuthorizationsService', () => {
 
         const result = await service.findOne('0x6'.padEnd(66, '0'), new BigNumber(1));
         expect(result).toEqual(mockAuthorization);
+      });
+    });
+  });
+
+  describe('accept', () => {
+    let mockAuthorizationRequest: MockAuthorizationRequest;
+
+    beforeEach(() => {
+      mockAuthorizationRequest = new MockAuthorizationRequest();
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+    });
+    describe('if there is an error', () => {
+      it('should pass it up the chain', async () => {
+        const expectedError = new Error('Some error');
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
+
+        mockAuthorizationRequest.accept.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        let error;
+        try {
+          await service.accept(new BigNumber(1), '0x6000');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(expectedError);
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should call the accept procedure and return the queue data', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            blockNumber: new BigNumber(1),
+            tag: TxTags.portfolio.AcceptPortfolioCustody,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
+
+        mockAuthorizationRequest.accept.mockResolvedValue(mockQueue);
+
+        const result = await service.accept(new BigNumber(1), '0x6000');
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
+              transactionTag: TxTags.portfolio.AcceptPortfolioCustody,
+              type: TransactionType.Single,
+            },
+          ],
+        });
+      });
+    });
+  });
+
+  describe('reject', () => {
+    let mockAuthorizationRequest: MockAuthorizationRequest;
+
+    beforeEach(() => {
+      mockAuthorizationRequest = new MockAuthorizationRequest();
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+    });
+
+    describe('if there is an error', () => {
+      it('should pass it up the chain', async () => {
+        const expectedError = new Error('Some error');
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
+
+        mockAuthorizationRequest.remove.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        let error;
+        try {
+          await service.reject(new BigNumber(1), '0x6000');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toEqual(expectedError);
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should call the remove procedure and return the queue data', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            blockNumber: new BigNumber(1),
+            tag: TxTags.portfolio.AcceptPortfolioCustody,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+
+        const findOneSpy = jest.spyOn(service, 'findOne');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
+
+        mockAuthorizationRequest.remove.mockResolvedValue(mockQueue);
+
+        const result = await service.reject(new BigNumber(2), '0x6000');
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
+              transactionTag: TxTags.portfolio.AcceptPortfolioCustody,
+              type: TransactionType.Single,
+            },
+          ],
+        });
       });
     });
   });

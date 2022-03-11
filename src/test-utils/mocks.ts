@@ -197,6 +197,9 @@ export class MockAuthorizationRequest {
   target = {
     did: '0x6'.padEnd(66, '1a'),
   };
+
+  public accept = jest.fn();
+  public remove = jest.fn();
 }
 
 export class MockTransactionQueue {

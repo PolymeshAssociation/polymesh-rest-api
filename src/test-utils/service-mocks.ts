@@ -20,3 +20,11 @@ export class MockRelayerAccountsService {
 
   public findAll = jest.fn().mockReturnValue([]);
 }
+
+export class MockAuthorizationsService {
+  findPendingByDid = jest.fn();
+  findIssuedByDid = jest.fn();
+  findOne = jest.fn();
+  accept = jest.fn();
+  reject = jest.fn();
+}
