@@ -1,15 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClaimType, ConditionType, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 
-import { ResultsModel } from '~/common/models/results.model';
 import { ComplianceController } from '~/compliance/compliance.controller';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
+import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
+import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
 import { MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('ComplianceController', () => {
   let controller: ComplianceController;
+
   const mockService = new MockComplianceService();
+
   const ticker = 'TICKER';
   const validBody = {
     signer: '0x0600000000000000000000000000000000000000000000000000000000000000',
@@ -48,30 +50,13 @@ describe('ComplianceController', () => {
 
   describe('getComplianceRequirements', () => {
     it('should return the list of all compliance requirements of an Asset', async () => {
-      const mockRequirements = [
-        {
-          id: 1,
-          conditions: [
-            {
-              type: ConditionType.IsPresent,
-              claim: {
-                type: ClaimType.Accredited,
-                scope: {
-                  type: ScopeType.Identity,
-                  value: 'Ox6'.padEnd(66, '0'),
-                },
-              },
-              target: 'Receiver',
-              trustedClaimIssuers: [],
-            },
-          ],
-        },
-      ];
-      mockService.findComplianceRequirements.mockResolvedValue({ requirements: mockRequirements });
+      const mockComplianceRequirements = new MockComplianceRequirements();
+      mockService.findComplianceRequirements.mockResolvedValue(mockComplianceRequirements);
 
       const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual(new ResultsModel({ results: mockRequirements }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(result).toEqual(mockComplianceRequirements as ComplianceRequirementsModel);
     });
   });
 

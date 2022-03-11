@@ -2,31 +2,33 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   ClaimType,
-  KnownTokenType,
-  TokenIdentifierType,
+  KnownAssetType,
+  SecurityIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
-import { MockComplianceRequirements } from '~/assets/mocks/compliance-requirements.mock';
-import { ComplianceRequirementsModel } from '~/assets/models/compliance-requirements.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { MockSecurityToken } from '~/test-utils/mocks';
-import { MockAssetService } from '~/test-utils/service-mocks';
+import { ComplianceService } from '~/compliance/compliance.service';
+import { MockAsset } from '~/test-utils/mocks';
+import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;
 
   const mockAssetsService = new MockAssetService();
+  const mockComplianceService = new MockComplianceService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AssetsController],
-      providers: [AssetsService],
+      providers: [AssetsService, ComplianceService],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
+      .overrideProvider(ComplianceService)
+      .useValue(mockComplianceService)
       .compile();
 
     controller = module.get<AssetsController>(AssetsController);
@@ -38,8 +40,8 @@ describe('AssetsController', () => {
 
   describe('getDetails', () => {
     it('should return the details', async () => {
-      const mockTokenDetails = {
-        assetType: KnownTokenType.EquityCommon,
+      const mockAssetDetails = {
+        assetType: KnownAssetType.EquityCommon,
         isDivisible: false,
         name: 'NAME',
         owner: {
@@ -49,24 +51,24 @@ describe('AssetsController', () => {
       };
       const mockIdentifiers = [
         {
-          type: TokenIdentifierType.Isin,
+          type: SecurityIdentifierType.Isin,
           value: 'US000000000',
         },
       ];
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.details.mockResolvedValue(mockTokenDetails);
-      mockSecurityToken.getIdentifiers.mockResolvedValue(mockIdentifiers);
+      const mockAsset = new MockAsset();
+      mockAsset.details.mockResolvedValue(mockAssetDetails);
+      mockAsset.getIdentifiers.mockResolvedValue(mockIdentifiers);
 
       const mockFundingRound = 'Series A';
-      mockSecurityToken.currentFundingRound.mockResolvedValue(mockFundingRound);
+      mockAsset.currentFundingRound.mockResolvedValue(mockFundingRound);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await controller.getDetails({ ticker: 'SOME_TICKER' });
 
       const mockResult = {
-        ...mockTokenDetails,
-        identifiers: mockIdentifiers,
+        ...mockAssetDetails,
+        securityIdentifiers: mockIdentifiers,
         fundingRound: mockFundingRound,
       };
 
@@ -83,13 +85,16 @@ describe('AssetsController', () => {
         },
       ],
       next: '0xddddd',
-      count: 2,
+      count: new BigNumber(2),
     };
 
     it('should return the list of Asset holders', async () => {
       mockAssetsService.findHolders.mockResolvedValue(mockHolders);
 
-      const result = await controller.getHolders({ ticker: 'SOME_TICKER' }, { size: 1 });
+      const result = await controller.getHolders(
+        { ticker: 'SOME_TICKER' },
+        { size: new BigNumber(1) }
+      );
       const expectedResults = mockHolders.data.map(holder => {
         return { identity: holder.identity.did, balance: holder.balance };
       });
@@ -97,7 +102,7 @@ describe('AssetsController', () => {
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: expectedResults,
-          total: mockHolders.count,
+          total: new BigNumber(mockHolders.count),
           next: mockHolders.next,
         })
       );
@@ -108,7 +113,7 @@ describe('AssetsController', () => {
 
       const result = await controller.getHolders(
         { ticker: 'SOME_TICKER' },
-        { size: 1, start: 'SOME_START_KEY' }
+        { size: new BigNumber(1), start: 'SOME_START_KEY' }
       );
 
       const expectedResults = mockHolders.data.map(holder => {
@@ -118,7 +123,7 @@ describe('AssetsController', () => {
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: expectedResults,
-          total: mockHolders.count,
+          total: new BigNumber(mockHolders.count),
           next: mockHolders.next,
         })
       );
@@ -135,18 +140,21 @@ describe('AssetsController', () => {
         },
       ],
       next: '0xddddd',
-      count: 2,
+      count: new BigNumber(2),
     };
 
     it('should return the list of Asset documents', async () => {
       mockAssetsService.findDocuments.mockResolvedValue(mockDocuments);
 
-      const result = await controller.getDocuments({ ticker: 'SOME_TICKER' }, { size: 1 });
+      const result = await controller.getDocuments(
+        { ticker: 'SOME_TICKER' },
+        { size: new BigNumber(1) }
+      );
 
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: mockDocuments.data,
-          total: mockDocuments.count,
+          total: new BigNumber(mockDocuments.count),
           next: mockDocuments.next,
         })
       );
@@ -157,28 +165,16 @@ describe('AssetsController', () => {
 
       const result = await controller.getDocuments(
         { ticker: 'SOME_TICKER' },
-        { size: 1, start: 'SOME_START_KEY' }
+        { size: new BigNumber(1), start: 'SOME_START_KEY' }
       );
 
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: mockDocuments.data,
-          total: mockDocuments.count,
+          total: new BigNumber(mockDocuments.count),
           next: mockDocuments.next,
         })
       );
-    });
-  });
-
-  describe('getComplianceRequirements', () => {
-    it('should return the list of all compliance requirements of an Asset', async () => {
-      const mockComplianceRequirements = new MockComplianceRequirements();
-      mockAssetsService.findComplianceRequirements.mockResolvedValue(mockComplianceRequirements);
-
-      const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
     });
   });
 
@@ -186,34 +182,36 @@ describe('AssetsController', () => {
     it('should return the list of all trusted Claim Issuers of an Asset', async () => {
       const mockClaimIssuers = [
         {
-          did: 'Ox6'.padEnd(66, '0'),
+          identity: {
+            did: 'Ox6'.padEnd(66, '0'),
+          },
           trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
         },
       ];
-      mockAssetsService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
+      mockComplianceService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
 
       const result = await controller.getTrustedClaimIssuers({ ticker: 'SOME_TICKER' });
 
-      expect(result).toEqual({ results: mockClaimIssuers });
+      expect(result).toEqual({
+        results: [
+          {
+            did: 'Ox6'.padEnd(66, '0'),
+            trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+          },
+        ],
+      });
     });
   });
 
   describe('reserveTicker', () => {
     it('should call the service and return the results', async () => {
       const input = { ticker: 'SOME_TICKER', signer: '0x6000' };
-      const response = {
-        transactions: [
-          {
-            blockHash: '0xfb3f745444ae63e66240d57eb9d769b0152af23214600425fe7c01f02512d960',
-            transactionHash: '0xe16c51097d10e712b9f6ff572ca0c8c77ffcab0af8a8cb0598f8b891ab3ce46a',
-            transactionTag: 'asset.reserveTicker',
-          },
-        ],
-      };
-      mockAssetsService.registerTicker.mockResolvedValue(response);
+      mockAssetsService.registerTicker.mockResolvedValue({ transactions: ['transaction'] });
 
       const result = await controller.registerTicker(input);
-      expect(result).toEqual(response);
+      expect(result).toEqual({
+        transactions: ['transaction'],
+      });
       expect(mockAssetsService.registerTicker).toHaveBeenCalledWith(input);
     });
 
@@ -224,22 +222,13 @@ describe('AssetsController', () => {
           name: 'Berkshire Class A',
           ticker: 'BRK.A',
           isDivisible: false,
-          assetType: KnownTokenType.EquityCommon,
+          assetType: KnownAssetType.EquityCommon,
           requireInvestorUniqueness: false,
         };
-        const response = {
-          transactions: [
-            {
-              blockHash: '0xfb3f745444ae63e66240d57eb9d769b0152af23214600425fe7c01f02512d960',
-              transactionHash: '0xe16c51097d10e712b9f6ff572ca0c8c77ffcab0af8a8cb0598f8b891ab3ce46a',
-              transactionTag: 'asset.createAsset',
-            },
-          ],
-        };
-        mockAssetsService.createAsset.mockResolvedValue(response);
+        mockAssetsService.createAsset.mockResolvedValue({ transactions: ['transaction'] });
 
         const result = await controller.createAsset(input);
-        expect(result).toEqual(response);
+        expect(result).toEqual({ transactions: ['transaction'] });
         expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
       });
     });
@@ -248,20 +237,11 @@ describe('AssetsController', () => {
       it('should call the service and return the results', async () => {
         const signer = '0x6000';
         const ticker = 'TICKER';
-        const amount = new BigNumber('1000');
-        const response = {
-          transactions: [
-            {
-              blockHash: '0xfb3f745444ae63e66240d57eb9d769b0152af23214600425fe7c01f02512d960',
-              transactionHash: '0xe16c51097d10e712b9f6ff572ca0c8c77ffcab0af8a8cb0598f8b891ab3ce46a',
-              transactionTag: 'asset.issue',
-            },
-          ],
-        };
-        mockAssetsService.issue.mockResolvedValue(response);
+        const amount = new BigNumber(1000);
+        mockAssetsService.issue.mockResolvedValue({ transactions: ['transaction'] });
 
         const result = await controller.issue({ ticker }, { signer, amount });
-        expect(result).toEqual(response);
+        expect(result).toEqual({ transactions: ['transaction'] });
         expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
       });
     });

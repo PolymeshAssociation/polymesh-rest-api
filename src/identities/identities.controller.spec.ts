@@ -4,10 +4,12 @@ import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/type
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
+import { AccountModel } from '~/identities/models/account.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -25,8 +27,8 @@ describe('IdentitiesController', () => {
 
   const mockIdentitiesService = {
     findOne: jest.fn(),
-    findTrustingTokens: jest.fn(),
-    addSecondaryKey: jest.fn(),
+    findTrustingAssets: jest.fn(),
+    addSecondaryAccount: jest.fn(),
   };
 
   const mockAuthorizationsService = {
@@ -99,18 +101,36 @@ describe('IdentitiesController', () => {
 
       const mockIdentityDetails = new IdentityModel({
         did,
-        primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
-        secondaryKeysFrozen: false,
-        secondaryKeys: [],
+        primaryAccount: {
+          account: new AccountModel({
+            address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+          }),
+          permissions: {
+            portfolios: null,
+            assets: null,
+            transactions: null,
+            transactionGroups: [],
+          },
+        },
+        secondaryAccountsFrozen: false,
+        secondaryAccounts: [],
       });
 
       const mockIdentity = new MockIdentity();
       mockIdentity.did = did;
-      mockIdentity.getPrimaryKey.mockResolvedValue({
-        address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+      mockIdentity.getPrimaryAccount.mockResolvedValue({
+        account: {
+          address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+        },
+        permissions: {
+          portfolios: null,
+          assets: null,
+          transactions: null,
+          transactionGroups: [],
+        },
       });
-      mockIdentity.areSecondaryKeysFrozen.mockResolvedValue(false);
-      mockIdentity.getSecondaryKeys.mockResolvedValue([]);
+      mockIdentity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      mockIdentity.getSecondaryAccounts.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const result = await controller.getIdentityDetails({ did });
@@ -178,12 +198,12 @@ describe('IdentitiesController', () => {
   describe('getIssuedAuthorizations', () => {
     it('should return list of authorizations issued by an identity', async () => {
       const did = '0x6'.padEnd(66, '0');
-      const mockRequestedAuthorizations = { next: undefined, results: [], total: 0 };
+      const mockRequestedAuthorizations = { next: undefined, results: [], total: new BigNumber(0) };
       mockAuthorizationsService.findIssuedByDid.mockResolvedValue({
         data: [],
-        count: 0,
+        count: new BigNumber(0),
       });
-      const result = await controller.getIssuedAuthorizations({ did }, { size: 1 });
+      const result = await controller.getIssuedAuthorizations({ did }, { size: new BigNumber(1) });
       expect(result).toEqual(mockRequestedAuthorizations);
     });
   });
@@ -234,13 +254,13 @@ describe('IdentitiesController', () => {
     const paginatedResult = {
       data: claims,
       next: null,
-      count: 1,
+      count: new BigNumber(1),
     };
     it('should give issued Claims with no start value', async () => {
       mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getIssuedClaims(
         { did },
-        { size: 10 },
+        { size: new BigNumber(10) },
         { includeExpired: false }
       );
       expect(result).toEqual({
@@ -254,7 +274,7 @@ describe('IdentitiesController', () => {
       mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getIssuedClaims(
         { did },
-        { size: 10, start: 1 },
+        { size: new BigNumber(10), start: new BigNumber(1) },
         { includeExpired: false }
       );
       expect(result).toEqual({
@@ -288,18 +308,22 @@ describe('IdentitiesController', () => {
         },
       ],
       next: null,
-      count: 1,
+      count: new BigNumber(1),
     };
 
     it('should give associated Claims with no start value', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
-      const result = await controller.getAssociatedClaims({ did }, { size: 10 }, {});
+      const result = await controller.getAssociatedClaims({ did }, { size: new BigNumber(10) }, {});
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
     it('should give associated Claims with start value', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
-      const result = await controller.getAssociatedClaims({ did }, { size: 10, start: 1 }, {});
+      const result = await controller.getAssociatedClaims(
+        { did },
+        { size: new BigNumber(10), start: new BigNumber(1) },
+        {}
+      );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
@@ -307,7 +331,7 @@ describe('IdentitiesController', () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
       const result = await controller.getAssociatedClaims(
         { did },
-        { size: 10, start: 1 },
+        { size: new BigNumber(10), start: new BigNumber(1) },
         { claimTypes: [ClaimType.Accredited] }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
@@ -317,46 +341,50 @@ describe('IdentitiesController', () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
       const result = await controller.getAssociatedClaims(
         { did },
-        { size: 10, start: 1 },
+        { size: new BigNumber(10), start: new BigNumber(1) },
         { includeExpired: true }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
   });
 
-  describe('getTrustingTokens', () => {
+  describe('getTrustingAssets', () => {
     it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
       const did = '0x6'.padEnd(66, '0');
       const mockAssets = [
         {
-          ticker: 'BAR_TOKEN',
+          ticker: 'BAR_TICKER',
         },
         {
-          ticker: 'FOO_TOKEN',
+          ticker: 'FOO_TICKER',
         },
       ];
-      mockIdentitiesService.findTrustingTokens.mockResolvedValue(mockAssets);
+      mockIdentitiesService.findTrustingAssets.mockResolvedValue(mockAssets);
 
-      const result = await controller.getTrustingTokens({ did });
+      const result = await controller.getTrustingAssets({ did });
 
       expect(result).toEqual(new ResultsModel({ results: mockAssets }));
     });
   });
 
-  describe('addSecondaryKey', () => {
-    it('should return the transaction details on adding a Secondary Key', async () => {
-      const transactions = ['transaction'];
+  describe('addSecondaryAccount', () => {
+    it('should return the transaction details on adding a Secondary Account', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
-        result: undefined,
-        transactions,
+        result: mockAuthorization,
+        transactions: ['transaction'],
       };
-      mockIdentitiesService.addSecondaryKey.mockResolvedValue(mockData);
+      mockIdentitiesService.addSecondaryAccount.mockResolvedValue(mockData);
 
-      const result = await controller.addSecondaryKey({ signer: 'Ox60', secondaryKey: '5xdd' });
+      const result = await controller.addSecondaryAccount({
+        signer: 'Ox60',
+        secondaryAccount: '5xdd',
+      });
 
       expect(result).toEqual({
-        result: undefined,
-        transactions,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+        transactions: ['transaction'],
       });
     });
   });

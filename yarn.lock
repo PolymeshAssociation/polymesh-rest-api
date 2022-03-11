@@ -1098,10 +1098,10 @@
     "@types/websocket" "^1.0.3"
     websocket "^1.0.34"
 
-"@polymathnetwork/polymesh-sdk@12.0.0-alpha.8":
-  version "12.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-12.0.0-alpha.8.tgz#445a91fa80ef2dac0181fdf04748b114bf27e3dc"
-  integrity sha512-sLI203zOPdsUGHfN3usFSB6mm1XtPpN5rlimcZQOdwelTYsRxIPRALR95GCqEIkkE60EGom3dL3LiP5E6ExJKw==
+"@polymathnetwork/polymesh-sdk@13.0.0-alpha.31":
+  version "13.0.0-alpha.31"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-13.0.0-alpha.31.tgz#b33e4fc0e3c5cd4b4a2b709cbdb38a333163df23"
+  integrity sha512-AOjAWe7wAXWjI/aRIDyT7pCS++96zabgier90UT1MjhP1CgadGbbiqOHvWjLW3NiZP3iL3ZSnDeaX+yi/5c9aw==
   dependencies:
     "@polkadot/api" "5.1.1"
     "@polkadot/util" "7.0.2"
@@ -2489,9 +2489,9 @@ camelcase@^6.0.0:
   integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
 
 caniuse-lite@^1.0.30001248:
-  version "1.0.30001249"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001249.tgz#90a330057f8ff75bfe97a94d047d5e14fabb2ee8"
-  integrity sha512-vcX4U8lwVXPdqzPWi6cAJ3FnQaqXbBqy/GZseKNQzRj37J7qZdGcBtxq/QLFNLLlfsoXLUdHw8Iwenri86Tagw==
+  version "1.0.30001300"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001300.tgz"
+  integrity sha512-cVjiJHWGcNlJi8TZVKNMnvMid3Z3TTdDHmLDzlOdIiZq138Exvo0G+G0wTdVYolxKb4AYwC+38pxodiInVtJSA==
 
 capture-exit@^2.0.0:
   version "2.0.0"

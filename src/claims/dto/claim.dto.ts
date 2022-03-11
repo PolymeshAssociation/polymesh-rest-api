@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ClaimType, CountryCode, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
 import {
-  ClaimType,
-  CountryCode,
-  isScopedClaim,
-  ScopeType,
-} from '@polymathnetwork/polymesh-sdk/types';
+  isCddClaim,
+  isInvestorUniquenessV2Claim,
+  isNoDataClaim,
+} from '@polymathnetwork/polymesh-sdk/utils';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmptyObject, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 
@@ -25,14 +25,16 @@ export class ClaimDto {
 
   @ApiPropertyOptional({
     description:
-      'The scope of the Claim. Required for most types except for `CustomerDueDiliegence`, `InvestorUniqunessV2` and `NoData`',
+      'The scope of the Claim. Required for most types except for `CustomerDueDiligence`, `InvestorUniquenessV2` and `NoData`',
     type: ScopeDto,
     example: {
       type: ScopeType.Identity,
       value: '0x0600000000000000000000000000000000000000000000000000000000000000',
     },
   })
-  @ValidateIf(isScopedClaim)
+  @ValidateIf(
+    claim => !isNoDataClaim(claim) && !isCddClaim(claim) && !isInvestorUniquenessV2Claim(claim)
+  )
   @ValidateNested()
   @Type(() => ScopeDto)
   @IsNotEmptyObject()

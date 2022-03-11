@@ -29,7 +29,7 @@ export class AuthorizationsService {
 
   public async findIssuedByDid(
     did: string,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<AuthorizationRequest>> {
     const identity = await this.identitiesService.findOne(did);

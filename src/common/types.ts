@@ -1,13 +1,4 @@
-import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
-
-export type QueueResult<T> = {
-  result: T;
-  transactions: {
-    blockHash: string;
-    transactionHash: string;
-    transactionTag: TxTag;
-  }[];
-};
+/* istanbul ignore file */
 
 export interface Entity<Serialized> {
   uuid: string;
@@ -17,3 +8,8 @@ export interface Entity<Serialized> {
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export type Class<T extends {} = {}> = new (...args: any[]) => T;
+
+export enum TransactionType {
+  Single = 'single',
+  Batch = 'batch',
+}

@@ -18,7 +18,7 @@ import { SettlementsModule } from '~/settlements/settlements.module';
     PolymeshModule,
     LoggerModule,
     RelayerAccountsModule,
-    AssetsModule,
+    forwardRef(() => AssetsModule),
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),
     forwardRef(() => PortfoliosModule),

@@ -11,10 +11,20 @@ import {
   ProcedureOpts,
   TxTags,
 } from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+import {
+  isPolymeshError,
+  isPolymeshTransaction,
+  isPolymeshTransactionBatch,
+} from '@polymathnetwork/polymesh-sdk/utils';
 import { flatten } from 'lodash';
 
-import { QueueResult } from '~/common/types';
+import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
+import { TransactionModel } from '~/common/models/transaction.model';
+
+export type QueueResult<T> = {
+  result: T;
+  transactions: (TransactionModel | BatchTransactionModel)[];
+};
 
 export async function processQueue<MethodArgs, ReturnType>(
   method: ProcedureMethod<MethodArgs, unknown, ReturnType>,
@@ -25,30 +35,55 @@ export async function processQueue<MethodArgs, ReturnType>(
     const queue = await method(args, opts);
     const result = await queue.run();
 
-    return {
-      result,
-      transactions: queue.transactions.map(({ blockHash, txHash, tag }) => ({
+    const assembleTransaction = (transaction: unknown) => {
+      let tagDetails;
+      if (isPolymeshTransaction(transaction)) {
+        const { tag } = transaction;
+        tagDetails = { transactionTag: tag };
+      } else if (isPolymeshTransactionBatch(transaction)) {
+        const { transactions } = transaction;
+        tagDetails = {
+          transactionTags: transactions.map(({ tag }) => tag),
+        };
+      } else {
+        throw new Error(
+          'Unsupported transaction details received. Please report this issue to the Polymath team'
+        );
+      }
+
+      const { blockHash, txHash, blockNumber } = transaction;
+      const constructorParams = {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         blockHash: blockHash!,
         transactionHash: txHash!,
-        transactionTag: tag,
+        blockNumber: blockNumber!,
+        ...tagDetails,
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      })),
+      };
+
+      if ('transactionTag' in constructorParams) {
+        return new TransactionModel(constructorParams);
+      }
+      return new BatchTransactionModel(constructorParams);
+    };
+
+    return {
+      result,
+      transactions: queue.transactions.map(assembleTransaction),
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     if (isPolymeshError(err)) {
       const { message, code } = err;
-      const errorMessage = message.replace(/Security Token/g, 'Asset');
       switch (code) {
         case ErrorCode.ValidationError:
-          throw new BadRequestException(errorMessage);
+          throw new BadRequestException(message);
         case ErrorCode.InsufficientBalance:
         case ErrorCode.UnmetPrerequisite:
-          throw new UnprocessableEntityException(errorMessage);
+          throw new UnprocessableEntityException(message);
         case ErrorCode.DataUnavailable:
-          throw new NotFoundException(errorMessage);
+          throw new NotFoundException(message);
         default:
-          throw new InternalServerErrorException(errorMessage);
+          throw new InternalServerErrorException(message);
       }
     }
     throw new InternalServerErrorException(err.message);

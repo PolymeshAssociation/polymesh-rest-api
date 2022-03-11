@@ -9,8 +9,7 @@ import {
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
@@ -128,7 +127,7 @@ export class CorporateActionsService {
     const { distribution } = await this.findDistribution(ticker, id);
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const params = {
-      documents: documents.map(document => document.toTokenDocument()),
+      documents: documents.map(document => document.toAssetDocument()),
     };
     return processQueue(distribution.linkDocuments, params, {
       signer: address,

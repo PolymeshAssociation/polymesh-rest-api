@@ -7,7 +7,7 @@ import { MockDistribution } from '~/corporate-actions/mocks/dividend-distributio
 export class MockDistributionWithDetails {
   distribution = new MockDistribution();
   details = {
-    remainingFunds: new BigNumber('2100.1'),
+    remainingFunds: new BigNumber(2100.1),
     fundsReclaimed: false,
   };
 }

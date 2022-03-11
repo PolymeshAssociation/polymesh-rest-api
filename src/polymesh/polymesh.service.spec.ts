@@ -37,6 +37,6 @@ describe('PolymeshService', () => {
   it('should ping the node every 10 seconds', () => {
     jest.advanceTimersByTime(20000);
 
-    expect(mockPolymeshApi.getLatestBlock).toHaveBeenCalledTimes(2);
+    expect(mockPolymeshApi.network.getLatestBlock).toHaveBeenCalledTimes(2);
   });
 });

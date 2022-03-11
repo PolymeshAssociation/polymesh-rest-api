@@ -8,6 +8,7 @@ import { SignerModel } from '~/identities/models/signer.model';
 export class AccountModel extends SignerModel {
   @ApiProperty({
     type: 'string',
+    example: '5grwXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx',
   })
   readonly address: string;
 

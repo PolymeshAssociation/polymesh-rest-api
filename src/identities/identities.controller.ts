@@ -9,12 +9,13 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
+  Asset,
   AuthorizationType,
   Claim,
   ClaimType,
   Instruction,
-  SecurityToken,
   Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -24,6 +25,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import { GeneratedAuthorizationRequestModel } from '~/authorizations/models/generated-authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/model/claim.model';
@@ -33,7 +35,7 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { AddSecondaryKeyParamsDto } from '~/identities/dto/add-secondary-key-params.dto';
+import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -135,8 +137,9 @@ export class IdentitiesController {
   @ApiQuery({
     name: 'size',
     description: 'The number of issued Authorizations to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -184,8 +187,9 @@ export class IdentitiesController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the Authorization to be fetched',
-    type: 'number',
+    type: 'string',
     required: true,
+    example: '1',
   })
   @ApiOkResponse({
     description: 'Details of the Authorization',
@@ -212,10 +216,10 @@ export class IdentitiesController {
   })
   @ApiArrayResponse('string', {
     paginated: false,
-    example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
+    example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
   })
   @Get(':did/assets')
-  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
+  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
     const results = await this.assetsService.findAllByOwner(did);
     return new ResultsModel({ results });
   }
@@ -283,14 +287,16 @@ export class IdentitiesController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Claims to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
     description: 'Start index from which Claims are to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '0',
   })
   @ApiQuery({
     name: 'includeExpired',
@@ -316,7 +322,7 @@ export class IdentitiesController {
       did,
       includeExpired,
       size,
-      Number(start)
+      new BigNumber(start || 0)
     );
 
     const claimsData = claimsResultSet.data.map(
@@ -352,8 +358,9 @@ export class IdentitiesController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Claims to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -392,7 +399,7 @@ export class IdentitiesController {
       claimTypes,
       includeExpired,
       size,
-      Number(start)
+      new BigNumber(start || 0)
     );
     const results = claimsResultSet.data.map(
       ({ issuedAt, expiry, claim, target, issuer }) =>
@@ -422,19 +429,19 @@ export class IdentitiesController {
   @ApiArrayResponse('string', {
     description: 'List of Assets for which the Identity is a trusted Claim Issuer',
     paginated: false,
-    example: ['BAR_TOKEN', 'FOO_TOKEN'],
+    example: ['SOME_TICKER', 'RANDOM_TICKER'],
   })
-  @Get(':did/trusting-tokens')
-  async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
-    const results = await this.identitiesService.findTrustingTokens(did);
+  @Get(':did/trusting-assets')
+  async getTrustingAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
+    const results = await this.identitiesService.findTrustingAssets(did);
     return new ResultsModel({ results });
   }
 
   // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
   @ApiOperation({
-    summary: 'Add Secondary Key',
+    summary: 'Add Secondary Account',
     description:
-      'This endpoint will send an invitation to a Secondary Key to join an Identity. It also defines the set of permissions the Secondary Key will have.',
+      'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
   })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
@@ -447,11 +454,16 @@ export class IdentitiesController {
     description:
       'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
-  @Post('/secondary-keys')
-  async addSecondaryKey(
-    @Body() addSecondaryKeyParamsDto: AddSecondaryKeyParamsDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.identitiesService.addSecondaryKey(addSecondaryKeyParamsDto);
-    return new TransactionQueueModel({ transactions });
+  @Post('/secondary-accounts')
+  async addSecondaryAccount(
+    @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
+  ): Promise<GeneratedAuthorizationRequestModel> {
+    const { transactions, result } = await this.identitiesService.addSecondaryAccount(
+      addSecondaryAccountParamsDto
+    );
+    return new GeneratedAuthorizationRequestModel({
+      transactions,
+      authorizationRequest: createAuthorizationRequestModel(result),
+    });
   }
 }

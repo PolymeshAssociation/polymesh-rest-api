@@ -1,7 +1,10 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
+
+import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class CalendarPeriodModel {
   @ApiProperty({
@@ -14,8 +17,9 @@ export class CalendarPeriodModel {
 
   @ApiProperty({
     description: 'Number of units',
-    type: 'number',
-    example: 3,
+    type: 'string',
+    example: '3',
   })
-  readonly amount: number;
+  @FromBigNumber()
+  readonly amount: BigNumber;
 }

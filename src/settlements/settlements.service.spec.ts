@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -13,7 +14,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { IdentitiesModule } from '~/identities/identities.module';
+import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -23,10 +24,10 @@ import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.modul
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import {
+  MockAsset,
   MockIdentity,
   MockInstruction,
   MockPolymesh,
-  MockSecurityToken,
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
@@ -35,6 +36,7 @@ import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
 describe('SettlementsService', () => {
@@ -52,8 +54,8 @@ describe('SettlementsService', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [IdentitiesModule, PolymeshModule, RelayerAccountsModule],
-      providers: [SettlementsService, AssetsService],
+      imports: [PolymeshModule, RelayerAccountsModule],
+      providers: [SettlementsService, AssetsService, IdentitiesService],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -67,11 +69,14 @@ describe('SettlementsService', () => {
 
     service = module.get<SettlementsService>(SettlementsService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+
     mockIsPolymeshError.mockReturnValue(false);
+    mockIsPolymeshTransaction.mockReturnValue(true);
   });
 
   afterAll(() => {
     mockIsPolymeshError.mockReset();
+    mockIsPolymeshTransaction.mockReset();
   });
 
   afterEach(async () => {
@@ -116,7 +121,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findInstruction(new BigNumber('123'));
+          await service.findInstruction(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -133,7 +138,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findInstruction(new BigNumber('123'));
+          await service.findInstruction(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -146,7 +151,7 @@ describe('SettlementsService', () => {
 
         error = null;
         try {
-          await service.findInstruction(new BigNumber('123'));
+          await service.findInstruction(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -158,7 +163,7 @@ describe('SettlementsService', () => {
       it('should return the Instruction entity', async () => {
         const mockInstruction = new MockInstruction();
         mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
-        const result = await service.findInstruction(new BigNumber('123'));
+        const result = await service.findInstruction(new BigNumber(123));
         expect(result).toEqual(mockInstruction);
       });
     });
@@ -179,7 +184,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findVenue(new BigNumber('123'));
+          await service.findVenue(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -196,7 +201,7 @@ describe('SettlementsService', () => {
 
         let error;
         try {
-          await service.findVenue(new BigNumber('123'));
+          await service.findVenue(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -209,7 +214,7 @@ describe('SettlementsService', () => {
 
         error = null;
         try {
-          await service.findVenue(new BigNumber('123'));
+          await service.findVenue(new BigNumber(123));
         } catch (err) {
           error = err;
         }
@@ -221,7 +226,7 @@ describe('SettlementsService', () => {
       it('should return the Venue entity', async () => {
         const mockVenue = new MockVenue();
         mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
-        const result = await service.findVenue(new BigNumber('123'));
+        const result = await service.findVenue(new BigNumber(123));
         expect(result).toEqual(mockVenue);
       });
     });
@@ -235,6 +240,7 @@ describe('SettlementsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.settlement.AddInstruction,
         },
       ];
@@ -253,7 +259,7 @@ describe('SettlementsService', () => {
             from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
             to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
             amount: new BigNumber(100),
-            asset: 'TOKEN',
+            asset: 'FAKE_TICKER',
           },
         ],
       };
@@ -265,7 +271,7 @@ describe('SettlementsService', () => {
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.createInstruction(new BigNumber('123'), body as any);
+      const result = await service.createInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: mockInstruction,
@@ -273,7 +279,9 @@ describe('SettlementsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.AddInstruction,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -284,7 +292,7 @@ describe('SettlementsService', () => {
               from: 'fromDid',
               to: { identity: 'toDid', id: new BigNumber(1) },
               amount: new BigNumber(100),
-              token: 'TOKEN',
+              asset: 'FAKE_TICKER',
             },
           ],
         },
@@ -302,11 +310,12 @@ describe('SettlementsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.settlement.CreateVenue,
         },
       ];
       const mockQueue = new MockTransactionQueue(transactions);
-      mockPolymeshApi.currentIdentity.createVenue.mockResolvedValue(mockQueue);
+      mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockQueue);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const body = {
@@ -325,11 +334,13 @@ describe('SettlementsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.CreateVenue,
+            type: TransactionType.Single,
           },
         ],
       });
-      expect(mockPolymeshApi.currentIdentity.createVenue).toHaveBeenCalledWith(
+      expect(mockPolymeshApi.settlements.createVenue).toHaveBeenCalledWith(
         { description: body.description, type: body.type },
         { signer: address }
       );
@@ -357,7 +368,7 @@ describe('SettlementsService', () => {
 
         let error = null;
         try {
-          await service.modifyVenue(new BigNumber('123'), body);
+          await service.modifyVenue(new BigNumber(123), body);
         } catch (err) {
           error = err;
         }
@@ -377,6 +388,7 @@ describe('SettlementsService', () => {
           {
             blockHash: '0x1',
             txHash: '0x2',
+            blockNumber: new BigNumber(1),
             tag: TxTags.settlement.UpdateVenueType,
           },
         ];
@@ -391,7 +403,7 @@ describe('SettlementsService', () => {
         const address = 'address';
         mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-        const result = await service.modifyVenue(new BigNumber('123'), body);
+        const result = await service.modifyVenue(new BigNumber(123), body);
 
         expect(result).toEqual({
           result: undefined,
@@ -399,7 +411,9 @@ describe('SettlementsService', () => {
             {
               blockHash: '0x1',
               transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
               transactionTag: TxTags.settlement.UpdateVenueType,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -419,6 +433,7 @@ describe('SettlementsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.settlement.AffirmInstruction,
         },
       ];
@@ -436,7 +451,7 @@ describe('SettlementsService', () => {
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.affirmInstruction(new BigNumber('123'), body as any);
+      const result = await service.affirmInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: undefined,
@@ -444,7 +459,9 @@ describe('SettlementsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.AffirmInstruction,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -460,6 +477,7 @@ describe('SettlementsService', () => {
         {
           blockHash: '0x1',
           txHash: '0x2',
+          blockNumber: new BigNumber(1),
           tag: TxTags.settlement.RejectInstruction,
         },
       ];
@@ -473,7 +491,7 @@ describe('SettlementsService', () => {
       const address = 'address';
       mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
 
-      const result = await service.rejectInstruction(new BigNumber('123'), {
+      const result = await service.rejectInstruction(new BigNumber(123), {
         signer: 'signer',
       });
 
@@ -483,7 +501,9 @@ describe('SettlementsService', () => {
           {
             blockHash: '0x1',
             transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.RejectInstruction,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -508,7 +528,7 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findVenueSpy.mockResolvedValue(mockVenue as any);
 
-      const result = await service.findVenueDetails(new BigNumber('123'));
+      const result = await service.findVenueDetails(new BigNumber(123));
 
       expect(result).toEqual(mockDetails);
       findVenueSpy.mockRestore();
@@ -536,7 +556,7 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const result = await service.findAffirmations(new BigNumber('123'), 10);
+      const result = await service.findAffirmations(new BigNumber(123), new BigNumber(10));
 
       expect(result).toEqual(mockAffirmations);
       findInstructionSpy.mockRestore();
@@ -555,16 +575,16 @@ describe('SettlementsService', () => {
         result: false,
       };
 
-      const mockSecurityToken = new MockSecurityToken();
-      mockSecurityToken.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
+      const mockAsset = new MockAsset();
+      mockAsset.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
 
-      mockAssetsService.findOne.mockResolvedValue(mockSecurityToken);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await service.canTransfer(
         new PortfolioDto({ did: 'fromDid', id: new BigNumber(1) }).toPortfolioLike(),
         new PortfolioDto({ did: 'toDid', id: new BigNumber(2) }).toPortfolioLike(),
         'TICKER',
-        new BigNumber('123')
+        new BigNumber(123)
       );
 
       expect(result).toEqual(mockTransferBreakdown);

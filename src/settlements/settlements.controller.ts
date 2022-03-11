@@ -150,8 +150,9 @@ export class SettlementsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of affirmations to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -221,7 +222,10 @@ export class SettlementsController {
     const { result: venue, transactions } = await this.settlementsService.createVenue(
       createVenueDto
     );
-    return new CreatedVenueModel({ venue, transactions });
+    return new CreatedVenueModel({
+      venue,
+      transactions,
+    });
   }
 
   @ApiTags('venues')

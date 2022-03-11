@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { ResultsModel } from '~/common/models/results.model';
@@ -13,7 +12,6 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -70,7 +68,7 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(response);
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        defaultTaxWithholding: new BigNumber('25'),
+        defaultTaxWithholding: new BigNumber(25),
       };
 
       const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
@@ -112,7 +110,7 @@ describe('CorporateActionsController', () => {
 
       const result = await controller.getDividendDistribution({
         ticker: 'TICKER',
-        id: new BigNumber('1'),
+        id: new BigNumber(1),
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,18 +123,7 @@ describe('CorporateActionsController', () => {
       const mockDistribution = new MockDistribution();
       const response = {
         result: mockDistribution,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            transactionTag: TxTags.corporateAction.InitiateCorporateAction,
-          },
-          {
-            blockHash: '0x3',
-            transactionHash: '0x4',
-            transactionTag: TxTags.capitalDistribution.Distribute,
-          },
-        ],
+        transactions: ['transaction'],
       };
       mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
       const mockDate = new Date();
@@ -153,24 +140,11 @@ describe('CorporateActionsController', () => {
 
       const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
 
-      expect(result).toEqual(
-        new CreatedDividendDistributionModel({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dividendDistribution: createDividendDistributionModel(mockDistribution as any),
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
-            },
-            {
-              blockHash: '0x3',
-              transactionHash: '0x4',
-              transactionTag: TxTags.capitalDistribution.Distribute,
-            },
-          ],
-        })
-      );
+      expect(result).toEqual({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dividendDistribution: createDividendDistributionModel(mockDistribution as any),
+        transactions: ['transaction'],
+      });
       expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
         'TICKER',
         body
@@ -233,13 +207,7 @@ describe('CorporateActionsController', () => {
 
   describe('linkDocuments', () => {
     it('should call the service and return the results', async () => {
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          tag: TxTags.corporateAction.LinkCaDoc,
-        },
-      ];
+      const transactions = ['transaction'];
 
       const body = {
         documents: [
@@ -255,12 +223,12 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.linkDocuments.mockResolvedValue({ transactions });
 
       const result = await controller.linkDocuments(
-        { ticker: 'TICKER', id: new BigNumber('1') },
+        { ticker: 'TICKER', id: new BigNumber(1) },
         body
       );
 
       expect(result).toEqual({
-        transactions,
+        transactions: ['transaction'],
       });
     });
   });
@@ -321,7 +289,7 @@ describe('CorporateActionsController', () => {
 
   describe('modifyCheckpoint', () => {
     it('should call the service and return the results', async () => {
-      const transactions = ['transactions'];
+      const transactions = ['transaction'];
 
       const body = {
         checkpoint: new Date(),
@@ -331,12 +299,12 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.modifyCheckpoint.mockResolvedValue({ transactions });
 
       const result = await controller.modifyDistributionCheckpoint(
-        { ticker: 'TICKER', id: new BigNumber('1') },
+        { ticker: 'TICKER', id: new BigNumber(1) },
         body
       );
 
       expect(result).toEqual({
-        transactions,
+        transactions: ['transaction'],
       });
       expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
         'TICKER',

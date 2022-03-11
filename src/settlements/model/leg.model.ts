@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import { Asset } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
@@ -37,7 +37,7 @@ export class LegModel {
     example: 'TICKER',
   })
   @FromEntity()
-  readonly asset: SecurityToken;
+  readonly asset: Asset;
 
   constructor(model: LegModel) {
     Object.assign(this, model);

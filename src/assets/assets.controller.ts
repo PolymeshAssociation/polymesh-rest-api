@@ -19,19 +19,22 @@ import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
-import { ComplianceRequirementsModel } from '~/assets/models/compliance-requirements.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
-import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ComplianceService } from '~/compliance/compliance.service';
+import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 @ApiTags('assets')
 @Controller('assets')
 export class AssetsController {
-  constructor(private readonly assetsService: AssetsService) {}
+  constructor(
+    private readonly assetsService: AssetsService,
+    private readonly complianceService: ComplianceService
+  ) {}
 
   @ApiOperation({
     summary: 'Fetch Asset details',
@@ -67,8 +70,9 @@ export class AssetsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Asset holders to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -117,9 +121,9 @@ export class AssetsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of documents to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
-    example: 10,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -160,39 +164,6 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Fetch Compliance Requirements of an Asset',
-    description:
-      'This endpoint will provide the list of all compliance requirements of an Asset along with Default Trusted Claim Issuers',
-  })
-  @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Compliance Requirements are to be fetched',
-    type: 'string',
-    example: 'TICKER',
-  })
-  @ApiOkResponse({
-    description:
-      'List of Compliance Requirements of the Asset along with Default Trusted Claim Issuers',
-    type: ComplianceRequirementsModel,
-  })
-  @Get(':ticker/compliance-requirements')
-  public async getComplianceRequirements(
-    @Param() { ticker }: TickerParamsDto
-  ): Promise<ComplianceRequirementsModel> {
-    const {
-      requirements,
-      defaultTrustedClaimIssuers,
-    } = await this.assetsService.findComplianceRequirements(ticker);
-
-    return new ComplianceRequirementsModel({
-      requirements,
-      defaultTrustedClaimIssuers: defaultTrustedClaimIssuers.map(
-        ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
-      ),
-    });
-  }
-
-  @ApiOperation({
     summary: 'Fetch trusted Claim Issuers of an Asset',
     description:
       'This endpoint will provide the list of all default trusted Claim Issuers of an Asset',
@@ -211,10 +182,10 @@ export class AssetsController {
   public async getTrustedClaimIssuers(
     @Param() { ticker }: TickerParamsDto
   ): Promise<ResultsModel<TrustedClaimIssuerModel>> {
-    const results = await this.assetsService.findTrustedClaimIssuers(ticker);
+    const results = await this.complianceService.findTrustedClaimIssuers(ticker);
     return new ResultsModel({
       results: results.map(
-        ({ did, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
+        ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
       ),
     });
   }

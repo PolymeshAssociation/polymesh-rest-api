@@ -17,7 +17,7 @@ export function createDividendDistributionModel(
     expiryDate,
     paymentDate,
     id,
-    token: { ticker },
+    asset: { ticker },
     declarationDate,
     description,
     targets,

@@ -14,8 +14,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -73,7 +72,7 @@ export class SettlementsService {
       ...rest,
       legs: rest.legs.map(({ amount, asset, from, to }) => ({
         amount,
-        token: asset,
+        asset,
         from: from.toPortfolioLike(),
         to: to.toPortfolioLike(),
       })),
@@ -141,7 +140,7 @@ export class SettlementsService {
 
   public async findAffirmations(
     id: BigNumber,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<InstructionAffirmation>> {
     const instruction = await this.findInstruction(id);
@@ -156,7 +155,7 @@ export class SettlementsService {
       type,
     };
     const address = this.relayerAccountsService.findAddressByDid(signer);
-    const method = this.polymeshService.polymeshApi.currentIdentity.createVenue;
+    const method = this.polymeshService.polymeshApi.settlements.createVenue;
     return processQueue(method, params, { signer: address });
   }
 

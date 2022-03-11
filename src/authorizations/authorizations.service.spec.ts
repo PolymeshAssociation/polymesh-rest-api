@@ -102,19 +102,19 @@ describe('AuthorizationsService', () => {
         },
       ],
       next: '0x450a3',
-      count: 15,
+      count: new BigNumber(15),
     };
     mockIdentity.authorizations.getSent.mockResolvedValue(mockIssuedAuthorizations);
 
     it('should return a list of issued Authorizations', async () => {
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findIssuedByDid(did, 1);
+      const result = await service.findIssuedByDid(did, new BigNumber(1));
       expect(result).toEqual(mockIssuedAuthorizations);
     });
 
     it('should return a list of issued Authorizations from start key', async () => {
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findIssuedByDid(did, 1, '0x41bc3');
+      const result = await service.findIssuedByDid(did, new BigNumber(1), '0x41bc3');
       expect(result).toEqual(mockIssuedAuthorizations);
     });
   });

@@ -1,22 +1,22 @@
 /* istanbul ignore file */
 
 import {
-  StoBalanceStatus,
-  StoSaleStatus,
-  StoTimingStatus,
+  OfferingBalanceStatus,
+  OfferingSaleStatus,
+  OfferingTimingStatus,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum, IsOptional } from 'class-validator';
 
 export class OfferingStatusFilterDto {
-  @IsEnum(StoTimingStatus)
+  @IsEnum(OfferingTimingStatus)
   @IsOptional()
-  readonly timing?: StoTimingStatus;
+  readonly timing?: OfferingTimingStatus;
 
-  @IsEnum(StoBalanceStatus)
+  @IsEnum(OfferingBalanceStatus)
   @IsOptional()
-  readonly balance?: StoBalanceStatus;
+  readonly balance?: OfferingBalanceStatus;
 
-  @IsEnum(StoSaleStatus)
+  @IsEnum(OfferingSaleStatus)
   @IsOptional()
-  readonly sale?: StoSaleStatus;
+  readonly sale?: OfferingSaleStatus;
 }

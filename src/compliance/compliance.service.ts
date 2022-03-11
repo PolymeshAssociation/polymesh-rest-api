@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { SetAssetRequirementsParams } from '@polymathnetwork/polymesh-sdk/api/procedures/setAssetRequirements';
 import {
+  Asset,
   ComplianceRequirements,
-  DefaultTrustedClaimIssuer,
-  SecurityToken,
+  TrustedClaimIssuer,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 
@@ -24,7 +23,7 @@ export class ComplianceService {
     return asset.compliance.requirements.get();
   }
 
-  public async findTrustedClaimIssuers(ticker: string): Promise<DefaultTrustedClaimIssuer[]> {
+  public async findTrustedClaimIssuers(ticker: string): Promise<TrustedClaimIssuer<true>[]> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.compliance.trustedClaimIssuers.get();
   }
@@ -32,7 +31,7 @@ export class ComplianceService {
   public async setRequirements(
     ticker: string,
     params: SetRequirementsDto
-  ): Promise<QueueResult<SecurityToken>> {
+  ): Promise<QueueResult<Asset>> {
     const { signer } = params;
     const asset = await this.assetsService.findOne(ticker);
     const address = this.relayerAccountsService.findAddressByDid(signer);
