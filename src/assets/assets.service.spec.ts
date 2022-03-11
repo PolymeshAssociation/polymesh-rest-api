@@ -333,7 +333,7 @@ describe('AssetsService', () => {
           throw expectedError;
         });
 
-        mockSignerService.findAddressBySigner.mockReturnValue('address');
+        mockSignerService.getAddressByHandle.mockReturnValue('address');
 
         let error;
         try {
@@ -361,7 +361,7 @@ describe('AssetsService', () => {
         mockPolymeshApi.assets.createAsset.mockResolvedValue(mockQueue);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
         const result = await service.createAsset(createBody);
         expect(result).toEqual({
           result: mockAsset,
@@ -403,7 +403,7 @@ describe('AssetsService', () => {
       findSpy.mockResolvedValue(mockAsset as any);
 
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
       const result = await service.issue('TICKER', issueBody);
       expect(result).toEqual({
         result: undefined,
@@ -442,7 +442,7 @@ describe('AssetsService', () => {
         };
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
         const result = await service.registerTicker(registerBody);
         expect(result).toEqual({
           result: undefined,

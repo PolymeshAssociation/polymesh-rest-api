@@ -127,7 +127,7 @@ describe('CorporateActionsService', () => {
         mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockQueue);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
@@ -344,7 +344,7 @@ describe('CorporateActionsService', () => {
         );
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.createDividendDistribution(ticker, body);
 
@@ -416,7 +416,7 @@ describe('CorporateActionsService', () => {
         mockAsset.corporateActions.remove.mockResolvedValue(mockQueue);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
 
@@ -490,7 +490,7 @@ describe('CorporateActionsService', () => {
       ];
       test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const distributionWithDetails = new MockDistributionWithDetails();
         distributionWithDetails.distribution.pay.mockImplementation(() => {
@@ -535,7 +535,7 @@ describe('CorporateActionsService', () => {
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.payDividends('TICKER', new BigNumber(1), body);
         expect(result).toEqual({
@@ -633,7 +633,7 @@ describe('CorporateActionsService', () => {
         findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.linkDocuments('TICKER', new BigNumber(1), body);
         expect(result).toEqual({
@@ -698,7 +698,7 @@ describe('CorporateActionsService', () => {
 
       test.each(cases)('%s', async (_, polymeshError, HttpException) => {
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const distributionWithDetails = new MockDistributionWithDetails();
         distributionWithDetails.distribution.claim.mockImplementation(() => {
@@ -743,7 +743,7 @@ describe('CorporateActionsService', () => {
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.claimDividends('TICKER', new BigNumber(1), signer);
         expect(result).toEqual({
@@ -793,7 +793,7 @@ describe('CorporateActionsService', () => {
       ];
       test.each(cases)('%s', async (_, polymeshError, httpException) => {
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const distributionWithDetails = new MockDistributionWithDetails();
         distributionWithDetails.distribution.reclaimFunds.mockImplementation(() => {
@@ -838,7 +838,7 @@ describe('CorporateActionsService', () => {
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.reclaimRemainingFunds('TICKER', new BigNumber(1), signer);
         expect(result).toEqual({
@@ -925,7 +925,7 @@ describe('CorporateActionsService', () => {
         findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyCheckpoint('TICKER', new BigNumber(1), body);
         expect(result).toEqual({

@@ -192,7 +192,7 @@ describe('PortfoliosService', () => {
       mockPortfolio.moveFunds.mockResolvedValue(mockQueue);
 
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
       const body = {
         signer: '0x6000',
         to: new BigNumber(2),
@@ -252,7 +252,7 @@ describe('PortfoliosService', () => {
       mockPolymeshApi.identities.createPortfolio.mockResolvedValue(mockQueue);
 
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
       const body = {
         signer: '0x6000',
         name: 'FOLIO-1',
@@ -316,7 +316,7 @@ describe('PortfoliosService', () => {
         });
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const findOneSpy = jest.spyOn(service, 'findOne');
 
@@ -363,7 +363,7 @@ describe('PortfoliosService', () => {
         });
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.deletePortfolio(portfolio, signer);
         expect(result).toEqual({

@@ -15,7 +15,7 @@ export class MockPolymesh {
   public static create = jest.fn().mockResolvedValue(new MockPolymesh());
 
   public disconnect = jest.fn();
-  public addSigner = jest.fn();
+  public setSigningManager = jest.fn();
 
   public network = {
     getLatestBlock: jest.fn(),

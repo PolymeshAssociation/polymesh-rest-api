@@ -16,5 +16,5 @@ export class MockComplianceService {
 }
 
 export class MockSignerService {
-  public findAddressBySigner = jest.fn();
+  public getAddressByHandle = jest.fn();
 }

@@ -163,7 +163,7 @@ describe('IdentitiesService', () => {
         };
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         mockPolymeshApi.accountManagement.inviteAccount.mockImplementation(() => {
           throw polymeshError;
@@ -202,7 +202,7 @@ describe('IdentitiesService', () => {
         };
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.addSecondaryAccount(body);
         expect(result).toEqual({

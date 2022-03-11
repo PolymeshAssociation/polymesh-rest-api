@@ -56,7 +56,7 @@ export class IdentitiesService {
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): Promise<QueueResult<AuthorizationRequest>> {
     const { signer, expiry, permissions, secondaryAccount } = addSecondaryAccountParamsDto;
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
     const params = {
       targetAccount: secondaryAccount,
       permissions: permissions?.toPermissionsLike(),

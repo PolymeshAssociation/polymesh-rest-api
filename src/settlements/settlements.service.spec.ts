@@ -268,7 +268,7 @@ describe('SettlementsService', () => {
         ...params,
       };
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.createInstruction(new BigNumber(123), body as any);
@@ -324,7 +324,7 @@ describe('SettlementsService', () => {
         type: VenueType.Exchange,
       };
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.createVenue(body);
 
@@ -401,7 +401,7 @@ describe('SettlementsService', () => {
           type: VenueType.Exchange,
         };
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyVenue(new BigNumber(123), body);
 
@@ -448,7 +448,7 @@ describe('SettlementsService', () => {
         signer: 'signer',
       };
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.affirmInstruction(new BigNumber(123), body as any);
@@ -489,7 +489,7 @@ describe('SettlementsService', () => {
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.rejectInstruction(new BigNumber(123), {
         signer: 'signer',

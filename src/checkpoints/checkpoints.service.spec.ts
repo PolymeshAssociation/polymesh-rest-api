@@ -255,7 +255,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
       const body = {
         signer: 'signer',
       };
@@ -303,7 +303,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
       const mockDate = new Date();
       const params = {
         signer: 'signer',
@@ -442,7 +442,7 @@ describe('CheckpointsService', () => {
         const signer = '0x6'.padEnd(66, '0');
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const mockAsset = new MockAsset();
         mockAsset.checkpoints.schedules.remove.mockImplementation(() => {
@@ -485,7 +485,7 @@ describe('CheckpointsService', () => {
         const id = new BigNumber(1);
 
         const address = 'address';
-        mockSignerService.findAddressBySigner.mockReturnValue(address);
+        mockSignerService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.deleteScheduleByTicker(ticker, id, signer);
         expect(result).toEqual({

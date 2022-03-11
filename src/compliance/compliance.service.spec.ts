@@ -96,7 +96,7 @@ describe('ComplianceService', () => {
       const address = 'address';
       mockAsset.compliance.requirements.set.mockResolvedValue(mockQueue);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockSignerService.findAddressBySigner.mockReturnValue(address);
+      mockSignerService.getAddressByHandle.mockReturnValue(address);
 
       const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
 

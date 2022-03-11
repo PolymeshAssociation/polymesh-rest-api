@@ -6,28 +6,31 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
 export class SignerService {
-  private addressBook: Record<string, string> = {}; // This may need to be its own service to support authorization logic
+  private addressBook: Record<string, string> = {};
   constructor(
     public readonly signerManager: SigningManager,
     private polymeshService: PolymeshService
   ) {}
 
-  public findAddressBySigner(signer: string): string {
-    // we could perform an auth check here to confirm the bearer token
-    const address = this.addressBook[signer];
+  public getAddressByHandle(handle: string): string {
+    const address = this.addressBook[handle];
     if (!address) {
-      throw new NotFoundException(`There is no signer associated to "${signer}"`);
+      throw new NotFoundException(`There is no signer associated to "${handle}"`);
     }
     return address;
   }
 
+  public setAddressByHandle(handle: string, address: string): void {
+    this.addressBook[handle] = address;
+  }
+
   public async loadAccounts(accounts: Record<string, string>): Promise<void> {
-    await this.polymeshService.polymeshApi.setSigningManager(this.signerManager);
     const manager = this.signerManager;
+    await this.polymeshService.polymeshApi.setSigningManager(manager);
     if (isLocalSigningManager(manager)) {
       Object.entries(accounts).forEach(([handle, mnemonic]) => {
         const address = manager.addAccount({ mnemonic });
-        this.addressBook[handle] = address;
+        this.setAddressByHandle(handle, address);
       });
     }
   }

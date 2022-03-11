@@ -34,7 +34,7 @@ export class ComplianceService {
   ): Promise<QueueResult<Asset>> {
     const { signer } = params;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
     return processQueue(asset.compliance.requirements.set, params as SetAssetRequirementsParams, {
       signingAccount: address,
     });

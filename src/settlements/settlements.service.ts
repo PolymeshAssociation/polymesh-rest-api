@@ -66,7 +66,7 @@ export class SettlementsService {
     const { signer, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
 
     const params = {
       ...rest,
@@ -89,7 +89,7 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
 
     return processQueue(instruction.affirm, { signingAccount: address }, {});
   }
@@ -102,7 +102,7 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
 
     return processQueue(instruction.reject, { signingAccount: address }, {});
   }
@@ -154,7 +154,7 @@ export class SettlementsService {
       description,
       type,
     };
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
     return processQueue(method, params, { signingAccount: address });
   }
@@ -166,7 +166,7 @@ export class SettlementsService {
     const { signer, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
-    const address = this.signerService.findAddressBySigner(signer);
+    const address = this.signerService.getAddressByHandle(signer);
     return processQueue(venue.modify, params, { signingAccount: address });
   }
 
