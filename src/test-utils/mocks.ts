@@ -27,6 +27,7 @@ export class MockPolymesh {
     reserveTicker: jest.fn(),
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
+    getTickerReservations: jest.fn(),
   };
 
   public accountManagement = {

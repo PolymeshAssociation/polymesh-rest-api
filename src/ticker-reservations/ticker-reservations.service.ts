@@ -64,4 +64,11 @@ export class TickerReservationsService {
     const { extend } = await this.findOne(ticker);
     return processQueue(extend, {}, { signer: address });
   }
+
+  public async findAllByOwner(owner: string): Promise<TickerReservation[]> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+    return polymeshApi.assets.getTickerReservations({ owner });
+  }
 }

@@ -16,6 +16,7 @@ import {
   Claim,
   ClaimType,
   Instruction,
+  TickerReservation,
   Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -40,8 +41,8 @@ import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-@ApiTags('identities')
 @Controller('identities')
 export class IdentitiesController {
   constructor(
@@ -50,6 +51,7 @@ export class IdentitiesController {
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
     private readonly claimsService: ClaimsService,
+    private readonly tickerReservationsService: TickerReservationsService,
     private readonly logger: PolymeshLogger
   ) {
     this.logger.setContext(IdentitiesController.name);
@@ -464,5 +466,31 @@ export class IdentitiesController {
       transactions,
       authorizationRequest: createAuthorizationRequestModel(result),
     });
+  }
+
+  @ApiTags('ticker-reservations')
+  @ApiOperation({
+    summary: 'Fetch all tickers reserved by an Identity',
+    description:
+      "This endpoints provides all the tickers currently reserved by an Identity. This doesn't include Assets that have already been launched. Tickers with unreadable characters in their tickers will be left out",
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID whose reserved tickers are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of tickers',
+    paginated: false,
+    example: ['SOME_TICKER', 'RANDOM_TICKER'],
+  })
+  @Get(':did/tickers')
+  public async getReservedTickers(
+    @Param() { did }: DidDto
+  ): Promise<ResultsModel<TickerReservation>> {
+    const results = await this.tickerReservationsService.findAllByOwner(did);
+    return new ResultsModel({ results });
   }
 }

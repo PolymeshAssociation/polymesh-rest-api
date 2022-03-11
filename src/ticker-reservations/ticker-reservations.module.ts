@@ -11,5 +11,6 @@ import { TickerReservationsService } from '~/ticker-reservations/ticker-reservat
   imports: [PolymeshModule, RelayerAccountsModule],
   controllers: [TickerReservationsController],
   providers: [TickerReservationsService],
+  exports: [TickerReservationsService],
 })
 export class TickerReservationsModule {}

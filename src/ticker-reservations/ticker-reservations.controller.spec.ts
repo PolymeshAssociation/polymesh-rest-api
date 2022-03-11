@@ -72,7 +72,7 @@ describe('TickerReservationsController', () => {
       const mockResult = {
         owner: new MockIdentity(),
         expiryDate: mockDate,
-        status: TickerReservationStatus.Free,
+        status: TickerReservationStatus.Reserved,
       };
 
       const mockTickerReservation = new MockTickerReservation();

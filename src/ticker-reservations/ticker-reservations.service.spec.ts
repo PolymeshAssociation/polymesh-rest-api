@@ -48,18 +48,18 @@ describe('TickerReservationsService', () => {
       .useValue(mockRelayerAccountsService)
       .compile();
 
-    service = module.get<TickerReservationsService>(TickerReservationsService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+    service = module.get<TickerReservationsService>(TickerReservationsService);
 
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
 
-  afterAll(() => {
-    mockIsPolymeshTransaction.mockReset();
-  });
-
   afterEach(async () => {
     await polymeshService.close();
+  });
+
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   it('should be defined', () => {
@@ -129,10 +129,9 @@ describe('TickerReservationsService', () => {
     });
     describe('otherwise', () => {
       it('should return the reservation', async () => {
-        const mockTickerReservation = {
-          ticker: 'BRK.A',
-        };
+        const mockTickerReservation = new MockTickerReservation();
         mockPolymeshApi.assets.getTickerReservation.mockResolvedValue(mockTickerReservation);
+
         const result = await service.findOne('BRK.A');
         expect(result).toEqual(mockTickerReservation);
       });
@@ -346,6 +345,16 @@ describe('TickerReservationsService', () => {
         });
         findOneSpy.mockRestore();
       });
+    });
+  });
+
+  describe('findAllByOwner', () => {
+    it('should return the list of TickerReservations', async () => {
+      const mockTickerReservation = new MockTickerReservation();
+      mockPolymeshApi.assets.getTickerReservations.mockResolvedValue([mockTickerReservation]);
+
+      const result = await service.findAllByOwner('0x6000');
+      expect(result).toEqual([mockTickerReservation]);
     });
   });
 });
