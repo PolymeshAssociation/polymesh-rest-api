@@ -3,7 +3,6 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountsService } from '~/accounts/accounts.service';
-import { mockTransactions, mockTransactionsResult } from '~/test-utils/mocks';
 import { MockAccountsService } from '~/test-utils/service-mocks';
 
 describe('AccountsController', () => {
@@ -44,7 +43,8 @@ describe('AccountsController', () => {
 
   describe('transferPolyx', () => {
     it('should return the transaction details on transferring POLYX balance', async () => {
-      mockAccountsService.transferPolyx.mockResolvedValue({ transactions: mockTransactions });
+      const transactions = ['transaction'];
+      mockAccountsService.transferPolyx.mockResolvedValue({ transactions });
 
       const body = {
         signer: '0x6'.padEnd(66, '0'),
@@ -56,7 +56,7 @@ describe('AccountsController', () => {
       const result = await controller.transferPolyx(body);
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions,
       });
     });
   });

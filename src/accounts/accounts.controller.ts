@@ -5,6 +5,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -12,7 +13,6 @@ import { AccountParamsDto } from '~/accounts/dto/account-params.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { createTransactionQueueModel } from '~/common/utils';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -48,9 +48,17 @@ export class AccountsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
+  @ApiUnprocessableEntityResponse({
+    description:
+      '<ul>' +
+      "<li>The destination Account doesn't have an associated Identity</li>" +
+      '<li>The receiver Identity has an invalid CDD claim</li>' +
+      '<li>Insufficient free balance</li>' +
+      '</ul>',
+  })
   @Post('transfer')
   async transferPolyx(@Body() params: TransferPolyxDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.accountsService.transferPolyx(params);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 }

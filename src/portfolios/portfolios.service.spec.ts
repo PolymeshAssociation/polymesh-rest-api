@@ -7,6 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -213,6 +214,7 @@ describe('PortfoliosService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.portfolio.MovePortfolioFunds,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -265,6 +267,7 @@ describe('PortfoliosService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.portfolio.CreatePortfolio,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -371,6 +374,7 @@ describe('PortfoliosService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.portfolio.DeletePortfolio,
+              type: TransactionType.Single,
             },
           ],
         });

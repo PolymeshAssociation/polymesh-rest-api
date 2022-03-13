@@ -1,23 +1,4 @@
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTag } from '@polymathnetwork/polymesh-sdk/types';
-
-export type Transaction = {
-  blockHash: string;
-  transactionHash: string;
-  blockNumber: BigNumber;
-} & (
-  | {
-      transactionTag: TxTag;
-    }
-  | {
-      transactionTags: TxTag[];
-    }
-);
-
-export type QueueResult<T> = {
-  result: T;
-  transactions: Transaction[];
-};
+/* istanbul ignore file */
 
 export interface Entity<Serialized> {
   uuid: string;
@@ -27,3 +8,8 @@ export interface Entity<Serialized> {
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export type Class<T extends {} = {}> = new (...args: any[]) => T;
+
+export enum TransactionType {
+  Single = 'single',
+  Batch = 'batch',
+}

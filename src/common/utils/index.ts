@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   ErrorCode,
   ModuleName,
@@ -21,7 +20,11 @@ import { flatten } from 'lodash';
 
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
-import { QueueResult, Transaction } from '~/common/types';
+
+export type QueueResult<T> = {
+  result: T;
+  transactions: (TransactionModel | BatchTransactionModel)[];
+};
 
 export async function processQueue<MethodArgs, ReturnType>(
   method: ProcedureMethod<MethodArgs, unknown, ReturnType>,
@@ -49,14 +52,19 @@ export async function processQueue<MethodArgs, ReturnType>(
       }
 
       const { blockHash, txHash, blockNumber } = transaction;
-      return {
+      const constructorParams = {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         blockHash: blockHash!,
         transactionHash: txHash!,
-        blockNumber: new BigNumber(blockNumber || 0),
+        blockNumber: blockNumber!,
         ...tagDetails,
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
       };
+
+      if ('transactionTag' in constructorParams) {
+        return new TransactionModel(constructorParams);
+      }
+      return new BatchTransactionModel(constructorParams);
     };
 
     return {
@@ -92,15 +100,4 @@ export function getTxTagsWithModuleNames(): string[] {
   const txTags = getTxTags();
   const moduleNames = Object.values(ModuleName);
   return [...moduleNames, ...txTags];
-}
-
-export function createTransactionQueueModel(
-  transactions: Transaction[]
-): (TransactionModel | BatchTransactionModel)[] {
-  return transactions.map(transaction => {
-    if ('transactionTag' in transaction) {
-      return new TransactionModel(transaction);
-    }
-    return new BatchTransactionModel(transaction);
-  });
 }

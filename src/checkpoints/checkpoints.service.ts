@@ -15,8 +15,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 

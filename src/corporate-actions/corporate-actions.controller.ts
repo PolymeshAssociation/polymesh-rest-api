@@ -17,7 +17,6 @@ import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { createTransactionQueueModel } from '~/common/utils';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import {
   createDividendDistributionDetailsModel,
@@ -112,7 +111,7 @@ export class CorporateActionsController {
       ticker,
       corporateActionDefaultConfigDto
     );
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('dividend-distributions')
@@ -226,7 +225,7 @@ export class CorporateActionsController {
     );
     return new CreatedDividendDistributionModel({
       dividendDistribution: createDividendDistributionModel(result),
-      transactions: createTransactionQueueModel(transactions),
+      transactions,
     });
   }
 
@@ -260,7 +259,7 @@ export class CorporateActionsController {
     @Query() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.corporateActionsService.remove(ticker, id, signer);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('dividend-distributions')
@@ -304,7 +303,7 @@ export class CorporateActionsController {
       id,
       payDividendsDto
     );
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
@@ -342,7 +341,7 @@ export class CorporateActionsController {
       id,
       linkDocumentsDto
     );
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('dividend-distributions')
@@ -383,7 +382,7 @@ export class CorporateActionsController {
     @Body() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.corporateActionsService.claimDividends(ticker, id, signer);
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('dividend-distributions')
@@ -426,7 +425,7 @@ export class CorporateActionsController {
       id,
       signer
     );
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiTags('dividend-distributions', 'checkpoints')
@@ -481,6 +480,6 @@ export class CorporateActionsController {
       id,
       modifyDistributionCheckpointDto
     );
-    return new TransactionQueueModel({ transactions: createTransactionQueueModel(transactions) });
+    return new TransactionQueueModel({ transactions });
   }
 }

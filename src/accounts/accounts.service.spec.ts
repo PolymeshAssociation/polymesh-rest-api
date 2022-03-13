@@ -8,6 +8,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -165,6 +166,7 @@ describe('AccountsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.balances.TransferWithMemo,
+              type: TransactionType.Single,
             },
           ],
         });

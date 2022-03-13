@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AccountBalance } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 

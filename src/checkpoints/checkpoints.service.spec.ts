@@ -9,6 +9,7 @@ import { CalendarUnit, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/t
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { TransactionType } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import {
@@ -273,6 +274,7 @@ describe('CheckpointsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.checkpoint.CreateCheckpoint,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -324,6 +326,7 @@ describe('CheckpointsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.checkpoint.CreateSchedule,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -498,6 +501,7 @@ describe('CheckpointsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.checkpoint.RemoveSchedule,
+              type: TransactionType.Single,
             },
           ],
         });

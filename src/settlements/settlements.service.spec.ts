@@ -14,6 +14,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -280,6 +281,7 @@ describe('SettlementsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.AddInstruction,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -334,6 +336,7 @@ describe('SettlementsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.CreateVenue,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -410,6 +413,7 @@ describe('SettlementsService', () => {
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
               transactionTag: TxTags.settlement.UpdateVenueType,
+              type: TransactionType.Single,
             },
           ],
         });
@@ -457,6 +461,7 @@ describe('SettlementsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.AffirmInstruction,
+            type: TransactionType.Single,
           },
         ],
       });
@@ -498,6 +503,7 @@ describe('SettlementsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.settlement.RejectInstruction,
+            type: TransactionType.Single,
           },
         ],
       });

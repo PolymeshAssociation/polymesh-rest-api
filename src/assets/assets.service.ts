@@ -13,8 +13,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { ReserveTickerDto as RegisterTickerDto } from '~/assets/dto/reserve-ticker.dto';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 

@@ -13,13 +13,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import {
-  MockInstruction,
-  MockPortfolio,
-  mockTransactions,
-  mockTransactionsResult,
-  MockVenue,
-} from '~/test-utils/mocks';
+import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -106,7 +100,7 @@ describe('SettlementsController', () => {
     it('should create an instruction and return the data returned by the service', async () => {
       const mockData = {
         result: 'fakeInstruction',
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
@@ -115,7 +109,7 @@ describe('SettlementsController', () => {
 
       expect(result).toEqual({
         instruction: 'fakeInstruction',
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -123,7 +117,7 @@ describe('SettlementsController', () => {
   describe('affirmInstruction', () => {
     it('should affirm an instruction and return the data returned by the service', async () => {
       const mockData = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.affirmInstruction.mockResolvedValue(mockData);
 
@@ -131,7 +125,7 @@ describe('SettlementsController', () => {
       const result = await controller.affirmInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -139,7 +133,7 @@ describe('SettlementsController', () => {
   describe('rejectInstruction', () => {
     it('should reject an instruction and return the data returned by the service', async () => {
       const mockData = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.rejectInstruction.mockResolvedValue(mockData);
 
@@ -149,7 +143,7 @@ describe('SettlementsController', () => {
       );
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -210,7 +204,7 @@ describe('SettlementsController', () => {
       const mockVenue = new MockVenue();
       const mockData = {
         result: mockVenue,
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.createVenue.mockResolvedValue(mockData);
 
@@ -218,7 +212,7 @@ describe('SettlementsController', () => {
 
       expect(result).toEqual({
         venue: mockVenue,
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });
@@ -226,7 +220,7 @@ describe('SettlementsController', () => {
   describe('modifyVenue', () => {
     it('should modify a venue and return the data returned by the service', async () => {
       const mockData = {
-        transactions: mockTransactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
 
@@ -239,7 +233,7 @@ describe('SettlementsController', () => {
       const result = await controller.modifyVenue({ id: new BigNumber(3) }, body);
 
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
     });
   });

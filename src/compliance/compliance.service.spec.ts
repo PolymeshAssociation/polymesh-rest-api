@@ -6,6 +6,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ClaimType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { TransactionType } from '~/common/types';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
@@ -109,6 +110,7 @@ describe('ComplianceService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.complianceManager.AddComplianceRequirement,
+            type: TransactionType.Single,
           },
         ],
       });

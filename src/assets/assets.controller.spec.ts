@@ -11,7 +11,7 @@ import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
-import { MockAsset, mockTransactions, mockTransactionsResult } from '~/test-utils/mocks';
+import { MockAsset } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
@@ -206,11 +206,11 @@ describe('AssetsController', () => {
   describe('reserveTicker', () => {
     it('should call the service and return the results', async () => {
       const input = { ticker: 'SOME_TICKER', signer: '0x6000' };
-      mockAssetsService.registerTicker.mockResolvedValue({ transactions: mockTransactions });
+      mockAssetsService.registerTicker.mockResolvedValue({ transactions: ['transaction'] });
 
       const result = await controller.registerTicker(input);
       expect(result).toEqual({
-        transactions: mockTransactionsResult,
+        transactions: ['transaction'],
       });
       expect(mockAssetsService.registerTicker).toHaveBeenCalledWith(input);
     });
@@ -225,10 +225,10 @@ describe('AssetsController', () => {
           assetType: KnownAssetType.EquityCommon,
           requireInvestorUniqueness: false,
         };
-        mockAssetsService.createAsset.mockResolvedValue({ transactions: mockTransactions });
+        mockAssetsService.createAsset.mockResolvedValue({ transactions: ['transaction'] });
 
         const result = await controller.createAsset(input);
-        expect(result).toEqual({ transactions: mockTransactionsResult });
+        expect(result).toEqual({ transactions: ['transaction'] });
         expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
       });
     });
@@ -238,10 +238,10 @@ describe('AssetsController', () => {
         const signer = '0x6000';
         const ticker = 'TICKER';
         const amount = new BigNumber(1000);
-        mockAssetsService.issue.mockResolvedValue({ transactions: mockTransactions });
+        mockAssetsService.issue.mockResolvedValue({ transactions: ['transaction'] });
 
         const result = await controller.issue({ ticker }, { signer, amount });
-        expect(result).toEqual({ transactions: mockTransactionsResult });
+        expect(result).toEqual({ transactions: ['transaction'] });
         expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
       });
     });
