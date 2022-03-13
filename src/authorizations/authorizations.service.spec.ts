@@ -1,4 +1,3 @@
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
@@ -11,6 +10,7 @@ import { AuthorizationType, ErrorCode, TxTags } from '@polymathnetwork/polymesh-
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
+import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { MockAuthorizationRequest, MockIdentity, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
@@ -149,7 +149,7 @@ describe('AuthorizationsService', () => {
     });
 
     describe('if the AuthorizationRequest does not exist', () => {
-      it('should throw a NotFoundException', async () => {
+      it('should throw a NotFoundException', () => {
         const mockError = {
           code: ErrorCode.DataUnavailable,
           message: 'The Authorization Request does not exist',
@@ -161,32 +161,22 @@ describe('AuthorizationsService', () => {
 
         mockIsPolymeshError.mockReturnValue(true);
 
-        let error;
-        try {
-          await service.findOne('TICKER', new BigNumber(1));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
+        return expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toBeInstanceOf(
+          NotFoundException
+        );
       });
     });
 
     describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
+      it('should pass the error along the chain', () => {
         const mockError = new Error('foo');
         mockIdentity.authorizations.getOne.mockImplementation(() => {
           throw mockError;
         });
 
-        let error;
-        try {
-          await service.findOne('TICKER', new BigNumber(1));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(mockError);
+        return expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toThrowError(
+          mockError
+        );
       });
     });
 
@@ -220,14 +210,9 @@ describe('AuthorizationsService', () => {
           throw expectedError;
         });
 
-        let error;
-        try {
-          await service.accept(new BigNumber(1), '0x6000');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
+        await expect(() => service.accept(new BigNumber(1), '0x6000')).rejects.toThrowError(
+          expectedError
+        );
         findOneSpy.mockRestore();
       });
     });
@@ -287,14 +272,9 @@ describe('AuthorizationsService', () => {
           throw expectedError;
         });
 
-        let error;
-        try {
-          await service.reject(new BigNumber(1), '0x6000');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
+        await expect(() => service.reject(new BigNumber(1), '0x6000')).rejects.toThrowError(
+          expectedError
+        );
         findOneSpy.mockRestore();
       });
     });
@@ -306,7 +286,7 @@ describe('AuthorizationsService', () => {
             blockHash: '0x1',
             txHash: '0x2',
             blockNumber: new BigNumber(1),
-            tag: TxTags.portfolio.AcceptPortfolioCustody,
+            tag: TxTags.identity.RemoveAuthorization,
           },
         ];
         const mockQueue = new MockTransactionQueue(transactions);
@@ -325,7 +305,7 @@ describe('AuthorizationsService', () => {
               blockHash: '0x1',
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
-              transactionTag: TxTags.portfolio.AcceptPortfolioCustody,
+              transactionTag: TxTags.identity.RemoveAuthorization,
               type: TransactionType.Single,
             },
           ],
