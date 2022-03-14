@@ -2,6 +2,7 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
+import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -19,11 +20,16 @@ import { SignerService } from '~/signer/signer.service';
         polymeshService: PolymeshService,
         configuration: ConfigType<typeof signersConfig>
       ): Promise<SignerService> => {
-        // TODO figure out the correct signer to make based on configuration
-
-        const manager = await LocalSigningManager.create({ accounts: [] });
-        const service = new SignerService(manager, polymeshService);
-        await service.loadAccounts(configuration);
+        let service;
+        if (configuration.vault) {
+          const manager = new HashicorpVaultSigningManager(configuration.vault);
+          service = new SignerService(manager, polymeshService);
+          await service.loadAccounts({});
+        } else {
+          const manager = await LocalSigningManager.create({ accounts: [] });
+          service = new SignerService(manager, polymeshService);
+          await service.loadAccounts(configuration.local);
+        }
 
         return service;
       },

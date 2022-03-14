@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
 
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { isLocalSigningManager, isVaultSigningManager } from '~/signer/util';
 
 @Injectable()
 export class SignerService {
@@ -32,10 +32,11 @@ export class SignerService {
         const address = manager.addAccount({ mnemonic });
         this.setAddressByHandle(handle, address);
       });
+    } else if (isVaultSigningManager(manager)) {
+      const keys = await manager.getVaultKeys();
+      keys.forEach(({ name, version, address }) => {
+        this.setAddressByHandle(`${name}-${version}`, address);
+      });
     }
   }
-}
-
-function isLocalSigningManager(manager: SigningManager): manager is LocalSigningManager {
-  return manager instanceof LocalSigningManager;
 }
