@@ -3,7 +3,7 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('signer-accounts', () => {
-  const { RELAYER_DIDS, RELAYER_MNEMONICS, VAULT_URL, VAULT_TOKEN } = process.env;
+  const { LOCAL_SIGNERS, LOCAL_MNEMONICS, VAULT_URL, VAULT_TOKEN } = process.env;
 
   if (VAULT_URL && VAULT_TOKEN) {
     const vault = {
@@ -13,13 +13,13 @@ export default registerAs('signer-accounts', () => {
     return { vault };
   }
 
-  const dids = RELAYER_DIDS?.split(',').map(d => d.trim()) || [];
-  const mnemonics = RELAYER_MNEMONICS?.split(',').map(m => m.trim()) || [];
+  const signers = LOCAL_SIGNERS?.split(',').map(d => d.trim()) || [];
+  const mnemonics = LOCAL_MNEMONICS?.split(',').map(m => m.trim()) || [];
 
   const accounts: Record<string, string> = {};
 
-  dids.forEach((did, index) => {
-    accounts[did] = mnemonics[index];
+  signers.forEach((signer, index) => {
+    accounts[signer] = mnemonics[index];
   });
 
   return {

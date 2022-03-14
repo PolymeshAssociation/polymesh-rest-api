@@ -15,7 +15,7 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
     {
       provide: POLYMESH_API,
       useFactory: async (configuration: ConfigType<typeof polymeshConfig>): Promise<Polymesh> => {
-        return Polymesh.connect({ ...configuration });
+        return Polymesh.connect(configuration);
       },
       inject: [polymeshConfig.KEY],
     },

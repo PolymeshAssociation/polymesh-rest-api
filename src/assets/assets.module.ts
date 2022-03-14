@@ -9,11 +9,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { SignerModule } from '~/signer/signer.module';
 
 @Module({
-  imports: [
-    forwardRef(() => PolymeshModule),
-    forwardRef(() => ComplianceModule),
-    forwardRef(() => SignerModule),
-  ],
+  imports: [PolymeshModule, SignerModule, forwardRef(() => ComplianceModule)],
   controllers: [AssetsController],
   providers: [AssetsService],
   exports: [AssetsService],
