@@ -5,7 +5,7 @@ import { IsString } from 'class-validator';
 
 export class SignerDto {
   @ApiProperty({
-    description: 'An Identifier for the account that should sign the transaction',
+    description: 'An identifier for the account that should sign the transaction',
     example: 'alice',
   })
   @IsString()
