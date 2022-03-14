@@ -24,7 +24,7 @@ PORT=## port in which the server will listen. Defaults to 3000 ##
 POLYMESH_NODE_URL=## websocket URL for a Polymesh node ##
 POLYMESH_MIDDLEWARE_URL=## URL for an instance of the Polymesh GraphQL Middleware service ##
 POLYMESH_MIDDLEWARE_API_KEY=## API key for the Middleware GraphQL service ##
-LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemonic##
+LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemonic ##
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_SECRET=## The access token for authorization with the Vault instance ##
@@ -32,7 +32,7 @@ VAULT_SECRET=## The access token for authorization with the Vault instance ##
 
 ### Signing Transactions
 
-There are currently two configurations that the REST API maybe configured in to sign transactions. When Vault is configured it will override the local signers and those values will be ignored
+There are currently two configurations that the REST API maybe configured in to sign transactions. When Vault is configured it will override the local signers and those values will be ignored.
 
 1. Local Signing:
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding entry in `LOCAL_SIGNERS` (by array offset).

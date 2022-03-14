@@ -1,7 +1,3 @@
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-const mockIsPolymeshTransaction = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
@@ -36,18 +32,13 @@ describe('SignerService', () => {
     polymeshService = module.get<PolymeshService>(PolymeshService);
   });
 
-  afterAll(() => {
-    mockIsPolymeshError.mockReset();
-    mockIsPolymeshTransaction.mockReset();
-  });
-
   afterEach(async () => {
     await polymeshService.close();
   });
 
   describe('loadAccounts', () => {
     it('should call polymeshApi setSigningManager method', () => {
-      service.loadAccounts({});
+      service.loadAccounts();
       expect(mockPolymeshApi.setSigningManager).toHaveBeenCalled();
     });
 
@@ -102,7 +93,7 @@ describe('SignerService', () => {
             version: 2,
           },
         ]);
-        await service.loadAccounts({});
+        await service.loadAccounts();
         expect(addressSpy).toHaveBeenCalledWith('alice-1', 'ABC');
         expect(addressSpy).toHaveBeenCalledWith('bob-1', 'DEF');
         expect(addressSpy).toHaveBeenCalledWith('bob-2', 'GHI');

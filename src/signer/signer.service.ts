@@ -24,7 +24,7 @@ export class SignerService {
     this.addressBook[handle] = address;
   }
 
-  public async loadAccounts(accounts: Record<string, string>): Promise<void> {
+  public async loadAccounts(accounts: Record<string, string> = {}): Promise<void> {
     const manager = this.signerManager;
     await this.polymeshService.polymeshApi.setSigningManager(manager);
     if (isLocalSigningManager(manager)) {
