@@ -9,6 +9,7 @@ import {
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockAsset } from '~/test-utils/mocks';
@@ -175,6 +176,28 @@ describe('AssetsController', () => {
           next: mockDocuments.next,
         })
       );
+    });
+  });
+
+  describe('setDocuments', () => {
+    it('should call the service and return the results', async () => {
+      const transactions = ['transaction'];
+      const body = {
+        signer: '0x6000',
+        documents: [
+          new AssetDocumentDto({
+            name: 'TEST-DOC',
+            uri: 'URI',
+            contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
+          }),
+        ],
+      };
+      const ticker = 'SOME_TICKER';
+      mockAssetsService.setDocuments.mockResolvedValue({ transactions });
+
+      const result = await controller.setDocuments({ ticker }, body);
+      expect(result).toEqual({ transactions });
+      expect(mockAssetsService.setDocuments).toHaveBeenCalledWith(ticker, body);
     });
   });
 

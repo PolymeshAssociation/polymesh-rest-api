@@ -83,8 +83,5 @@ export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOn
     }
   });
 
-  return applyDecorators(
-    ApiProperty({ ...apiPropertyOptions, oneOf: oneOfItems }),
-    ApiExtraModels(...extraModels)
-  );
+  return applyDecorators(ApiProperty({ ...apiPropertyOptions, oneOf: oneOfItems }));
 };

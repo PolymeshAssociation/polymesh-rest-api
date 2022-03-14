@@ -9,6 +9,7 @@ import { ErrorCode, KnownAssetType, TxTags } from '@polymathnetwork/polymesh-sdk
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -49,7 +50,7 @@ describe('AssetsService', () => {
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
 
-  afterEach(() => {
+  afterAll(() => {
     mockIsPolymeshTransaction.mockReset();
   });
 
@@ -240,6 +241,61 @@ describe('AssetsService', () => {
 
       const result = await service.findDocuments('TICKER', new BigNumber(10), 'NEXT_KEY');
       expect(result).toEqual(mockAssetDocuments);
+      findOneSpy.mockRestore();
+    });
+  });
+
+  describe('setDocuments', () => {
+    it('should run a set procedure and return the queue results', async () => {
+      const mockAsset = new MockAsset();
+      const mockTransactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.AddDocuments,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(mockTransactions);
+      mockQueue.run.mockResolvedValue(mockAsset);
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAsset as any);
+
+      mockAsset.documents.set.mockResolvedValue(mockQueue);
+
+      const address = 'address';
+      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+
+      const body = {
+        signer: 'signer',
+        documents: [
+          new AssetDocumentDto({
+            name: 'TEST-DOC',
+            uri: 'URI',
+            contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
+          }),
+        ],
+      };
+
+      const result = await service.setDocuments('TICKER', body);
+      expect(result).toEqual({
+        result: mockAsset,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.asset.AddDocuments,
+            type: TransactionType.Single,
+          },
+        ],
+      });
+      expect(mockAsset.documents.set).toHaveBeenCalledWith(
+        { documents: body.documents },
+        { signer: 'address' }
+      );
       findOneSpy.mockRestore();
     });
   });
