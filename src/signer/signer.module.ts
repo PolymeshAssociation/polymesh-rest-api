@@ -24,14 +24,15 @@ import { SignerService } from '~/signer/signer.service';
         logger: PolymeshLogger
       ): Promise<SignerService> => {
         let service;
-        if (configuration.vault) {
-          const manager = new HashicorpVaultSigningManager(configuration.vault);
+        const { vault, local } = configuration;
+        if (vault) {
+          const manager = new HashicorpVaultSigningManager(vault);
           service = new SignerService(manager, polymeshService, logger);
           await service.loadAccounts();
         } else {
           const manager = await LocalSigningManager.create({ accounts: [] });
           service = new SignerService(manager, polymeshService, logger);
-          await service.loadAccounts(configuration.local);
+          await service.loadAccounts(local);
         }
 
         return service;

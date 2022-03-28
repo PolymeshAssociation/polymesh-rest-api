@@ -1,15 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
+import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { isLocalSigningManager, isVaultSigningManager } from '~/signer/util';
 
 @Injectable()
 export class SignerService {
   private addressBook: Record<string, string> = {};
   constructor(
-    public readonly signerManager: SigningManager,
+    public readonly signingManager: SigningManager,
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger
   ) {
@@ -30,14 +31,14 @@ export class SignerService {
   }
 
   public async loadAccounts(accounts: Record<string, string> = {}): Promise<void> {
-    const manager = this.signerManager;
+    const manager = this.signingManager;
     await this.polymeshService.polymeshApi.setSigningManager(manager);
-    if (isLocalSigningManager(manager)) {
+    if (manager instanceof LocalSigningManager) {
       Object.entries(accounts).forEach(([handle, mnemonic]) => {
         const address = manager.addAccount({ mnemonic });
         this.setAddressByHandle(handle, address);
       });
-    } else if (isVaultSigningManager(manager)) {
+    } else if (manager instanceof HashicorpVaultSigningManager) {
       const keys = await manager.getVaultKeys();
       keys.forEach(({ name, version, address }) => {
         const keyName = `${name}-${version}`;

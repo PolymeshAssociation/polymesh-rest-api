@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
 
@@ -10,7 +11,6 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SignerModule } from '~/signer/signer.module';
 import { SignerService } from '~/signer/signer.service';
-import * as signerUtils from '~/signer/util';
 import { MockHashicorpVaultSigningManager, MockPolymesh } from '~/test-utils/mocks';
 
 describe('SignerService', () => {
@@ -62,21 +62,9 @@ describe('SignerService', () => {
     });
 
     describe('with HashicorpVaultSigningManager', () => {
-      let isLocalSpy: jest.SpyInstance;
-      let isVaultSpy: jest.SpyInstance;
-
-      beforeEach(() => {
-        isLocalSpy = jest.spyOn(signerUtils, 'isLocalSigningManager').mockReturnValue(false);
-        isVaultSpy = jest.spyOn(signerUtils, 'isVaultSigningManager').mockReturnValue(true);
-      });
-
-      afterEach(() => {
-        isLocalSpy.mockRestore();
-        isVaultSpy.mockRestore();
-      });
-
       it('should call setAddressByHandle for each account', async () => {
         const vaultManager = new MockHashicorpVaultSigningManager();
+        Object.setPrototypeOf(vaultManager, HashicorpVaultSigningManager.prototype);
         service = new SignerService(vaultManager, polymeshService, logger);
         const addressSpy = jest.spyOn(service, 'setAddressByHandle');
         vaultManager.getVaultKeys.mockResolvedValue([
