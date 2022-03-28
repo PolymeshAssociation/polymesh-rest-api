@@ -18,3 +18,8 @@ export class MockComplianceService {
 export class MockSignerService {
   public getAddressByHandle = jest.fn();
 }
+
+export class MockAccountsService {
+  getAccountBalance = jest.fn();
+  transferPolyx = jest.fn();
+}

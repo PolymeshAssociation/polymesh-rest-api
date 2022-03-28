@@ -39,7 +39,6 @@ export class PortfoliosController {
     name: 'did',
     description: 'The DID whose Portfolios are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse(PortfolioModel, {
