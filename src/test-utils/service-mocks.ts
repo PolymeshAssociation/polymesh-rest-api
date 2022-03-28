@@ -20,3 +20,8 @@ export class MockRelayerAccountsService {
 
   public findAll = jest.fn().mockReturnValue([]);
 }
+
+export class MockAccountsService {
+  getAccountBalance = jest.fn();
+  transferPolyx = jest.fn();
+}
