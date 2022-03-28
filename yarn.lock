@@ -1098,8 +1098,10 @@
     "@types/websocket" "^1.0.3"
     websocket "^1.0.34"
 
-"@polymathnetwork/hashicorp-vault-signing-manager@file:../signing-managers/dist/packages/hashicorp-vault-signing-manager":
-  version "1.0.2"
+"@polymathnetwork/hashicorp-vault-signing-manager@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/hashicorp-vault-signing-manager/-/hashicorp-vault-signing-manager-1.1.0.tgz#552d673197f676dd1b5a5dc0f2edd260d8d137ff"
+  integrity sha512-Xf6eSros80bRYq7+pDxrE2K8MMguDNGn//TagQicrPr64SoymGo9c5T3KNf/85iQwDGbcCIKo4KCkbV/zCZeag==
   dependencies:
     "@polkadot/util" "^7.0.2"
     "@polkadot/util-crypto" "^7.0.2"
