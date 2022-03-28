@@ -395,7 +395,7 @@ describe('IdentitiesController', () => {
     });
   });
 
-  describe('getReservedTickers', () => {
+  describe('getTickerReservations', () => {
     it('should call the service and return all the reserved tickers', async () => {
       const mockTickerReservation = new MockTickerReservation();
 
@@ -403,7 +403,7 @@ describe('IdentitiesController', () => {
 
       const did = '0x6'.padEnd(66, '0');
 
-      const result = await controller.getReservedTickers({ did });
+      const result = await controller.getTickerReservations({ did });
       expect(result).toEqual({
         results: [mockTickerReservation],
       });

@@ -248,7 +248,7 @@ describe('AssetsService', () => {
     const createBody = {
       signer: '0x6000',
       name: 'Berkshire Class A',
-      ticker: 'BRK.A',
+      ticker: 'TICKER',
       isDivisible: false,
       assetType: KnownAssetType.EquityCommon,
       requireInvestorUniqueness: false,

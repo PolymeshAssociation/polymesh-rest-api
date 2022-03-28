@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiGoneResponse,
   ApiNotFoundResponse,
@@ -13,7 +12,7 @@ import {
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
-import { GeneratedAuthorizationRequestModel } from '~/authorizations/models/generated-authorization-request.model';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { TransferTickerOwnershipDto } from '~/ticker-reservations/dto/transfer-ticker-ownership.dto';
@@ -41,7 +40,7 @@ export class TickerReservationsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
-  @ApiBadRequestResponse({
+  @ApiUnprocessableEntityResponse({
     description: 'The ticker has already been reserved',
   })
   @Post()
@@ -68,7 +67,7 @@ export class TickerReservationsController {
     type: TickerReservationModel,
   })
   @ApiNotFoundResponse({
-    description: 'The ticker has no reservation',
+    description: 'The ticker has not been reserved',
   })
   @ApiGoneResponse({
     description: 'Asset has already been created',
@@ -80,9 +79,9 @@ export class TickerReservationsController {
   }
 
   @ApiOperation({
-    summary: 'Transfer ownership of the ticker reservation',
+    summary: 'Transfer ownership of the ticker Reservation',
     description:
-      'This endpoint transfers ownership of the ticker reservation to `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
+      'This endpoint transfers ownership of the ticker Reservation to `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
   })
   @ApiParam({
     name: 'ticker',
@@ -91,8 +90,8 @@ export class TickerReservationsController {
     example: 'TICKER',
   })
   @ApiCreatedResponse({
-    description: 'Newly generated Authorization request along with transaction details',
-    type: GeneratedAuthorizationRequestModel,
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
   })
   @ApiUnprocessableEntityResponse({
     description: 'Asset has already been created for the ticker',
@@ -106,7 +105,7 @@ export class TickerReservationsController {
       ticker,
       params
     );
-    return new GeneratedAuthorizationRequestModel({
+    return new CreatedAuthorizationRequestModel({
       transactions,
       authorizationRequest: createAuthorizationRequestModel(result),
     });
@@ -115,7 +114,7 @@ export class TickerReservationsController {
   @ApiOperation({
     summary: 'Extend ticker reservation',
     description:
-      'This endpoint extends the time period of a ticker reservation for 60 days from now to later use it in the creation of an Asset',
+      'This endpoint extends the time period of a ticker reservation for 60 days from now',
   })
   @ApiParam({
     name: 'ticker',
@@ -131,7 +130,7 @@ export class TickerReservationsController {
     description:
       '<ul>' +
       '<li>Asset has already been created for the ticker</li>' +
-      '<li>Ticker not reserved or the reservation has expired</li>' +
+      '<li>Ticker not reserved or the Reservation has expired</li>' +
       '</ul>',
   })
   @Post('/extend')

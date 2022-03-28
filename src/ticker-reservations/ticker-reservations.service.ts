@@ -35,7 +35,7 @@ export class TickerReservationsService {
           code === ErrorCode.UnmetPrerequisite &&
           message.endsWith('Asset has been created')
         ) {
-          throw new GoneException(`Asset ${ticker} has already been created`);
+          throw new GoneException(`Asset "${ticker}" has already been created`);
         }
       }
 
@@ -44,8 +44,9 @@ export class TickerReservationsService {
   }
 
   public async reserve(ticker: string, signer: string): Promise<QueueResult<TickerReservation>> {
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    const reserveTicker = this.polymeshService.polymeshApi.assets.reserveTicker;
+    const { relayerAccountsService, polymeshService } = this;
+    const address = relayerAccountsService.findAddressByDid(signer);
+    const { reserveTicker } = polymeshService.polymeshApi.assets;
     return processQueue(reserveTicker, { ticker }, { signer: address });
   }
 
@@ -62,6 +63,7 @@ export class TickerReservationsService {
   public async extend(ticker: string, signer: string): Promise<QueueResult<TickerReservation>> {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const { extend } = await this.findOne(ticker);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(extend, { signer: address }, {});
   }
 

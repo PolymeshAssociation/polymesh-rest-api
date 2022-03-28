@@ -26,7 +26,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
-import { GeneratedAuthorizationRequestModel } from '~/authorizations/models/generated-authorization-request.model';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/model/claim.model';
@@ -446,8 +446,8 @@ export class IdentitiesController {
       'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
   })
   @ApiCreatedResponse({
-    description: 'Newly generated Authorization request along with transaction details',
-    type: GeneratedAuthorizationRequestModel,
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
   })
   @ApiInternalServerErrorResponse({
     description: "The supplied address is not encoded with the chain's SS58 format",
@@ -459,11 +459,11 @@ export class IdentitiesController {
   @Post('/secondary-accounts')
   async addSecondaryAccount(
     @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
-  ): Promise<GeneratedAuthorizationRequestModel> {
+  ): Promise<CreatedAuthorizationRequestModel> {
     const { transactions, result } = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );
-    return new GeneratedAuthorizationRequestModel({
+    return new CreatedAuthorizationRequestModel({
       transactions,
       authorizationRequest: createAuthorizationRequestModel(result),
     });
@@ -473,7 +473,7 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Fetch all tickers reserved by an Identity',
     description:
-      "This endpoints provides all the tickers currently reserved by an Identity. This doesn't include Assets that have already been launched. Tickers with unreadable characters in their tickers will be left out",
+      "This endpoint provides all the tickers currently reserved by an Identity. This doesn't include Assets that have already been created. Tickers with unreadable characters in them will be left out",
   })
   @ApiParam({
     name: 'did',
@@ -487,8 +487,8 @@ export class IdentitiesController {
     paginated: false,
     example: ['SOME_TICKER', 'RANDOM_TICKER'],
   })
-  @Get(':did/tickers')
-  public async getReservedTickers(
+  @Get(':did/ticker-reservations')
+  public async getTickerReservations(
     @Param() { did }: DidDto
   ): Promise<ResultsModel<TickerReservation>> {
     const results = await this.tickerReservationsService.findAllByOwner(did);

@@ -62,6 +62,7 @@ export class AssetDetailsModel {
     description: 'Current funding round of the Asset',
     type: 'string',
     example: 'Series A',
+    nullable: true,
   })
   readonly fundingRound: string | null;
 

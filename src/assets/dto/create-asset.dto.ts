@@ -22,7 +22,7 @@ export class CreateAssetDto extends SignerDto {
 
   @ApiProperty({
     description: 'The ticker of the Asset. This must already be reserved by the Signer',
-    example: 'BRK.A',
+    example: 'TICKER',
   })
   @IsTicker()
   readonly ticker: string;

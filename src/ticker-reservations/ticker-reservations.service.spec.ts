@@ -81,7 +81,7 @@ describe('TickerReservationsService', () => {
 
         let error;
         try {
-          await service.findOne('BRK.A');
+          await service.findOne('TICKER');
         } catch (err) {
           error = err;
         }
@@ -93,7 +93,7 @@ describe('TickerReservationsService', () => {
       it('should throw a GoneException', async () => {
         const mockError = {
           code: ErrorCode.UnmetPrerequisite,
-          message: 'BRK.A Asset has been created',
+          message: 'TICKER Asset has been created',
         };
         mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
           throw mockError;
@@ -103,7 +103,7 @@ describe('TickerReservationsService', () => {
 
         let error;
         try {
-          await service.findOne('BRK.A');
+          await service.findOne('TICKER');
         } catch (err) {
           error = err;
         }
@@ -120,7 +120,7 @@ describe('TickerReservationsService', () => {
         mockIsPolymeshError.mockReturnValue(true);
         let error;
         try {
-          await service.findOne('BRK.A');
+          await service.findOne('TICKER');
         } catch (err) {
           error = err;
         }
@@ -132,7 +132,7 @@ describe('TickerReservationsService', () => {
         const mockTickerReservation = new MockTickerReservation();
         mockPolymeshApi.assets.getTickerReservation.mockResolvedValue(mockTickerReservation);
 
-        const result = await service.findOne('BRK.A');
+        const result = await service.findOne('TICKER');
         expect(result).toEqual(mockTickerReservation);
       });
     });

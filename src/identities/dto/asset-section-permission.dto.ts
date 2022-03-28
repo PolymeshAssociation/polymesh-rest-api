@@ -13,6 +13,7 @@ export class AssetSectionPermissionDto extends PermissionTypeDto {
     type: 'string',
     isArray: true,
     example: ['TICKER123456'],
+    nullable: true,
   })
   @IsArray()
   @IsTicker({ each: true })
