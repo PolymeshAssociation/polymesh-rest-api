@@ -27,7 +27,6 @@ export class AccountsController {
     name: 'account',
     description: 'The Account address whose balance is to be fetched',
     type: 'string',
-    required: true,
     example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
   })
   @ApiOkResponse({
@@ -56,7 +55,7 @@ export class AccountsController {
       '<li>Insufficient free balance</li>' +
       '</ul>',
   })
-  @Post('transfer')
+  @Post('transfers')
   async transferPolyx(@Body() params: TransferPolyxDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.accountsService.transferPolyx(params);
     return new TransactionQueueModel({ transactions });

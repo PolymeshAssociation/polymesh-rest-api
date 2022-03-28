@@ -22,8 +22,12 @@ export class AccountsService {
 
   public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
     const { signer, ...rest } = params;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    const transferPolyx = this.polymeshService.polymeshApi.network.transferPolyx;
+    const { relayerAccountsService, polymeshService } = this;
+
+    const address = relayerAccountsService.findAddressByDid(signer);
+
+    const { transferPolyx } = polymeshService.polymeshApi.network;
+
     return processQueue(transferPolyx, rest, { signer: address });
   }
 }
