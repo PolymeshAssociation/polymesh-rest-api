@@ -165,9 +165,9 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Update list of Documents for an Asset',
+    summary: 'Set a list of Documents for an Asset',
     description:
-      'This endpoint assign a new list of Documents to the Asset by replacing the existing list of Documents with the ones passed in the parameters',
+      'This endpoint assigns a new list of Documents to the Asset by replacing the existing list of Documents with the ones passed in the body',
   })
   @ApiParam({
     name: 'ticker',
@@ -177,6 +177,9 @@ export class AssetsController {
   })
   @ApiOkResponse({
     description: 'Details of the transaction',
+  })
+  @ApiNotFoundResponse({
+    description: 'Asset was not found',
   })
   @ApiBadRequestResponse({
     description: 'The supplied Document list is equal to the current one',
