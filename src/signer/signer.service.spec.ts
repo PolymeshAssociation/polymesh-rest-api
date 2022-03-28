@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
 
+import { LoggerModule } from '~/logger/logger.module';
+import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -13,23 +16,26 @@ import { MockHashicorpVaultSigningManager, MockPolymesh } from '~/test-utils/moc
 describe('SignerService', () => {
   let service: SignerService;
   let manager: SigningManager;
+  let logger: PolymeshLogger;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SignerModule],
+      imports: [PolymeshModule, SignerModule, LoggerModule],
+      providers: [mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .compile();
 
+    logger = await module.resolve<PolymeshLogger>(PolymeshLogger);
+    polymeshService = module.get<PolymeshService>(PolymeshService);
     manager = await LocalSigningManager.create({ accounts: [] });
     manager.setSs58Format(0);
-    service = new SignerService(manager, polymeshService);
 
-    polymeshService = module.get<PolymeshService>(PolymeshService);
+    service = new SignerService(manager, polymeshService, logger);
   });
 
   afterEach(async () => {
@@ -71,7 +77,7 @@ describe('SignerService', () => {
 
       it('should call setAddressByHandle for each account', async () => {
         const vaultManager = new MockHashicorpVaultSigningManager();
-        service = new SignerService(vaultManager, polymeshService);
+        service = new SignerService(vaultManager, polymeshService, logger);
         const addressSpy = jest.spyOn(service, 'setAddressByHandle');
         vaultManager.getVaultKeys.mockResolvedValue([
           {

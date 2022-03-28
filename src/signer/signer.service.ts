@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
 
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { isLocalSigningManager, isVaultSigningManager } from '~/signer/util';
 
@@ -9,8 +10,11 @@ export class SignerService {
   private addressBook: Record<string, string> = {};
   constructor(
     public readonly signerManager: SigningManager,
-    private polymeshService: PolymeshService
-  ) {}
+    private readonly polymeshService: PolymeshService,
+    private readonly logger: PolymeshLogger
+  ) {
+    this.logger.setContext(SignerService.name);
+  }
 
   public getAddressByHandle(handle: string): string {
     const address = this.addressBook[handle];
@@ -22,6 +26,7 @@ export class SignerService {
 
   public setAddressByHandle(handle: string, address: string): void {
     this.addressBook[handle] = address;
+    this.logger.log(`Key "${handle}" with address "${address}" was loaded`);
   }
 
   public async loadAccounts(accounts: Record<string, string> = {}): Promise<void> {
@@ -35,7 +40,8 @@ export class SignerService {
     } else if (isVaultSigningManager(manager)) {
       const keys = await manager.getVaultKeys();
       keys.forEach(({ name, version, address }) => {
-        this.setAddressByHandle(`${name}-${version}`, address);
+        const keyName = `${name}-${version}`;
+        this.setAddressByHandle(keyName, address);
       });
     }
   }
