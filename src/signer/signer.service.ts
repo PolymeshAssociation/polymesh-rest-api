@@ -17,8 +17,11 @@ export class SignerService {
     this.logger.setContext(SignerService.name);
   }
 
-  public getAddressByHandle(handle: string): string {
-    const address = this.addressBook[handle];
+  public async getAddressByHandle(handle: string): Promise<string> {
+    let address: string | undefined = this.addressBook[handle];
+    if (!address) {
+      address = await this.checkVaultKeys(handle);
+    }
     if (!address) {
       throw new NotFoundException(`There is no signer associated to "${handle}"`);
     }
@@ -44,6 +47,22 @@ export class SignerService {
         const keyName = `${name}-${version}`;
         this.setAddressByHandle(keyName, address);
       });
+    }
+  }
+
+  /**
+   * @hidden
+   *
+   * If the signing manager is a Vault signer, this method will check if they key is present as it may have been added after initialization
+   */
+  private async checkVaultKeys(handle: string): Promise<string | undefined> {
+    if (this.signingManager instanceof HashicorpVaultSigningManager) {
+      const keys = await this.signingManager.getVaultKeys();
+      const key = keys.find(({ name, version }) => `${name}-${version}` === handle);
+      if (key) {
+        this.setAddressByHandle(handle, key.address);
+        return key.address;
+      }
     }
   }
 }

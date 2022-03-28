@@ -99,14 +99,28 @@ describe('SignerService', () => {
   describe('getAddressByHandle', () => {
     it('should get a loaded Account', () => {
       service.setAddressByHandle('humanId', 'someAddress');
-      const result = service.getAddressByHandle('humanId');
-      expect(result).toEqual('someAddress');
+      return expect(service.getAddressByHandle('humanId')).resolves.toEqual('someAddress');
     });
 
     it('should throw if an Account is not loaded', () => {
-      expect(() => service.getAddressByHandle('badId')).toThrowError(
+      return expect(() => service.getAddressByHandle('badId')).rejects.toThrowError(
         'There is no signer associated to "badId"'
       );
+    });
+
+    describe('with HashicorpVaultSigner', () => {
+      it('should check for the key in vault if not found in the addressBook', () => {
+        const vaultManager = new MockHashicorpVaultSigningManager();
+        Object.setPrototypeOf(vaultManager, HashicorpVaultSigningManager.prototype);
+        const address = 'newAddress';
+        vaultManager.getVaultKeys.mockResolvedValue([
+          { key: '0x123', address, name: 'new', version: 1 },
+        ]);
+
+        service = new SignerService(vaultManager, polymeshService, logger);
+
+        return expect(service.getAddressByHandle('new-1')).resolves.toEqual(address);
+      });
     });
   });
 });

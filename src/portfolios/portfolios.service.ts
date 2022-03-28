@@ -54,7 +54,7 @@ export class PortfoliosService {
   public async moveAssets(owner: string, params: AssetMovementDto): Promise<QueueResult<void>> {
     const { signer, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     const args = {
       to: toPortfolioId(to),
       items: items.map(({ ticker: asset, amount, memo }) => {
@@ -75,7 +75,7 @@ export class PortfoliosService {
       polymeshService: { polymeshApi },
     } = this;
     const { signer, ...rest } = params;
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(polymeshApi.identities.createPortfolio, rest, { signingAccount: address });
   }
 
@@ -83,7 +83,7 @@ export class PortfoliosService {
     portfolio: PortfolioDto,
     signer: string
   ): Promise<QueueResult<void>> {
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     const identity = await this.identitiesService.findOne(portfolio.did);
     return processQueue(
       identity.portfolios.delete,

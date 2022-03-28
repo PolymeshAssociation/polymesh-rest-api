@@ -75,14 +75,14 @@ export class AssetsService {
 
   public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
     const { signer, ...rest } = params;
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     const reserveTicker = this.polymeshService.polymeshApi.assets.reserveTicker;
     return processQueue(reserveTicker, rest, { signingAccount: address });
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
-    const signingAccount = this.signerService.getAddressByHandle(signer);
+    const signingAccount = await this.signerService.getAddressByHandle(signer);
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
     return processQueue(createAsset, rest, { signingAccount });
   }
@@ -90,7 +90,7 @@ export class AssetsService {
   public async issue(ticker: string, params: IssueDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(asset.issuance.issue, rest, { signingAccount: address });
   }
 

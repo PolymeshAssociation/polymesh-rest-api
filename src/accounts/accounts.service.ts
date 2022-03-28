@@ -24,7 +24,7 @@ export class AccountsService {
     const { signer, ...rest } = params;
     const { signingService, polymeshService } = this;
 
-    const address = signingService.getAddressByHandle(signer);
+    const address = await signingService.getAddressByHandle(signer);
 
     const { transferPolyx } = polymeshService.polymeshApi.network;
 

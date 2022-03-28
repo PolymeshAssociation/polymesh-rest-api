@@ -85,7 +85,7 @@ export class CheckpointsService {
   ): Promise<QueueResult<Checkpoint>> {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
   }
 
@@ -95,7 +95,7 @@ export class CheckpointsService {
   ): Promise<QueueResult<CheckpointSchedule>> {
     const { signer, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(asset.checkpoints.schedules.create, rest, { signingAccount: address });
   }
 
@@ -124,7 +124,7 @@ export class CheckpointsService {
     id: BigNumber,
     signer: string
   ): Promise<QueueResult<void>> {
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     const asset = await this.assetsService.findOne(ticker);
     return processQueue(
       asset.checkpoints.schedules.remove,

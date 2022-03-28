@@ -36,7 +36,7 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, ...rest } = corporateActionDefaultConfigDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(asset.corporateActions.setDefaultConfig, rest as Required<typeof rest>, {
       signingAccount: address,
     });
@@ -72,7 +72,7 @@ export class CorporateActionsService {
   ): Promise<QueueResult<DividendDistribution>> {
     const { signer, originPortfolio, ...rest } = dividendDistributionDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
@@ -91,7 +91,7 @@ export class CorporateActionsService {
     signer: string
   ): Promise<QueueResult<void>> {
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(
       asset.corporateActions.remove,
       { corporateAction },
@@ -108,7 +108,7 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, targets } = payDividendsDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(
       distribution.pay,
       { targets },
@@ -125,7 +125,7 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, documents } = linkDocumentsDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
     };
@@ -140,7 +140,7 @@ export class CorporateActionsService {
     signer: string
   ): Promise<QueueResult<void>> {
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(distribution.claim, undefined, {
       signingAccount: address,
     });
@@ -152,7 +152,7 @@ export class CorporateActionsService {
     signer: string
   ): Promise<QueueResult<void>> {
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(distribution.reclaimFunds, undefined, {
       signingAccount: address,
     });
@@ -165,7 +165,7 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, checkpoint } = modifyDistributionCheckpointDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.signerService.getAddressByHandle(signer);
+    const address = await this.signerService.getAddressByHandle(signer);
     return processQueue(
       distribution.modifyCheckpoint,
       { checkpoint },
