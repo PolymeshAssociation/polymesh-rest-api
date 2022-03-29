@@ -66,6 +66,7 @@ export class AuthorizationsService {
     const { accept } = await this.findOne(signer, id);
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(accept, { signer: address }, {});
   }
 
@@ -73,6 +74,7 @@ export class AuthorizationsService {
     const { remove } = await this.findOne(signer, id);
 
     const address = this.relayerAccountsService.findAddressByDid(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(remove, { signer: address }, {});
   }
 }

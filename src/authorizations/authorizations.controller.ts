@@ -52,7 +52,7 @@ export class AuthorizationsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the Authorization Request to be accepted',
+    description: 'The ID of the Authorization Request to be rejected',
     type: 'string',
     example: '123',
   })

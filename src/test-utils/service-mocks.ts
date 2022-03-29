@@ -28,3 +28,7 @@ export class MockAuthorizationsService {
   accept = jest.fn();
   reject = jest.fn();
 }
+export class MockAccountsService {
+  getAccountBalance = jest.fn();
+  transferPolyx = jest.fn();
+}
