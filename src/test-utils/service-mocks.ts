@@ -28,3 +28,8 @@ export class MockTickerReservationsService {
   extend = jest.fn();
   findAllByOwner = jest.fn();
 }
+
+export class MockAccountsService {
+  getAccountBalance = jest.fn();
+  transferPolyx = jest.fn();
+}

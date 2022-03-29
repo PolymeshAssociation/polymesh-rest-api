@@ -19,6 +19,7 @@ export class MockPolymesh {
 
   public network = {
     getLatestBlock: jest.fn(),
+    transferPolyx: jest.fn(),
   };
 
   public assets = {
@@ -31,6 +32,7 @@ export class MockPolymesh {
   };
 
   public accountManagement = {
+    getAccountBalance: jest.fn(),
     inviteAccount: jest.fn(),
   };
 
