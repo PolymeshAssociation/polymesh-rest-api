@@ -10,7 +10,6 @@ import { TransactionType } from '~/common/types';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { mockSignerProvider } from '~/signer/mock-signer';
-import { SignerService } from '~/signer/signer.service';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 
@@ -30,8 +29,6 @@ describe('ComplianceService', () => {
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(SignerService)
-      .useValue(mockSignerService)
       .compile();
 
     service = module.get(ComplianceService);

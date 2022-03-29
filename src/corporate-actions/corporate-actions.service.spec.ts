@@ -24,9 +24,8 @@ import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corp
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { mockSignerProvider } from '~/signer/mock-signer';
-import { SignerService } from '~/signer/signer.service';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockAssetService, MockSignerService } from '~/test-utils/service-mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -40,7 +39,7 @@ describe('CorporateActionsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockSignerService = new MockSignerService();
+  const mockSignerService = mockSignerProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,8 +47,6 @@ describe('CorporateActionsService', () => {
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(SignerService)
-      .useValue(mockSignerService)
       .compile();
 
     service = module.get<CorporateActionsService>(CorporateActionsService);

@@ -21,8 +21,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { SignerModule } from '~/signer/signer.module';
-import { SignerService } from '~/signer/signer.service';
+import { mockSignerProvider } from '~/signer/mock-signer';
 import {
   MockAsset,
   MockIdentity,
@@ -31,7 +30,6 @@ import {
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
-import { MockSignerService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -49,13 +47,13 @@ describe('SettlementsService', () => {
   const mockAssetsService = {
     findOne: jest.fn(),
   };
-  const mockSignerService = new MockSignerService();
+  const mockSignerService = mockSignerProvider.useValue;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SignerModule],
-      providers: [SettlementsService, AssetsService, IdentitiesService],
+      imports: [PolymeshModule],
+      providers: [SettlementsService, AssetsService, IdentitiesService, mockSignerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -63,8 +61,6 @@ describe('SettlementsService', () => {
       .useValue(mockIdentitiesService)
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(SignerService)
-      .useValue(mockSignerService)
       .compile();
 
     service = module.get<SettlementsService>(SettlementsService);

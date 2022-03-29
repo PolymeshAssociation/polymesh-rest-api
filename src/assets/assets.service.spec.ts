@@ -13,8 +13,7 @@ import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SignerModule } from '~/signer/signer.module';
-import { SignerService } from '~/signer/signer.service';
+import { mockSignerProvider } from '~/signer/mock-signer';
 import { MockAsset, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockSignerService } from '~/test-utils/service-mocks';
 
@@ -34,13 +33,11 @@ describe('AssetsService', () => {
     mockPolymeshApi = new MockPolymesh();
     mockSignerService = new MockSignerService();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SignerModule],
-      providers: [AssetsService],
+      imports: [PolymeshModule],
+      providers: [AssetsService, mockSignerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(SignerService)
-      .useValue(mockSignerService)
       .compile();
 
     service = module.get<AssetsService>(AssetsService);
