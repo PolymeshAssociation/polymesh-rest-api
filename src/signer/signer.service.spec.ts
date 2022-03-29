@@ -62,7 +62,7 @@ describe('SignerService', () => {
     });
 
     describe('with HashicorpVaultSigningManager', () => {
-      it('should call setAddressByHandle for each account', async () => {
+      it('should call logKey for each account', async () => {
         const vaultManager = new MockHashicorpVaultSigningManager();
         Object.setPrototypeOf(vaultManager, HashicorpVaultSigningManager.prototype);
         service = new SignerService(vaultManager, polymeshService, logger);
@@ -98,29 +98,37 @@ describe('SignerService', () => {
   });
 
   describe('getAddressByHandle', () => {
-    it('should get a loaded Account', () => {
-      service.setAddressByHandle('humanId', 'someAddress');
-      return expect(service.getAddressByHandle('humanId')).resolves.toEqual('someAddress');
+    describe('with LocalSigningManager', () => {
+      it('should get a loaded Account from the address book', () => {
+        service.setAddressByHandle('humanId', 'someAddress');
+        return expect(service.getAddressByHandle('humanId')).resolves.toEqual('someAddress');
+      });
+      it('should throw if an Account is not loaded', () => {
+        return expect(() => service.getAddressByHandle('badId')).rejects.toThrowError(
+          'There is no signer associated to "badId"'
+        );
+      });
     });
 
-    it('should throw if an Account is not loaded', () => {
-      return expect(() => service.getAddressByHandle('badId')).rejects.toThrowError(
-        'There is no signer associated to "badId"'
-      );
-    });
-
-    describe('with HashicorpVaultSigner', () => {
-      it('should check for the key in vault if not found in the addressBook', () => {
+    describe('with HashicorpVaultSigningManager', () => {
+      const address = 'newAddress';
+      beforeEach(() => {
         const vaultManager = new MockHashicorpVaultSigningManager();
         Object.setPrototypeOf(vaultManager, HashicorpVaultSigningManager.prototype);
-        const address = 'newAddress';
         vaultManager.getVaultKeys.mockResolvedValue([
           { key: '0x123', address, name: 'new', version: 1 },
         ]);
 
         service = new SignerService(vaultManager, polymeshService, logger);
-
+      });
+      it('should check for the key in vault', () => {
         return expect(service.getAddressByHandle('new-1')).resolves.toEqual(address);
+      });
+
+      it('should throw if an Account is not found', () => {
+        return expect(service.getAddressByHandle('badId')).rejects.toThrowError(
+          'There is no signer associated to "badId'
+        );
       });
     });
   });
