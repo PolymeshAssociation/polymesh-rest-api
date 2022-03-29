@@ -66,7 +66,8 @@ describe('SignerService', () => {
         const vaultManager = new MockHashicorpVaultSigningManager();
         Object.setPrototypeOf(vaultManager, HashicorpVaultSigningManager.prototype);
         service = new SignerService(vaultManager, polymeshService, logger);
-        const addressSpy = jest.spyOn(service, 'setAddressByHandle');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const logKeySpy = jest.spyOn(service as any, 'logKey'); // spy on  private method
         vaultManager.getVaultKeys.mockResolvedValue([
           {
             name: 'alice',
@@ -88,10 +89,10 @@ describe('SignerService', () => {
           },
         ]);
         await service.loadAccounts();
-        expect(addressSpy).toHaveBeenCalledWith('alice-1', 'ABC');
-        expect(addressSpy).toHaveBeenCalledWith('bob-1', 'DEF');
-        expect(addressSpy).toHaveBeenCalledWith('bob-2', 'GHI');
-        addressSpy.mockRestore();
+        expect(logKeySpy).toHaveBeenCalledWith('alice-1', 'ABC');
+        expect(logKeySpy).toHaveBeenCalledWith('bob-1', 'DEF');
+        expect(logKeySpy).toHaveBeenCalledWith('bob-2', 'GHI');
+        logKeySpy.mockRestore();
       });
     });
   });
