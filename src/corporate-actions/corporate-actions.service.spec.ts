@@ -23,6 +23,7 @@ import { CorporateActionsService } from '~/corporate-actions/corporate-actions.s
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
+import { mockSignerProvider } from '~/signer/mock-signer';
 import { SignerService } from '~/signer/signer.service';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService, MockSignerService } from '~/test-utils/service-mocks';
@@ -43,7 +44,7 @@ describe('CorporateActionsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CorporateActionsService, AssetsService, SignerService],
+      providers: [CorporateActionsService, AssetsService, mockSignerProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)

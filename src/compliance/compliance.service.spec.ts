@@ -9,9 +9,10 @@ import { AssetsService } from '~/assets/assets.service';
 import { TransactionType } from '~/common/types';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
+import { mockSignerProvider } from '~/signer/mock-signer';
 import { SignerService } from '~/signer/signer.service';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockAssetService, MockSignerService } from '~/test-utils/service-mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -20,12 +21,12 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 
 describe('ComplianceService', () => {
   let service: ComplianceService;
-  const mockSignerService = new MockSignerService();
+  const mockSignerService = mockSignerProvider.useValue;
   const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SignerService, AssetsService, ComplianceService],
+      providers: [AssetsService, ComplianceService, mockSignerProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)

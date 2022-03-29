@@ -14,7 +14,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { SignerService } from '~/signer/signer.service';
+import { mockSignerProvider } from '~/signer/mock-signer';
 import {
   MockIdentity,
   MockPolymesh,
@@ -41,18 +41,16 @@ describe('PortfoliosService', () => {
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSignerService = new MockSignerService();
+    mockSignerService = mockSignerProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [PortfoliosService, IdentitiesService, SignerService],
+      providers: [PortfoliosService, IdentitiesService, mockSignerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
-      .overrideProvider(SignerService)
-      .useValue(mockSignerService)
       .compile();
 
     service = module.get<PortfoliosService>(PortfoliosService);

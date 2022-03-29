@@ -11,14 +11,14 @@ import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { TransactionType } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { SignerService } from '~/signer/signer.service';
+import { mockSignerProvider } from '~/signer/mock-signer';
 import {
   MockAsset,
   MockCheckpoint,
   MockCheckpointSchedule,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-import { MockAssetService, MockSignerService } from '~/test-utils/service-mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -32,16 +32,19 @@ describe('CheckpointsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockSignerService = new MockSignerService();
+  const mockSignerService = mockSignerProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CheckpointsService, AssetsService, SignerService, mockPolymeshLoggerProvider],
+      providers: [
+        CheckpointsService,
+        AssetsService,
+        mockPolymeshLoggerProvider,
+        mockSignerProvider,
+      ],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(SignerService)
-      .useValue(mockSignerService)
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
