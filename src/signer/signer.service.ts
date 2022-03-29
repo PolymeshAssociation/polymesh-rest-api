@@ -1,75 +1,94 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
-import { SigningManager } from '@polymathnetwork/signing-manager-types';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
-export class SignerService {
+export abstract class SignerService {
+  public abstract getAddressByHandle(handle: string): Promise<string>;
+
+  public abstract initialize(accounts?: Record<string, string>): Promise<void>;
+
+  protected throwNoSigner(handle: string): never {
+    throw new NotFoundException(`There is no signer associated to "${handle}"`);
+  }
+}
+
+export class LocalSigner extends SignerService {
   private addressBook: Record<string, string> = {};
+
   constructor(
-    public readonly signingManager: SigningManager,
+    private readonly signingManager: LocalSigningManager,
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger
   ) {
+    super();
     this.logger.setContext(SignerService.name);
   }
 
-  public async getAddressByHandle(handle: string): Promise<string> {
-    let address: string;
-    if (this.signingManager instanceof LocalSigningManager) {
-      address = this.addressBook[handle];
-    } else {
-      address = await this.checkVaultKeys(handle);
-    }
+  public getAddressByHandle(handle: string): Promise<string> {
+    const address = this.addressBook[handle];
 
     if (!address) {
-      throw new NotFoundException(`There is no signer associated to "${handle}"`);
+      this.throwNoSigner(handle);
     }
 
-    return address;
+    return Promise.resolve(address);
   }
 
   public setAddressByHandle(handle: string, address: string): void {
     this.addressBook[handle] = address;
   }
 
-  public async loadAccounts(accounts: Record<string, string> = {}): Promise<void> {
+  public async initialize(accounts: Record<string, string> = {}): Promise<void> {
     const manager = this.signingManager;
     await this.polymeshService.polymeshApi.setSigningManager(manager);
-    if (manager instanceof LocalSigningManager) {
-      Object.entries(accounts).forEach(([handle, mnemonic]) => {
-        const address = manager.addAccount({ mnemonic });
-        this.setAddressByHandle(handle, address);
-        this.logKey(handle, address);
-      });
-    } else if (manager instanceof HashicorpVaultSigningManager) {
-      // logs available keys on startup for developer convenience
-      const keys = await manager.getVaultKeys();
-      keys.forEach(({ name, version, address }) => {
-        const keyName = `${name}-${version}`;
-        this.logKey(keyName, address);
-      });
+    Object.entries(accounts).forEach(([handle, mnemonic]) => {
+      const address = manager.addAccount({ mnemonic });
+      this.setAddressByHandle(handle, address);
+      this.logKey(handle, address);
+    });
+  }
+
+  private logKey(handle: string, address: string): void {
+    this.logger.log(`Key "${handle}" with address "${address}" was loaded`);
+  }
+}
+
+export class VaultSigner extends SignerService {
+  constructor(
+    private readonly signingManager: HashicorpVaultSigningManager,
+    private readonly polymeshService: PolymeshService,
+    private readonly logger: PolymeshLogger
+  ) {
+    super();
+    this.logger.setContext(VaultSigner.name);
+  }
+
+  public initialize(): Promise<void> {
+    this.polymeshService.polymeshApi.setSigningManager(this.signingManager);
+    return this.logKeys();
+  }
+
+  public async getAddressByHandle(handle: string): Promise<string> {
+    const keys = await this.signingManager.getVaultKeys();
+    const key = keys.find(({ name, version }) => `${name}-${version}` === handle);
+    if (key) {
+      this.logKey(handle, key.address);
+      return key.address;
+    } else {
+      this.throwNoSigner(handle);
     }
   }
 
-  /**
-   * @hidden
-   *
-   * If the signing manager is a Vault signer, this method will check if they key is present as it may have been added after initialization
-   */
-  private async checkVaultKeys(handle: string): Promise<string> {
-    if (this.signingManager instanceof HashicorpVaultSigningManager) {
-      const keys = await this.signingManager.getVaultKeys();
-      const key = keys.find(({ name, version }) => `${name}-${version}` === handle);
-      if (key) {
-        this.logKey(handle, key.address);
-        return key.address;
-      }
-    }
-    return '';
+  public async logKeys(): Promise<void> {
+    const keys = await this.signingManager.getVaultKeys();
+    keys.forEach(({ name, version, address }) => {
+      const keyName = `${name}-${version}`;
+      this.logKey(keyName, address);
+    });
   }
 
   private logKey(handle: string, address: string): void {

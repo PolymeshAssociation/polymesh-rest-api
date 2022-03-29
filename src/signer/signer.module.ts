@@ -10,7 +10,7 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import signersConfig from '~/signer/config/signers.config';
-import { SignerService } from '~/signer/signer.service';
+import { LocalSigner, SignerService, VaultSigner } from '~/signer/signer.service';
 
 @Module({
   imports: [ConfigModule.forFeature(signersConfig), PolymeshModule, LoggerModule],
@@ -27,14 +27,13 @@ import { SignerService } from '~/signer/signer.service';
         const { vault, local } = configuration;
         if (vault) {
           const manager = new HashicorpVaultSigningManager(vault);
-          service = new SignerService(manager, polymeshService, logger);
-          await service.loadAccounts();
+          service = new VaultSigner(manager, polymeshService, logger);
+          await service.initialize();
         } else {
           const manager = await LocalSigningManager.create({ accounts: [] });
-          service = new SignerService(manager, polymeshService, logger);
-          await service.loadAccounts(local);
+          service = new LocalSigner(manager, polymeshService, logger);
+          await service.initialize(local);
         }
-
         return service;
       },
     },
