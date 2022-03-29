@@ -65,7 +65,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose details are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
@@ -87,7 +86,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose pending Authorizations are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
@@ -131,7 +129,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose issued Authorizations are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
@@ -181,14 +178,12 @@ export class IdentitiesController {
     name: 'did',
     description: 'The Identity whose targeting Authorization is to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiParam({
     name: 'id',
     description: 'The ID of the Authorization to be fetched',
     type: 'string',
-    required: true,
     example: '1',
   })
   @ApiOkResponse({
@@ -211,7 +206,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose Assets are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
@@ -232,7 +226,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose pending settlement Instructions are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
@@ -258,7 +251,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose Venues are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
@@ -281,7 +273,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose issued Claims are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
@@ -352,7 +343,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID whose associated Claims are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
@@ -423,7 +413,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID of the Claim Issuer for which the Assets are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {

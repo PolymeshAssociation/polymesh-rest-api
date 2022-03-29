@@ -184,7 +184,7 @@ export class AssetsController {
   @ApiBadRequestResponse({
     description: 'The supplied Document list is equal to the current one',
   })
-  @Post(':ticker/documents')
+  @Post(':ticker/set-documents')
   public async setDocuments(
     @Param() { ticker }: TickerParamsDto,
     @Body() setAssetDocumentsDto: SetAssetDocumentsDto
