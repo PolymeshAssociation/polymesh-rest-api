@@ -40,10 +40,8 @@ export class ComplianceController {
   public async getComplianceRequirements(
     @Param() { ticker }: TickerParamsDto
   ): Promise<ComplianceRequirementsModel> {
-    const {
-      requirements,
-      defaultTrustedClaimIssuers,
-    } = await this.complianceService.findComplianceRequirements(ticker);
+    const { requirements, defaultTrustedClaimIssuers } =
+      await this.complianceService.findComplianceRequirements(ticker);
 
     return new ComplianceRequirementsModel({
       requirements: requirements.map(

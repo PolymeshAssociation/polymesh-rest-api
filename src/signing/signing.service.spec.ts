@@ -92,7 +92,7 @@ describe('VaultSigningService', () => {
 
     manager.setSs58Format(0);
 
-    const castedManager = (manager as unknown) as HashicorpVaultSigningManager;
+    const castedManager = manager as unknown as HashicorpVaultSigningManager;
 
     service = new VaultSigningService(castedManager, polymeshService, logger);
 

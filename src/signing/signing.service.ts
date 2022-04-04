@@ -49,7 +49,7 @@ export class LocalSigningService extends SigningService {
     this.addressBook[handle] = address;
   }
 
-  public async initialize(accounts: Record<string, string> = {}): Promise<void> {
+  public override async initialize(accounts: Record<string, string> = {}): Promise<void> {
     await super.initialize();
     _.forEach(accounts, (mnemonic, handle) => {
       const address = this.signingManager.addAccount({ mnemonic });
@@ -73,7 +73,7 @@ export class VaultSigningService extends SigningService {
     this.logger.setContext(VaultSigningService.name);
   }
 
-  public async initialize(): Promise<void> {
+  public override async initialize(): Promise<void> {
     await super.initialize();
     return this.logKeys();
   }
