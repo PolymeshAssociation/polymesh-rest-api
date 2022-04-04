@@ -11,7 +11,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { TransactionType } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { mockSignerProvider } from '~/signer/mock-signer';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockCheckpoint,
@@ -32,7 +32,7 @@ describe('CheckpointsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockSignerService = mockSignerProvider.useValue;
+  const mockSigningService = mockSigningProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,7 +40,7 @@ describe('CheckpointsService', () => {
         CheckpointsService,
         AssetsService,
         mockPolymeshLoggerProvider,
-        mockSignerProvider,
+        mockSigningProvider,
       ],
     })
       .overrideProvider(AssetsService)
@@ -258,7 +258,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const body = {
         signer: 'signer',
       };
@@ -306,7 +306,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
       const address = 'address';
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const mockDate = new Date();
       const params = {
         signer: 'signer',
@@ -445,7 +445,7 @@ describe('CheckpointsService', () => {
         const signer = '0x6'.padEnd(66, '0');
 
         const address = 'address';
-        mockSignerService.getAddressByHandle.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const mockAsset = new MockAsset();
         mockAsset.checkpoints.schedules.remove.mockImplementation(() => {
@@ -488,7 +488,7 @@ describe('CheckpointsService', () => {
         const id = new BigNumber(1);
 
         const address = 'address';
-        mockSignerService.getAddressByHandle.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.deleteScheduleByTicker(ticker, id, signer);
         expect(result).toEqual({

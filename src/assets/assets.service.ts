@@ -15,13 +15,13 @@ import { IssueDto } from '~/assets/dto/issue.dto';
 import { ReserveTickerDto as RegisterTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SignerService } from '~/signer/signer.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly signerService: SignerService
+    private readonly signingService: SigningService
   ) {}
 
   public async findOne(ticker: string): Promise<Asset> {
@@ -75,14 +75,14 @@ export class AssetsService {
 
   public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
     const { signer, ...rest } = params;
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const reserveTicker = this.polymeshService.polymeshApi.assets.reserveTicker;
     return processQueue(reserveTicker, rest, { signingAccount: address });
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
-    const signingAccount = await this.signerService.getAddressByHandle(signer);
+    const signingAccount = await this.signingService.getAddressByHandle(signer);
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
     return processQueue(createAsset, rest, { signingAccount });
   }
@@ -90,7 +90,7 @@ export class AssetsService {
   public async issue(ticker: string, params: IssueDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.issuance.issue, rest, { signingAccount: address });
   }
 

@@ -17,9 +17,9 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { mockSignerProvider } from '~/signer/mock-signer';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockSignerService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -32,15 +32,15 @@ describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockSignerService: MockSignerService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSignerService = mockSignerProvider.useValue;
+    mockSigningService = mockSigningProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [IdentitiesService, mockPolymeshLoggerProvider, mockSignerProvider],
+      providers: [IdentitiesService, mockPolymeshLoggerProvider, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -160,7 +160,7 @@ describe('IdentitiesService', () => {
         };
 
         const address = 'address';
-        mockSignerService.getAddressByHandle.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         mockPolymeshApi.accountManagement.inviteAccount.mockImplementation(() => {
           throw polymeshError;
@@ -199,7 +199,7 @@ describe('IdentitiesService', () => {
         };
 
         const address = 'address';
-        mockSignerService.getAddressByHandle.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.addSecondaryAccount(body);
         expect(result).toEqual({

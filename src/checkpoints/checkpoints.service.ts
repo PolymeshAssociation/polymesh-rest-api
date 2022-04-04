@@ -17,13 +17,13 @@ import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint
 import { SignerDto } from '~/common/dto/signer.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import { SignerService } from '~/signer/signer.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class CheckpointsService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly signerService: SignerService,
+    private readonly signingService: SigningService,
     private readonly logger: PolymeshLogger
   ) {
     this.logger.setContext(CheckpointsService.name);
@@ -85,7 +85,7 @@ export class CheckpointsService {
   ): Promise<QueueResult<Checkpoint>> {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
   }
 
@@ -95,7 +95,7 @@ export class CheckpointsService {
   ): Promise<QueueResult<CheckpointSchedule>> {
     const { signer, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.checkpoints.schedules.create, rest, { signingAccount: address });
   }
 
@@ -124,7 +124,7 @@ export class CheckpointsService {
     id: BigNumber,
     signer: string
   ): Promise<QueueResult<void>> {
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const asset = await this.assetsService.findOne(ticker);
     return processQueue(
       asset.checkpoints.schedules.remove,

@@ -9,7 +9,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { TransactionType } from '~/common/types';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
-import { mockSignerProvider } from '~/signer/mock-signer';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 
@@ -20,12 +20,12 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 
 describe('ComplianceService', () => {
   let service: ComplianceService;
-  const mockSignerService = mockSignerProvider.useValue;
+  const mockSigningService = mockSigningProvider.useValue;
   const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AssetsService, ComplianceService, mockSignerProvider],
+      providers: [AssetsService, ComplianceService, mockSigningProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
@@ -94,7 +94,7 @@ describe('ComplianceService', () => {
       const address = 'address';
       mockAsset.compliance.requirements.set.mockResolvedValue(mockQueue);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
 

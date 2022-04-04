@@ -11,13 +11,13 @@ import { LoggerModule } from '~/logger/logger.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
-import { SignerModule } from '~/signer/signer.module';
+import { SigningModule } from '~/signing/signing.module';
 
 @Module({
   imports: [
     PolymeshModule,
     LoggerModule,
-    SignerModule,
+    SigningModule,
     forwardRef(() => AssetsModule),
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),

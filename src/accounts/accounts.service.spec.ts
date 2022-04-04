@@ -12,10 +12,10 @@ import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { mockSignerProvider } from '~/signer/mock-signer';
-import { SignerModule } from '~/signer/signer.module';
+import { mockSigningProvider } from '~/signing/signing.mock';
+import { SigningModule } from '~/signing/signing.module';
 import { MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockSignerService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -28,15 +28,15 @@ describe('AccountsService', () => {
   let service: AccountsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockSignerService: MockSignerService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSignerService = mockSignerProvider.useValue;
+    mockSigningService = mockSigningProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SignerModule],
-      providers: [AccountsService, mockSignerProvider],
+      imports: [PolymeshModule, SigningModule],
+      providers: [AccountsService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -112,7 +112,7 @@ describe('AccountsService', () => {
         };
 
         const someKey = 'someKey';
-        mockSignerService.getAddressByHandle.mockReturnValue(someKey);
+        mockSigningService.getAddressByHandle.mockReturnValue(someKey);
 
         mockPolymeshApi.network.transferPolyx.mockImplementation(() => {
           throw polymeshError;
@@ -153,7 +153,7 @@ describe('AccountsService', () => {
         };
 
         const keyName = 'someKey';
-        mockSignerService.getAddressByHandle.mockReturnValue(keyName);
+        mockSigningService.getAddressByHandle.mockReturnValue(keyName);
 
         const result = await service.transferPolyx(body);
         expect(result).toEqual({

@@ -5,10 +5,10 @@ import { Module } from '@nestjs/common';
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountsService } from '~/accounts/accounts.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { SignerModule } from '~/signer/signer.module';
+import { SigningModule } from '~/signing/signing.module';
 
 @Module({
-  imports: [PolymeshModule, SignerModule],
+  imports: [PolymeshModule, SigningModule],
   controllers: [AccountsController],
   providers: [AccountsService],
 })

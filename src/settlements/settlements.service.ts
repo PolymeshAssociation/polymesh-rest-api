@@ -20,14 +20,14 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
-import { SignerService } from '~/signer/signer.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class SettlementsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
     private readonly polymeshService: PolymeshService,
-    private readonly signerService: SignerService,
+    private readonly signingService: SigningService,
     private readonly assetsService: AssetsService
   ) {}
 
@@ -66,7 +66,7 @@ export class SettlementsService {
     const { signer, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
 
     const params = {
       ...rest,
@@ -89,7 +89,7 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
 
     return processQueue(instruction.affirm, { signingAccount: address }, {});
   }
@@ -102,7 +102,7 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
 
     return processQueue(instruction.reject, { signingAccount: address }, {});
   }
@@ -154,7 +154,7 @@ export class SettlementsService {
       description,
       type,
     };
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
     return processQueue(method, params, { signingAccount: address });
   }
@@ -166,7 +166,7 @@ export class SettlementsService {
     const { signer, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
-    const address = await this.signerService.getAddressByHandle(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(venue.modify, params, { signingAccount: address });
   }
 

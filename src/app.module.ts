@@ -16,7 +16,7 @@ import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
-import { SignerModule } from '~/signer/signer.module';
+import { SigningModule } from '~/signing/signing.module';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { SignerModule } from '~/signer/signer.module';
     PolymeshModule,
     IdentitiesModule,
     SettlementsModule,
-    SignerModule,
+    SigningModule,
     AuthorizationsModule,
     PortfoliosModule,
     ClaimsModule,

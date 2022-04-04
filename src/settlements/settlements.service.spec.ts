@@ -21,7 +21,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { mockSignerProvider } from '~/signer/mock-signer';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockIdentity,
@@ -47,13 +47,13 @@ describe('SettlementsService', () => {
   const mockAssetsService = {
     findOne: jest.fn(),
   };
-  const mockSignerService = mockSignerProvider.useValue;
+  const mockSigningService = mockSigningProvider.useValue;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [SettlementsService, AssetsService, IdentitiesService, mockSignerProvider],
+      providers: [SettlementsService, AssetsService, IdentitiesService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -264,7 +264,7 @@ describe('SettlementsService', () => {
         ...params,
       };
       const address = 'address';
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.createInstruction(new BigNumber(123), body as any);
@@ -320,7 +320,7 @@ describe('SettlementsService', () => {
         type: VenueType.Exchange,
       };
       const address = 'address';
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.createVenue(body);
 
@@ -397,7 +397,7 @@ describe('SettlementsService', () => {
           type: VenueType.Exchange,
         };
         const address = 'address';
-        mockSignerService.getAddressByHandle.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyVenue(new BigNumber(123), body);
 
@@ -444,7 +444,7 @@ describe('SettlementsService', () => {
         signer: 'signer',
       };
       const address = 'address';
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.affirmInstruction(new BigNumber(123), body as any);
@@ -485,7 +485,7 @@ describe('SettlementsService', () => {
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
       const address = 'address';
-      mockSignerService.getAddressByHandle.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.rejectInstruction(new BigNumber(123), {
         signer: 'signer',

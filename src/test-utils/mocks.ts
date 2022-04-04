@@ -219,13 +219,3 @@ export class MockOffering {
   ticker = 'TICKER';
   public getInvestments = jest.fn();
 }
-
-export class MockHashicorpVaultSigningManager {
-  externalSigner = jest.fn();
-  getVaultKeys = jest.fn();
-  getExternalSigner = jest.fn();
-  getSs58Format = jest.fn();
-  setSs58Format = jest.fn();
-  getAccounts = jest.fn();
-  vault = jest.fn();
-}

@@ -4,13 +4,13 @@ import { AccountBalance } from '@polymathnetwork/polymesh-sdk/types';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SignerService } from '~/signer/signer.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly signingService: SignerService
+    private readonly signingService: SigningService
   ) {}
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {

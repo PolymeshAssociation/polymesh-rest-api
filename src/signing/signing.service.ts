@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
+import _ from 'lodash';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
-export abstract class SignerService {
+export abstract class SigningService {
   public abstract getAddressByHandle(handle: string): Promise<string>;
 
   public abstract initialize(accounts?: Record<string, string>): Promise<void>;
@@ -16,7 +17,7 @@ export abstract class SignerService {
   }
 }
 
-export class LocalSigner extends SignerService {
+export class LocalSigningService extends SigningService {
   private addressBook: Record<string, string> = {};
 
   constructor(
@@ -25,7 +26,7 @@ export class LocalSigner extends SignerService {
     private readonly logger: PolymeshLogger
   ) {
     super();
-    this.logger.setContext(SignerService.name);
+    this.logger.setContext(SigningService.name);
   }
 
   public getAddressByHandle(handle: string): Promise<string> {
@@ -45,7 +46,7 @@ export class LocalSigner extends SignerService {
   public async initialize(accounts: Record<string, string> = {}): Promise<void> {
     const manager = this.signingManager;
     await this.polymeshService.polymeshApi.setSigningManager(manager);
-    Object.entries(accounts).forEach(([handle, mnemonic]) => {
+    _.forEach(accounts, (mnemonic, handle) => {
       const address = manager.addAccount({ mnemonic });
       this.setAddressByHandle(handle, address);
       this.logKey(handle, address);
@@ -57,14 +58,14 @@ export class LocalSigner extends SignerService {
   }
 }
 
-export class VaultSigner extends SignerService {
+export class VaultSigningService extends SigningService {
   constructor(
     private readonly signingManager: HashicorpVaultSigningManager,
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger
   ) {
     super();
-    this.logger.setContext(VaultSigner.name);
+    this.logger.setContext(VaultSigningService.name);
   }
 
   public initialize(): Promise<void> {

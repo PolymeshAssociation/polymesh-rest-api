@@ -8,12 +8,13 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SignerModule } from '~/signer/signer.module';
-import { LocalSigner, VaultSigner } from '~/signer/signer.service';
-import { MockHashicorpVaultSigningManager, MockPolymesh } from '~/test-utils/mocks';
+import { MockHashicorpVaultSigningManager } from '~/signing/signing.mock';
+import { SigningModule } from '~/signing/signing.module';
+import { LocalSigningService, VaultSigningService } from '~/signing/signing.service';
+import { MockPolymesh } from '~/test-utils/mocks';
 
-describe('LocalSigner', () => {
-  let service: LocalSigner;
+describe('LocalSigningService', () => {
+  let service: LocalSigningService;
   let logger: PolymeshLogger;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
@@ -21,7 +22,7 @@ describe('LocalSigner', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SignerModule, LoggerModule],
+      imports: [PolymeshModule, SigningModule, LoggerModule],
       providers: [mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
@@ -33,7 +34,7 @@ describe('LocalSigner', () => {
     const manager = await LocalSigningManager.create({ accounts: [] });
     manager.setSs58Format(0);
 
-    service = new LocalSigner(manager, polymeshService, logger);
+    service = new LocalSigningService(manager, polymeshService, logger);
   });
 
   afterEach(async () => {
@@ -41,8 +42,8 @@ describe('LocalSigner', () => {
   });
 
   describe('initialize', () => {
-    it('should call polymeshApi setSigningManager method', () => {
-      service.initialize({});
+    it('should call polymeshApi setSigningManager method', async () => {
+      await service.initialize({});
       expect(mockPolymeshApi.setSigningManager).toHaveBeenCalled();
     });
 
@@ -68,8 +69,8 @@ describe('LocalSigner', () => {
   });
 });
 
-describe('VaultSigner', () => {
-  let service: VaultSigner;
+describe('VaultSigningService', () => {
+  let service: VaultSigningService;
   let logger: PolymeshLogger;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
@@ -78,7 +79,7 @@ describe('VaultSigner', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SignerModule, LoggerModule],
+      imports: [PolymeshModule, SigningModule, LoggerModule],
       providers: [mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
@@ -89,11 +90,11 @@ describe('VaultSigner', () => {
     polymeshService = module.get<PolymeshService>(PolymeshService);
     manager = new MockHashicorpVaultSigningManager();
 
-    Object.setPrototypeOf(manager, HashicorpVaultSigningManager.prototype); // so instanceof works with the mock
     manager.setSs58Format(0);
 
     const castedManager = (manager as unknown) as HashicorpVaultSigningManager;
-    service = new VaultSigner(castedManager, polymeshService, logger);
+
+    service = new VaultSigningService(castedManager, polymeshService, logger);
 
     manager.getVaultKeys.mockResolvedValue([
       {
