@@ -10,13 +10,13 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { processQueue, QueueResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class AuthorizationsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async findPendingByDid(
@@ -65,16 +65,16 @@ export class AuthorizationsService {
   public async accept(id: BigNumber, signer: string): Promise<QueueResult<void>> {
     const { accept } = await this.findOne(signer, id);
 
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(accept, { signer: address }, {});
+    return processQueue(accept, { signingAccount: address }, {});
   }
 
   public async reject(id: BigNumber, signer: string): Promise<QueueResult<void>> {
     const { remove } = await this.findOne(signer, id);
 
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(remove, { signer: address }, {});
+    return processQueue(remove, { signingAccount: address }, {});
   }
 }

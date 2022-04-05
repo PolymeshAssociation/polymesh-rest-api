@@ -6,10 +6,10 @@ import { AuthorizationsController } from '~/authorizations/authorizations.contro
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { SigningModule } from '~/signing/signing.module';
 
 @Module({
-  imports: [PolymeshModule, RelayerAccountsModule, forwardRef(() => IdentitiesModule)],
+  imports: [PolymeshModule, SigningModule, forwardRef(() => IdentitiesModule)],
   providers: [AuthorizationsService],
   exports: [AuthorizationsService],
   controllers: [AuthorizationsController],
