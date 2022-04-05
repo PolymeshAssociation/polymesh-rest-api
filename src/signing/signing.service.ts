@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
 import { SigningManager } from '@polymathnetwork/signing-manager-types';
-import _ from 'lodash';
+import { forEach } from 'lodash';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -32,7 +32,7 @@ export class LocalSigningService extends SigningService {
     private readonly logger: PolymeshLogger
   ) {
     super();
-    this.logger.setContext(SigningService.name);
+    this.logger.setContext(LocalSigningService.name);
   }
 
   public getAddressByHandle(handle: string): Promise<string> {
@@ -51,7 +51,7 @@ export class LocalSigningService extends SigningService {
 
   public override async initialize(accounts: Record<string, string> = {}): Promise<void> {
     await super.initialize();
-    _.forEach(accounts, (mnemonic, handle) => {
+    forEach(accounts, (mnemonic, handle) => {
       const address = this.signingManager.addAccount({ mnemonic });
       this.setAddressByHandle(handle, address);
       this.logKey(handle, address);

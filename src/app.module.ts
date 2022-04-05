@@ -27,10 +27,13 @@ import { SigningModule } from '~/signing/signing.module';
         POLYMESH_MIDDLEWARE_URL: Joi.string(),
         POLYMESH_MIDDLEWARE_API_KEY: Joi.string(),
         LOCAL_SIGNERS: Joi.string(),
-        LOCAL_MNEMNOICS: Joi.string(),
+        LOCAL_MNEMONICS: Joi.string(),
         VAULT_TOKEN: Joi.string(),
         VAULT_URL: Joi.string(),
-      }).and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY'),
+      })
+        .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')
+        .and('LOCAL_SIGNERS', 'LOCAL_MNEMONICS')
+        .nand('LOCAL_SIGNERS', 'VAULT_TOKEN'),
     }),
     AssetsModule,
     PolymeshModule,
