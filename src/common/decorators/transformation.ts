@@ -56,6 +56,10 @@ function toJsonObject(obj: unknown): unknown {
     return obj.map(toJsonObject);
   }
 
+  if (obj instanceof BigNumber && !obj.isNaN()) {
+    return obj.toString();
+  }
+
   if (obj && typeof obj === 'object') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return mapValues(obj as any, val => toJsonObject(val));
