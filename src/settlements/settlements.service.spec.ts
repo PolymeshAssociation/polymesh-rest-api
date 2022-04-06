@@ -20,9 +20,8 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockIdentity,
@@ -31,7 +30,6 @@ import {
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -49,13 +47,13 @@ describe('SettlementsService', () => {
   const mockAssetsService = {
     findOne: jest.fn(),
   };
-  const mockRelayerAccountsService = new MockRelayerAccountsService();
+  const mockSigningService = mockSigningProvider.useValue;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
-      providers: [SettlementsService, AssetsService, IdentitiesService],
+      imports: [PolymeshModule],
+      providers: [SettlementsService, AssetsService, IdentitiesService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -63,8 +61,6 @@ describe('SettlementsService', () => {
       .useValue(mockIdentitiesService)
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<SettlementsService>(SettlementsService);
@@ -268,7 +264,7 @@ describe('SettlementsService', () => {
         ...params,
       };
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.createInstruction(new BigNumber(123), body as any);
@@ -296,7 +292,7 @@ describe('SettlementsService', () => {
             },
           ],
         },
-        { signer: address }
+        { signingAccount: address }
       );
       findVenueSpy.mockRestore();
     });
@@ -324,7 +320,7 @@ describe('SettlementsService', () => {
         type: VenueType.Exchange,
       };
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.createVenue(body);
 
@@ -342,7 +338,7 @@ describe('SettlementsService', () => {
       });
       expect(mockPolymeshApi.settlements.createVenue).toHaveBeenCalledWith(
         { description: body.description, type: body.type },
-        { signer: address }
+        { signingAccount: address }
       );
     });
   });
@@ -401,7 +397,7 @@ describe('SettlementsService', () => {
           type: VenueType.Exchange,
         };
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyVenue(new BigNumber(123), body);
 
@@ -419,7 +415,7 @@ describe('SettlementsService', () => {
         });
         expect(mockVenue.modify).toHaveBeenCalledWith(
           { description: body.description, type: body.type },
-          { signer: address }
+          { signingAccount: address }
         );
         findVenueSpy.mockRestore();
       });
@@ -448,7 +444,7 @@ describe('SettlementsService', () => {
         signer: 'signer',
       };
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.affirmInstruction(new BigNumber(123), body as any);
@@ -465,7 +461,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signer: address }, {});
+      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signingAccount: address }, {});
       findInstructionSpy.mockRestore();
     });
   });
@@ -489,7 +485,7 @@ describe('SettlementsService', () => {
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.rejectInstruction(new BigNumber(123), {
         signer: 'signer',
@@ -507,7 +503,7 @@ describe('SettlementsService', () => {
           },
         ],
       });
-      expect(mockInstruction.reject).toHaveBeenCalledWith({ signer: address }, {});
+      expect(mockInstruction.reject).toHaveBeenCalledWith({ signingAccount: address }, {});
       findInstructionSpy.mockRestore();
     });
   });

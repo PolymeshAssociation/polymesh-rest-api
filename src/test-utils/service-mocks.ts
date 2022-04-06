@@ -16,10 +16,8 @@ export class MockComplianceService {
   findTrustedClaimIssuers = jest.fn();
 }
 
-export class MockRelayerAccountsService {
-  public findAddressByDid = jest.fn();
-
-  public findAll = jest.fn().mockReturnValue([]);
+export class MockSigningService {
+  public getAddressByHandle = jest.fn();
 }
 
 export class MockAuthorizationsService {

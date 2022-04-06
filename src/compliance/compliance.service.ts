@@ -9,13 +9,13 @@ import {
 import { AssetsService } from '~/assets/assets.service';
 import { processQueue, QueueResult } from '~/common/utils';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class ComplianceService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async findComplianceRequirements(ticker: string): Promise<ComplianceRequirements> {
@@ -34,9 +34,9 @@ export class ComplianceService {
   ): Promise<QueueResult<Asset>> {
     const { signer } = params;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.compliance.requirements.set, params as SetAssetRequirementsParams, {
-      signer: address,
+      signingAccount: address,
     });
   }
 }

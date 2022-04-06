@@ -12,10 +12,10 @@ import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
+import { SigningModule } from '~/signing/signing.module';
 import { MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -28,20 +28,18 @@ describe('AccountsService', () => {
   let service: AccountsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSigningService = mockSigningProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
-      providers: [AccountsService],
+      imports: [PolymeshModule, SigningModule],
+      providers: [AccountsService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<AccountsService>(AccountsService);
@@ -113,8 +111,8 @@ describe('AccountsService', () => {
           memo: 'Sample memo',
         };
 
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const someKey = 'someKey';
+        mockSigningService.getAddressByHandle.mockReturnValue(someKey);
 
         mockPolymeshApi.network.transferPolyx.mockImplementation(() => {
           throw polymeshError;
@@ -154,8 +152,8 @@ describe('AccountsService', () => {
           memo: 'Sample memo',
         };
 
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        const keyName = 'someKey';
+        mockSigningService.getAddressByHandle.mockReturnValue(keyName);
 
         const result = await service.transferPolyx(body);
         expect(result).toEqual({

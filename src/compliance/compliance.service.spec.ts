@@ -9,9 +9,9 @@ import { AssetsService } from '~/assets/assets.service';
 import { TransactionType } from '~/common/types';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockAssetService, MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockAssetService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -20,17 +20,15 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 
 describe('ComplianceService', () => {
   let service: ComplianceService;
-  const mockRelayerAccountsService = new MockRelayerAccountsService();
+  const mockSigningService = mockSigningProvider.useValue;
   const mockAssetsService = new MockAssetService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RelayerAccountsService, AssetsService, ComplianceService],
+      providers: [AssetsService, ComplianceService, mockSigningProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get(ComplianceService);
@@ -96,7 +94,7 @@ describe('ComplianceService', () => {
       const address = 'address';
       mockAsset.compliance.requirements.set.mockResolvedValue(mockQueue);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
 
