@@ -69,17 +69,21 @@ type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {
   union: (Omit<SchemaObject, 'oneOf'> | Type)[];
 };
 
+/**
+ * Create a property decorator with `oneOf` attribute whose value is set to the SchemaObject or ReferenceObject of the items of `union` parameter
+ *
+ * @note Non-schema objects in `union` must be defined as extra models using the `ApiExtraModels` decorator(at the class-level)
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOneOfOptions) => {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const extraModels: Function[] = [];
   const oneOfItems: (SchemaObject | ReferenceObject)[] = [];
+
   union.forEach(item => {
     if (typeof item === 'object') {
       oneOfItems.push(item);
     } else {
       oneOfItems.push({ $ref: getSchemaPath(item) });
-      extraModels.push(item);
     }
   });
 
