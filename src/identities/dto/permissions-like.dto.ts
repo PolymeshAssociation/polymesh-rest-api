@@ -58,8 +58,8 @@ export class PermissionsLikeDto {
     const { assets, portfolios, transactions, transactionGroups } = this;
 
     let permissionsLike: PermissionsLike = {
-      assets: assets === null ? null : assets?.toPermissions(),
-      portfolios: portfolios === null ? null : portfolios?.toPermissions(),
+      assets: assets === null ? null : assets?.toAssetPermissions(),
+      portfolios: portfolios === null ? null : portfolios?.toPortfolioPermissions(),
     };
 
     if (transactions === null) {
@@ -67,7 +67,7 @@ export class PermissionsLikeDto {
     } else if (transactions) {
       permissionsLike = {
         ...permissionsLike,
-        transactions: transactions.toPermissions(),
+        transactions: transactions.toTransactionPermissions(),
       };
     } else if (transactionGroups) {
       permissionsLike = { ...permissionsLike, transactionGroups };

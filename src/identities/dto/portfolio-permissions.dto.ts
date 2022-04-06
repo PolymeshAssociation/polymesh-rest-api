@@ -20,7 +20,7 @@ export class PortfolioPermissionsDto extends PermissionTypeDto {
   @Type(() => PortfolioDto)
   readonly values: PortfolioDto[];
 
-  public toPermissions(): SectionPermissions<PortfolioLike> | null {
+  public toPortfolioPermissions(): SectionPermissions<PortfolioLike> | null {
     const { values, type } = this;
 
     return {
@@ -29,7 +29,7 @@ export class PortfolioPermissionsDto extends PermissionTypeDto {
     };
   }
 
-  constructor(dto: Omit<PortfolioPermissionsDto, 'toPermissions'>) {
+  constructor(dto: Omit<PortfolioPermissionsDto, 'toPortfolioPermissions'>) {
     super();
     Object.assign(this, dto);
   }

@@ -38,7 +38,7 @@ export class TransactionPermissionsDto extends PermissionTypeDto {
   @IsOptional()
   readonly exceptions?: TxTag[];
 
-  public toPermissions(): TransactionPermissions | null {
+  public toTransactionPermissions(): TransactionPermissions | null {
     const { values, type, exceptions } = this;
 
     return {
@@ -48,7 +48,7 @@ export class TransactionPermissionsDto extends PermissionTypeDto {
     };
   }
 
-  constructor(dto: Omit<TransactionPermissionsDto, 'toPermissions'>) {
+  constructor(dto: Omit<TransactionPermissionsDto, 'toTransactionPermissions'>) {
     super();
     Object.assign(this, dto);
   }

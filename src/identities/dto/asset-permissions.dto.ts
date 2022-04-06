@@ -18,7 +18,7 @@ export class AssetPermissionsDto extends PermissionTypeDto {
   @IsTicker({ each: true })
   readonly values: string[];
 
-  public toPermissions(): SectionPermissions<string> | null {
+  public toAssetPermissions(): SectionPermissions<string> | null {
     const { values, type } = this;
 
     return {
@@ -27,7 +27,7 @@ export class AssetPermissionsDto extends PermissionTypeDto {
     };
   }
 
-  constructor(dto: Omit<AssetPermissionsDto, 'toPermissions'>) {
+  constructor(dto: Omit<AssetPermissionsDto, 'toAssetPermissions'>) {
     super();
     Object.assign(this, dto);
   }
