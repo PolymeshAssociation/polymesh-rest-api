@@ -89,11 +89,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.assetsService.findHolders(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findHolders(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -141,11 +141,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
-    const { data, count: total, next } = await this.assetsService.findDocuments(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findDocuments(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(

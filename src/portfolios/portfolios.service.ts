@@ -14,14 +14,14 @@ import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class PortfoliosService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly identitiesService: IdentitiesService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async findAllByOwner(did: string): Promise<[DefaultPortfolio, ...NumberedPortfolio[]]> {
@@ -54,7 +54,7 @@ export class PortfoliosService {
   public async moveAssets(owner: string, params: AssetMovementDto): Promise<QueueResult<void>> {
     const { signer, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const args = {
       to: toPortfolioId(to),
       items: items.map(({ ticker: asset, amount, memo }) => {
@@ -65,7 +65,7 @@ export class PortfoliosService {
         };
       }),
     };
-    return processQueue(fromPortfolio.moveFunds, args, { signer: address });
+    return processQueue(fromPortfolio.moveFunds, args, { signingAccount: address });
   }
 
   public async createPortfolio(
@@ -75,20 +75,20 @@ export class PortfoliosService {
       polymeshService: { polymeshApi },
     } = this;
     const { signer, ...rest } = params;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(polymeshApi.identities.createPortfolio, rest, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(polymeshApi.identities.createPortfolio, rest, { signingAccount: address });
   }
 
   public async deletePortfolio(
     portfolio: PortfolioDto,
     signer: string
   ): Promise<QueueResult<void>> {
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const identity = await this.identitiesService.findOne(portfolio.did);
     return processQueue(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      { signer: address }
+      { signingAccount: address }
     );
   }
 }

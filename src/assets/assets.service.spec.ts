@@ -13,10 +13,9 @@ import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAsset, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -28,19 +27,17 @@ describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSigningService = new MockSigningService();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
-      providers: [AssetsService],
+      imports: [PolymeshModule],
+      providers: [AssetsService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<AssetsService>(AssetsService);
@@ -333,7 +330,7 @@ describe('AssetsService', () => {
           throw expectedError;
         });
 
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+        mockSigningService.getAddressByHandle.mockReturnValue('address');
 
         let error;
         try {
@@ -361,7 +358,7 @@ describe('AssetsService', () => {
         mockPolymeshApi.assets.createAsset.mockResolvedValue(mockQueue);
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
         const result = await service.createAsset(createBody);
         expect(result).toEqual({
           result: mockAsset,
@@ -403,7 +400,7 @@ describe('AssetsService', () => {
       findSpy.mockResolvedValue(mockAsset as any);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const result = await service.issue('TICKER', issueBody);
       expect(result).toEqual({
         result: undefined,
@@ -442,7 +439,7 @@ describe('AssetsService', () => {
         };
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
         const result = await service.registerTicker(registerBody);
         expect(result).toEqual({
           result: undefined,

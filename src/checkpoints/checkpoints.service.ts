@@ -17,13 +17,13 @@ import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint
 import { SignerDto } from '~/common/dto/signer.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class CheckpointsService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly relayerAccountsService: RelayerAccountsService,
+    private readonly signingService: SigningService,
     private readonly logger: PolymeshLogger
   ) {
     this.logger.setContext(CheckpointsService.name);
@@ -85,8 +85,8 @@ export class CheckpointsService {
   ): Promise<QueueResult<Checkpoint>> {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.checkpoints.create, { signer: address }, {});
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
   }
 
   public async createScheduleByTicker(
@@ -95,8 +95,8 @@ export class CheckpointsService {
   ): Promise<QueueResult<CheckpointSchedule>> {
     const { signer, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.checkpoints.schedules.create, rest, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(asset.checkpoints.schedules.create, rest, { signingAccount: address });
   }
 
   public async getAssetBalance(
@@ -124,8 +124,12 @@ export class CheckpointsService {
     id: BigNumber,
     signer: string
   ): Promise<QueueResult<void>> {
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const asset = await this.assetsService.findOne(ticker);
-    return processQueue(asset.checkpoints.schedules.remove, { schedule: id }, { signer: address });
+    return processQueue(
+      asset.checkpoints.schedules.remove,
+      { schedule: id },
+      { signingAccount: address }
+    );
   }
 }
