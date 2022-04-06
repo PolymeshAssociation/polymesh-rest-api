@@ -79,6 +79,7 @@ export class IdentitiesController {
     return createIdentityModel(identity);
   }
 
+  @ApiTags('authorizations')
   @ApiOperation({
     summary: 'Get pending Authorizations received by an Identity',
     description:
@@ -123,6 +124,7 @@ export class IdentitiesController {
     });
   }
 
+  @ApiTags('authorizations')
   @ApiOperation({
     summary: 'Get Authorizations issued by an Identity',
     description: 'This endpoint will provide a list of all the Authorizations added by an Identity',
@@ -172,6 +174,7 @@ export class IdentitiesController {
     });
   }
 
+  @ApiTags('authorizations')
   @ApiOperation({
     summary: 'Get a specific Authorization targeting an Identity',
     description: 'This endpoint will return a specific Authorization targeting an Identity',

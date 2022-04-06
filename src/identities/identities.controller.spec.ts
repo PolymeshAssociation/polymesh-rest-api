@@ -15,7 +15,11 @@ import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';
-import { MockAssetService, MockTickerReservationsService } from '~/test-utils/service-mocks';
+import {
+  MockAssetService,
+  MockAuthorizationsService,
+  MockTickerReservationsService,
+} from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
 describe('IdentitiesController', () => {
@@ -32,11 +36,7 @@ describe('IdentitiesController', () => {
     addSecondaryAccount: jest.fn(),
   };
 
-  const mockAuthorizationsService = {
-    findPendingByDid: jest.fn(),
-    findIssuedByDid: jest.fn(),
-    findOne: jest.fn(),
-  };
+  const mockAuthorizationsService = new MockAuthorizationsService();
 
   const mockClaimsService = {
     findIssuedByDid: jest.fn(),
