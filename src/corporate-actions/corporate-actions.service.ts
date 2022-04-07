@@ -16,13 +16,13 @@ import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { ModifyDistributionCheckpointDto } from '~/corporate-actions/dto/modify-distribution-checkpoint.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class CorporateActionsService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async findDefaultConfigByTicker(ticker: string): Promise<CorporateActionDefaultConfig> {
@@ -36,9 +36,9 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, ...rest } = corporateActionDefaultConfigDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.corporateActions.setDefaultConfig, rest as Required<typeof rest>, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -72,7 +72,7 @@ export class CorporateActionsService {
   ): Promise<QueueResult<DividendDistribution>> {
     const { signer, originPortfolio, ...rest } = dividendDistributionDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
@@ -80,7 +80,7 @@ export class CorporateActionsService {
         ...rest,
       },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }
@@ -91,12 +91,12 @@ export class CorporateActionsService {
     signer: string
   ): Promise<QueueResult<void>> {
     const asset = await this.assetsService.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(
       asset.corporateActions.remove,
       { corporateAction },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }
@@ -108,12 +108,12 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, targets } = payDividendsDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(
       distribution.pay,
       { targets },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }
@@ -125,12 +125,12 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, documents } = linkDocumentsDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
     };
     return processQueue(distribution.linkDocuments, params, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -140,9 +140,9 @@ export class CorporateActionsService {
     signer: string
   ): Promise<QueueResult<void>> {
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(distribution.claim, undefined, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -152,9 +152,9 @@ export class CorporateActionsService {
     signer: string
   ): Promise<QueueResult<void>> {
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(distribution.reclaimFunds, undefined, {
-      signer: address,
+      signingAccount: address,
     });
   }
 
@@ -165,12 +165,12 @@ export class CorporateActionsService {
   ): Promise<QueueResult<void>> {
     const { signer, checkpoint } = modifyDistributionCheckpointDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(
       distribution.modifyCheckpoint,
       { checkpoint },
       {
-        signer: address,
+        signingAccount: address,
       }
     );
   }

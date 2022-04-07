@@ -30,16 +30,15 @@ export class ClaimsService {
     size?: BigNumber,
     start?: BigNumber
   ): Promise<ResultSet<ClaimData>> {
-    const identitiesWithClaims = await this.polymeshService.polymeshApi.claims.getIdentitiesWithClaims(
-      {
+    const identitiesWithClaims =
+      await this.polymeshService.polymeshApi.claims.getIdentitiesWithClaims({
         targets: [target],
         scope,
         claimTypes,
         includeExpired,
         size,
         start,
-      }
-    );
+      });
     return {
       data: identitiesWithClaims.data?.[0].claims || [],
       next: identitiesWithClaims.next,

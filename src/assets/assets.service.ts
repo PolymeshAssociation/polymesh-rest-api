@@ -13,13 +13,13 @@ import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async findOne(ticker: string): Promise<Asset> {
@@ -73,15 +73,15 @@ export class AssetsService {
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const signingAccount = await this.signingService.getAddressByHandle(signer);
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return processQueue(createAsset, rest, { signer: address });
+    return processQueue(createAsset, rest, { signingAccount });
   }
 
   public async issue(ticker: string, params: IssueDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.issuance.issue, rest, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(asset.issuance.issue, rest, { signingAccount: address });
   }
 }

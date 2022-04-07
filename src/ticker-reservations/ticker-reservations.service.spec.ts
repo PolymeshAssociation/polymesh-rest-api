@@ -11,15 +11,14 @@ import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAuthorizationRequest,
   MockPolymesh,
   MockTickerReservation,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -32,20 +31,18 @@ describe('TickerReservationsService', () => {
   let service: TickerReservationsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSigningService = mockSigningProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
-      providers: [TickerReservationsService],
+      imports: [PolymeshModule],
+      providers: [TickerReservationsService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .compile();
 
     polymeshService = module.get<PolymeshService>(PolymeshService);
@@ -143,7 +140,7 @@ describe('TickerReservationsService', () => {
     const signer = '0x6000';
 
     beforeEach(() => {
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error while reserving the ticker', () => {
@@ -209,7 +206,7 @@ describe('TickerReservationsService', () => {
 
     beforeEach(() => {
       mockTickerReservation = new MockTickerReservation();
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error while transferring the ownership of the ticker', () => {
@@ -282,7 +279,7 @@ describe('TickerReservationsService', () => {
 
     beforeEach(() => {
       mockTickerReservation = new MockTickerReservation();
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error while transferring the ownership of the ticker', () => {

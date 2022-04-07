@@ -80,11 +80,11 @@ export class CheckpointsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<CheckpointDetailsModel>> {
-    const { data, count: total, next } = await this.checkpointsService.findAllByTicker(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.checkpointsService.findAllByTicker(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -327,12 +327,11 @@ export class CheckpointsController {
     @Param() { ticker, id }: CheckpointParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.checkpointsService.getHolders(
-      ticker,
-      id,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.checkpointsService.getHolders(ticker, id, size, start?.toString());
     return new PaginatedResultsModel({
       results: data.map(
         ({ identity, balance }) => new IdentityBalanceModel({ identity: identity.did, balance })
