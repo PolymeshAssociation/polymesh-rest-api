@@ -32,7 +32,7 @@ describe('AssetsService', () => {
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSigningService = new MockSigningService();
+    mockSigningService = mockSigningProvider.useValue;
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
       providers: [AssetsService, mockSigningProvider],
@@ -263,7 +263,7 @@ describe('AssetsService', () => {
       mockAsset.documents.set.mockResolvedValue(mockQueue);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const body = {
         signer: 'signer',
@@ -291,7 +291,7 @@ describe('AssetsService', () => {
       });
       expect(mockAsset.documents.set).toHaveBeenCalledWith(
         { documents: body.documents },
-        { signer: 'address' }
+        { signingAccount: address }
       );
       findOneSpy.mockRestore();
     });

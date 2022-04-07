@@ -83,8 +83,8 @@ export class AssetsService {
     } = await this.findOne(ticker);
 
     const { signer, documents } = params;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(set, { documents }, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(set, { documents }, { signingAccount: address });
   }
 
   public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
