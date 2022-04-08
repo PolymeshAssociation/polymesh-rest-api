@@ -27,14 +27,14 @@ import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservati
         POLYMESH_NODE_URL: Joi.required(),
         POLYMESH_MIDDLEWARE_URL: Joi.string(),
         POLYMESH_MIDDLEWARE_API_KEY: Joi.string(),
-        LOCAL_SIGNERS: Joi.string(),
-        LOCAL_MNEMONICS: Joi.string(),
-        VAULT_TOKEN: Joi.string(),
-        VAULT_URL: Joi.string(),
+        LOCAL_SIGNERS: Joi.string().allow(''),
+        LOCAL_MNEMONICS: Joi.string().allow(''),
+        VAULT_TOKEN: Joi.string().allow(''),
+        VAULT_URL: Joi.string().allow(''),
       })
         .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')
         .and('LOCAL_SIGNERS', 'LOCAL_MNEMONICS')
-        .nand('LOCAL_SIGNERS', 'VAULT_TOKEN'),
+        .and('VAULT_TOKEN', 'VAULT_URL'),
     }),
     AssetsModule,
     TickerReservationsModule,
