@@ -181,7 +181,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The Identity whose targeting Authorization is to be fetched',
+    description: 'The DID of the Identity whose targeting Authorization is to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
