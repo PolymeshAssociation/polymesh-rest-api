@@ -65,7 +65,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose details are to be fetched',
+    description: 'The DID of the Identity whose details are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -87,7 +87,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose pending Authorizations are to be fetched',
+    description: 'The DID of the Identity whose pending Authorizations are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -131,7 +131,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose issued Authorizations are to be fetched',
+    description: 'The DID of the Identity whose issued Authorizations are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -209,7 +209,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Assets are to be fetched',
+    description: 'The DID of the Identity whose Assets are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -229,7 +229,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose pending settlement Instructions are to be fetched',
+    description: 'The DID of the Identity whose pending settlement Instructions are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -254,7 +254,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Venues are to be fetched',
+    description: 'The DID of the Identity whose Venues are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -276,7 +276,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose issued Claims are to be fetched',
+    description: 'The DID of the Identity whose issued Claims are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -346,7 +346,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose associated Claims are to be fetched',
+    description: 'The DID of the Identity whose associated Claims are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -469,7 +469,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose reserved tickers are to be fetched',
+    description: 'The DID of the Identity whose reserved tickers are to be fetched',
     type: 'string',
     required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',

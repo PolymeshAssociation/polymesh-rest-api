@@ -207,7 +207,7 @@ describe('AssetsController', () => {
     it('should call the service and return the results', async () => {
       const input = {
         signer: '0x6000',
-        name: 'Berkshire Class A',
+        name: 'Ticker Corp',
         ticker: 'TICKER',
         isDivisible: false,
         assetType: KnownAssetType.EquityCommon,
