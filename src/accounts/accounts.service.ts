@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   Account,
   AccountBalance,
+  ErrorCode,
   ExtrinsicData,
   ResultSet,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
@@ -23,14 +25,38 @@ export class AccountsService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    return polymeshApi.accountManagement.getAccount({ address });
+    try {
+      return await polymeshApi.accountManagement.getAccount({ address });
+    } catch (err: unknown) {
+      if (isPolymeshError(err)) {
+        const { code, message } = err;
+        if (
+          code === ErrorCode.ValidationError &&
+          message.startsWith('The supplied address is not a valid')
+        ) {
+          throw new BadRequestException(`The address "${address}" is not a valid SS58 address`);
+        }
+        if (
+          code === ErrorCode.ValidationError &&
+          message.startsWith('The supplied address is not encoded')
+        ) {
+          throw new BadRequestException(
+            `The address "${address}" is not encoded with the chain's SS58 format "${polymeshApi.network
+              .getSs58Format()
+              .toString()}"`
+          );
+        }
+      }
+
+      throw err;
+    }
   }
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    return polymeshApi.accountManagement.getAccountBalance({ account });
+    return await polymeshApi.accountManagement.getAccountBalance({ account });
   }
 
   public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
