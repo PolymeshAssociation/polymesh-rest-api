@@ -31,7 +31,7 @@
     "@nestjs/swagger": "4.8.0",
     "@polymathnetwork/hashicorp-vault-signing-manager": "^1.1.0",
     "@polymathnetwork/local-signing-manager": "^1.0.5",
-    "@polymathnetwork/polymesh-sdk": "14.0.0-alpha.10",
+    "@polymathnetwork/polymesh-sdk": "14.0.0-alpha.11",
     "@polymathnetwork/signing-manager-types": "^1.0.3",
     "class-transformer": "0.4.0",
     "class-validator": "0.13.1",
