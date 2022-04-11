@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common';
 import {
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -14,6 +15,7 @@ import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { MiddlewareInterceptor } from '~/common/interceptors/middleware.interceptor';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -67,7 +69,8 @@ export class AccountsController {
 
   @ApiOperation({
     summary: 'Get transaction history of an Account',
-    description: 'This endpoint provides a list of transactions signed by the given Account',
+    description:
+      'This endpoint provides a list of transactions signed by the given Account. This requires Polymesh GraphQL Middleware Service',
   })
   @ApiParam({
     name: 'account',
@@ -79,6 +82,10 @@ export class AccountsController {
     description: 'List of transactions signed by the given Account',
     paginated: true,
   })
+  @ApiForbiddenResponse({
+    description: 'Middleware connection details are not provided',
+  })
+  @UseInterceptors(MiddlewareInterceptor)
   @Get(':account/transactions')
   async getTransactionHistory(
     @Param() { account }: AccountParamsDto,
