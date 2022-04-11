@@ -56,7 +56,7 @@ export class AccountsService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    return await polymeshApi.accountManagement.getAccountBalance({ account });
+    return polymeshApi.accountManagement.getAccountBalance({ account });
   }
 
   public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
@@ -83,6 +83,6 @@ export class AccountsService {
       orderBy = { field, order };
     }
 
-    return await account.getTransactionHistory({ ...rest, ...orderBy });
+    return account.getTransactionHistory({ ...rest, ...orderBy });
   }
 }
