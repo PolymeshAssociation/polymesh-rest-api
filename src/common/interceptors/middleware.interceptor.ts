@@ -11,10 +11,10 @@ import { Observable } from 'rxjs';
 export class MiddlewareInterceptor implements NestInterceptor {
   /**
    * Intercept method, checks if API is initialized with Polymesh GraphQL Middleware Service or not
-   * @param context details about the current request
+   * @param _context details about the current request
    * @param next implements the handle method that returns an Observable
    */
-  public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  public intercept(_context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const { POLYMESH_MIDDLEWARE_URL, POLYMESH_MIDDLEWARE_API_KEY } = process.env;
 
     if (!POLYMESH_MIDDLEWARE_URL || !POLYMESH_MIDDLEWARE_API_KEY) {
