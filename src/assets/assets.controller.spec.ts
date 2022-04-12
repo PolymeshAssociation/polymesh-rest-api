@@ -9,6 +9,7 @@ import {
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockAsset } from '~/test-utils/mocks';
@@ -64,7 +65,7 @@ describe('AssetsController', () => {
 
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const result = await controller.getDetails({ ticker: 'SOME_TICKER' });
+      const result = await controller.getDetails({ ticker: 'TICKER' });
 
       const mockResult = {
         ...mockAssetDetails,
@@ -91,10 +92,7 @@ describe('AssetsController', () => {
     it('should return the list of Asset holders', async () => {
       mockAssetsService.findHolders.mockResolvedValue(mockHolders);
 
-      const result = await controller.getHolders(
-        { ticker: 'SOME_TICKER' },
-        { size: new BigNumber(1) }
-      );
+      const result = await controller.getHolders({ ticker: 'TICKER' }, { size: new BigNumber(1) });
       const expectedResults = mockHolders.data.map(holder => {
         return { identity: holder.identity.did, balance: holder.balance };
       });
@@ -112,7 +110,7 @@ describe('AssetsController', () => {
       mockAssetsService.findHolders.mockResolvedValue(mockHolders);
 
       const result = await controller.getHolders(
-        { ticker: 'SOME_TICKER' },
+        { ticker: 'TICKER' },
         { size: new BigNumber(1), start: 'SOME_START_KEY' }
       );
 
@@ -147,7 +145,7 @@ describe('AssetsController', () => {
       mockAssetsService.findDocuments.mockResolvedValue(mockDocuments);
 
       const result = await controller.getDocuments(
-        { ticker: 'SOME_TICKER' },
+        { ticker: 'TICKER' },
         { size: new BigNumber(1) }
       );
 
@@ -164,7 +162,7 @@ describe('AssetsController', () => {
       mockAssetsService.findDocuments.mockResolvedValue(mockDocuments);
 
       const result = await controller.getDocuments(
-        { ticker: 'SOME_TICKER' },
+        { ticker: 'TICKER' },
         { size: new BigNumber(1), start: 'SOME_START_KEY' }
       );
 
@@ -175,6 +173,28 @@ describe('AssetsController', () => {
           next: mockDocuments.next,
         })
       );
+    });
+  });
+
+  describe('setDocuments', () => {
+    it('should call the service and return the results', async () => {
+      const transactions = ['transaction'];
+      const body = {
+        signer: '0x6000',
+        documents: [
+          new AssetDocumentDto({
+            name: 'TEST-DOC',
+            uri: 'URI',
+            contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
+          }),
+        ],
+      };
+      const ticker = 'TICKER';
+      mockAssetsService.setDocuments.mockResolvedValue({ transactions });
+
+      const result = await controller.setDocuments({ ticker }, body);
+      expect(result).toEqual({ transactions });
+      expect(mockAssetsService.setDocuments).toHaveBeenCalledWith(ticker, body);
     });
   });
 
@@ -190,7 +210,7 @@ describe('AssetsController', () => {
       ];
       mockComplianceService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
 
-      const result = await controller.getTrustedClaimIssuers({ ticker: 'SOME_TICKER' });
+      const result = await controller.getTrustedClaimIssuers({ ticker: 'TICKER' });
 
       expect(result).toEqual({
         results: [

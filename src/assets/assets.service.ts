@@ -11,6 +11,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
+import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
@@ -69,6 +70,19 @@ export class AssetsService {
   ): Promise<ResultSet<AssetDocument>> {
     const asset = await this.findOne(ticker);
     return asset.documents.get({ size, start });
+  }
+
+  public async setDocuments(
+    ticker: string,
+    params: SetAssetDocumentsDto
+  ): Promise<QueueResult<Asset>> {
+    const {
+      documents: { set },
+    } = await this.findOne(ticker);
+
+    const { signer, documents } = params;
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(set, { documents }, { signingAccount: address });
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
