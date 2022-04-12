@@ -53,7 +53,7 @@ describe('ComplianceController', () => {
       const mockComplianceRequirements = new MockComplianceRequirements();
       mockService.findComplianceRequirements.mockResolvedValue(mockComplianceRequirements);
 
-      const result = await controller.getComplianceRequirements({ ticker: 'SOME_TICKER' });
+      const result = await controller.getComplianceRequirements({ ticker: 'TICKER' });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(result).toEqual(mockComplianceRequirements as ComplianceRequirementsModel);

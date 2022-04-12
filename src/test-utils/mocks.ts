@@ -65,6 +65,7 @@ export class MockAsset {
 
   public documents = {
     get: jest.fn(),
+    set: jest.fn(),
   };
 
   public settlements = {

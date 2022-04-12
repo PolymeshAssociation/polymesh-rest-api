@@ -75,6 +75,7 @@ export async function processQueue<MethodArgs, ReturnType>(
     if (isPolymeshError(err)) {
       const { message, code } = err;
       switch (code) {
+        case ErrorCode.NoDataChange:
         case ErrorCode.ValidationError:
           throw new BadRequestException(message);
         case ErrorCode.InsufficientBalance:
