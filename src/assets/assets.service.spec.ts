@@ -2,7 +2,7 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { GoneException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, KnownAssetType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
@@ -297,83 +297,11 @@ describe('AssetsService', () => {
     });
   });
 
-  describe('findTickerReservation', () => {
-    describe('if the reservation does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          message: 'There is no reservation for',
-          code: ErrorCode.UnmetPrerequisite,
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findTickerReservation('BRK.A');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
-    });
-    describe('if the asset has already been created', () => {
-      it('should throw a GoneException', async () => {
-        const mockError = {
-          code: ErrorCode.UnmetPrerequisite,
-          message: 'BRK.A Asset has been created',
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findTickerReservation('BRK.A');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(GoneException);
-      });
-    });
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('Something else');
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw expectedError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-        let error;
-        try {
-          await service.findTickerReservation('BRK.A');
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBe(expectedError);
-      });
-    });
-    describe('otherwise', () => {
-      it('should return the reservation', async () => {
-        const mockTickerReservation = {
-          ticker: 'BRK.A',
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockResolvedValue(mockTickerReservation);
-        const result = await service.findTickerReservation('BRK.A');
-        expect(result).toEqual(mockTickerReservation);
-      });
-    });
-  });
   describe('createAsset', () => {
     const createBody = {
       signer: '0x6000',
-      name: 'Berkshire Class A',
-      ticker: 'BRK.A',
+      name: 'Ticker Corp',
+      ticker: 'TICKER',
       isDivisible: false,
       assetType: KnownAssetType.EquityCommon,
       requireInvestorUniqueness: false,
@@ -471,45 +399,6 @@ describe('AssetsService', () => {
         ],
       });
       findSpy.mockRestore();
-    });
-  });
-
-  describe('registerTicker', () => {
-    describe('otherwise', () => {
-      it('should register the ticker', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.asset.RegisterTicker,
-          },
-        ];
-
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.assets.reserveTicker.mockResolvedValue(mockQueue);
-
-        const registerBody = {
-          signer: '0x6000',
-          ticker: 'BRK.A',
-        };
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-        const result = await service.registerTicker(registerBody);
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.asset.RegisterTicker,
-              type: TransactionType.Single,
-            },
-          ],
-        });
-      });
     });
   });
 });

@@ -90,7 +90,7 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     const address = await this.signingService.getAddressByHandle(signer);
-
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(instruction.affirm, { signingAccount: address }, {});
   }
 
@@ -103,7 +103,7 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     const address = await this.signingService.getAddressByHandle(signer);
-
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(instruction.reject, { signingAccount: address }, {});
   }
 

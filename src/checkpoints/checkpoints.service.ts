@@ -86,6 +86,7 @@ export class CheckpointsService {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
   }
 

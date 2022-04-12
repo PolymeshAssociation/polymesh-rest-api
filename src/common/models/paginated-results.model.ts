@@ -19,6 +19,7 @@ export class PaginatedResultsModel<DataType> extends ResultsModel<DataType> {
     type: 'string',
     description:
       'Offset start value for the next set of paginated data (null means there is no more data to fetch)',
+    nullable: true,
   })
   @FromBigNumber()
   readonly next: string | BigNumber | null;

@@ -5,31 +5,31 @@ import { PermissionsLike, TxGroup } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, ValidateNested } from 'class-validator';
 
-import { AssetSectionPermissionDto } from '~/identities/dto/asset-section-permission.dto';
-import { PortfolioSectionPermissionDto } from '~/identities/dto/portfolio-section-permission.dto';
+import { AssetPermissionsDto } from '~/identities/dto/asset-permissions.dto';
+import { PortfolioPermissionsDto } from '~/identities/dto/portfolio-permissions.dto';
 import { TransactionPermissionsDto } from '~/identities/dto/transaction-permissions.dto';
 
 export class PermissionsLikeDto {
   @ApiPropertyOptional({
     description: 'Assets on which to grant permissions. A null value represents full permissions',
-    type: AssetSectionPermissionDto,
+    type: AssetPermissionsDto,
     nullable: true,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => AssetSectionPermissionDto)
-  readonly assets?: AssetSectionPermissionDto | null;
+  @Type(() => AssetPermissionsDto)
+  readonly assets?: AssetPermissionsDto | null;
 
   @ApiPropertyOptional({
     description:
       'Portfolios on which to grant permissions. A null value represents full permissions',
-    type: PortfolioSectionPermissionDto,
+    type: PortfolioPermissionsDto,
     nullable: true,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => PortfolioSectionPermissionDto)
-  readonly portfolios?: PortfolioSectionPermissionDto | null;
+  @Type(() => PortfolioPermissionsDto)
+  readonly portfolios?: PortfolioPermissionsDto | null;
 
   @ApiPropertyOptional({
     description:
@@ -58,8 +58,8 @@ export class PermissionsLikeDto {
     const { assets, portfolios, transactions, transactionGroups } = this;
 
     let permissionsLike: PermissionsLike = {
-      assets: assets === null ? null : assets?.toSectionPermissions(),
-      portfolios: portfolios === null ? null : portfolios?.toSectionPermissions(),
+      assets: assets === null ? null : assets?.toAssetPermissions(),
+      portfolios: portfolios === null ? null : portfolios?.toPortfolioPermissions(),
     };
 
     if (transactions === null) {

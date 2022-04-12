@@ -28,6 +28,7 @@ export class MockPolymesh {
     reserveTicker: jest.fn(),
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
+    getTickerReservations: jest.fn(),
   };
 
   public accountManagement = {
@@ -222,4 +223,12 @@ export class MockOffering {
   id = new BigNumber(1);
   ticker = 'TICKER';
   public getInvestments = jest.fn();
+}
+
+export class MockTickerReservation {
+  ticker = 'TICKER';
+
+  public transferOwnership = jest.fn();
+  public extend = jest.fn();
+  public details = jest.fn();
 }

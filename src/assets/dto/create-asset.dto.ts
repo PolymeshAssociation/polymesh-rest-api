@@ -15,14 +15,14 @@ import { SignerDto } from '~/common/dto/signer.dto';
 export class CreateAssetDto extends SignerDto {
   @ApiProperty({
     description: 'The name of the Asset',
-    example: 'Berkshire Hathaway Inc. Class A',
+    example: 'Ticker Corp',
   })
   @IsString()
   readonly name: string;
 
   @ApiProperty({
     description: 'The ticker of the Asset. This must already be reserved by the Signer',
-    example: 'BRK.A',
+    example: 'TICKER',
   })
   @IsTicker()
   readonly ticker: string;

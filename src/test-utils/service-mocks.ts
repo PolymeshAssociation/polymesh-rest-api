@@ -20,6 +20,14 @@ export class MockSigningService {
   public getAddressByHandle = jest.fn();
 }
 
+export class MockTickerReservationsService {
+  findOne = jest.fn();
+  reserve = jest.fn();
+  transferOwnership = jest.fn();
+  extend = jest.fn();
+  findAllByOwner = jest.fn();
+}
+
 export class MockAuthorizationsService {
   findPendingByDid = jest.fn();
   findIssuedByDid = jest.fn();
@@ -27,6 +35,7 @@ export class MockAuthorizationsService {
   accept = jest.fn();
   reject = jest.fn();
 }
+
 export class MockAccountsService {
   getAccountBalance = jest.fn();
   transferPolyx = jest.fn();
