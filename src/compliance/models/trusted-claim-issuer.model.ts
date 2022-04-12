@@ -16,6 +16,7 @@ export class TrustedClaimIssuerModel {
     enum: ClaimType,
     isArray: true,
     example: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+    nullable: true,
   })
   readonly trustedFor: ClaimType[] | null;
 

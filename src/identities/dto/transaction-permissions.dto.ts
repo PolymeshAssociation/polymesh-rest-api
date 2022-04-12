@@ -48,7 +48,7 @@ export class TransactionPermissionsDto extends PermissionTypeDto {
     };
   }
 
-  constructor(dto: Omit<TransactionPermissionsDto, 'toSectionPermissions'>) {
+  constructor(dto: Omit<TransactionPermissionsDto, 'toTransactionPermissions'>) {
     super();
     Object.assign(this, dto);
   }

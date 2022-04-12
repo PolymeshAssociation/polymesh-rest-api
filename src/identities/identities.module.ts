@@ -12,6 +12,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
 import { SigningModule } from '~/signing/signing.module';
+import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SigningModule } from '~/signing/signing.module';
     forwardRef(() => AuthorizationsModule),
     forwardRef(() => PortfoliosModule),
     ClaimsModule,
+    TickerReservationsModule,
   ],
   controllers: [IdentitiesController],
   providers: [IdentitiesService],
