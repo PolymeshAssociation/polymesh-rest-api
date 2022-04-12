@@ -25,10 +25,10 @@ describe('AuthorizationsService', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
   };
-  let mockRelayerAccountsService: MockSigningService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
-    mockRelayerAccountsService = new MockSigningService();
+    mockSigningService = mockSigningProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [AuthorizationsService, IdentitiesService, mockSigningProvider],
@@ -192,7 +192,7 @@ describe('AuthorizationsService', () => {
 
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockRelayerAccountsService.getAddressByHandle.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
@@ -253,7 +253,7 @@ describe('AuthorizationsService', () => {
 
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockRelayerAccountsService.getAddressByHandle.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error', () => {

@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 
+import { ApiExtraModels } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
@@ -8,6 +9,7 @@ import { TransactionIdentifierModel } from '~/common/models/transaction-identifi
 import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionType } from '~/common/types';
 
+@ApiExtraModels(TransactionModel, BatchTransactionModel)
 export class TransactionQueueModel {
   @ApiPropertyOneOf({
     description: 'List of transactions',

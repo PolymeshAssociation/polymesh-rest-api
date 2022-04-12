@@ -3,6 +3,7 @@ export class MockAssetService {
   findOne = jest.fn();
   findHolders = jest.fn();
   findDocuments = jest.fn();
+  setDocuments = jest.fn();
   findAllByOwner = jest.fn();
   registerTicker = jest.fn();
   createAsset = jest.fn();

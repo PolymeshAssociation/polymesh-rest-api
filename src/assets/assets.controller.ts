@@ -16,6 +16,7 @@ import { createAssetDetailsModel } from '~/assets/assets.util';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
+import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -161,6 +162,35 @@ export class AssetsController {
       total,
       next,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Set a list of Documents for an Asset',
+    description:
+      'This endpoint assigns a new list of Documents to the Asset by replacing the existing list of Documents with the ones passed in the body',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose documents are to be updated',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+  })
+  @ApiNotFoundResponse({
+    description: 'Asset was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'The supplied Document list is equal to the current one',
+  })
+  @Post(':ticker/set-documents')
+  public async setDocuments(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() setAssetDocumentsDto: SetAssetDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiOperation({
