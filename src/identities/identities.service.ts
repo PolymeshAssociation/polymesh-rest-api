@@ -20,7 +20,7 @@ export class IdentitiesService {
     private readonly logger: PolymeshLogger,
     private readonly relayerAccountsService: RelayerAccountsService
   ) {
-    this.logger.setContext(IdentitiesService.name);
+    logger.setContext(IdentitiesService.name);
   }
 
   /**

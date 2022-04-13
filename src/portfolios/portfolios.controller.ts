@@ -29,7 +29,9 @@ export class PortfoliosController {
   constructor(
     private readonly portfoliosService: PortfoliosService,
     private logger: PolymeshLogger
-  ) {}
+  ) {
+    logger.setContext(PortfoliosService.name);
+  }
 
   @ApiOperation({
     summary: 'Get all Portfolios of an Identity',

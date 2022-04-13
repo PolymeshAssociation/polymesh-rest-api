@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
+import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
 
 export class CreatedDividendDistributionModel extends TransactionQueueModel {
   @ApiProperty({

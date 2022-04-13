@@ -24,5 +24,10 @@
     "/// TODO @\\w+/", // ignore github handles in TODOs
     "/0x.+/" // ignore hex values
   ],
-  "cSpell.words": ["Isin", "metatype", "POLYX"]
+  "cSpell.words": [
+    "Isin",
+    "metatype",
+    "POLYX",
+    "serdes"
+  ]
 }

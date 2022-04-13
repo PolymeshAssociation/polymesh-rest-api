@@ -28,7 +28,7 @@ import { AuthorizationRequestModel } from '~/authorizations/models/authorization
 import { GeneratedAuthorizationRequestModel } from '~/authorizations/models/generated-authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
-import { ClaimModel } from '~/claims/model/claim.model';
+import { ClaimModel } from '~/claims/models/claim.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
@@ -53,7 +53,7 @@ export class IdentitiesController {
     private readonly claimsService: ClaimsService,
     private readonly logger: PolymeshLogger
   ) {
-    this.logger.setContext(IdentitiesController.name);
+    logger.setContext(IdentitiesController.name);
   }
 
   @Get(':did')

@@ -11,7 +11,7 @@ import {
 import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
-import { LegModel } from '~/settlements/model/leg.model';
+import { LegModel } from '~/settlements/models/leg.model';
 
 export class InstructionModel {
   @ApiProperty({

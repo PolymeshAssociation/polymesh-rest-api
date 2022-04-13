@@ -27,12 +27,12 @@ import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distri
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { ModifyDistributionCheckpointDto } from '~/corporate-actions/dto/modify-distribution-checkpoint.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
-import { CorporateActionDefaultConfigModel } from '~/corporate-actions/model/corporate-action-default-config.model';
-import { CorporateActionTargetsModel } from '~/corporate-actions/model/corporate-action-targets.model';
-import { CreatedDividendDistributionModel } from '~/corporate-actions/model/created-dividend-distribution.model';
-import { DividendDistributionDetailsModel } from '~/corporate-actions/model/dividend-distribution-details.model';
-import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
-import { TaxWithholdingModel } from '~/corporate-actions/model/tax-withholding.model';
+import { CorporateActionDefaultConfigModel } from '~/corporate-actions/models/corporate-action-default-config.model';
+import { CorporateActionTargetsModel } from '~/corporate-actions/models/corporate-action-targets.model';
+import { CreatedDividendDistributionModel } from '~/corporate-actions/models/created-dividend-distribution.model';
+import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
+import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
+import { TaxWithholdingModel } from '~/corporate-actions/models/tax-withholding.model';
 
 class DividendDistributionParamsDto extends IdParamsDto {
   @IsTicker()

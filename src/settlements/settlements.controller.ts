@@ -19,12 +19,12 @@ import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
-import { CreatedInstructionModel } from '~/settlements/model/created-instruction.model';
-import { CreatedVenueModel } from '~/settlements/model/created-venue.model';
-import { InstructionAffirmationModel } from '~/settlements/model/instruction-affirmation.model';
-import { InstructionModel } from '~/settlements/model/instruction.model';
-import { TransferBreakdownModel } from '~/settlements/model/transfer-breakdown.model';
-import { VenueDetailsModel } from '~/settlements/model/venue-details.model';
+import { CreatedInstructionModel } from '~/settlements/models/created-instruction.model';
+import { CreatedVenueModel } from '~/settlements/models/created-venue.model';
+import { InstructionAffirmationModel } from '~/settlements/models/instruction-affirmation.model';
+import { InstructionModel } from '~/settlements/models/instruction.model';
+import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
+import { VenueDetailsModel } from '~/settlements/models/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
 

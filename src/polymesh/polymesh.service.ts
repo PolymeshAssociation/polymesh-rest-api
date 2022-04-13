@@ -3,18 +3,24 @@ import { Polymesh } from '@polymathnetwork/polymesh-sdk';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { ScheduleService } from '~/schedule/schedule.service';
 
 @Injectable()
 export class PolymeshService {
-  private heartbeatInterval: NodeJS.Timeout;
+  private heartbeatIntervalId = 'polymeshHeartbeat';
 
   constructor(
     @Inject(POLYMESH_API) public readonly polymeshApi: Polymesh,
+    private readonly scheduleService: ScheduleService,
     relayerAccountsService: RelayerAccountsService
   ) {
-    this.heartbeatInterval = setInterval(() => {
-      polymeshApi.network.getLatestBlock();
-    }, 10000);
+    scheduleService.addInterval(
+      this.heartbeatIntervalId,
+      async () => {
+        await polymeshApi.network.getLatestBlock();
+      },
+      10000
+    );
 
     const accounts = relayerAccountsService.findAll();
 
@@ -28,7 +34,8 @@ export class PolymeshService {
 
   /* istanbul ignore next: not worth the trouble */
   public close(): Promise<void> {
-    clearInterval(this.heartbeatInterval);
-    return this.polymeshApi.disconnect();
+    const { polymeshApi, scheduleService, heartbeatIntervalId } = this;
+    scheduleService.deleteInterval(heartbeatIntervalId);
+    return polymeshApi.disconnect();
   }
 }

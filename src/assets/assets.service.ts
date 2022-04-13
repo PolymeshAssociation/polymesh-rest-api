@@ -14,13 +14,18 @@ import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { ReserveTickerDto as RegisterTickerDto } from '~/assets/dto/reserve-ticker.dto';
 import { processQueue, QueueResult } from '~/common/utils';
+import { TransactionUpdatePayload } from '~/events/types';
+import { NotificationPayload } from '~/notifications/types';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { TransactionsService } from '~/transactions/transactions.service';
+import { Transaction } from '~/transactions/types';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
+    private readonly transactionsService: TransactionsService,
     private readonly relayerAccountsService: RelayerAccountsService
   ) {}
 
@@ -78,6 +83,19 @@ export class AssetsService {
     const address = this.relayerAccountsService.findAddressByDid(signer);
     const reserveTicker = this.polymeshService.polymeshApi.assets.reserveTicker;
     return processQueue(reserveTicker, rest, { signer: address });
+  }
+
+  public async registerTickerSub(
+    params: RegisterTickerDto & { webhookUrl: string }
+  ): Promise<NotificationPayload<TransactionUpdatePayload>> {
+    const { signer, webhookUrl, ...rest } = params;
+    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const reserveTicker = this.polymeshService.polymeshApi.assets.reserveTicker;
+    const {
+      transactions: [transaction],
+    } = await reserveTicker(rest, { signer: address });
+
+    return this.transactionsService.submitAndSubscribe(transaction as Transaction, webhookUrl);
   }
 
   public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
