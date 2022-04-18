@@ -8,7 +8,7 @@ import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { PermissionTypeDto } from '~/identities/dto/permission-type.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
-export class PortfolioSectionPermissionDto extends PermissionTypeDto {
+export class PortfolioPermissionsDto extends PermissionTypeDto {
   @ApiProperty({
     description: 'List of Portfolios to be included or excluded in the permissions',
     isArray: true,
@@ -20,7 +20,7 @@ export class PortfolioSectionPermissionDto extends PermissionTypeDto {
   @Type(() => PortfolioDto)
   readonly values: PortfolioDto[];
 
-  public toSectionPermissions(): SectionPermissions<PortfolioLike> | null {
+  public toPortfolioPermissions(): SectionPermissions<PortfolioLike> | null {
     const { values, type } = this;
 
     return {
@@ -29,7 +29,7 @@ export class PortfolioSectionPermissionDto extends PermissionTypeDto {
     };
   }
 
-  constructor(dto: Omit<PortfolioSectionPermissionDto, 'toSectionPermissions'>) {
+  constructor(dto: Omit<PortfolioPermissionsDto, 'toPortfolioPermissions'>) {
     super();
     Object.assign(this, dto);
   }

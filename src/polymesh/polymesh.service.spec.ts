@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
 import { ScheduleService } from '~/schedule/schedule.service';
 import { MockPolymesh } from '~/test-utils/mocks';
 import { MockScheduleService } from '~/test-utils/service-mocks';
@@ -20,7 +19,6 @@ describe('PolymeshService', () => {
     mockScheduleService.addInterval.mockImplementation((_, cb) => cb());
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [RelayerAccountsModule],
       providers: [
         PolymeshService,
         { provide: POLYMESH_API, useValue: mockPolymeshApi },

@@ -5,10 +5,10 @@ import { Module } from '@nestjs/common';
 import { AssetsModule } from '~/assets/assets.module';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { SigningModule } from '~/signing/signing.module';
 
 @Module({
-  imports: [AssetsModule, RelayerAccountsModule],
+  imports: [AssetsModule, SigningModule],
   controllers: [CorporateActionsController],
   providers: [CorporateActionsService],
 })

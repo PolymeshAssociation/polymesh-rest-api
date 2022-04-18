@@ -15,7 +15,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
-import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
+import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -89,11 +89,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.assetsService.findHolders(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findHolders(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -130,7 +130,7 @@ export class AssetsController {
     description: 'Start key from which documents are to be fetched',
     type: 'string',
     required: false,
-    example: 'STARTKEY',
+    example: 'START_KEY',
   })
   @ApiArrayResponse(AssetDocumentModel, {
     description: 'List of documents attached to the Asset',
@@ -141,11 +141,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
-    const { data, count: total, next } = await this.assetsService.findDocuments(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findDocuments(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -161,6 +161,35 @@ export class AssetsController {
       total,
       next,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Set a list of Documents for an Asset',
+    description:
+      'This endpoint assigns a new list of Documents to the Asset by replacing the existing list of Documents with the ones passed in the body',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose documents are to be updated',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+  })
+  @ApiNotFoundResponse({
+    description: 'Asset was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'The supplied Document list is equal to the current one',
+  })
+  @Post(':ticker/set-documents')
+  public async setDocuments(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() setAssetDocumentsDto: SetAssetDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiOperation({
@@ -210,23 +239,6 @@ export class AssetsController {
     @Body() params: IssueDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.issue(ticker, params);
-    return new TransactionQueueModel({ transactions });
-  }
-
-  @ApiOperation({
-    summary: 'Reserve a Ticker',
-    description: 'Reserves a ticker so that an Asset can be created with it later',
-  })
-  @ApiCreatedResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiBadRequestResponse({
-    description: 'The ticker has already been reserved',
-  })
-  @Post('/reservations/tickers')
-  public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
-    const { transactions } = await this.assetsService.registerTicker(params);
     return new TransactionQueueModel({ transactions });
   }
 

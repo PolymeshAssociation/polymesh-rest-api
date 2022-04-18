@@ -25,9 +25,15 @@
     "/0x.+/" // ignore hex values
   ],
   "cSpell.words": [
+    "Custodied",
+    "Hashicorp",
     "Isin",
     "metatype",
+    "nand",
+    "polymathnetwork",
+    "Polymesh",
     "POLYX",
-    "serdes"
+    "serdes",
+    "unsub"
   ]
 }

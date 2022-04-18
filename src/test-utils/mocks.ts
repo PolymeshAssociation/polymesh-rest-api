@@ -21,7 +21,7 @@ export class MockPolymesh {
   public static create = jest.fn().mockResolvedValue(new MockPolymesh());
 
   public disconnect = jest.fn();
-  public addSigner = jest.fn();
+  public setSigningManager = jest.fn();
 
   public network = {
     getLatestBlock: jest.fn(),
@@ -34,6 +34,7 @@ export class MockPolymesh {
     reserveTicker: jest.fn(),
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
+    getTickerReservations: jest.fn(),
   };
 
   public accountManagement = {
@@ -69,6 +70,7 @@ export class MockAsset {
 
   public documents = {
     get: jest.fn(),
+    set: jest.fn(),
   };
 
   public settlements = {
@@ -252,4 +254,12 @@ export class MockOffering {
   id = new BigNumber(1);
   ticker = 'TICKER';
   public getInvestments = jest.fn();
+}
+
+export class MockTickerReservation {
+  ticker = 'TICKER';
+
+  public transferOwnership = jest.fn();
+  public extend = jest.fn();
+  public details = jest.fn();
 }

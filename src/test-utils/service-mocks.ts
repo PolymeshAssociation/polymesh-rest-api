@@ -3,6 +3,7 @@ export class MockAssetService {
   findOne = jest.fn();
   findHolders = jest.fn();
   findDocuments = jest.fn();
+  setDocuments = jest.fn();
   findAllByOwner = jest.fn();
   registerTicker = jest.fn();
   createAsset = jest.fn();
@@ -15,10 +16,16 @@ export class MockComplianceService {
   findTrustedClaimIssuers = jest.fn();
 }
 
-export class MockRelayerAccountsService {
-  public findAddressByDid = jest.fn();
+export class MockSigningService {
+  public getAddressByHandle = jest.fn();
+}
 
-  public findAll = jest.fn().mockReturnValue([]);
+export class MockTickerReservationsService {
+  findOne = jest.fn();
+  reserve = jest.fn();
+  transferOwnership = jest.fn();
+  extend = jest.fn();
+  findAllByOwner = jest.fn();
 }
 
 export class MockAuthorizationsService {
@@ -28,6 +35,7 @@ export class MockAuthorizationsService {
   accept = jest.fn();
   reject = jest.fn();
 }
+
 export class MockAccountsService {
   getAccountBalance = jest.fn();
   transferPolyx = jest.fn();

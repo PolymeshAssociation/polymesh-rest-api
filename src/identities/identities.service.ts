@@ -11,14 +11,14 @@ import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {
     logger.setContext(IdentitiesService.name);
   }
@@ -56,13 +56,13 @@ export class IdentitiesService {
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): Promise<QueueResult<AuthorizationRequest>> {
     const { signer, expiry, permissions, secondaryAccount } = addSecondaryAccountParamsDto;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
     const params = {
       targetAccount: secondaryAccount,
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
     const inviteAccount = this.polymeshService.polymeshApi.accountManagement.inviteAccount;
-    return processQueue(inviteAccount, params, { signer: address });
+    return processQueue(inviteAccount, params, { signingAccount: address });
   }
 }

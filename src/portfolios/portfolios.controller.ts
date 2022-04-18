@@ -39,7 +39,7 @@ export class PortfoliosController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Portfolios are to be fetched',
+    description: 'The DID of the Identity whose Portfolios are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })

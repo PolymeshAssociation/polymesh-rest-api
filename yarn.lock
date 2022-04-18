@@ -826,7 +826,7 @@
     cron "1.8.2"
     uuid "8.3.2"
 
-"@nestjs/schematics@8.0.10", "@nestjs/schematics@^8.0.3":
+"@nestjs/schematics@^8.0.10", "@nestjs/schematics@^8.0.3":
   version "8.0.10"
   resolved "https://registry.yarnpkg.com/@nestjs/schematics/-/schematics-8.0.10.tgz#4f951ea1ac94721ba6a6ccfae6461f8b22949573"
   integrity sha512-gQq/8TYjtgum+5+QuPfHHKgKxDgNLGh8mH+EJ1skOKX+GTxgt5jmg1GFmwEfiOXZUcF9thT6GsOVNKWrdO3YMg==
@@ -1084,14 +1084,32 @@
     "@types/websocket" "^1.0.3"
     websocket "^1.0.34"
 
-"@polymathnetwork/polymesh-sdk@13.0.0-alpha.31":
-  version "13.0.0-alpha.31"
-  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-13.0.0-alpha.31.tgz#b33e4fc0e3c5cd4b4a2b709cbdb38a333163df23"
-  integrity sha512-AOjAWe7wAXWjI/aRIDyT7pCS++96zabgier90UT1MjhP1CgadGbbiqOHvWjLW3NiZP3iL3ZSnDeaX+yi/5c9aw==
+"@polymathnetwork/hashicorp-vault-signing-manager@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/hashicorp-vault-signing-manager/-/hashicorp-vault-signing-manager-1.1.0.tgz#552d673197f676dd1b5a5dc0f2edd260d8d137ff"
+  integrity sha512-Xf6eSros80bRYq7+pDxrE2K8MMguDNGn//TagQicrPr64SoymGo9c5T3KNf/85iQwDGbcCIKo4KCkbV/zCZeag==
+  dependencies:
+    "@polkadot/util" "^7.0.2"
+    "@polkadot/util-crypto" "^7.0.2"
+    "@polymathnetwork/signing-manager-types" "^1.0.3"
+    cross-fetch "^3.1.5"
+    lodash "^4.17.21"
+
+"@polymathnetwork/local-signing-manager@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/local-signing-manager/-/local-signing-manager-1.0.5.tgz#6d1878f78279266802bd7f418b62940b4b38a1f8"
+  integrity sha512-FatnaQ2neVReqaE/VaPbdwSKbMXVFhRoOVfGp2f0cIrpctg920JU55ggh5sqhj59I2v3aRsla5e+H468nYizWA==
+  dependencies:
+    "@polymathnetwork/signing-manager-types" "^1.0.3"
+
+"@polymathnetwork/polymesh-sdk@14.0.0-alpha.4":
+  version "14.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-14.0.0-alpha.4.tgz#ac13eac4e1d53c504e083ce3ceeb335835536a4d"
+  integrity sha512-xY4+FbrlP5/Ij3sTcgH26bQUKp4eAKBMrr6J8LLcsb7Y7EcjRWgE4HSb4EPCwQ7XR9QQiPcAG+K/aw74IuJqpA==
   dependencies:
     "@polkadot/api" "5.1.1"
-    "@polkadot/util" "7.0.2"
-    "@polkadot/util-crypto" "7.0.2"
+    "@polkadot/util" "^7.0.2"
+    "@polkadot/util-crypto" "^7.0.2"
     apollo-cache-inmemory "^1.6.6"
     apollo-client "^2.6.10"
     apollo-link "^1.2.14"
@@ -1111,6 +1129,11 @@
     lodash "^4.17.15"
     semver "^7.3.5"
     websocket-as-promised "^2.0.1"
+
+"@polymathnetwork/signing-manager-types@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/signing-manager-types/-/signing-manager-types-1.0.3.tgz#80f8696c34e6e1a6a570e2d25ae967b614f5822a"
+  integrity sha512-4o0gxlvDAgS08MlnAkxqJJ6B9CGTj47/rhjUdPoH1GJ1AbnLAX3TCoZvr/qgBZe+7SLKPd8fur2o2x1m4KtSfw==
 
 "@sideway/address@^4.1.0":
   version "4.1.2"
@@ -3023,6 +3046,13 @@ cross-fetch@^3.0.6:
   integrity sha512-1eAtFWdIubi6T4XPy6ei9iUFoKpUkIF971QLN8lIvvvwueI65+Nw5haMNKUwfJxabqlIIDODJKGrQ66gxC0PbQ==
   dependencies:
     node-fetch "2.6.1"
+
+cross-fetch@^3.1.5:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.5.tgz#e1389f44d9e7ba767907f7af8454787952ab534f"
+  integrity sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==
+  dependencies:
+    node-fetch "2.6.7"
 
 cross-spawn@^6.0.0, cross-spawn@^6.0.5:
   version "6.0.5"
@@ -6330,7 +6360,7 @@ node-fetch@2.6.1:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
-node-fetch@^2.6.1:
+node-fetch@2.6.7, node-fetch@^2.6.1:
   version "2.6.7"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
   integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
@@ -6889,15 +6919,20 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@2.2.1, prettier@^2.0.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.2.1.tgz#795a1a78dd52f073da0cd42b21f9c91381923ff5"
-  integrity sha512-PqyhM2yCjg/oKkFPtTGUojv7gnZAoG80ttl45O6x2Ug/rMJw4wcc9k6aaf2hibP7BGVCCM33gZoGjyvt9mm16Q==
+prettier@2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.1.tgz#76903c3f8c4449bc9ac597acefa24dc5ad4cbea6"
+  integrity sha512-p+vNbgpLjif/+D+DwAZAbndtRrR0md0MwfmOVN9N+2RgyACMT+7tfaRnT+WDPkqnuVwleyuBIG2XBxKDme3hPA==
 
 prettier@^1.7.0:
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.19.1.tgz#f7d7f5ff8a9cd872a7be4ca142095956a60797cb"
   integrity sha512-s7PoyDv/II1ObgQunCbB9PdLmUcBZcnWOcxDh7O0N/UwDEsHyqkW+Qh28jW+mVuCdx7gLB0BotYI1Y6uI9iyew==
+
+prettier@^2.0.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.2.1.tgz#795a1a78dd52f073da0cd42b21f9c91381923ff5"
+  integrity sha512-PqyhM2yCjg/oKkFPtTGUojv7gnZAoG80ttl45O6x2Ug/rMJw4wcc9k6aaf2hibP7BGVCCM33gZoGjyvt9mm16Q==
 
 pretty-format@^23.0.1:
   version "23.6.0"

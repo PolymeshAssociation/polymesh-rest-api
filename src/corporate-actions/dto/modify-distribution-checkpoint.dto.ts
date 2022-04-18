@@ -1,11 +1,14 @@
 /* istanbul ignore file */
 
+import { ApiExtraModels } from '@nestjs/swagger';
+
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { ToCaCheckpoint } from '~/corporate-actions/decorators/transformation';
 import { IsCaCheckpoint } from '~/corporate-actions/decorators/validation';
 import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
 
+@ApiExtraModels(CorporateActionCheckpointDto)
 export class ModifyDistributionCheckpointDto extends SignerDto {
   @ApiPropertyOneOf({
     description:

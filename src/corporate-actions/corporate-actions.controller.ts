@@ -73,11 +73,8 @@ export class CorporateActionsController {
   public async getDefaultConfig(
     @Param() { ticker }: TickerParamsDto
   ): Promise<CorporateActionDefaultConfigModel> {
-    const {
-      targets,
-      defaultTaxWithholding,
-      taxWithholdings,
-    } = await this.corporateActionsService.findDefaultConfigByTicker(ticker);
+    const { targets, defaultTaxWithholding, taxWithholdings } =
+      await this.corporateActionsService.findDefaultConfigByTicker(ticker);
     return new CorporateActionDefaultConfigModel({
       targets: new CorporateActionTargetsModel(targets),
       defaultTaxWithholding,

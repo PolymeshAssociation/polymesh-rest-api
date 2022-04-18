@@ -16,6 +16,7 @@ import {
   Claim,
   ClaimType,
   Instruction,
+  TickerReservation,
   Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 
@@ -25,7 +26,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
-import { GeneratedAuthorizationRequestModel } from '~/authorizations/models/generated-authorization-request.model';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
@@ -34,13 +35,13 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
 @ApiTags('identities')
 @Controller('identities')
@@ -51,6 +52,7 @@ export class IdentitiesController {
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
     private readonly claimsService: ClaimsService,
+    private readonly tickerReservationsService: TickerReservationsService,
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(IdentitiesController.name);
@@ -63,7 +65,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose details are to be fetched',
+    description: 'The DID of the Identity whose details are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -85,7 +87,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose pending Authorizations are to be fetched',
+    description: 'The DID of the Identity whose pending Authorizations are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -129,7 +131,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose issued Authorizations are to be fetched',
+    description: 'The DID of the Identity whose issued Authorizations are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -179,7 +181,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The Identity whose targeting Authorization is to be fetched',
+    description: 'The DID of the Identity whose targeting Authorization is to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -207,7 +209,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Assets are to be fetched',
+    description: 'The DID of the Identity whose Assets are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -227,7 +229,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose pending settlement Instructions are to be fetched',
+    description: 'The DID of the Identity whose pending settlement Instructions are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -252,7 +254,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Venues are to be fetched',
+    description: 'The DID of the Identity whose Venues are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -274,7 +276,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose issued Claims are to be fetched',
+    description: 'The DID of the Identity whose issued Claims are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -344,7 +346,7 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose associated Claims are to be fetched',
+    description: 'The DID of the Identity whose associated Claims are to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
@@ -436,8 +438,8 @@ export class IdentitiesController {
       'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
   })
   @ApiCreatedResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
   })
   @ApiInternalServerErrorResponse({
     description: "The supplied address is not encoded with the chain's SS58 format",
@@ -449,13 +451,39 @@ export class IdentitiesController {
   @Post('/secondary-accounts')
   async addSecondaryAccount(
     @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
-  ): Promise<GeneratedAuthorizationRequestModel> {
+  ): Promise<CreatedAuthorizationRequestModel> {
     const { transactions, result } = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );
-    return new GeneratedAuthorizationRequestModel({
+    return new CreatedAuthorizationRequestModel({
       transactions,
       authorizationRequest: createAuthorizationRequestModel(result),
     });
+  }
+
+  @ApiTags('ticker-reservations')
+  @ApiOperation({
+    summary: 'Fetch all tickers reserved by an Identity',
+    description:
+      "This endpoint provides all the tickers currently reserved by an Identity. This doesn't include Assets that have already been created. Tickers with unreadable characters in them will be left out",
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose reserved tickers are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of tickers',
+    paginated: false,
+    example: ['SOME_TICKER', 'RANDOM_TICKER'],
+  })
+  @Get(':did/ticker-reservations')
+  public async getTickerReservations(
+    @Param() { did }: DidDto
+  ): Promise<ResultsModel<TickerReservation>> {
+    const results = await this.tickerReservationsService.findAllByOwner(did);
+    return new ResultsModel({ results });
   }
 }

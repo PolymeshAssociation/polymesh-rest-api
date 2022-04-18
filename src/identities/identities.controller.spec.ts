@@ -14,8 +14,13 @@ import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockAuthorizationRequest, MockIdentity } from '~/test-utils/mocks';
-import { MockAssetService, MockAuthorizationsService } from '~/test-utils/service-mocks';
+import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';
+import {
+  MockAssetService,
+  MockAuthorizationsService,
+  MockTickerReservationsService,
+} from '~/test-utils/service-mocks';
+import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -38,6 +43,8 @@ describe('IdentitiesController', () => {
     findAssociatedByDid: jest.fn(),
   };
 
+  const mockTickerReservationsService = new MockTickerReservationsService();
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       controllers: [IdentitiesController],
@@ -47,6 +54,7 @@ describe('IdentitiesController', () => {
         IdentitiesService,
         AuthorizationsService,
         ClaimsService,
+        TickerReservationsService,
         mockPolymeshLoggerProvider,
       ],
     })
@@ -60,6 +68,8 @@ describe('IdentitiesController', () => {
       .useValue(mockAuthorizationsService)
       .overrideProvider(ClaimsService)
       .useValue(mockClaimsService)
+      .overrideProvider(TickerReservationsService)
+      .useValue(mockTickerReservationsService)
       .compile();
 
     controller = module.get<IdentitiesController>(IdentitiesController);
@@ -382,6 +392,22 @@ describe('IdentitiesController', () => {
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
         transactions: ['transaction'],
       });
+    });
+  });
+
+  describe('getTickerReservations', () => {
+    it('should call the service and return all the reserved tickers', async () => {
+      const mockTickerReservation = new MockTickerReservation();
+
+      mockTickerReservationsService.findAllByOwner.mockResolvedValue([mockTickerReservation]);
+
+      const did = '0x6'.padEnd(66, '0');
+
+      const result = await controller.getTickerReservations({ did });
+      expect(result).toEqual({
+        results: [mockTickerReservation],
+      });
+      expect(mockTickerReservationsService.findAllByOwner).toHaveBeenCalledWith(did);
     });
   });
 });

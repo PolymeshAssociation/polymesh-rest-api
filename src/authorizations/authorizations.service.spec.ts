@@ -10,10 +10,9 @@ import { AuthorizationType, ErrorCode, TxTags } from '@polymathnetwork/polymesh-
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAuthorizationRequest, MockIdentity, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -26,17 +25,14 @@ describe('AuthorizationsService', () => {
   const mockIdentitiesService = {
     findOne: jest.fn(),
   };
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSigningService = mockSigningProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [RelayerAccountsModule],
-      providers: [AuthorizationsService, IdentitiesService],
+      providers: [AuthorizationsService, IdentitiesService, mockSigningProvider],
     })
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
       .compile();
@@ -196,7 +192,7 @@ describe('AuthorizationsService', () => {
 
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
@@ -257,7 +253,7 @@ describe('AuthorizationsService', () => {
 
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error', () => {

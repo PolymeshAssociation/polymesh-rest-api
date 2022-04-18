@@ -4,13 +4,13 @@ import { AccountBalance } from '@polymathnetwork/polymesh-sdk/types';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {
@@ -22,12 +22,12 @@ export class AccountsService {
 
   public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
     const { signer, ...rest } = params;
-    const { relayerAccountsService, polymeshService } = this;
+    const { signingService, polymeshService } = this;
 
-    const address = relayerAccountsService.findAddressByDid(signer);
+    const address = await signingService.getAddressByHandle(signer);
 
     const { transferPolyx } = polymeshService.polymeshApi.network;
 
-    return processQueue(transferPolyx, rest, { signer: address });
+    return processQueue(transferPolyx, rest, { signingAccount: address });
   }
 }

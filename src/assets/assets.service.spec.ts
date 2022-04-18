@@ -2,21 +2,21 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { GoneException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, KnownAssetType, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
+import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAsset, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockRelayerAccountsService } from '~/test-utils/service-mocks';
+import { MockSigningService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -28,19 +28,17 @@ describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockRelayerAccountsService: MockRelayerAccountsService;
+  let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockRelayerAccountsService = new MockRelayerAccountsService();
+    mockSigningService = mockSigningProvider.useValue;
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, RelayerAccountsModule],
-      providers: [AssetsService],
+      imports: [PolymeshModule],
+      providers: [AssetsService, mockSigningProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(RelayerAccountsService)
-      .useValue(mockRelayerAccountsService)
       .compile();
 
     service = module.get<AssetsService>(AssetsService);
@@ -49,7 +47,7 @@ describe('AssetsService', () => {
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
 
-  afterEach(() => {
+  afterAll(() => {
     mockIsPolymeshTransaction.mockReset();
   });
 
@@ -244,83 +242,66 @@ describe('AssetsService', () => {
     });
   });
 
-  describe('findTickerReservation', () => {
-    describe('if the reservation does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          message: 'There is no reservation for',
-          code: ErrorCode.UnmetPrerequisite,
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw mockError;
-        });
+  describe('setDocuments', () => {
+    it('should run a set procedure and return the queue results', async () => {
+      const mockAsset = new MockAsset();
+      const mockTransactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.AddDocuments,
+        },
+      ];
+      const mockQueue = new MockTransactionQueue(mockTransactions);
+      mockQueue.run.mockResolvedValue(mockAsset);
 
-        mockIsPolymeshError.mockReturnValue(true);
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAsset as any);
 
-        let error;
-        try {
-          await service.findTickerReservation('BRK.A');
-        } catch (err) {
-          error = err;
-        }
+      mockAsset.documents.set.mockResolvedValue(mockQueue);
 
-        expect(error).toBeInstanceOf(NotFoundException);
+      const address = 'address';
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
+
+      const body = {
+        signer: 'signer',
+        documents: [
+          new AssetDocumentDto({
+            name: 'TEST-DOC',
+            uri: 'URI',
+            contentHash: '0x'.padEnd(MAX_CONTENT_HASH_LENGTH, 'a'),
+          }),
+        ],
+      };
+
+      const result = await service.setDocuments('TICKER', body);
+      expect(result).toEqual({
+        result: mockAsset,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.asset.AddDocuments,
+            type: TransactionType.Single,
+          },
+        ],
       });
-    });
-    describe('if the asset has already been created', () => {
-      it('should throw a GoneException', async () => {
-        const mockError = {
-          code: ErrorCode.UnmetPrerequisite,
-          message: 'BRK.A Asset has been created',
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findTickerReservation('BRK.A');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(GoneException);
-      });
-    });
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('Something else');
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw expectedError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-        let error;
-        try {
-          await service.findTickerReservation('BRK.A');
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBe(expectedError);
-      });
-    });
-    describe('otherwise', () => {
-      it('should return the reservation', async () => {
-        const mockTickerReservation = {
-          ticker: 'BRK.A',
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockResolvedValue(mockTickerReservation);
-        const result = await service.findTickerReservation('BRK.A');
-        expect(result).toEqual(mockTickerReservation);
-      });
+      expect(mockAsset.documents.set).toHaveBeenCalledWith(
+        { documents: body.documents },
+        { signingAccount: address }
+      );
+      findOneSpy.mockRestore();
     });
   });
+
   describe('createAsset', () => {
     const createBody = {
       signer: '0x6000',
-      name: 'Berkshire Class A',
-      ticker: 'BRK.A',
+      name: 'Ticker Corp',
+      ticker: 'TICKER',
       isDivisible: false,
       assetType: KnownAssetType.EquityCommon,
       requireInvestorUniqueness: false,
@@ -333,7 +314,7 @@ describe('AssetsService', () => {
           throw expectedError;
         });
 
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue('address');
+        mockSigningService.getAddressByHandle.mockReturnValue('address');
 
         let error;
         try {
@@ -361,7 +342,7 @@ describe('AssetsService', () => {
         mockPolymeshApi.assets.createAsset.mockResolvedValue(mockQueue);
 
         const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
         const result = await service.createAsset(createBody);
         expect(result).toEqual({
           result: mockAsset,
@@ -403,7 +384,7 @@ describe('AssetsService', () => {
       findSpy.mockResolvedValue(mockAsset as any);
 
       const address = 'address';
-      mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const result = await service.issue('TICKER', issueBody);
       expect(result).toEqual({
         result: undefined,
@@ -418,45 +399,6 @@ describe('AssetsService', () => {
         ],
       });
       findSpy.mockRestore();
-    });
-  });
-
-  describe('registerTicker', () => {
-    describe('otherwise', () => {
-      it('should register the ticker', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.asset.RegisterTicker,
-          },
-        ];
-
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.assets.reserveTicker.mockResolvedValue(mockQueue);
-
-        const registerBody = {
-          signer: '0x6000',
-          ticker: 'BRK.A',
-        };
-
-        const address = 'address';
-        mockRelayerAccountsService.findAddressByDid.mockReturnValue(address);
-        const result = await service.registerTicker(registerBody);
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.asset.RegisterTicker,
-              type: TransactionType.Single,
-            },
-          ],
-        });
-      });
     });
   });
 });
