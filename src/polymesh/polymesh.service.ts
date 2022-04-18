@@ -16,8 +16,8 @@ export class PolymeshService {
   ) {
     scheduleService.addInterval(
       this.heartbeatIntervalId,
-      async () => {
-        await polymeshApi.network.getLatestBlock();
+      () => {
+        polymeshApi.network.getLatestBlock();
       },
       10000
     );

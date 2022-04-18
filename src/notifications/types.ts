@@ -1,4 +1,4 @@
-import { EventPayload } from '~/events/types';
+import { EventType, GetPayload } from '~/events/types';
 
 export enum NotificationStatus {
   /**
@@ -19,6 +19,8 @@ export enum NotificationStatus {
   Orphaned = 'orphaned',
 }
 
-export type NotificationPayload<T extends EventPayload = EventPayload> = {
+export type NotificationPayload<T extends EventType = EventType> = {
   subscriptionId: number;
-} & T;
+  type: T;
+  payload: GetPayload<T>;
+};

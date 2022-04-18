@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { EventType } from '~/events/types';
 import { SubscriptionStatus } from '~/subscriptions/types';
 

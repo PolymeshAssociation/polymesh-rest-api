@@ -76,3 +76,8 @@ export interface TransactionUpdateEvent extends EventEntity<TransactionUpdatePay
 
 // payloads (can be extended in the future)
 export type EventPayload = TransactionUpdatePayload;
+
+// maps types to payloads, should be extended
+export type GetPayload<T extends EventType> = T extends EventType.TransactionUpdate
+  ? TransactionUpdatePayload
+  : EventPayload;

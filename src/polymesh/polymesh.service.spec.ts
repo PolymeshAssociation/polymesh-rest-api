@@ -3,29 +3,38 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { ScheduleService } from '~/schedule/schedule.service';
 import { MockPolymesh } from '~/test-utils/mocks';
+import { MockScheduleService } from '~/test-utils/service-mocks';
 
 describe('PolymeshService', () => {
   let service: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
+  let mockScheduleService: MockScheduleService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
+    mockScheduleService = new MockScheduleService();
+
+    mockScheduleService.addInterval.mockImplementation((_, cb) => cb());
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [RelayerAccountsModule],
-      providers: [PolymeshService, { provide: POLYMESH_API, useValue: mockPolymeshApi }],
-    }).compile();
+      providers: [
+        PolymeshService,
+        { provide: POLYMESH_API, useValue: mockPolymeshApi },
+        ScheduleService,
+      ],
+    })
+      .overrideProvider(ScheduleService)
+      .useValue(mockScheduleService)
+      .compile();
 
     service = module.get<PolymeshService>(PolymeshService);
   });
 
   afterAll(async () => {
-    jest.useRealTimers();
     await service.close();
     await new Promise(resolve => setTimeout(resolve, 5000));
   });
@@ -34,9 +43,12 @@ describe('PolymeshService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should ping the node every 10 seconds', () => {
-    jest.advanceTimersByTime(20000);
-
-    expect(mockPolymeshApi.network.getLatestBlock).toHaveBeenCalledTimes(2);
+  it('should add an interval to ping the node every 10 seconds', async () => {
+    expect(mockPolymeshApi.network.getLatestBlock).toHaveBeenCalledTimes(1);
+    expect(mockScheduleService.addInterval).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      10000
+    );
   });
 });

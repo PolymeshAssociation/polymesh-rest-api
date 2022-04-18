@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { NotificationStatus } from '~/notifications/types';
 
 export class NotificationEntity {
@@ -10,6 +12,8 @@ export class NotificationEntity {
   public triesLeft: number;
 
   public status: NotificationStatus;
+
+  public createdAt: Date;
 
   constructor(entity: NotificationEntity) {
     Object.assign(this, entity);

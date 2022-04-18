@@ -53,7 +53,7 @@ export class TransactionsService {
   public async submitAndSubscribe(
     transaction: Transaction,
     webhookUrl: string
-  ): Promise<NotificationPayload<TransactionUpdatePayload>> {
+  ): Promise<NotificationPayload<EventType.TransactionUpdate>> {
     const { subscriptionsService, logger } = this;
 
     const id = this.addListener(transaction);
@@ -70,7 +70,8 @@ export class TransactionsService {
 
     return {
       subscriptionId,
-      ...this.assemblePayload(transaction),
+      type: EventType.TransactionUpdate,
+      payload: this.assemblePayload(transaction),
     };
   }
 
@@ -125,14 +126,18 @@ export class TransactionsService {
         ].includes(status)
       ) {
         const { transactionStore } = this;
-        const txData = transactionStore.get(id);
-        txData?.unsubCallback();
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const txData = transactionStore.get(id)!;
+        txData.unsubCallback();
         transactionStore.delete(id);
 
         await this.markSubsAsDone(id);
       }
     } catch (err) {
-      this.logger.error(`Error while handling status change for transaction "${id}"`, err);
+      this.logger.error(
+        `Error while handling status change for transaction "${id}"`,
+        (err as Error).message
+      );
     }
   }
 
@@ -169,11 +174,13 @@ export class TransactionsService {
 
     if (isPolymeshTransaction(transaction)) {
       payload = {
+        ...payload,
         type: TransactionType.Single,
         transactionTag: transaction.tag,
       };
     } else {
       payload = {
+        ...payload,
         type: TransactionType.Batch,
         transactionTags: transaction.transactions.map(({ tag }) => tag),
       };
@@ -196,7 +203,8 @@ export class TransactionsService {
       payload = {
         ...payload,
         blockHash,
-        blockNumber: blockNumber?.toString(),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        blockNumber: blockNumber!.toString(),
       };
 
       if (status === TransactionStatus.Succeeded) {
@@ -210,7 +218,8 @@ export class TransactionsService {
         status
       )
     ) {
-      payload.error = transaction.error?.message;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      payload.error = transaction.error!.message;
     }
 
     return (payload as unknown) as TransactionUpdatePayload;

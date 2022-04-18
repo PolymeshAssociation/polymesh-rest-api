@@ -6,12 +6,12 @@ import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
 import { EventsService } from '~/events/events.service';
-import { EventPayload } from '~/events/types';
+import { EventPayload, EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import notificationsConfig from '~/notifications/config/notifications.config';
 import { NotificationEntity } from '~/notifications/entities/notification.entity';
 import { SIGNATURE_HEADER_KEY } from '~/notifications/notifications.consts';
-import { NotificationStatus } from '~/notifications/types';
+import { NotificationPayload, NotificationStatus } from '~/notifications/types';
 import { ScheduleService } from '~/schedule/schedule.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 
@@ -34,11 +34,20 @@ export class NotificationsService {
   ) {
     const { maxTries, retryInterval } = config;
 
-    this.maxTries = maxTries + 1; // we add the first try
+    this.maxTries = maxTries;
     this.retryInterval = retryInterval;
 
-    this.notifications = {};
-    this.currentId = 0;
+    this.notifications = {
+      1: new NotificationEntity({
+        id: 1,
+        subscriptionId: 1,
+        eventId: 1,
+        triesLeft: maxTries,
+        status: NotificationStatus.Acknowledged,
+        createdAt: new Date('10/14/1987'),
+      }),
+    };
+    this.currentId = 1;
 
     logger.setContext(NotificationsService.name);
   }
@@ -69,6 +78,7 @@ export class NotificationsService {
         ...notification,
         triesLeft,
         status: NotificationStatus.Active,
+        createdAt: new Date(),
       });
 
       /**
@@ -110,7 +120,12 @@ export class NotificationsService {
    * @param ms - amount of milliseconds to wait before sending the notification
    */
   private scheduleSendNotification(id: number, ms: number = this.retryInterval): void {
-    this.scheduleService.addTimeout(this.getTimeoutId(id), () => this.sendNotification(id), ms);
+    this.scheduleService.addTimeout(
+      this.getTimeoutId(id),
+      /* istanbul ignore next */
+      () => this.sendNotification(id),
+      ms
+    );
   }
 
   /**
@@ -134,7 +149,7 @@ export class NotificationsService {
     const { subscriptionId, eventId, triesLeft } = notification;
 
     try {
-      const [subscription, { payload }] = await Promise.all([
+      const [subscription, { payload, type }] = await Promise.all([
         subscriptionsService.findOne(subscriptionId),
         eventsService.findOne(eventId),
       ]);
@@ -151,12 +166,16 @@ export class NotificationsService {
 
       const signature = this.signPayload(payload);
       const response = await lastValueFrom(
-        this.httpService.post(webhookUrl, payload, {
-          headers: {
-            [SIGNATURE_HEADER_KEY]: signature,
-          },
-          timeout: 10000,
-        })
+        this.httpService.post(
+          webhookUrl,
+          this.assembleNotificationPayload(subscriptionId, type, payload),
+          {
+            headers: {
+              [SIGNATURE_HEADER_KEY]: signature,
+            },
+            timeout: 10000,
+          }
+        )
       );
 
       await this.handleWebhookResponse(id, response);
@@ -165,6 +184,18 @@ export class NotificationsService {
 
       await this.retry(id, triesLeft - 1);
     }
+  }
+
+  private assembleNotificationPayload<T extends EventType>(
+    subscriptionId: number,
+    eventType: T,
+    eventPayload: GetPayload<T>
+  ): NotificationPayload<T> {
+    return {
+      type: eventType,
+      subscriptionId,
+      payload: eventPayload,
+    };
   }
 
   /**

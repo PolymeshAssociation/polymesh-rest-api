@@ -1,6 +1,9 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { TransactionStatus, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { TransactionType } from '~/common/types';
 import { EventEntity } from '~/events/entities/event.entity';
+import { EventType, TransactionUpdatePayload } from '~/events/types';
 import { NotificationsService } from '~/notifications/notifications.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
@@ -15,8 +18,21 @@ export class EventsService {
     @Inject(forwardRef(() => NotificationsService))
     private readonly notificationsService: NotificationsService
   ) {
-    this.events = {};
-    this.currentId = 0;
+    this.events = {
+      1: new EventEntity<TransactionUpdatePayload>({
+        scope: '0x01',
+        type: EventType.TransactionUpdate,
+        processed: true,
+        id: 1,
+        createdAt: new Date('10/14/1987'),
+        payload: {
+          type: TransactionType.Single,
+          transactionTag: TxTags.asset.RegisterTicker,
+          status: TransactionStatus.Unapproved,
+        },
+      }),
+    };
+    this.currentId = 1;
   }
 
   /**

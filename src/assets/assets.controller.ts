@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -10,7 +10,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Response } from 'express';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -28,9 +27,6 @@ import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
-import { TransactionUpdatePayload } from '~/events/types';
-import { NotificationPayload } from '~/notifications/types';
-import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
 
 @ApiTags('assets')
 @Controller('assets')
@@ -232,33 +228,6 @@ export class AssetsController {
   public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.registerTicker(params);
     return new TransactionQueueModel({ transactions });
-  }
-
-  // TODO: delete
-  @Post('/reserve-ticker-sub')
-  public async registerTickerSub(
-    @Body() params: ReserveTickerDto & { webhookUrl: string }
-  ): Promise<NotificationPayload<TransactionUpdatePayload>> {
-    return this.assetsService.registerTickerSub(params);
-  }
-
-  // TODO: delete
-  @Post('/hook')
-  public async dummyHook(
-    @Headers() headers: { [HANDSHAKE_HEADER_KEY]: string },
-    @Res() response: Response,
-    @Body() body: any
-  ) {
-    console.log('HEADERS', headers);
-    const handshakeSecret = headers[HANDSHAKE_HEADER_KEY];
-    console.log('HANDSHAKE_SECRET', handshakeSecret);
-    if (handshakeSecret) {
-      response.setHeader(HANDSHAKE_HEADER_KEY, handshakeSecret);
-    }
-
-    console.log('WEBHOOK BODY', body);
-
-    response.status(200).send();
   }
 
   @ApiOperation({

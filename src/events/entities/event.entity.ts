@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { EventPayload, EventType } from '~/events/types';
 
 export class EventEntity<T extends EventPayload = EventPayload> {

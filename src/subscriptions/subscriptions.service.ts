@@ -166,7 +166,12 @@ export class SubscriptionsService {
    * @param ms - amount of milliseconds to wait before sending the handshake
    */
   private scheduleSendHandshake(id: number, ms: number = this.retryInterval): void {
-    this.scheduleService.addTimeout(this.getTimeoutId(id), () => this.sendHandshake(id), ms);
+    this.scheduleService.addTimeout(
+      this.getTimeoutId(id),
+      /* istanbul ignore next */
+      () => this.sendHandshake(id),
+      ms
+    );
   }
 
   /**
@@ -211,11 +216,11 @@ export class SubscriptionsService {
         )
       );
 
-      await this.handleHandshakeResponse(id, response);
+      await this.handleHandshakeResponse(id, response, secret);
     } catch (err) {
       logger.error(`Error while sending handshake for subscription "${id}":`, err);
 
-      await this.retry(id, triesLeft);
+      await this.retry(id, triesLeft - 1);
     }
   }
 
@@ -225,10 +230,14 @@ export class SubscriptionsService {
    *
    * @param id - subscription ID
    */
-  private async handleHandshakeResponse(id: number, response: AxiosResponse): Promise<void> {
+  private async handleHandshakeResponse(
+    id: number,
+    response: AxiosResponse,
+    secret: string
+  ): Promise<void> {
     const { status, headers } = response;
 
-    if (status === HttpStatus.OK && headers[HANDSHAKE_HEADER_KEY]) {
+    if (status === HttpStatus.OK && headers[HANDSHAKE_HEADER_KEY] === secret) {
       await this.updateSubscription(id, {
         status: SubscriptionStatus.Active,
       });
