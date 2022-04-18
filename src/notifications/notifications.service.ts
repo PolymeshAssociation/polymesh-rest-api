@@ -149,7 +149,7 @@ export class NotificationsService {
     const { subscriptionId, eventId, triesLeft } = notification;
 
     try {
-      const [subscription, { payload, type }] = await Promise.all([
+      const [subscription, { payload, type, scope }] = await Promise.all([
         subscriptionsService.findOne(subscriptionId),
         eventsService.findOne(eventId),
       ]);
@@ -168,7 +168,7 @@ export class NotificationsService {
       const response = await lastValueFrom(
         this.httpService.post(
           webhookUrl,
-          this.assembleNotificationPayload(subscriptionId, type, payload),
+          this.assembleNotificationPayload(subscriptionId, type, scope, payload),
           {
             headers: {
               [SIGNATURE_HEADER_KEY]: signature,
@@ -188,13 +188,15 @@ export class NotificationsService {
 
   private assembleNotificationPayload<T extends EventType>(
     subscriptionId: number,
-    eventType: T,
-    eventPayload: GetPayload<T>
+    type: T,
+    scope: string,
+    payload: GetPayload<T>
   ): NotificationPayload<T> {
     return {
-      type: eventType,
+      type,
+      scope,
       subscriptionId,
-      payload: eventPayload,
+      payload,
     };
   }
 

@@ -110,6 +110,7 @@ describe('NotificationsService', () => {
 
       const webhookUrl = 'https://www.example.com';
       const type = EventType.TransactionUpdate;
+      const scope = '0x01';
       const payload = {
         type: TransactionType.Single,
         transactionTag: TxTags.asset.RegisterTicker,
@@ -123,6 +124,7 @@ describe('NotificationsService', () => {
       mockEventsService.findOne.mockReturnValue({
         payload,
         type,
+        scope,
         subscriptionId,
       });
       mockLastValueFrom.mockReturnValue({

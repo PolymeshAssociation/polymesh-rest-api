@@ -57,10 +57,12 @@ export class TransactionsService {
     const { subscriptionsService, logger } = this;
 
     const id = this.addListener(transaction);
+    const eventScope = String(id);
+    const eventType = EventType.TransactionUpdate;
 
     const subscriptionId = await subscriptionsService.createSubscription({
-      eventType: EventType.TransactionUpdate,
-      eventScope: String(id),
+      eventType,
+      eventScope,
       webhookUrl,
     });
 
@@ -70,7 +72,8 @@ export class TransactionsService {
 
     return {
       subscriptionId,
-      type: EventType.TransactionUpdate,
+      type: eventType,
+      scope: eventScope,
       payload: this.assemblePayload(transaction),
     };
   }
@@ -222,6 +225,6 @@ export class TransactionsService {
       payload.error = transaction.error!.message;
     }
 
-    return (payload as unknown) as TransactionUpdatePayload;
+    return payload as unknown as TransactionUpdatePayload;
   }
 }

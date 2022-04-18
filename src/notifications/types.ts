@@ -22,5 +22,6 @@ export enum NotificationStatus {
 export type NotificationPayload<T extends EventType = EventType> = {
   subscriptionId: number;
   type: T;
+  scope: string;
   payload: GetPayload<T>;
 };

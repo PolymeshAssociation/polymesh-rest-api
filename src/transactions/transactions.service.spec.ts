@@ -57,14 +57,14 @@ describe('TransactionsService', () => {
 
   describe('submitAndSubscribe', () => {
     it('should create a subscription, run the transaction, listen to changes on it (creating events), and return the first notification payload', async () => {
-      let transaction:
-        | MockPolymeshTransaction
-        | MockPolymeshTransactionBatch = new MockPolymeshTransaction();
+      let transaction: MockPolymeshTransaction | MockPolymeshTransactionBatch =
+        new MockPolymeshTransaction();
       const webhookUrl = 'http://www.example.com';
 
       const subscriptionId = 1;
       const transactionHash = '0xabc';
       const eventType = EventType.TransactionUpdate;
+      const eventScope = '0';
       const blockHash = '0xdef';
       const blockNumber = new BigNumber(1);
       const errorMessage = 'foo';
@@ -84,7 +84,7 @@ describe('TransactionsService', () => {
       mockIsPolymeshTransaction.mockReturnValue(true);
 
       let result = await service.submitAndSubscribe(
-        (transaction as unknown) as Transaction,
+        transaction as unknown as Transaction,
         webhookUrl
       );
 
@@ -96,11 +96,12 @@ describe('TransactionsService', () => {
       expect(result).toEqual({
         type: eventType,
         subscriptionId,
+        scope: eventScope,
         payload: expectedPayload,
       });
       expect(mockSubscriptionsService.createSubscription).toHaveBeenCalledWith({
         eventType,
-        eventScope: '0',
+        eventScope: eventScope,
         webhookUrl,
       });
 
@@ -111,7 +112,7 @@ describe('TransactionsService', () => {
 
       expect(mockEventsService.createEvent).toHaveBeenCalledWith({
         type: EventType.TransactionUpdate,
-        scope: '0',
+        scope: eventScope,
         payload: {
           ...expectedPayload,
           status: TransactionStatus.Running,
@@ -129,7 +130,7 @@ describe('TransactionsService', () => {
 
       expect(mockEventsService.createEvent).toHaveBeenCalledWith({
         type: EventType.TransactionUpdate,
-        scope: '0',
+        scope: eventScope,
         payload: {
           ...expectedPayload,
           status: TransactionStatus.Succeeded,
@@ -151,16 +152,14 @@ describe('TransactionsService', () => {
 
       mockIsPolymeshTransaction.mockReturnValue(false);
 
-      result = await service.submitAndSubscribe(
-        (transaction as unknown) as Transaction,
-        webhookUrl
-      );
+      result = await service.submitAndSubscribe(transaction as unknown as Transaction, webhookUrl);
 
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();
 
       expect(result).toEqual({
         subscriptionId,
         type: eventType,
+        scope: eventScope,
         payload: {
           type: TransactionType.Batch,
           transactionTags: [TxTags.asset.RegisterTicker, TxTags.asset.CreateAsset],
@@ -178,7 +177,7 @@ describe('TransactionsService', () => {
 
       expect(mockEventsService.createEvent).toHaveBeenCalledWith({
         type: EventType.TransactionUpdate,
-        scope: '0',
+        scope: eventScope,
         payload: {
           type: TransactionType.Batch,
           transactionTags: [TxTags.asset.RegisterTicker, TxTags.asset.CreateAsset],
