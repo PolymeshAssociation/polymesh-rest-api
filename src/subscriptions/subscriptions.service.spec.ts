@@ -21,6 +21,8 @@ jest.mock('rxjs', () => ({
 
 describe('SubscriptionsService', () => {
   let service: SubscriptionsService;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let unsafeService: any;
 
   let mockScheduleService: MockScheduleService;
   let mockHttpService: MockHttpService;
@@ -77,6 +79,13 @@ describe('SubscriptionsService', () => {
       .compile();
 
     service = module.get<SubscriptionsService>(SubscriptionsService);
+
+    unsafeService = service;
+    unsafeService.subscriptions = {
+      1: subs[0],
+      2: subs[1],
+    };
+    unsafeService.currentId = 2;
   });
 
   it('should be defined', () => {
@@ -158,8 +167,7 @@ describe('SubscriptionsService', () => {
       });
 
       // ignore expired subs
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendHandshake(1);
+      await unsafeService.sendHandshake(1);
 
       expect(mockHttpService.post).not.toHaveBeenCalled();
 
@@ -170,8 +178,7 @@ describe('SubscriptionsService', () => {
         },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendHandshake(3);
+      await unsafeService.sendHandshake(3);
 
       let subscription = await service.findOne(3);
       expect(subscription.status).toBe(SubscriptionStatus.Active);
@@ -184,8 +191,7 @@ describe('SubscriptionsService', () => {
         status: SubscriptionStatus.Inactive,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendHandshake(3);
+      await unsafeService.sendHandshake(3);
 
       subscription = await service.findOne(3);
       expect(subscription.status).toBe(SubscriptionStatus.Inactive);
@@ -195,8 +201,7 @@ describe('SubscriptionsService', () => {
         triesLeft: 1,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendHandshake(3);
+      await unsafeService.sendHandshake(3);
 
       subscription = await service.findOne(3);
       expect(subscription.status).toBe(SubscriptionStatus.Rejected);

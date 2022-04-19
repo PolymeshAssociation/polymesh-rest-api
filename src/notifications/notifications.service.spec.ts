@@ -29,6 +29,8 @@ jest.mock('rxjs', () => ({
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let unsafeService: any;
 
   let mockScheduleService: MockScheduleService;
   let mockSubscriptionsService: MockSubscriptionsService;
@@ -69,6 +71,20 @@ describe('NotificationsService', () => {
       .compile();
 
     service = module.get<NotificationsService>(NotificationsService);
+    unsafeService = service;
+
+    unsafeService.notifications = {
+      1: new NotificationEntity({
+        id: 1,
+        subscriptionId: 1,
+        eventId: 1,
+        triesLeft: maxTries,
+        status: NotificationStatus.Acknowledged,
+        createdAt: new Date('10/14/1987'),
+        nonce: 0,
+      }),
+    };
+    unsafeService.currentId = 1;
   });
 
   it('should be defined', () => {
@@ -135,8 +151,7 @@ describe('NotificationsService', () => {
 
       // notifications for expired subscriptions should be marked as orphaned
       mockIsExpired.mockReturnValue(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendNotification(1);
+      await unsafeService.sendNotification(1);
 
       let notification = await service.findOne(1);
 
@@ -145,8 +160,7 @@ describe('NotificationsService', () => {
 
       mockIsExpired.mockReturnValue(false);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendNotification(2);
+      await unsafeService.sendNotification(2);
 
       notification = await service.findOne(2);
 
@@ -160,8 +174,7 @@ describe('NotificationsService', () => {
         status: 500,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendNotification(2);
+      await unsafeService.sendNotification(2);
 
       notification = await service.findOne(2);
 
@@ -172,8 +185,7 @@ describe('NotificationsService', () => {
         triesLeft: 1,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (service as any).sendNotification(2);
+      await unsafeService.sendNotification(2);
 
       notification = await service.findOne(2);
 

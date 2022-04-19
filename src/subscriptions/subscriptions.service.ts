@@ -5,7 +5,6 @@ import { AxiosResponse } from 'axios';
 import { filter, pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
-import { EventType } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { ScheduleService } from '~/schedule/schedule.service';
 import subscriptionsConfig from '~/subscriptions/config/subscriptions.config';
@@ -35,31 +34,8 @@ export class SubscriptionsService {
     this.maxTries = triesLeft;
     this.retryInterval = retryInterval;
 
-    this.subscriptions = {
-      1: new SubscriptionEntity({
-        id: 1,
-        eventType: EventType.TransactionUpdate,
-        eventScope: '0x01',
-        webhookUrl: 'https://example.com/hook',
-        createdAt: new Date('10/14/1987'),
-        ttl,
-        status: SubscriptionStatus.Done,
-        triesLeft,
-        nextNonce: 0,
-      }),
-      2: new SubscriptionEntity({
-        id: 2,
-        eventType: EventType.TransactionUpdate,
-        eventScope: '0x02',
-        webhookUrl: 'https://example.com/hook',
-        createdAt: new Date('10/14/1987'),
-        ttl,
-        status: SubscriptionStatus.Rejected,
-        triesLeft,
-        nextNonce: 0,
-      }),
-    };
-    this.currentId = 2;
+    this.subscriptions = {};
+    this.currentId = 0;
 
     logger.setContext(SubscriptionsService.name);
   }

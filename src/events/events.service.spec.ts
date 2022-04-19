@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionStatus, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
+import { EventEntity } from '~/events/entities/event.entity';
 import { EventsService } from '~/events/events.service';
-import { EventType } from '~/events/types';
+import { EventType, TransactionUpdatePayload } from '~/events/types';
 import { NotificationsService } from '~/notifications/notifications.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { MockNotificationsService, MockSubscriptionsService } from '~/test-utils/service-mocks';
@@ -28,6 +29,24 @@ describe('EventsService', () => {
       .compile();
 
     service = module.get<EventsService>(EventsService);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const unsafeService: any = service;
+    unsafeService.events = {
+      1: new EventEntity<TransactionUpdatePayload>({
+        scope: '0x01',
+        type: EventType.TransactionUpdate,
+        processed: true,
+        id: 1,
+        createdAt: new Date('10/14/1987'),
+        payload: {
+          type: TransactionType.Single,
+          transactionTag: TxTags.asset.RegisterTicker,
+          status: TransactionStatus.Unapproved,
+        },
+      }),
+    };
+    unsafeService.currentId = 1;
   });
 
   it('should be defined', () => {

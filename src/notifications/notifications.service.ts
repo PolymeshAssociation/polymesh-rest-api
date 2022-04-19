@@ -37,18 +37,8 @@ export class NotificationsService {
     this.maxTries = maxTries;
     this.retryInterval = retryInterval;
 
-    this.notifications = {
-      1: new NotificationEntity({
-        id: 1,
-        subscriptionId: 1,
-        eventId: 1,
-        triesLeft: maxTries,
-        status: NotificationStatus.Acknowledged,
-        createdAt: new Date('10/14/1987'),
-        nonce: 0,
-      }),
-    };
-    this.currentId = 1;
+    this.notifications = {};
+    this.currentId = 0;
 
     logger.setContext(NotificationsService.name);
   }
