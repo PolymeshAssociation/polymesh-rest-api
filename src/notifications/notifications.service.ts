@@ -104,12 +104,6 @@ export class NotificationsService {
     return updated;
   }
 
-  private async incrementId(): Promise<number> {
-    this.currentId += 1;
-
-    return this.currentId;
-  }
-
   /**
    * Schedule a notification to be sent after a certain time has elapsed
    *

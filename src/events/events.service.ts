@@ -1,9 +1,6 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { TransactionStatus, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
-import { TransactionType } from '~/common/types';
 import { EventEntity } from '~/events/entities/event.entity';
-import { EventType, TransactionUpdatePayload } from '~/events/types';
 import { NotificationsService } from '~/notifications/notifications.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
@@ -30,7 +27,9 @@ export class EventsService {
   ): Promise<number> {
     const { events } = this;
 
-    const id = await this.incrementId();
+    this.currentId += 1;
+
+    const id = this.currentId;
 
     const event = new EventEntity({
       id,
@@ -56,12 +55,6 @@ export class EventsService {
     }
 
     return event;
-  }
-
-  private async incrementId(): Promise<number> {
-    this.currentId += 1;
-
-    return this.currentId;
   }
 
   private async createEventNotifications(event: EventEntity) {
