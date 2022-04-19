@@ -52,6 +52,7 @@ export class MockSubscriptionsService {
   createSubscription = jest.fn();
   updateSubscription = jest.fn();
   batchMarkAsDone = jest.fn();
+  batchBumpNonce = jest.fn();
 }
 
 export class MockNotificationsService {

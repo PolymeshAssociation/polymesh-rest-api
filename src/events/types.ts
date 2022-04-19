@@ -27,7 +27,6 @@ interface TransactionSucceededPayload extends TransactionInBlockPayload {
 type TransactionFailedPayload = TransactionInBlockPayload &
   TransactionErrorPayload & {
     status: TransactionStatus.Failed;
-    error: string;
   };
 interface TransactionRejectedPayload extends TransactionErrorPayload {
   status: TransactionStatus.Rejected;
@@ -35,7 +34,6 @@ interface TransactionRejectedPayload extends TransactionErrorPayload {
 type TransactionAbortedPayload = TransactionSignedPayload &
   TransactionErrorPayload & {
     status: TransactionStatus.Aborted;
-    error: string;
   };
 interface TransactionRunningPayload extends TransactionSignedPayload {
   status: TransactionStatus.Running;

@@ -23,5 +23,6 @@ export type NotificationPayload<T extends EventType = EventType> = {
   subscriptionId: number;
   type: T;
   scope: string;
+  nonce: number;
   payload: GetPayload<T>;
 };

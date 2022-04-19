@@ -20,6 +20,8 @@ export class SubscriptionEntity {
 
   public triesLeft: number;
 
+  public nextNonce: number;
+
   public isExpired(): boolean {
     const { createdAt, ttl } = this;
 

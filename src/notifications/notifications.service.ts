@@ -45,6 +45,7 @@ export class NotificationsService {
         triesLeft: maxTries,
         status: NotificationStatus.Acknowledged,
         createdAt: new Date('10/14/1987'),
+        nonce: 0,
       }),
     };
     this.currentId = 1;
@@ -63,7 +64,7 @@ export class NotificationsService {
   }
 
   public async createNotifications(
-    newNotifications: Pick<NotificationEntity, 'eventId' | 'subscriptionId'>[]
+    newNotifications: Pick<NotificationEntity, 'eventId' | 'subscriptionId' | 'nonce'>[]
   ): Promise<number[]> {
     const { notifications, maxTries: triesLeft } = this;
     const newIds: number[] = [];
@@ -146,7 +147,7 @@ export class NotificationsService {
     const notification = await this.findOne(id);
 
     const { subscriptionsService, eventsService, logger } = this;
-    const { subscriptionId, eventId, triesLeft } = notification;
+    const { subscriptionId, eventId, triesLeft, nonce } = notification;
 
     try {
       const [subscription, { payload, type, scope }] = await Promise.all([
@@ -168,7 +169,7 @@ export class NotificationsService {
       const response = await lastValueFrom(
         this.httpService.post(
           webhookUrl,
-          this.assembleNotificationPayload(subscriptionId, type, scope, payload),
+          this.assembleNotificationPayload(subscriptionId, type, scope, payload, nonce),
           {
             headers: {
               [SIGNATURE_HEADER_KEY]: signature,
@@ -190,13 +191,15 @@ export class NotificationsService {
     subscriptionId: number,
     type: T,
     scope: string,
-    payload: GetPayload<T>
+    payload: GetPayload<T>,
+    nonce: number
   ): NotificationPayload<T> {
     return {
       type,
       scope,
       subscriptionId,
       payload,
+      nonce,
     };
   }
 

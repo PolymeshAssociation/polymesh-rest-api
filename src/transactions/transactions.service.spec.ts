@@ -98,6 +98,7 @@ describe('TransactionsService', () => {
         subscriptionId,
         scope: eventScope,
         payload: expectedPayload,
+        nonce: 0,
       });
       expect(mockSubscriptionsService.createSubscription).toHaveBeenCalledWith({
         eventType,
@@ -160,6 +161,7 @@ describe('TransactionsService', () => {
         subscriptionId,
         type: eventType,
         scope: eventScope,
+        nonce: 0,
         payload: {
           type: TransactionType.Batch,
           transactionTags: [TxTags.asset.RegisterTicker, TxTags.asset.CreateAsset],

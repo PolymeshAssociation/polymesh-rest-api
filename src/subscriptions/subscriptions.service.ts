@@ -45,6 +45,7 @@ export class SubscriptionsService {
         ttl,
         status: SubscriptionStatus.Done,
         triesLeft,
+        nextNonce: 0,
       }),
       2: new SubscriptionEntity({
         id: 2,
@@ -55,6 +56,7 @@ export class SubscriptionsService {
         ttl,
         status: SubscriptionStatus.Rejected,
         triesLeft,
+        nextNonce: 0,
       }),
     };
     this.currentId = 2;
@@ -115,6 +117,7 @@ export class SubscriptionsService {
       status: SubscriptionStatus.Inactive,
       ttl,
       triesLeft,
+      nextNonce: 0,
     });
 
     /**
@@ -126,7 +129,7 @@ export class SubscriptionsService {
   }
 
   /**
-   * @note ignores any properties other than `status` and `triesLeft`
+   * @note ignores any properties other than `status`, `triesLeft` and `nextNonce`
    */
   public async updateSubscription(
     id: number,
@@ -134,7 +137,7 @@ export class SubscriptionsService {
   ): Promise<SubscriptionEntity> {
     const { subscriptions } = this;
 
-    const updater = pick(data, 'status', 'triesLeft');
+    const updater = pick(data, 'status', 'triesLeft', 'nextNonce');
 
     const current = await this.findOne(id);
 
@@ -156,6 +159,17 @@ export class SubscriptionsService {
 
     ids.forEach(id => {
       subscriptions[id].status = SubscriptionStatus.Done;
+    });
+  }
+
+  /**
+   * Increase the latest nonce of many subscriptions at once by one
+   */
+  public async batchBumpNonce(ids: number[]): Promise<void> {
+    const { subscriptions } = this;
+
+    ids.forEach(id => {
+      subscriptions[id].nextNonce += 1;
     });
   }
 

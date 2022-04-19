@@ -15,6 +15,8 @@ export class NotificationEntity {
 
   public createdAt: Date;
 
+  public nonce: number;
+
   constructor(entity: NotificationEntity) {
     Object.assign(this, entity);
   }

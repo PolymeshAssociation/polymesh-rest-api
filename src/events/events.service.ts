@@ -74,20 +74,24 @@ export class EventsService {
 
   private async createEventNotifications(event: EventEntity) {
     const { type: eventType, scope: eventScope, id: eventId } = event;
+    const { subscriptionsService, notificationsService } = this;
 
-    const affectedSubscriptions = await this.subscriptionsService.findAll({
+    const affectedSubscriptions = await subscriptionsService.findAll({
       eventType,
       eventScope,
       status: SubscriptionStatus.Active,
       excludeExpired: true,
     });
 
-    const notifications = affectedSubscriptions.map(({ id: subscriptionId }) => ({
+    const notifications = affectedSubscriptions.map(({ id: subscriptionId, nextNonce: nonce }) => ({
       subscriptionId,
       eventId,
+      nonce,
     }));
 
-    await this.notificationsService.createNotifications(notifications);
+    await subscriptionsService.batchBumpNonce(affectedSubscriptions.map(({ id }) => id));
+
+    await notificationsService.createNotifications(notifications);
   }
 
   private async markEventAsProcessed(id: number): Promise<void> {

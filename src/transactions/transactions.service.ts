@@ -66,6 +66,11 @@ export class TransactionsService {
       webhookUrl,
     });
 
+    // since we're sending an "initial" notification with nonce 0 as a response, we start with the nonce at 1
+    await subscriptionsService.updateSubscription(subscriptionId, {
+      nextNonce: 1,
+    });
+
     // TODO @monitz87: use dedicated error service
     // we don't propagate transaction errors because they're sent as status updates
     transaction.run().catch(({ message, stack }: Error) => logger.error(message, stack));
@@ -75,6 +80,7 @@ export class TransactionsService {
       type: eventType,
       scope: eventScope,
       payload: this.assemblePayload(transaction),
+      nonce: 0,
     };
   }
 

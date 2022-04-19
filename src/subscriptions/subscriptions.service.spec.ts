@@ -39,6 +39,7 @@ describe('SubscriptionsService', () => {
       ttl,
       status: SubscriptionStatus.Done,
       triesLeft: maxTries,
+      nextNonce: 0,
     }),
     new SubscriptionEntity({
       id: 2,
@@ -49,6 +50,7 @@ describe('SubscriptionsService', () => {
       ttl,
       status: SubscriptionStatus.Rejected,
       triesLeft: maxTries,
+      nextNonce: 0,
     }),
   ];
 
@@ -152,6 +154,7 @@ describe('SubscriptionsService', () => {
         eventType,
         eventScope,
         webhookUrl,
+        nextNonce: 0,
       });
 
       // ignore expired subs
@@ -223,6 +226,16 @@ describe('SubscriptionsService', () => {
       const result = await service.findAll({ status: SubscriptionStatus.Done });
 
       expect(result.length).toBe(2);
+    });
+  });
+
+  describe('method: batchBumpNonce', () => {
+    it('should mark a group of subscriptions as done', async () => {
+      await service.batchBumpNonce([1, 2]);
+
+      const result = await service.findAll();
+
+      expect(result.every(({ nextNonce }) => nextNonce === 1));
     });
   });
 });

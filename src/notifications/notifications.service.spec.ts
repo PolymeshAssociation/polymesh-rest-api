@@ -87,6 +87,7 @@ describe('NotificationsService', () => {
           triesLeft: maxTries,
           status: NotificationStatus.Acknowledged,
           createdAt: new Date('10/14/1987'),
+          nonce: 0,
         })
       );
     });
@@ -103,6 +104,7 @@ describe('NotificationsService', () => {
         {
           eventId: 2,
           subscriptionId,
+          nonce: 0,
         },
       ]);
 
