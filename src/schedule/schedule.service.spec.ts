@@ -115,6 +115,18 @@ describe('ScheduleService', () => {
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalledWith(
         `Error on scheduled task "${id}": ${message}`
       );
+
+      cb.mockImplementation(() => {
+        throw message;
+      });
+
+      service.addTimeout(id, cb, time);
+
+      jest.advanceTimersByTime(time);
+
+      expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalledWith(
+        `Error on scheduled task "${id}": ${message}`
+      );
     });
   });
 });

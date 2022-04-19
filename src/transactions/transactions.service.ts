@@ -36,6 +36,8 @@ export class TransactionsService {
     }
   > = new Map();
 
+  private currentId = 0;
+
   constructor(
     private readonly eventsService: EventsService,
     private readonly subscriptionsService: SubscriptionsService,
@@ -73,7 +75,11 @@ export class TransactionsService {
 
     // TODO @monitz87: use dedicated error service
     // we don't propagate transaction errors because they're sent as status updates
-    transaction.run().catch(({ message, stack }: Error) => logger.error(message, stack));
+    transaction
+      .run()
+      .catch(({ message, stack }: Error) =>
+        logger.error(`Error while running transaction "${id}": ${message}`, stack)
+      );
 
     return {
       subscriptionId,
@@ -89,7 +95,9 @@ export class TransactionsService {
    */
   private addListener(transaction: Transaction): number {
     const { transactionStore } = this;
-    const id = transactionStore.size;
+
+    this.currentId += 1;
+    const id = this.currentId;
 
     const unsubCallback = transaction.onStatusChange(tx =>
       this.handleTransactionStatusChange(id, tx)
@@ -145,7 +153,7 @@ export class TransactionsService {
     } catch (err) {
       this.logger.error(
         `Error while handling status change for transaction "${id}"`,
-        (err as Error).message
+        (err as Error).message || JSON.stringify(err)
       );
     }
   }

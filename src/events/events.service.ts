@@ -30,8 +30,7 @@ export class EventsService {
   ): Promise<number> {
     const { events } = this;
 
-    this.currentId += 1;
-    const id = this.currentId;
+    const id = await this.incrementId();
 
     const event = new EventEntity({
       id,
@@ -57,6 +56,12 @@ export class EventsService {
     }
 
     return event;
+  }
+
+  private async incrementId(): Promise<number> {
+    this.currentId += 1;
+
+    return this.currentId;
   }
 
   private async createEventNotifications(event: EventEntity) {

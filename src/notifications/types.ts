@@ -12,7 +12,7 @@ export enum NotificationStatus {
   /**
    * couldn't be delivered after max retries
    */
-  TimedOut = 'timedOut',
+  Failed = 'failed',
   /**
    * subscription expired before the notification was acknowledged
    */

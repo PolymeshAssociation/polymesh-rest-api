@@ -189,7 +189,7 @@ describe('NotificationsService', () => {
 
       notification = await service.findOne(2);
 
-      expect(notification.status).toBe(NotificationStatus.TimedOut);
+      expect(notification.status).toBe(NotificationStatus.Failed);
     });
   });
 

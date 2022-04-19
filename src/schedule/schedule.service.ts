@@ -61,7 +61,9 @@ export class ScheduleService {
       try {
         await cb();
       } catch (err) {
-        logger.error(`Error on scheduled task "${id}": ${(err as Error).message}`);
+        logger.error(
+          `Error on scheduled task "${id}": ${(err as Error).message || JSON.stringify(err)}`
+        );
       }
     };
   }
