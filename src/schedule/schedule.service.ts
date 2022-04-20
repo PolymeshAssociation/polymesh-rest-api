@@ -49,10 +49,10 @@ export class ScheduleService {
     id: string,
     type: ScheduledTaskType,
     cb: () => void | Promise<void>
-  ): () => void | Promise<void> {
+  ): () => Promise<void> {
     const { logger } = this;
 
-    return async () => {
+    return async (): Promise<void> => {
       // the scheduler registry keeps timeout ids forever. This allows us to reuse them
       if (type === ScheduledTaskType.Timeout) {
         this.deleteTimeout(id);

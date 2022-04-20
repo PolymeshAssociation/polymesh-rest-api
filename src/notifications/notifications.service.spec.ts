@@ -91,7 +91,7 @@ describe('NotificationsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('method: findOne', () => {
+  describe('findOne', () => {
     it('should return a notification by ID', async () => {
       const result = await service.findOne(1);
 
@@ -113,7 +113,7 @@ describe('NotificationsService', () => {
     });
   });
 
-  describe('method: createNotifications', () => {
+  describe('createNotifications', () => {
     it('should create a group of notifications, return their IDs, and schedule them to be sent, retrying if something goes wrong', async () => {
       const subscriptionId = 1;
       const result = await service.createNotifications([
@@ -193,7 +193,7 @@ describe('NotificationsService', () => {
     });
   });
 
-  describe('method: updateSubscription', () => {
+  describe('updateSubscription', () => {
     it('should update a notification and return it, ignoring fields other than status or triesLeft', async () => {
       const status = NotificationStatus.Active;
       const triesLeft = 1;

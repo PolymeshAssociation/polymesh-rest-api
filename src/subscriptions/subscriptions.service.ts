@@ -180,7 +180,7 @@ export class SubscriptionsService {
    *
    * @param id - subscription ID
    */
-  private async sendHandshake(id: number) {
+  private async sendHandshake(id: number): Promise<void> {
     const subscription = await this.findOne(id);
 
     if (subscription.isExpired()) {
@@ -245,7 +245,7 @@ export class SubscriptionsService {
    * @param triesLeft - amount of retries left for the subscription. If none are left,
    *   the subscription is marked as "rejected" and no retry is scheduled
    */
-  private async retry(id: number, triesLeft: number) {
+  private async retry(id: number, triesLeft: number): Promise<void> {
     if (triesLeft === 0) {
       await this.updateSubscription(id, {
         triesLeft,

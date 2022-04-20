@@ -198,8 +198,9 @@ export class NotificationsService {
    *
    * @param id - notification IID
    */
-  private async handleWebhookResponse(id: number, response: AxiosResponse) {
-    if (response.status === HttpStatus.OK) {
+  private async handleWebhookResponse(id: number, response: AxiosResponse): Promise<void> {
+    const { status } = response;
+    if (status === HttpStatus.OK) {
       await this.updateNotification(id, {
         status: NotificationStatus.Acknowledged,
       });
@@ -207,7 +208,7 @@ export class NotificationsService {
       return;
     }
 
-    throw new Error('Webhook responded with non-OK status');
+    throw new Error(`Webhook responded with non-OK status: ${status}`);
   }
 
   /**
@@ -217,7 +218,7 @@ export class NotificationsService {
    * @param triesLeft - amount of retries left for the notification. If none are left,
    *   the notification is marked as "timed out" and no retry is scheduled
    */
-  private async retry(id: number, triesLeft: number) {
+  private async retry(id: number, triesLeft: number): Promise<void> {
     if (triesLeft === 0) {
       await this.updateNotification(id, {
         triesLeft,

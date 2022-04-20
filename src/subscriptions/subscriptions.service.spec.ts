@@ -92,7 +92,7 @@ describe('SubscriptionsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('method: findAll', () => {
+  describe('findAll', () => {
     it('should return all subscriptions', async () => {
       const result = await service.findAll();
 
@@ -126,7 +126,7 @@ describe('SubscriptionsService', () => {
     });
   });
 
-  describe('method: findOne', () => {
+  describe('findOne', () => {
     it('should return a single subscription by ID', async () => {
       const result = await service.findOne(1);
 
@@ -138,7 +138,7 @@ describe('SubscriptionsService', () => {
     });
   });
 
-  describe('method: createSubscription', () => {
+  describe('createSubscription', () => {
     it('should create a subscription and return its ID, and send a handshake to the webhook, retrying if it fails', async () => {
       const eventType = EventType.TransactionUpdate;
       const eventScope = '0x03';
@@ -208,7 +208,7 @@ describe('SubscriptionsService', () => {
     });
   });
 
-  describe('method: updateSubscription', () => {
+  describe('updateSubscription', () => {
     it('should update a subscription and return it, ignoring fields other than status or triesLeft', async () => {
       const status = SubscriptionStatus.Active;
       const triesLeft = 1;
@@ -224,7 +224,7 @@ describe('SubscriptionsService', () => {
     });
   });
 
-  describe('method: batchMarkAsDone', () => {
+  describe('batchMarkAsDone', () => {
     it('should mark a group of subscriptions as done', async () => {
       await service.batchMarkAsDone([1, 2]);
 
@@ -234,7 +234,7 @@ describe('SubscriptionsService', () => {
     });
   });
 
-  describe('method: batchBumpNonce', () => {
+  describe('batchBumpNonce', () => {
     it('should mark a group of subscriptions as done', async () => {
       await service.batchBumpNonce([1, 2]);
 

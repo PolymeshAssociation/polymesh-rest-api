@@ -38,7 +38,9 @@ export async function processQueue<MethodArgs, ReturnType>(
     const queue = await method(args, opts);
     const result = await queue.run();
 
-    const assembleTransaction = (transaction: unknown) => {
+    const assembleTransaction = (
+      transaction: unknown
+    ): TransactionModel | BatchTransactionModel => {
       let tagDetails;
       if (isPolymeshTransaction(transaction)) {
         const { tag } = transaction;

@@ -117,7 +117,7 @@ export class TransactionsService {
    *
    * @param id - internal transaction ID
    */
-  private async handleTransactionStatusChange(id: number, transaction: Transaction) {
+  private async handleTransactionStatusChange(id: number, transaction: Transaction): Promise<void> {
     /*
      * we save the status into a variable in case it changes while
      *   creating the event and notifications

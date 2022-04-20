@@ -15,6 +15,19 @@ describe('EventsService', () => {
   let mockNotificationsService: MockNotificationsService;
   let mockSubscriptionsService: MockSubscriptionsService;
 
+  const event = new EventEntity<TransactionUpdatePayload>({
+    scope: '0x01',
+    type: EventType.TransactionUpdate,
+    processed: true,
+    id: 1,
+    createdAt: new Date('10/14/1987'),
+    payload: {
+      type: TransactionType.Single,
+      transactionTag: TxTags.asset.RegisterTicker,
+      status: TransactionStatus.Unapproved,
+    },
+  });
+
   beforeEach(async () => {
     mockNotificationsService = new MockNotificationsService();
     mockSubscriptionsService = new MockSubscriptionsService();
@@ -33,18 +46,7 @@ describe('EventsService', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const unsafeService: any = service;
     unsafeService.events = {
-      1: new EventEntity<TransactionUpdatePayload>({
-        scope: '0x01',
-        type: EventType.TransactionUpdate,
-        processed: true,
-        id: 1,
-        createdAt: new Date('10/14/1987'),
-        payload: {
-          type: TransactionType.Single,
-          transactionTag: TxTags.asset.RegisterTicker,
-          status: TransactionStatus.Unapproved,
-        },
-      }),
+      1: event,
     };
     unsafeService.currentId = 1;
   });
@@ -53,7 +55,7 @@ describe('EventsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('method: createEvent', () => {
+  describe('createEvent', () => {
     it('should create an event and its associated notifications, and return the new event ID', async () => {
       const type = EventType.TransactionUpdate;
       const scope = '0x02';
@@ -78,9 +80,9 @@ describe('EventsService', () => {
       expect(result).toBe(2);
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { createdAt, ...event } = await service.findOne(2);
+      const { createdAt, ...updatedEvent } = await service.findOne(2);
 
-      expect(event).toEqual({
+      expect(updatedEvent).toEqual({
         type,
         scope,
         payload,
@@ -96,22 +98,11 @@ describe('EventsService', () => {
     });
   });
 
-  describe('method: findOne', () => {
+  describe('findOne', () => {
     it('should return an event by ID', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { createdAt, ...result } = await service.findOne(1);
+      const result = await service.findOne(1);
 
-      expect(result).toEqual({
-        id: 1,
-        type: EventType.TransactionUpdate,
-        scope: '0x01',
-        processed: true,
-        payload: {
-          type: TransactionType.Single,
-          transactionTag: TxTags.asset.RegisterTicker,
-          status: TransactionStatus.Unapproved,
-        },
-      });
+      expect(result).toEqual(event);
     });
 
     it('should throw an error if the event does not exist', () => {

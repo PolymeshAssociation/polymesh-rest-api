@@ -9,7 +9,7 @@ import { AppModule } from '~/app.module';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   // App setup
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(

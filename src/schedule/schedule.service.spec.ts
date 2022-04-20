@@ -24,7 +24,7 @@ describe('ScheduleService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('method: addInterval', () => {
+  describe('addInterval', () => {
     const id = 'someId';
     const cb = jest.fn();
     const time = 5000;
@@ -60,7 +60,7 @@ describe('ScheduleService', () => {
     });
   });
 
-  describe('method: deleteInterval', () => {
+  describe('deleteInterval', () => {
     it('should remove an interval added to the scheduler registry', () => {
       const id = 'someId';
       const cb = jest.fn();
@@ -78,7 +78,7 @@ describe('ScheduleService', () => {
     });
   });
 
-  describe('method: addTimeout', () => {
+  describe('addTimeout', () => {
     const id = 'someId';
     const cb = jest.fn();
     const time = 5000;

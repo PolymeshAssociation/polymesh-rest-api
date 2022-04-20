@@ -57,7 +57,7 @@ export class EventsService {
     return event;
   }
 
-  private async createEventNotifications(event: EventEntity) {
+  private async createEventNotifications(event: EventEntity): Promise<void> {
     const { type: eventType, scope: eventScope, id: eventId } = event;
     const { subscriptionsService, notificationsService } = this;
 

@@ -15,10 +15,10 @@ interface TransactionErrorPayload {
   error: string;
 }
 
-type TransactionInBlockPayload = TransactionSignedPayload & {
+interface TransactionInBlockPayload extends TransactionSignedPayload {
   blockHash: string;
   blockNumber: string;
-};
+}
 
 interface TransactionSucceededPayload extends TransactionInBlockPayload {
   status: TransactionStatus.Succeeded;
