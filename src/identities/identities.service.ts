@@ -20,7 +20,7 @@ export class IdentitiesService {
     private readonly logger: PolymeshLogger,
     private readonly signingService: SigningService
   ) {
-    this.logger.setContext(IdentitiesService.name);
+    logger.setContext(IdentitiesService.name);
   }
 
   /**

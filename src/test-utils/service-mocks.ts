@@ -40,3 +40,32 @@ export class MockAccountsService {
   getAccountBalance = jest.fn();
   transferPolyx = jest.fn();
 }
+
+export class MockEventsService {
+  createEvent = jest.fn();
+  findOne = jest.fn();
+}
+
+export class MockSubscriptionsService {
+  findAll = jest.fn();
+  findOne = jest.fn();
+  createSubscription = jest.fn();
+  updateSubscription = jest.fn();
+  batchMarkAsDone = jest.fn();
+  batchBumpNonce = jest.fn();
+}
+
+export class MockNotificationsService {
+  findOne = jest.fn();
+  createNotifications = jest.fn();
+  updateNotification = jest.fn();
+}
+
+export class MockHttpService {
+  post = jest.fn();
+}
+
+export class MockScheduleService {
+  addTimeout = jest.fn();
+  addInterval = jest.fn();
+}

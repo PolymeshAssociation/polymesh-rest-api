@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
-import { CorporateActionModel } from '~/corporate-actions/model/corporate-action.model';
+import { CorporateActionModel } from '~/corporate-actions/models/corporate-action.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 
 export class DividendDistributionModel extends CorporateActionModel {

@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { registerDecorator, ValidationArguments } from 'class-validator';
 
 export function IsPermissionsLike() {

@@ -22,14 +22,14 @@ describe('LocalSigningService', () => {
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PolymeshModule, SigningModule, LoggerModule],
+      imports: [PolymeshModule, SigningModule],
       providers: [mockPolymeshLoggerProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .compile();
 
-    logger = await module.resolve<PolymeshLogger>(PolymeshLogger);
+    logger = mockPolymeshLoggerProvider.useValue as unknown as PolymeshLogger;
     polymeshService = module.get<PolymeshService>(PolymeshService);
     const manager = await LocalSigningManager.create({ accounts: [] });
     manager.setSs58Format(0);
@@ -86,7 +86,7 @@ describe('VaultSigningService', () => {
       .useValue(mockPolymeshApi)
       .compile();
 
-    logger = await module.resolve<PolymeshLogger>(PolymeshLogger);
+    logger = mockPolymeshLoggerProvider.useValue as unknown as PolymeshLogger;
     polymeshService = module.get<PolymeshService>(PolymeshService);
     manager = new MockHashicorpVaultSigningManager();
 

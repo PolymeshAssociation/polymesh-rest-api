@@ -16,7 +16,7 @@ import {
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
   {
@@ -74,7 +74,7 @@ type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {
  *
  * @note Non-schema objects in `union` must be defined as extra models using the `ApiExtraModels` decorator(at the class-level)
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOneOfOptions) => {
   // eslint-disable-next-line @typescript-eslint/ban-types
   const oneOfItems: (SchemaObject | ReferenceObject)[] = [];

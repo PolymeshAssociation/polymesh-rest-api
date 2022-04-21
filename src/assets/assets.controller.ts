@@ -130,7 +130,7 @@ export class AssetsController {
     description: 'Start key from which documents are to be fetched',
     type: 'string',
     required: false,
-    example: 'STARTKEY',
+    example: 'START_KEY',
   })
   @ApiArrayResponse(AssetDocumentModel, {
     description: 'List of documents attached to the Asset',

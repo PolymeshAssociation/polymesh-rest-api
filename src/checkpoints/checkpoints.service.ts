@@ -26,7 +26,7 @@ export class CheckpointsService {
     private readonly signingService: SigningService,
     private readonly logger: PolymeshLogger
   ) {
-    this.logger.setContext(CheckpointsService.name);
+    logger.setContext(CheckpointsService.name);
   }
 
   public async findAllByTicker(

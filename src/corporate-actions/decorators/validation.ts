@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { registerDecorator, validate as validateClass, ValidationArguments } from 'class-validator';
 
 import { CorporateActionCheckpointDto } from '~/corporate-actions/dto/corporate-action-checkpoint.dto';
