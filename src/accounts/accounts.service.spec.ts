@@ -62,27 +62,6 @@ describe('AccountsService', () => {
   });
 
   describe('findOne', () => {
-    describe('if the Account address is invalid', () => {
-      it('should throw a BadRequestException', async () => {
-        const mockError = {
-          code: ErrorCode.ValidationError,
-          message: 'The supplied address is not a valid SS58 address',
-        };
-
-        mockPolymeshApi.accountManagement.getAccount.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        const address = 'address';
-
-        const expectedError = await expect(() => service.findOne(address)).rejects;
-        expectedError.toBeInstanceOf(BadRequestException);
-        expectedError.toThrowError(`The address "${address}" is not a valid SS58 address`);
-      });
-    });
-
     describe("if the Account address is not encoded with the chain's SS58 format", () => {
       it('should throw a BadRequestException', async () => {
         const mockError = {
@@ -272,7 +251,7 @@ describe('AccountsService', () => {
       count: new BigNumber(1),
     };
 
-    it('should return the list of Asset documents', async () => {
+    it('should return the transaction history of the Asset', async () => {
       const mockAccount = new MockAccount();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
@@ -287,18 +266,5 @@ describe('AccountsService', () => {
       expect(result).toEqual(mockTransactions);
       findOneSpy.mockRestore();
     });
-
-    // it('should return the list of Asset documents with order filters', async () => {
-    //   const mockAsset = new MockAsset();
-
-    //   const findOneSpy = jest.spyOn(service, 'findOne');
-    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   findOneSpy.mockResolvedValue(mockAsset as any);
-    //   mockAsset.documents.get.mockResolvedValue(mockAssetDocuments);
-
-    //   const result = await service.findDocuments('TICKER', new BigNumber(10), 'NEXT_KEY');
-    //   expect(result).toEqual(mockAssetDocuments);
-    //   findOneSpy.mockRestore();
-    // });
   });
 });

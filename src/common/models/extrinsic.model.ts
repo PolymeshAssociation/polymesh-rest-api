@@ -24,7 +24,7 @@ export class ExtrinsicModel {
   readonly blockNumber: BigNumber;
 
   @ApiProperty({
-    description: 'Index of the transaction on the block',
+    description: 'Index of the transaction in the block',
     type: 'string',
     example: '1',
   })
@@ -59,7 +59,7 @@ export class ExtrinsicModel {
   readonly transactionTag: TxTag;
 
   @ApiProperty({
-    description: 'List of parameters to associated with the transaction',
+    description: 'List of parameters associated with the transaction',
     isArray: true,
     example: [
       {
@@ -72,7 +72,7 @@ export class ExtrinsicModel {
   readonly params: Record<string, unknown>[];
 
   @ApiProperty({
-    description: 'Indicates whether the transaction is successful or not',
+    description: 'Indicates whether the transaction was successful or not',
     type: 'boolean',
     example: true,
   })

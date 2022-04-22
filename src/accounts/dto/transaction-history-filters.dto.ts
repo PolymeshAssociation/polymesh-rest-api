@@ -44,7 +44,7 @@ export class TransactionHistoryFiltersDto {
   readonly tag?: TxTag;
 
   @ApiPropertyOptional({
-    description: 'Indicator to filter out successful transactions',
+    description: 'If true, only successful transactions are fetched',
     type: 'boolean',
     example: true,
   })

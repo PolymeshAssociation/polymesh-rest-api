@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common';
 import {
   ApiCreatedResponse,
-  ApiForbiddenResponse,
+  ApiNotImplementedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -82,8 +82,8 @@ export class AccountsController {
     description: 'List of transactions signed by the given Account',
     paginated: true,
   })
-  @ApiForbiddenResponse({
-    description: 'Middleware connection details are not provided',
+  @ApiNotImplementedResponse({
+    description: 'GraphQL Middleware not reachable',
   })
   @UseInterceptors(MiddlewareInterceptor)
   @Get(':account/transactions')

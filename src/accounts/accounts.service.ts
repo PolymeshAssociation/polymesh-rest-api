@@ -29,17 +29,8 @@ export class AccountsService {
       return await polymeshApi.accountManagement.getAccount({ address });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (
-          code === ErrorCode.ValidationError &&
-          message.startsWith('The supplied address is not a valid')
-        ) {
-          throw new BadRequestException(`The address "${address}" is not a valid SS58 address`);
-        }
-        if (
-          code === ErrorCode.ValidationError &&
-          message.startsWith('The supplied address is not encoded')
-        ) {
+        const { code } = err;
+        if (code === ErrorCode.ValidationError) {
           throw new BadRequestException(
             `The address "${address}" is not encoded with the chain's SS58 format "${polymeshApi.network
               .getSs58Format()

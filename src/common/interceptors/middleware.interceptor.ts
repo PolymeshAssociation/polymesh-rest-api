@@ -1,9 +1,9 @@
 import {
   CallHandler,
   ExecutionContext,
-  ForbiddenException,
   Injectable,
   NestInterceptor,
+  NotImplementedException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
@@ -18,7 +18,7 @@ export class MiddlewareInterceptor implements NestInterceptor {
     const { POLYMESH_MIDDLEWARE_URL, POLYMESH_MIDDLEWARE_API_KEY } = process.env;
 
     if (!POLYMESH_MIDDLEWARE_URL || !POLYMESH_MIDDLEWARE_API_KEY) {
-      throw new ForbiddenException(
+      throw new NotImplementedException(
         'Cannot make the request without an enabled middleware connection. Please provide `POLYMESH_MIDDLEWARE_URL` and `POLYMESH_MIDDLEWARE_API_KEY` in your environment'
       );
     }

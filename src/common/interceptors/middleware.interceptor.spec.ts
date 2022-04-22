@@ -1,4 +1,4 @@
-import { ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { ExecutionContext, NotImplementedException } from '@nestjs/common';
 
 import { MiddlewareInterceptor } from '~/common/interceptors/middleware.interceptor';
 
@@ -24,7 +24,7 @@ describe('MiddlewareInterceptor', () => {
   });
 
   describe('intercept', () => {
-    it('should throw a ForbiddenException if middleware url and api key are not defined', () => {
+    it('should throw a NotImplementedException if middleware url and api key are not defined', () => {
       let err;
 
       try {
@@ -33,8 +33,8 @@ describe('MiddlewareInterceptor', () => {
         err = e;
       }
 
-      expect(err).toBeInstanceOf(ForbiddenException);
-      expect((err as ForbiddenException).message).toEqual(
+      expect(err).toBeInstanceOf(NotImplementedException);
+      expect((err as NotImplementedException).message).toEqual(
         'Cannot make the request without an enabled middleware connection. Please provide `POLYMESH_MIDDLEWARE_URL` and `POLYMESH_MIDDLEWARE_API_KEY` in your environment'
       );
     });
