@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
-import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
+import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
 
 export class DividendDistributionDetailsModel extends DividendDistributionModel {
   @ApiProperty({

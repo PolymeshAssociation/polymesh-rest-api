@@ -1,6 +1,12 @@
 /* istanbul ignore file */
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AuthorizationType, CalendarUnit, TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  AuthorizationType,
+  CalendarUnit,
+  TransactionStatus,
+  TxTag,
+  TxTags,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -219,6 +225,31 @@ export class MockTransactionQueue {
   ) {}
 
   public run = jest.fn();
+}
+
+class MockPolymeshTransactionBase {
+  blockHash?: string;
+  txHash?: string;
+  blockNumber?: BigNumber;
+  status: TransactionStatus = TransactionStatus.Unapproved;
+  error: Error;
+
+  run = jest.fn().mockReturnValue(Promise.resolve());
+  onStatusChange = jest.fn();
+}
+export class MockPolymeshTransaction extends MockPolymeshTransactionBase {
+  tag: TxTag = TxTags.asset.RegisterTicker;
+}
+
+export class MockPolymeshTransactionBatch extends MockPolymeshTransactionBase {
+  transactions: { tag: TxTag }[] = [
+    {
+      tag: TxTags.asset.RegisterTicker,
+    },
+    {
+      tag: TxTags.asset.CreateAsset,
+    },
+  ];
 }
 
 export class MockOffering {

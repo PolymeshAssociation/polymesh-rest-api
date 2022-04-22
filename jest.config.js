@@ -8,5 +8,6 @@ module.exports = {
     '~/(.*)': '<rootDir>/src/$1',
   },
   testRegex: '.*\\.spec\\.ts$',
-  coverageDirectory: '../coverage',
+  coverageDirectory: './coverage',
+  collectCoverage: true,
 };

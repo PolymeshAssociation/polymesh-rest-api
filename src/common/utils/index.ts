@@ -7,6 +7,7 @@ import {
 import {
   ErrorCode,
   ModuleName,
+  NoArgsProcedureMethod,
   ProcedureMethod,
   ProcedureOpts,
   TxTags,
@@ -26,8 +27,10 @@ export type QueueResult<T> = {
   transactions: (TransactionModel | BatchTransactionModel)[];
 };
 
+type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
+
 export async function processQueue<MethodArgs, ReturnType>(
-  method: ProcedureMethod<MethodArgs, unknown, ReturnType>,
+  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, unknown, ReturnType>>,
   args: MethodArgs,
   opts: ProcedureOpts
 ): Promise<QueueResult<ReturnType>> {
@@ -35,7 +38,9 @@ export async function processQueue<MethodArgs, ReturnType>(
     const queue = await method(args, opts);
     const result = await queue.run();
 
-    const assembleTransaction = (transaction: unknown) => {
+    const assembleTransaction = (
+      transaction: unknown
+    ): TransactionModel | BatchTransactionModel => {
       let tagDetails;
       if (isPolymeshTransaction(transaction)) {
         const { tag } = transaction;
