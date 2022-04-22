@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiCreatedResponse,
-  ApiNotImplementedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -15,7 +14,6 @@ import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { MiddlewareInterceptor } from '~/common/interceptors/middleware.interceptor';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -82,10 +80,6 @@ export class AccountsController {
     description: 'List of transactions signed by the given Account',
     paginated: true,
   })
-  @ApiNotImplementedResponse({
-    description: 'GraphQL Middleware not reachable',
-  })
-  @UseInterceptors(MiddlewareInterceptor)
   @Get(':account/transactions')
   async getTransactionHistory(
     @Param() { account }: AccountParamsDto,
