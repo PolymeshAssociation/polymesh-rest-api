@@ -63,6 +63,7 @@ export class MockPolymesh {
 }
 
 export class MockAsset {
+  ticker = 'TICKER';
   public details = jest.fn();
   public getIdentifiers = jest.fn();
   public currentFundingRound = jest.fn();
@@ -116,6 +117,8 @@ export class MockAsset {
     setDefaultConfig: jest.fn(),
     remove: jest.fn(),
   };
+
+  public toJson = jest.fn().mockImplementation(() => this.ticker);
 }
 
 export class MockInstruction {
@@ -268,4 +271,5 @@ export class MockTickerReservation {
 export class MockAccount {
   address = 'address';
   getTransactionHistory = jest.fn();
+  getPermissions = jest.fn();
 }
