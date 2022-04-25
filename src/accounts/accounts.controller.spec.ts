@@ -1,8 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
+import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountsService } from '~/accounts/accounts.service';
+import { ExtrinsicModel } from '~/common/models/extrinsic.model';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { MockAccountsService } from '~/test-utils/service-mocks';
 
 describe('AccountsController', () => {
@@ -58,6 +62,49 @@ describe('AccountsController', () => {
       expect(result).toEqual({
         transactions,
       });
+    });
+  });
+
+  describe('getTransactionHistory', () => {
+    const mockTransaction = {
+      blockHash: 'blockHash',
+      blockNumber: new BigNumber(1000000),
+      extrinsicIdx: new BigNumber(1),
+      address: 'someAccount',
+      nonce: new BigNumber(123456),
+      txTag: TxTags.asset.RegisterTicker,
+      params: [
+        {
+          name: 'ticker',
+          value: 'TICKER',
+        },
+      ],
+      success: true,
+      specVersionId: new BigNumber(3002),
+      extrinsicHash: 'extrinsicHash',
+    };
+
+    const mockTransactions = {
+      data: [mockTransaction],
+      next: null,
+      count: new BigNumber(1),
+    };
+
+    it('should return the list of Asset documents', async () => {
+      mockAccountsService.getTransactionHistory.mockResolvedValue(mockTransactions);
+
+      const result = await controller.getTransactionHistory(
+        { account: 'someAccount' },
+        { field: TransactionOrderFields.BlockId, order: Order.Desc }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: [new ExtrinsicModel(mockTransaction)],
+          total: new BigNumber(1),
+          next: null,
+        })
+      );
     });
   });
 });

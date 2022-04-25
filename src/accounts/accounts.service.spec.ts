@@ -2,9 +2,10 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -14,7 +15,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { SigningModule } from '~/signing/signing.module';
-import { MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAccount, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
@@ -49,6 +50,7 @@ describe('AccountsService', () => {
 
   afterAll(() => {
     mockIsPolymeshTransaction.mockReset();
+    mockIsPolymeshError.mockReset();
   });
 
   afterEach(async () => {
@@ -57,6 +59,58 @@ describe('AccountsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('findOne', () => {
+    describe("if the Account address is not encoded with the chain's SS58 format", () => {
+      it('should throw a BadRequestException', async () => {
+        const mockError = {
+          code: ErrorCode.ValidationError,
+          message: "The supplied address is not encoded with the chain's SS58 format",
+        };
+
+        const ss58Format = new BigNumber(42);
+        mockPolymeshApi.network.getSs58Format.mockReturnValue(ss58Format);
+
+        mockPolymeshApi.accountManagement.getAccount.mockImplementation(() => {
+          throw mockError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const address = 'address';
+
+        const expectedError = await expect(() => service.findOne(address)).rejects;
+        expectedError.toBeInstanceOf(BadRequestException);
+        expectedError.toThrowError(
+          `The address "${address}" is not encoded with the chain's SS58 format "${ss58Format.toString()}"`
+        );
+      });
+    });
+
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('Something else');
+
+        mockPolymeshApi.accountManagement.getAccount.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        return expect(() => service.findOne('address')).rejects.toThrowError('Something else');
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the Account', async () => {
+        const mockAccount = 'account';
+
+        mockPolymeshApi.accountManagement.getAccount.mockReturnValue(mockAccount);
+
+        const result = await service.findOne('address');
+
+        expect(result).toBe(mockAccount);
+      });
+    });
   });
 
   describe('getAccountBalance', () => {
@@ -128,7 +182,6 @@ describe('AccountsService', () => {
 
         expect(error).toBeInstanceOf(HttpException);
         expect(mockPolymeshApi.network.transferPolyx).toHaveBeenCalled();
-        mockIsPolymeshError.mockReset();
       });
     });
 
@@ -170,6 +223,48 @@ describe('AccountsService', () => {
         });
         expect(mockPolymeshApi.network.transferPolyx).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('getTransactionHistory', () => {
+    const mockTransactions = {
+      data: [
+        {
+          blockHash: 'blockHash',
+          blockNumber: new BigNumber(1000000),
+          extrinsicIdx: new BigNumber(1),
+          address: 'someAccount',
+          nonce: new BigNumber(123456),
+          txTag: TxTags.asset.RegisterTicker,
+          params: [
+            {
+              name: 'ticker',
+              value: 'TICKER',
+            },
+          ],
+          success: true,
+          specVersionId: new BigNumber(3002),
+          extrinsicHash: 'extrinsicHash',
+        },
+      ],
+      next: null,
+      count: new BigNumber(1),
+    };
+
+    it('should return the transaction history of the Asset', async () => {
+      const mockAccount = new MockAccount();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAccount as any);
+      mockAccount.getTransactionHistory.mockResolvedValue(mockTransactions);
+
+      const result = await service.getTransactionHistory('address', {
+        field: TransactionOrderFields.BlockId,
+        order: Order.Desc,
+      });
+      expect(result).toEqual(mockTransactions);
+      findOneSpy.mockRestore();
     });
   });
 });
