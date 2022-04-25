@@ -1102,10 +1102,10 @@
   dependencies:
     "@polymathnetwork/signing-manager-types" "^1.0.3"
 
-"@polymathnetwork/polymesh-sdk@14.0.0-alpha.4":
-  version "14.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-14.0.0-alpha.4.tgz#ac13eac4e1d53c504e083ce3ceeb335835536a4d"
-  integrity sha512-xY4+FbrlP5/Ij3sTcgH26bQUKp4eAKBMrr6J8LLcsb7Y7EcjRWgE4HSb4EPCwQ7XR9QQiPcAG+K/aw74IuJqpA==
+"@polymathnetwork/polymesh-sdk@14.0.0-alpha.11":
+  version "14.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-14.0.0-alpha.11.tgz#5a7f6ceeb8bdeaa449487c3ddcef9744af6ba071"
+  integrity sha512-MYyQdPloY8YOYw5qZaoQ0haDxQzOZdsYsd6CVwHzu/WDkryCTNustEbonfxTEoZyB5hIs46Mfg31k1YXgwH9hg==
   dependencies:
     "@polkadot/api" "5.1.1"
     "@polkadot/util" "^7.0.2"
@@ -1122,7 +1122,7 @@
     cross-fetch "^3.0.6"
     dayjs "1.10.6"
     eth-sig-util "3.0.1"
-    graphql "14.5.0"
+    graphql "^15.0.0"
     graphql-tag "2.12.4"
     iso-7064 "^1.0.2"
     json-stable-stringify "^1.0.1"
@@ -4551,12 +4551,10 @@ graphql-tag@2.12.4:
   dependencies:
     tslib "^2.1.0"
 
-graphql@14.5.0:
-  version "14.5.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.5.0.tgz#4801e6460942c9c591944617f6dd224a9e531520"
-  integrity sha512-wnGcTD181L2xPnIwHHjx/moV4ulxA2Kms9zcUY+B/SIrK+2N+iOC6WNgnR2zVTmg1Z8P+CZq5KXibTnatg3WUw==
-  dependencies:
-    iterall "^1.2.2"
+graphql@^15.0.0:
+  version "15.8.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
+  integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==
 
 growly@^1.3.0:
   version "1.3.0"
@@ -5265,11 +5263,6 @@ istanbul-reports@^3.0.2:
   dependencies:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
-
-iterall@^1.2.2:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.3.0.tgz#afcb08492e2915cbd8a0884eb93a8c94d0d72fea"
-  integrity sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==
 
 iterare@1.2.1:
   version "1.2.1"

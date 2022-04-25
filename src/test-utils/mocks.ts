@@ -26,6 +26,7 @@ export class MockPolymesh {
   public network = {
     getLatestBlock: jest.fn(),
     transferPolyx: jest.fn(),
+    getSs58Format: jest.fn(),
   };
 
   public assets = {
@@ -38,6 +39,7 @@ export class MockPolymesh {
   };
 
   public accountManagement = {
+    getAccount: jest.fn(),
     getAccountBalance: jest.fn(),
     inviteAccount: jest.fn(),
   };
@@ -256,11 +258,15 @@ export class MockOffering {
   ticker = 'TICKER';
   public getInvestments = jest.fn();
 }
-
 export class MockTickerReservation {
   ticker = 'TICKER';
 
   public transferOwnership = jest.fn();
   public extend = jest.fn();
   public details = jest.fn();
+}
+
+export class MockAccount {
+  address = 'address';
+  getTransactionHistory = jest.fn();
 }

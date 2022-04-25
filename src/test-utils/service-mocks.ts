@@ -39,6 +39,7 @@ export class MockAuthorizationsService {
 export class MockAccountsService {
   getAccountBalance = jest.fn();
   transferPolyx = jest.fn();
+  getTransactionHistory = jest.fn();
 }
 
 export class MockEventsService {
