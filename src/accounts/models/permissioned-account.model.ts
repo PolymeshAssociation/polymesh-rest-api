@@ -16,7 +16,7 @@ export class PermissionedAccountModel {
   readonly account: AccountModel;
 
   @ApiProperty({
-    description: 'Permissions present with this Secondary Account',
+    description: 'Permissions present with this Permissioned Account',
   })
   @FromEntityObject()
   readonly permissions: Permissions;

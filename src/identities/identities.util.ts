@@ -1,12 +1,12 @@
 /** istanbul ignore file */
 
-import { Identity, PermissionedAccount, Signer } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, Signer } from '@polymathnetwork/polymesh-sdk/types';
 import { isAccount } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { createPermissionedAccountModel } from '~/accounts/accounts.util';
 import { AccountModel } from '~/identities/models/account.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
-import { PermissionedAccountModel } from '~/identities/models/permissioned-account.model';
 import { SignerModel } from '~/identities/models/signer.model';
 
 /**
@@ -38,14 +38,4 @@ export function createSignerModel(signer: Signer): SignerModel {
   return new IdentitySignerModel({
     did: signer.did,
   });
-}
-
-export function createPermissionedAccountModel(
-  permissionedAccount: PermissionedAccount
-): PermissionedAccountModel {
-  const {
-    account: { address },
-    permissions,
-  } = permissionedAccount;
-  return new PermissionedAccountModel({ account: new AccountModel({ address }), permissions });
 }
