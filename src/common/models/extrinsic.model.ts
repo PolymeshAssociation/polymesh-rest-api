@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ExtrinsicData, TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
-import { FromBigNumber, FromEntityObject } from '~/common/decorators/transformation';
+import { FromBigNumber } from '~/common/decorators/transformation';
 import { getTxTags } from '~/common/utils';
 
 export class ExtrinsicModel {
@@ -68,7 +68,6 @@ export class ExtrinsicModel {
       },
     ],
   })
-  @FromEntityObject()
   readonly params: Record<string, unknown>[];
 
   @ApiProperty({
