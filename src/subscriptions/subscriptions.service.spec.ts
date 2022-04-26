@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 const mockLastValueFrom = jest.fn();
+const mockRandomBytes = jest.fn();
 
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -17,6 +18,10 @@ import { MockHttpService, MockScheduleService } from '~/test-utils/service-mocks
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   lastValueFrom: mockLastValueFrom,
+}));
+jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
+  randomBytes: mockRandomBytes,
 }));
 
 describe('SubscriptionsService', () => {
@@ -171,10 +176,14 @@ describe('SubscriptionsService', () => {
 
       expect(mockHttpService.post).not.toHaveBeenCalled();
 
+      const handshakeSecret = 'cGxhY2Vob2xkZXI=';
+      mockRandomBytes.mockImplementation((_length, callback) => {
+        callback(undefined, Buffer.from(handshakeSecret, 'base64'));
+      });
       mockLastValueFrom.mockResolvedValue({
         status: 200,
         headers: {
-          [HANDSHAKE_HEADER_KEY]: 'placeholderHandshake:3',
+          [HANDSHAKE_HEADER_KEY]: handshakeSecret,
         },
       });
 

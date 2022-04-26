@@ -2,8 +2,10 @@ import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
+import { randomBytes } from 'crypto';
 import { filter, pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { promisify } from 'util';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { ScheduleService } from '~/schedule/schedule.service';
@@ -191,7 +193,7 @@ export class SubscriptionsService {
     const { httpService, logger } = this;
 
     try {
-      const secret = this.generateHandshakeSecret(id);
+      const secret = await this.generateHandshakeSecret();
 
       const response = await lastValueFrom(
         httpService.post(
@@ -266,10 +268,10 @@ export class SubscriptionsService {
   /**
    * Generate a random handshake secret that the webhook has to mirror back
    *   to activate the subscription
-   *
-   * @param id - subscription ID
    */
-  private generateHandshakeSecret(id: number): string {
-    return `placeholderHandshake:${id}`;
+  private async generateHandshakeSecret(): Promise<string> {
+    const buf = await promisify(randomBytes)(32);
+
+    return buf.toString('base64');
   }
 }
