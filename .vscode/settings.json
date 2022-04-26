@@ -1,7 +1,7 @@
 {
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.preferences.quoteStyle": "single",
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.tsdk": "node_modules/typescript/lib",
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "search.exclude": {

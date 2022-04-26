@@ -53,6 +53,7 @@ export class AssetsController {
   @Get(':ticker')
   public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<AssetDetailsModel> {
     const asset = await this.assetsService.findOne(ticker);
+
     return createAssetDetailsModel(asset);
   }
 
