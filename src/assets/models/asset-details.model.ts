@@ -66,6 +66,13 @@ export class AssetDetailsModel {
   })
   readonly fundingRound: string | null;
 
+  @ApiProperty({
+    description: 'Whether transfers are frozen for the Asset',
+    type: 'boolean',
+    example: 'true',
+  })
+  readonly isFrozen: boolean;
+
   constructor(model: AssetDetailsModel) {
     Object.assign(this, model);
   }
