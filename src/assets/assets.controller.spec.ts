@@ -56,9 +56,11 @@ describe('AssetsController', () => {
           value: 'US000000000',
         },
       ];
+      const mockAssetIsFrozen = false;
       const mockAsset = new MockAsset();
       mockAsset.details.mockResolvedValue(mockAssetDetails);
       mockAsset.getIdentifiers.mockResolvedValue(mockIdentifiers);
+      mockAsset.isFrozen.mockResolvedValue(mockAssetIsFrozen);
 
       const mockFundingRound = 'Series A';
       mockAsset.currentFundingRound.mockResolvedValue(mockFundingRound);
@@ -71,6 +73,7 @@ describe('AssetsController', () => {
         ...mockAssetDetails,
         securityIdentifiers: mockIdentifiers,
         fundingRound: mockFundingRound,
+        isFrozen: mockAssetIsFrozen,
       };
 
       expect(result).toEqual(mockResult);
