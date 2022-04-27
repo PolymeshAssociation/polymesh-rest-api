@@ -2,6 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
+import { createHmac } from 'crypto';
+import stringify from 'json-stable-stringify';
 import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
@@ -145,7 +147,7 @@ export class NotificationsService {
         eventsService.findOne(eventId),
       ]);
 
-      const { webhookUrl } = subscription;
+      const { webhookUrl, legitimacySecret } = subscription;
 
       if (subscription.isExpired()) {
         await this.updateNotification(id, {
@@ -155,18 +157,21 @@ export class NotificationsService {
         return;
       }
 
-      const signature = this.signPayload(payload);
+      const notificationPayload = this.assembleNotificationPayload(
+        subscriptionId,
+        type,
+        scope,
+        payload,
+        nonce
+      );
+      const signature = this.signPayload(notificationPayload, legitimacySecret);
       const response = await lastValueFrom(
-        this.httpService.post(
-          webhookUrl,
-          this.assembleNotificationPayload(subscriptionId, type, scope, payload, nonce),
-          {
-            headers: {
-              [SIGNATURE_HEADER_KEY]: signature,
-            },
-            timeout: 10000,
-          }
-        )
+        this.httpService.post(webhookUrl, notificationPayload, {
+          headers: {
+            [SIGNATURE_HEADER_KEY]: signature,
+          },
+          timeout: 10000,
+        })
       );
 
       await this.handleWebhookResponse(id, response);
@@ -235,11 +240,10 @@ export class NotificationsService {
     this.scheduleSendNotification(id);
   }
 
-  // TODO @monitz87: implement HMAC signature (will have to include the secret somehow)
   /**
    * Compute a signature of the payload for legitimacy validation
    */
-  private signPayload(payload: EventPayload): string {
-    return `placeholderSignature:${JSON.stringify(payload)}`;
+  private signPayload(payload: NotificationPayload, secret: string): string {
+    return createHmac('SHA256', secret).update(stringify(payload)).digest('base64');
   }
 }
