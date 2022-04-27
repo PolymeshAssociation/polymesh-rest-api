@@ -6,7 +6,7 @@ import { PermissionTypeModel } from '~/accounts/models/permission-type.model';
 
 export class AssetPermissionsModel extends PermissionTypeModel {
   @ApiProperty({
-    description: 'List of assets included/excluded',
+    description: 'List of included/excluded Assets',
     type: 'string',
     isArray: true,
     example: ['TICKER123456'],

@@ -8,7 +8,7 @@ import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifi
 
 export class PortfolioPermissionsModel extends PermissionTypeModel {
   @ApiProperty({
-    description: 'List of Portfolios to be included or excluded',
+    description: 'List of included/excluded Portfolios',
     isArray: true,
     type: PortfolioIdentifierModel,
   })

@@ -1,5 +1,3 @@
-/** istanbul ignore file */
-
 import { PermissionedAccount, Permissions } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
@@ -9,16 +7,6 @@ import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissio
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
 import { AccountModel } from '~/identities/models/account.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
-
-export function createPermissionedAccountModel(
-  permissionedAccount: PermissionedAccount
-): PermissionedAccountModel {
-  const {
-    account: { address },
-    permissions,
-  } = permissionedAccount;
-  return new PermissionedAccountModel({ account: new AccountModel({ address }), permissions });
-}
 
 export function createPermissionsModel(permissions: Permissions): PermissionsModel {
   let { assets, portfolios, transactions, transactionGroups } = permissions;
@@ -55,5 +43,18 @@ export function createPermissionsModel(permissions: Permissions): PermissionsMod
     portfolios: portfolioPermissions,
     transactions: transactionPermissions,
     transactionGroups,
+  });
+}
+
+export function createPermissionedAccountModel(
+  permissionedAccount: PermissionedAccount
+): PermissionedAccountModel {
+  const {
+    account: { address },
+    permissions,
+  } = permissionedAccount;
+  return new PermissionedAccountModel({
+    account: new AccountModel({ address }),
+    permissions: createPermissionsModel(permissions),
   });
 }
