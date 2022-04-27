@@ -9,12 +9,14 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
+import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
@@ -260,6 +262,31 @@ export class AssetsController {
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: "Redeem Asset's tokens",
+    description:
+      "This endpoint allows to redeem (burn) an amount of an Asset's tokens. These tokens are removed from Signer's Default Portfolio",
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      "The amount to be redeemed is less than free balance in the Signer's Default Portfolio",
+  })
+  @Post(':ticker/redeem')
+  public async redeem(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: RedeemTokensDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.redeem(ticker, params);
     return new TransactionQueueModel({ transactions });
   }
 }
