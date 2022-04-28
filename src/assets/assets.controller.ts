@@ -287,7 +287,7 @@ export class AssetsController {
     description: 'The Asset does not exist',
   })
   @ApiUnprocessableEntityResponse({
-    description: 'The asset is already frozen',
+    description: 'The Asset is already frozen',
   })
   @Post(':ticker/freeze')
   public async freeze(
