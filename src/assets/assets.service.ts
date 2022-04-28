@@ -12,6 +12,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
@@ -97,5 +98,21 @@ export class AssetsService {
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.issuance.issue, rest, { signingAccount: address });
+  }
+
+  public async freeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+    const { signer } = params;
+    const asset = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(asset.freeze, { signingAccount: address }, {});
+  }
+
+  public async unfreeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+    const { signer } = params;
+    const asset = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(asset.unfreeze, { signingAccount: address }, {});
   }
 }
