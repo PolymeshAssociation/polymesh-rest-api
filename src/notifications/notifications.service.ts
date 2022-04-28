@@ -8,7 +8,7 @@ import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
 import { EventsService } from '~/events/events.service';
-import { EventPayload, EventType, GetPayload } from '~/events/types';
+import { EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import notificationsConfig from '~/notifications/config/notifications.config';
 import { NotificationEntity } from '~/notifications/entities/notification.entity';
