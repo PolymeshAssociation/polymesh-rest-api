@@ -15,6 +15,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ReserveTickerDto } from '~/ticker-reservations/dto/reserve-ticker.dto';
 import { TransferTickerOwnershipDto } from '~/ticker-reservations/dto/transfer-ticker-ownership.dto';
 import { ExtendedTickerReservationModel } from '~/ticker-reservations/models/extended-ticker-reservation.model';
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
@@ -22,19 +23,13 @@ import { TickerReservationsService } from '~/ticker-reservations/ticker-reservat
 import { createTickerReservationModel } from '~/ticker-reservations/ticker-reservations.util';
 
 @ApiTags('ticker-reservations')
-@Controller('ticker-reservations/:ticker')
+@Controller('ticker-reservations')
 export class TickerReservationsController {
   constructor(private readonly tickerReservationsService: TickerReservationsService) {}
 
   @ApiOperation({
     summary: 'Reserve a Ticker',
     description: 'Reserves a ticker so that an Asset can be created with it later',
-  })
-  @ApiParam({
-    name: 'ticker',
-    description: 'Ticker to be reserved',
-    type: 'string',
-    example: 'TICKER',
   })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
@@ -43,10 +38,9 @@ export class TickerReservationsController {
   @ApiUnprocessableEntityResponse({
     description: 'The ticker has already been reserved',
   })
-  @Post()
+  @Post('reserve-ticker')
   public async reserve(
-    @Param() { ticker }: TickerParamsDto,
-    @Body() { signer }: SignerDto
+    @Body() { ticker, signer }: ReserveTickerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.tickerReservationsService.reserve(ticker, signer);
     return new TransactionQueueModel({ transactions });
@@ -72,7 +66,7 @@ export class TickerReservationsController {
   @ApiGoneResponse({
     description: 'Asset has already been created',
   })
-  @Get()
+  @Get(':ticker')
   public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<TickerReservationModel> {
     const tickerReservation = await this.tickerReservationsService.findOne(ticker);
     return createTickerReservationModel(tickerReservation);
@@ -96,7 +90,7 @@ export class TickerReservationsController {
   @ApiUnprocessableEntityResponse({
     description: 'Asset has already been created for the ticker',
   })
-  @Post('/transfer-ownership')
+  @Post(':ticker/transfer-ownership')
   public async transferOwnership(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: TransferTickerOwnershipDto
@@ -133,7 +127,7 @@ export class TickerReservationsController {
       '<li>Ticker not reserved or the Reservation has expired</li>' +
       '</ul>',
   })
-  @Post('/extend')
+  @Post(':ticker/extend')
   public async extendReservation(
     @Param() { ticker }: TickerParamsDto,
     @Body() { signer }: SignerDto
