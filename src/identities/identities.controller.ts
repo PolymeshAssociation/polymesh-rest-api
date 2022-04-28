@@ -176,12 +176,14 @@ export class IdentitiesController {
 
   @ApiTags('authorizations')
   @ApiOperation({
-    summary: 'Get a specific Authorization targeting an Identity',
-    description: 'This endpoint will return a specific Authorization targeting an Identity',
+    summary: 'Get a pending Authorization',
+    description:
+      'This endpoint will return a specific Authorization issued by or targeting an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID of the Identity whose targeting Authorization is to be fetched',
+    description:
+      'The DID of the Identity whose issued by or targeting Authorization is to be fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })

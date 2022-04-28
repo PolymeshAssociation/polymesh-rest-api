@@ -47,9 +47,11 @@ export class AuthorizationsController {
 
   @ApiOperation({
     summary: 'Remove an Authorization Request',
-    description: `This endpoint will reject/cancel a pending Authorization Request. 
-      - If you are the Request issuer, this will cancel the Authorization. 
-      - If you are the target, this will reject the Authorization
+    description: `This endpoint will reject/cancel a pending Authorization Request
+      <ul>
+        <li>If you are the Request issuer, this will cancel the Authorization</li>
+        <li>If you are the Request target, this will reject the Authorization</li>
+      </ul>
     `,
   })
   @ApiParam({
