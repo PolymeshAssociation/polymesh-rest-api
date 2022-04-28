@@ -67,6 +67,7 @@ export class MockAsset {
   public getIdentifiers = jest.fn();
   public currentFundingRound = jest.fn();
   public isFrozen = jest.fn();
+  public controllerTransfer = jest.fn();
   public assetHolders = {
     get: jest.fn(),
   };

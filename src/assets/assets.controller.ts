@@ -9,10 +9,12 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
@@ -260,6 +262,30 @@ export class AssetsController {
   @Post('')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Controller Transfer',
+    description:
+      'This endpoint forces a transfer from the `origin` Portfolio to the signer’s Default Portfolio',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `origin` Portfolio does not have enough free balance for the transfer',
+  })
+  @Post(':ticker/controller-transfer')
+  public async controllerTransfer(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: ControllerTransferDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.controllerTransfer(ticker, params);
     return new TransactionQueueModel({ transactions });
   }
 }

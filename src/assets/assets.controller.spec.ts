@@ -12,6 +12,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { MockAsset } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
 
@@ -254,6 +255,26 @@ describe('AssetsController', () => {
       const result = await controller.issue({ ticker }, { signer, amount });
       expect(result).toEqual({ transactions: ['transaction'] });
       expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
+    });
+  });
+
+  describe('controllerTransfer', () => {
+    it('should call the service and return the results', async () => {
+      const signer = '0x6000';
+      const ticker = 'TICKER';
+      const amount = new BigNumber(1000);
+      const origin = new PortfolioDto({ id: new BigNumber(1), did: '0x1000' });
+
+      mockAssetsService.controllerTransfer.mockResolvedValue({ transactions: ['transaction'] });
+
+      const result = await controller.controllerTransfer({ ticker }, { signer, origin, amount });
+
+      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(mockAssetsService.controllerTransfer).toHaveBeenCalledWith(ticker, {
+        signer,
+        origin,
+        amount,
+      });
     });
   });
 });

@@ -9,6 +9,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
@@ -97,5 +98,22 @@ export class AssetsService {
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.issuance.issue, rest, { signingAccount: address });
+  }
+
+  public async controllerTransfer(
+    ticker: string,
+    params: ControllerTransferDto
+  ): Promise<QueueResult<void>> {
+    const { signer, origin, amount } = params;
+
+    const { controllerTransfer } = await this.findOne(ticker);
+
+    const address = await this.signingService.getAddressByHandle(signer);
+
+    return processQueue(
+      controllerTransfer,
+      { originPortfolio: origin.toPortfolioLike(), amount },
+      { signingAccount: address }
+    );
   }
 }
