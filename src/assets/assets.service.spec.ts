@@ -451,7 +451,7 @@ describe('AssetsService', () => {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
-          tag: TxTags.asset.Freeze,
+          tag: TxTags.asset.Unfreeze,
         },
       ];
       const findSpy = jest.spyOn(service, 'findOne');
