@@ -9,6 +9,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -22,6 +23,7 @@ import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -234,6 +236,9 @@ export class AssetsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
   @Post(':ticker/issue')
   public async issue(
     @Param() { ticker }: TickerParamsDto,
@@ -257,9 +262,69 @@ export class AssetsController {
   @ApiGoneResponse({
     description: 'The ticker has already been used to create an asset',
   })
-  @Post('')
+  @Post('create-asset')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Freeze transfers for an Asset',
+    description:
+      'This endpoint submits a transaction that causes the Asset to become frozen. This means that it cannot be transferred or minted until it is unfrozen',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to freeze',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The Asset is already frozen',
+  })
+  @Post(':ticker/freeze')
+  public async freeze(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.freeze(ticker, params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Unfreeze transfers for an Asset',
+    description:
+      'This endpoint submits a transaction that unfreezes the Asset. This means that transfers and minting can be performed until it is frozen again',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to unfreeze',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The Asset is already unfrozen',
+  })
+  @Post(':ticker/unfreeze')
+  public async unfreeze(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.unfreeze(ticker, params);
     return new TransactionQueueModel({ transactions });
   }
 }

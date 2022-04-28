@@ -34,7 +34,7 @@ describe('TickerReservationsController', () => {
 
       const ticker = 'SOME_TICKER';
       const signer = '0x6000';
-      const result = await controller.reserve({ ticker }, { signer });
+      const result = await controller.reserve({ ticker, signer });
 
       expect(result).toEqual({
         transactions: ['transaction'],
