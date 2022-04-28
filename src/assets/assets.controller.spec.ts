@@ -10,9 +10,10 @@ import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
-import { MockAsset } from '~/test-utils/mocks';
+import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
@@ -254,6 +255,29 @@ describe('AssetsController', () => {
       const result = await controller.issue({ ticker }, { signer, amount });
       expect(result).toEqual({ transactions: ['transaction'] });
       expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
+    });
+  });
+
+  describe('transferOwnership', () => {
+    it('should call the service and return the results', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      const mockData = {
+        result: mockAuthorization,
+        transactions: ['transaction'],
+      };
+      mockAssetsService.transferOwnership.mockResolvedValue(mockData);
+
+      const body = { signer: '0x6000', target: '0x1000' };
+      const ticker = 'SOME_TICKER';
+
+      const result = await controller.transferOwnership({ ticker }, body);
+
+      expect(result).toEqual({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+        transactions: ['transaction'],
+      });
+      expect(mockAssetsService.transferOwnership).toHaveBeenCalledWith(ticker, body);
     });
   });
 });

@@ -8,6 +8,7 @@ export class MockAssetService {
   registerTicker = jest.fn();
   createAsset = jest.fn();
   issue = jest.fn();
+  transferOwnership = jest.fn();
 }
 
 export class MockComplianceService {

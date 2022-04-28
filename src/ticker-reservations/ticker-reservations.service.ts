@@ -9,7 +9,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
-import { TransferTickerOwnershipDto } from '~/ticker-reservations/dto/transfer-ticker-ownership.dto';
+import { TransferOwnershipDto } from '~/ticker-reservations/dto/transfer-ownership.dto';
 
 @Injectable()
 export class TickerReservationsService {
@@ -52,7 +52,7 @@ export class TickerReservationsService {
 
   public async transferOwnership(
     ticker: string,
-    params: TransferTickerOwnershipDto
+    params: TransferOwnershipDto
   ): Promise<QueueResult<AuthorizationRequest>> {
     const { signer, ...rest } = params;
     const address = await this.signingService.getAddressByHandle(signer);

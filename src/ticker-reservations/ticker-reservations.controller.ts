@@ -15,7 +15,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { TransferTickerOwnershipDto } from '~/ticker-reservations/dto/transfer-ticker-ownership.dto';
+import { TransferOwnershipDto } from '~/ticker-reservations/dto/transfer-ownership.dto';
 import { ExtendedTickerReservationModel } from '~/ticker-reservations/models/extended-ticker-reservation.model';
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
@@ -99,7 +99,7 @@ export class TickerReservationsController {
   @Post('/transfer-ownership')
   public async transferOwnership(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransferTickerOwnershipDto
+    @Body() params: TransferOwnershipDto
   ): Promise<TransactionQueueModel> {
     const { transactions, result } = await this.tickerReservationsService.transferOwnership(
       ticker,

@@ -3,6 +3,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   Asset,
   AssetDocument,
+  AuthorizationRequest,
   ErrorCode,
   IdentityBalance,
   ResultSet,
@@ -15,6 +16,7 @@ import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
+import { TransferOwnershipDto } from '~/ticker-reservations/dto/transfer-ownership.dto';
 
 @Injectable()
 export class AssetsService {
@@ -97,5 +99,15 @@ export class AssetsService {
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.issuance.issue, rest, { signingAccount: address });
+  }
+
+  public async transferOwnership(
+    ticker: string,
+    params: TransferOwnershipDto
+  ): Promise<QueueResult<AuthorizationRequest>> {
+    const { signer, ...rest } = params;
+    const address = await this.signingService.getAddressByHandle(signer);
+    const { transferOwnership } = await this.findOne(ticker);
+    return processQueue(transferOwnership, rest, { signingAccount: address });
   }
 }
