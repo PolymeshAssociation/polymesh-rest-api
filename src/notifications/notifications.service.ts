@@ -13,6 +13,7 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import notificationsConfig from '~/notifications/config/notifications.config';
 import { NotificationEntity } from '~/notifications/entities/notification.entity';
 import { SIGNATURE_HEADER_KEY } from '~/notifications/notifications.consts';
+import { signPayload } from '~/notifications/notifications.util';
 import { NotificationPayload, NotificationStatus } from '~/notifications/types';
 import { ScheduleService } from '~/schedule/schedule.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
@@ -164,7 +165,7 @@ export class NotificationsService {
         payload,
         nonce
       );
-      const signature = this.signPayload(notificationPayload, legitimacySecret);
+      const signature = signPayload(notificationPayload, legitimacySecret);
       const response = await lastValueFrom(
         this.httpService.post(webhookUrl, notificationPayload, {
           headers: {
@@ -238,12 +239,5 @@ export class NotificationsService {
     });
 
     this.scheduleSendNotification(id);
-  }
-
-  /**
-   * Compute a signature of the payload for legitimacy validation
-   */
-  private signPayload(payload: NotificationPayload, secret: string): string {
-    return createHmac('SHA256', secret).update(stringify(payload)).digest('base64');
   }
 }
