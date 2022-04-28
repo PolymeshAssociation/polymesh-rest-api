@@ -48,7 +48,7 @@ describe('AuthorizationsController', () => {
     it('should call the service and return the transaction details', async () => {
       const transactions = ['transaction'];
 
-      mockAuthorizationsService.reject.mockResolvedValue({ transactions });
+      mockAuthorizationsService.remove.mockResolvedValue({ transactions });
 
       const authId = new BigNumber(1);
       const signer = '0x6000';
@@ -58,7 +58,7 @@ describe('AuthorizationsController', () => {
         result: undefined,
         transactions: ['transaction'],
       });
-      expect(mockAuthorizationsService.reject).toHaveBeenCalledWith(authId, signer);
+      expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, signer);
     });
   });
 });

@@ -33,7 +33,7 @@ export class MockAuthorizationsService {
   findIssuedByDid = jest.fn();
   findOne = jest.fn();
   accept = jest.fn();
-  reject = jest.fn();
+  remove = jest.fn();
 }
 
 export class MockAccountsService {
