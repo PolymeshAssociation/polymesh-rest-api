@@ -299,7 +299,7 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Freeze transfers for an Asset',
+    summary: 'Unfreeze transfers for an Asset',
     description:
       'This endpoint submits a transaction that unfreezes the Asset. This means that transfers and minting can be performed until it is frozen again',
   })
