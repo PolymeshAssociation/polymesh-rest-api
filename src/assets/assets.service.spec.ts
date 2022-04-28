@@ -472,7 +472,7 @@ describe('AssetsService', () => {
             blockHash: '0x1',
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.Freeze,
+            transactionTag: TxTags.asset.Unfreeze,
             type: TransactionType.Single,
           },
         ],
