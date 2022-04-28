@@ -104,7 +104,7 @@ describe('TransactionsService', () => {
       });
       expect(mockSubscriptionsService.createSubscription).toHaveBeenCalledWith({
         eventType,
-        eventScope: eventScope,
+        eventScope,
         webhookUrl,
         legitimacySecret,
       });
