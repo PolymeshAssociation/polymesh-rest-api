@@ -248,7 +248,7 @@ describe('AuthorizationsService', () => {
     });
   });
 
-  describe('reject', () => {
+  describe('remove', () => {
     let mockAuthorizationRequest: MockAuthorizationRequest;
 
     beforeEach(() => {
@@ -268,7 +268,7 @@ describe('AuthorizationsService', () => {
           throw expectedError;
         });
 
-        await expect(() => service.reject(new BigNumber(1), '0x6000')).rejects.toThrowError(
+        await expect(() => service.remove(new BigNumber(1), '0x6000')).rejects.toThrowError(
           expectedError
         );
         findOneSpy.mockRestore();
@@ -293,7 +293,7 @@ describe('AuthorizationsService', () => {
 
         mockAuthorizationRequest.remove.mockResolvedValue(mockQueue);
 
-        const result = await service.reject(new BigNumber(2), '0x6000');
+        const result = await service.remove(new BigNumber(2), '0x6000');
         expect(result).toEqual({
           result: undefined,
           transactions: [

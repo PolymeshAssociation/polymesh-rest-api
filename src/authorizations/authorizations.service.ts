@@ -70,7 +70,7 @@ export class AuthorizationsService {
     return processQueue(accept, { signingAccount: address }, {});
   }
 
-  public async reject(id: BigNumber, signer: string): Promise<QueueResult<void>> {
+  public async remove(id: BigNumber, signer: string): Promise<QueueResult<void>> {
     const { remove } = await this.findOne(signer, id);
 
     const address = await this.signingService.getAddressByHandle(signer);
