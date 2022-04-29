@@ -13,6 +13,7 @@ import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
@@ -102,8 +103,24 @@ export class AssetsService {
 
   public async redeem(ticker: string, params: RedeemTokensDto): Promise<QueueResult<void>> {
     const { signer, amount } = params;
+    const { redeem } = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(redeem, { amount }, { signingAccount: address });
+  }
+
+  public async freeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+    const { signer } = params;
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.redeem, { amount }, { signingAccount: address });
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(asset.freeze, { signingAccount: address }, {});
+  }
+
+  public async unfreeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+    const { signer } = params;
+    const asset = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(asset.unfreeze, { signingAccount: address }, {});
   }
 }

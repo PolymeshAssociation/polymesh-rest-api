@@ -5,6 +5,7 @@ import {
   KnownAssetType,
   SecurityIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
+import _ from 'lodash';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
@@ -267,6 +268,30 @@ describe('AssetsController', () => {
       const result = await controller.redeem({ ticker }, { signer, amount });
       expect(result).toEqual({ transactions: ['transaction'] });
       expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount });
+    });
+  });
+
+  describe('freeze', () => {
+    it('should call the service and return the results', async () => {
+      const signer = '0x6000';
+      const ticker = 'TICKER';
+      mockAssetsService.freeze.mockResolvedValue({ transactions: ['transaction'] });
+
+      const result = await controller.freeze({ ticker }, { signer });
+      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(mockAssetsService.freeze).toHaveBeenCalledWith(ticker, { signer });
+    });
+  });
+
+  describe('unfreeze', () => {
+    it('should call the service and return the results', async () => {
+      const signer = '0x6000';
+      const ticker = 'TICKER';
+      mockAssetsService.unfreeze.mockResolvedValue({ transactions: ['transaction'] });
+
+      const result = await controller.unfreeze({ ticker }, { signer });
+      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(mockAssetsService.unfreeze).toHaveBeenCalledWith(ticker, { signer });
     });
   });
 });

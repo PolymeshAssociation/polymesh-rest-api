@@ -28,6 +28,11 @@ LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemo
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_SECRET=## The access token for authorization with the Vault instance ##
+SUBSCRIPTIONS_TTL=## Amount of milliseconds before a subscription is considered expired ##
+SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscription via handshake before it is considered rejected ##
+SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscription handshake attempts ##
+NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
+NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
 ```
 
 ### Signing Transactions

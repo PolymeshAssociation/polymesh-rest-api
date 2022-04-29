@@ -68,6 +68,9 @@ export class MockAsset {
   public currentFundingRound = jest.fn();
   public isFrozen = jest.fn();
   public redeem = jest.fn();
+  public freeze = jest.fn();
+  public unfreeze = jest.fn();
+
   public assetHolders = {
     get: jest.fn(),
   };
@@ -117,6 +120,10 @@ export class MockAsset {
     getDefaultConfig: jest.fn(),
     setDefaultConfig: jest.fn(),
     remove: jest.fn(),
+  };
+
+  public issuance = {
+    issue: jest.fn(),
   };
 }
 

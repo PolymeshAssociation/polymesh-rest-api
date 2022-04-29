@@ -377,9 +377,8 @@ describe('AssetsService', () => {
       const findSpy = jest.spyOn(service, 'findOne');
 
       const mockQueue = new MockTransactionQueue(transactions);
-      const mockAsset = {
-        issuance: { issue: jest.fn().mockResolvedValue(mockQueue) },
-      };
+      const mockAsset = new MockAsset();
+      mockAsset.issuance.issue.mockResolvedValue(mockQueue);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
@@ -436,6 +435,86 @@ describe('AssetsService', () => {
             transactionHash: '0x2',
             blockNumber: new BigNumber(1),
             transactionTag: TxTags.asset.Redeem,
+            type: TransactionType.Single,
+          },
+        ],
+      });
+      findSpy.mockRestore();
+    });
+  });
+
+  describe('freeze', () => {
+    const freezeBody = {
+      signer: '0x6000',
+    };
+    it('should freeze the asset', async () => {
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.Freeze,
+        },
+      ];
+      const findSpy = jest.spyOn(service, 'findOne');
+
+      const mockQueue = new MockTransactionQueue(transactions);
+      const mockAsset = new MockAsset();
+      mockAsset.freeze.mockResolvedValue(mockQueue);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const address = 'address';
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
+      const result = await service.freeze('TICKER', freezeBody);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.asset.Freeze,
+            type: TransactionType.Single,
+          },
+        ],
+      });
+      findSpy.mockRestore();
+    });
+  });
+
+  describe('unfreeze', () => {
+    const unfreezeBody = {
+      signer: '0x6000',
+    };
+    it('should unfreeze the asset', async () => {
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.Unfreeze,
+        },
+      ];
+      const findSpy = jest.spyOn(service, 'findOne');
+
+      const mockQueue = new MockTransactionQueue(transactions);
+      const mockAsset = new MockAsset();
+      mockAsset.unfreeze.mockResolvedValue(mockQueue);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const address = 'address';
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
+      const result = await service.unfreeze('TICKER', unfreezeBody);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.asset.Unfreeze,
             type: TransactionType.Single,
           },
         ],
