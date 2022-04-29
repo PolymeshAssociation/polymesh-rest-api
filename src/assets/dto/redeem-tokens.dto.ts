@@ -9,9 +9,9 @@ import { SignerDto } from '~/common/dto/signer.dto';
 
 export class RedeemTokensDto extends SignerDto {
   @ApiProperty({
-    description: "The amount of Asset's tokens to be redeemed",
+    description: 'The amount of Asset tokens to be redeemed',
     example: '100',
-    type: BigNumber,
+    type: 'string',
   })
   @ToBigNumber()
   @IsBigNumber()

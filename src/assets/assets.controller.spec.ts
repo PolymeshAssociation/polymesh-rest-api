@@ -5,7 +5,6 @@ import {
   KnownAssetType,
   SecurityIdentifierType,
 } from '@polymathnetwork/polymesh-sdk/types';
-import _ from 'lodash';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';

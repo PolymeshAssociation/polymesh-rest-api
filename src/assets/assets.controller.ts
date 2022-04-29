@@ -270,9 +270,9 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: "Redeem Asset's tokens",
+    summary: 'Redeem Asset tokens',
     description:
-      "This endpoint allows to redeem (burn) an amount of an Asset's tokens. These tokens are removed from Signer's Default Portfolio",
+      "This endpoint allows to redeem (burn) an amount of an Asset tokens. These tokens are removed from Signer's Default Portfolio",
   })
   @ApiCreatedResponse({
     description: 'Details about the transaction',
@@ -283,7 +283,7 @@ export class AssetsController {
   })
   @ApiUnprocessableEntityResponse({
     description:
-      "The amount to be redeemed is less than free balance in the Signer's Default Portfolio",
+      "The amount to be redeemed is larger than the free balance in the Signer's Default Portfolio",
   })
   @Post(':ticker/redeem')
   public async redeem(
