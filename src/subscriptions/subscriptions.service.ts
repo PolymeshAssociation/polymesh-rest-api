@@ -81,7 +81,7 @@ export class SubscriptionsService {
   }
 
   public async createSubscription(
-    sub: Pick<SubscriptionEntity, 'eventType' | 'eventScope' | 'webhookUrl'>
+    sub: Pick<SubscriptionEntity, 'eventType' | 'eventScope' | 'webhookUrl' | 'legitimacySecret'>
   ): Promise<number> {
     const { subscriptions, ttl, maxTries: triesLeft } = this;
 

@@ -35,6 +35,7 @@ describe('SubscriptionsService', () => {
   const ttl = 120000;
   const maxTries = 5;
   const retryInterval = 5000;
+  const legitimacySecret = 'someSecret';
 
   const subs = [
     new SubscriptionEntity({
@@ -47,6 +48,7 @@ describe('SubscriptionsService', () => {
       status: SubscriptionStatus.Done,
       triesLeft: maxTries,
       nextNonce: 0,
+      legitimacySecret,
     }),
     new SubscriptionEntity({
       id: 2,
@@ -58,6 +60,7 @@ describe('SubscriptionsService', () => {
       status: SubscriptionStatus.Rejected,
       triesLeft: maxTries,
       nextNonce: 0,
+      legitimacySecret,
     }),
   ];
 
@@ -153,6 +156,7 @@ describe('SubscriptionsService', () => {
         eventScope,
         eventType,
         webhookUrl,
+        legitimacySecret,
       });
 
       expect(result).toEqual(3);
@@ -169,6 +173,7 @@ describe('SubscriptionsService', () => {
         eventScope,
         webhookUrl,
         nextNonce: 0,
+        legitimacySecret,
       });
 
       // ignore expired subs
