@@ -54,7 +54,8 @@ export class TransactionsService {
    */
   public async submitAndSubscribe(
     transaction: Transaction,
-    webhookUrl: string
+    webhookUrl: string,
+    legitimacySecret: string
   ): Promise<NotificationPayload<EventType.TransactionUpdate>> {
     const { subscriptionsService, logger } = this;
 
@@ -66,6 +67,7 @@ export class TransactionsService {
       eventType,
       eventScope,
       webhookUrl,
+      legitimacySecret,
     });
 
     // since we're sending an "initial" notification with nonce 0 as a response, we start with the nonce at 1

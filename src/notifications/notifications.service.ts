@@ -6,11 +6,12 @@ import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
 import { EventsService } from '~/events/events.service';
-import { EventPayload, EventType, GetPayload } from '~/events/types';
+import { EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import notificationsConfig from '~/notifications/config/notifications.config';
 import { NotificationEntity } from '~/notifications/entities/notification.entity';
 import { SIGNATURE_HEADER_KEY } from '~/notifications/notifications.consts';
+import { signPayload } from '~/notifications/notifications.util';
 import { NotificationPayload, NotificationStatus } from '~/notifications/types';
 import { ScheduleService } from '~/schedule/schedule.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
@@ -145,7 +146,7 @@ export class NotificationsService {
         eventsService.findOne(eventId),
       ]);
 
-      const { webhookUrl } = subscription;
+      const { webhookUrl, legitimacySecret } = subscription;
 
       if (subscription.isExpired()) {
         await this.updateNotification(id, {
@@ -155,18 +156,21 @@ export class NotificationsService {
         return;
       }
 
-      const signature = this.signPayload(payload);
+      const notificationPayload = this.assembleNotificationPayload(
+        subscriptionId,
+        type,
+        scope,
+        payload,
+        nonce
+      );
+      const signature = signPayload(notificationPayload, legitimacySecret);
       const response = await lastValueFrom(
-        this.httpService.post(
-          webhookUrl,
-          this.assembleNotificationPayload(subscriptionId, type, scope, payload, nonce),
-          {
-            headers: {
-              [SIGNATURE_HEADER_KEY]: signature,
-            },
-            timeout: 10000,
-          }
-        )
+        this.httpService.post(webhookUrl, notificationPayload, {
+          headers: {
+            [SIGNATURE_HEADER_KEY]: signature,
+          },
+          timeout: 10000,
+        })
       );
 
       await this.handleWebhookResponse(id, response);
@@ -233,13 +237,5 @@ export class NotificationsService {
     });
 
     this.scheduleSendNotification(id);
-  }
-
-  // TODO @monitz87: implement HMAC signature (will have to include the secret somehow)
-  /**
-   * Compute a signature of the payload for legitimacy validation
-   */
-  private signPayload(payload: EventPayload): string {
-    return `placeholderSignature:${JSON.stringify(payload)}`;
   }
 }

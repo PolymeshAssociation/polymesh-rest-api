@@ -63,6 +63,7 @@ describe('TransactionsService', () => {
     const blockHash = '0xdef';
     const blockNumber = new BigNumber(1);
     const webhookUrl = 'http://www.example.com';
+    const legitimacySecret = 'someSecret';
 
     beforeEach(() => {
       mockSubscriptionsService.createSubscription.mockReturnValue(subscriptionId);
@@ -85,7 +86,8 @@ describe('TransactionsService', () => {
 
       const result = await service.submitAndSubscribe(
         transaction as unknown as Transaction,
-        webhookUrl
+        webhookUrl,
+        legitimacySecret
       );
 
       const expectedPayload = {
@@ -102,8 +104,9 @@ describe('TransactionsService', () => {
       });
       expect(mockSubscriptionsService.createSubscription).toHaveBeenCalledWith({
         eventType,
-        eventScope: eventScope,
+        eventScope,
         webhookUrl,
+        legitimacySecret,
       });
 
       // test different status updates
@@ -163,7 +166,8 @@ describe('TransactionsService', () => {
 
       const result = await service.submitAndSubscribe(
         transaction as unknown as Transaction,
-        webhookUrl
+        webhookUrl,
+        legitimacySecret
       );
 
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();
