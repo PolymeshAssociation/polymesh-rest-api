@@ -14,10 +14,6 @@ export class ControllerTransferDto extends SignerDto {
   @ApiProperty({
     description: 'Portfolio from which Asset tokens will be transferred',
     type: () => PortfolioDto,
-    example: {
-      did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-      id: 1,
-    },
   })
   @ValidateNested()
   @Type(() => PortfolioDto)
@@ -26,7 +22,7 @@ export class ControllerTransferDto extends SignerDto {
   @ApiProperty({
     description: 'The amount of the Asset tokens to be transferred',
     example: '1000',
-    type: BigNumber,
+    type: 'string',
   })
   @ToBigNumber()
   @IsBigNumber()

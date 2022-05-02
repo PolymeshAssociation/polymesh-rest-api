@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType, CountryCode, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, CountryCode } from '@polymathnetwork/polymesh-sdk/types';
 import {
   isCddClaim,
   isInvestorUniquenessV2Claim,
@@ -27,10 +27,6 @@ export class ClaimDto {
     description:
       'The scope of the Claim. Required for most types except for `CustomerDueDiligence`, `InvestorUniquenessV2` and `NoData`',
     type: ScopeDto,
-    example: {
-      type: ScopeType.Identity,
-      value: '0x0600000000000000000000000000000000000000000000000000000000000000',
-    },
   })
   @ValidateIf(
     claim => !isNoDataClaim(claim) && !isCddClaim(claim) && !isInvestorUniquenessV2Claim(claim)
