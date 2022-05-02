@@ -30,7 +30,7 @@ export class CreateAssetDto extends SignerDto {
   @ApiPropertyOptional({
     description: 'The initial supply count of the Asset',
     example: '627880',
-    type: BigNumber,
+    type: 'string',
   })
   @IsOptional()
   @ToBigNumber()
