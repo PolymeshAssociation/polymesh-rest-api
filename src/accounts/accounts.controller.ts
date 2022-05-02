@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -9,9 +10,11 @@ import {
 } from '@nestjs/swagger';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { createPermissionsModel } from '~/accounts/accounts.util';
 import { AccountParamsDto } from '~/accounts/dto/account-params.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
@@ -94,5 +97,29 @@ export class AccountsController {
       total: count,
       next,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Get Account Permissions',
+    description:
+      'The endpoint retrieves the Permissions an Account has as a Permissioned Account for its corresponding Identity',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address whose Permissions are to be fetched',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiOkResponse({
+    description: 'Permissions of the Account',
+    type: PermissionsModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'Account is not associated with any Identity',
+  })
+  @Get(':account/permissions')
+  async getPermissions(@Param() { account }: AccountParamsDto): Promise<PermissionsModel> {
+    const permissions = await this.accountsService.getPermissions(account);
+    return createPermissionsModel(permissions);
   }
 }
