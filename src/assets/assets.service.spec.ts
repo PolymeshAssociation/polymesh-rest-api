@@ -15,7 +15,12 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAsset, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import {
+  MockAsset,
+  MockAuthorizationRequest,
+  MockPolymesh,
+  MockTransactionQueue,
+} from '~/test-utils/mocks';
 import { MockSigningService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -398,6 +403,55 @@ describe('AssetsService', () => {
         ],
       });
       findSpy.mockRestore();
+    });
+  });
+
+  describe('transferOwnership', () => {
+    const ticker = 'TICKER';
+    const body = {
+      signer: '0x6000',
+      target: '0x1000',
+      expiry: new Date(),
+    };
+
+    it('should run a transferOwnership procedure and return the queue data', async () => {
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.identity.AddAuthorization,
+        },
+      ];
+
+      const mockResult = new MockAuthorizationRequest();
+
+      const mockQueue = new MockTransactionQueue(transactions);
+      mockQueue.run.mockResolvedValue(mockResult);
+
+      const mockAsset = new MockAsset();
+      mockAsset.transferOwnership.mockResolvedValue(mockQueue);
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAsset as any);
+
+      mockSigningService.getAddressByHandle.mockReturnValue('address');
+
+      const result = await service.transferOwnership(ticker, body);
+      expect(result).toEqual({
+        result: mockResult,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.identity.AddAuthorization,
+            type: TransactionType.Single,
+          },
+        ],
+      });
+      findOneSpy.mockRestore();
     });
   });
 
