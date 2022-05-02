@@ -8,6 +8,7 @@ export class MockAssetService {
   registerTicker = jest.fn();
   createAsset = jest.fn();
   issue = jest.fn();
+  redeem = jest.fn();
   freeze = jest.fn();
   unfreeze = jest.fn();
 }

@@ -22,6 +22,14 @@ export class SubscriptionEntity {
 
   public nextNonce: number;
 
+  /**
+   * secret for the legitimacy signature. This shared secret is used to
+   *   compute an HMAC of every notification payload being sent to `webhookUrl` and sent
+   *   as part of the request headers. It can be used by the consumer of the subscription
+   *   to verify that messages received by their webhooks are being sent by us
+   */
+  public legitimacySecret: string;
+
   public isExpired(): boolean {
     const { createdAt, ttl } = this;
 

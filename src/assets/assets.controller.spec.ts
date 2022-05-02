@@ -257,6 +257,19 @@ describe('AssetsController', () => {
     });
   });
 
+  describe('redeem', () => {
+    it('should call the service and return the results', async () => {
+      const signer = '0x6000';
+      const ticker = 'TICKER';
+      const amount = new BigNumber(1000);
+      mockAssetsService.redeem.mockResolvedValue({ transactions: ['transaction'] });
+
+      const result = await controller.redeem({ ticker }, { signer, amount });
+      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount });
+    });
+  });
+
   describe('freeze', () => {
     it('should call the service and return the results', async () => {
       const signer = '0x6000';
