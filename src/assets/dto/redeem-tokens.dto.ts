@@ -7,10 +7,10 @@ import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
-export class IssueDto extends SignerDto {
+export class RedeemTokensDto extends SignerDto {
   @ApiProperty({
-    description: 'The amount of the Asset to issue',
-    example: '1000',
+    description: 'The amount of Asset tokens to be redeemed',
+    example: '100',
     type: 'string',
   })
   @ToBigNumber()
