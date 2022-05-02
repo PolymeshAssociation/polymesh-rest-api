@@ -124,7 +124,7 @@ describe('IdentitiesService', () => {
     });
   });
 
-  describe('inviteAccount', () => {
+  describe('addSecondaryAccount', () => {
     describe('errors', () => {
       const cases: ErrorCase[] = [
         [

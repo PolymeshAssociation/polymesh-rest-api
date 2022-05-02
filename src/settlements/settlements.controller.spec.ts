@@ -9,36 +9,23 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
+import { MockSettlementsService } from '~/test-utils/service-mocks';
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
-  const mockSettlementsService = {
-    findInstruction: jest.fn(),
-    createInstruction: jest.fn(),
-    affirmInstruction: jest.fn(),
-    rejectInstruction: jest.fn(),
-    findVenueDetails: jest.fn(),
-    findAffirmations: jest.fn(),
-    createVenue: jest.fn(),
-    modifyVenue: jest.fn(),
-    canTransfer: jest.fn(),
-  };
-  const mockIdentitiesService = {};
+  const mockSettlementsService = new MockSettlementsService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SettlementsController],
-      providers: [SettlementsService, IdentitiesService],
+      providers: [SettlementsService],
     })
       .overrideProvider(SettlementsService)
       .useValue(mockSettlementsService)
-      .overrideProvider(IdentitiesService)
-      .useValue(mockIdentitiesService)
       .compile();
 
     controller = module.get<SettlementsController>(SettlementsController);

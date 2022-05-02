@@ -32,17 +32,10 @@ export class AuthorizationsService {
     });
   }
 
-  public async findIssuedByDid(
-    did: string,
-    size: BigNumber,
-    start?: string
-  ): Promise<ResultSet<AuthorizationRequest>> {
+  public async findIssuedByDid(did: string): Promise<ResultSet<AuthorizationRequest>> {
     const identity = await this.identitiesService.findOne(did);
 
-    return identity.authorizations.getSent({
-      size,
-      start,
-    });
+    return identity.authorizations.getSent();
   }
 
   public async findOne(did: string, id: BigNumber): Promise<AuthorizationRequest> {

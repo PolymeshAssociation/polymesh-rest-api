@@ -10,15 +10,11 @@ import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { MockPortfolio } from '~/test-utils/mocks';
+import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
 describe('PortfoliosController', () => {
   let controller: PortfoliosController;
-  const mockPortfoliosService = {
-    moveAssets: jest.fn(),
-    findAllByOwner: jest.fn(),
-    createPortfolio: jest.fn(),
-    deletePortfolio: jest.fn(),
-  };
+  const mockPortfoliosService = new MockPortfoliosService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

@@ -62,7 +62,7 @@ export class IdentitiesService {
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
-    const inviteAccount = this.polymeshService.polymeshApi.accountManagement.inviteAccount;
+    const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
     return processQueue(inviteAccount, params, { signingAccount: address });
   }
 }

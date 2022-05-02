@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 export class MockAssetService {
   findOne = jest.fn();
   findHolders = jest.fn();
@@ -72,4 +73,67 @@ export class MockHttpService {
 export class MockScheduleService {
   addTimeout = jest.fn();
   addInterval = jest.fn();
+}
+
+export class MockIdentitiesService {
+  findOne = jest.fn();
+  findTrustingAssets = jest.fn();
+  addSecondaryAccount = jest.fn();
+}
+
+export class MockSettlementsService {
+  findInstruction = jest.fn();
+  createInstruction = jest.fn();
+  affirmInstruction = jest.fn();
+  rejectInstruction = jest.fn();
+  findVenueDetails = jest.fn();
+  findAffirmations = jest.fn();
+  createVenue = jest.fn();
+  modifyVenue = jest.fn();
+  canTransfer = jest.fn();
+  findPendingInstructionsByDid = jest.fn();
+  findVenuesByOwner = jest.fn();
+}
+
+export class MockClaimsService {
+  findIssuedByDid = jest.fn();
+  findAssociatedByDid = jest.fn();
+}
+
+export class MockPortfoliosService {
+  moveAssets = jest.fn();
+  findAllByOwner = jest.fn();
+  createPortfolio = jest.fn();
+  deletePortfolio = jest.fn();
+}
+
+export class MockOfferingsService {
+  findInvestmentsByTicker = jest.fn();
+  findAllByTicker = jest.fn();
+}
+
+export class MockCorporateActionsService {
+  findDefaultConfigByTicker = jest.fn();
+  updateDefaultConfigByTicker = jest.fn();
+  findDistributionsByTicker = jest.fn();
+  findDistribution = jest.fn();
+  createDividendDistribution = jest.fn();
+  remove = jest.fn();
+  payDividends = jest.fn();
+  claimDividends = jest.fn();
+  linkDocuments = jest.fn();
+  reclaimRemainingFunds = jest.fn();
+  modifyCheckpoint = jest.fn();
+}
+
+export class MockCheckpointsService {
+  findAllByTicker = jest.fn();
+  findSchedulesByTicker = jest.fn();
+  findScheduleById = jest.fn();
+  createByTicker = jest.fn();
+  createScheduleByTicker = jest.fn();
+  getAssetBalance = jest.fn();
+  getHolders = jest.fn();
+  deleteScheduleByTicker = jest.fn();
+  findOne = jest.fn();
 }
