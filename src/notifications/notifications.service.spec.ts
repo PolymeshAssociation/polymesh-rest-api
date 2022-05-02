@@ -127,6 +127,7 @@ describe('NotificationsService', () => {
       expect(result).toEqual([2]);
 
       const webhookUrl = 'https://www.example.com';
+      const legitimacySecret = 'someSecret';
       const type = EventType.TransactionUpdate;
       const scope = '0x01';
       const payload = {
@@ -138,6 +139,7 @@ describe('NotificationsService', () => {
         webhookUrl,
         id: subscriptionId,
         isExpired: mockIsExpired,
+        legitimacySecret,
       });
       mockEventsService.findOne.mockReturnValue({
         payload,

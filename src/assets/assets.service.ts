@@ -12,6 +12,7 @@ import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
+import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { processQueue, QueueResult } from '~/common/utils';
@@ -99,6 +100,13 @@ export class AssetsService {
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     return processQueue(asset.issuance.issue, rest, { signingAccount: address });
+  }
+
+  public async redeem(ticker: string, params: RedeemTokensDto): Promise<QueueResult<void>> {
+    const { signer, amount } = params;
+    const { redeem } = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(redeem, { amount }, { signingAccount: address });
   }
 
   public async freeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {

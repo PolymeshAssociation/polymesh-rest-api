@@ -402,6 +402,48 @@ describe('AssetsService', () => {
     });
   });
 
+  describe('redeem', () => {
+    const redeemBody = {
+      signer: '0x6000',
+      amount: new BigNumber(1000),
+    };
+    it('should run a redeem procedure and return the queue results', async () => {
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.Redeem,
+        },
+      ];
+      const findSpy = jest.spyOn(service, 'findOne');
+
+      const mockQueue = new MockTransactionQueue(transactions);
+      const mockAsset = new MockAsset();
+      mockAsset.redeem.mockResolvedValue(mockQueue);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const address = 'address';
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
+
+      const result = await service.redeem('TICKER', redeemBody);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.asset.Redeem,
+            type: TransactionType.Single,
+          },
+        ],
+      });
+      findSpy.mockRestore();
+    });
+  });
+
   describe('freeze', () => {
     const freezeBody = {
       signer: '0x6000',
