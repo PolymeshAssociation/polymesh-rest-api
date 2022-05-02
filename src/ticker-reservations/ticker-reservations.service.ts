@@ -6,10 +6,10 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
-import { TransferOwnershipDto } from '~/ticker-reservations/dto/transfer-ownership.dto';
 
 @Injectable()
 export class TickerReservationsService {

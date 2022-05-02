@@ -24,12 +24,12 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
-import { TransferOwnershipDto } from '~/ticker-reservations/dto/transfer-ownership.dto';
 
 @ApiTags('assets')
 @Controller('assets')
@@ -269,7 +269,7 @@ export class AssetsController {
   @ApiOperation({
     summary: 'Transfer ownership of an Asset',
     description:
-      'This endpoint transfers ownership of the Asset to `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
+      'This endpoint transfers ownership of the Asset to a `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
   })
   @ApiParam({
     name: 'ticker',
@@ -281,11 +281,11 @@ export class AssetsController {
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedAuthorizationRequestModel,
   })
-  @Post('/:ticker/transfer-ownership')
+  @Post(':ticker/transfer-ownership')
   public async transferOwnership(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: TransferOwnershipDto
-  ): Promise<TransactionQueueModel> {
+  ): Promise<CreatedAuthorizationRequestModel> {
     const { transactions, result } = await this.assetsService.transferOwnership(ticker, params);
     return new CreatedAuthorizationRequestModel({
       transactions,
