@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Account,
   AccountBalance,
   ErrorCode,
   ExtrinsicData,
+  Permissions,
   ResultSet,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
@@ -75,5 +76,20 @@ export class AccountsService {
     }
 
     return account.getTransactionHistory({ ...rest, ...orderBy });
+  }
+
+  public async getPermissions(address: string): Promise<Permissions> {
+    const account = await this.findOne(address);
+    try {
+      return await account.getPermissions();
+    } catch (err) {
+      if (isPolymeshError(err)) {
+        const { code } = err;
+        if (code === ErrorCode.DataUnavailable) {
+          throw new NotFoundException(`There is no Identity associated with Account "${address}"`);
+        }
+      }
+      throw err;
+    }
   }
 }

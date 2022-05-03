@@ -9,6 +9,7 @@ export class MockAssetService {
   registerTicker = jest.fn();
   createAsset = jest.fn();
   issue = jest.fn();
+  transferOwnership = jest.fn();
   redeem = jest.fn();
   freeze = jest.fn();
   unfreeze = jest.fn();
@@ -44,6 +45,7 @@ export class MockAccountsService {
   getAccountBalance = jest.fn();
   transferPolyx = jest.fn();
   getTransactionHistory = jest.fn();
+  getPermissions = jest.fn();
 }
 
 export class MockEventsService {
