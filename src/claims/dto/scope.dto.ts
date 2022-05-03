@@ -18,7 +18,7 @@ export class ScopeDto {
 
   @ApiProperty({
     description:
-      'The value of the Scope. This is a hex prefixed 64 charcter string for `Identity`, 12 uppercase letters for Ticker',
+      'The value of the Scope. This is a hex prefixed 64 character string for `Identity`, 12 uppercase letters for Ticker',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @IsValidScopeValue('type')

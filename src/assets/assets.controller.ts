@@ -14,6 +14,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
@@ -381,6 +382,36 @@ export class AssetsController {
     @Body() params: SignerDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.unfreeze(ticker, params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Controller Transfer',
+    description:
+      'This endpoint forces a transfer from the `origin` Portfolio to the signer’s Default Portfolio',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to be transferred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `origin` Portfolio does not have enough free balance for the transfer',
+  })
+  @Post(':ticker/controller-transfer')
+  public async controllerTransfer(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: ControllerTransferDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.controllerTransfer(ticker, params);
     return new TransactionQueueModel({ transactions });
   }
 }

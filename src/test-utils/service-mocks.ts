@@ -13,6 +13,7 @@ export class MockAssetService {
   redeem = jest.fn();
   freeze = jest.fn();
   unfreeze = jest.fn();
+  controllerTransfer = jest.fn();
 }
 
 export class MockComplianceService {
