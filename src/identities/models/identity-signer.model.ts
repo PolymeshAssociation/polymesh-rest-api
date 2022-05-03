@@ -14,7 +14,7 @@ export class IdentitySignerModel extends SignerModel {
   readonly did: string;
 
   constructor(model: Omit<IdentitySignerModel, 'signerType'>) {
-    super({ signerType: SignerType.Account });
+    super({ signerType: SignerType.Identity });
     Object.assign(this, model);
   }
 }

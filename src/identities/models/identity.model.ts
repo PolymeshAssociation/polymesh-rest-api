@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-import { PermissionedAccountModel } from '~/identities/models/permissioned-account.model';
+import { PermissionedAccountModel } from '~/accounts/models/permissioned-account.model';
 
 export class IdentityModel {
   @ApiProperty({

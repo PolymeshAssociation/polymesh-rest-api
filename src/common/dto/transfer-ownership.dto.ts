@@ -6,7 +6,7 @@ import { IsDate, IsOptional } from 'class-validator';
 import { IsDid } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
-export class TransferTickerOwnershipDto extends SignerDto {
+export class TransferOwnershipDto extends SignerDto {
   @ApiProperty({
     type: 'string',
     description: 'DID of the target Identity',

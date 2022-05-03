@@ -2,11 +2,15 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
-import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode, PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { TransactionType } from '~/common/types';
@@ -15,7 +19,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { SigningModule } from '~/signing/signing.module';
-import { MockAccount, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAccount, MockAsset, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
 import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
@@ -265,6 +269,86 @@ describe('AccountsService', () => {
       });
       expect(result).toEqual(mockTransactions);
       findOneSpy.mockRestore();
+    });
+  });
+
+  describe('getPermissions', () => {
+    const mockPermissions = {
+      assets: {
+        type: PermissionType.Include,
+        values: [new MockAsset()],
+      },
+      portfolios: {
+        type: PermissionType.Include,
+        values: [],
+      },
+      transactions: {
+        type: PermissionType.Include,
+        values: [TxTags.asset.AddDocuments],
+      },
+      transactionGroups: [TxGroup.Issuance, TxGroup.StoManagement],
+    };
+
+    let findOneSpy: jest.SpyInstance;
+    let mockAccount: MockAccount;
+
+    beforeEach(() => {
+      mockAccount = new MockAccount();
+      findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAccount as any);
+    });
+
+    describe('if the Account address is not associated with any Identity', () => {
+      it('should throw a NotFoundException', async () => {
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'There is no Identity associated with Account',
+        };
+
+        mockAccount.getPermissions.mockImplementation(() => {
+          throw mockError;
+        });
+
+        mockIsPolymeshError.mockReturnValue(true);
+
+        const address = 'address';
+
+        const expectedError = await expect(() => service.getPermissions(address)).rejects;
+
+        expectedError.toBeInstanceOf(NotFoundException);
+        expectedError.toThrowError(`There is no Identity associated with Account "${address}"`);
+
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('if there is a different error', () => {
+      it('should pass the error along the chain', async () => {
+        const expectedError = new Error('Something else');
+
+        mockAccount.getPermissions.mockImplementation(() => {
+          throw expectedError;
+        });
+
+        await expect(() => service.getPermissions('address')).rejects.toThrowError(
+          'Something else'
+        );
+
+        findOneSpy.mockRestore();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the Account Permissions', async () => {
+        mockAccount.getPermissions.mockResolvedValue(mockPermissions);
+
+        const result = await service.getPermissions('address');
+
+        expect(result).toEqual(mockPermissions);
+
+        findOneSpy.mockRestore();
+      });
     });
   });
 });

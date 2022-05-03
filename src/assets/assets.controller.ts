@@ -23,9 +23,12 @@ import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
+import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -268,6 +271,33 @@ export class AssetsController {
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
     return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Transfer ownership of an Asset',
+    description:
+      'This endpoint transfers ownership of the Asset to a `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'Ticker of the Asset whose ownership is to be transferred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
+  })
+  @Post('/:ticker/transfer-ownership')
+  public async transferOwnership(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: TransferOwnershipDto
+  ): Promise<CreatedAuthorizationRequestModel> {
+    const { transactions, result } = await this.assetsService.transferOwnership(ticker, params);
+    return new CreatedAuthorizationRequestModel({
+      transactions,
+      authorizationRequest: createAuthorizationRequestModel(result),
+    });
   }
 
   @ApiOperation({

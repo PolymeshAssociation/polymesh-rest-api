@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountsService } from '~/accounts/accounts.service';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { MockAsset, MockPortfolio } from '~/test-utils/mocks';
 import { MockAccountsService } from '~/test-utils/service-mocks';
 
 describe('AccountsController', () => {
@@ -105,6 +106,51 @@ describe('AccountsController', () => {
           next: null,
         })
       );
+    });
+  });
+
+  describe('getPermissions', () => {
+    const mockPermissions = {
+      assets: {
+        type: PermissionType.Include,
+        values: [new MockAsset()],
+      },
+      portfolios: {
+        type: PermissionType.Include,
+        values: [new MockPortfolio()],
+      },
+      transactions: {
+        type: PermissionType.Include,
+        values: [TxTags.asset.AddDocuments],
+      },
+      transactionGroups: [TxGroup.Issuance, TxGroup.StoManagement],
+    };
+
+    it('should return the Account Permissions', async () => {
+      mockAccountsService.getPermissions.mockResolvedValue(mockPermissions);
+
+      const result = await controller.getPermissions({ account: 'someAccount' });
+
+      expect(result).toEqual({
+        assets: {
+          type: PermissionType.Include,
+          values: ['TICKER'],
+        },
+        portfolios: {
+          type: PermissionType.Include,
+          values: [
+            {
+              id: '1',
+              did: '0x06'.padEnd(66, '0'),
+            },
+          ],
+        },
+        transactions: {
+          type: PermissionType.Include,
+          values: [TxTags.asset.AddDocuments],
+        },
+        transactionGroups: [TxGroup.Issuance, TxGroup.StoManagement],
+      });
     });
   });
 });
