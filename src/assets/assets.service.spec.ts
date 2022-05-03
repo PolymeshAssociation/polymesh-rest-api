@@ -14,6 +14,7 @@ import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
@@ -573,6 +574,62 @@ describe('AssetsService', () => {
           },
         ],
       });
+      findSpy.mockRestore();
+    });
+  });
+
+  describe('controllerTransfer', () => {
+    it('should run a controllerTransfer procedure and return the queue results', async () => {
+      const signer = '0x6000';
+      const origin = new PortfolioDto({ id: new BigNumber(1), did: '0x1000' });
+      const amount = new BigNumber(100);
+
+      const transactions = [
+        {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.ControllerTransfer,
+        },
+      ];
+
+      const mockQueue = new MockTransactionQueue(transactions);
+
+      const mockAsset = new MockAsset();
+      mockAsset.controllerTransfer.mockResolvedValue(mockQueue);
+
+      const findSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const address = 'address';
+      mockSigningService.getAddressByHandle.mockReturnValue(address);
+
+      const result = await service.controllerTransfer('TICKER', { signer, origin, amount });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [
+          {
+            blockHash: '0x1',
+            transactionHash: '0x2',
+            blockNumber: new BigNumber(1),
+            transactionTag: TxTags.asset.ControllerTransfer,
+            type: TransactionType.Single,
+          },
+        ],
+      });
+
+      expect(mockAsset.controllerTransfer).toHaveBeenCalledWith(
+        {
+          originPortfolio: {
+            identity: '0x1000',
+            id: new BigNumber(1),
+          },
+          amount,
+        },
+        { signingAccount: address }
+      );
       findSpy.mockRestore();
     });
   });

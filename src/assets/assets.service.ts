@@ -10,6 +10,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
@@ -134,5 +135,22 @@ export class AssetsService {
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return processQueue(asset.unfreeze, { signingAccount: address }, {});
+  }
+
+  public async controllerTransfer(
+    ticker: string,
+    params: ControllerTransferDto
+  ): Promise<QueueResult<void>> {
+    const { signer, origin, amount } = params;
+
+    const { controllerTransfer } = await this.findOne(ticker);
+
+    const address = await this.signingService.getAddressByHandle(signer);
+
+    return processQueue(
+      controllerTransfer,
+      { originPortfolio: origin.toPortfolioLike(), amount },
+      { signingAccount: address }
+    );
   }
 }

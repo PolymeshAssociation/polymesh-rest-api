@@ -73,6 +73,7 @@ export class MockAsset {
   public redeem = jest.fn();
   public freeze = jest.fn();
   public unfreeze = jest.fn();
+  public controllerTransfer = jest.fn();
 
   public assetHolders = {
     get: jest.fn(),
