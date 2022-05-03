@@ -11,14 +11,14 @@ export class PendingAuthorizationsModel {
     type: AuthorizationRequestModel,
   })
   @Type(() => AuthorizationRequestModel)
-  readonly sent: AuthorizationRequestModel[];
+  readonly received: AuthorizationRequestModel[];
 
   @ApiProperty({
     description: 'List of pending Authorization Requests issued by the specified Identity',
     type: AuthorizationRequestModel,
   })
   @Type(() => AuthorizationRequestModel)
-  readonly received: AuthorizationRequestModel[];
+  readonly sent: AuthorizationRequestModel[];
 
   constructor(model: PendingAuthorizationsModel) {
     Object.assign(this, model);

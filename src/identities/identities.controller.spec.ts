@@ -226,7 +226,7 @@ describe('IdentitiesController', () => {
     });
 
     it('should return list of pending authorizations for a given Identity', async () => {
-      let result = await controller.getPendingAuthorizations({ did }, {});
+      let result = await controller.getPendingAuthorizations({ did }, { includeExpired: true });
       expect(result).toEqual(
         new PendingAuthorizationsModel({
           received: [mockReceivedAuthorization],

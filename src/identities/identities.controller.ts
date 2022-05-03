@@ -105,17 +105,16 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse(PendingAuthorizationsModel, {
-    description: 'List of all pending authorizations issued by or targeting the given Identity',
-    paginated: false,
+  @ApiOkResponse({
+    description:
+      'List of all pending Authorizations for which the given Identity is either the issuer or the target',
+    type: PendingAuthorizationsModel,
   })
   @Get(':did/pending-authorizations')
   async getPendingAuthorizations(
     @Param() { did }: DidDto,
     @Query() { type, includeExpired }: AuthorizationsFilterDto
   ): Promise<PendingAuthorizationsModel> {
-    this.logger.debug(`Fetching pending authorizations for did ${did}`);
-
     const [pending, issued] = await Promise.all([
       this.authorizationsService.findPendingByDid(did, includeExpired, type),
       this.authorizationsService.findIssuedByDid(did),
@@ -123,12 +122,10 @@ export class IdentitiesController {
 
     let { data: sent } = issued;
     if (sent.length > 0) {
-      if (includeExpired !== undefined) {
-        sent = sent.filter(({ isExpired }) => isExpired() === includeExpired);
-      }
-      if (type) {
-        sent = sent.filter(({ data: { type: authType } }) => type === authType);
-      }
+      sent = sent.filter(
+        ({ isExpired, data: { type: authType } }) =>
+          (includeExpired || !isExpired()) && (!type || type === authType)
+      );
     }
 
     return new PendingAuthorizationsModel({
