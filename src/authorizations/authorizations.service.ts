@@ -32,17 +32,10 @@ export class AuthorizationsService {
     });
   }
 
-  public async findIssuedByDid(
-    did: string,
-    size: BigNumber,
-    start?: string
-  ): Promise<ResultSet<AuthorizationRequest>> {
+  public async findIssuedByDid(did: string): Promise<ResultSet<AuthorizationRequest>> {
     const identity = await this.identitiesService.findOne(did);
 
-    return identity.authorizations.getSent({
-      size,
-      start,
-    });
+    return identity.authorizations.getSent();
   }
 
   public async findOne(did: string, id: BigNumber): Promise<AuthorizationRequest> {
@@ -70,7 +63,7 @@ export class AuthorizationsService {
     return processQueue(accept, { signingAccount: address }, {});
   }
 
-  public async reject(id: BigNumber, signer: string): Promise<QueueResult<void>> {
+  public async remove(id: BigNumber, signer: string): Promise<QueueResult<void>> {
     const { remove } = await this.findOne(signer, id);
 
     const address = await this.signingService.getAddressByHandle(signer);

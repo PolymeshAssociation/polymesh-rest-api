@@ -12,7 +12,7 @@ import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAuthorizationRequest, MockIdentity, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockSigningService } from '~/test-utils/service-mocks';
+import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -22,9 +22,9 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
-  const mockIdentitiesService = {
-    findOne: jest.fn(),
-  };
+
+  const mockIdentitiesService = new MockIdentitiesService();
+
   let mockSigningService: MockSigningService;
 
   beforeEach(async () => {
@@ -121,13 +121,7 @@ describe('AuthorizationsService', () => {
 
     it('should return a list of issued Authorizations', async () => {
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findIssuedByDid(did, new BigNumber(1));
-      expect(result).toEqual(mockIssuedAuthorizations);
-    });
-
-    it('should return a list of issued Authorizations from start key', async () => {
-      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findIssuedByDid(did, new BigNumber(1), '0x41bc3');
+      const result = await service.findIssuedByDid(did);
       expect(result).toEqual(mockIssuedAuthorizations);
     });
   });
@@ -248,7 +242,7 @@ describe('AuthorizationsService', () => {
     });
   });
 
-  describe('reject', () => {
+  describe('remove', () => {
     let mockAuthorizationRequest: MockAuthorizationRequest;
 
     beforeEach(() => {
@@ -268,7 +262,7 @@ describe('AuthorizationsService', () => {
           throw expectedError;
         });
 
-        await expect(() => service.reject(new BigNumber(1), '0x6000')).rejects.toThrowError(
+        await expect(() => service.remove(new BigNumber(1), '0x6000')).rejects.toThrowError(
           expectedError
         );
         findOneSpy.mockRestore();
@@ -293,7 +287,7 @@ describe('AuthorizationsService', () => {
 
         mockAuthorizationRequest.remove.mockResolvedValue(mockQueue);
 
-        const result = await service.reject(new BigNumber(2), '0x6000');
+        const result = await service.remove(new BigNumber(2), '0x6000');
         expect(result).toEqual({
           result: undefined,
           transactions: [

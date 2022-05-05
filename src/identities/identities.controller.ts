@@ -27,6 +27,7 @@ import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-param
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
+import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
@@ -104,84 +105,44 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse(AuthorizationRequestModel, {
-    description: 'List of all pending authorizations received by the Identity',
-    paginated: false,
+  @ApiOkResponse({
+    description:
+      'List of all pending Authorizations for which the given Identity is either the issuer or the target',
+    type: PendingAuthorizationsModel,
   })
   @Get(':did/pending-authorizations')
   async getPendingAuthorizations(
     @Param() { did }: DidDto,
     @Query() { type, includeExpired }: AuthorizationsFilterDto
-  ): Promise<ResultsModel<AuthorizationRequestModel>> {
-    this.logger.debug(`Fetching pending authorization received by did ${did}`);
+  ): Promise<PendingAuthorizationsModel> {
+    const [pending, issued] = await Promise.all([
+      this.authorizationsService.findPendingByDid(did, includeExpired, type),
+      this.authorizationsService.findIssuedByDid(did),
+    ]);
 
-    const results = await this.authorizationsService.findPendingByDid(did, includeExpired, type);
+    let { data: sent } = issued;
+    if (sent.length > 0) {
+      sent = sent.filter(
+        ({ isExpired, data: { type: authType } }) =>
+          (includeExpired || !isExpired()) && (!type || type === authType)
+      );
+    }
 
-    return new ResultsModel({
-      results: results.map(authorizationRequest =>
-        createAuthorizationRequestModel(authorizationRequest)
-      ),
+    return new PendingAuthorizationsModel({
+      received: pending.map(createAuthorizationRequestModel),
+      sent: sent.map(createAuthorizationRequestModel),
     });
   }
 
   @ApiTags('authorizations')
   @ApiOperation({
-    summary: 'Get Authorizations issued by an Identity',
-    description: 'This endpoint will provide a list of all the Authorizations added by an Identity',
+    summary: 'Get a pending Authorization',
+    description:
+      'This endpoint will return a specific Authorization issued by or targeting an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID of the Identity whose issued Authorizations are to be fetched',
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiQuery({
-    name: 'size',
-    description: 'The number of issued Authorizations to be fetched',
-    type: 'string',
-    required: false,
-    example: '10',
-  })
-  @ApiQuery({
-    name: 'start',
-    description: 'Start key from which values are to be fetched',
-    type: 'string',
-    required: false,
-  })
-  @ApiArrayResponse(AuthorizationRequestModel, {
-    description: 'List of all Authorizations issued by the Identity',
-    paginated: true,
-  })
-  @Get(':did/issued-authorizations')
-  async getIssuedAuthorizations(
-    @Param() { did }: DidDto,
-    @Query() { size, start }: PaginatedParamsDto
-  ): Promise<PaginatedResultsModel<AuthorizationRequestModel>> {
-    this.logger.debug(`Fetching requested authorizations for ${did} from start`);
-
-    const { data, count, next } = await this.authorizationsService.findIssuedByDid(
-      did,
-      size,
-      start?.toString()
-    );
-
-    return new PaginatedResultsModel<AuthorizationRequestModel>({
-      results: data.map(authorizationRequest =>
-        createAuthorizationRequestModel(authorizationRequest)
-      ),
-      total: count,
-      next: next,
-    });
-  }
-
-  @ApiTags('authorizations')
-  @ApiOperation({
-    summary: 'Get a specific Authorization targeting an Identity',
-    description: 'This endpoint will return a specific Authorization targeting an Identity',
-  })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Identity whose targeting Authorization is to be fetched',
+    description: 'The DID of the issuer or target Identity of the Authorization being fetched',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })

@@ -30,6 +30,7 @@ import {
   MockTransactionQueue,
   MockVenue,
 } from '~/test-utils/mocks';
+import { MockAssetService, MockIdentitiesService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
@@ -41,12 +42,11 @@ describe('SettlementsService', () => {
   let service: SettlementsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  const mockIdentitiesService = {
-    findOne: jest.fn(),
-  };
-  const mockAssetsService = {
-    findOne: jest.fn(),
-  };
+
+  const mockIdentitiesService = new MockIdentitiesService();
+
+  const mockAssetsService = new MockAssetService();
+
   const mockSigningService = mockSigningProvider.useValue;
 
   beforeEach(async () => {

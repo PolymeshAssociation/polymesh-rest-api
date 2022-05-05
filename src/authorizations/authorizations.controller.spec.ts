@@ -44,21 +44,21 @@ describe('AuthorizationsController', () => {
     });
   });
 
-  describe('reject', () => {
+  describe('remove', () => {
     it('should call the service and return the transaction details', async () => {
       const transactions = ['transaction'];
 
-      mockAuthorizationsService.reject.mockResolvedValue({ transactions });
+      mockAuthorizationsService.remove.mockResolvedValue({ transactions });
 
       const authId = new BigNumber(1);
       const signer = '0x6000';
-      const result = await controller.reject({ id: authId }, { signer });
+      const result = await controller.remove({ id: authId }, { signer });
 
       expect(result).toEqual({
         result: undefined,
         transactions: ['transaction'],
       });
-      expect(mockAuthorizationsService.reject).toHaveBeenCalledWith(authId, signer);
+      expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, signer);
     });
   });
 });

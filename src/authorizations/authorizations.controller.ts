@@ -46,13 +46,17 @@ export class AuthorizationsController {
   }
 
   @ApiOperation({
-    summary: 'Reject an Authorization Request',
-    description:
-      'This endpoint will reject a pending Authorization Request. You must be the target of the Request to be able to reject it',
+    summary: 'Remove an Authorization Request',
+    description: `This endpoint will reject/cancel a pending Authorization Request
+      <ul>
+        <li>If you are the Request issuer, this will cancel the Authorization</li>
+        <li>If you are the Request target, this will reject the Authorization</li>
+      </ul>
+    `,
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the Authorization Request to be rejected',
+    description: 'The ID of the Authorization Request to be removed',
     type: 'string',
     example: '123',
   })
@@ -61,14 +65,15 @@ export class AuthorizationsController {
     type: TransactionQueueModel,
   })
   @ApiNotFoundResponse({
-    description: 'There is no Authorization Request with the passed ID targeting the `signer`',
+    description:
+      'There is no Authorization Request with the passed ID issued by or targeting the `signer`',
   })
-  @Post('/:id/reject')
-  public async reject(
+  @Post('/:id/remove')
+  public async remove(
     @Param() { id }: IdParamsDto,
     @Body() { signer }: SignerDto
   ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.authorizationsService.reject(id, signer);
+    const { transactions } = await this.authorizationsService.remove(id, signer);
 
     return new TransactionQueueModel({ transactions });
   }

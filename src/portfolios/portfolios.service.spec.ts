@@ -21,7 +21,7 @@ import {
   MockPortfolio,
   MockTransactionQueue,
 } from '~/test-utils/mocks';
-import { MockSigningService } from '~/test-utils/service-mocks';
+import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -32,9 +32,9 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
 
 describe('PortfoliosService', () => {
   let service: PortfoliosService;
-  const mockIdentitiesService = {
-    findOne: jest.fn(),
-  };
+
+  const mockIdentitiesService = new MockIdentitiesService();
+
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
   let mockSigningService: MockSigningService;

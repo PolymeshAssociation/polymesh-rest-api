@@ -8,13 +8,11 @@ import { MockOfferingWithDetails } from '~/offerings/mocks/offering-with-details
 import { OfferingsController } from '~/offerings/offerings.controller';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
+import { MockOfferingsService } from '~/test-utils/service-mocks';
 
 describe('OfferingsController', () => {
   let controller: OfferingsController;
-  const mockOfferingsService = {
-    findInvestmentsByTicker: jest.fn(),
-    findAllByTicker: jest.fn(),
-  };
+  const mockOfferingsService = new MockOfferingsService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

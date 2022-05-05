@@ -10,21 +10,12 @@ import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedul
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
+import { MockCheckpointsService } from '~/test-utils/service-mocks';
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
 
-  const mockCheckpointsService = {
-    findAllByTicker: jest.fn(),
-    findSchedulesByTicker: jest.fn(),
-    findScheduleById: jest.fn(),
-    createByTicker: jest.fn(),
-    createScheduleByTicker: jest.fn(),
-    getAssetBalance: jest.fn(),
-    getHolders: jest.fn(),
-    deleteScheduleByTicker: jest.fn(),
-    findOne: jest.fn(),
-  };
+  const mockCheckpointsService = new MockCheckpointsService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
