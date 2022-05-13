@@ -82,6 +82,7 @@ export class MockIdentitiesService {
   findOne = jest.fn();
   findTrustingAssets = jest.fn();
   addSecondaryAccount = jest.fn();
+  createMockCdd = jest.fn();
 }
 
 export class MockSettlementsService {

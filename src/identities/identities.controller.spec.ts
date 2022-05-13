@@ -15,6 +15,7 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
+import * as identityUtil from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -470,6 +471,26 @@ describe('IdentitiesController', () => {
         results: [mockTickerReservation],
       });
       expect(mockTickerReservationsService.findAllByOwner).toHaveBeenCalledWith(did);
+    });
+  });
+
+  describe('mockCdd', () => {
+    it('should call the service and return the Identity', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fakeIdentityModel = {} as any;
+      const createIdentityModelSpy = jest
+        .spyOn(identityUtil, 'createIdentityModel')
+        .mockResolvedValue(fakeIdentityModel);
+
+      const params = {
+        address: '5abc',
+        initialPolyx: new BigNumber(10),
+      };
+
+      const result = await controller.createMockCdd(params);
+      expect(result).toEqual(fakeIdentityModel);
+      expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
+      createIdentityModelSpy.mockRestore();
     });
   });
 });

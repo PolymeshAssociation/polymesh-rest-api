@@ -37,6 +37,7 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -446,5 +447,21 @@ export class IdentitiesController {
   ): Promise<ResultsModel<TickerReservation>> {
     const results = await this.tickerReservationsService.findAllByOwner(did);
     return new ResultsModel({ results });
+  }
+
+  @ApiOperation({
+    summary: 'Creates a fake Identity for an Account and sets its POLYX balance (DEV ONLY)',
+    description:
+      'This endpoint creates a Identity for an Account and sets its POLYX balance. Will only work with development chains, that is Alice must exist, be able to call `testUtils.mockCddRegisterDid` and have `sudo` permission',
+  })
+  @ApiOkResponse({ description: 'The DID of the Identity created' })
+  @ApiBadRequestResponse({
+    description:
+      'This instance of the REST API is pointing to a chain that lacks development features. A proper CDD provider must be used instead',
+  })
+  @Post('/mock-cdd')
+  public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
+    const identity = await this.identitiesService.createMockCdd(params);
+    return createIdentityModel(identity);
   }
 }

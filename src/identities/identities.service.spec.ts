@@ -28,6 +28,15 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
+jest.mock('@polkadot/keyring', () => ({
+  ...jest.requireActual('@polkadot/keyring'),
+  Keyring: jest.fn().mockImplementation(() => {
+    return {
+      addFromUri: jest.fn(),
+    };
+  }),
+}));
+
 describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
@@ -216,6 +225,17 @@ describe('IdentitiesService', () => {
         });
         expect(mockPolymeshApi.accountManagement.inviteAccount).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('createMockCdd', () => {
+    it('should return a promise', async () => {
+      const params = {
+        address: 'address',
+        initialPolyx: new BigNumber(10),
+      };
+      const result = service.createMockCdd(params);
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 });
