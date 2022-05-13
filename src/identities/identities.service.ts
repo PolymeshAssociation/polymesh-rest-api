@@ -132,11 +132,8 @@ export class IdentitiesService {
             .signAndSend(
               this.alicePair,
               async ({ status: balanceStatus, events: balanceEvents }: ISubmittableResult) => {
-                if (balanceStatus.isInBlock || balanceStatus.isFinalized) {
-                  handlePolkadotErrors(balanceEvents, 'balance');
-                }
-
                 if (balanceStatus.isFinalized) {
+                  handlePolkadotErrors(balanceEvents, 'balance');
                   success('ok');
                 }
               }
