@@ -14,12 +14,15 @@ export class CreateMockIdentityDto {
   })
   @IsString()
   readonly address: string;
+  // TODO should get address validator
 
   @ApiProperty({
-    description: 'Starting POLYX balance to initialize the Account with',
-    example: 100000,
+    description: 'Starting POLYX balance to initialize the Account with. Unit in micro POLYX',
+    example: 100000000000,
   })
   @IsBigNumber()
   @ToBigNumber()
   initialPolyx: BigNumber;
+  // TODO this should probably be converted to POLY token instead of µPOLYX
+  // 6 decimal places of precision and positive number
 }

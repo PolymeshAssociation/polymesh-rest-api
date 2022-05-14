@@ -103,41 +103,27 @@ export class IdentitiesService {
     });
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    const handlePolkadotErrors = (events: EventRecord[], method: 'mockCdd' | 'balance') => {
-      const errorEvents = events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
-      if (errorEvents.length) {
-        const exception =
-          method === 'mockCdd'
-            ? new BadRequestException(
-                `Unable to create a mock Identity for address: "${address}". Perhaps it is already linked to an Identity or Alice is unable to create CDD claims on the chain`
-              )
-            : new InternalServerErrorException(
-                `Unable to set initial balance for ${address}. Perhaps Alice lacks sudo permissions`
-              );
-        fail(exception);
-      }
-    };
 
     await api.tx.testUtils
       .mockCddRegisterDid(address)
       .signAndSend(this.alicePair, ({ status, events }: ISubmittableResult) => {
         if (status.isInBlock || status.isFinalized) {
-          handlePolkadotErrors(events, 'mockCdd');
+          this.handlePolkadotErrors(events, 'mockCdd', fail);
         }
+
+        const handleBalanceResult = async ({
+          status: balanceStatus,
+          events: balanceEvents,
+        }: ISubmittableResult): Promise<void> => {
+          if (balanceStatus.isFinalized) {
+            this.handlePolkadotErrors(balanceEvents, 'balance', fail);
+            success('ok');
+          }
+        };
 
         if (status.isInBlock) {
           const setBalance = api.tx.balances.setBalance(address, initialPolyx.toNumber(), 0);
-          api.tx.sudo
-            .sudo(setBalance)
-            .signAndSend(
-              this.alicePair,
-              async ({ status: balanceStatus, events: balanceEvents }: ISubmittableResult) => {
-                if (balanceStatus.isFinalized) {
-                  handlePolkadotErrors(balanceEvents, 'balance');
-                  success('ok');
-                }
-              }
-            );
+          api.tx.sudo.sudo(setBalance).signAndSend(this.alicePair, handleBalanceResult);
         }
       });
 
@@ -154,5 +140,25 @@ export class IdentitiesService {
     }
 
     return id;
+  }
+
+  private handlePolkadotErrors(
+    events: EventRecord[],
+    method: 'mockCdd' | 'balance',
+    reject: (reason: HttpException) => void
+  ): void {
+    const api = this.polymeshService.polymeshApi._polkadotApi;
+    const errorEvents = events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
+    if (errorEvents.length) {
+      const exception =
+        method === 'mockCdd'
+          ? new BadRequestException(
+              'Unable to create mock Identity. Perhaps the address is already linked to an Identity or Alice is unable to create CDD claims on the chain'
+            )
+          : new InternalServerErrorException(
+              'Unable to set initial balance for. Perhaps Alice lacks sudo permissions'
+            );
+      reject(exception);
+    }
   }
 }

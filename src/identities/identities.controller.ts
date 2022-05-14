@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -452,12 +460,15 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Creates a fake Identity for an Account and sets its POLYX balance (DEV ONLY)',
     description:
-      'This endpoint creates a Identity for an Account and sets its POLYX balance. Will only work with development chains, that is Alice must exist, be able to call `testUtils.mockCddRegisterDid` and have `sudo` permission',
+      'This endpoint creates a Identity for an Account and sets its POLYX balance. Will only work with development chains. Alice must exist, be able to call `testUtils.mockCddRegisterDid` and have `sudo` permission',
   })
   @ApiOkResponse({ description: 'The DID of the Identity created' })
   @ApiBadRequestResponse({
     description:
       'This instance of the REST API is pointing to a chain that lacks development features. A proper CDD provider must be used instead',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to execute an extrinsic, or something unexpected',
   })
   @Post('/mock-cdd')
   public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
