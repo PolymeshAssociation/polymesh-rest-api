@@ -16,7 +16,6 @@ import {
   Identity,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
-import { bigNumberToBalance } from '@polymathnetwork/polymesh-sdk/utils/conversion';
 
 import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
