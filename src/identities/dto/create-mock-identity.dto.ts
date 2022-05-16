@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsPositiveBigNumber } from '~/common/decorators/validation';
+import { IsBigNumber, IsNotNegativeBigNumber } from '~/common/decorators/validation';
 
 export class CreateMockIdentityDto {
   @ApiProperty({
@@ -20,7 +20,7 @@ export class CreateMockIdentityDto {
     example: 100000,
   })
   @IsBigNumber()
-  @IsPositiveBigNumber()
+  @IsNotNegativeBigNumber()
   @ToBigNumber()
   initialPolyx: BigNumber;
 }

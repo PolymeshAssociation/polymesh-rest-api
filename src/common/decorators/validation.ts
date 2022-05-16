@@ -62,7 +62,7 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
   };
 }
 
-export function IsPositiveBigNumber(validationOptions?: ValidationOptions) {
+export function IsNotNegativeBigNumber(validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
     registerDecorator({
@@ -72,10 +72,10 @@ export function IsPositiveBigNumber(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: BigNumber) {
-          return value.gt(0);
+          return value.gte(0);
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a positive number`;
+          return `${args.property} must not be negative`;
         },
       },
     });
