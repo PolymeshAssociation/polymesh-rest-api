@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsBigNumber, IsPositiveBigNumber } from '~/common/decorators/validation';
 
 export class CreateMockIdentityDto {
   @ApiProperty({
@@ -14,15 +14,13 @@ export class CreateMockIdentityDto {
   })
   @IsString()
   readonly address: string;
-  // TODO should get address validator
 
   @ApiProperty({
-    description: 'Starting POLYX balance to initialize the Account with. Unit in micro POLYX',
-    example: 100000000000,
+    description: 'Starting POLYX balance to initialize the Account with',
+    example: 100000,
   })
   @IsBigNumber()
+  @IsPositiveBigNumber()
   @ToBigNumber()
   initialPolyx: BigNumber;
-  // TODO this should probably be converted to POLY token instead of µPOLYX
-  // 6 decimal places of precision and positive number
 }

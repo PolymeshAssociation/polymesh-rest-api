@@ -62,6 +62,26 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
   };
 }
 
+export function IsPositiveBigNumber(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isBigNumber',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: BigNumber) {
+          return value.gt(0);
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a positive number`;
+        },
+      },
+    });
+  };
+}
+
 // TODO @prashantasdeveloper Reduce the below code from two decorators if possible - IsTxTag and IsTxTagOrModuleName
 export function IsTxTag(validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/ban-types

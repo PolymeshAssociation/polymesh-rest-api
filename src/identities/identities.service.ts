@@ -16,6 +16,7 @@ import {
   Identity,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+import { bigNumberToBalance } from '@polymathnetwork/polymesh-sdk/utils/conversion';
 
 import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
@@ -122,7 +123,11 @@ export class IdentitiesService {
         };
 
         if (status.isInBlock) {
-          const setBalance = api.tx.balances.setBalance(address, initialPolyx.toNumber(), 0);
+          const setBalance = api.tx.balances.setBalance(
+            address,
+            initialPolyx.shiftedBy(6).toNumber(),
+            0
+          );
           api.tx.sudo.sudo(setBalance).signAndSend(this.alicePair, handleBalanceResult);
         }
       });
