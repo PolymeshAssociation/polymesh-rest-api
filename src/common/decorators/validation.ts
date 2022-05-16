@@ -42,7 +42,11 @@ export function IsTicker(validationOptions?: ValidationOptions) {
   );
 }
 
-export function IsBigNumber(validationOptions?: ValidationOptions) {
+export function IsBigNumber(
+  numericValidations: { atLeast?: number; atMost?: number } = {},
+  validationOptions?: ValidationOptions
+) {
+  const isDefined = (v: number | undefined): v is number => typeof v !== 'undefined';
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
     registerDecorator({
@@ -52,30 +56,24 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: unknown) {
-          return value instanceof BigNumber && !value.isNaN();
-        },
-        defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a number`;
-        },
-      },
-    });
-  };
-}
+          const { atLeast, atMost } = numericValidations;
+          if (!(value instanceof BigNumber)) return false;
+          if (value.isNaN()) return false;
+          if (isDefined(atLeast) && value.lt(atLeast)) return false;
+          if (isDefined(atMost) && value.gt(atMost)) return false;
 
-export function IsNotNegativeBigNumber(validationOptions?: ValidationOptions) {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  return function (object: Object, propertyName: string) {
-    registerDecorator({
-      name: 'isBigNumber',
-      target: object.constructor,
-      propertyName,
-      options: validationOptions,
-      validator: {
-        validate(value: BigNumber) {
-          return value.gte(0);
+          return true;
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must not be negative`;
+          const { atLeast, atMost } = numericValidations;
+          let message = `${args.property} must be a number`;
+          if (isDefined(atLeast)) {
+            message += ` at least ${atLeast}`;
+          }
+          if (isDefined(atMost)) {
+            message += `${isDefined(atLeast) ? ' and' : ''} at most ${atMost}`;
+          }
+          return message;
         },
       },
     });

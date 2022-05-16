@@ -17,7 +17,7 @@ export class TransactionHistoryFiltersDto {
     example: '1000000',
   })
   @IsOptional()
-  @IsBigNumber()
+  @IsBigNumber({ atLeast: 0 })
   @ToBigNumber()
   readonly blockNumber?: BigNumber;
 

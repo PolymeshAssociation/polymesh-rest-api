@@ -454,7 +454,7 @@ export class IdentitiesController {
     description:
       'This endpoint creates a Identity for an Account and sets its POLYX balance. Will only work with development chains. Alice must exist, be able to call `testUtils.mockCddRegisterDid` and have `sudo` permission',
   })
-  @ApiOkResponse({ description: 'The DID of the Identity created' })
+  @ApiOkResponse({ description: 'The details of the newly created Identity' })
   @ApiBadRequestResponse({
     description:
       'This instance of the REST API is pointing to a chain that lacks development features. A proper CDD provider must be used instead',

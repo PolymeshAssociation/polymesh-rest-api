@@ -11,5 +11,6 @@ import { SigningModule } from '~/signing/signing.module';
   imports: [PolymeshModule, SigningModule],
   controllers: [AccountsController],
   providers: [AccountsService],
+  exports: [AccountsService],
 })
 export class AccountsModule {}

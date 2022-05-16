@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsNotNegativeBigNumber } from '~/common/decorators/validation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class CreateMockIdentityDto {
   @ApiProperty({
@@ -19,8 +19,7 @@ export class CreateMockIdentityDto {
     description: 'Starting POLYX balance to initialize the Account with',
     example: 100000,
   })
-  @IsBigNumber()
-  @IsNotNegativeBigNumber()
+  @IsBigNumber({ atLeast: 0, atMost: 50 })
   @ToBigNumber()
-  initialPolyx: BigNumber;
+  readonly initialPolyx: BigNumber;
 }

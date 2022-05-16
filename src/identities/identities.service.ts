@@ -17,6 +17,7 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { AccountsService } from '~/accounts/accounts.service';
 import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
@@ -30,7 +31,8 @@ export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
-    private readonly signingService: SigningService
+    private readonly signingService: SigningService,
+    private readonly accountsService: AccountsService
   ) {
     logger.setContext(IdentitiesService.name);
   }
@@ -82,16 +84,22 @@ export class IdentitiesService {
    * @note intended for development chains only (i.e. Alice exists and can call `testUtils.createMockCddClaim`)
    */
   public async createMockCdd({ address, initialPolyx }: CreateMockIdentityDto): Promise<Identity> {
-    const api = this.polymeshService.polymeshApi._polkadotApi;
+    const {
+      _polkadotApi: {
+        tx: { testUtils, balances, sudo },
+      },
+      network,
+    } = this.polymeshService.polymeshApi;
 
-    if (!api.tx.testUtils) {
+    if (!testUtils) {
       throw new BadRequestException(
         'The chain does not have the `testUtils` pallet enabled. This endpoint is intended for development use only'
       );
     }
 
     if (!this.alicePair) {
-      const keyring = new Keyring({ type: 'sr25519', ss58Format: 42 });
+      const ss58Format = network.getSs58Format().toNumber();
+      const keyring = new Keyring({ type: 'sr25519', ss58Format });
       this.alicePair = keyring.addFromUri('//Alice');
     }
 
@@ -104,7 +112,7 @@ export class IdentitiesService {
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 
-    await api.tx.testUtils
+    await testUtils
       .mockCddRegisterDid(address)
       .signAndSend(this.alicePair, ({ status, events }: ISubmittableResult) => {
         if (status.isInBlock || status.isFinalized) {
@@ -122,20 +130,14 @@ export class IdentitiesService {
         };
 
         if (status.isInBlock) {
-          const setBalance = api.tx.balances.setBalance(
-            address,
-            initialPolyx.shiftedBy(6).toNumber(),
-            0
-          );
-          api.tx.sudo.sudo(setBalance).signAndSend(this.alicePair, handleBalanceResult);
+          const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
+          sudo.sudo(setBalance).signAndSend(this.alicePair, handleBalanceResult);
         }
       });
 
     await signal;
 
-    const targetAccount = this.polymeshService.polymeshApi.accountManagement.getAccount({
-      address,
-    });
+    const targetAccount = await this.accountsService.findOne(address);
 
     const id = await targetAccount.getIdentity();
 
@@ -151,8 +153,12 @@ export class IdentitiesService {
     method: 'mockCdd' | 'balance',
     reject: (reason: HttpException) => void
   ): void {
-    const api = this.polymeshService.polymeshApi._polkadotApi;
-    const errorEvents = events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
+    const {
+      events: {
+        system: { ExtrinsicFailed },
+      },
+    } = this.polymeshService.polymeshApi._polkadotApi;
+    const errorEvents = events.filter(({ event }) => ExtrinsicFailed.is(event));
     if (errorEvents.length) {
       const exception =
         method === 'mockCdd'
