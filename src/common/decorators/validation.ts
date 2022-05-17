@@ -46,10 +46,8 @@ export function IsNumber(
   numericValidations: { atLeast?: number; atMost?: number } = {},
   validationOptions?: ValidationOptions
 ) {
-  const { atLeast, atMost } = numericValidations;
   const isDefined = (v: number | undefined): v is number => typeof v !== 'undefined';
-  const hasAtLeast = isDefined(atLeast);
-  const hasAtMost = isDefined(atMost);
+  const { atLeast, atMost } = numericValidations;
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
     registerDecorator({
@@ -61,15 +59,15 @@ export function IsNumber(
         validate(value: unknown) {
           if (!(value instanceof BigNumber)) return false;
           if (value.isNaN()) return false;
-          /* eslint-disable @typescript-eslint/no-non-null-assertion */
-          if (hasAtLeast && value.lt(atLeast!)) return false;
-          if (hasAtMost && value.gt(atMost!)) return false;
-          /* eslint-enable @typescript-eslint/no-non-null-assertion */
+          if (isDefined(atLeast) && value.lt(atLeast)) return false;
+          if (isDefined(atMost) && value.gt(atMost)) return false;
 
           return true;
         },
         defaultMessage(args: ValidationArguments) {
           let message = `${args.property} must be a number`;
+          const hasAtLeast = isDefined(atLeast);
+          const hasAtMost = isDefined(atMost);
           if (hasAtLeast && hasAtMost) {
             message += ` that is between ${atLeast} and ${atMost}`;
           } else if (hasAtLeast) {
