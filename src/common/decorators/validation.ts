@@ -51,7 +51,7 @@ export function IsBigNumber(
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isNumber',
+      name: 'isBigNumber',
       target: object.constructor,
       propertyName,
       options: validationOptions,
