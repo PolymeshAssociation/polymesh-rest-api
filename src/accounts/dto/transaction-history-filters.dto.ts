@@ -7,7 +7,7 @@ import { TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 import { IsBoolean, IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTxTag } from '~/common/decorators/validation';
+import { IsNumber, IsTxTag } from '~/common/decorators/validation';
 import { getTxTags } from '~/common/utils';
 
 export class TransactionHistoryFiltersDto {
@@ -17,7 +17,7 @@ export class TransactionHistoryFiltersDto {
     example: '1000000',
   })
   @IsOptional()
-  @IsBigNumber({ atLeast: 0 })
+  @IsNumber({ atLeast: 0 })
   @ToBigNumber()
   readonly blockNumber?: BigNumber;
 
@@ -58,7 +58,7 @@ export class TransactionHistoryFiltersDto {
     example: '10',
   })
   @IsOptional()
-  @IsBigNumber()
+  @IsNumber()
   @ToBigNumber()
   readonly size?: BigNumber;
 
@@ -68,7 +68,7 @@ export class TransactionHistoryFiltersDto {
     example: '1',
   })
   @IsOptional()
-  @IsBigNumber()
+  @IsNumber()
   @ToBigNumber()
   readonly start?: BigNumber;
 

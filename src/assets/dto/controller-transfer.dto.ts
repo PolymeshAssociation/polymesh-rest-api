@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
@@ -25,6 +25,6 @@ export class ControllerTransferDto extends SignerDto {
     type: 'string',
   })
   @ToBigNumber()
-  @IsBigNumber()
+  @IsNumber()
   readonly amount: BigNumber;
 }

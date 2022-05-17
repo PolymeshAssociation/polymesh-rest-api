@@ -110,8 +110,6 @@ export class IdentitiesService {
       fail = reject;
     });
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-
     await testUtils
       .mockCddRegisterDid(address)
       .signAndSend(this.alicePair, ({ status, events }: ISubmittableResult) => {
@@ -160,6 +158,7 @@ export class IdentitiesService {
     } = this.polymeshService.polymeshApi._polkadotApi;
     const errorEvents = events.filter(({ event }) => ExtrinsicFailed.is(event));
     if (errorEvents.length) {
+      console.log('error events: ', errorEvents.toString());
       const exception =
         method === 'mockCdd'
           ? new BadRequestException(

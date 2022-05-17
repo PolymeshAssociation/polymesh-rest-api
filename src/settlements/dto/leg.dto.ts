@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsNumber, IsTicker } from '~/common/decorators/validation';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
 export class LegDto {
@@ -15,7 +15,7 @@ export class LegDto {
     type: 'string',
     example: '1000',
   })
-  @IsBigNumber()
+  @IsNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 

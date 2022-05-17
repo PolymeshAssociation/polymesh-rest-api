@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { PortfolioMovementDto } from '~/portfolios/dto/portfolio-movement.dto';
 
@@ -15,7 +15,7 @@ export class AssetMovementDto extends SignerDto {
     example: '2',
     description: 'ID of the Portfolio to move the Asset from. Use 0 for default Portfolio',
   })
-  @IsBigNumber()
+  @IsNumber()
   @ToBigNumber()
   readonly from: BigNumber;
 
@@ -23,7 +23,7 @@ export class AssetMovementDto extends SignerDto {
     example: '1',
     description: 'ID of the Portfolio to move the Asset to. Use 0 for default Portfolio',
   })
-  @IsBigNumber()
+  @IsNumber()
   @ToBigNumber()
   readonly to: BigNumber;
 

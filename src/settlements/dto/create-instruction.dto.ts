@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { LegDto } from '~/settlements/dto/leg.dto';
 
@@ -37,7 +37,7 @@ export class CreateInstructionDto extends SignerDto {
     example: '123',
   })
   @IsOptional()
-  @IsBigNumber()
+  @IsNumber()
   @ToBigNumber()
   readonly endBlock?: BigNumber;
 }

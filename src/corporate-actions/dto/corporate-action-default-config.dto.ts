@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 import { ValidateIf, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
@@ -35,7 +35,7 @@ export class CorporateActionDefaultConfigDto extends SignerDto {
       !!defaultTaxWithholding || (!targets && !taxWithholdings)
   )
   @ToBigNumber()
-  @IsBigNumber()
+  @IsNumber()
   readonly defaultTaxWithholding?: BigNumber;
 
   @ApiPropertyOptional({
