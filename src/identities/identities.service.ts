@@ -21,6 +21,7 @@ import { AccountsService } from '~/accounts/accounts.service';
 import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
+import { PolkadotTransaction } from '~/identities/identities.util';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
@@ -28,6 +29,7 @@ import { SigningService } from '~/signing/signing.service';
 @Injectable()
 export class IdentitiesService {
   private alicePair: KeyringPair;
+
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
@@ -97,45 +99,17 @@ export class IdentitiesService {
       );
     }
 
+    const targetAccount = await this.accountsService.findOne(address);
+
     if (!this.alicePair) {
       const ss58Format = network.getSs58Format().toNumber();
       const keyring = new Keyring({ type: 'sr25519', ss58Format });
       this.alicePair = keyring.addFromUri('//Alice');
     }
 
-    let success: (value: unknown) => void;
-    let fail: (reason: HttpException) => void;
-    const signal = new Promise((resolve, reject) => {
-      success = resolve;
-      fail = reject;
-    });
-
-    await testUtils
-      .mockCddRegisterDid(address)
-      .signAndSend(this.alicePair, ({ status, events }: ISubmittableResult) => {
-        if (status.isInBlock || status.isFinalized) {
-          this.handlePolkadotErrors(events, 'mockCdd', fail);
-        }
-
-        const handleBalanceResult = async ({
-          status: balanceStatus,
-          events: balanceEvents,
-        }: ISubmittableResult): Promise<void> => {
-          if (balanceStatus.isFinalized) {
-            this.handlePolkadotErrors(balanceEvents, 'balance', fail);
-            success('ok');
-          }
-        };
-
-        if (status.isInBlock) {
-          const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
-          sudo.sudo(setBalance).signAndSend(this.alicePair, handleBalanceResult);
-        }
-      });
-
-    await signal;
-
-    const targetAccount = await this.accountsService.findOne(address);
+    await this.execTransaction(testUtils.mockCddRegisterDid, address, 'mockCdd');
+    const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
+    await this.execTransaction(sudo.sudo, setBalance, 'balance');
 
     const id = await targetAccount.getIdentity();
 
@@ -144,6 +118,27 @@ export class IdentitiesService {
     }
 
     return id;
+  }
+
+  private async execTransaction(
+    tx: PolkadotTransaction,
+    params: unknown,
+    txName: 'mockCdd' | 'balance'
+  ): Promise<void> {
+    let unsub: Promise<() => void>;
+    return new Promise((resolve, reject) => {
+      unsub = tx(params as string).signAndSend(
+        this.alicePair,
+        ({ status, events }: ISubmittableResult) => {
+          if (status.isInBlock) {
+            this.handlePolkadotErrors(events, txName, reject);
+            resolve('ok');
+          }
+        }
+      ) as Promise<() => void>;
+    }).then(async () => {
+      (await unsub)();
+    });
   }
 
   private handlePolkadotErrors(
@@ -158,14 +153,13 @@ export class IdentitiesService {
     } = this.polymeshService.polymeshApi._polkadotApi;
     const errorEvents = events.filter(({ event }) => ExtrinsicFailed.is(event));
     if (errorEvents.length) {
-      console.log('error events: ', errorEvents.toString());
       const exception =
         method === 'mockCdd'
           ? new BadRequestException(
               'Unable to create mock Identity. Perhaps the address is already linked to an Identity or Alice is unable to create CDD claims on the chain'
             )
           : new InternalServerErrorException(
-              'Unable to set initial balance for. Perhaps Alice lacks sudo permissions'
+              'Unable to set initial balance for given address. Perhaps Alice lacks sudo permissions'
             );
       reject(exception);
     }

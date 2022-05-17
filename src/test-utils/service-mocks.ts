@@ -47,6 +47,7 @@ export class MockAccountsService {
   transferPolyx = jest.fn();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
+  findOne = jest.fn();
 }
 
 export class MockEventsService {
