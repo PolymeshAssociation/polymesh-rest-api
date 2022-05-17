@@ -6,7 +6,7 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { MAX_MEMO_LENGTH } from '~/accounts/accounts.consts';
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber } from '~/common/decorators/validation';
+import { IsBigNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
 export class TransferPolyxDto extends SignerDto {
@@ -24,7 +24,7 @@ export class TransferPolyxDto extends SignerDto {
     type: 'string',
     example: '123',
   })
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 

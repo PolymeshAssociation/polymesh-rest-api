@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsDid, IsNumber } from '~/common/decorators/validation';
+import { IsBigNumber,IsDid } from '~/common/decorators/validation';
 
 export class TaxWithholdingDto {
   @ApiProperty({
@@ -21,6 +21,6 @@ export class TaxWithholdingDto {
     example: '67.25',
   })
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly percentage: BigNumber;
 }

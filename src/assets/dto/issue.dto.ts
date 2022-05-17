@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber } from '~/common/decorators/validation';
+import { IsBigNumber } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
 export class IssueDto extends SignerDto {
@@ -14,6 +14,6 @@ export class IssueDto extends SignerDto {
     type: 'string',
   })
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly amount: BigNumber;
 }

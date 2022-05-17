@@ -6,7 +6,7 @@ import { CaCheckpointType } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber } from '~/common/decorators/validation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class CorporateActionCheckpointDto {
   @ApiProperty({
@@ -23,7 +23,7 @@ export class CorporateActionCheckpointDto {
     example: '1',
   })
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly id: BigNumber;
 
   constructor(dto: CorporateActionCheckpointDto) {

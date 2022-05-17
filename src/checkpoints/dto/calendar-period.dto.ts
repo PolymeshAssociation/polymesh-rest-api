@@ -6,7 +6,7 @@ import { CalendarUnit } from '@polymathnetwork/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber } from '~/common/decorators/validation';
+import { IsBigNumber } from '~/common/decorators/validation';
 
 export class CalendarPeriodDto {
   @ApiProperty({
@@ -23,7 +23,7 @@ export class CalendarPeriodDto {
     type: 'string',
     example: '3',
   })
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 }

@@ -9,7 +9,7 @@ import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 
 export class CreateAssetDto extends SignerDto {
@@ -34,7 +34,7 @@ export class CreateAssetDto extends SignerDto {
   })
   @IsOptional()
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly initialSupply?: BigNumber;
 
   @ApiProperty({

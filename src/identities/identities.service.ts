@@ -1,13 +1,11 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { ISubmittableResult } from '@polkadot/types/types';
 import {
   Asset,
   AuthorizationRequest,
@@ -20,7 +18,6 @@ import { AccountsService } from '~/accounts/accounts.service';
 import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
-import { PolkadotTransaction } from '~/identities/identities.util';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
@@ -106,9 +103,13 @@ export class IdentitiesService {
       this.alicePair = keyring.addFromUri('//Alice');
     }
 
-    await this.execTransaction(testUtils.mockCddRegisterDid, address);
+    await this.polymeshService.execTransaction(
+      this.alicePair,
+      testUtils.mockCddRegisterDid,
+      address
+    );
     const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
-    await this.execTransaction(sudo.sudo, setBalance);
+    await this.polymeshService.execTransaction(this.alicePair, sudo.sudo, setBalance);
 
     const id = await targetAccount.getIdentity();
 
@@ -117,45 +118,5 @@ export class IdentitiesService {
     }
 
     return id;
-  }
-
-  private async execTransaction(tx: PolkadotTransaction, params: unknown): Promise<void> {
-    const txName = tx.method;
-    let unsub: Promise<() => void>;
-    return new Promise((resolve, reject) => {
-      unsub = tx(params as string).signAndSend(this.alicePair, (receipt: ISubmittableResult) => {
-        receipt.findRecord('system', 'ExtrinsicFailed');
-        const { status } = receipt;
-        if (status.isInBlock) {
-          this.handlePolkadotErrors(receipt, txName, reject);
-          resolve('ok');
-        }
-      }) as Promise<() => void>;
-    }).then(async () => {
-      (await unsub)();
-    });
-  }
-
-  private handlePolkadotErrors(
-    receipt: ISubmittableResult,
-    method: string,
-    reject: (reason: HttpException) => void
-  ): void {
-    const hasError = !!receipt.findRecord('system', 'ExtrinsicFailed') || receipt.isError;
-    if (hasError) {
-      let exception: HttpException;
-      if (method === 'mockCddRegisterDid') {
-        exception = new BadRequestException(
-          'Unable to create mock Identity. Perhaps the address is already linked to an Identity or Alice is unable to create CDD claims on the chain'
-        );
-      } else if (method === 'sudo') {
-        exception = new InternalServerErrorException(
-          'Unable to set initial balance for given address. Perhaps Alice lacks sudo permissions'
-        );
-      } else {
-        exception = new InternalServerErrorException('Unable to process the request');
-      }
-      reject(exception);
-    }
   }
 }

@@ -7,7 +7,7 @@ import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { ToCaCheckpoint } from '~/corporate-actions/decorators/transformation';
 import { IsCaCheckpoint } from '~/corporate-actions/decorators/validation';
@@ -51,7 +51,7 @@ export class DividendDistributionDto extends SignerDto {
   })
   @IsOptional()
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly defaultTaxWithholding?: BigNumber;
 
   @ApiPropertyOptional({
@@ -84,7 +84,7 @@ export class DividendDistributionDto extends SignerDto {
     example: '123',
   })
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly originPortfolio: BigNumber;
 
   @ApiProperty({
@@ -101,7 +101,7 @@ export class DividendDistributionDto extends SignerDto {
     example: '100',
   })
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly perShare: BigNumber;
 
   @ApiProperty({
@@ -110,7 +110,7 @@ export class DividendDistributionDto extends SignerDto {
     example: '1000',
   })
   @ToBigNumber()
-  @IsNumber()
+  @IsBigNumber()
   readonly maxAmount: BigNumber;
 
   @ApiProperty({

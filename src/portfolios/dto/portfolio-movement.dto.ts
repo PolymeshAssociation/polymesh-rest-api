@@ -5,7 +5,7 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { IsByteLength, IsOptional, IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 
 export class PortfolioMovementDto {
   @ApiProperty({
@@ -20,7 +20,7 @@ export class PortfolioMovementDto {
     example: '1234',
     type: 'string',
   })
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 

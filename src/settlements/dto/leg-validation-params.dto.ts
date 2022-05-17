@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsDid, IsNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
 
 export class LegValidationParamsDto {
   @ApiProperty({
@@ -12,7 +12,7 @@ export class LegValidationParamsDto {
     type: 'string',
     example: '1000',
   })
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
 
@@ -30,7 +30,7 @@ export class LegValidationParamsDto {
     type: 'string',
     example: '1',
   })
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly fromPortfolio: BigNumber;
 
@@ -48,7 +48,7 @@ export class LegValidationParamsDto {
     type: 'string',
     example: '2',
   })
-  @IsNumber()
+  @IsBigNumber()
   @ToBigNumber()
   readonly toPortfolio: BigNumber;
 
