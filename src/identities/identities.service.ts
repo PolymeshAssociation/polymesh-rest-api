@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Keyring } from '@polkadot/keyring';
+import { KeyringPair } from '@polkadot/keyring/types';
 import {
   Asset,
   AuthorizationRequest,
@@ -7,18 +14,23 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { AccountsService } from '~/accounts/accounts.service';
 import { processQueue, QueueResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class IdentitiesService {
+  private alicePair: KeyringPair;
+
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
-    private readonly signingService: SigningService
+    private readonly signingService: SigningService,
+    private readonly accountsService: AccountsService
   ) {
     logger.setContext(IdentitiesService.name);
   }
@@ -64,5 +76,47 @@ export class IdentitiesService {
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
     return processQueue(inviteAccount, params, { signingAccount: address });
+  }
+
+  /**
+   * @note intended for development chains only (i.e. Alice exists and can call `testUtils.createMockCddClaim`)
+   */
+  public async createMockCdd({ address, initialPolyx }: CreateMockIdentityDto): Promise<Identity> {
+    const {
+      _polkadotApi: {
+        tx: { testUtils, balances, sudo },
+      },
+      network,
+    } = this.polymeshService.polymeshApi;
+
+    if (!testUtils) {
+      throw new BadRequestException(
+        'The chain does not have the `testUtils` pallet enabled. This endpoint is intended for development use only'
+      );
+    }
+
+    const targetAccount = await this.accountsService.findOne(address);
+
+    if (!this.alicePair) {
+      const ss58Format = network.getSs58Format().toNumber();
+      const keyring = new Keyring({ type: 'sr25519', ss58Format });
+      this.alicePair = keyring.addFromUri('//Alice');
+    }
+
+    await this.polymeshService.execTransaction(
+      this.alicePair,
+      testUtils.mockCddRegisterDid,
+      address
+    );
+    const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
+    await this.polymeshService.execTransaction(this.alicePair, sudo.sudo, setBalance);
+
+    const id = await targetAccount.getIdentity();
+
+    if (!id) {
+      throw new InternalServerErrorException('The Identity was not created');
+    }
+
+    return id;
   }
 }

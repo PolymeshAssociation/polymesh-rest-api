@@ -47,6 +47,7 @@ export class MockAccountsService {
   transferPolyx = jest.fn();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
+  findOne = jest.fn();
 }
 
 export class MockEventsService {
@@ -82,6 +83,7 @@ export class MockIdentitiesService {
   findOne = jest.fn();
   findTrustingAssets = jest.fn();
   addSecondaryAccount = jest.fn();
+  createMockCdd = jest.fn();
 }
 
 export class MockSettlementsService {

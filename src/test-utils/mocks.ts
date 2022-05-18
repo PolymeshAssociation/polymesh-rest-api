@@ -61,6 +61,16 @@ export class MockPolymesh {
     getIssuedClaims: jest.fn(),
     getIdentitiesWithClaims: jest.fn(),
   };
+
+  public _polkadotApi = {
+    tx: {
+      testUtils: {
+        mockCddRegisterDid: jest.fn().mockReturnValue({
+          signAndSend: jest.fn(),
+        }),
+      },
+    },
+  };
 }
 
 export class MockAsset {

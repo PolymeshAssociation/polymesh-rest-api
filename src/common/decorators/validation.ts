@@ -42,7 +42,12 @@ export function IsTicker(validationOptions?: ValidationOptions) {
   );
 }
 
-export function IsBigNumber(validationOptions?: ValidationOptions) {
+export function IsBigNumber(
+  numericValidations: { min?: number; max?: number } = {},
+  validationOptions?: ValidationOptions
+) {
+  const isDefined = (v: number | undefined): v is number => typeof v !== 'undefined';
+  const { min, max } = numericValidations;
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
     registerDecorator({
@@ -52,10 +57,33 @@ export function IsBigNumber(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: unknown) {
-          return value instanceof BigNumber && !value.isNaN();
+          if (!(value instanceof BigNumber)) {
+            return false;
+          }
+          if (value.isNaN()) {
+            return false;
+          }
+          if (isDefined(min) && value.lt(min)) {
+            return false;
+          }
+          if (isDefined(max) && value.gt(max)) {
+            return false;
+          }
+
+          return true;
         },
         defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be a number`;
+          let message = `${args.property} must be a number`;
+          const hasMin = isDefined(min);
+          const hasMax = isDefined(max);
+          if (hasMin && hasMax) {
+            message += ` that is between ${min} and ${max}`;
+          } else if (hasMin) {
+            message += ` that is at least ${min}`;
+          } else if (hasMax) {
+            message += ` that is at most ${max}`;
+          }
+          return message;
         },
       },
     });

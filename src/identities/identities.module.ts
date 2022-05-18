@@ -2,6 +2,7 @@
 
 import { forwardRef, Module } from '@nestjs/common';
 
+import { AccountsModule } from '~/accounts/accounts.module';
 import { AssetsModule } from '~/assets/assets.module';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { ClaimsModule } from '~/claims/claims.module';
@@ -23,6 +24,7 @@ import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservati
     forwardRef(() => SettlementsModule),
     forwardRef(() => AuthorizationsModule),
     forwardRef(() => PortfoliosModule),
+    AccountsModule,
     ClaimsModule,
     TickerReservationsModule,
   ],

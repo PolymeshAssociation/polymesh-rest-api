@@ -11,6 +11,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AccountsService } from '~/accounts/accounts.service';
 import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -19,7 +20,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockSigningService } from '~/test-utils/service-mocks';
+import { MockAccountsService, MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
 jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
@@ -28,11 +29,21 @@ jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
+jest.mock('@polkadot/keyring', () => ({
+  ...jest.requireActual('@polkadot/keyring'),
+  Keyring: jest.fn().mockImplementation(() => {
+    return {
+      addFromUri: jest.fn(),
+    };
+  }),
+}));
+
 describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
   let mockSigningService: MockSigningService;
+  const mockAccountsService = new MockAccountsService();
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
@@ -40,8 +51,15 @@ describe('IdentitiesService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [IdentitiesService, mockPolymeshLoggerProvider, mockSigningProvider],
+      providers: [
+        IdentitiesService,
+        AccountsService,
+        mockPolymeshLoggerProvider,
+        mockSigningProvider,
+      ],
     })
+      .overrideProvider(AccountsService)
+      .useValue(mockAccountsService)
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .compile();
@@ -216,6 +234,18 @@ describe('IdentitiesService', () => {
         });
         expect(mockPolymeshApi.accountManagement.inviteAccount).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('createMockCdd', () => {
+    it('should return a promise', async () => {
+      const params = {
+        address: 'address',
+        initialPolyx: new BigNumber(10),
+      };
+      mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
+      const result = service.createMockCdd(params);
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 });
