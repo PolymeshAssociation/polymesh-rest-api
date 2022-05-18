@@ -34,7 +34,7 @@ export class PolymeshService {
 
   /**
    * @hidden
-   * Allows for the execution of a transaction defined in the polkadot.js instance, by passing the SDK.
+   * Allows for the execution of a transaction defined in the polkadot.js instance, bypassing the SDK.
    * SDK methods should be used instead of this where possible
    */
   public async execTransaction<Args extends unknown[]>(
