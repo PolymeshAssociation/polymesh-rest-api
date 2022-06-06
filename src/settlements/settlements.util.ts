@@ -5,8 +5,8 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
-import { InstructionModel } from '~/settlements/model/instruction.model';
-import { LegModel } from '~/settlements/model/leg.model';
+import { InstructionModel } from '~/settlements/models/instruction.model';
+import { LegModel } from '~/settlements/models/leg.model';
 
 export async function createInstructionModel(instruction: Instruction): Promise<InstructionModel> {
   const [details, legsResultSet, instructionStatus] = await Promise.all([
@@ -24,7 +24,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
     type,
     legs:
       legsResultSet.data?.map(
-        ({ from, to, amount, token: asset }) =>
+        ({ from, to, amount, asset }) =>
           new LegModel({
             from: createPortfolioIdentifierModel(from),
             to: createPortfolioIdentifierModel(to),

@@ -4,31 +4,30 @@ import {
   ErrorCode,
   Instruction,
   InstructionAffirmation,
-  isPolymeshError,
   PortfolioLike,
   ResultSet,
   TransferBreakdown,
   Venue,
   VenueDetails,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class SettlementsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService,
+    private readonly signingService: SigningService,
     private readonly assetsService: AssetsService
   ) {}
 
@@ -62,24 +61,24 @@ export class SettlementsService {
 
   public async createInstruction(
     venueId: BigNumber,
-    createInstructuionDto: CreateInstructionDto
+    createInstructionDto: CreateInstructionDto
   ): Promise<QueueResult<Instruction>> {
-    const { signer, ...rest } = createInstructuionDto;
+    const { signer, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
 
     const params = {
       ...rest,
       legs: rest.legs.map(({ amount, asset, from, to }) => ({
         amount,
-        token: asset,
+        asset,
         from: from.toPortfolioLike(),
         to: to.toPortfolioLike(),
       })),
     };
 
-    return processQueue(venue.addInstruction, params, { signer: address });
+    return processQueue(venue.addInstruction, params, { signingAccount: address });
   }
 
   public async affirmInstruction(
@@ -90,9 +89,22 @@ export class SettlementsService {
 
     const instruction = await this.findInstruction(id);
 
-    const address = this.relayerAccountsService.findAddressByDid(signer);
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(instruction.affirm, { signingAccount: address }, {});
+  }
 
-    return processQueue(instruction.affirm, undefined, { signer: address });
+  public async rejectInstruction(
+    id: BigNumber,
+    signerDto: SignerDto
+  ): Promise<QueueResult<Instruction>> {
+    const { signer } = signerDto;
+
+    const instruction = await this.findInstruction(id);
+
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(instruction.reject, { signingAccount: address }, {});
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -128,7 +140,7 @@ export class SettlementsService {
 
   public async findAffirmations(
     id: BigNumber,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<InstructionAffirmation>> {
     const instruction = await this.findInstruction(id);
@@ -137,14 +149,14 @@ export class SettlementsService {
   }
 
   public async createVenue(createVenueDto: CreateVenueDto): Promise<QueueResult<Venue>> {
-    const { signer, details, type } = createVenueDto;
+    const { signer, description, type } = createVenueDto;
     const params = {
-      details,
+      description,
       type,
     };
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    const identity = await this.identitiesService.findOne(signer);
-    return processQueue(identity.createVenue, params, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    const method = this.polymeshService.polymeshApi.settlements.createVenue;
+    return processQueue(method, params, { signingAccount: address });
   }
 
   public async modifyVenue(
@@ -154,8 +166,8 @@ export class SettlementsService {
     const { signer, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(venue.modify, params, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(venue.modify, params, { signingAccount: address });
   }
 
   public async canTransfer(

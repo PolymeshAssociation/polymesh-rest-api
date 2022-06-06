@@ -1,6 +1,3 @@
-/* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
@@ -12,40 +9,23 @@ import {
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { IdentitiesService } from '~/identities/identities.service';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
-
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
-  isPolymeshError: mockIsPolymeshError,
-}));
+import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
+import { MockSettlementsService } from '~/test-utils/service-mocks';
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
-  const mockSettlementsService = {
-    findInstruction: jest.fn(),
-    createInstruction: jest.fn(),
-    affirmInstruction: jest.fn(),
-    findVenueDetails: jest.fn(),
-    findAffirmations: jest.fn(),
-    createVenue: jest.fn(),
-    modifyVenue: jest.fn(),
-    canTransfer: jest.fn(),
-  };
-  const mockIdentitiesService = {};
+  const mockSettlementsService = new MockSettlementsService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SettlementsController],
-      providers: [SettlementsService, IdentitiesService],
+      providers: [SettlementsService],
     })
       .overrideProvider(SettlementsService)
       .useValue(mockSettlementsService)
-      .overrideProvider(IdentitiesService)
-      .useValue(mockIdentitiesService)
       .compile();
 
     controller = module.get<SettlementsController>(SettlementsController);
@@ -62,20 +42,20 @@ describe('SettlementsController', () => {
       const mockInstruction = new MockInstruction();
       const mockInstructionDetails = {
         venue: {
-          id: new BigNumber('123'),
+          id: new BigNumber(123),
         },
         status: InstructionStatus.Pending,
         createdAt: date,
         type: InstructionType.SettleOnBlock,
-        endBlock: new BigNumber('1000000'),
+        endBlock: new BigNumber(1000000),
       };
       const mockLegs = {
         data: [
           {
             from: new MockPortfolio(),
             to: new MockPortfolio(),
-            amount: new BigNumber('100'),
-            token: {
+            amount: new BigNumber(100),
+            asset: {
               ticker: 'TICKER',
             },
           },
@@ -86,12 +66,12 @@ describe('SettlementsController', () => {
       mockInstruction.getStatus.mockResolvedValue({ status: InstructionStatus.Pending });
       mockInstruction.getLegs.mockResolvedValue(mockLegs);
       mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
-      const result = await controller.getInstruction({ id: new BigNumber('3') });
+      const result = await controller.getInstruction({ id: new BigNumber(3) });
 
       expect(result).toEqual({
         ...mockInstructionDetails,
         legs:
-          mockLegs.data.map(({ from, to, amount, token: asset }) => ({
+          mockLegs.data.map(({ from, to, amount, asset }) => ({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             from: createPortfolioIdentifierModel(from as any),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,36 +85,52 @@ describe('SettlementsController', () => {
 
   describe('createInstruction', () => {
     it('should create an instruction and return the data returned by the service', async () => {
-      const transactions = ['transaction'];
       const mockData = {
         result: 'fakeInstruction',
-        transactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.createInstruction({ id: new BigNumber('3') }, {} as any);
+      const result = await controller.createInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
-        instructionId: 'fakeInstruction',
-        transactions,
+        instruction: 'fakeInstruction',
+        transactions: ['transaction'],
       });
     });
   });
 
   describe('affirmInstruction', () => {
     it('should affirm an instruction and return the data returned by the service', async () => {
-      const transactions = ['transaction'];
       const mockData = {
-        transactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.affirmInstruction.mockResolvedValue(mockData);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.affirmInstruction({ id: new BigNumber('3') }, {} as any);
+      const result = await controller.affirmInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
-        transactions,
+        transactions: ['transaction'],
+      });
+    });
+  });
+
+  describe('rejectInstruction', () => {
+    it('should reject an instruction and return the data returned by the service', async () => {
+      const mockData = {
+        transactions: ['transaction'],
+      };
+      mockSettlementsService.rejectInstruction.mockResolvedValue(mockData);
+
+      const result = await controller.affirmInstruction(
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+
+      expect(result).toEqual({
+        transactions: ['transaction'],
       });
     });
   });
@@ -154,7 +150,10 @@ describe('SettlementsController', () => {
       };
       mockSettlementsService.findAffirmations.mockResolvedValue(mockAffirmations);
 
-      const result = await controller.getAffirmations({ id: new BigNumber('3') }, { size: 10 });
+      const result = await controller.getAffirmations(
+        { id: new BigNumber(3) },
+        { size: new BigNumber(10) }
+      );
 
       expect(result).toEqual(
         new PaginatedResultsModel({
@@ -176,7 +175,7 @@ describe('SettlementsController', () => {
       };
       mockSettlementsService.findVenueDetails.mockResolvedValue(mockVenueDetails);
 
-      const result = await controller.getVenueDetails({ id: new BigNumber('3') });
+      const result = await controller.getVenueDetails({ id: new BigNumber(3) });
 
       expect(result).toEqual(mockVenueDetails);
     });
@@ -186,26 +185,29 @@ describe('SettlementsController', () => {
     it('should create a Venue and return the data returned by the service', async () => {
       const body = {
         signer: '0x6'.padEnd(66, '0'),
-        details: 'Generic Exchange',
+        description: 'Generic Exchange',
         type: VenueType.Exchange,
       };
-      const transactions = ['transaction'];
+      const mockVenue = new MockVenue();
       const mockData = {
-        transactions,
+        result: mockVenue,
+        transactions: ['transaction'],
       };
       mockSettlementsService.createVenue.mockResolvedValue(mockData);
 
       const result = await controller.createVenue(body);
 
-      expect(result).toEqual(mockData);
+      expect(result).toEqual({
+        venue: mockVenue,
+        transactions: ['transaction'],
+      });
     });
   });
 
   describe('modifyVenue', () => {
     it('should modify a venue and return the data returned by the service', async () => {
-      const transactions = ['transaction'];
       const mockData = {
-        transactions,
+        transactions: ['transaction'],
       };
       mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
 
@@ -215,10 +217,10 @@ describe('SettlementsController', () => {
         type: VenueType.Exchange,
       };
 
-      const result = await controller.modifyVenue({ id: new BigNumber('3') }, body);
+      const result = await controller.modifyVenue({ id: new BigNumber(3) }, body);
 
       expect(result).toEqual({
-        transactions,
+        transactions: ['transaction'],
       });
     });
   });
@@ -239,11 +241,11 @@ describe('SettlementsController', () => {
 
       const result = await controller.validateLeg({
         fromDid: 'fromDid',
-        fromPortfolio: new BigNumber('1'),
+        fromPortfolio: new BigNumber(1),
         toDid: 'toDid',
-        toPortfolio: new BigNumber('1'),
+        toPortfolio: new BigNumber(1),
         asset: 'TICKER',
-        amount: new BigNumber('123'),
+        amount: new BigNumber(123),
       });
 
       expect(result).toEqual(mockTransferBreakdown);

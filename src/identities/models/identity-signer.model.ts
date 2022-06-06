@@ -1,7 +1,9 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { SignerType } from '@polymathnetwork/polymesh-sdk/types';
 
-import { SignerModel } from './signer.model';
+import { SignerModel } from '~/identities/models/signer.model';
 
 export class IdentitySignerModel extends SignerModel {
   @ApiProperty({
@@ -12,7 +14,7 @@ export class IdentitySignerModel extends SignerModel {
   readonly did: string;
 
   constructor(model: Omit<IdentitySignerModel, 'signerType'>) {
-    super({ signerType: SignerType.Account });
+    super({ signerType: SignerType.Identity });
     Object.assign(this, model);
   }
 }

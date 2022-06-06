@@ -3,10 +3,11 @@ module.exports = {
   transformIgnorePatterns: ['/node_modules/(?![@polymathnetwork/src]).+\\.js$'],
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testPathIgnorePatterns: ['dist'],
+  testPathIgnorePatterns: ['<rootDir>/dist/*'],
   moduleNameMapper: {
     '~/(.*)': '<rootDir>/src/$1',
   },
   testRegex: '.*\\.spec\\.ts$',
-  coverageDirectory: '../coverage',
+  coverageDirectory: './coverage',
+  collectCoverage: true,
 };

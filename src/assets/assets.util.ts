@@ -1,16 +1,23 @@
 /* istanbul ignore file */
 
-import { SecurityToken } from '@polymathnetwork/polymesh-sdk/types';
+import { Asset } from '@polymathnetwork/polymesh-sdk/types';
 
-import { AssetDetailsModel } from './models/asset-details.model';
+import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 
 /**
  * Fetch and assemble data for an Asset
  */
-export async function createAssetDetailsModel(asset: SecurityToken): Promise<AssetDetailsModel> {
-  const [{ owner, assetType, name, totalSupply, isDivisible }, identifiers] = await Promise.all([
+export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetailsModel> {
+  const [
+    { owner, assetType, name, totalSupply, isDivisible },
+    securityIdentifiers,
+    fundingRound,
+    isFrozen,
+  ] = await Promise.all([
     asset.details(),
     asset.getIdentifiers(),
+    asset.currentFundingRound(),
+    asset.isFrozen(),
   ]);
 
   return new AssetDetailsModel({
@@ -19,6 +26,8 @@ export async function createAssetDetailsModel(asset: SecurityToken): Promise<Ass
     name,
     totalSupply,
     isDivisible,
-    identifiers,
+    securityIdentifiers,
+    fundingRound,
+    isFrozen,
   });
 }

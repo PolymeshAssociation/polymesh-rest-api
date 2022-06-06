@@ -1,32 +1,29 @@
 /* istanbul ignore file */
 
-import { DistributionWithDetails } from '@polymathnetwork/polymesh-sdk/types';
+import { DistributionWithDetails, DividendDistribution } from '@polymathnetwork/polymesh-sdk/types';
 
-import { DividendDistributionModel } from '~/corporate-actions/model/dividend-distribution.model';
+import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
+import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 
 export function createDividendDistributionModel(
-  distributionWithDetails: DistributionWithDetails
+  distribution: DividendDistribution
 ): DividendDistributionModel {
   const {
-    distribution: {
-      origin,
-      currency,
-      perShare,
-      maxAmount,
-      expiryDate,
-      paymentDate,
-      id,
-      ticker,
-      declarationDate,
-      description,
-      targets,
-      defaultTaxWithholding,
-      taxWithholdings,
-    },
-    details,
-  } = distributionWithDetails;
-
+    origin,
+    currency,
+    perShare,
+    maxAmount,
+    expiryDate,
+    paymentDate,
+    id,
+    asset: { ticker },
+    declarationDate,
+    description,
+    targets,
+    defaultTaxWithholding,
+    taxWithholdings,
+  } = distribution;
   return new DividendDistributionModel({
     origin: createPortfolioIdentifierModel(origin),
     currency,
@@ -41,6 +38,16 @@ export function createDividendDistributionModel(
     targets,
     defaultTaxWithholding,
     taxWithholdings,
+  });
+}
+
+export function createDividendDistributionDetailsModel(
+  distributionWithDetails: DistributionWithDetails
+): DividendDistributionDetailsModel {
+  const { distribution, details } = distributionWithDetails;
+
+  return new DividendDistributionDetailsModel({
+    ...createDividendDistributionModel(distribution),
     ...details,
   });
 }

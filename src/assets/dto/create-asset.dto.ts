@@ -2,12 +2,12 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { KnownTokenType } from '@polymathnetwork/polymesh-sdk/types';
+import { KnownAssetType } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { AssetIdentifierDto } from '~/assets/dto/asset-identifier.dto';
+import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { SignerDto } from '~/common/dto/signer.dto';
@@ -15,30 +15,30 @@ import { SignerDto } from '~/common/dto/signer.dto';
 export class CreateAssetDto extends SignerDto {
   @ApiProperty({
     description: 'The name of the Asset',
-    example: 'Berkshire Hathaway Inc. Class A',
+    example: 'Ticker Corp',
   })
   @IsString()
   readonly name: string;
 
   @ApiProperty({
     description: 'The ticker of the Asset. This must already be reserved by the Signer',
-    example: 'BRK.A',
+    example: 'TICKER',
   })
   @IsTicker()
   readonly ticker: string;
 
   @ApiPropertyOptional({
-    description: 'The total supply count of the Asset',
+    description: 'The initial supply count of the Asset',
     example: '627880',
-    type: BigNumber,
+    type: 'string',
   })
   @IsOptional()
   @ToBigNumber()
   @IsBigNumber()
-  readonly totalSupply?: BigNumber;
+  readonly initialSupply?: BigNumber;
 
   @ApiProperty({
-    description: 'Specifies if the Asset token can be divided',
+    description: 'Specifies if the Asset can be divided',
     example: 'false',
   })
   @IsBoolean()
@@ -46,20 +46,28 @@ export class CreateAssetDto extends SignerDto {
 
   @ApiProperty({
     description: 'The type of Asset',
-    enum: KnownTokenType,
-    example: KnownTokenType.EquityCommon,
+    enum: KnownAssetType,
+    example: KnownAssetType.EquityCommon,
   })
   @IsString()
   readonly assetType: string;
 
+  @ApiProperty({
+    description:
+      'Specifies whether Identities must have an Investor Uniqueness Claim in order to be able to hold this Asset. More info [here](https://developers.polymesh.live/introduction/identity#polymesh-unique-identity-system-puis)',
+    example: true,
+  })
+  @IsBoolean()
+  readonly requireInvestorUniqueness: boolean;
+
   @ApiPropertyOptional({
-    description: 'List of Asset Identifiers',
+    description: "List of Asset's Security Identifiers",
     isArray: true,
-    type: AssetIdentifierDto,
+    type: SecurityIdentifierDto,
   })
   @ValidateNested({ each: true })
-  @Type(() => AssetIdentifierDto)
-  readonly identifiers?: AssetIdentifierDto[];
+  @Type(() => SecurityIdentifierDto)
+  readonly securityIdentifiers?: SecurityIdentifierDto[];
 
   @ApiPropertyOptional({
     description: 'The current funding round of the Asset',

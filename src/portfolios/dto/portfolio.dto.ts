@@ -5,19 +5,20 @@ import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import { PortfolioLike } from '@polymathnetwork/polymesh-sdk/types';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsDid } from '~/common/decorators/validation';
+import { IsBigNumber,IsDid } from '~/common/decorators/validation';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 
 export class PortfolioDto {
   @ApiProperty({
+    description: 'The DID of the Portfolio owner',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @IsDid()
   readonly did: string;
 
   @ApiProperty({
-    example: '123',
     description: 'Portfolio number. Use 0 for the Default Portfolio',
+    example: '123',
   })
   @IsBigNumber()
   @ToBigNumber()

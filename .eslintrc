@@ -7,16 +7,40 @@
     "es6": true
   },
   "rules": {
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/indent": "off",
     "quotes": ["error", "single", { "avoidEscape": true }],
     "simple-import-sort/sort": "error",
     "sort-imports": "off",
     "import/order": "off",
     "no-dupe-class-members": "off",
-    "no-shadow": "error",
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
     "arrow-parens": "off",
     "no-useless-constructor": "off",
-    "@typescript-eslint/no-useless-constructor": "error"
+    "@typescript-eslint/no-useless-constructor": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [".*"],
+            "message": "Please use absolute imports instead"
+          }
+        ],
+        "paths": [
+          {
+            "name": "@polymathnetwork/polymesh-sdk/internal",
+            "message": "polymesh-sdk/internal should not be used"
+          },
+          {
+            "name": "@polymathnetwork/polymesh-sdk/polkadot",
+            "message": "polymesh-sdk/polkadot should not be used"
+          }
+        ]
+      }
+    ]
   },
   "plugins": ["@typescript-eslint", "simple-import-sort", "node", "import", "prettier", "promise"],
   "parserOptions": {

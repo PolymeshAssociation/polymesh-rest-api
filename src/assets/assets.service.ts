@@ -1,43 +1,42 @@
-import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSecurityTokenParams } from '@polymathnetwork/polymesh-sdk/internal';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
-  DefaultTrustedClaimIssuer,
+  Asset,
+  AssetDocument,
+  AuthorizationRequest,
   ErrorCode,
   IdentityBalance,
-  isPolymeshError,
-  Requirement,
   ResultSet,
-  SecurityToken,
-  TickerReservation,
-  TokenDocument,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
+import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
-import { ReserveTickerDto as RegisterTickerDto } from '~/assets/dto/reserve-ticker.dto';
-import { QueueResult } from '~/common/types';
-import { processQueue } from '~/common/utils/utils';
+import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
+import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
+import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
+import { processQueue, QueueResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
-  public async findOne(ticker: string): Promise<SecurityToken> {
+  public async findOne(ticker: string): Promise<Asset> {
     try {
-      const asset = await this.polymeshService.polymeshApi.getSecurityToken({ ticker });
-
-      return asset;
+      return await this.polymeshService.polymeshApi.assets.getAsset({ ticker });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code, message } = err;
         if (
           code === ErrorCode.DataUnavailable &&
-          message.startsWith('There is no Security Token with ticker')
+          message.startsWith('There is no Asset with ticker')
         ) {
           throw new NotFoundException(`There is no Asset with ticker "${ticker}"`);
         }
@@ -47,111 +46,111 @@ export class AssetsService {
     }
   }
 
-  public async findAllByOwner(owner: string): Promise<SecurityToken[]> {
+  public async findAllByOwner(owner: string): Promise<Asset[]> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    const isDidValid = await polymeshApi.isIdentityValid({ identity: owner });
+    const isDidValid = await polymeshApi.identities.isIdentityValid({ identity: owner });
 
     if (!isDidValid) {
       throw new NotFoundException(`There is no identity with DID ${owner}`);
     }
 
-    return polymeshApi.getSecurityTokens({ owner });
+    return polymeshApi.assets.getAssets({ owner });
   }
 
   public async findHolders(
     ticker: string,
-    size: number,
+    size: BigNumber,
     start?: string
   ): Promise<ResultSet<IdentityBalance>> {
     const asset = await this.findOne(ticker);
-    return asset.tokenHolders.get({ size, start });
+    return asset.assetHolders.get({ size, start });
   }
 
   public async findDocuments(
     ticker: string,
-    size: number,
+    size: BigNumber,
     start?: string
-  ): Promise<ResultSet<TokenDocument>> {
+  ): Promise<ResultSet<AssetDocument>> {
     const asset = await this.findOne(ticker);
     return asset.documents.get({ size, start });
   }
 
-  public async findComplianceRequirements(ticker: string): Promise<Requirement[]> {
-    const asset = await this.findOne(ticker);
-    return asset.compliance.requirements.get();
+  public async setDocuments(
+    ticker: string,
+    params: SetAssetDocumentsDto
+  ): Promise<QueueResult<Asset>> {
+    const {
+      documents: { set },
+    } = await this.findOne(ticker);
+
+    const { signer, documents } = params;
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(set, { documents }, { signingAccount: address });
   }
 
-  public async findTrustedClaimIssuers(ticker: string): Promise<DefaultTrustedClaimIssuer[]> {
-    const asset = await this.findOne(ticker);
-    return asset.compliance.trustedClaimIssuers.get();
-  }
-
-  public async registerTicker(params: RegisterTickerDto): Promise<QueueResult<TickerReservation>> {
+  public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(this.polymeshService.polymeshApi.reserveTicker, rest, { signer: address });
+    const signingAccount = await this.signingService.getAddressByHandle(signer);
+    const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
+    return processQueue(createAsset, rest, { signingAccount });
   }
 
-  public async createAsset(params: CreateAssetDto): Promise<QueueResult<SecurityToken>> {
-    const { signer, ...rest } = params;
-    let reservation: TickerReservation;
-    let reserveResponse: QueueResult<TickerReservation> | undefined;
-    // if the asset isn't already reserved we will attempt to reserve it for the user
-    try {
-      reservation = await this.findTickerReservation(params.ticker);
-    } catch (err) {
-      if (err instanceof NotFoundException) {
-        reserveResponse = await this.registerTicker({ signer, ticker: params.ticker });
-        reservation = reserveResponse.result;
-      } else {
-        throw err;
-      }
-    }
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    const args: CreateSecurityTokenParams = {
-      name: rest.name,
-      totalSupply: rest.totalSupply,
-      isDivisible: rest.isDivisible,
-      tokenType: rest.assetType,
-      tokenIdentifiers: rest.identifiers,
-      fundingRound: rest.fundingRound,
-      documents: rest.documents,
-    };
-    const res = await processQueue(reservation.createToken, args, { signer: address });
-    // prepend the reserve transaction if nessesary
-    if (reserveResponse) {
-      return {
-        ...res,
-        transactions: [...reserveResponse.transactions, ...res.transactions],
-      };
-    }
-    return res;
-  }
-
-  public async issue(ticker: string, params: IssueDto): Promise<QueueResult<SecurityToken>> {
+  public async issue(ticker: string, params: IssueDto): Promise<QueueResult<Asset>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    return processQueue(asset.issuance.issue, rest, { signer: address });
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(asset.issuance.issue, rest, { signingAccount: address });
   }
 
-  public async findTickerReservation(ticker: string): Promise<TickerReservation> {
-    try {
-      const reservation = await this.polymeshService.polymeshApi.getTickerReservation({ ticker });
-      return reservation;
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (code === ErrorCode.FatalError && message.startsWith('There is no reservation for')) {
-          throw new NotFoundException(`There is no reservation for "${ticker}"`);
-        } else if (code === ErrorCode.FatalError && message.endsWith('token has been created')) {
-          throw new GoneException(`${ticker} has already been created`);
-        }
-      }
+  public async transferOwnership(
+    ticker: string,
+    params: TransferOwnershipDto
+  ): Promise<QueueResult<AuthorizationRequest>> {
+    const { signer, ...rest } = params;
+    const address = await this.signingService.getAddressByHandle(signer);
+    const { transferOwnership } = await this.findOne(ticker);
+    return processQueue(transferOwnership, rest, { signingAccount: address });
+  }
 
-      throw err;
-    }
+  public async redeem(ticker: string, params: RedeemTokensDto): Promise<QueueResult<void>> {
+    const { signer, amount } = params;
+    const { redeem } = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(redeem, { amount }, { signingAccount: address });
+  }
+
+  public async freeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+    const { signer } = params;
+    const asset = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(asset.freeze, { signingAccount: address }, {});
+  }
+
+  public async unfreeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+    const { signer } = params;
+    const asset = await this.findOne(ticker);
+    const address = await this.signingService.getAddressByHandle(signer);
+    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+    return processQueue(asset.unfreeze, { signingAccount: address }, {});
+  }
+
+  public async controllerTransfer(
+    ticker: string,
+    params: ControllerTransferDto
+  ): Promise<QueueResult<void>> {
+    const { signer, origin, amount } = params;
+
+    const { controllerTransfer } = await this.findOne(ticker);
+
+    const address = await this.signingService.getAddressByHandle(signer);
+
+    return processQueue(
+      controllerTransfer,
+      { originPortfolio: origin.toPortfolioLike(), amount },
+      { signingAccount: address }
+    );
   }
 }

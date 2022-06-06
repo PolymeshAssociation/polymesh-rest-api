@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-import { SecondaryKeyModel } from '~/identities/models/secondary-key.model';
+import { PermissionedAccountModel } from '~/accounts/models/permissioned-account.model';
 
 export class IdentityModel {
   @ApiProperty({
@@ -14,26 +14,26 @@ export class IdentityModel {
   readonly did: string;
 
   @ApiProperty({
-    type: 'string',
-    description: 'Primary key of the Identity',
-    example: '5grwXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx',
+    description: 'Primary Account of the Identity',
+    type: () => PermissionedAccountModel,
   })
-  readonly primaryKey: string;
+  @Type(() => PermissionedAccountModel)
+  readonly primaryAccount: PermissionedAccountModel;
 
   @ApiProperty({
-    description: 'Secondary keys of the Identity',
-    type: () => SecondaryKeyModel,
+    description: 'Secondary Accounts of the Identity',
+    type: () => PermissionedAccountModel,
     isArray: true,
   })
-  @Type(() => SecondaryKeyModel)
-  readonly secondaryKeys: SecondaryKeyModel[];
+  @Type(() => PermissionedAccountModel)
+  readonly secondaryAccounts: PermissionedAccountModel[];
 
   @ApiProperty({
     type: 'boolean',
-    description: 'Indicator to know if secondary keys are frozen or not',
+    description: 'Indicator to know if Secondary Accounts are frozen or not',
     example: false,
   })
-  readonly secondaryKeysFrozen: boolean;
+  readonly secondaryAccountsFrozen: boolean;
 
   constructor(model: IdentityModel) {
     Object.assign(this, model);

@@ -1,43 +1,55 @@
 import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AuthorizationType, ClaimType } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  AuthorizationType,
+  ClaimType,
+  GenericAuthorizationData,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ResultsModel } from '~/common/models/results.model';
+import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
+import * as identityUtil from '~/identities/identities.util';
+import { AccountModel } from '~/identities/models/account.model';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { MockIdentity } from '~/test-utils/mocks';
-
-import { IdentitiesController } from './identities.controller';
+import {
+  MockAuthorizationRequest,
+  MockIdentity,
+  MockTickerReservation,
+  MockVenue,
+} from '~/test-utils/mocks';
+import {
+  MockAssetService,
+  MockAuthorizationsService,
+  MockClaimsService,
+  MockIdentitiesService,
+  MockSettlementsService,
+  MockTickerReservationsService,
+} from '~/test-utils/service-mocks';
+import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
-  const mockAssetsService = {
-    findAllByOwner: jest.fn(),
-  };
+  const mockAssetsService = new MockAssetService();
 
-  const mockSettlementsService = {
-    findPendingInstructionsByDid: jest.fn(),
-  };
+  const mockSettlementsService = new MockSettlementsService();
 
-  const mockIdentitiesService = {
-    findOne: jest.fn(),
-    findTrustingTokens: jest.fn(),
-  };
+  const mockIdentitiesService = new MockIdentitiesService();
 
-  const mockAuthorizationsService = {
-    findPendingByDid: jest.fn(),
-    findIssuedByDid: jest.fn(),
-  };
+  const mockAuthorizationsService = new MockAuthorizationsService();
 
-  const mockClaimsService = {
-    findIssuedByDid: jest.fn(),
-    findAssociatedByDid: jest.fn(),
-  };
+  const mockClaimsService = new MockClaimsService();
+
+  const mockTickerReservationsService = new MockTickerReservationsService();
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -48,6 +60,7 @@ describe('IdentitiesController', () => {
         IdentitiesService,
         AuthorizationsService,
         ClaimsService,
+        TickerReservationsService,
         mockPolymeshLoggerProvider,
       ],
     })
@@ -61,6 +74,8 @@ describe('IdentitiesController', () => {
       .useValue(mockAuthorizationsService)
       .overrideProvider(ClaimsService)
       .useValue(mockClaimsService)
+      .overrideProvider(TickerReservationsService)
+      .useValue(mockTickerReservationsService)
       .compile();
 
     controller = module.get<IdentitiesController>(IdentitiesController);
@@ -92,24 +107,58 @@ describe('IdentitiesController', () => {
     });
   });
 
+  describe('getVenues', () => {
+    it("should return the Identity's Venues", async () => {
+      const mockResults = [new MockVenue()];
+      mockSettlementsService.findVenuesByOwner.mockResolvedValue(mockResults);
+
+      const result = await controller.getVenues({ did: '0x6'.padEnd(66, '0') });
+      expect(result).toEqual({
+        results: [
+          expect.objectContaining({
+            id: new BigNumber(1),
+          }),
+        ],
+      });
+    });
+  });
+
   describe('getIdentityDetails', () => {
     it("should return the Identity's details", async () => {
       const did = '0x6'.padEnd(66, '0');
 
       const mockIdentityDetails = new IdentityModel({
         did,
-        primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
-        secondaryKeysFrozen: false,
-        secondaryKeys: [],
+        primaryAccount: {
+          account: new AccountModel({
+            address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+          }),
+          permissions: {
+            portfolios: null,
+            assets: null,
+            transactions: null,
+            transactionGroups: [],
+          },
+        },
+        secondaryAccountsFrozen: false,
+        secondaryAccounts: [],
       });
 
       const mockIdentity = new MockIdentity();
       mockIdentity.did = did;
-      mockIdentity.getPrimaryKey.mockResolvedValue({
-        address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+      mockIdentity.getPrimaryAccount.mockResolvedValue({
+        account: {
+          address: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
+        },
+        permissions: {
+          portfolios: null,
+          assets: null,
+          transactions: null,
+          transactionGroups: [],
+        },
       });
-      mockIdentity.areSecondaryKeysFrozen.mockResolvedValue(false);
-      mockIdentity.getSecondaryKeys.mockResolvedValue([]);
+      mockIdentity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      mockIdentity.getSecondaryAccounts.mockResolvedValue([]);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const result = await controller.getIdentityDetails({ did });
@@ -119,54 +168,136 @@ describe('IdentitiesController', () => {
   });
 
   describe('getPendingAuthorizations', () => {
-    it('should return list of pending authorizations received by identity', async () => {
-      const did = '0x6'.padEnd(66, '0');
-      const pendingAuthorization = {
-        authId: new BigNumber(2236),
-        issuer: {
-          primaryKey: '5GNWrbft4pJcYSak9tkvUy89e2AKimEwHb6CKaJq81KHEj8e',
-          did,
-        },
-        data: {
-          type: AuthorizationType.TransferTicker,
-          value: 'FOO',
-        },
-        expiry: null,
-      };
+    const did = '0x6'.padEnd(66, '0');
+    const targetDid = '0x1'.padEnd(66, '0');
+    const pendingAuthorization = {
+      authId: new BigNumber(2236),
+      issuer: {
+        did: targetDid,
+      },
+      data: {
+        type: AuthorizationType.TransferTicker,
+        value: 'FOO',
+      } as unknown as GenericAuthorizationData,
+      expiry: null,
+      target: {
+        did,
+      },
+    };
 
+    const issuedAuthorization = {
+      authId: new BigNumber(2237),
+      issuer: {
+        did,
+      },
+      data: {
+        type: AuthorizationType.TransferAssetOwnership,
+        value: 'FOO2',
+      } as unknown as GenericAuthorizationData,
+      expiry: new Date('10/14/1987'),
+      target: {
+        did: targetDid,
+      },
+      isExpired: jest.fn().mockReturnValue(true),
+    };
+
+    const mockReceivedAuthorization = new AuthorizationRequestModel({
+      id: pendingAuthorization.authId,
+      issuer: expect.objectContaining({
+        did: targetDid,
+      }),
+      data: pendingAuthorization.data,
+      expiry: null,
+      target: new IdentitySignerModel({ did }),
+    });
+
+    const mockSentAuthorization = new AuthorizationRequestModel({
+      id: issuedAuthorization.authId,
+      issuer: expect.objectContaining({
+        did,
+      }),
+      data: issuedAuthorization.data,
+      expiry: new Date('10/14/1987'),
+      target: new IdentitySignerModel({ did: targetDid }),
+    });
+
+    beforeEach(() => {
       mockAuthorizationsService.findPendingByDid.mockResolvedValue([pendingAuthorization]);
-      const result = await controller.getPendingAuthorizations({ did }, {});
-      expect(result).toEqual(new ResultsModel({ results: [pendingAuthorization] }));
+      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({ data: [issuedAuthorization] });
+    });
+
+    it('should return list of pending authorizations for a given Identity', async () => {
+      let result = await controller.getPendingAuthorizations({ did }, { includeExpired: true });
+      expect(result).toEqual(
+        new PendingAuthorizationsModel({
+          received: [mockReceivedAuthorization],
+          sent: [mockSentAuthorization],
+        })
+      );
+
+      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({ data: [] });
+      result = await controller.getPendingAuthorizations({ did }, {});
+      expect(result).toEqual(
+        new PendingAuthorizationsModel({
+          received: [mockReceivedAuthorization],
+          sent: [],
+        })
+      );
     });
 
     it('should support filtering pending authorizations by authorization type', async () => {
-      const did = '0x6'.padEnd(66, '0');
-      mockAuthorizationsService.findPendingByDid.mockResolvedValue([]);
       const result = await controller.getPendingAuthorizations(
         { did },
-        { type: AuthorizationType.JoinIdentity }
+        { type: AuthorizationType.TransferTicker }
       );
-      expect(result).toEqual(new ResultsModel({ results: [] }));
+      expect(result).toEqual(
+        new PendingAuthorizationsModel({
+          received: [mockReceivedAuthorization],
+          sent: [],
+        })
+      );
     });
 
     it('should support filtering pending Authorizations by whether they have expired or not', async () => {
-      const did = '0x6'.padEnd(66, '0');
-      mockAuthorizationsService.findPendingByDid.mockResolvedValue([]);
-      const result = await controller.getPendingAuthorizations({ did }, { includeExpired: false });
-      expect(result).toEqual(new ResultsModel({ results: [] }));
+      let result = await controller.getPendingAuthorizations({ did }, { includeExpired: false });
+      expect(result).toEqual(
+        new PendingAuthorizationsModel({
+          received: [mockReceivedAuthorization],
+          sent: [],
+        })
+      );
+
+      result = await controller.getPendingAuthorizations({ did }, { includeExpired: true });
+      expect(result).toEqual(
+        new PendingAuthorizationsModel({
+          received: [mockReceivedAuthorization],
+          sent: [mockSentAuthorization],
+        })
+      );
     });
   });
 
-  describe('getIssuedAuthorizations', () => {
-    it('should return list of authorizations issued by an identity', async () => {
-      const did = '0x6'.padEnd(66, '0');
-      const mockRequestedAuthorizations = { next: undefined, results: [], total: 0 };
-      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({
-        data: [],
-        count: 0,
+  describe('getPendingAuthorization', () => {
+    it('should call the service and return the AuthorizationRequest details', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      mockAuthorizationsService.findOne.mockResolvedValue(mockAuthorization);
+      const result = await controller.getPendingAuthorization({
+        did: '0x6'.padEnd(66, '0'),
+        id: new BigNumber(1),
       });
-      const result = await controller.getIssuedAuthorizations({ did }, { size: 1 });
-      expect(result).toEqual(mockRequestedAuthorizations);
+      expect(result).toEqual({
+        id: mockAuthorization.authId,
+        expiry: null,
+        data: {
+          type: 'PortfolioCustody',
+          value: {
+            did: mockAuthorization.data.value.did,
+            id: new BigNumber(1),
+          },
+        },
+        issuer: mockAuthorization.issuer,
+        target: new IdentitySignerModel({ did: mockAuthorization.target.did }),
+      });
     });
   });
 
@@ -192,13 +323,13 @@ describe('IdentitiesController', () => {
     const paginatedResult = {
       data: claims,
       next: null,
-      count: 1,
+      count: new BigNumber(1),
     };
     it('should give issued Claims with no start value', async () => {
       mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getIssuedClaims(
         { did },
-        { size: 10 },
+        { size: new BigNumber(10) },
         { includeExpired: false }
       );
       expect(result).toEqual({
@@ -212,7 +343,7 @@ describe('IdentitiesController', () => {
       mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
       const result = await controller.getIssuedClaims(
         { did },
-        { size: 10, start: 1 },
+        { size: new BigNumber(10), start: new BigNumber(1) },
         { includeExpired: false }
       );
       expect(result).toEqual({
@@ -246,18 +377,22 @@ describe('IdentitiesController', () => {
         },
       ],
       next: null,
-      count: 1,
+      count: new BigNumber(1),
     };
 
     it('should give associated Claims with no start value', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
-      const result = await controller.getAssociatedClaims({ did }, { size: 10 }, {});
+      const result = await controller.getAssociatedClaims({ did }, { size: new BigNumber(10) }, {});
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
     it('should give associated Claims with start value', async () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
-      const result = await controller.getAssociatedClaims({ did }, { size: 10, start: 1 }, {});
+      const result = await controller.getAssociatedClaims(
+        { did },
+        { size: new BigNumber(10), start: new BigNumber(1) },
+        {}
+      );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
@@ -265,7 +400,7 @@ describe('IdentitiesController', () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
       const result = await controller.getAssociatedClaims(
         { did },
-        { size: 10, start: 1 },
+        { size: new BigNumber(10), start: new BigNumber(1) },
         { claimTypes: [ClaimType.Accredited] }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
@@ -275,29 +410,87 @@ describe('IdentitiesController', () => {
       mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
       const result = await controller.getAssociatedClaims(
         { did },
-        { size: 10, start: 1 },
+        { size: new BigNumber(10), start: new BigNumber(1) },
         { includeExpired: true }
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
   });
 
-  describe('getTrustingTokens', () => {
+  describe('getTrustingAssets', () => {
     it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
       const did = '0x6'.padEnd(66, '0');
       const mockAssets = [
         {
-          ticker: 'BAR_TOKEN',
+          ticker: 'BAR_TICKER',
         },
         {
-          ticker: 'FOO_TOKEN',
+          ticker: 'FOO_TICKER',
         },
       ];
-      mockIdentitiesService.findTrustingTokens.mockResolvedValue(mockAssets);
+      mockIdentitiesService.findTrustingAssets.mockResolvedValue(mockAssets);
 
-      const result = await controller.getTrustingTokens({ did });
+      const result = await controller.getTrustingAssets({ did });
 
       expect(result).toEqual(new ResultsModel({ results: mockAssets }));
+    });
+  });
+
+  describe('addSecondaryAccount', () => {
+    it('should return the transaction details on adding a Secondary Account', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      const mockData = {
+        result: mockAuthorization,
+        transactions: ['transaction'],
+      };
+      mockIdentitiesService.addSecondaryAccount.mockResolvedValue(mockData);
+
+      const result = await controller.addSecondaryAccount({
+        signer: 'Ox60',
+        secondaryAccount: '5xdd',
+      });
+
+      expect(result).toEqual({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+        transactions: ['transaction'],
+      });
+    });
+  });
+
+  describe('getTickerReservations', () => {
+    it('should call the service and return all the reserved tickers', async () => {
+      const mockTickerReservation = new MockTickerReservation();
+
+      mockTickerReservationsService.findAllByOwner.mockResolvedValue([mockTickerReservation]);
+
+      const did = '0x6'.padEnd(66, '0');
+
+      const result = await controller.getTickerReservations({ did });
+      expect(result).toEqual({
+        results: [mockTickerReservation],
+      });
+      expect(mockTickerReservationsService.findAllByOwner).toHaveBeenCalledWith(did);
+    });
+  });
+
+  describe('mockCdd', () => {
+    it('should call the service and return the Identity', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fakeIdentityModel = 'fakeIdentityModel' as any;
+      const createIdentityModelSpy = jest
+        .spyOn(identityUtil, 'createIdentityModel')
+        .mockResolvedValue(fakeIdentityModel);
+
+      const params = {
+        address: '5abc',
+        initialPolyx: new BigNumber(10),
+      };
+
+      const result = await controller.createMockCdd(params);
+      expect(result).toEqual(fakeIdentityModel);
+      expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
+      createIdentityModelSpy.mockRestore();
     });
   });
 });

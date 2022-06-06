@@ -1,20 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { MoveFundsParams, NumberedPortfolio } from '@polymathnetwork/polymesh-sdk/internal';
-import { DefaultPortfolio, ErrorCode, isPolymeshError } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  DefaultPortfolio,
+  ErrorCode,
+  NumberedPortfolio,
+} from '@polymathnetwork/polymesh-sdk/types';
+import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
 
-import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { processQueue } from '~/common/utils/utils';
+import { processQueue, QueueResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
+import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
+import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
-import { RelayerAccountsService } from '~/relayer-accounts/relayer-accounts.service';
+import { SigningService } from '~/signing/signing.service';
 
 @Injectable()
 export class PortfoliosService {
   constructor(
+    private readonly polymeshService: PolymeshService,
     private readonly identitiesService: IdentitiesService,
-    private readonly relayerAccountsService: RelayerAccountsService
+    private readonly signingService: SigningService
   ) {}
 
   public async findAllByOwner(did: string): Promise<[DefaultPortfolio, ...NumberedPortfolio[]]> {
@@ -44,20 +51,44 @@ export class PortfoliosService {
     }
   }
 
-  public async moveAssets(owner: string, params: AssetMovementDto): Promise<TransactionQueueModel> {
+  public async moveAssets(owner: string, params: AssetMovementDto): Promise<QueueResult<void>> {
     const { signer, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
-    const address = this.relayerAccountsService.findAddressByDid(signer);
-    const args: MoveFundsParams = {
+    const address = await this.signingService.getAddressByHandle(signer);
+    const args = {
       to: toPortfolioId(to),
-      items: items.map(({ ticker: token, amount, memo }) => {
+      items: items.map(({ ticker: asset, amount, memo }) => {
         return {
-          token,
+          asset,
           amount: new BigNumber(amount),
           memo,
         };
       }),
     };
-    return processQueue(fromPortfolio.moveFunds, args, { signer: address });
+    return processQueue(fromPortfolio.moveFunds, args, { signingAccount: address });
+  }
+
+  public async createPortfolio(
+    params: CreatePortfolioDto
+  ): Promise<QueueResult<NumberedPortfolio>> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+    const { signer, ...rest } = params;
+    const address = await this.signingService.getAddressByHandle(signer);
+    return processQueue(polymeshApi.identities.createPortfolio, rest, { signingAccount: address });
+  }
+
+  public async deletePortfolio(
+    portfolio: PortfolioDto,
+    signer: string
+  ): Promise<QueueResult<void>> {
+    const address = await this.signingService.getAddressByHandle(signer);
+    const identity = await this.identitiesService.findOne(portfolio.did);
+    return processQueue(
+      identity.portfolios.delete,
+      { portfolio: portfolio.id },
+      { signingAccount: address }
+    );
   }
 }

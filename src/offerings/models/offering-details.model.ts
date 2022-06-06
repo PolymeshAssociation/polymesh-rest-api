@@ -4,10 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
 import {
   Identity,
-  StoBalanceStatus,
-  StoSaleStatus,
-  StoStatus,
-  StoTimingStatus,
+  OfferingBalanceStatus,
+  OfferingSaleStatus,
+  OfferingStatus,
+  OfferingTimingStatus,
   Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
@@ -95,12 +95,12 @@ export class OfferingDetailsModel {
   @ApiProperty({
     description: 'Status of the Offering',
     example: {
-      timing: StoTimingStatus.Started,
-      balance: StoBalanceStatus.Available,
-      sale: StoSaleStatus.Live,
+      timing: OfferingTimingStatus.Started,
+      balance: OfferingBalanceStatus.Available,
+      sale: OfferingSaleStatus.Live,
     },
   })
-  readonly status: StoStatus;
+  readonly status: OfferingStatus;
 
   @ApiProperty({
     description: 'Minimum raising amount per transaction',

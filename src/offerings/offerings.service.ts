@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ResultSet, StoStatus, StoWithDetails } from '@polymathnetwork/polymesh-sdk/types';
+import {
+  OfferingStatus,
+  OfferingWithDetails,
+  ResultSet,
+} from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { InvestmentModel } from '~/offerings/models/investment.model';
@@ -11,15 +15,15 @@ export class OfferingsService {
 
   public async findAllByTicker(
     ticker: string,
-    stoStatus?: Partial<StoStatus>
-  ): Promise<StoWithDetails[]> {
+    stoStatus?: Partial<OfferingStatus>
+  ): Promise<OfferingWithDetails[]> {
     const asset = await this.assetsService.findOne(ticker);
     return asset.offerings.get({ status: stoStatus });
   }
 
-  public async findOne(ticker: string, id: BigNumber): Promise<StoWithDetails> {
+  public async findOne(ticker: string, id: BigNumber): Promise<OfferingWithDetails> {
     const offerings = await this.findAllByTicker(ticker);
-    const offering = offerings.find(o => o.sto.id.eq(id));
+    const offering = offerings.find(({ offering: { id: offeringId } }) => offeringId.eq(id));
     if (!offering) {
       throw new NotFoundException(`Offering with ID "${id}" for Asset "${ticker}" was not found`);
     }
@@ -29,10 +33,10 @@ export class OfferingsService {
   public async findInvestmentsByTicker(
     ticker: string,
     id: BigNumber,
-    size: number,
-    start?: number
+    size: BigNumber,
+    start?: BigNumber
   ): Promise<ResultSet<InvestmentModel>> {
-    const offering = await this.findOne(ticker, id);
-    return offering.sto.getInvestments({ size, start });
+    const { offering } = await this.findOne(ticker, id);
+    return offering.getInvestments({ size, start });
   }
 }

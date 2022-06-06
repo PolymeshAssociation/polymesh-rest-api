@@ -6,7 +6,8 @@ import { Identity } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
-import { FromEntity, FromPortfolioId } from '~/common/decorators/transformation';
+import { FromEntity } from '~/common/decorators/transformation';
+import { FromPortfolioId } from '~/portfolios/decorators/transformation';
 
 export class PortfolioModel {
   @ApiProperty({

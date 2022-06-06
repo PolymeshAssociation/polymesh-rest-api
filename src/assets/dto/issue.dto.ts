@@ -11,7 +11,7 @@ export class IssueDto extends SignerDto {
   @ApiProperty({
     description: 'The amount of the Asset to issue',
     example: '1000',
-    type: BigNumber,
+    type: 'string',
   })
   @ToBigNumber()
   @IsBigNumber()

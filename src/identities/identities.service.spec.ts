@@ -1,41 +1,76 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
+const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PolymeshError } from '@polymathnetwork/polymesh-sdk/internal';
-import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
+import { AccountsService } from '~/accounts/accounts.service';
+import { TransactionType } from '~/common/types';
+import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockIdentity, MockPolymesh } from '~/test-utils/mocks';
+import { mockSigningProvider } from '~/signing/signing.mock';
+import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAccountsService, MockSigningService } from '~/test-utils/service-mocks';
+import { ErrorCase } from '~/test-utils/types';
 
-import { IdentitiesService } from './identities.service';
-
-jest.mock('@polymathnetwork/polymesh-sdk/types', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/types'),
+jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
+  isPolymeshTransaction: mockIsPolymeshTransaction,
+}));
+
+jest.mock('@polkadot/keyring', () => ({
+  ...jest.requireActual('@polkadot/keyring'),
+  Keyring: jest.fn().mockImplementation(() => {
+    return {
+      addFromUri: jest.fn(),
+    };
+  }),
 }));
 
 describe('IdentitiesService', () => {
   let service: IdentitiesService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
+  let mockSigningService: MockSigningService;
+  const mockAccountsService = new MockAccountsService();
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
+    mockSigningService = mockSigningProvider.useValue;
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [IdentitiesService, mockPolymeshLoggerProvider],
+      providers: [
+        IdentitiesService,
+        AccountsService,
+        mockPolymeshLoggerProvider,
+        mockSigningProvider,
+      ],
     })
+      .overrideProvider(AccountsService)
+      .useValue(mockAccountsService)
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
       .compile();
 
     service = module.get<IdentitiesService>(IdentitiesService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+    mockIsPolymeshTransaction.mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    mockIsPolymeshTransaction.mockReset();
   });
 
   afterEach(async () => {
@@ -49,11 +84,12 @@ describe('IdentitiesService', () => {
   describe('findOne', () => {
     describe('if the Identity does not exist', () => {
       it('should throw a NotFoundException', async () => {
-        mockPolymeshApi.getIdentity.mockImplementation(() => {
-          throw new PolymeshError({
-            code: ErrorCode.DataUnavailable,
-            message: 'The Identity does not exist',
-          });
+        const mockError = {
+          code: ErrorCode.DataUnavailable,
+          message: 'The Identity does not exist',
+        };
+        mockPolymeshApi.identities.getIdentity.mockImplementation(() => {
+          throw mockError;
         });
 
         mockIsPolymeshError.mockReturnValue(true);
@@ -73,7 +109,7 @@ describe('IdentitiesService', () => {
       it('should return the Identity', async () => {
         const fakeResult = 'identity';
 
-        mockPolymeshApi.getIdentity.mockReturnValue(fakeResult);
+        mockPolymeshApi.identities.getIdentity.mockReturnValue(fakeResult);
 
         const result = await service.findOne('realDid');
 
@@ -82,14 +118,14 @@ describe('IdentitiesService', () => {
     });
   });
 
-  describe('findTrustingTokens', () => {
+  describe('findTrustingAssets', () => {
     it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
-      const mockTokens = [
+      const mockAssets = [
         {
-          ticker: 'BAR_TOKEN',
+          ticker: 'FAKE_TICKER',
         },
         {
-          ticker: 'FOO_TOKEN',
+          ticker: 'RANDOM_TICKER',
         },
       ];
       const mockIdentity = new MockIdentity();
@@ -97,12 +133,119 @@ describe('IdentitiesService', () => {
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockIdentity as any);
-      mockIdentity.getTrustingTokens.mockResolvedValue(mockTokens);
+      mockIdentity.getTrustingAssets.mockResolvedValue(mockAssets);
 
-      const result = await service.findTrustingTokens('TICKER');
-      expect(result).toEqual(mockTokens);
+      const result = await service.findTrustingAssets('TICKER');
+      expect(result).toEqual(mockAssets);
 
       findOneSpy.mockRestore();
+    });
+  });
+
+  describe('addSecondaryAccount', () => {
+    describe('errors', () => {
+      const cases: ErrorCase[] = [
+        [
+          'Invalid SS58 format',
+          {
+            code: ErrorCode.FatalError,
+            message: "The supplied address is not encoded with the chain's SS58 format",
+          },
+          InternalServerErrorException,
+        ],
+        [
+          'Target already belongs to an Identity',
+          {
+            code: ErrorCode.ValidationError,
+            message: 'The target Account is already part of an Identity',
+          },
+          BadRequestException,
+        ],
+        [
+          'The target Account has a pending invite',
+          {
+            code: ErrorCode.ValidationError,
+            message: 'The target Account already has a pending invitation to join this Identity',
+          },
+          BadRequestException,
+        ],
+      ];
+
+      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          secondaryAccount: 'address',
+        };
+
+        const address = 'address';
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
+
+        mockPolymeshApi.accountManagement.inviteAccount.mockImplementation(() => {
+          throw polymeshError;
+        });
+        mockIsPolymeshError.mockReturnValue(true);
+
+        let error;
+        try {
+          await service.addSecondaryAccount(body);
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).toBeInstanceOf(HttpException);
+        expect(mockPolymeshApi.accountManagement.inviteAccount).toHaveBeenCalled();
+        mockIsPolymeshError.mockReset();
+      });
+    });
+
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        const transactions = [
+          {
+            blockHash: '0x1',
+            txHash: '0x2',
+            blockNumber: new BigNumber(1),
+            tag: TxTags.identity.JoinIdentityAsKey,
+          },
+        ];
+        const mockQueue = new MockTransactionQueue(transactions);
+        mockPolymeshApi.accountManagement.inviteAccount.mockResolvedValue(mockQueue);
+
+        const body = {
+          signer: '0x6'.padEnd(66, '0'),
+          secondaryAccount: 'address',
+        };
+
+        const address = 'address';
+        mockSigningService.getAddressByHandle.mockReturnValue(address);
+
+        const result = await service.addSecondaryAccount(body);
+        expect(result).toEqual({
+          result: undefined,
+          transactions: [
+            {
+              blockHash: '0x1',
+              transactionHash: '0x2',
+              blockNumber: new BigNumber(1),
+              transactionTag: TxTags.identity.JoinIdentityAsKey,
+              type: TransactionType.Single,
+            },
+          ],
+        });
+        expect(mockPolymeshApi.accountManagement.inviteAccount).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('createMockCdd', () => {
+    it('should return a promise', async () => {
+      const params = {
+        address: 'address',
+        initialPolyx: new BigNumber(10),
+      };
+      mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
+      const result = service.createMockCdd(params);
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 });

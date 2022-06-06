@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Identity, KnownTokenType, TokenIdentifier } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, KnownAssetType, SecurityIdentifier } from '@polymathnetwork/polymesh-sdk/types';
 
 import { FromBigNumber, FromEntity, FromEntityObject } from '~/common/decorators/transformation';
 
@@ -18,15 +18,15 @@ export class AssetDetailsModel {
   @ApiProperty({
     description: 'Type of the Asset',
     type: 'string',
-    enum: KnownTokenType,
-    example: KnownTokenType.EquityCommon,
+    enum: KnownAssetType,
+    example: KnownAssetType.EquityCommon,
   })
   readonly assetType: string;
 
   @ApiProperty({
     description: 'Name of the Asset',
     type: 'string',
-    example: 'MyToken',
+    example: 'MyAsset',
   })
   readonly name: string;
 
@@ -46,7 +46,7 @@ export class AssetDetailsModel {
   readonly isDivisible: boolean;
 
   @ApiProperty({
-    description: 'List of Asset identifiers',
+    description: "List of Asset's Security Identifiers",
     isArray: true,
     example: [
       {
@@ -56,7 +56,22 @@ export class AssetDetailsModel {
     ],
   })
   @FromEntityObject()
-  readonly identifiers: TokenIdentifier[];
+  readonly securityIdentifiers: SecurityIdentifier[];
+
+  @ApiProperty({
+    description: 'Current funding round of the Asset',
+    type: 'string',
+    example: 'Series A',
+    nullable: true,
+  })
+  readonly fundingRound: string | null;
+
+  @ApiProperty({
+    description: 'Whether transfers are frozen for the Asset',
+    type: 'boolean',
+    example: 'true',
+  })
+  readonly isFrozen: boolean;
 
   constructor(model: AssetDetailsModel) {
     Object.assign(this, model);

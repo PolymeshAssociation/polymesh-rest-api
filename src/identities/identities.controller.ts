@@ -1,30 +1,49 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AuthorizationRequest, Venue } from '@polymathnetwork/polymesh-sdk/internal';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import {
+  Asset,
   AuthorizationType,
   Claim,
   ClaimType,
   Instruction,
-  SecurityToken,
+  TickerReservation,
+  Venue,
 } from '@polymathnetwork/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
+import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
+import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
-import { ClaimModel } from '~/claims/model/claim.model';
+import { ClaimModel } from '~/claims/models/claim.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
 @ApiTags('identities')
 @Controller('identities')
@@ -35,9 +54,10 @@ export class IdentitiesController {
     private readonly identitiesService: IdentitiesService,
     private readonly authorizationsService: AuthorizationsService,
     private readonly claimsService: ClaimsService,
+    private readonly tickerReservationsService: TickerReservationsService,
     private readonly logger: PolymeshLogger
   ) {
-    this.logger.setContext(IdentitiesController.name);
+    logger.setContext(IdentitiesController.name);
   }
 
   @Get(':did')
@@ -47,9 +67,8 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose details are to be fetched',
+    description: 'The DID of the Identity whose details are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
@@ -62,6 +81,7 @@ export class IdentitiesController {
     return createIdentityModel(identity);
   }
 
+  @ApiTags('authorizations')
   @ApiOperation({
     summary: 'Get pending Authorizations received by an Identity',
     description:
@@ -69,9 +89,8 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose pending Authorizations are to be fetched',
+    description: 'The DID of the Identity whose pending Authorizations are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
@@ -87,99 +106,63 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse(AuthorizationRequest, {
-    description: 'List of all pending authorizations received by the Identity',
-    paginated: false,
-    example: [
-      {
-        id: '1',
-        expiry: null,
-        data: {
-          type: 'NoData',
-        },
-        issuer: '0x6'.padEnd(66, '1a1a'),
-        target: {
-          type: 'Identity',
-          value: '0x0600000000000000000000000000000000000000000000000000000000000000',
-        },
-      },
-    ],
+  @ApiOkResponse({
+    description:
+      'List of all pending Authorizations for which the given Identity is either the issuer or the target',
+    type: PendingAuthorizationsModel,
   })
   @Get(':did/pending-authorizations')
   async getPendingAuthorizations(
     @Param() { did }: DidDto,
     @Query() { type, includeExpired }: AuthorizationsFilterDto
-  ): Promise<ResultsModel<AuthorizationRequest>> {
-    this.logger.debug(`Fetching pending authorization received by did ${did}`);
+  ): Promise<PendingAuthorizationsModel> {
+    const [pending, issued] = await Promise.all([
+      this.authorizationsService.findPendingByDid(did, includeExpired, type),
+      this.authorizationsService.findIssuedByDid(did),
+    ]);
 
-    const results = await this.authorizationsService.findPendingByDid(did, includeExpired, type);
+    let { data: sent } = issued;
+    if (sent.length > 0) {
+      sent = sent.filter(
+        ({ isExpired, data: { type: authType } }) =>
+          (includeExpired || !isExpired()) && (!type || type === authType)
+      );
+    }
 
-    return new ResultsModel({ results });
+    return new PendingAuthorizationsModel({
+      received: pending.map(createAuthorizationRequestModel),
+      sent: sent.map(createAuthorizationRequestModel),
+    });
   }
 
+  @ApiTags('authorizations')
   @ApiOperation({
-    summary: 'Get Authorizations issued by an Identity',
-    description: 'This endpoint will provide a list of all the Authorizations added by an Identity',
+    summary: 'Get a pending Authorization',
+    description:
+      'This endpoint will return a specific Authorization issued by or targeting an Identity',
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose issued Authorizations are to be fetched',
+    description: 'The DID of the issuer or target Identity of the Authorization being fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiQuery({
-    name: 'size',
-    description: 'The number of issued Authorizations to be fetched',
-    type: 'number',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'start',
-    description: 'Start key from which values are to be fetched',
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Authorization to be fetched',
     type: 'string',
-    required: false,
+    example: '1',
   })
-  @ApiArrayResponse(AuthorizationRequest, {
-    description: 'List of all Authorizations issued by the Identity',
-    paginated: true,
-    example: [
-      {
-        id: '2',
-        expiry: null,
-        data: {
-          type: 'PortfolioCustody',
-          value: {
-            did: '0x0600000000000000000000000000000000000000000000000000000000000000',
-            id: '1',
-          },
-        },
-        issuer: '0x0600000000000000000000000000000000000000000000000000000000000000',
-        target: {
-          type: 'Identity',
-          value: '0x6'.padEnd(66, '1a1a'),
-        },
-      },
-    ],
+  @ApiOkResponse({
+    description: 'Details of the Authorization',
+    type: AuthorizationRequestModel,
   })
-  @Get(':did/issued-authorizations')
-  async getIssuedAuthorizations(
-    @Param() { did }: DidDto,
-    @Query() { size, start }: PaginatedParamsDto
-  ): Promise<PaginatedResultsModel<AuthorizationRequest>> {
-    this.logger.debug(`Fetching requested authorizations for ${did} from start`);
-
-    const { data, count, next } = await this.authorizationsService.findIssuedByDid(
-      did,
-      size,
-      start?.toString()
-    );
-
-    return new PaginatedResultsModel<AuthorizationRequest>({
-      results: data,
-      total: count,
-      next: next,
-    });
+  @Get(':did/pending-authorizations/:id')
+  async getPendingAuthorization(
+    @Param() { did, id }: AuthorizationParamsDto
+  ): Promise<AuthorizationRequestModel> {
+    const authorizationRequest = await this.authorizationsService.findOne(did, id);
+    return createAuthorizationRequestModel(authorizationRequest);
   }
 
   @ApiTags('assets')
@@ -188,17 +171,16 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Assets are to be fetched',
+    description: 'The DID of the Identity whose Assets are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
     paginated: false,
-    example: ['FOO_TOKEN', 'BAR_TOKEN', 'BAZ_TOKEN'],
+    example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
   })
   @Get(':did/assets')
-  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
+  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
     const results = await this.assetsService.findAllByOwner(did);
     return new ResultsModel({ results });
   }
@@ -209,9 +191,8 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose pending settlement Instructions are to be fetched',
+    description: 'The DID of the Identity whose pending settlement Instructions are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
@@ -235,9 +216,8 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose Venues are to be fetched',
+    description: 'The DID of the Identity whose Venues are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
@@ -258,22 +238,23 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose issued Claims are to be fetched',
+    description: 'The DID of the Identity whose issued Claims are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
     name: 'size',
     description: 'The number of Claims to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
     description: 'Start index from which Claims are to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '0',
   })
   @ApiQuery({
     name: 'includeExpired',
@@ -299,7 +280,7 @@ export class IdentitiesController {
       did,
       includeExpired,
       size,
-      Number(start)
+      new BigNumber(start || 0)
     );
 
     const claimsData = claimsResultSet.data.map(
@@ -327,16 +308,16 @@ export class IdentitiesController {
   })
   @ApiParam({
     name: 'did',
-    description: 'The DID whose associated Claims are to be fetched',
+    description: 'The DID of the Identity whose associated Claims are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiQuery({
     name: 'size',
     description: 'The number of Claims to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -375,7 +356,7 @@ export class IdentitiesController {
       claimTypes,
       includeExpired,
       size,
-      Number(start)
+      new BigNumber(start || 0)
     );
     const results = claimsResultSet.data.map(
       ({ issuedAt, expiry, claim, target, issuer }) =>
@@ -399,17 +380,91 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID of the Claim Issuer for which the Assets are to be fetched',
     type: 'string',
-    required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
     description: 'List of Assets for which the Identity is a trusted Claim Issuer',
     paginated: false,
-    example: ['BAR_TOKEN', 'FOO_TOKEN'],
+    example: ['SOME_TICKER', 'RANDOM_TICKER'],
   })
-  @Get(':did/trusting-tokens')
-  async getTrustingTokens(@Param() { did }: DidDto): Promise<ResultsModel<SecurityToken>> {
-    const results = await this.identitiesService.findTrustingTokens(did);
+  @Get(':did/trusting-assets')
+  async getTrustingAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
+    const results = await this.identitiesService.findTrustingAssets(did);
     return new ResultsModel({ results });
+  }
+
+  // TODO @prashantasdeveloper Update the response codes on the error codes are finalized in SDK
+  @ApiOperation({
+    summary: 'Add Secondary Account',
+    description:
+      'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
+  })
+  @ApiCreatedResponse({
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: "The supplied address is not encoded with the chain's SS58 format",
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
+  })
+  @Post('/secondary-accounts')
+  async addSecondaryAccount(
+    @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
+  ): Promise<CreatedAuthorizationRequestModel> {
+    const { transactions, result } = await this.identitiesService.addSecondaryAccount(
+      addSecondaryAccountParamsDto
+    );
+    return new CreatedAuthorizationRequestModel({
+      transactions,
+      authorizationRequest: createAuthorizationRequestModel(result),
+    });
+  }
+
+  @ApiTags('ticker-reservations')
+  @ApiOperation({
+    summary: 'Fetch all tickers reserved by an Identity',
+    description:
+      "This endpoint provides all the tickers currently reserved by an Identity. This doesn't include Assets that have already been created. Tickers with unreadable characters in them will be left out",
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose reserved tickers are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of tickers',
+    paginated: false,
+    example: ['SOME_TICKER', 'RANDOM_TICKER'],
+  })
+  @Get(':did/ticker-reservations')
+  public async getTickerReservations(
+    @Param() { did }: DidDto
+  ): Promise<ResultsModel<TickerReservation>> {
+    const results = await this.tickerReservationsService.findAllByOwner(did);
+    return new ResultsModel({ results });
+  }
+
+  @ApiOperation({
+    summary: 'Creates a fake Identity for an Account and sets its POLYX balance (DEV ONLY)',
+    description:
+      'This endpoint creates a Identity for an Account and sets its POLYX balance. Will only work with development chains. Alice must exist, be able to call `testUtils.mockCddRegisterDid` and have `sudo` permission',
+  })
+  @ApiOkResponse({ description: 'The details of the newly created Identity' })
+  @ApiBadRequestResponse({
+    description:
+      'This instance of the REST API is pointing to a chain that lacks development features. A proper CDD provider must be used instead',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to execute an extrinsic, or something unexpected',
+  })
+  @Post('/mock-cdd')
+  public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
+    const identity = await this.identitiesService.createMockCdd(params);
+    return createIdentityModel(identity);
   }
 }

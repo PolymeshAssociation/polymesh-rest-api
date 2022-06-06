@@ -7,10 +7,10 @@ import { Polymesh } from '@polymathnetwork/polymesh-sdk';
 import polymeshConfig from '~/polymesh/config/polymesh.config';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { RelayerAccountsModule } from '~/relayer-accounts/relayer-accounts.module';
+import { ScheduleModule } from '~/schedule/schedule.module';
 
 @Module({
-  imports: [ConfigModule.forFeature(polymeshConfig), RelayerAccountsModule],
+  imports: [ConfigModule.forFeature(polymeshConfig), ScheduleModule],
   providers: [
     PolymeshService,
     {

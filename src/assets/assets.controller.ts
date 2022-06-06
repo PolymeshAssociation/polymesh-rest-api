@@ -9,29 +9,39 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
-import { ReserveTickerDto } from '~/assets/dto/reserve-ticker.dto';
+import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
+import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
-import { RequirementModel } from '~/assets/models/requirement.model';
-import { TrustedClaimIssuerModel } from '~/assets/models/trusted-claim-issuer.model';
+import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { SignerDto } from '~/common/dto/signer.dto';
+import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ComplianceService } from '~/compliance/compliance.service';
+import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 @ApiTags('assets')
 @Controller('assets')
 export class AssetsController {
-  constructor(private readonly assetsService: AssetsService) {}
+  constructor(
+    private readonly assetsService: AssetsService,
+    private readonly complianceService: ComplianceService
+  ) {}
 
   @ApiOperation({
     summary: 'Fetch Asset details',
@@ -50,6 +60,7 @@ export class AssetsController {
   @Get(':ticker')
   public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<AssetDetailsModel> {
     const asset = await this.assetsService.findOne(ticker);
+
     return createAssetDetailsModel(asset);
   }
 
@@ -67,8 +78,9 @@ export class AssetsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of Asset holders to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
@@ -85,17 +97,17 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
-    const { data, count: total, next } = await this.assetsService.findHolders(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findHolders(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
         ({ identity, balance }) =>
           new IdentityBalanceModel({
-            identity,
+            identity: identity.did,
             balance,
           })
       ),
@@ -117,16 +129,16 @@ export class AssetsController {
   @ApiQuery({
     name: 'size',
     description: 'The number of documents to be fetched',
-    type: 'number',
+    type: 'string',
     required: false,
-    example: 10,
+    example: '10',
   })
   @ApiQuery({
     name: 'start',
     description: 'Start key from which documents are to be fetched',
     type: 'string',
     required: false,
-    example: 'STARTKEY',
+    example: 'START_KEY',
   })
   @ApiArrayResponse(AssetDocumentModel, {
     description: 'List of documents attached to the Asset',
@@ -137,11 +149,11 @@ export class AssetsController {
     @Param() { ticker }: TickerParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
-    const { data, count: total, next } = await this.assetsService.findDocuments(
-      ticker,
-      size,
-      start?.toString()
-    );
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.assetsService.findDocuments(ticker, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -160,28 +172,32 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: 'Fetch compliance requirements for an Asset',
-    description: 'This endpoint will provide the list of all compliance requirements of an Asset',
+    summary: 'Set a list of Documents for an Asset',
+    description:
+      'This endpoint assigns a new list of Documents to the Asset by replacing the existing list of Documents with the ones passed in the body',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be fetched',
+    description: 'The ticker of the Asset whose documents are to be updated',
     type: 'string',
     example: 'TICKER',
   })
-  @ApiArrayResponse(RequirementModel, {
-    description: 'List of compliance requirements of the Asset',
-    paginated: false,
+  @ApiOkResponse({
+    description: 'Details of the transaction',
   })
-  @Get(':ticker/compliance-requirements')
-  public async getComplianceRequirements(
-    @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<RequirementModel>> {
-    const results = await this.assetsService.findComplianceRequirements(ticker);
-
-    return new ResultsModel({
-      results: results.map(({ id, conditions }) => new RequirementModel({ id, conditions })),
-    });
+  @ApiNotFoundResponse({
+    description: 'Asset was not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'The supplied Document list is equal to the current one',
+  })
+  @Post(':ticker/set-documents')
+  public async setDocuments(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() setAssetDocumentsDto: SetAssetDocumentsDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
+    return new TransactionQueueModel({ transactions });
   }
 
   @ApiOperation({
@@ -203,12 +219,10 @@ export class AssetsController {
   public async getTrustedClaimIssuers(
     @Param() { ticker }: TickerParamsDto
   ): Promise<ResultsModel<TrustedClaimIssuerModel>> {
-    const results = await this.assetsService.findTrustedClaimIssuers(ticker);
+    const results = await this.complianceService.findTrustedClaimIssuers(ticker);
     return new ResultsModel({
       results: results.map(
-        ({ did, trustedFor }) =>
-          // TODO @monitz87 remove the below null conversion once updated in SDK
-          new TrustedClaimIssuerModel({ did, trustedFor: trustedFor || null })
+        ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
       ),
     });
   }
@@ -227,29 +241,15 @@ export class AssetsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
   @Post(':ticker/issue')
   public async issue(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: IssueDto
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.issue(ticker, params);
-    return new TransactionQueueModel({ transactions });
-  }
-
-  @ApiOperation({
-    summary: 'Reserve a Ticker',
-    description: 'Reserves a ticker so that an Asset can be created with it later',
-  })
-  @ApiCreatedResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiBadRequestResponse({
-    description: 'The ticker has already been reserved',
-  })
-  @Post('/reservations/tickers')
-  public async registerTicker(@Body() params: ReserveTickerDto): Promise<TransactionQueueModel> {
-    const { transactions } = await this.assetsService.registerTicker(params);
     return new TransactionQueueModel({ transactions });
   }
 
@@ -267,9 +267,151 @@ export class AssetsController {
   @ApiGoneResponse({
     description: 'The ticker has already been used to create an asset',
   })
-  @Post('')
+  @Post('create-asset')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Transfer ownership of an Asset',
+    description:
+      'This endpoint transfers ownership of the Asset to a `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'Ticker of the Asset whose ownership is to be transferred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
+  })
+  @Post('/:ticker/transfer-ownership')
+  public async transferOwnership(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: TransferOwnershipDto
+  ): Promise<CreatedAuthorizationRequestModel> {
+    const { transactions, result } = await this.assetsService.transferOwnership(ticker, params);
+    return new CreatedAuthorizationRequestModel({
+      transactions,
+      authorizationRequest: createAuthorizationRequestModel(result),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Redeem Asset tokens',
+    description:
+      "This endpoint allows to redeem (burn) an amount of an Asset tokens. These tokens are removed from Signer's Default Portfolio",
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description:
+      "The amount to be redeemed is larger than the free balance in the Signer's Default Portfolio",
+  })
+  @Post(':ticker/redeem')
+  public async redeem(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: RedeemTokensDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.redeem(ticker, params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Freeze transfers for an Asset',
+    description:
+      'This endpoint submits a transaction that causes the Asset to become frozen. This means that it cannot be transferred or minted until it is unfrozen',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to freeze',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The Asset is already frozen',
+  })
+  @Post(':ticker/freeze')
+  public async freeze(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.freeze(ticker, params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Unfreeze transfers for an Asset',
+    description:
+      'This endpoint submits a transaction that unfreezes the Asset. This means that transfers and minting can be performed until it is frozen again',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to unfreeze',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The Asset is already unfrozen',
+  })
+  @Post(':ticker/unfreeze')
+  public async unfreeze(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: SignerDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.unfreeze(ticker, params);
+    return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: 'Controller Transfer',
+    description:
+      'This endpoint forces a transfer from the `origin` Portfolio to the signer’s Default Portfolio',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to be transferred',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiCreatedResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `origin` Portfolio does not have enough free balance for the transfer',
+  })
+  @Post(':ticker/controller-transfer')
+  public async controllerTransfer(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: ControllerTransferDto
+  ): Promise<TransactionQueueModel> {
+    const { transactions } = await this.assetsService.controllerTransfer(ticker, params);
     return new TransactionQueueModel({ transactions });
   }
 }

@@ -7,6 +7,7 @@ import {
   NumberedPortfolio,
   PortfolioBalance,
 } from '@polymathnetwork/polymesh-sdk/types';
+import { isNumberedPortfolio } from '@polymathnetwork/polymesh-sdk/utils';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
@@ -17,22 +18,21 @@ export async function createPortfolioModel(
   did: string
 ): Promise<PortfolioModel> {
   let custodian: Identity;
-  let tokenBalances: PortfolioBalance[];
+  let assetBalances: PortfolioBalance[];
   let name = 'default';
 
   let portfolioId;
-  // TODO @monitz87: replace with typeguard when they are implemented in the SDK
-  if ((<NumberedPortfolio>portfolio).getName) {
+  if (isNumberedPortfolio(portfolio)) {
     const numberedPortfolio = <NumberedPortfolio>portfolio;
     portfolioId = numberedPortfolio.id;
-    [tokenBalances, custodian, name] = await Promise.all([
-      portfolio.getTokenBalances(),
+    [assetBalances, custodian, name] = await Promise.all([
+      portfolio.getAssetBalances(),
       portfolio.getCustodian(),
       numberedPortfolio.getName(),
     ]);
   } else {
-    [tokenBalances, custodian] = await Promise.all([
-      portfolio.getTokenBalances(),
+    [assetBalances, custodian] = await Promise.all([
+      portfolio.getAssetBalances(),
       portfolio.getCustodian(),
     ]);
   }
@@ -40,8 +40,8 @@ export async function createPortfolioModel(
   let portfolioModelParams: ConstructorParameters<typeof PortfolioModel>[0] = {
     id: portfolioId,
     name,
-    assetBalances: tokenBalances.map(
-      ({ token: asset, total, free, locked }) =>
+    assetBalances: assetBalances.map(
+      ({ asset, total, free, locked }) =>
         new AssetBalanceModel({
           asset,
           total,

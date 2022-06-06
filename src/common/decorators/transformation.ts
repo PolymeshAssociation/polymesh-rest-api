@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { isEntity } from '@polymathnetwork/polymesh-sdk/types';
+import { isEntity } from '@polymathnetwork/polymesh-sdk/utils';
 import { Transform } from 'class-transformer';
 import { mapValues } from 'lodash';
 
@@ -56,6 +56,10 @@ function toJsonObject(obj: unknown): unknown {
     return obj.map(toJsonObject);
   }
 
+  if (obj instanceof BigNumber && !obj.isNaN()) {
+    return obj.toString();
+  }
+
   if (obj && typeof obj === 'object') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return mapValues(obj as any, val => toJsonObject(val));
@@ -68,10 +72,4 @@ function toJsonObject(obj: unknown): unknown {
  */
 export function FromBigNumber() {
   return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
-}
-
-export function FromPortfolioId() {
-  return applyDecorators(
-    Transform(({ value }: { value?: BigNumber | string }) => (value || new BigNumber(0)).toString())
-  );
 }
