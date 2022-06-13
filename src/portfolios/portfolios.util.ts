@@ -60,7 +60,7 @@ export async function createPortfolioModel(
 export function createPortfolioIdentifierModel(
   portfolio: DefaultPortfolio | NumberedPortfolio
 ): PortfolioIdentifierModel {
-  return new PortfolioIdentifierModel(portfolio.toJson());
+  return new PortfolioIdentifierModel(portfolio.toHuman());
 }
 
 export function toPortfolioId(id: BigNumber): BigNumber | undefined {

@@ -1,10 +1,5 @@
-import { GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  AuthorizationRequest,
-  ErrorCode,
-  TickerReservation,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+import { Injectable } from '@nestjs/common';
+import { AuthorizationRequest, TickerReservation } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { processQueue, QueueResult } from '~/common/utils';
@@ -19,28 +14,9 @@ export class TickerReservationsService {
   ) {}
 
   public async findOne(ticker: string): Promise<TickerReservation> {
-    try {
-      return await this.polymeshService.polymeshApi.assets.getTickerReservation({
-        ticker,
-      });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (
-          code === ErrorCode.UnmetPrerequisite &&
-          message.startsWith('There is no reservation for')
-        ) {
-          throw new NotFoundException(`There is no reservation for "${ticker}"`);
-        } else if (
-          code === ErrorCode.UnmetPrerequisite &&
-          message.endsWith('Asset has been created')
-        ) {
-          throw new GoneException(`Asset "${ticker}" has already been created`);
-        }
-      }
-
-      throw err;
-    }
+    return this.polymeshService.polymeshApi.assets.getTickerReservation({
+      ticker,
+    });
   }
 
   public async reserve(ticker: string, signer: string): Promise<QueueResult<TickerReservation>> {

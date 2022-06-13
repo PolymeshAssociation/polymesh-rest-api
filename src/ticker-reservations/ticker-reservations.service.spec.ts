@@ -2,10 +2,9 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { GoneException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -64,74 +63,12 @@ describe('TickerReservationsService', () => {
   });
 
   describe('findOne', () => {
-    describe('if the reservation does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          message: 'There is no reservation for',
-          code: ErrorCode.UnmetPrerequisite,
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw mockError;
-        });
+    it('should return the reservation', async () => {
+      const mockTickerReservation = new MockTickerReservation();
+      mockPolymeshApi.assets.getTickerReservation.mockResolvedValue(mockTickerReservation);
 
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findOne('TICKER');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
-    });
-    describe('if the asset has already been created', () => {
-      it('should throw a GoneException', async () => {
-        const mockError = {
-          code: ErrorCode.UnmetPrerequisite,
-          message: 'TICKER Asset has been created',
-        };
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findOne('TICKER');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(GoneException);
-      });
-    });
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('Something else');
-        mockPolymeshApi.assets.getTickerReservation.mockImplementation(() => {
-          throw expectedError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-        let error;
-        try {
-          await service.findOne('TICKER');
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBe(expectedError);
-      });
-    });
-    describe('otherwise', () => {
-      it('should return the reservation', async () => {
-        const mockTickerReservation = new MockTickerReservation();
-        mockPolymeshApi.assets.getTickerReservation.mockResolvedValue(mockTickerReservation);
-
-        const result = await service.findOne('TICKER');
-        expect(result).toEqual(mockTickerReservation);
-      });
+      const result = await service.findOne('TICKER');
+      expect(result).toEqual(mockTickerReservation);
     });
   });
 

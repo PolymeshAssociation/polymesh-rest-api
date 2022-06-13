@@ -14,7 +14,7 @@ export function createPermissionsModel(permissions: Permissions): PermissionsMod
   let assetPermissions: AssetPermissionsModel | null;
   if (assets) {
     const { type, values } = assets;
-    assetPermissions = new AssetPermissionsModel({ type, values: values.map(v => v.toJson()) });
+    assetPermissions = new AssetPermissionsModel({ type, values: values.map(v => v.toHuman()) });
   } else {
     assetPermissions = null;
   }
