@@ -1457,7 +1457,7 @@
   dependencies:
     "@polymathnetwork/signing-manager-types" "^1.0.3"
 
-"@polymathnetwork/polymesh-sdk@15.0.0-alpha.11":
+"@polymathnetwork/polymesh-sdk@15.0.0-alpha.10":
   version "15.0.0-alpha.10"
   resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-sdk/-/polymesh-sdk-15.0.0-alpha.10.tgz#d5f9998945fcc1015b66395e9a860cdf8a16be52"
   integrity sha512-XzYH6r9aWvyhoCSQbbCEETK/OPrp5cadDNiDzOsYCJ/ie4pV7u6K/RiVWpzAw3+QS4sMTMUjzyNshYenFVh5Rg==
