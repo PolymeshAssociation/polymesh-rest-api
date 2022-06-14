@@ -3,7 +3,7 @@
 export interface Entity<Serialized> {
   uuid: string;
 
-  toJson(): Serialized;
+  toHuman(): Serialized;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any

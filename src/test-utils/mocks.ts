@@ -140,7 +140,7 @@ export class MockAsset {
     issue: jest.fn(),
   };
 
-  public toJson = jest.fn().mockImplementation(() => this.ticker);
+  public toHuman = jest.fn().mockImplementation(() => this.ticker);
 }
 
 export class MockInstruction {
@@ -193,7 +193,7 @@ export class MockPortfolio {
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
   public moveFunds = jest.fn();
-  public toJson = jest.fn().mockImplementation(() => {
+  public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',
       did: '0x06'.padEnd(66, '0'),
