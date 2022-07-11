@@ -13,6 +13,7 @@ import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
@@ -336,6 +337,38 @@ describe('AssetsController', () => {
         origin,
         amount,
       });
+    });
+  });
+
+  describe('getOperationHistory', () => {
+    it('should call the service and return the results', async () => {
+      const mockAgent = {
+        did: 'Ox6'.padEnd(66, '0'),
+      };
+      const mockHistory = [
+        {
+          blockNumber: new BigNumber(123),
+          blockHash: 'blockHash',
+          blockDate: new Date('07/11/2022'),
+          eventIndex: new BigNumber(1),
+        },
+      ];
+      const mockAgentOperations = [
+        {
+          identity: mockAgent,
+          history: mockHistory,
+        },
+      ];
+      mockAssetsService.getOperationHistory.mockResolvedValue(mockAgentOperations);
+
+      const result = await controller.getOperationHistory({ ticker: 'TICKER' });
+
+      expect(result).toEqual([
+        {
+          identity: new IdentitySignerModel(mockAgent),
+          history: mockHistory,
+        },
+      ]);
     });
   });
 });

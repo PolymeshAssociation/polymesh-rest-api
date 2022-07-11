@@ -84,6 +84,7 @@ export class MockAsset {
   public freeze = jest.fn();
   public unfreeze = jest.fn();
   public controllerTransfer = jest.fn();
+  public getOperationHistory = jest.fn();
 
   public assetHolders = {
     get: jest.fn(),

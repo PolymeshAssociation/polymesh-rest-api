@@ -4,6 +4,7 @@ import {
   InstructionType,
 } from '@polymathnetwork/polymesh-sdk/types';
 
+import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
@@ -49,7 +50,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
   if (instructionStatus.status !== InstructionStatus.Pending) {
     instructionModelParams = {
       ...instructionModelParams,
-      eventIdentifier: instructionStatus.eventIdentifier,
+      eventIdentifier: new EventIdentifierModel(instructionStatus.eventIdentifier),
     };
   }
 
