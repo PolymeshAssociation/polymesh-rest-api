@@ -467,7 +467,7 @@ export class CorporateActionsController {
       "<li>Checkpoint Schedule doesn't exist</li>" +
       '</ul>',
   })
-  @Post(':id/modify-checkpoint')
+  @Post('dividend-distributions/:id/modify-checkpoint')
   public async modifyDistributionCheckpoint(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
