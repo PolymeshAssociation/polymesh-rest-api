@@ -256,7 +256,7 @@ export class CheckpointsController {
     description: 'Details of the newly created Checkpoint Schedule',
     type: CreatedCheckpointScheduleModel,
   })
-  @Post('schedules')
+  @Post('schedules/create')
   public async createSchedule(
     @Param() { ticker }: TickerParamsDto,
     @Body() createCheckpointScheduleDto: CreateCheckpointScheduleDto
@@ -400,7 +400,7 @@ export class CheckpointsController {
   @ApiNotFoundResponse({
     description: "Schedule doesn't exist. It may have expired, been removed, or never been created",
   })
-  @Delete('schedules/:id')
+  @Post('schedules/:id/delete')
   public async deleteSchedule(
     @Param() { ticker, id }: DeleteCheckpointScheduleParamsDto,
     @Query() { signer }: SignerDto

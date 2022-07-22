@@ -191,7 +191,7 @@ export class AssetsController {
   @ApiBadRequestResponse({
     description: 'The supplied Document list is equal to the current one',
   })
-  @Post(':ticker/set-documents')
+  @Post(':ticker/documents/set')
   public async setDocuments(
     @Param() { ticker }: TickerParamsDto,
     @Body() setAssetDocumentsDto: SetAssetDocumentsDto
@@ -267,7 +267,7 @@ export class AssetsController {
   @ApiGoneResponse({
     description: 'The ticker has already been used to create an asset',
   })
-  @Post('create-asset')
+  @Post('create')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
     return new TransactionQueueModel({ transactions });

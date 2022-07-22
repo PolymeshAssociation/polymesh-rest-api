@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -16,7 +16,7 @@ import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 @ApiTags('assets', 'compliance')
-@Controller('/assets/:ticker/compliance-requirements')
+@Controller('assets/:ticker/compliance-requirements')
 export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}
 
@@ -68,7 +68,7 @@ export class ComplianceController {
     description: 'Details of the transaction',
     type: TransactionQueueModel,
   })
-  @Put()
+  @Post('set')
   public async setRequirements(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: SetRequirementsDto
