@@ -417,7 +417,7 @@ export class AssetsController {
   }
 
   @ApiOperation({
-    summary: "Fetch a list of Asset's operation history",
+    summary: "Fetch an Asset's operation history",
     description:
       "This endpoint provides a list of events triggered by transactions performed by various agent Identities, related to the Asset's configuration",
   })
