@@ -13,7 +13,6 @@ import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceService } from '~/compliance/compliance.service';
-import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
@@ -365,7 +364,7 @@ describe('AssetsController', () => {
 
       expect(result).toEqual([
         {
-          identity: new IdentitySignerModel(mockAgent),
+          did: mockAgent.did,
           history: mockHistory,
         },
       ]);

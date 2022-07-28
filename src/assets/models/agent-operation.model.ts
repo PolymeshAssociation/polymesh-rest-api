@@ -5,15 +5,13 @@ import { HistoricAgentOperation } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
-import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 
 export class AgentOperationModel {
   @ApiProperty({
-    description: 'Agent Identity that performed the operations',
-    type: IdentitySignerModel,
+    description: 'DID of the Agent that performed the operations',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @Type(() => IdentitySignerModel)
-  readonly identity: IdentitySignerModel;
+  readonly did: string;
 
   @ApiProperty({
     description: 'List of Asset Operation Events that were triggered by the Agent Identity',
@@ -29,7 +27,7 @@ export class AgentOperationModel {
       history,
     } = data;
     Object.assign(this, {
-      identity: new IdentitySignerModel({ did }),
+      did,
       history: history.map(eventIdentifier => new EventIdentifierModel(eventIdentifier)),
     });
   }
