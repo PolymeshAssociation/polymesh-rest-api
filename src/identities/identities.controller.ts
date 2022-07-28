@@ -410,7 +410,7 @@ export class IdentitiesController {
     description:
       'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
-  @Post('/secondary-accounts/add')
+  @Post('/secondary-accounts/invite')
   async addSecondaryAccount(
     @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): Promise<CreatedAuthorizationRequestModel> {
