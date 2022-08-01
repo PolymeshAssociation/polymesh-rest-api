@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -68,7 +68,7 @@ export class SettlementsController {
     description: 'The ID of the newly created Instruction',
     type: CreatedInstructionModel,
   })
-  @Post('venues/:id/instructions')
+  @Post('venues/:id/instructions/create')
   public async createInstruction(
     @Param() { id }: IdParamsDto,
     @Body() createInstructionDto: CreateInstructionDto
@@ -217,7 +217,7 @@ export class SettlementsController {
     description: 'Details about the newly created Venue',
     type: CreatedVenueModel,
   })
-  @Post('/venues')
+  @Post('/venues/create')
   public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<CreatedVenueModel> {
     const { result: venue, transactions } = await this.settlementsService.createVenue(
       createVenueDto
@@ -236,7 +236,7 @@ export class SettlementsController {
   @ApiOperation({
     summary: "Modify a venue's details",
   })
-  @Patch('venues/:id')
+  @Post('venues/:id/modify')
   public async modifyVenue(
     @Param() { id }: IdParamsDto,
     @Body() modifyVenueDto: ModifyVenueDto

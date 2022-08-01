@@ -397,7 +397,7 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Add Secondary Account',
     description:
-      'This endpoint will send an invitation to a Secondary Account to join an Identity. It also defines the set of permissions the Secondary Account will have.',
+      'This endpoint will send an invitation to a Secondary Account to join the Identity of the signer. It also defines the set of permissions the Secondary Account will have.',
   })
   @ApiCreatedResponse({
     description: 'Newly created Authorization Request along with transaction details',
@@ -410,7 +410,7 @@ export class IdentitiesController {
     description:
       'The target Account is already part of an Identity or already has a pending invitation to join this Identity',
   })
-  @Post('/secondary-accounts')
+  @Post('/secondary-accounts/invite')
   async addSecondaryAccount(
     @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): Promise<CreatedAuthorizationRequestModel> {
