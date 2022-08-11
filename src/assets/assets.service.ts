@@ -5,6 +5,7 @@ import {
   AssetDocument,
   AuthorizationRequest,
   ErrorCode,
+  HistoricAgentOperation,
   IdentityBalance,
   ResultSet,
 } from '@polymathnetwork/polymesh-sdk/types';
@@ -152,5 +153,10 @@ export class AssetsService {
       { originPortfolio: origin.toPortfolioLike(), amount },
       { signingAccount: address }
     );
+  }
+
+  public async getOperationHistory(ticker: string): Promise<HistoricAgentOperation[]> {
+    const asset = await this.findOne(ticker);
+    return asset.getOperationHistory();
   }
 }

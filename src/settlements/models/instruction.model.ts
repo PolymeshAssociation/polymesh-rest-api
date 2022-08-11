@@ -2,15 +2,11 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import {
-  EventIdentifier,
-  InstructionStatus,
-  InstructionType,
-  Venue,
-} from '@polymathnetwork/polymesh-sdk/types';
+import { InstructionStatus, InstructionType, Venue } from '@polymathnetwork/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { LegModel } from '~/settlements/models/leg.model';
 
 export class InstructionModel {
@@ -71,9 +67,10 @@ export class InstructionModel {
   @ApiPropertyOptional({
     description:
       'Identifies the event where the Instruction execution was attempted. This value will not be present for a "Pending" Instruction',
+    type: EventIdentifierModel,
   })
-  @FromEntity()
-  readonly eventIdentifier?: EventIdentifier;
+  @Type(() => EventIdentifierModel)
+  readonly eventIdentifier?: EventIdentifierModel;
 
   @ApiProperty({
     description: 'List of Legs in the Instruction',

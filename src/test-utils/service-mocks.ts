@@ -14,6 +14,7 @@ export class MockAssetService {
   freeze = jest.fn();
   unfreeze = jest.fn();
   controllerTransfer = jest.fn();
+  getOperationHistory = jest.fn();
 }
 
 export class MockComplianceService {
