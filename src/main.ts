@@ -19,7 +19,6 @@ async function bootstrap(): Promise<void> {
         enableImplicitConversion: true,
       },
       whitelist: true,
-      forbidNonWhitelisted: true,
     })
   );
   const logger = new PolymeshLogger();

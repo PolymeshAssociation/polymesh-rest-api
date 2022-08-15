@@ -338,4 +338,36 @@ describe('AssetsController', () => {
       });
     });
   });
+
+  describe('getOperationHistory', () => {
+    it('should call the service and return the results', async () => {
+      const mockAgent = {
+        did: 'Ox6'.padEnd(66, '0'),
+      };
+      const mockHistory = [
+        {
+          blockNumber: new BigNumber(123),
+          blockHash: 'blockHash',
+          blockDate: new Date('07/11/2022'),
+          eventIndex: new BigNumber(1),
+        },
+      ];
+      const mockAgentOperations = [
+        {
+          identity: mockAgent,
+          history: mockHistory,
+        },
+      ];
+      mockAssetsService.getOperationHistory.mockResolvedValue(mockAgentOperations);
+
+      const result = await controller.getOperationHistory({ ticker: 'TICKER' });
+
+      expect(result).toEqual([
+        {
+          did: mockAgent.did,
+          history: mockHistory,
+        },
+      ]);
+    });
+  });
 });

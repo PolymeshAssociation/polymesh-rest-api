@@ -43,6 +43,25 @@ describe('TickerReservationsController', () => {
     });
   });
 
+  describe('getDetails', () => {
+    it('should call the service and return the details', async () => {
+      const mockDetails = {
+        owner: '0x6000',
+        expiryDate: null,
+        status: TickerReservationStatus.AssetCreated,
+      };
+      const mockTickerReservation = new MockTickerReservation();
+      mockTickerReservation.details.mockResolvedValue(mockDetails);
+      mockTickerReservationsService.findOne.mockResolvedValue(mockTickerReservation);
+
+      const ticker = 'SOME_TICKER';
+      const result = await controller.getDetails({ ticker });
+
+      expect(result).toEqual(mockDetails);
+      expect(mockTickerReservationsService.findOne).toHaveBeenCalledWith(ticker);
+    });
+  });
+
   describe('transferOwnership', () => {
     it('should call the service and return the results', async () => {
       const mockAuthorization = new MockAuthorizationRequest();

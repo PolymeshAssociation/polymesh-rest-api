@@ -20,6 +20,7 @@ import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
@@ -191,7 +192,7 @@ export class AssetsController {
   @ApiBadRequestResponse({
     description: 'The supplied Document list is equal to the current one',
   })
-  @Post(':ticker/set-documents')
+  @Post(':ticker/documents/set')
   public async setDocuments(
     @Param() { ticker }: TickerParamsDto,
     @Body() setAssetDocumentsDto: SetAssetDocumentsDto
@@ -267,7 +268,7 @@ export class AssetsController {
   @ApiGoneResponse({
     description: 'The ticker has already been used to create an asset',
   })
-  @Post('create-asset')
+  @Post('create')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.createAsset(params);
     return new TransactionQueueModel({ transactions });
@@ -413,5 +414,30 @@ export class AssetsController {
   ): Promise<TransactionQueueModel> {
     const { transactions } = await this.assetsService.controllerTransfer(ticker, params);
     return new TransactionQueueModel({ transactions });
+  }
+
+  @ApiOperation({
+    summary: "Fetch an Asset's operation history",
+    description:
+      "This endpoint provides a list of events triggered by transactions performed by various agent Identities, related to the Asset's configuration",
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose operation history is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'List of operations grouped by the agent Identity who performed them',
+    isArray: true,
+    type: AgentOperationModel,
+  })
+  @Get(':ticker/operations')
+  public async getOperationHistory(
+    @Param() { ticker }: TickerParamsDto
+  ): Promise<AgentOperationModel[]> {
+    const agentOperations = await this.assetsService.getOperationHistory(ticker);
+
+    return agentOperations.map(agentOperation => new AgentOperationModel(agentOperation));
   }
 }

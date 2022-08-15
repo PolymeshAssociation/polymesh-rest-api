@@ -62,7 +62,7 @@ export class AccountsController {
       '<li>Insufficient free balance</li>' +
       '</ul>',
   })
-  @Post('transfers')
+  @Post('transfer')
   async transferPolyx(@Body() params: TransferPolyxDto): Promise<TransactionQueueModel> {
     const { transactions } = await this.accountsService.transferPolyx(params);
     return new TransactionQueueModel({ transactions });

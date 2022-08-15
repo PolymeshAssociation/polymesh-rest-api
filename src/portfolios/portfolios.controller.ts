@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -76,7 +76,7 @@ export class PortfoliosController {
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
-  @Post('/identities/:did/portfolios/asset-movements')
+  @Post('/identities/:did/portfolios/move-assets')
   public async moveAssets(
     @Param() { did }: DidDto,
     @Body() transferParams: AssetMovementDto
@@ -93,7 +93,7 @@ export class PortfoliosController {
     description: 'Details of the newly created Portfolio',
     type: CreatedPortfolioModel,
   })
-  @Post('/portfolios')
+  @Post('/portfolios/create')
   public async createPortfolio(
     @Body() createPortfolioParams: CreatePortfolioDto
   ): Promise<CreatedPortfolioModel> {
@@ -133,7 +133,7 @@ export class PortfoliosController {
   @ApiNotFoundResponse({
     description: 'The Portfolio was removed and no longer exists',
   })
-  @Delete('/identities/:did/portfolios/:id')
+  @Post('/identities/:did/portfolios/:id/delete')
   public async deletePortfolio(
     @Param() portfolio: PortfolioDto,
     @Query() { signer }: SignerDto

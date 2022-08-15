@@ -633,4 +633,35 @@ describe('AssetsService', () => {
       findSpy.mockRestore();
     });
   });
+
+  describe('getOperationHistory', () => {
+    it("should return the Asset's operation history", async () => {
+      const mockAsset = new MockAsset();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAsset as any);
+
+      const mockOperations = [
+        {
+          identity: {
+            did: 'Ox6'.padEnd(66, '0'),
+          },
+          history: [
+            {
+              blockNumber: new BigNumber(123),
+              blockHash: 'blockHash',
+              blockDate: new Date('07/11/2022'),
+              eventIndex: new BigNumber(1),
+            },
+          ],
+        },
+      ];
+      mockAsset.getOperationHistory.mockResolvedValue(mockOperations);
+
+      const result = await service.getOperationHistory('TICKER');
+      expect(result).toEqual(mockOperations);
+      findOneSpy.mockRestore();
+    });
+  });
 });

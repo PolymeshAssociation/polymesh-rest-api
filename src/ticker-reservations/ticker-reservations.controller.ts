@@ -1,8 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import {
   ApiCreatedResponse,
-  ApiGoneResponse,
-  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -59,12 +57,6 @@ export class TickerReservationsController {
   @ApiOkResponse({
     description: 'Details of the ticker reservation',
     type: TickerReservationModel,
-  })
-  @ApiNotFoundResponse({
-    description: 'The ticker has not been reserved',
-  })
-  @ApiGoneResponse({
-    description: 'Asset has already been created',
   })
   @Get(':ticker')
   public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<TickerReservationModel> {

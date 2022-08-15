@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -99,7 +99,7 @@ export class CorporateActionsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
-  @Patch('default-config')
+  @Post('default-config/modify')
   public async updateDefaultConfig(
     @Param() { ticker }: TickerParamsDto,
     @Body() corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
@@ -211,7 +211,7 @@ export class CorporateActionsController {
       '<li>Cannot distribute Dividends using the Asset as currency</li>' +
       '</ul>',
   })
-  @Post('dividend-distributions')
+  @Post('dividend-distributions/create')
   public async createDividendDistribution(
     @Param() { ticker }: TickerParamsDto,
     @Body() dividendDistributionDto: DividendDistributionDto
@@ -250,7 +250,7 @@ export class CorporateActionsController {
   @ApiBadRequestResponse({
     description: "The Corporate Action doesn't exist",
   })
-  @Delete(':id')
+  @Post(':id/delete')
   public async deleteCorporateAction(
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
     @Query() { signer }: SignerDto
@@ -290,7 +290,7 @@ export class CorporateActionsController {
       '<li>Some of the supplied Identities are not included in this Distribution</li>' +
       '</ul>',
   })
-  @Post(':id/payments')
+  @Post('dividend-distributions/:id/payments/pay')
   public async payDividends(
     @Param() { id, ticker }: DistributeFundsParamsDto,
     @Body() payDividendsDto: PayDividendsDto
@@ -328,7 +328,7 @@ export class CorporateActionsController {
   @ApiUnprocessableEntityResponse({
     description: 'Some of the provided documents are not associated with the Asset',
   })
-  @Put(':id/documents')
+  @Post(':id/documents/link')
   public async linkDocuments(
     @Param() { ticker, id }: DividendDistributionParamsDto,
     @Body() linkDocumentsDto: LinkDocumentsDto
@@ -467,7 +467,7 @@ export class CorporateActionsController {
       "<li>Checkpoint Schedule doesn't exist</li>" +
       '</ul>',
   })
-  @Put(':id/checkpoint')
+  @Post('dividend-distributions/:id/modify-checkpoint')
   public async modifyDistributionCheckpoint(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto

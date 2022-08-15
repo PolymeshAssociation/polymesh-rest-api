@@ -20,7 +20,7 @@ export function ToBigNumber() {
  * Entity -> POJO
  */
 export function FromEntity() {
-  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toJson()));
+  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toHuman()));
 }
 
 /**
@@ -31,7 +31,7 @@ export function FromMaybeEntityArray() {
     Transform(({ value }: { value: unknown[] }) =>
       value.map(val => {
         if (isEntity(val)) {
-          return val.toJson();
+          return val.toHuman();
         }
 
         return val;
@@ -44,16 +44,16 @@ export function FromMaybeEntityArray() {
  *   or serialize the value if it is an SDK Entity in
  */
 export function FromEntityObject() {
-  return applyDecorators(Transform(({ value }: { value: unknown }) => toJsonObject(value)));
+  return applyDecorators(Transform(({ value }: { value: unknown }) => toHumanObject(value)));
 }
 
-function toJsonObject(obj: unknown): unknown {
+function toHumanObject(obj: unknown): unknown {
   if (isEntity(obj)) {
-    return obj.toJson();
+    return obj.toHuman();
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(toJsonObject);
+    return obj.map(toHumanObject);
   }
 
   if (obj instanceof BigNumber && !obj.isNaN()) {
@@ -62,7 +62,7 @@ function toJsonObject(obj: unknown): unknown {
 
   if (obj && typeof obj === 'object') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return mapValues(obj as any, val => toJsonObject(val));
+    return mapValues(obj as any, val => toHumanObject(val));
   }
   return obj;
 }
