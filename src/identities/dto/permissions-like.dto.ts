@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { PermissionsLike, TxGroup } from '@polymathnetwork/polymesh-sdk/types';
+import { PermissionsLike, TxGroup } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, ValidateNested } from 'class-validator';
 

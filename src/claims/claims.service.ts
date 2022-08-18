@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ClaimData, ClaimType, ResultSet, Scope } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { ClaimData, ClaimType, ResultSet, Scope } from '@polymeshassociation/polymesh-sdk/types';
 
 import { PolymeshService } from '~/polymesh/polymesh.service';
 

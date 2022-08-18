@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthorizationRequest, TickerReservation } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { processQueue, QueueResult } from '~/common/utils';

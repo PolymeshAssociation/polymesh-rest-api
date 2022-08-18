@@ -4,14 +4,14 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
   ErrorCode,
   TransferError,
   TxTags,
   VenueType,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionType } from '~/common/types';
@@ -32,8 +32,8 @@ import {
 } from '~/test-utils/mocks';
 import { MockAssetService, MockIdentitiesService } from '~/test-utils/service-mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));

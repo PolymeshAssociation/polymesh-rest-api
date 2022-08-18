@@ -2,8 +2,8 @@
 const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TransactionStatus, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { TransactionStatus, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
@@ -15,8 +15,8 @@ import { MockEventsService, MockSubscriptionsService } from '~/test-utils/servic
 import { TransactionsService } from '~/transactions/transactions.service';
 import { Transaction } from '~/transactions/types';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 

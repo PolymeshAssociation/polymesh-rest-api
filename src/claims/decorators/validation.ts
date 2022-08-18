@@ -2,7 +2,7 @@
 
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { applyDecorators } from '@nestjs/common';
-import { ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 import {
   IsHexadecimal,
   isHexadecimal,

@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 import { IsValidScopeValue } from '~/claims/decorators/validation';

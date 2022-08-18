@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionStatus } from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshTransaction } from '@polymathnetwork/polymesh-sdk/utils';
+import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';

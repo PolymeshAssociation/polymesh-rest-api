@@ -11,12 +11,12 @@ import {
   ProcedureMethod,
   ProcedureOpts,
   TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 import {
   isPolymeshError,
   isPolymeshTransaction,
   isPolymeshTransactionBatch,
-} from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/utils';
 import { flatten } from 'lodash';
 
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SecurityIdentifierType } from '@polymathnetwork/polymesh-sdk/types';
+import { SecurityIdentifierType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsString } from 'class-validator';
 
 export class SecurityIdentifierDto {

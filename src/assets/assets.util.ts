@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { Asset } from '@polymathnetwork/polymesh-sdk/types';
+import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 

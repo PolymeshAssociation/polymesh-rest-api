@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { AffirmationStatus, Identity } from '@polymathnetwork/polymesh-sdk/types';
+import { AffirmationStatus, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 

@@ -1,5 +1,5 @@
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { ClaimType, ConditionType, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { ClaimType, ConditionType, ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 
 export class MockComplianceRequirements {
   requirements = [

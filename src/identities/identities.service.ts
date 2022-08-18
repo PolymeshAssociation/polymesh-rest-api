@@ -11,8 +11,8 @@ import {
   AuthorizationRequest,
   ErrorCode,
   Identity,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { processQueue, QueueResult } from '~/common/utils';

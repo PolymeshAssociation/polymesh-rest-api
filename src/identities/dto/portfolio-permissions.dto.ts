@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { PortfolioLike, SectionPermissions } from '@polymathnetwork/polymesh-sdk/types';
+import { PortfolioLike, SectionPermissions } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 

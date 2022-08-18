@@ -6,8 +6,8 @@ import {
   ExtrinsicData,
   Permissions,
   ResultSet,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';

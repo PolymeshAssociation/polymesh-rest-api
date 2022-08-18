@@ -1,7 +1,7 @@
 /** istanbul ignore file */
 
-import { Identity, Signer } from '@polymathnetwork/polymesh-sdk/types';
-import { isAccount } from '@polymathnetwork/polymesh-sdk/utils';
+import { Identity, Signer } from '@polymeshassociation/polymesh-sdk/types';
+import { isAccount } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { createPermissionedAccountModel } from '~/accounts/accounts.util';
 import { AccountModel } from '~/identities/models/account.model';
@@ -22,7 +22,7 @@ export async function createIdentityModel(identity: Identity): Promise<IdentityM
     did: identity.did,
     primaryAccount: createPermissionedAccountModel(primaryAccount),
     secondaryAccountsFrozen,
-    secondaryAccounts: secondaryAccounts.map(createPermissionedAccountModel),
+    secondaryAccounts: secondaryAccounts.data.map(createPermissionedAccountModel),
   });
 }
 

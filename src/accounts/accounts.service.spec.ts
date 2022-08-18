@@ -8,9 +8,14 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
-import { ErrorCode, PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
+import {
+  ErrorCode,
+  PermissionType,
+  TxGroup,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { TransactionType } from '~/common/types';
@@ -23,8 +28,8 @@ import { MockAccount, MockAsset, MockPolymesh, MockTransactionQueue } from '~/te
 import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));

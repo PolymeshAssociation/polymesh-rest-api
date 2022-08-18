@@ -8,14 +8,14 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { ErrorCode } from '@polymathnetwork/polymesh-sdk/types';
+import { ErrorCode } from '@polymeshassociation/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
 import { processQueue } from '~/common/utils';
 import { MockVenue } from '~/test-utils/mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
 }));
 

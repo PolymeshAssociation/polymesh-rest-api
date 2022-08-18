@@ -7,7 +7,7 @@ import {
   PermissionType,
   TxGroup,
   TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { createPermissionedAccountModel, createPermissionsModel } from '~/accounts/accounts.util';
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';

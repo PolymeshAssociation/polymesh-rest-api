@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsOptional } from 'class-validator';
 
 import { IncludeExpiredFilterDto } from '~/common/dto/params.dto';
