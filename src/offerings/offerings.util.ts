@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { OfferingWithDetails } from '@polymathnetwork/polymesh-sdk/types';
+import { OfferingWithDetails } from '@polymeshassociation/polymesh-sdk/types';
 
 import { OfferingDetailsModel } from '~/offerings/models/offering-details.model';
 import { TierModel } from '~/offerings/models/tier.model';

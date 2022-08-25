@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { AuthorizationsController } from '~/authorizations/authorizations.controller';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';

@@ -1,6 +1,6 @@
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { InstructionStatus } from '@polymathnetwork/polymesh-sdk/types';
+import { InstructionStatus } from '@polymeshassociation/polymesh-sdk/types';
 import request from 'supertest';
 
 import { AppModule } from '~/app.module';

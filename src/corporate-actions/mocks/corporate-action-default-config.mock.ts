@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { TargetTreatment } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MockIdentity } from '~/test-utils/mocks';
 

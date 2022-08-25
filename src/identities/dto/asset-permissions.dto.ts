@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { SectionPermissions } from '@polymathnetwork/polymesh-sdk/types';
+import { SectionPermissions } from '@polymeshassociation/polymesh-sdk/types';
 import { IsArray } from 'class-validator';
 
 import { IsTicker } from '~/common/decorators/validation';

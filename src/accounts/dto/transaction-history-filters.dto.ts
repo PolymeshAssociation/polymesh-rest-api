@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
-import { TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
+import { TxTag, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { IsBoolean, IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';

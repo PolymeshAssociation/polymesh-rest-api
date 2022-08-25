@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TransactionStatus, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { TransactionStatus, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
 import { EventEntity } from '~/events/entities/event.entity';

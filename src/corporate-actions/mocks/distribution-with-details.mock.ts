@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 

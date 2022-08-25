@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { PermissionType } from '@polymathnetwork/polymesh-sdk/types';
+import { PermissionType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 export class PermissionTypeDto {

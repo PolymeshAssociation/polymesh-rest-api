@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { VenueType } from '@polymathnetwork/polymesh-sdk/types';
+import { VenueType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsString, ValidateIf } from 'class-validator';
 
 import { SignerDto } from '~/common/dto/signer.dto';

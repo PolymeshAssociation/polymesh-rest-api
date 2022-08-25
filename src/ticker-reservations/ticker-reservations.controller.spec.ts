@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TickerReservationStatus } from '@polymathnetwork/polymesh-sdk/types';
+import { TickerReservationStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';

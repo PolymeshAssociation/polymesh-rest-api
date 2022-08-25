@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockPortfolio } from '~/test-utils/mocks';

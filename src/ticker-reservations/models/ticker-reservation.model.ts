@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Identity, TickerReservationStatus } from '@polymathnetwork/polymesh-sdk/types';
+import { Identity, TickerReservationStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 

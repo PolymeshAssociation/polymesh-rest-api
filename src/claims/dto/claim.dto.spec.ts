@@ -1,5 +1,5 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
-import { ClaimType, CountryCode, ScopeType } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, CountryCode, ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 import { InvalidCase, ValidCase } from '~/test-utils/types';

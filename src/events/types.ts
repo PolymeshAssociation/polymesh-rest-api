@@ -1,4 +1,4 @@
-import { TransactionStatus, TxTag } from '@polymathnetwork/polymesh-sdk/types';
+import { TransactionStatus, TxTag } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
 import { EventEntity } from '~/events/entities/event.entity';

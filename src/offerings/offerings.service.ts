@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   OfferingStatus,
   OfferingWithDetails,
   ResultSet,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { InvestmentModel } from '~/offerings/models/investment.model';

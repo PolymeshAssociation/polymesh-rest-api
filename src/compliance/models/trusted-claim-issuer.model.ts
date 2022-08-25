@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 
 export class TrustedClaimIssuerModel {
   @ApiProperty({

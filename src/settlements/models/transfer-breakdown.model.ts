@@ -3,7 +3,7 @@ import {
   Compliance,
   TransferError,
   TransferRestrictionResult,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromEntityObject } from '~/common/decorators/transformation';
 

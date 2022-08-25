@@ -1,11 +1,11 @@
 {
   "preset": "ts-jest/presets/js-with-babel",
   "moduleFileExtensions": ["js", "json", "ts"],
-  "transformIgnorePatterns": ["/node_modules/(?![@polymathnetwork/src]).+\\.js$"],
+  "transformIgnorePatterns": ["/node_modules/(?![@polymeshassociation/src]).+\\.js$"],
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
-  
+
   "moduleNameMapper": {
     "~/(.*)": "<rootDir>/../src/$1"
   },

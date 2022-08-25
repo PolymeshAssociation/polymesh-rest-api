@@ -4,7 +4,7 @@ import {
   OfferingBalanceStatus,
   OfferingSaleStatus,
   OfferingTimingStatus,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsOptional } from 'class-validator';
 
 export class OfferingStatusFilterDto {

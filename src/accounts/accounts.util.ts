@@ -1,4 +1,4 @@
-import { PermissionedAccount, Permissions } from '@polymathnetwork/polymesh-sdk/types';
+import { PermissionedAccount, Permissions } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
 import { PermissionedAccountModel } from '~/accounts/models/permissioned-account.model';

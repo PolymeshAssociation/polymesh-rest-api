@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Checkpoint } from '@polymathnetwork/polymesh-sdk/types';
+import { Checkpoint } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';

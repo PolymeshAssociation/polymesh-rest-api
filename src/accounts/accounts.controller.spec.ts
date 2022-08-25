@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { Order, TransactionOrderFields } from '@polymathnetwork/polymesh-sdk/middleware/types';
-import { PermissionType, TxGroup, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
+import { PermissionType, TxGroup, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountsService } from '~/accounts/accounts.service';

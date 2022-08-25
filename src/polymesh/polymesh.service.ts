@@ -8,7 +8,7 @@ import {
 import { AugmentedSubmittable, SubmittableExtrinsic } from '@polkadot/api/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { ISubmittableResult } from '@polkadot/types/types';
-import { Polymesh } from '@polymathnetwork/polymesh-sdk';
+import { Polymesh } from '@polymeshassociation/polymesh-sdk';
 
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { ScheduleService } from '~/schedule/schedule.service';

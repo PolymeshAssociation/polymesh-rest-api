@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { SetAssetRequirementsParams } from '@polymathnetwork/polymesh-sdk/api/procedures/setAssetRequirements';
 import {
   Asset,
   ComplianceRequirements,
+  SetAssetRequirementsParams,
   TrustedClaimIssuer,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { processQueue, QueueResult } from '~/common/utils';

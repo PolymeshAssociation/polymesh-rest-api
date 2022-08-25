@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { TickerReservation } from '@polymathnetwork/polymesh-sdk/types';
+import { TickerReservation } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
 

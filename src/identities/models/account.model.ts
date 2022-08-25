@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { SignerType } from '@polymathnetwork/polymesh-sdk/types';
+import { SignerType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { SignerModel } from '~/identities/models/signer.model';
 

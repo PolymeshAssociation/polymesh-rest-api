@@ -1,5 +1,5 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
-import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
+import { TargetTreatment } from '@polymeshassociation/polymesh-sdk/types';
 
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { InvalidCase, ValidCase } from '~/test-utils/types';

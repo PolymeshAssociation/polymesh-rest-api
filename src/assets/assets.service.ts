@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
   AssetDocument,
@@ -8,8 +8,8 @@ import {
   HistoricAgentOperation,
   IdentityBalance,
   ResultSet,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';

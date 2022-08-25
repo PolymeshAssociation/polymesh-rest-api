@@ -3,8 +3,8 @@ const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -20,8 +20,8 @@ import {
 import { MockSigningService } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));

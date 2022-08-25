@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   DefaultPortfolio,
   ErrorCode,
   NumberedPortfolio,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { processQueue, QueueResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';

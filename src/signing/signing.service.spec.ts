@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
-import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
+import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
+import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 
 import { LoggerModule } from '~/logger/logger.module';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';

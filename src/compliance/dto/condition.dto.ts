@@ -1,8 +1,11 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ConditionTarget, ConditionType } from '@polymathnetwork/polymesh-sdk/types';
-import { isMultiClaimCondition, isSingleClaimCondition } from '@polymathnetwork/polymesh-sdk/utils';
+import { ConditionTarget, ConditionType } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  isMultiClaimCondition,
+  isSingleClaimCondition,
+} from '@polymeshassociation/polymesh-sdk/utils';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
 

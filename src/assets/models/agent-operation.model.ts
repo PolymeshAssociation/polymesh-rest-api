@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { HistoricAgentOperation } from '@polymathnetwork/polymesh-sdk/types';
+import { HistoricAgentOperation } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';

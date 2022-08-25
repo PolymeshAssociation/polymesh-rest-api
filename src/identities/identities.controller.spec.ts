@@ -1,10 +1,10 @@
 import { Test } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   ClaimType,
   GenericAuthorizationData,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
@@ -158,7 +158,7 @@ describe('IdentitiesController', () => {
         },
       });
       mockIdentity.areSecondaryAccountsFrozen.mockResolvedValue(false);
-      mockIdentity.getSecondaryAccounts.mockResolvedValue([]);
+      mockIdentity.getSecondaryAccounts.mockResolvedValue({ data: [], next: null, count: 0 });
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const result = await controller.getIdentityDetails({ did });
