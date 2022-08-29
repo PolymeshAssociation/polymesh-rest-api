@@ -227,7 +227,7 @@ export class TransactionsService {
       };
 
       if (status === TransactionStatus.Succeeded) {
-        payload.result = 'placeholder'; // TODO @monitz87: use real result when we eliminate TQs
+        payload.result = transaction.receipt; // TODO @eric make sure receipt is result
       }
     }
 

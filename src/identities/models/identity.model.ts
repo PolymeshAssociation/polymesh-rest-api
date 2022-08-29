@@ -21,7 +21,7 @@ export class IdentityModel {
   readonly primaryAccount: PermissionedAccountModel;
 
   @ApiProperty({
-    description: 'Secondary Accounts of the Identity',
+    description: 'Secondary Accounts of the Identity (Up to the first 200)',
     type: () => PermissionedAccountModel,
     isArray: true,
   })

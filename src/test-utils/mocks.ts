@@ -240,15 +240,17 @@ export class MockAuthorizationRequest {
   public remove = jest.fn();
 }
 
-export class MockTransactionQueue {
+export class MockTransaction {
   constructor(
-    public readonly transactions: {
+    readonly transaction: {
       blockHash: string;
       txHash: string;
       tag: TxTag;
       blockNumber: BigNumber;
-    }[]
-  ) {}
+    }
+  ) {
+    Object.assign(this, transaction);
+  }
 
   public run = jest.fn();
 }
@@ -277,6 +279,8 @@ export class MockPolymeshTransactionBatch extends MockPolymeshTransactionBase {
     },
   ];
 }
+
+export type CallbackFn<T extends MockPolymeshTransactionBase> = (tx: T) => Promise<void>;
 
 export class MockOffering {
   id = new BigNumber(1);

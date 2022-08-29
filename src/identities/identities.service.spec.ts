@@ -19,7 +19,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockIdentity, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockIdentity, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import { MockAccountsService, MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
@@ -200,16 +200,14 @@ describe('IdentitiesService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.identity.JoinIdentityAsKey,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.accountManagement.inviteAccount.mockResolvedValue(mockQueue);
+        const transactions = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.identity.JoinIdentityAsKey,
+        };
+        const mockTransaction = new MockTransaction(transactions);
+        mockPolymeshApi.accountManagement.inviteAccount.mockResolvedValue(mockTransaction);
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),

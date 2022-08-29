@@ -75,6 +75,7 @@ export class IdentitiesService {
       expiry,
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
+    console.log('inviting account: ', inviteAccount);
     return processQueue(inviteAccount, params, { signingAccount: address });
   }
 

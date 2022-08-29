@@ -24,7 +24,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { SigningModule } from '~/signing/signing.module';
-import { MockAccount, MockAsset, MockPolymesh, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAccount, MockAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import { MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
@@ -196,16 +196,14 @@ describe('AccountsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.balances.TransferWithMemo,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockQueue);
+        const transactions = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.balances.TransferWithMemo,
+        };
+        const mockTransaction = new MockTransaction(transactions);
+        mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockTransaction);
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   ErrorCode,
+  GenericPolymeshTransaction,
   ModuleName,
   NoArgsProcedureMethod,
   ProcedureMethod,
@@ -29,17 +30,17 @@ export type QueueResult<T> = {
 
 type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
 
-export async function processQueue<MethodArgs, ReturnType>(
-  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, unknown, ReturnType>>,
+export async function processQueue<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
+  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
   args: MethodArgs,
   opts: ProcedureOpts
-): Promise<QueueResult<ReturnType>> {
+): Promise<QueueResult<TransformedReturnType>> {
   try {
     const queue = await method(args, opts);
     const result = await queue.run();
 
-    const assembleTransaction = (
-      transaction: unknown
+    const assembleTransactionResponse = <T, R = T>(
+      transaction: GenericPolymeshTransaction<T, R>
     ): TransactionModel | BatchTransactionModel => {
       let tagDetails;
       if (isPolymeshTransaction(transaction)) {
@@ -55,7 +56,6 @@ export async function processQueue<MethodArgs, ReturnType>(
           'Unsupported transaction details received. Please report this issue to the Polymath team'
         );
       }
-
       const { blockHash, txHash, blockNumber } = transaction;
       const constructorParams = {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -74,7 +74,7 @@ export async function processQueue<MethodArgs, ReturnType>(
 
     return {
       result,
-      transactions: queue.transactions.map(assembleTransaction),
+      transactions: [assembleTransactionResponse(queue)],
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     if (isPolymeshError(err)) {

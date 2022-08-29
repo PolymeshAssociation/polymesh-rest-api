@@ -15,12 +15,7 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import {
-  MockIdentity,
-  MockPolymesh,
-  MockPortfolio,
-  MockTransactionQueue,
-} from '~/test-utils/mocks';
+import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
 import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
@@ -178,16 +173,14 @@ describe('PortfoliosService', () => {
       const mockPortfolio = new MockPortfolio();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockPortfolio as any);
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.portfolio.MovePortfolioFunds,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockPortfolio.moveFunds.mockResolvedValue(mockQueue);
+      const transactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.MovePortfolioFunds,
+      };
+      const mockTransaction = new MockTransaction(transactions);
+      mockPortfolio.moveFunds.mockResolvedValue(mockTransaction);
 
       const address = 'address';
       mockSigningService.getAddressByHandle.mockReturnValue(address);
@@ -236,18 +229,16 @@ describe('PortfoliosService', () => {
   describe('createPortfolio', () => {
     it('should create a Portfolio and return the queue results', async () => {
       const mockPortfolio = new MockPortfolio();
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.portfolio.CreatePortfolio,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockQueue.run.mockResolvedValue(mockPortfolio);
+      const transactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.CreatePortfolio,
+      };
+      const mockTransaction = new MockTransaction(transactions);
+      mockTransaction.run.mockResolvedValue(mockPortfolio);
 
-      mockPolymeshApi.identities.createPortfolio.mockResolvedValue(mockQueue);
+      mockPolymeshApi.identities.createPortfolio.mockResolvedValue(mockTransaction);
 
       const address = 'address';
       mockSigningService.getAddressByHandle.mockReturnValue(address);
@@ -340,19 +331,17 @@ describe('PortfoliosService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.portfolio.DeletePortfolio,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transactions = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.portfolio.DeletePortfolio,
+        };
+        const mockTransaction = new MockTransaction(transactions);
 
         const mockIdentity = new MockIdentity();
         mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-        mockIdentity.portfolios.delete.mockResolvedValue(mockQueue);
+        mockIdentity.portfolios.delete.mockResolvedValue(mockTransaction);
 
         const signer = '0x6'.padEnd(66, '0');
         const portfolio = new PortfolioDto({

@@ -13,7 +13,7 @@ import { SignerModel } from '~/identities/models/signer.model';
  * Fetch and assemble data for an Identity
  */
 export async function createIdentityModel(identity: Identity): Promise<IdentityModel> {
-  const [primaryAccount, secondaryAccountsFrozen, secondaryAccounts] = await Promise.all([
+  const [primaryAccount, secondaryAccountsFrozen, { data: secondaryAccounts }] = await Promise.all([
     identity.getPrimaryAccount(),
     identity.areSecondaryAccountsFrozen(),
     identity.getSecondaryAccounts(),
@@ -22,7 +22,7 @@ export async function createIdentityModel(identity: Identity): Promise<IdentityM
     did: identity.did,
     primaryAccount: createPermissionedAccountModel(primaryAccount),
     secondaryAccountsFrozen,
-    secondaryAccounts: secondaryAccounts.data.map(createPermissionedAccountModel),
+    secondaryAccounts: secondaryAccounts.map(createPermissionedAccountModel),
   });
 }
 
