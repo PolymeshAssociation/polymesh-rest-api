@@ -24,7 +24,7 @@ import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corp
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAsset, MockPolymeshTransactionBatch, MockTransaction } from '~/test-utils/mocks';
+import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
