@@ -144,7 +144,7 @@ describe('TransactionsService', () => {
           transactionHash,
           blockHash,
           blockNumber: blockNumber.toString(),
-          result: undefined,
+          result: 'placeholder',
         },
       });
       expect(unsubCallback).toHaveBeenCalled();

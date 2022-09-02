@@ -11,7 +11,7 @@ import {
 import { ErrorCode } from '@polymeshassociation/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
-import { processQueue } from '~/common/utils';
+import { processTransaction } from '~/common/utils';
 import { MockVenue } from '~/test-utils/mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
@@ -40,7 +40,9 @@ describe('processQueue', () => {
       mockIsPolymeshError.mockReturnValue(true);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await expect(processQueue(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(expected);
+      await expect(processTransaction(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(
+        expected
+      );
 
       mockIsPolymeshError.mockReset();
     });
@@ -53,7 +55,7 @@ describe('processQueue', () => {
         throw new Error('Foo');
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await expect(processQueue(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(
+      await expect(processTransaction(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(
         InternalServerErrorException
       );
     });

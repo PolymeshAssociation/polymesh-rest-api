@@ -9,7 +9,7 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
@@ -33,13 +33,17 @@ export class CorporateActionsService {
   public async updateDefaultConfigByTicker(
     ticker: string,
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { signer, ...rest } = corporateActionDefaultConfigDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.corporateActions.setDefaultConfig, rest as Required<typeof rest>, {
-      signingAccount: address,
-    });
+    return processTransaction(
+      asset.corporateActions.setDefaultConfig,
+      rest as Required<typeof rest>,
+      {
+        signingAccount: address,
+      }
+    );
   }
 
   public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
@@ -69,11 +73,11 @@ export class CorporateActionsService {
   public async createDividendDistribution(
     ticker: string,
     dividendDistributionDto: DividendDistributionDto
-  ): Promise<QueueResult<DividendDistribution>> {
+  ): Promise<TransactionResult<DividendDistribution>> {
     const { signer, originPortfolio, ...rest } = dividendDistributionDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+    return processTransaction(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
         originPortfolio: toPortfolioId(originPortfolio),
@@ -89,10 +93,10 @@ export class CorporateActionsService {
     ticker: string,
     corporateAction: BigNumber,
     signer: string
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+    return processTransaction(
       asset.corporateActions.remove,
       { corporateAction },
       {
@@ -105,11 +109,11 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     payDividendsDto: PayDividendsDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { signer, targets } = payDividendsDto;
     const { distribution } = await this.findDistribution(ticker, id);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+    return processTransaction(
       distribution.pay,
       { targets },
       {
@@ -122,14 +126,14 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     linkDocumentsDto: LinkDocumentsDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { signer, documents } = linkDocumentsDto;
     const { distribution } = await this.findDistribution(ticker, id);
     const address = await this.signingService.getAddressByHandle(signer);
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
     };
-    return processQueue(distribution.linkDocuments, params, {
+    return processTransaction(distribution.linkDocuments, params, {
       signingAccount: address,
     });
   }
@@ -138,10 +142,10 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     signer: string
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { distribution } = await this.findDistribution(ticker, id);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(distribution.claim, undefined, {
+    return processTransaction(distribution.claim, undefined, {
       signingAccount: address,
     });
   }
@@ -150,10 +154,10 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     signer: string
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { distribution } = await this.findDistribution(ticker, id);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(distribution.reclaimFunds, undefined, {
+    return processTransaction(distribution.reclaimFunds, undefined, {
       signingAccount: address,
     });
   }
@@ -162,11 +166,11 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { signer, checkpoint } = modifyDistributionCheckpointDto;
     const { distribution } = await this.findDistribution(ticker, id);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+    return processTransaction(
       distribution.modifyCheckpoint,
       { checkpoint },
       {

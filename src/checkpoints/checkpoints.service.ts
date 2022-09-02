@@ -15,7 +15,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { SigningService } from '~/signing/signing.service';
 
@@ -82,22 +82,24 @@ export class CheckpointsService {
   public async createByTicker(
     ticker: string,
     signerDto: SignerDto
-  ): Promise<QueueResult<Checkpoint>> {
+  ): Promise<TransactionResult<Checkpoint>> {
     const { signer } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
+    return processTransaction(asset.checkpoints.create, { signingAccount: address }, {});
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
-  ): Promise<QueueResult<CheckpointSchedule>> {
+  ): Promise<TransactionResult<CheckpointSchedule>> {
     const { signer, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.checkpoints.schedules.create, rest, { signingAccount: address });
+    return processTransaction(asset.checkpoints.schedules.create, rest, {
+      signingAccount: address,
+    });
   }
 
   public async getAssetBalance(
@@ -124,10 +126,10 @@ export class CheckpointsService {
     ticker: string,
     id: BigNumber,
     signer: string
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const address = await this.signingService.getAddressByHandle(signer);
     const asset = await this.assetsService.findOne(ticker);
-    return processQueue(
+    return processTransaction(
       asset.checkpoints.schedules.remove,
       { schedule: id },
       { signingAccount: address }

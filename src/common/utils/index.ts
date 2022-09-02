@@ -23,21 +23,25 @@ import { flatten } from 'lodash';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 
-export type QueueResult<T> = {
+export type TransactionResult<T> = {
   result: T;
   transactions: (TransactionModel | BatchTransactionModel)[];
 };
 
 type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
 
-export async function processQueue<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
+export async function processTransaction<
+  MethodArgs,
+  ReturnType,
+  TransformedReturnType = ReturnType
+>(
   method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
   args: MethodArgs,
   opts: ProcedureOpts
-): Promise<QueueResult<TransformedReturnType>> {
+): Promise<TransactionResult<TransformedReturnType>> {
   try {
-    const queue = await method(args, opts);
-    const result = await queue.run();
+    const tx = await method(args, opts);
+    const result = await tx.run();
 
     const assembleTransactionResponse = <T, R = T>(
       transaction: GenericPolymeshTransaction<T, R>
@@ -53,7 +57,7 @@ export async function processQueue<MethodArgs, ReturnType, TransformedReturnType
         };
       } else {
         throw new Error(
-          'Unsupported transaction details received. Please report this issue to the Polymath team'
+          'Unsupported transaction details received. Please report this issue to the Polymesh team'
         );
       }
       const { blockHash, txHash, blockNumber } = transaction;
@@ -74,7 +78,7 @@ export async function processQueue<MethodArgs, ReturnType, TransformedReturnType
 
     return {
       result,
-      transactions: [assembleTransactionResponse(queue)],
+      transactions: [assembleTransactionResponse(tx)],
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     if (isPolymeshError(err)) {

@@ -11,7 +11,7 @@ import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
 
@@ -51,7 +51,7 @@ export class AccountsService {
     return polymeshApi.accountManagement.getAccountBalance({ account });
   }
 
-  public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
+  public async transferPolyx(params: TransferPolyxDto): Promise<TransactionResult<void>> {
     const { signer, ...rest } = params;
     const { signingService, polymeshService } = this;
 
@@ -59,7 +59,7 @@ export class AccountsService {
 
     const { transferPolyx } = polymeshService.polymeshApi.network;
 
-    return processQueue(transferPolyx, rest, { signingAccount: address });
+    return processTransaction(transferPolyx, rest, { signingAccount: address });
   }
 
   public async getTransactionHistory(

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
 
@@ -19,28 +19,34 @@ export class TickerReservationsService {
     });
   }
 
-  public async reserve(ticker: string, signer: string): Promise<QueueResult<TickerReservation>> {
+  public async reserve(
+    ticker: string,
+    signer: string
+  ): Promise<TransactionResult<TickerReservation>> {
     const { signingService, polymeshService } = this;
     const address = await signingService.getAddressByHandle(signer);
     const { reserveTicker } = polymeshService.polymeshApi.assets;
-    return processQueue(reserveTicker, { ticker }, { signingAccount: address });
+    return processTransaction(reserveTicker, { ticker }, { signingAccount: address });
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
-  ): Promise<QueueResult<AuthorizationRequest>> {
+  ): Promise<TransactionResult<AuthorizationRequest>> {
     const { signer, ...rest } = params;
     const address = await this.signingService.getAddressByHandle(signer);
     const { transferOwnership } = await this.findOne(ticker);
-    return processQueue(transferOwnership, rest, { signingAccount: address });
+    return processTransaction(transferOwnership, rest, { signingAccount: address });
   }
 
-  public async extend(ticker: string, signer: string): Promise<QueueResult<TickerReservation>> {
+  public async extend(
+    ticker: string,
+    signer: string
+  ): Promise<TransactionResult<TickerReservation>> {
     const address = await this.signingService.getAddressByHandle(signer);
     const { extend } = await this.findOne(ticker);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(extend, { signingAccount: address }, {});
+    return processTransaction(extend, { signingAccount: address }, {});
   }
 
   public async findAllByOwner(owner: string): Promise<TickerReservation[]> {

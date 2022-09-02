@@ -15,7 +15,7 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -66,7 +66,7 @@ export class IdentitiesService {
 
   public async addSecondaryAccount(
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
-  ): Promise<QueueResult<AuthorizationRequest>> {
+  ): Promise<TransactionResult<AuthorizationRequest>> {
     const { signer, expiry, permissions, secondaryAccount } = addSecondaryAccountParamsDto;
     const address = await this.signingService.getAddressByHandle(signer);
     const params = {
@@ -75,8 +75,8 @@ export class IdentitiesService {
       expiry,
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
-    console.log('inviting account: ', inviteAccount);
-    return processQueue(inviteAccount, params, { signingAccount: address });
+
+    return processTransaction(inviteAccount, params, { signingAccount: address });
   }
 
   /**

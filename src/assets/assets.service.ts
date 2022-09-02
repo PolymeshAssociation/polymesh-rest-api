@@ -18,7 +18,7 @@ import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { SignerDto } from '~/common/dto/signer.dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/signing.service';
 
@@ -81,74 +81,74 @@ export class AssetsService {
   public async setDocuments(
     ticker: string,
     params: SetAssetDocumentsDto
-  ): Promise<QueueResult<Asset>> {
+  ): Promise<TransactionResult<Asset>> {
     const {
       documents: { set },
     } = await this.findOne(ticker);
 
     const { signer, documents } = params;
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(set, { documents }, { signingAccount: address });
+    return processTransaction(set, { documents }, { signingAccount: address });
   }
 
-  public async createAsset(params: CreateAssetDto): Promise<QueueResult<Asset>> {
+  public async createAsset(params: CreateAssetDto): Promise<TransactionResult<Asset>> {
     const { signer, ...rest } = params;
     const signingAccount = await this.signingService.getAddressByHandle(signer);
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return processQueue(createAsset, rest, { signingAccount });
+    return processTransaction(createAsset, rest, { signingAccount });
   }
 
-  public async issue(ticker: string, params: IssueDto): Promise<QueueResult<Asset>> {
+  public async issue(ticker: string, params: IssueDto): Promise<TransactionResult<Asset>> {
     const { signer, ...rest } = params;
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.issuance.issue, rest, { signingAccount: address });
+    return processTransaction(asset.issuance.issue, rest, { signingAccount: address });
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
-  ): Promise<QueueResult<AuthorizationRequest>> {
+  ): Promise<TransactionResult<AuthorizationRequest>> {
     const { signer, ...rest } = params;
     const address = await this.signingService.getAddressByHandle(signer);
     const { transferOwnership } = await this.findOne(ticker);
-    return processQueue(transferOwnership, rest, { signingAccount: address });
+    return processTransaction(transferOwnership, rest, { signingAccount: address });
   }
 
-  public async redeem(ticker: string, params: RedeemTokensDto): Promise<QueueResult<void>> {
+  public async redeem(ticker: string, params: RedeemTokensDto): Promise<TransactionResult<void>> {
     const { signer, amount } = params;
     const { redeem } = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(redeem, { amount }, { signingAccount: address });
+    return processTransaction(redeem, { amount }, { signingAccount: address });
   }
 
-  public async freeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+  public async freeze(ticker: string, params: SignerDto): Promise<TransactionResult<Asset>> {
     const { signer } = params;
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(asset.freeze, { signingAccount: address }, {});
+    return processTransaction(asset.freeze, { signingAccount: address }, {});
   }
 
-  public async unfreeze(ticker: string, params: SignerDto): Promise<QueueResult<Asset>> {
+  public async unfreeze(ticker: string, params: SignerDto): Promise<TransactionResult<Asset>> {
     const { signer } = params;
     const asset = await this.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(asset.unfreeze, { signingAccount: address }, {});
+    return processTransaction(asset.unfreeze, { signingAccount: address }, {});
   }
 
   public async controllerTransfer(
     ticker: string,
     params: ControllerTransferDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { signer, origin, amount } = params;
 
     const { controllerTransfer } = await this.findOne(ticker);
 
     const address = await this.signingService.getAddressByHandle(signer);
 
-    return processQueue(
+    return processTransaction(
       controllerTransfer,
       { originPortfolio: origin.toPortfolioLike(), amount },
       { signingAccount: address }
