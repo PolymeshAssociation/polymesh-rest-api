@@ -27,7 +27,7 @@ export class SubscriptionsService {
     @Inject(subscriptionsConfig.KEY) config: ConfigType<typeof subscriptionsConfig>,
     private readonly scheduleService: ScheduleService,
     private readonly httpService: HttpService,
-    // TODO @monitz87: handle errors with specialized service
+    // TODO @polymath-eric: handle errors with specialized service
     private readonly logger: PolymeshLogger
   ) {
     const { ttl, maxTries: triesLeft, retryInterval } = config;
@@ -264,7 +264,7 @@ export class SubscriptionsService {
     this.scheduleSendHandshake(id);
   }
 
-  // TODO @monitz87: implement random secret generation
+  // TODO @polymath-eric: implement random secret generation
   /**
    * Generate a random handshake secret that the webhook has to mirror back
    *   to activate the subscription

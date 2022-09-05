@@ -54,4 +54,4 @@ jobs:
         run: yarn --frozen-lockfile
       - name: test
         run: yarn test:cov
-      # TODO @monitz87: add SonarCloud step when the account confusion is sorted
+      # TODO @polymath-eric: add SonarCloud step when the account confusion is sorted
