@@ -30,7 +30,7 @@ export class NotificationsService {
     private readonly subscriptionsService: SubscriptionsService,
     @Inject(forwardRef(() => EventsService)) private readonly eventsService: EventsService,
     private readonly httpService: HttpService,
-    // TODO @monitz87: handle errors with specialized service
+    // TODO @polymath-eric: handle errors with specialized service
     private readonly logger: PolymeshLogger
   ) {
     const { maxTries, retryInterval } = config;
