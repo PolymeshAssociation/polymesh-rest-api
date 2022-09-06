@@ -13,7 +13,7 @@ import { Transaction } from '~/transactions/types';
 
 @Injectable()
 export class TransactionsService {
-  // TODO @monitz87: use tx bytes instead of numeric id when we support transaction serdes in the SDK
+  // TODO @polymath-eric: use tx bytes instead of numeric id when we support transaction serdes in the SDK
   /**
    * in-memory transaction store by Transaction Identifier. We use a Map
    *   to be able to recycle indexes easily and remove elements in a performant way
@@ -41,7 +41,7 @@ export class TransactionsService {
   constructor(
     private readonly eventsService: EventsService,
     private readonly subscriptionsService: SubscriptionsService,
-    // TODO @monitz87: handle errors with specialized service
+    // TODO @polymath-eric: handle errors with specialized service
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(TransactionsService.name);
@@ -75,7 +75,7 @@ export class TransactionsService {
       nextNonce: 1,
     });
 
-    // TODO @monitz87: use dedicated error service
+    // TODO @polymath-eric: use dedicated error service
     // we don't propagate transaction errors because they're sent as status updates
     transaction
       .run()
@@ -131,7 +131,7 @@ export class TransactionsService {
       await this.eventsService.createEvent<TransactionUpdateEvent>({
         type: EventType.TransactionUpdate,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        scope: String(id), // TODO @monitz87: replace with bytes when we have tx serdes
+        scope: String(id), // TODO @polymath-eric: replace with bytes when we have tx serdes
         payload: this.assemblePayload(transaction),
       });
 
