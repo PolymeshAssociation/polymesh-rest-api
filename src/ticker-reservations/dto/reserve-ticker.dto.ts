@@ -3,9 +3,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IsTicker } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 
-export class ReserveTickerDto extends SignerDto {
+export class ReserveTickerDto extends TransactionBaseDto {
   @ApiProperty({
     type: 'string',
     description: 'Ticker to be reserved',

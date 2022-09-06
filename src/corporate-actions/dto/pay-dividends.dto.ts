@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IsDid } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 
-export class PayDividendsDto extends SignerDto {
+export class PayDividendsDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'DIDs of the target Identities',
     type: 'string',

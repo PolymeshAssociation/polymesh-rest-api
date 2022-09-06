@@ -1,14 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { ProcedureMethod, TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
 import { EventType, TransactionUpdateEvent, TransactionUpdatePayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { NotificationPayload } from '~/notifications/types';
+import { SigningService } from '~/signing/signing.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
+import transactionsConfig from '~/transactions/config/transactions.config';
+import {
+  handleSdkError,
+  prepareProcedure,
+  processTransaction,
+  QueueResult,
+  WithArgsProcedureMethod,
+} from '~/transactions/transactions.util';
 import { Transaction } from '~/transactions/types';
 
 @Injectable()
@@ -37,14 +48,41 @@ export class TransactionsService {
   > = new Map();
 
   private currentId = 0;
+  private legitimacySecret: string;
 
   constructor(
+    @Inject(transactionsConfig.KEY) config: ConfigType<typeof transactionsConfig>,
     private readonly eventsService: EventsService,
     private readonly subscriptionsService: SubscriptionsService,
-    // TODO @polymath-eric: handle errors with specialized service
+    private readonly signingService: SigningService,
+    // TODO @monitz87: handle errors with specialized service
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(TransactionsService.name);
+    this.legitimacySecret = config.legitimacySecret;
+  }
+
+  public async submit<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
+    method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
+    args: MethodArgs,
+    transactionBaseDto: TransactionBaseDto
+  ): Promise<NotificationPayload | QueueResult<TransformedReturnType>> {
+    const { signer, webhookUrl } = transactionBaseDto;
+    const signingAccount = await this.signingService.getAddressByHandle(signer);
+    try {
+      if (!webhookUrl) {
+        return processTransaction(method, args, { signingAccount });
+      } else {
+        const transaction = await prepareProcedure(method, args, { signingAccount });
+        return this.submitAndSubscribe(
+          transaction as Transaction,
+          webhookUrl,
+          this.legitimacySecret
+        );
+      }
+    } catch (error) {
+      handleSdkError(error);
+    }
   }
 
   /**
@@ -52,13 +90,12 @@ export class TransactionsService {
    *
    * @returns initial transaction status notification
    */
-  public async submitAndSubscribe(
+  private async submitAndSubscribe(
     transaction: Transaction,
     webhookUrl: string,
     legitimacySecret: string
   ): Promise<NotificationPayload<EventType.TransactionUpdate>> {
     const { subscriptionsService, logger } = this;
-
     const id = this.addListener(transaction);
     const eventScope = String(id);
     const eventType = EventType.TransactionUpdate;

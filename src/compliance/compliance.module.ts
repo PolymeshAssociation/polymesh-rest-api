@@ -6,10 +6,10 @@ import { AssetsModule } from '~/assets/assets.module';
 import { ComplianceController } from '~/compliance/compliance.controller';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { IdentitiesModule } from '~/identities/identities.module';
-import { SigningModule } from '~/signing/signing.module';
+import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({
-  imports: [forwardRef(() => AssetsModule), IdentitiesModule, SigningModule],
+  imports: [forwardRef(() => AssetsModule), IdentitiesModule, TransactionsModule],
   providers: [ComplianceService],
   exports: [ComplianceService],
   controllers: [ComplianceController],

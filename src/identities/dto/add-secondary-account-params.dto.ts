@@ -4,11 +4,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 import { IsPermissionsLike } from '~/identities/decorators/validation';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 
-export class AddSecondaryAccountParamsDto extends SignerDto {
+export class AddSecondaryAccountParamsDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Account address to be invited',
     example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',

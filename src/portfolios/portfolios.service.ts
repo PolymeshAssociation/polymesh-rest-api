@@ -7,21 +7,21 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { processTransaction, TransactionResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class PortfoliosService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly identitiesService: IdentitiesService,
-    private readonly signingService: SigningService
+    private readonly transactionsService: TransactionsService
   ) {}
 
   public async findAllByOwner(did: string): Promise<[DefaultPortfolio, ...NumberedPortfolio[]]> {
@@ -51,13 +51,9 @@ export class PortfoliosService {
     }
   }
 
-  public async moveAssets(
-    owner: string,
-    params: AssetMovementDto
-  ): Promise<TransactionResult<void>> {
-    const { signer, to, items, from } = params;
+  public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {
+    const { signer, webhookUrl, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
-    const address = await this.signingService.getAddressByHandle(signer);
     const args = {
       to: toPortfolioId(to),
       items: items.map(({ ticker: asset, amount, memo }) => {
@@ -68,32 +64,30 @@ export class PortfoliosService {
         };
       }),
     };
-    return processTransaction(fromPortfolio.moveFunds, args, { signingAccount: address });
+    return this.transactionsService.submit(fromPortfolio.moveFunds, args, { signer, webhookUrl });
   }
 
-  public async createPortfolio(
-    params: CreatePortfolioDto
-  ): Promise<TransactionResult<NumberedPortfolio>> {
+  public async createPortfolio(params: CreatePortfolioDto): ServiceReturn<NumberedPortfolio> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    const { signer, ...rest } = params;
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processTransaction(polymeshApi.identities.createPortfolio, rest, {
-      signingAccount: address,
+    const { signer, webhookUrl, ...rest } = params;
+    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, rest, {
+      signer,
+      webhookUrl,
     });
   }
 
   public async deletePortfolio(
     portfolio: PortfolioDto,
-    signer: string
-  ): Promise<TransactionResult<void>> {
-    const address = await this.signingService.getAddressByHandle(signer);
+    signer: string,
+    webhookUrl?: string
+  ): ServiceReturn<void> {
     const identity = await this.identitiesService.findOne(portfolio.did);
-    return processTransaction(
+    return this.transactionsService.submit(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      { signingAccount: address }
+      { signer, webhookUrl }
     );
   }
 }

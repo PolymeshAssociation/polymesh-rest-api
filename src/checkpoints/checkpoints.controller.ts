@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -9,6 +8,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { Checkpoint, CheckpointSchedule } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
@@ -20,14 +20,16 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
+import { basicModelResolver } from '~/transactions/transactions.util';
 
 class DeleteCheckpointScheduleParamsDto extends IdParamsDto {
   @IsTicker()
@@ -145,23 +147,26 @@ export class CheckpointsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedResponse({
+  @ApiCreatedOrSubscriptionResponse({
     description: 'Details of the newly created Checkpoint',
     type: CreatedCheckpointModel,
   })
   @Post()
   public async createCheckpoint(
     @Param() { ticker }: TickerParamsDto,
-    @Body() signerDto: SignerDto
-  ): Promise<CreatedCheckpointModel> {
-    const { result: checkpoint, transactions } = await this.checkpointsService.createByTicker(
-      ticker,
-      signerDto
-    );
-    return new CreatedCheckpointModel({
-      checkpoint,
-      transactions,
-    });
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<ApiTransactionResponse> {
+    const serviceResult = await this.checkpointsService.createByTicker(ticker, signerDto);
+
+    const resolver: ModelResolver<Checkpoint> = ({ result: checkpoint, transactions }) =>
+      Promise.resolve(
+        new CreatedCheckpointModel({
+          checkpoint,
+          transactions,
+        })
+      );
+
+    return handlePayload(serviceResult, resolver);
   }
 
   @ApiOperation({
@@ -252,7 +257,7 @@ export class CheckpointsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedResponse({
+  @ApiCreatedOrSubscriptionResponse({
     description: 'Details of the newly created Checkpoint Schedule',
     type: CreatedCheckpointScheduleModel,
   })
@@ -260,29 +265,36 @@ export class CheckpointsController {
   public async createSchedule(
     @Param() { ticker }: TickerParamsDto,
     @Body() createCheckpointScheduleDto: CreateCheckpointScheduleDto
-  ): Promise<CreatedCheckpointScheduleModel> {
-    const {
+  ): Promise<ApiTransactionResponse> {
+    const serviceResult = await this.checkpointsService.createScheduleByTicker(
+      ticker,
+      createCheckpointScheduleDto
+    );
+
+    const resolver: ModelResolver<CheckpointSchedule> = async ({
       result: { id: createdScheduleId },
       transactions,
-    } = await this.checkpointsService.createScheduleByTicker(ticker, createCheckpointScheduleDto);
+    }) => {
+      const {
+        schedule: { id, period, start, complexity, expiryDate },
+        details,
+      } = await this.checkpointsService.findScheduleById(ticker, createdScheduleId);
 
-    const {
-      schedule: { id, period, start, complexity, expiryDate },
-      details,
-    } = await this.checkpointsService.findScheduleById(ticker, createdScheduleId);
+      return new CreatedCheckpointScheduleModel({
+        schedule: new CheckpointScheduleModel({
+          id,
+          ticker,
+          period,
+          start,
+          complexity,
+          expiryDate,
+          ...details,
+        }),
+        transactions,
+      });
+    };
 
-    return new CreatedCheckpointScheduleModel({
-      schedule: new CheckpointScheduleModel({
-        id,
-        ticker,
-        period,
-        start,
-        complexity,
-        expiryDate,
-        ...details,
-      }),
-      transactions,
-    });
+    return handlePayload(serviceResult, resolver);
   }
 
   @ApiOperation({
@@ -403,13 +415,9 @@ export class CheckpointsController {
   @Post('schedules/:id/delete')
   public async deleteSchedule(
     @Param() { ticker, id }: DeleteCheckpointScheduleParamsDto,
-    @Query() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.checkpointsService.deleteScheduleByTicker(
-      ticker,
-      id,
-      signer
-    );
-    return new TransactionQueueModel({ transactions });
+    @Query() { signer }: TransactionBaseDto
+  ): Promise<ApiTransactionResponse> {
+    const result = await this.checkpointsService.deleteScheduleByTicker(ticker, id, signer);
+    return handlePayload(result, basicModelResolver);
   }
 }

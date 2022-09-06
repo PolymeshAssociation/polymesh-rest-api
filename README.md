@@ -35,6 +35,7 @@ SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscripti
 SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscription handshake attempts ##
 NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
+NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
 ```
 
 ### Signing Transactions

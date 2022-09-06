@@ -2,22 +2,23 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
-import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
-import { ErrorCase } from '~/test-utils/types';
+import {
+  MockIdentitiesService,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -32,15 +33,15 @@ describe('PortfoliosService', () => {
 
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockSigningService: MockSigningService;
+  let mockTransactionsService: MockTransactionsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSigningService = mockSigningProvider.useValue;
+    mockTransactionsService = mockTransactionsProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [PortfoliosService, IdentitiesService, mockSigningProvider],
+      providers: [PortfoliosService, IdentitiesService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -180,10 +181,8 @@ describe('PortfoliosService', () => {
         tag: TxTags.portfolio.MovePortfolioFunds,
       };
       const mockTransaction = new MockTransaction(transaction);
-      mockPortfolio.moveFunds.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const body = {
         signer: '0x6000',
         to: new BigNumber(2),
@@ -199,17 +198,10 @@ describe('PortfoliosService', () => {
       const result = await service.moveAssets('0x6000', body);
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.portfolio.MovePortfolioFunds,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockPortfolio.moveFunds).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPortfolio.moveFunds,
         {
           to: new BigNumber(2),
           items: [
@@ -220,7 +212,7 @@ describe('PortfoliosService', () => {
             },
           ],
         },
-        { signingAccount: address }
+        { signer: '0x6000' }
       );
       findOneSpy.mockRestore();
     });
@@ -238,10 +230,11 @@ describe('PortfoliosService', () => {
       const mockTransaction = new MockTransaction(transaction);
       mockTransaction.run.mockResolvedValue(mockPortfolio);
 
-      mockPolymeshApi.identities.createPortfolio.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const body = {
         signer: '0x6000',
         name: 'FOLIO-1',
@@ -250,85 +243,12 @@ describe('PortfoliosService', () => {
       const result = await service.createPortfolio(body);
       expect(result).toEqual({
         result: mockPortfolio,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.portfolio.CreatePortfolio,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockPolymeshApi.identities.createPortfolio).toHaveBeenCalledWith(
-        {
-          name: body.name,
-        },
-        { signingAccount: address }
-      );
     });
   });
 
   describe('deletePortfolio', () => {
-    describe('errors', () => {
-      const cases: ErrorCase[] = [
-        [
-          'Portfolio no longer exists',
-          {
-            code: ErrorCode.DataUnavailable,
-            message: 'The Portfolio was removed and no longer exists',
-          },
-          NotFoundException,
-        ],
-        [
-          'Portfolio contains assets',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'You cannot delete a Portfolio that contains any assets',
-          },
-          BadRequestException,
-        ],
-        [
-          "Portfolio doesn't exist",
-          {
-            code: ErrorCode.ValidationError,
-            message: "The Portfolio doesn't exist",
-          },
-          BadRequestException,
-        ],
-      ];
-      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
-        const signer = '0x6'.padEnd(66, '0');
-        const portfolio = new PortfolioDto({
-          id: new BigNumber(1),
-          did: '0x6'.padEnd(66, '0'),
-        });
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-
-        const mockIdentity = new MockIdentity();
-        mockIdentity.portfolios.delete.mockImplementation(() => {
-          throw polymeshError;
-        });
-        mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.deletePortfolio(portfolio, signer);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBeInstanceOf(HttpException);
-
-        mockIsPolymeshError.mockReset();
-        findOneSpy.mockRestore();
-      });
-    });
-
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
         const transaction = {
@@ -349,21 +269,15 @@ describe('PortfoliosService', () => {
           did: '0x6'.padEnd(66, '0'),
         });
 
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: undefined,
+          transactions: [mockTransaction],
+        });
 
         const result = await service.deletePortfolio(portfolio, signer);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.portfolio.DeletePortfolio,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
       });
     });

@@ -10,9 +10,9 @@ import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 
-export class CreateAssetDto extends SignerDto {
+export class CreateAssetDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'The name of the Asset',
     example: 'Ticker Corp',

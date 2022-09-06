@@ -1,19 +1,20 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { DidDto } from '~/common/dto/params.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
@@ -22,6 +23,7 @@ import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.mod
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
+import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('portfolios')
 @Controller()
@@ -72,7 +74,7 @@ export class PortfoliosController {
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiCreatedResponse({
+  @ApiCreatedOrSubscriptionResponse({
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
@@ -80,30 +82,32 @@ export class PortfoliosController {
   public async moveAssets(
     @Param() { did }: DidDto,
     @Body() transferParams: AssetMovementDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.portfoliosService.moveAssets(did, transferParams);
-    return new TransactionQueueModel({ transactions });
+  ): Promise<ApiTransactionResponse> {
+    const result = await this.portfoliosService.moveAssets(did, transferParams);
+    return handlePayload(result, basicModelResolver);
   }
 
   @ApiOperation({
     summary: 'Create a Portfolio',
     description: 'This endpoint creates a Portfolio',
   })
-  @ApiCreatedResponse({
+  @ApiCreatedOrSubscriptionResponse({
     description: 'Details of the newly created Portfolio',
     type: CreatedPortfolioModel,
   })
   @Post('/portfolios/create')
   public async createPortfolio(
     @Body() createPortfolioParams: CreatePortfolioDto
-  ): Promise<CreatedPortfolioModel> {
-    const { result, transactions } = await this.portfoliosService.createPortfolio(
-      createPortfolioParams
-    );
-    return new CreatedPortfolioModel({
-      portfolio: createPortfolioIdentifierModel(result),
-      transactions,
-    });
+  ): Promise<ApiTransactionResponse> {
+    const serviceResult = await this.portfoliosService.createPortfolio(createPortfolioParams);
+    const resolver: ModelResolver<NumberedPortfolio> = ({ transactions, result }) =>
+      Promise.resolve(
+        new CreatedPortfolioModel({
+          portfolio: createPortfolioIdentifierModel(result),
+          transactions,
+        })
+      );
+    return handlePayload(serviceResult, resolver);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
@@ -136,9 +140,9 @@ export class PortfoliosController {
   @Post('/identities/:did/portfolios/:id/delete')
   public async deletePortfolio(
     @Param() portfolio: PortfolioDto,
-    @Query() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.portfoliosService.deletePortfolio(portfolio, signer);
-    return new TransactionQueueModel({ transactions });
+    @Query() { signer, webhookUrl }: TransactionBaseDto
+  ): Promise<ApiTransactionResponse> {
+    const result = await this.portfoliosService.deletePortfolio(portfolio, signer, webhookUrl);
+    return handlePayload(result, basicModelResolver);
   }
 }

@@ -11,8 +11,8 @@ import {
 import { ErrorCode } from '@polymeshassociation/polymesh-sdk/types';
 
 import { Class } from '~/common/types';
-import { processTransaction } from '~/common/utils';
 import { MockVenue } from '~/test-utils/mocks';
+import { processTransaction } from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),

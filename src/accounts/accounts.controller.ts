@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
-  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -16,10 +15,12 @@ import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { BalanceModel } from '~/assets/models/balance.model';
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ApiTransactionResponse, handlePayload } from '~/common/utils';
+import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -34,7 +35,7 @@ export class AccountsController {
     name: 'account',
     description: 'The Account address whose balance is to be fetched',
     type: 'string',
-    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV', // TODO use this address
   })
   @ApiOkResponse({
     description: 'Free, locked and total POLYX balance of the Account',
@@ -50,7 +51,7 @@ export class AccountsController {
     summary: 'Transfer an amount of POLYX to an account',
     description: 'This endpoint transfers an amount of POLYX to a specified Account',
   })
-  @ApiCreatedResponse({
+  @ApiCreatedOrSubscriptionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -63,9 +64,9 @@ export class AccountsController {
       '</ul>',
   })
   @Post('transfer')
-  async transferPolyx(@Body() params: TransferPolyxDto): Promise<TransactionQueueModel> {
-    const { transactions } = await this.accountsService.transferPolyx(params);
-    return new TransactionQueueModel({ transactions });
+  async transferPolyx(@Body() params: TransferPolyxDto): Promise<ApiTransactionResponse> {
+    const result = await this.accountsService.transferPolyx(params);
+    return handlePayload(result, basicModelResolver);
   }
 
   @ApiOperation({

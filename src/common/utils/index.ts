@@ -1,104 +1,11 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import {
-  ErrorCode,
-  GenericPolymeshTransaction,
-  ModuleName,
-  NoArgsProcedureMethod,
-  ProcedureMethod,
-  ProcedureOpts,
-  TxTags,
-} from '@polymeshassociation/polymesh-sdk/types';
-import {
-  isPolymeshError,
-  isPolymeshTransaction,
-  isPolymeshTransactionBatch,
-} from '@polymeshassociation/polymesh-sdk/utils';
+import { ModuleName, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { flatten } from 'lodash';
 
-import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
-import { TransactionModel } from '~/common/models/transaction.model';
-
-export type TransactionResult<T> = {
-  result: T;
-  transactions: (TransactionModel | BatchTransactionModel)[];
-};
-
-type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
-
-export async function processTransaction<
-  MethodArgs,
-  ReturnType,
-  TransformedReturnType = ReturnType
->(
-  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
-  args: MethodArgs,
-  opts: ProcedureOpts
-): Promise<TransactionResult<TransformedReturnType>> {
-  try {
-    const tx = await method(args, opts);
-    const result = await tx.run();
-
-    const assembleTransactionResponse = <T, R = T>(
-      transaction: GenericPolymeshTransaction<T, R>
-    ): TransactionModel | BatchTransactionModel => {
-      let tagDetails;
-      if (isPolymeshTransaction(transaction)) {
-        const { tag } = transaction;
-        tagDetails = { transactionTag: tag };
-      } else if (isPolymeshTransactionBatch(transaction)) {
-        const { transactions } = transaction;
-        tagDetails = {
-          transactionTags: transactions.map(({ tag }) => tag),
-        };
-      } else {
-        throw new Error(
-          'Unsupported transaction details received. Please report this issue to the Polymesh team'
-        );
-      }
-      const { blockHash, txHash, blockNumber } = transaction;
-      const constructorParams = {
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        blockHash: blockHash!,
-        transactionHash: txHash!,
-        blockNumber: blockNumber!,
-        ...tagDetails,
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      };
-
-      if ('transactionTag' in constructorParams) {
-        return new TransactionModel(constructorParams);
-      }
-      return new BatchTransactionModel(constructorParams);
-    };
-
-    return {
-      result,
-      transactions: [assembleTransactionResponse(tx)],
-    };
-  } catch (err) /* istanbul ignore next: not worth the trouble */ {
-    if (isPolymeshError(err)) {
-      const { message, code } = err;
-      switch (code) {
-        case ErrorCode.NoDataChange:
-        case ErrorCode.ValidationError:
-          throw new BadRequestException(message);
-        case ErrorCode.InsufficientBalance:
-        case ErrorCode.UnmetPrerequisite:
-          throw new UnprocessableEntityException(message);
-        case ErrorCode.DataUnavailable:
-          throw new NotFoundException(message);
-        default:
-          throw new InternalServerErrorException(message);
-      }
-    }
-    throw new InternalServerErrorException(err.message);
-  }
-}
+import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { EventType } from '~/events/types';
+import { NotificationPayload } from '~/notifications/types';
+import { QueueResult } from '~/transactions/transactions.util';
 
 /* istanbul ignore next */
 export function getTxTags(): string[] {
@@ -111,3 +18,24 @@ export function getTxTagsWithModuleNames(): string[] {
   const moduleNames = Object.values(ModuleName);
   return [...moduleNames, ...txTags];
 }
+
+export type ApiTransactionResponse = NotificationPayloadModel | TransactionQueueModel;
+
+// A helper type that lets a service return a QueueResult or a Subscription Receipt
+export type ServiceReturn<T> = Promise<
+  NotificationPayload<EventType.TransactionUpdate> | QueueResult<T>
+>;
+
+// A helper type that lets a controller return a Model or a Subscription Receipt
+export type ModelResolver<T> = (res: QueueResult<T>) => Promise<TransactionQueueModel>;
+
+export const handlePayload = <T>(
+  result: NotificationPayloadModel | QueueResult<T>,
+  resolver: ModelResolver<T>
+): NotificationPayloadModel | Promise<TransactionQueueModel> => {
+  if ('transactions' in result) {
+    return resolver(result);
+  } else {
+    return new NotificationPayloadModel(result);
+  }
+};

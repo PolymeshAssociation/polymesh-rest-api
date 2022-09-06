@@ -1,19 +1,16 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ApiTransactionResponse, handlePayload } from '~/common/utils';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
 import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
+import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('assets', 'compliance')
 @Controller('assets/:ticker/compliance-requirements')
@@ -64,7 +61,7 @@ export class ComplianceController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedResponse({
+  @ApiCreatedOrSubscriptionResponse({
     description: 'Details of the transaction',
     type: TransactionQueueModel,
   })
@@ -72,8 +69,8 @@ export class ComplianceController {
   public async setRequirements(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: SetRequirementsDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.complianceService.setRequirements(ticker, params);
-    return new TransactionQueueModel({ transactions });
+  ): Promise<ApiTransactionResponse> {
+    const result = await this.complianceService.setRequirements(ticker, params);
+    return handlePayload(result, basicModelResolver);
   }
 }

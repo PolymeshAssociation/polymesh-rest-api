@@ -10,19 +10,17 @@ import { ErrorCode, KnownAssetType, TxTags } from '@polymeshassociation/polymesh
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockAuthorizationRequest,
   MockPolymesh,
   MockTransaction,
 } from '~/test-utils/mocks';
-import { MockSigningService } from '~/test-utils/service-mocks';
+import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -34,14 +32,14 @@ describe('AssetsService', () => {
   let service: AssetsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockSigningService: MockSigningService;
+  let mockTransactionsService: MockTransactionsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSigningService = mockSigningProvider.useValue;
+    mockTransactionsService = mockTransactionsProvider.useValue;
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [AssetsService, mockSigningProvider],
+      providers: [AssetsService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -258,19 +256,19 @@ describe('AssetsService', () => {
         tag: TxTags.asset.AddDocuments,
       };
       const mockTransaction = new MockTransaction(mockTransactions);
-      mockTransaction.run.mockResolvedValue(mockAsset);
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockAsset as any);
 
-      mockAsset.documents.set.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockAsset,
+        transactions: [mockTransaction],
+      });
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
-
+      const signer = 'signer';
       const body = {
-        signer: 'signer',
+        signer,
         documents: [
           new AssetDocumentDto({
             name: 'TEST-DOC',
@@ -283,19 +281,12 @@ describe('AssetsService', () => {
       const result = await service.setDocuments('TICKER', body);
       expect(result).toEqual({
         result: mockAsset,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.AddDocuments,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockAsset.documents.set).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.documents.set,
         { documents: body.documents },
-        { signingAccount: address }
+        { signer }
       );
       findOneSpy.mockRestore();
     });
@@ -314,11 +305,9 @@ describe('AssetsService', () => {
       it('should pass it up the chain', async () => {
         const expectedError = new Error('Some error');
 
-        mockPolymeshApi.assets.createAsset.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
-
-        mockSigningService.getAddressByHandle.mockReturnValue('address');
 
         let error;
         try {
@@ -340,23 +329,15 @@ describe('AssetsService', () => {
           tag: TxTags.asset.CreateAsset,
         };
         const mockTransaction = new MockTransaction(transaction);
-        mockTransaction.run.mockResolvedValue(mockAsset);
-        mockPolymeshApi.assets.createAsset.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: mockAsset,
+          transactions: [mockTransaction],
+        });
 
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
         const result = await service.createAsset(createBody);
         expect(result).toEqual({
           result: mockAsset,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.asset.CreateAsset,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
       });
     });
@@ -378,24 +359,14 @@ describe('AssetsService', () => {
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
-      mockAsset.issuance.issue.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const result = await service.issue('TICKER', issueBody);
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.Issue,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
       findSpy.mockRestore();
     });
@@ -422,26 +393,19 @@ describe('AssetsService', () => {
       mockTransaction.run.mockResolvedValue(mockResult);
 
       const mockAsset = new MockAsset();
-      mockAsset.transferOwnership.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockResult,
+        transactions: [mockTransaction],
+      });
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockAsset as any);
 
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
-
       const result = await service.transferOwnership(ticker, body);
       expect(result).toEqual({
         result: mockResult,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.identity.AddAuthorization,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
       findOneSpy.mockRestore();
     });
@@ -463,25 +427,14 @@ describe('AssetsService', () => {
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
-      mockAsset.redeem.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
-
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.redeem('TICKER', redeemBody);
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.Redeem,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
       findSpy.mockRestore();
     });
@@ -502,24 +455,14 @@ describe('AssetsService', () => {
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
-      mockAsset.freeze.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const result = await service.freeze('TICKER', freezeBody);
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.Freeze,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
       findSpy.mockRestore();
     });
@@ -540,24 +483,14 @@ describe('AssetsService', () => {
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
-      mockAsset.unfreeze.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
       const result = await service.unfreeze('TICKER', unfreezeBody);
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.Unfreeze,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
       findSpy.mockRestore();
     });
@@ -579,30 +512,21 @@ describe('AssetsService', () => {
 
       const mockAsset = new MockAsset();
       mockAsset.controllerTransfer.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
-
       const result = await service.controllerTransfer('TICKER', { signer, origin, amount });
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.asset.ControllerTransfer,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
 
-      expect(mockAsset.controllerTransfer).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.controllerTransfer,
         {
           originPortfolio: {
             identity: '0x1000',
@@ -610,7 +534,7 @@ describe('AssetsService', () => {
           },
           amount,
         },
-        { signingAccount: address }
+        { signer }
       );
       findSpy.mockRestore();
     });

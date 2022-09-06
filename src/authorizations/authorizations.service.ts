@@ -8,15 +8,15 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { processTransaction, TransactionResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class AuthorizationsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
-    private readonly signingService: SigningService
+    private readonly transactionsService: TransactionsService
   ) {}
 
   public async findPendingByDid(
@@ -55,19 +55,16 @@ export class AuthorizationsService {
     }
   }
 
-  public async accept(id: BigNumber, signer: string): Promise<TransactionResult<void>> {
+  public async accept(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
     const { accept } = await this.findOne(signer, id);
 
-    const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(accept, { signingAccount: address }, {});
+    return this.transactionsService.submit(accept, {}, { signer, webhookUrl });
   }
 
-  public async remove(id: BigNumber, signer: string): Promise<TransactionResult<void>> {
+  public async remove(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
     const { remove } = await this.findOne(signer, id);
 
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(remove, { signingAccount: address }, {});
+    return this.transactionsService.submit(remove, {}, { signer, webhookUrl });
   }
 }

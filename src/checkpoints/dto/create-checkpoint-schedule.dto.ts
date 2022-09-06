@@ -8,9 +8,9 @@ import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 import { CalendarPeriodDto } from '~/checkpoints/dto/calendar-period.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/signer.dto';
 
-export class CreateCheckpointScheduleDto extends SignerDto {
+export class CreateCheckpointScheduleDto extends TransactionBaseDto {
   @ApiProperty({
     description:
       'Date from which the Schedule will start creating Checkpoints. A null value means the first Checkpoint will be created immediately',

@@ -2,11 +2,7 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import {
-  BadRequestException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
@@ -18,15 +14,12 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import { SigningModule } from '~/signing/signing.module';
 import { MockAccount, MockAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
-import { MockSigningService } from '~/test-utils/service-mocks';
-import { ErrorCase } from '~/test-utils/types';
+import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -38,15 +31,15 @@ describe('AccountsService', () => {
   let service: AccountsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockSigningService: MockSigningService;
+  let mockTransactionsService: MockTransactionsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSigningService = mockSigningProvider.useValue;
+    mockTransactionsService = mockTransactionsProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule, SigningModule],
-      providers: [AccountsService, mockSigningProvider],
+      providers: [AccountsService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -135,65 +128,6 @@ describe('AccountsService', () => {
   });
 
   describe('transferPolyx', () => {
-    describe('errors', () => {
-      const cases: ErrorCase[] = [
-        [
-          'Insufficient free balance',
-          {
-            code: ErrorCode.InsufficientBalance,
-            message: 'Insufficient free balance',
-            data: {
-              freeBalance: new BigNumber(10),
-            },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Destination Account without any Identity',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: "The destination Account doesn't have an associated Identity",
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Invalid CDD claim with receiver Identity',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'The receiver Identity has an invalid CDD claim',
-          },
-          UnprocessableEntityException,
-        ],
-      ];
-
-      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
-        const body = {
-          signer: '0x6'.padEnd(66, '0'),
-          to: 'address',
-          amount: new BigNumber(10),
-          memo: 'Sample memo',
-        };
-
-        const someKey = 'someKey';
-        mockSigningService.getAddressByHandle.mockReturnValue(someKey);
-
-        mockPolymeshApi.network.transferPolyx.mockImplementation(() => {
-          throw polymeshError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.transferPolyx(body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(HttpException);
-        expect(mockPolymeshApi.network.transferPolyx).toHaveBeenCalled();
-      });
-    });
-
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
         const transaction = {
@@ -204,31 +138,26 @@ describe('AccountsService', () => {
         };
         const mockTransaction = new MockTransaction(transaction);
         mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
+        const signer = '0x6'.padEnd(66, '0');
         const body = {
-          signer: '0x6'.padEnd(66, '0'),
+          signer,
           to: 'address',
           amount: new BigNumber(10),
           memo: 'Sample memo',
         };
 
-        const keyName = 'someKey';
-        mockSigningService.getAddressByHandle.mockReturnValue(keyName);
-
         const result = await service.transferPolyx(body);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.balances.TransferWithMemo,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(mockPolymeshApi.network.transferPolyx).toHaveBeenCalled();
+        // expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        //   mockPolymeshApi.network.transferPolyx,
+        //   new BigNumber(10),
+        //   { signer }
+        // );
       });
     });
   });
