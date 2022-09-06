@@ -241,13 +241,13 @@ describe('CheckpointsService', () => {
   describe('createByTicker', () => {
     it('should create a Checkpoint and return the queue results', async () => {
       const mockCheckpoint = new MockCheckpoint();
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.checkpoint.CreateCheckpoint,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockTransaction.run.mockResolvedValue(mockCheckpoint);
 
       const mockAsset = new MockAsset();
@@ -287,13 +287,13 @@ describe('CheckpointsService', () => {
   describe('createScheduleByTicker', () => {
     it('should create a Checkpoint Schedule and return the queue results', async () => {
       const mockCheckpointSchedule = new MockCheckpointSchedule();
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.checkpoint.CreateSchedule,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockTransaction.run.mockResolvedValue(mockCheckpointSchedule);
 
       const mockAsset = new MockAsset();
@@ -464,13 +464,13 @@ describe('CheckpointsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.checkpoint.RemoveSchedule,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const mockAsset = new MockAsset();
         mockAsset.checkpoints.schedules.remove.mockResolvedValue(mockTransaction);

@@ -200,13 +200,13 @@ describe('IdentitiesService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.identity.JoinIdentityAsKey,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockPolymeshApi.accountManagement.inviteAccount.mockResolvedValue(mockTransaction);
 
         const body = {

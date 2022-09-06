@@ -232,13 +232,13 @@ describe('SettlementsService', () => {
     it('should run an addInstruction procedure and return the queue data', async () => {
       const mockVenue = new MockVenue();
 
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.settlement.AddInstruction,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       const mockInstruction = 'instruction';
       mockTransaction.run.mockResolvedValue(mockInstruction);
       mockVenue.addInstruction.mockResolvedValue(mockTransaction);
@@ -300,13 +300,13 @@ describe('SettlementsService', () => {
     it('should run a createVenue procedure and return the queue data', async () => {
       const mockIdentity = new MockIdentity();
 
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.settlement.CreateVenue,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockTransaction);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
@@ -376,13 +376,13 @@ describe('SettlementsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findVenueSpy.mockResolvedValue(mockVenue as any);
 
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.settlement.UpdateVenueType,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockVenue.modify.mockResolvedValue(mockTransaction);
 
         const body = {
@@ -419,13 +419,13 @@ describe('SettlementsService', () => {
   describe('affirmInstruction', () => {
     it('should run an affirm procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.settlement.AffirmInstruction,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockInstruction.affirm.mockResolvedValue(mockTransaction);
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
@@ -461,13 +461,13 @@ describe('SettlementsService', () => {
   describe('rejectInstruction', () => {
     it('should run a reject procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.settlement.RejectInstruction,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockInstruction.reject.mockResolvedValue(mockTransaction);
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');

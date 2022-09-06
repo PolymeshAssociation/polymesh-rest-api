@@ -112,13 +112,13 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a setDefaultConfig procedure and return the queue data', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.corporateAction.SetDefaultWithholdingTax,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockTransaction);
 
@@ -318,13 +318,13 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a configureDividendDistribution procedure and return the created Dividend Distribution', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.corporateAction.InitiateCorporateActionAndDistribute,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         const mockDistribution = new MockDistribution();
         mockTransaction.run.mockResolvedValue(mockDistribution);
         mockAsset.corporateActions.distributions.configureDividendDistribution.mockResolvedValue(
@@ -385,13 +385,13 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a remove procedure and return the delete the Corporate Action', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.corporateAction.RemoveCa,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockAsset.corporateActions.remove.mockResolvedValue(mockTransaction);
 
         const address = 'address';
@@ -496,13 +496,13 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.capitalDistribution.PushBenefit,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
         distributionWithDetails.distribution.pay.mockResolvedValue(mockTransaction);
@@ -594,13 +594,13 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should run the linkDocuments procedure and return the queue results', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.corporateAction.LinkCaDoc,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockTransaction);
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
@@ -700,13 +700,13 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.capitalDistribution.Claim,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
         distributionWithDetails.distribution.claim.mockResolvedValue(mockTransaction);
@@ -793,13 +793,13 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.capitalDistribution.Reclaim,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
         distributionWithDetails.distribution.reclaimFunds.mockResolvedValue(mockTransaction);
@@ -880,13 +880,13 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should run the modifyCheckpoint procedure and return the queue results', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.corporateAction.ChangeRecordDate,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockDistributionWithDetails.distribution.modifyCheckpoint.mockResolvedValue(
           mockTransaction
         );

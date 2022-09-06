@@ -196,13 +196,13 @@ describe('AccountsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.balances.TransferWithMemo,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockTransaction);
 
         const body = {

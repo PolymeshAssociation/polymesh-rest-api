@@ -173,13 +173,13 @@ describe('PortfoliosService', () => {
       const mockPortfolio = new MockPortfolio();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockPortfolio as any);
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.portfolio.MovePortfolioFunds,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockPortfolio.moveFunds.mockResolvedValue(mockTransaction);
 
       const address = 'address';
@@ -229,13 +229,13 @@ describe('PortfoliosService', () => {
   describe('createPortfolio', () => {
     it('should create a Portfolio and return the queue results', async () => {
       const mockPortfolio = new MockPortfolio();
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.portfolio.CreatePortfolio,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockTransaction.run.mockResolvedValue(mockPortfolio);
 
       mockPolymeshApi.identities.createPortfolio.mockResolvedValue(mockTransaction);
@@ -331,13 +331,13 @@ describe('PortfoliosService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.portfolio.DeletePortfolio,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const mockIdentity = new MockIdentity();
         mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);

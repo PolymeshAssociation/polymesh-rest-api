@@ -333,13 +333,13 @@ describe('AssetsService', () => {
     describe('otherwise', () => {
       it('should create the asset', async () => {
         const mockAsset = new MockAsset();
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.asset.CreateAsset,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockTransaction.run.mockResolvedValue(mockAsset);
         mockPolymeshApi.assets.createAsset.mockResolvedValue(mockTransaction);
 
@@ -368,7 +368,7 @@ describe('AssetsService', () => {
       amount: new BigNumber(1000),
     };
     it('should issue the asset', async () => {
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
@@ -376,7 +376,7 @@ describe('AssetsService', () => {
       };
       const findSpy = jest.spyOn(service, 'findOne');
 
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
       mockAsset.issuance.issue.mockResolvedValue(mockTransaction);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -410,7 +410,7 @@ describe('AssetsService', () => {
     };
 
     it('should run a transferOwnership procedure and return the queue data', async () => {
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
@@ -418,7 +418,7 @@ describe('AssetsService', () => {
       };
       const mockResult = new MockAuthorizationRequest();
 
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       mockTransaction.run.mockResolvedValue(mockResult);
 
       const mockAsset = new MockAsset();
@@ -453,7 +453,7 @@ describe('AssetsService', () => {
       amount: new BigNumber(1000),
     };
     it('should run a redeem procedure and return the queue results', async () => {
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
@@ -461,7 +461,7 @@ describe('AssetsService', () => {
       };
       const findSpy = jest.spyOn(service, 'findOne');
 
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
       mockAsset.redeem.mockResolvedValue(mockTransaction);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -492,7 +492,7 @@ describe('AssetsService', () => {
       signer: '0x6000',
     };
     it('should freeze the asset', async () => {
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
@@ -500,7 +500,7 @@ describe('AssetsService', () => {
       };
       const findSpy = jest.spyOn(service, 'findOne');
 
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
       mockAsset.freeze.mockResolvedValue(mockTransaction);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -530,7 +530,7 @@ describe('AssetsService', () => {
       signer: '0x6000',
     };
     it('should unfreeze the asset', async () => {
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
@@ -538,7 +538,7 @@ describe('AssetsService', () => {
       };
       const findSpy = jest.spyOn(service, 'findOne');
 
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
       mockAsset.unfreeze.mockResolvedValue(mockTransaction);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -569,13 +569,13 @@ describe('AssetsService', () => {
       const origin = new PortfolioDto({ id: new BigNumber(1), did: '0x1000' });
       const amount = new BigNumber(100);
 
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.asset.ControllerTransfer,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
 
       const mockAsset = new MockAsset();
       mockAsset.controllerTransfer.mockResolvedValue(mockTransaction);

@@ -82,13 +82,13 @@ describe('ComplianceService', () => {
   describe('setRequirements', () => {
     it('should run a set rules procedure and return the queue data', async () => {
       const mockAsset = new MockAsset();
-      const transactions = {
+      const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
         tag: TxTags.complianceManager.AddComplianceRequirement,
       };
-      const mockTransaction = new MockTransaction(transactions);
+      const mockTransaction = new MockTransaction(transaction);
       const address = 'address';
       mockAsset.compliance.requirements.set.mockResolvedValue(mockTransaction);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);

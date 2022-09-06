@@ -209,14 +209,14 @@ describe('AuthorizationsService', () => {
 
     describe('otherwise', () => {
       it('should call the accept procedure and return the queue data', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.portfolio.AcceptPortfolioCustody,
         };
 
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -270,13 +270,13 @@ describe('AuthorizationsService', () => {
 
     describe('otherwise', () => {
       it('should call the remove procedure and return the queue data', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
           tag: TxTags.identity.RemoveAuthorization,
         };
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

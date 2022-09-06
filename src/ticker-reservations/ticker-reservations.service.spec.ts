@@ -101,7 +101,7 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a reserveTicker procedure and return the queue data', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
@@ -109,7 +109,7 @@ describe('TickerReservationsService', () => {
         };
         const mockResult = new MockTickerReservation();
 
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockTransaction.run.mockResolvedValue(mockResult);
         mockPolymeshApi.assets.reserveTicker.mockResolvedValue(mockTransaction);
 
@@ -170,7 +170,7 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a transferOwnership procedure and return the queue data', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
@@ -182,7 +182,7 @@ describe('TickerReservationsService', () => {
 
         const mockResult = new MockAuthorizationRequest();
 
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockTransaction.run.mockResolvedValue(mockResult);
         mockTickerReservation.transferOwnership.mockResolvedValue(mockTransaction);
 
@@ -240,7 +240,7 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a extend procedure and return the queue data', async () => {
-        const transactions = {
+        const transaction = {
           blockHash: '0x1',
           txHash: '0x2',
           blockNumber: new BigNumber(1),
@@ -253,7 +253,7 @@ describe('TickerReservationsService', () => {
 
         const mockResult = new MockTickerReservation();
 
-        const mockTransaction = new MockTransaction(transactions);
+        const mockTransaction = new MockTransaction(transaction);
         mockTransaction.run.mockResolvedValue(mockResult);
         mockTickerReservation.extend.mockResolvedValue(mockTransaction);
 
