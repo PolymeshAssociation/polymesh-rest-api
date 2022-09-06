@@ -153,11 +153,11 @@ describe('AccountsService', () => {
           result: undefined,
           transactions: [mockTransaction],
         });
-        // expect(mockTransactionsService.submit).toHaveBeenCalledWith(
-        //   mockPolymeshApi.network.transferPolyx,
-        //   new BigNumber(10),
-        //   { signer }
-        // );
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          mockPolymeshApi.network.transferPolyx,
+          new BigNumber(10),
+          { signer }
+        );
       });
     });
   });

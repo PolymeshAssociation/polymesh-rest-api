@@ -35,7 +35,7 @@ export class AccountsController {
     name: 'account',
     description: 'The Account address whose balance is to be fetched',
     type: 'string',
-    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV', // TODO use this address
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
   })
   @ApiOkResponse({
     description: 'Free, locked and total POLYX balance of the Account',

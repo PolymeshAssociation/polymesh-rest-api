@@ -13,7 +13,7 @@ export class TransactionBaseDto {
 
   @ApiProperty({
     description: 'An optional webhook URL to post the results of the transaction too',
-    example: 'http://localhost:2000/developer-testing/webhook', // TODO swap this out
+    example: 'http://example.com/webhook',
   })
   @IsOptional()
   @IsString()
