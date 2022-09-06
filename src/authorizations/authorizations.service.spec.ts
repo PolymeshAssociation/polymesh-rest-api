@@ -11,7 +11,7 @@ import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAuthorizationRequest, MockIdentity, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAuthorizationRequest, MockIdentity, MockTransaction } from '~/test-utils/mocks';
 import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
@@ -209,21 +209,20 @@ describe('AuthorizationsService', () => {
 
     describe('otherwise', () => {
       it('should call the accept procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.portfolio.AcceptPortfolioCustody,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.portfolio.AcceptPortfolioCustody,
+        };
+
+        const mockTransaction = new MockTransaction(transaction);
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.accept.mockResolvedValue(mockQueue);
+        mockAuthorizationRequest.accept.mockResolvedValue(mockTransaction);
 
         const result = await service.accept(new BigNumber(1), '0x6000');
         expect(result).toEqual({
@@ -271,21 +270,19 @@ describe('AuthorizationsService', () => {
 
     describe('otherwise', () => {
       it('should call the remove procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.identity.RemoveAuthorization,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.identity.RemoveAuthorization,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.remove.mockResolvedValue(mockQueue);
+        mockAuthorizationRequest.remove.mockResolvedValue(mockTransaction);
 
         const result = await service.remove(new BigNumber(2), '0x6000');
         expect(result).toEqual({

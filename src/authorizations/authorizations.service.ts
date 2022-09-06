@@ -8,7 +8,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { SigningService } from '~/signing/signing.service';
 
@@ -55,19 +55,19 @@ export class AuthorizationsService {
     }
   }
 
-  public async accept(id: BigNumber, signer: string): Promise<QueueResult<void>> {
+  public async accept(id: BigNumber, signer: string): Promise<TransactionResult<void>> {
     const { accept } = await this.findOne(signer, id);
 
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(accept, { signingAccount: address }, {});
+    return processTransaction(accept, { signingAccount: address }, {});
   }
 
-  public async remove(id: BigNumber, signer: string): Promise<QueueResult<void>> {
+  public async remove(id: BigNumber, signer: string): Promise<TransactionResult<void>> {
     const { remove } = await this.findOne(signer, id);
 
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(remove, { signingAccount: address }, {});
+    return processTransaction(remove, { signingAccount: address }, {});
   }
 }

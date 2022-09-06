@@ -10,7 +10,11 @@ import { EventsService } from '~/events/events.service';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
-import { MockPolymeshTransaction, MockPolymeshTransactionBatch } from '~/test-utils/mocks';
+import {
+  CallbackFn,
+  MockPolymeshTransaction,
+  MockPolymeshTransactionBatch,
+} from '~/test-utils/mocks';
 import { MockEventsService, MockSubscriptionsService } from '~/test-utils/service-mocks';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { Transaction } from '~/transactions/types';
@@ -72,8 +76,7 @@ describe('TransactionsService', () => {
     it('should create a subscription, run the transaction, listen to changes on it (creating events), and return the first notification payload (single)', async () => {
       const transaction: MockPolymeshTransaction = new MockPolymeshTransaction();
 
-      // this is a bit ugly but it's better than calling the submit function a bunch of times
-      let statusCallback: (tx: typeof transaction) => Promise<void> = async () => undefined;
+      let statusCallback: CallbackFn<MockPolymeshTransaction> = async () => undefined;
 
       const unsubCallback = jest.fn();
 
@@ -151,8 +154,7 @@ describe('TransactionsService', () => {
     it('should create a subscription, run the transaction, listen to changes on it (creating events), and return the first notification payload (batch)', async () => {
       const transaction = new MockPolymeshTransactionBatch();
 
-      // this is a bit ugly but it's better than calling the submit function a bunch of times
-      let statusCallback: (tx: typeof transaction) => Promise<void> = async () => undefined;
+      let statusCallback: CallbackFn<MockPolymeshTransactionBatch> = async () => undefined;
 
       const unsubCallback = jest.fn();
 

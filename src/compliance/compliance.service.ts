@@ -7,7 +7,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { SigningService } from '~/signing/signing.service';
 
@@ -31,12 +31,16 @@ export class ComplianceService {
   public async setRequirements(
     ticker: string,
     params: SetRequirementsDto
-  ): Promise<QueueResult<Asset>> {
+  ): Promise<TransactionResult<Asset>> {
     const { signer } = params;
     const asset = await this.assetsService.findOne(ticker);
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.compliance.requirements.set, params as SetAssetRequirementsParams, {
-      signingAccount: address,
-    });
+    return processTransaction(
+      asset.compliance.requirements.set,
+      params as SetAssetRequirementsParams,
+      {
+        signingAccount: address,
+      }
+    );
   }
 }

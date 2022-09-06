@@ -227,7 +227,7 @@ export class TransactionsService {
       };
 
       if (status === TransactionStatus.Succeeded) {
-        payload.result = 'placeholder'; // TODO @polymath-eric: use real result when we eliminate TQs
+        payload.result = 'placeholder'; // The SDK needs to support returning this (DA-407)
       }
     }
 

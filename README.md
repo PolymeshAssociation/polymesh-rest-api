@@ -11,6 +11,8 @@ This version is compatible with chain version 4.1.x
 - node.js version 14.x
 - yarn version 1.x
 
+Note, if running with node v16+ the env `NODE_OPTIONS` should be set to `--unhandled-rejections=warn` to correctly handle errors
+
 ### Installing Dependencies
 
 ```bash

@@ -10,7 +10,7 @@ import { TransactionType } from '~/common/types';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
@@ -82,17 +82,15 @@ describe('ComplianceService', () => {
   describe('setRequirements', () => {
     it('should run a set rules procedure and return the queue data', async () => {
       const mockAsset = new MockAsset();
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.complianceManager.AddComplianceRequirement,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.AddComplianceRequirement,
+      };
+      const mockTransaction = new MockTransaction(transaction);
       const address = 'address';
-      mockAsset.compliance.requirements.set.mockResolvedValue(mockQueue);
+      mockAsset.compliance.requirements.set.mockResolvedValue(mockTransaction);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockSigningService.getAddressByHandle.mockReturnValue(address);
 

@@ -15,7 +15,7 @@ import {
   MockAuthorizationRequest,
   MockPolymesh,
   MockTickerReservation,
-  MockTransactionQueue,
+  MockTransaction,
 } from '~/test-utils/mocks';
 import { MockSigningService } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
@@ -101,19 +101,17 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a reserveTicker procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.asset.RegisterTicker,
-          },
-        ];
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.RegisterTicker,
+        };
         const mockResult = new MockTickerReservation();
 
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(mockResult);
-        mockPolymeshApi.assets.reserveTicker.mockResolvedValue(mockQueue);
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransaction.run.mockResolvedValue(mockResult);
+        mockPolymeshApi.assets.reserveTicker.mockResolvedValue(mockTransaction);
 
         const result = await service.reserve(ticker, signer);
         expect(result).toEqual({
@@ -172,24 +170,21 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a transferOwnership procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.identity.AddAuthorization,
-          },
-        ];
-
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.identity.AddAuthorization,
+        };
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockTickerReservation as any);
 
         const mockResult = new MockAuthorizationRequest();
 
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(mockResult);
-        mockTickerReservation.transferOwnership.mockResolvedValue(mockQueue);
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransaction.run.mockResolvedValue(mockResult);
+        mockTickerReservation.transferOwnership.mockResolvedValue(mockTransaction);
 
         const result = await service.transferOwnership(ticker, body);
         expect(result).toEqual({
@@ -245,14 +240,12 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a extend procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.asset.RegisterTicker,
-          },
-        ];
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.RegisterTicker,
+        };
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -260,9 +253,9 @@ describe('TickerReservationsService', () => {
 
         const mockResult = new MockTickerReservation();
 
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(mockResult);
-        mockTickerReservation.extend.mockResolvedValue(mockQueue);
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransaction.run.mockResolvedValue(mockResult);
+        mockTickerReservation.extend.mockResolvedValue(mockTransaction);
 
         const result = await service.extend(ticker, signer);
         expect(result).toEqual({

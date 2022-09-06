@@ -24,7 +24,7 @@ import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corp
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
+import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService } from '~/test-utils/service-mocks';
 import { ErrorCase } from '~/test-utils/types';
 
@@ -112,17 +112,15 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a setDefaultConfig procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.SetDefaultWithholdingTax,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.SetDefaultWithholdingTax,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
-        mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockQueue);
+        mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockTransaction);
 
         const address = 'address';
         mockSigningService.getAddressByHandle.mockReturnValue(address);
@@ -320,25 +318,17 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a configureDividendDistribution procedure and return the created Dividend Distribution', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.InitiateCorporateAction,
-          },
-          {
-            blockHash: '0x3',
-            txHash: '0x4',
-            blockNumber: new BigNumber(2),
-            tag: TxTags.capitalDistribution.Distribute,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.InitiateCorporateActionAndDistribute,
+        };
+        const mockTransaction = new MockTransaction(transaction);
         const mockDistribution = new MockDistribution();
-        mockQueue.run.mockResolvedValue(mockDistribution);
+        mockTransaction.run.mockResolvedValue(mockDistribution);
         mockAsset.corporateActions.distributions.configureDividendDistribution.mockResolvedValue(
-          mockQueue
+          mockTransaction
         );
 
         const address = 'address';
@@ -353,14 +343,7 @@ describe('CorporateActionsService', () => {
               blockHash: '0x1',
               transactionHash: '0x2',
               blockNumber: new BigNumber(1),
-              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
-              type: TransactionType.Single,
-            },
-            {
-              blockHash: '0x3',
-              transactionHash: '0x4',
-              blockNumber: new BigNumber(2),
-              transactionTag: TxTags.capitalDistribution.Distribute,
+              transactionTag: TxTags.corporateAction.InitiateCorporateActionAndDistribute,
               type: TransactionType.Single,
             },
           ],
@@ -402,16 +385,14 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a remove procedure and return the delete the Corporate Action', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.RemoveCa,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockAsset.corporateActions.remove.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.RemoveCa,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockAsset.corporateActions.remove.mockResolvedValue(mockTransaction);
 
         const address = 'address';
         mockSigningService.getAddressByHandle.mockReturnValue(address);
@@ -515,18 +496,16 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.capitalDistribution.PushBenefit,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.capitalDistribution.PushBenefit,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.pay.mockResolvedValue(mockQueue);
+        distributionWithDetails.distribution.pay.mockResolvedValue(mockTransaction);
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -615,16 +594,14 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should run the linkDocuments procedure and return the queue results', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.LinkCaDoc,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.LinkCaDoc,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockTransaction);
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -723,18 +700,16 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.capitalDistribution.Claim,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.capitalDistribution.Claim,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.claim.mockResolvedValue(mockQueue);
+        distributionWithDetails.distribution.claim.mockResolvedValue(mockTransaction);
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -818,18 +793,16 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.capitalDistribution.Reclaim,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.capitalDistribution.Reclaim,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.reclaimFunds.mockResolvedValue(mockQueue);
+        distributionWithDetails.distribution.reclaimFunds.mockResolvedValue(mockTransaction);
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -907,16 +880,16 @@ describe('CorporateActionsService', () => {
 
     describe('otherwise', () => {
       it('should run the modifyCheckpoint procedure and return the queue results', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.ChangeRecordDate,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockDistributionWithDetails.distribution.modifyCheckpoint.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.ChangeRecordDate,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockDistributionWithDetails.distribution.modifyCheckpoint.mockResolvedValue(
+          mockTransaction
+        );
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

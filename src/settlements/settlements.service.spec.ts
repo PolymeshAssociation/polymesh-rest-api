@@ -27,7 +27,7 @@ import {
   MockIdentity,
   MockInstruction,
   MockPolymesh,
-  MockTransactionQueue,
+  MockTransaction,
   MockVenue,
 } from '~/test-utils/mocks';
 import { MockAssetService, MockIdentitiesService } from '~/test-utils/service-mocks';
@@ -232,18 +232,16 @@ describe('SettlementsService', () => {
     it('should run an addInstruction procedure and return the queue data', async () => {
       const mockVenue = new MockVenue();
 
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.AddInstruction,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.AddInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
       const mockInstruction = 'instruction';
-      mockQueue.run.mockResolvedValue(mockInstruction);
-      mockVenue.addInstruction.mockResolvedValue(mockQueue);
+      mockTransaction.run.mockResolvedValue(mockInstruction);
+      mockVenue.addInstruction.mockResolvedValue(mockTransaction);
 
       const findVenueSpy = jest.spyOn(service, 'findVenue');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -302,16 +300,14 @@ describe('SettlementsService', () => {
     it('should run a createVenue procedure and return the queue data', async () => {
       const mockIdentity = new MockIdentity();
 
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.CreateVenue,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockQueue);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.CreateVenue,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockTransaction);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
 
       const body = {
@@ -380,16 +376,14 @@ describe('SettlementsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findVenueSpy.mockResolvedValue(mockVenue as any);
 
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.settlement.UpdateVenueType,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockVenue.modify.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.settlement.UpdateVenueType,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockVenue.modify.mockResolvedValue(mockTransaction);
 
         const body = {
           signer: '0x6'.padEnd(66, '0'),
@@ -425,16 +419,14 @@ describe('SettlementsService', () => {
   describe('affirmInstruction', () => {
     it('should run an affirm procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.AffirmInstruction,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockInstruction.affirm.mockResolvedValue(mockQueue);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.AffirmInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockInstruction.affirm.mockResolvedValue(mockTransaction);
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -469,16 +461,14 @@ describe('SettlementsService', () => {
   describe('rejectInstruction', () => {
     it('should run a reject procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.RejectInstruction,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockInstruction.reject.mockResolvedValue(mockQueue);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.RejectInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockInstruction.reject.mockResolvedValue(mockTransaction);
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

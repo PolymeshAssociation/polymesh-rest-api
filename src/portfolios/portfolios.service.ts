@@ -7,7 +7,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
@@ -51,7 +51,10 @@ export class PortfoliosService {
     }
   }
 
-  public async moveAssets(owner: string, params: AssetMovementDto): Promise<QueueResult<void>> {
+  public async moveAssets(
+    owner: string,
+    params: AssetMovementDto
+  ): Promise<TransactionResult<void>> {
     const { signer, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
     const address = await this.signingService.getAddressByHandle(signer);
@@ -65,27 +68,29 @@ export class PortfoliosService {
         };
       }),
     };
-    return processQueue(fromPortfolio.moveFunds, args, { signingAccount: address });
+    return processTransaction(fromPortfolio.moveFunds, args, { signingAccount: address });
   }
 
   public async createPortfolio(
     params: CreatePortfolioDto
-  ): Promise<QueueResult<NumberedPortfolio>> {
+  ): Promise<TransactionResult<NumberedPortfolio>> {
     const {
       polymeshService: { polymeshApi },
     } = this;
     const { signer, ...rest } = params;
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(polymeshApi.identities.createPortfolio, rest, { signingAccount: address });
+    return processTransaction(polymeshApi.identities.createPortfolio, rest, {
+      signingAccount: address,
+    });
   }
 
   public async deletePortfolio(
     portfolio: PortfolioDto,
     signer: string
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const address = await this.signingService.getAddressByHandle(signer);
     const identity = await this.identitiesService.findOne(portfolio.did);
-    return processQueue(
+    return processTransaction(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
       { signingAccount: address }

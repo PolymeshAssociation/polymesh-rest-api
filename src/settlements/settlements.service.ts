@@ -14,7 +14,7 @@ import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { SignerDto } from '~/common/dto/signer.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { processTransaction, TransactionResult } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
@@ -62,7 +62,7 @@ export class SettlementsService {
   public async createInstruction(
     venueId: BigNumber,
     createInstructionDto: CreateInstructionDto
-  ): Promise<QueueResult<Instruction>> {
+  ): Promise<TransactionResult<Instruction>> {
     const { signer, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
@@ -78,33 +78,33 @@ export class SettlementsService {
       })),
     };
 
-    return processQueue(venue.addInstruction, params, { signingAccount: address });
+    return processTransaction(venue.addInstruction, params, { signingAccount: address });
   }
 
   public async affirmInstruction(
     id: BigNumber,
     signerDto: SignerDto
-  ): Promise<QueueResult<Instruction>> {
+  ): Promise<TransactionResult<Instruction>> {
     const { signer } = signerDto;
 
     const instruction = await this.findInstruction(id);
 
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(instruction.affirm, { signingAccount: address }, {});
+    return processTransaction(instruction.affirm, { signingAccount: address }, {});
   }
 
   public async rejectInstruction(
     id: BigNumber,
     signerDto: SignerDto
-  ): Promise<QueueResult<Instruction>> {
+  ): Promise<TransactionResult<Instruction>> {
     const { signer } = signerDto;
 
     const instruction = await this.findInstruction(id);
 
     const address = await this.signingService.getAddressByHandle(signer);
     // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(instruction.reject, { signingAccount: address }, {});
+    return processTransaction(instruction.reject, { signingAccount: address }, {});
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -148,7 +148,7 @@ export class SettlementsService {
     return instruction.getAffirmations({ size, start });
   }
 
-  public async createVenue(createVenueDto: CreateVenueDto): Promise<QueueResult<Venue>> {
+  public async createVenue(createVenueDto: CreateVenueDto): Promise<TransactionResult<Venue>> {
     const { signer, description, type } = createVenueDto;
     const params = {
       description,
@@ -156,18 +156,18 @@ export class SettlementsService {
     };
     const address = await this.signingService.getAddressByHandle(signer);
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
-    return processQueue(method, params, { signingAccount: address });
+    return processTransaction(method, params, { signingAccount: address });
   }
 
   public async modifyVenue(
     venueId: BigNumber,
     modifyVenueDto: ModifyVenueDto
-  ): Promise<QueueResult<void>> {
+  ): Promise<TransactionResult<void>> {
     const { signer, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
     const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(venue.modify, params, { signingAccount: address });
+    return processTransaction(venue.modify, params, { signingAccount: address });
   }
 
   public async canTransfer(
