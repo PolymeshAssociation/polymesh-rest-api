@@ -45,7 +45,7 @@ export class TickerReservationsService {
     webhookUrl?: string
   ): ServiceReturn<TickerReservation> {
     const { extend } = await this.findOne(ticker);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
+
     return this.transactionsService.submit(extend, {}, { webhookUrl, signer });
   }
 

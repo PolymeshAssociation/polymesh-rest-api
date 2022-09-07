@@ -41,9 +41,9 @@ export class TickerReservationsController {
   })
   @Post('reserve-ticker')
   public async reserve(
-    @Body() { ticker, signer }: ReserveTickerDto
+    @Body() { ticker, signer, webhookUrl }: ReserveTickerDto
   ): Promise<ApiTransactionResponse> {
-    const result = await this.tickerReservationsService.reserve(ticker, signer);
+    const result = await this.tickerReservationsService.reserve(ticker, signer, webhookUrl);
 
     return handlePayload(result, basicModelResolver);
   }
@@ -129,9 +129,9 @@ export class TickerReservationsController {
   @Post(':ticker/extend')
   public async extendReservation(
     @Param() { ticker }: TickerParamsDto,
-    @Body() { signer }: TransactionBaseDto
+    @Body() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
-    const serviceResult = await this.tickerReservationsService.extend(ticker, signer);
+    const serviceResult = await this.tickerReservationsService.extend(ticker, signer, webhookUrl);
 
     const resolver: ModelResolver<TickerReservation> = async ({ transactions, result }) =>
       new ExtendedTickerReservationModel({

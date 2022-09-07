@@ -55,7 +55,7 @@ export class TransactionsService {
     private readonly eventsService: EventsService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly signingService: SigningService,
-    // TODO @monitz87: handle errors with specialized service
+    // TODO @polymath-eric handle errors with specialized service
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(TransactionsService.name);

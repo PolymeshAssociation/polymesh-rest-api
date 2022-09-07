@@ -106,7 +106,7 @@ export function ApiCreatedOrSubscriptionResponse(
     ApiCreatedResponse(options),
     ApiAcceptedResponse({
       description:
-        'Returned if `webhookUrl` is passed in the body. A response will be posted to the URL given when the transaction is completed',
+        'Returned if `webhookUrl` is passed in the body. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
       type: NotificationPayloadModel,
     })
   );

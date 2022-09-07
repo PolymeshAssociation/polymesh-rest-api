@@ -11,7 +11,7 @@ export class TransactionBaseDto {
   @IsString()
   readonly signer: string;
 
-  // Hide the property so the interactive examples work
+  // Hide the property so the interactive examples work work without additional setup
   @ApiHideProperty()
   @IsOptional()
   @IsString()

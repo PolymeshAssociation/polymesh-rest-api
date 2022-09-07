@@ -51,7 +51,7 @@ Each signer in the API is referenced by an alias specified depending on which si
 
 ## Webhooks (alpha)
 
-Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. As an alternative a field `webhookUrl` can be passed in each non GET request. When given the http request will return after validation. A 202 status code will be returned.
+Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. As an alternative a field `webhookUrl` can be passed in each non GET request. When given the http request will return after validation. A 202 (Accepted) status code will be returned instead of the usual 201 (Created).
 
 Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with the value echoed back in the headers.
 

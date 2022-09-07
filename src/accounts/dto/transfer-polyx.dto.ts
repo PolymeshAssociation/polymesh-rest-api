@@ -13,8 +13,7 @@ export class TransferPolyxDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Account that will receive the POLYX',
     type: 'string',
-    // example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV', // TODO use this one
-    example: '5FUAXfiwa1zKwc8zwwkiJBc1RxHLFLYFeHspcpzEdzGLoJq8', // test account
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
   })
   @IsString()
   readonly to: string;

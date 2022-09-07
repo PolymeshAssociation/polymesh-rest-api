@@ -37,7 +37,7 @@ import { TransactionsModule } from '~/transactions/transactions.module';
         SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL: Joi.number().default(5000),
         NOTIFICATIONS_MAX_TRIES: Joi.number().default(5),
         NOTIFICATIONS_RETRY_INTERVAL: Joi.number().default(5000),
-        SUBSCRIPTIONS_LEGITIMACY_SECRET: Joi.string().default('defaultSecret'),
+        NOTIFICATIONS_LEGITIMACY_SECRET: Joi.string().default('defaultSecret'),
         LOCAL_SIGNERS: Joi.string().allow(''),
         LOCAL_MNEMONICS: Joi.string().allow(''),
         VAULT_TOKEN: Joi.string().allow(''),

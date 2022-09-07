@@ -261,9 +261,9 @@ export class CorporateActionsController {
   @Post(':id/delete')
   public async deleteCorporateAction(
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
-    @Query() { signer }: TransactionBaseDto
+    @Query() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
-    const result = await this.corporateActionsService.remove(ticker, id, signer);
+    const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
     return handlePayload(result, basicModelResolver);
   }
 
@@ -415,9 +415,14 @@ export class CorporateActionsController {
   @Post(':id/reclaim-funds')
   public async reclaimRemainingFunds(
     @Param() { id, ticker }: DividendDistributionParamsDto,
-    @Body() { signer }: TransactionBaseDto
+    @Body() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
-    const result = await this.corporateActionsService.reclaimRemainingFunds(ticker, id, signer);
+    const result = await this.corporateActionsService.reclaimRemainingFunds(
+      ticker,
+      id,
+      signer,
+      webhookUrl
+    );
     return handlePayload(result, basicModelResolver);
   }
 

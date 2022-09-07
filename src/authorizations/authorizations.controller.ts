@@ -40,9 +40,9 @@ export class AuthorizationsController {
   @Post('/:id/accept')
   public async accept(
     @Param() { id }: IdParamsDto,
-    @Body() { signer }: TransactionBaseDto
+    @Body() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
-    const result = await this.authorizationsService.accept(id, signer);
+    const result = await this.authorizationsService.accept(id, signer, webhookUrl);
 
     return handlePayload(result, basicModelResolver);
   }
@@ -73,9 +73,9 @@ export class AuthorizationsController {
   @Post('/:id/remove')
   public async remove(
     @Param() { id }: IdParamsDto,
-    @Body() { signer }: TransactionBaseDto
+    @Body() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
-    const result = await this.authorizationsService.remove(id, signer);
+    const result = await this.authorizationsService.remove(id, signer, webhookUrl);
 
     return handlePayload(result, basicModelResolver);
   }

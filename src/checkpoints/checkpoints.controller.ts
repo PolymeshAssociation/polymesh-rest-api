@@ -415,9 +415,14 @@ export class CheckpointsController {
   @Post('schedules/:id/delete')
   public async deleteSchedule(
     @Param() { ticker, id }: DeleteCheckpointScheduleParamsDto,
-    @Query() { signer }: TransactionBaseDto
+    @Query() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
-    const result = await this.checkpointsService.deleteScheduleByTicker(ticker, id, signer);
+    const result = await this.checkpointsService.deleteScheduleByTicker(
+      ticker,
+      id,
+      signer,
+      webhookUrl
+    );
     return handlePayload(result, basicModelResolver);
   }
 }
