@@ -12,7 +12,7 @@ export class DeveloperTestingController {
   constructor(private readonly logger: PolymeshLogger) {}
 
   @ApiOperation({
-    summary: 'Receives an arbitrary JSON payload and returns a 200 response',
+    summary: `Returns a 200 response and echos ${HANDSHAKE_HEADER_KEY} if present in the request`,
     description:
       'This endpoint is meant to aid testing webhook functionality for developers. It has no use for a regular user of the API',
   })
@@ -22,8 +22,6 @@ export class DeveloperTestingController {
     @Headers(HANDSHAKE_HEADER_KEY) secret: string,
     @Res() res: Response
   ): Promise<void> {
-    this.logger.debug(`Received webhook payload: ${JSON.stringify(payload)}`);
-
     if (secret) {
       res.header(HANDSHAKE_HEADER_KEY, secret);
     }

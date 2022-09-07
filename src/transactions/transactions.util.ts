@@ -22,26 +22,26 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 import { ModelResolver } from '~/common/utils';
 
-export type QueueResult<T> = {
+export type TransactionResult<T> = {
   result: T;
   transactions: (TransactionModel | BatchTransactionModel)[];
 };
 
-export type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown>
-  ? never
-  : T;
+type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
+
+export type Method<M, R, T> = WithArgsProcedureMethod<ProcedureMethod<M, R, T>>;
 
 /**
  * a helper function to handle when procedures have args and those without args
  */
 export function prepareProcedure<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
-  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
+  method: Method<MethodArgs, ReturnType, TransformedReturnType>,
   args: MethodArgs,
   opts: ProcedureOpts
 ): Promise<GenericPolymeshTransaction<ReturnType, TransformedReturnType>> {
   let procedure;
-  if (Object.keys(args).length === 0) {
-    procedure = method(opts as any);
+  if (!args || Object.keys(args).length === 0) {
+    procedure = method(opts as MethodArgs);
   } else {
     procedure = method(args, opts);
   }
@@ -53,10 +53,10 @@ export async function processTransaction<
   ReturnType,
   TransformedReturnType = ReturnType
 >(
-  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
+  method: Method<MethodArgs, ReturnType, TransformedReturnType>,
   args: MethodArgs,
   opts: ProcedureOpts
-): Promise<QueueResult<TransformedReturnType>> {
+): Promise<TransactionResult<TransformedReturnType>> {
   try {
     const procedure = await prepareProcedure(method, args, opts);
     const result = await procedure.run();

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { ProcedureMethod, TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionBaseDto } from '~/common/dto/signer.dto';
@@ -15,10 +15,10 @@ import { SubscriptionStatus } from '~/subscriptions/types';
 import transactionsConfig from '~/transactions/config/transactions.config';
 import {
   handleSdkError,
+  Method,
   prepareProcedure,
   processTransaction,
-  QueueResult,
-  WithArgsProcedureMethod,
+  TransactionResult,
 } from '~/transactions/transactions.util';
 import { Transaction } from '~/transactions/types';
 
@@ -63,17 +63,19 @@ export class TransactionsService {
   }
 
   public async submit<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
-    method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, ReturnType, TransformedReturnType>>,
+    method: Method<MethodArgs, ReturnType, TransformedReturnType>,
     args: MethodArgs,
     transactionBaseDto: TransactionBaseDto
-  ): Promise<NotificationPayload | QueueResult<TransformedReturnType>> {
+  ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
     const { signer, webhookUrl } = transactionBaseDto;
     const signingAccount = await this.signingService.getAddressByHandle(signer);
     try {
       if (!webhookUrl) {
         return processTransaction(method, args, { signingAccount });
       } else {
+        // prepare the procedure so the SDK will run its validation and throw if something isn't right
         const transaction = await prepareProcedure(method, args, { signingAccount });
+
         return this.submitAndSubscribe(
           transaction as Transaction,
           webhookUrl,

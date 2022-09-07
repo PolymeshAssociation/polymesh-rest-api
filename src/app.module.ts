@@ -11,6 +11,7 @@ import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
 import { ComplianceModule } from '~/compliance/compliance.module';
 import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.module';
+import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
@@ -41,6 +42,7 @@ import { TransactionsModule } from '~/transactions/transactions.module';
         LOCAL_MNEMONICS: Joi.string().allow(''),
         VAULT_TOKEN: Joi.string().allow(''),
         VAULT_URL: Joi.string().allow(''),
+        DEVELOPER_UTILS: Joi.bool().default(false),
       })
         .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')
         .and('LOCAL_SIGNERS', 'LOCAL_MNEMONICS')
@@ -65,7 +67,7 @@ import { TransactionsModule } from '~/transactions/transactions.module';
     EventsModule,
     NotificationsModule,
     ScheduleModule,
-    // DeveloperTestingModule, // Comment me in to get developer testing endpoints enabled
+    DeveloperTestingModule,
   ],
 })
 export class AppModule {}

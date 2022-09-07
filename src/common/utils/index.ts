@@ -5,7 +5,7 @@ import { NotificationPayloadModel } from '~/common/models/notification-payload-m
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { EventType } from '~/events/types';
 import { NotificationPayload } from '~/notifications/types';
-import { QueueResult } from '~/transactions/transactions.util';
+import { TransactionResult } from '~/transactions/transactions.util';
 
 /* istanbul ignore next */
 export function getTxTags(): string[] {
@@ -23,14 +23,14 @@ export type ApiTransactionResponse = NotificationPayloadModel | TransactionQueue
 
 // A helper type that lets a service return a QueueResult or a Subscription Receipt
 export type ServiceReturn<T> = Promise<
-  NotificationPayload<EventType.TransactionUpdate> | QueueResult<T>
+  NotificationPayload<EventType.TransactionUpdate> | TransactionResult<T>
 >;
 
 // A helper type that lets a controller return a Model or a Subscription Receipt
-export type ModelResolver<T> = (res: QueueResult<T>) => Promise<TransactionQueueModel>;
+export type ModelResolver<T> = (res: TransactionResult<T>) => Promise<TransactionQueueModel>;
 
 export const handlePayload = <T>(
-  result: NotificationPayloadModel | QueueResult<T>,
+  result: NotificationPayloadModel | TransactionResult<T>,
   resolver: ModelResolver<T>
 ): NotificationPayloadModel | Promise<TransactionQueueModel> => {
   if ('transactions' in result) {

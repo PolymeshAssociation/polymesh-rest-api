@@ -155,7 +155,7 @@ describe('AccountsService', () => {
         });
         expect(mockTransactionsService.submit).toHaveBeenCalledWith(
           mockPolymeshApi.network.transferPolyx,
-          new BigNumber(10),
+          { amount: new BigNumber(10), memo: 'Sample memo', to: 'address' },
           { signer }
         );
       });

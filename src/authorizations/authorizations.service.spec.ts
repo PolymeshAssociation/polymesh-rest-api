@@ -191,7 +191,7 @@ describe('AuthorizationsService', () => {
     });
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
-        const expectedError = new Error('Some error');
+        const expectedError = new Error('Accept error');
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -243,7 +243,7 @@ describe('AuthorizationsService', () => {
 
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
-        const expectedError = new Error('Some error');
+        const expectedError = new Error('Remove error');
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

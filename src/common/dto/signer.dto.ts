@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class TransactionBaseDto {
@@ -11,10 +11,8 @@ export class TransactionBaseDto {
   @IsString()
   readonly signer: string;
 
-  @ApiProperty({
-    description: 'An optional webhook URL to post the results of the transaction too',
-    example: 'http://example.com/webhook',
-  })
+  // Hide the property so the interactive examples work
+  @ApiHideProperty()
   @IsOptional()
   @IsString()
   readonly webhookUrl?: string;
