@@ -55,7 +55,7 @@ Normally the endpoints that create transactions wait for block finalization befo
 
 Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with the value echoed back in the headers.
 
-If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILs=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`
+If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILS=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`
 
 ### Warning
 

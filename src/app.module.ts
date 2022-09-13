@@ -67,7 +67,7 @@ import { TransactionsModule } from '~/transactions/transactions.module';
     EventsModule,
     NotificationsModule,
     ScheduleModule,
-    DeveloperTestingModule,
+    DeveloperTestingModule.register(),
   ],
 })
 export class AppModule {}
