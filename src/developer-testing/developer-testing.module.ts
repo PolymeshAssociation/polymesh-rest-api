@@ -1,17 +1,25 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 
 import { DeveloperTestingController } from '~/developer-testing/developer-testing.controller';
 import { LoggerModule } from '~/logger/logger.module';
 
-const DEVELOPER_UTILS = !!process.env.DEVELOPER_UTILS;
+@Module({})
+export class DeveloperTestingModule {
+  static register(): DynamicModule {
+    const controllers = [];
 
-const controllers = [];
-if (DEVELOPER_UTILS) {
-  controllers.push(DeveloperTestingController);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const DEVELOPER_UTILS: boolean = JSON.parse(process.env.DEVELOPER_UTILS!);
+
+    if (DEVELOPER_UTILS) {
+      controllers.push(DeveloperTestingController);
+    }
+
+    return {
+      module: DeveloperTestingModule,
+      imports: [LoggerModule],
+      controllers,
+      providers: [],
+    };
+  }
 }
-@Module({
-  imports: [LoggerModule],
-  controllers,
-  providers: [],
-})
-export class DeveloperTestingModule {}
