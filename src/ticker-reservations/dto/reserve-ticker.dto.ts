@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IsTicker } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class ReserveTickerDto extends TransactionBaseDto {
   @ApiProperty({

@@ -36,7 +36,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
+import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -418,13 +418,11 @@ export class IdentitiesController {
     const serviceResult = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );
-    const resolver: ModelResolver<AuthorizationRequest> = ({ transactions, result }) =>
-      Promise.resolve(
-        new CreatedAuthorizationRequestModel({
-          transactions,
-          authorizationRequest: createAuthorizationRequestModel(result),
-        })
-      );
+    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
+      new CreatedAuthorizationRequestModel({
+        transactions,
+        authorizationRequest: createAuthorizationRequestModel(result),
+      });
 
     return handlePayload(serviceResult, resolver);
   }

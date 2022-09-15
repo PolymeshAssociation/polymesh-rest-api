@@ -20,7 +20,6 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ApiTransactionResponse, handlePayload } from '~/common/utils';
-import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -66,7 +65,7 @@ export class AccountsController {
   @Post('transfer')
   async transferPolyx(@Body() params: TransferPolyxDto): Promise<ApiTransactionResponse> {
     const result = await this.accountsService.transferPolyx(params);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiOperation({

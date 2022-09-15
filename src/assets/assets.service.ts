@@ -16,7 +16,7 @@ import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';

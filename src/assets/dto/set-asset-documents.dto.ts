@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class SetAssetDocumentsDto extends TransactionBaseDto {
   @ApiProperty({

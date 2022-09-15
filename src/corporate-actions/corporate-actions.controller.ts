@@ -14,10 +14,10 @@ import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
+import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import {
   createDividendDistributionDetailsModel,
@@ -34,7 +34,6 @@ import { CreatedDividendDistributionModel } from '~/corporate-actions/models/cre
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
 import { TaxWithholdingModel } from '~/corporate-actions/models/tax-withholding.model';
-import { basicModelResolver } from '~/transactions/transactions.util';
 
 class DividendDistributionParamsDto extends IdParamsDto {
   @IsTicker()
@@ -110,7 +109,7 @@ export class CorporateActionsController {
       ticker,
       corporateActionDefaultConfigDto
     );
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -223,13 +222,11 @@ export class CorporateActionsController {
       dividendDistributionDto
     );
 
-    const resolver: ModelResolver<DividendDistribution> = ({ transactions, result }) =>
-      Promise.resolve(
-        new CreatedDividendDistributionModel({
-          dividendDistribution: createDividendDistributionModel(result),
-          transactions,
-        })
-      );
+    const resolver: TransactionResolver<DividendDistribution> = ({ transactions, result }) =>
+      new CreatedDividendDistributionModel({
+        dividendDistribution: createDividendDistributionModel(result),
+        transactions,
+      });
 
     return handlePayload(serviceResult, resolver);
   }
@@ -264,7 +261,7 @@ export class CorporateActionsController {
     @Query() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -304,7 +301,7 @@ export class CorporateActionsController {
     @Body() payDividendsDto: PayDividendsDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.corporateActionsService.payDividends(ticker, id, payDividendsDto);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
@@ -338,7 +335,7 @@ export class CorporateActionsController {
     @Body() linkDocumentsDto: LinkDocumentsDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.corporateActionsService.linkDocuments(ticker, id, linkDocumentsDto);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -379,7 +376,7 @@ export class CorporateActionsController {
     @Body() { signer }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.corporateActionsService.claimDividends(ticker, id, signer);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -423,7 +420,7 @@ export class CorporateActionsController {
       signer,
       webhookUrl
     );
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('dividend-distributions', 'checkpoints')
@@ -478,6 +475,6 @@ export class CorporateActionsController {
       id,
       modifyDistributionCheckpointDto
     );
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 }

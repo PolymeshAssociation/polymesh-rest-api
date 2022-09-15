@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class TransactionBaseDto {
   @ApiProperty({
@@ -11,9 +11,10 @@ export class TransactionBaseDto {
   @IsString()
   readonly signer: string;
 
-  // Hide the property so the interactive examples work work without additional setup
+  // Hide the property so the interactive examples work without additional setup
   @ApiHideProperty()
   @IsOptional()
   @IsString()
+  @IsUrl()
   readonly webhookUrl?: string;
 }

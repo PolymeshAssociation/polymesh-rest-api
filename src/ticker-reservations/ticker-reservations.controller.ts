@@ -12,16 +12,15 @@ import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
+import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
 import { ReserveTickerDto } from '~/ticker-reservations/dto/reserve-ticker.dto';
 import { ExtendedTickerReservationModel } from '~/ticker-reservations/models/extended-ticker-reservation.model';
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 import { createTickerReservationModel } from '~/ticker-reservations/ticker-reservations.util';
-import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('ticker-reservations')
 @Controller('ticker-reservations')
@@ -45,7 +44,7 @@ export class TickerReservationsController {
   ): Promise<ApiTransactionResponse> {
     const result = await this.tickerReservationsService.reserve(ticker, signer, webhookUrl);
 
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiOperation({
@@ -93,13 +92,11 @@ export class TickerReservationsController {
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.tickerReservationsService.transferOwnership(ticker, params);
 
-    const resolver: ModelResolver<AuthorizationRequest> = ({ transactions, result }) =>
-      Promise.resolve(
-        new CreatedAuthorizationRequestModel({
-          transactions,
-          authorizationRequest: createAuthorizationRequestModel(result),
-        })
-      );
+    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
+      new CreatedAuthorizationRequestModel({
+        transactions,
+        authorizationRequest: createAuthorizationRequestModel(result),
+      });
 
     return handlePayload(serviceResult, resolver);
   }
@@ -133,7 +130,7 @@ export class TickerReservationsController {
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.tickerReservationsService.extend(ticker, signer, webhookUrl);
 
-    const resolver: ModelResolver<TickerReservation> = async ({ transactions, result }) =>
+    const resolver: TransactionResolver<TickerReservation> = async ({ transactions, result }) =>
       new ExtendedTickerReservationModel({
         transactions,
         tickerReservation: await createTickerReservationModel(result),

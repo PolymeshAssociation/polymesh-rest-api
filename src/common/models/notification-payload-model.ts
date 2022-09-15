@@ -8,23 +8,26 @@ export class NotificationPayloadModel {
   @ApiProperty({
     description:
       'The ID of the subscription. Events related to the transaction will contain this ID in the payload',
+    example: 1,
   })
-  subscriptionId: number;
+  readonly subscriptionId: number;
 
   @ApiProperty({
     description: 'The nonce for the subscription',
+    example: 0,
   })
-  nonce: number;
+  readonly nonce: number;
 
   @ApiProperty({
     description: 'The type of event',
+    enum: EventType,
   })
-  type: EventType;
+  readonly type: EventType;
 
   @ApiProperty({
     description: 'The payload of the transaction subscribed too',
   })
-  payload: TransactionUpdatePayload;
+  readonly payload: TransactionUpdatePayload;
 
   constructor(model: NotificationPayloadModel) {
     Object.assign(this, model);

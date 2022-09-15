@@ -85,6 +85,7 @@ describe('TransactionsService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
   describe('submit (without webhookUrl)', () => {
     it('should process the transaction and return the result', async () => {
       const transaction: MockPolymeshTransaction = new MockPolymeshTransaction();

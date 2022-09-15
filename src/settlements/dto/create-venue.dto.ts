@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { VenueType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsString } from 'class-validator';
 
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class CreateVenueDto extends TransactionBaseDto {
   @ApiProperty({

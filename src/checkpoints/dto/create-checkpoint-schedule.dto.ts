@@ -8,7 +8,7 @@ import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 import { CalendarPeriodDto } from '~/checkpoints/dto/calendar-period.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class CreateCheckpointScheduleDto extends TransactionBaseDto {
   @ApiProperty({

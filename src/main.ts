@@ -7,7 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from '~/app.module';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
-import { WebhookResponseCodeInterceptor } from '~/common/interceptors/response.interceptor';
+import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 async function bootstrap(): Promise<void> {

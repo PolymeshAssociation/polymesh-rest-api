@@ -27,15 +27,24 @@ export type ServiceReturn<T> = Promise<
 >;
 
 // A helper type that lets a controller return a Model or a Subscription Receipt
-export type ModelResolver<T> = (res: TransactionResult<T>) => Promise<TransactionQueueModel>;
+export type TransactionResolver<T> = (
+  res: TransactionResult<T>
+) => Promise<TransactionQueueModel> | TransactionQueueModel;
 
 export const handlePayload = <T>(
   result: NotificationPayloadModel | TransactionResult<T>,
-  resolver: ModelResolver<T>
-): NotificationPayloadModel | Promise<TransactionQueueModel> => {
+  resolver: TransactionResolver<T> = basicModelResolver
+): NotificationPayloadModel | Promise<TransactionQueueModel> | TransactionQueueModel => {
   if ('transactions' in result) {
     return resolver(result);
   } else {
     return new NotificationPayloadModel(result);
   }
+};
+
+/**
+ * A helper function for controllers when they should return a basic TransactionQueueModel
+ */
+const basicModelResolver: TransactionResolver<unknown> = ({ transactions }) => {
+  return new TransactionQueueModel({ transactions });
 };

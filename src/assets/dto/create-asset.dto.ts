@@ -10,7 +10,7 @@ import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class CreateAssetDto extends TransactionBaseDto {
   @ApiProperty({

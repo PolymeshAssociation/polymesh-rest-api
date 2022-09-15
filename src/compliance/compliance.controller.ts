@@ -10,7 +10,6 @@ import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
 import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
-import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('assets', 'compliance')
 @Controller('assets/:ticker/compliance-requirements')
@@ -71,6 +70,6 @@ export class ComplianceController {
     @Body() params: SetRequirementsDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.complianceService.setRequirements(ticker, params);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 }

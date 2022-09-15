@@ -18,9 +18,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
-import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { TransactionModel } from '~/common/models/transaction.model';
-import { ModelResolver } from '~/common/utils';
 
 export type TransactionResult<T> = {
   result: T;
@@ -121,10 +119,3 @@ export function handleSdkError(err: Error): never {
   }
   throw new InternalServerErrorException(err.message);
 }
-
-/**
- * A helper function for controllers when they should return a basic TransactionQueueModel
- */
-export const basicModelResolver: ModelResolver<unknown> = ({ transactions }) => {
-  return Promise.resolve(new TransactionQueueModel({ transactions }));
-};

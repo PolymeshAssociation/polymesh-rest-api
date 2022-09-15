@@ -3,7 +3,7 @@ import { ConfigType } from '@nestjs/config';
 import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
 import { EventType, TransactionUpdateEvent, TransactionUpdatePayload } from '~/events/types';

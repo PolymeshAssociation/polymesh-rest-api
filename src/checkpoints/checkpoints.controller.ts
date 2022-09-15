@@ -24,12 +24,11 @@ import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/dec
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
-import { basicModelResolver } from '~/transactions/transactions.util';
+import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
 
 class DeleteCheckpointScheduleParamsDto extends IdParamsDto {
   @IsTicker()
@@ -158,13 +157,11 @@ export class CheckpointsController {
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.checkpointsService.createByTicker(ticker, signerDto);
 
-    const resolver: ModelResolver<Checkpoint> = ({ result: checkpoint, transactions }) =>
-      Promise.resolve(
-        new CreatedCheckpointModel({
-          checkpoint,
-          transactions,
-        })
-      );
+    const resolver: TransactionResolver<Checkpoint> = ({ result: checkpoint, transactions }) =>
+      new CreatedCheckpointModel({
+        checkpoint,
+        transactions,
+      });
 
     return handlePayload(serviceResult, resolver);
   }
@@ -271,7 +268,7 @@ export class CheckpointsController {
       createCheckpointScheduleDto
     );
 
-    const resolver: ModelResolver<CheckpointSchedule> = async ({
+    const resolver: TransactionResolver<CheckpointSchedule> = async ({
       result: { id: createdScheduleId },
       transactions,
     }) => {
@@ -423,6 +420,6 @@ export class CheckpointsController {
       signer,
       webhookUrl
     );
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 }

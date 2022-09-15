@@ -6,7 +6,7 @@ import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { LegDto } from '~/settlements/dto/leg.dto';
 
 export class CreateInstructionDto extends TransactionBaseDto {

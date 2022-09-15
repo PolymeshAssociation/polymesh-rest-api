@@ -27,6 +27,7 @@ export const mockTransactionsProvider = {
   provide: TransactionsService,
   useValue: new MockTransactionsService(),
 };
+
 export class MockComplianceService {
   setRequirements = jest.fn();
   findComplianceRequirements = jest.fn();

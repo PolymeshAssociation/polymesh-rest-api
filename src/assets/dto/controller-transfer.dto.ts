@@ -7,7 +7,7 @@ import { ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
 export class ControllerTransferDto extends TransactionBaseDto {

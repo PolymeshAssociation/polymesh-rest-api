@@ -13,7 +13,7 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';

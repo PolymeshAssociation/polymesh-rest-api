@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { IsPermissionsLike } from '~/identities/decorators/validation';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 

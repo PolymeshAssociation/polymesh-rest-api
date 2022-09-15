@@ -5,10 +5,10 @@ import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
+import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
@@ -22,7 +22,6 @@ import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.
 import { VenueDetailsModel } from '~/settlements/models/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel } from '~/settlements/settlements.util';
-import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('settlements')
 @Controller()
@@ -71,13 +70,11 @@ export class SettlementsController {
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.settlementsService.createInstruction(id, createInstructionDto);
 
-    const resolver: ModelResolver<Instruction> = ({ result: instruction, transactions }) =>
-      Promise.resolve(
-        new CreatedInstructionModel({
-          instruction,
-          transactions,
-        })
-      );
+    const resolver: TransactionResolver<Instruction> = ({ result: instruction, transactions }) =>
+      new CreatedInstructionModel({
+        instruction,
+        transactions,
+      });
 
     return handlePayload(serviceResult, resolver);
   }
@@ -104,7 +101,7 @@ export class SettlementsController {
     @Body() signerDto: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.settlementsService.affirmInstruction(id, signerDto);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('instructions')
@@ -128,7 +125,7 @@ export class SettlementsController {
     @Body() signerDto: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.settlementsService.rejectInstruction(id, signerDto);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiTags('instructions')
@@ -219,13 +216,11 @@ export class SettlementsController {
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.settlementsService.createVenue(createVenueDto);
 
-    const resolver: ModelResolver<Venue> = ({ result: venue, transactions }) =>
-      Promise.resolve(
-        new CreatedVenueModel({
-          venue,
-          transactions,
-        })
-      );
+    const resolver: TransactionResolver<Venue> = ({ result: venue, transactions }) =>
+      new CreatedVenueModel({
+        venue,
+        transactions,
+      });
 
     return handlePayload(serviceResult, resolver);
   }
@@ -244,7 +239,7 @@ export class SettlementsController {
     @Body() modifyVenueDto: ModifyVenueDto
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.settlementsService.modifyVenue(id, modifyVenueDto);
-    return handlePayload(serviceResult, basicModelResolver);
+    return handlePayload(serviceResult);
   }
 
   @ApiTags('assets')

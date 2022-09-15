@@ -14,7 +14,7 @@ import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { TransactionsService } from '~/transactions/transactions.service';

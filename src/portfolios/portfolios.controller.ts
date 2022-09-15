@@ -11,10 +11,10 @@ import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
 import { DidDto } from '~/common/dto/params.dto';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, ModelResolver } from '~/common/utils';
+import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
@@ -23,7 +23,6 @@ import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.mod
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
-import { basicModelResolver } from '~/transactions/transactions.util';
 
 @ApiTags('portfolios')
 @Controller()
@@ -84,7 +83,7 @@ export class PortfoliosController {
     @Body() transferParams: AssetMovementDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.portfoliosService.moveAssets(did, transferParams);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 
   @ApiOperation({
@@ -100,13 +99,11 @@ export class PortfoliosController {
     @Body() createPortfolioParams: CreatePortfolioDto
   ): Promise<ApiTransactionResponse> {
     const serviceResult = await this.portfoliosService.createPortfolio(createPortfolioParams);
-    const resolver: ModelResolver<NumberedPortfolio> = ({ transactions, result }) =>
-      Promise.resolve(
-        new CreatedPortfolioModel({
-          portfolio: createPortfolioIdentifierModel(result),
-          transactions,
-        })
-      );
+    const resolver: TransactionResolver<NumberedPortfolio> = ({ transactions, result }) =>
+      new CreatedPortfolioModel({
+        portfolio: createPortfolioIdentifierModel(result),
+        transactions,
+      });
     return handlePayload(serviceResult, resolver);
   }
 
@@ -143,6 +140,6 @@ export class PortfoliosController {
     @Query() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<ApiTransactionResponse> {
     const result = await this.portfoliosService.deletePortfolio(portfolio, signer, webhookUrl);
-    return handlePayload(result, basicModelResolver);
+    return handlePayload(result);
   }
 }

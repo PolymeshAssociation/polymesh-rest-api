@@ -5,7 +5,7 @@ import { ClaimType, CountryCode } from '@polymeshassociation/polymesh-sdk/types'
 import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, ValidateNested } from 'class-validator';
 
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ConditionDto } from '~/compliance/dto/condition.dto';
 
 export class SetRequirementsDto extends TransactionBaseDto {

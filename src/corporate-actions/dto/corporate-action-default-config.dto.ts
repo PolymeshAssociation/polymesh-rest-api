@@ -7,7 +7,7 @@ import { ValidateIf, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { CorporateActionTargetsDto } from '~/corporate-actions/dto/corporate-action-targets.dto';
 import { TaxWithholdingDto } from '~/corporate-actions/dto/tax-withholding.dto';
 

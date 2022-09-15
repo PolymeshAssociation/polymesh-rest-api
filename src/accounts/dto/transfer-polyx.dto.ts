@@ -7,7 +7,7 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 import { MAX_MEMO_LENGTH } from '~/accounts/accounts.consts';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { TransactionBaseDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class TransferPolyxDto extends TransactionBaseDto {
   @ApiProperty({
