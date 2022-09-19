@@ -58,7 +58,6 @@ export class AuthorizationsService {
   public async accept(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
     const { accept } = await this.findOne(signer, id);
 
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
     return this.transactionsService.submit(accept, {}, { signer, webhookUrl });
   }
 

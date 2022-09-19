@@ -9,12 +9,12 @@ import {
 } from '@nestjs/swagger';
 import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
+import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
@@ -73,7 +73,7 @@ export class PortfoliosController {
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Information about the transaction',
     type: TransactionQueueModel,
   })
@@ -81,7 +81,7 @@ export class PortfoliosController {
   public async moveAssets(
     @Param() { did }: DidDto,
     @Body() transferParams: AssetMovementDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.moveAssets(did, transferParams);
     return handlePayload(result);
   }
@@ -90,14 +90,14 @@ export class PortfoliosController {
     summary: 'Create a Portfolio',
     description: 'This endpoint creates a Portfolio',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details of the newly created Portfolio',
     type: CreatedPortfolioModel,
   })
   @Post('/portfolios/create')
   public async createPortfolio(
     @Body() createPortfolioParams: CreatePortfolioDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.portfoliosService.createPortfolio(createPortfolioParams);
     const resolver: TransactionResolver<NumberedPortfolio> = ({ transactions, result }) =>
       new CreatedPortfolioModel({
@@ -138,7 +138,7 @@ export class PortfoliosController {
   public async deletePortfolio(
     @Param() portfolio: PortfolioDto,
     @Query() { signer, webhookUrl }: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.deletePortfolio(portfolio, signer, webhookUrl);
     return handlePayload(result);
   }

@@ -11,11 +11,11 @@ import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/po
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
+import { ApiTransactionResponse } from '~/common/decorators/swagger';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
+import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ReserveTickerDto } from '~/ticker-reservations/dto/reserve-ticker.dto';
 import { ExtendedTickerReservationModel } from '~/ticker-reservations/models/extended-ticker-reservation.model';
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
@@ -31,7 +31,7 @@ export class TickerReservationsController {
     summary: 'Reserve a Ticker',
     description: 'Reserves a ticker so that an Asset can be created with it later',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -41,7 +41,7 @@ export class TickerReservationsController {
   @Post('reserve-ticker')
   public async reserve(
     @Body() { ticker, signer, webhookUrl }: ReserveTickerDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.tickerReservationsService.reserve(ticker, signer, webhookUrl);
 
     return handlePayload(result);
@@ -78,7 +78,7 @@ export class TickerReservationsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedAuthorizationRequestModel,
   })
@@ -89,7 +89,7 @@ export class TickerReservationsController {
   public async transferOwnership(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: TransferOwnershipDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.tickerReservationsService.transferOwnership(ticker, params);
 
     const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
@@ -112,7 +112,7 @@ export class TickerReservationsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details of extended ticker reservation along with transaction details',
     type: ExtendedTickerReservationModel,
   })
@@ -127,7 +127,7 @@ export class TickerReservationsController {
   public async extendReservation(
     @Param() { ticker }: TickerParamsDto,
     @Body() { signer, webhookUrl }: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.tickerReservationsService.extend(ticker, signer, webhookUrl);
 
     const resolver: TransactionResolver<TickerReservation> = async ({ transactions, result }) =>

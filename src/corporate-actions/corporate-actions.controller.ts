@@ -11,13 +11,13 @@ import {
 import { DividendDistribution } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
-import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
+import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import {
   createDividendDistributionDetailsModel,
@@ -104,7 +104,7 @@ export class CorporateActionsController {
   public async updateDefaultConfig(
     @Param() { ticker }: TickerParamsDto,
     @Body() corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.updateDefaultConfigByTicker(
       ticker,
       corporateActionDefaultConfigDto
@@ -182,7 +182,7 @@ export class CorporateActionsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details of the newly created Dividend Distribution',
     type: CreatedDividendDistributionModel,
   })
@@ -216,7 +216,7 @@ export class CorporateActionsController {
   public async createDividendDistribution(
     @Param() { ticker }: TickerParamsDto,
     @Body() dividendDistributionDto: DividendDistributionDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.corporateActionsService.createDividendDistribution(
       ticker,
       dividendDistributionDto
@@ -259,7 +259,7 @@ export class CorporateActionsController {
   public async deleteCorporateAction(
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
     @Query() { signer, webhookUrl }: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
     return handlePayload(result);
   }
@@ -299,7 +299,7 @@ export class CorporateActionsController {
   public async payDividends(
     @Param() { id, ticker }: DistributeFundsParamsDto,
     @Body() payDividendsDto: PayDividendsDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.payDividends(ticker, id, payDividendsDto);
     return handlePayload(result);
   }
@@ -333,7 +333,7 @@ export class CorporateActionsController {
   public async linkDocuments(
     @Param() { ticker, id }: DividendDistributionParamsDto,
     @Body() linkDocumentsDto: LinkDocumentsDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.linkDocuments(ticker, id, linkDocumentsDto);
     return handlePayload(result);
   }
@@ -374,7 +374,7 @@ export class CorporateActionsController {
   public async claimDividends(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() { signer }: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.claimDividends(ticker, id, signer);
     return handlePayload(result);
   }
@@ -413,7 +413,7 @@ export class CorporateActionsController {
   public async reclaimRemainingFunds(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() { signer, webhookUrl }: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.reclaimRemainingFunds(
       ticker,
       id,
@@ -469,7 +469,7 @@ export class CorporateActionsController {
   public async modifyDistributionCheckpoint(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.modifyCheckpoint(
       ticker,
       id,

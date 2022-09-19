@@ -31,12 +31,12 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
-import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
+import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -400,7 +400,7 @@ export class IdentitiesController {
     description:
       'This endpoint will send an invitation to a Secondary Account to join the Identity of the signer. It also defines the set of permissions the Secondary Account will have.',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedAuthorizationRequestModel,
   })
@@ -414,7 +414,7 @@ export class IdentitiesController {
   @Post('/secondary-accounts/invite')
   async addSecondaryAccount(
     @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );

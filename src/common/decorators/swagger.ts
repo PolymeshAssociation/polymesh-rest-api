@@ -99,7 +99,7 @@ export const ApiPropertyOneOf = ({
  *
  * @param options - these will be passed to the `ApiCreatedResponse` decorator
  */
-export function ApiCreatedOrSubscriptionResponse(
+export function ApiTransactionResponse(
   options: ApiResponseOptions
 ): ReturnType<typeof applyDecorators> {
   return applyDecorators(

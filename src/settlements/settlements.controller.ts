@@ -2,13 +2,13 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
+import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
@@ -67,7 +67,7 @@ export class SettlementsController {
   public async createInstruction(
     @Param() { id }: IdParamsDto,
     @Body() createInstructionDto: CreateInstructionDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.createInstruction(id, createInstructionDto);
 
     const resolver: TransactionResolver<Instruction> = ({ result: instruction, transactions }) =>
@@ -99,7 +99,7 @@ export class SettlementsController {
   public async affirmInstruction(
     @Param() { id }: IdParamsDto,
     @Body() signerDto: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.affirmInstruction(id, signerDto);
     return handlePayload(result);
   }
@@ -123,7 +123,7 @@ export class SettlementsController {
   public async rejectInstruction(
     @Param() { id }: IdParamsDto,
     @Body() signerDto: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.rejectInstruction(id, signerDto);
     return handlePayload(result);
   }
@@ -206,14 +206,14 @@ export class SettlementsController {
     summary: 'Create a Venue',
     description: 'This endpoint creates a new Venue',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the newly created Venue',
     type: CreatedVenueModel,
   })
   @Post('/venues/create')
   public async createVenue(
     @Body() createVenueDto: CreateVenueDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.createVenue(createVenueDto);
 
     const resolver: TransactionResolver<Venue> = ({ result: venue, transactions }) =>
@@ -237,7 +237,7 @@ export class SettlementsController {
   public async modifyVenue(
     @Param() { id }: IdParamsDto,
     @Body() modifyVenueDto: ModifyVenueDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.modifyVenue(id, modifyVenueDto);
     return handlePayload(serviceResult);
   }

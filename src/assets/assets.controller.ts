@@ -26,14 +26,14 @@ import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { ApiArrayResponse, ApiCreatedOrSubscriptionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { ApiTransactionResponse, handlePayload, TransactionResolver } from '~/common/utils';
+import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
@@ -197,7 +197,7 @@ export class AssetsController {
   public async setDocuments(
     @Param() { ticker }: TickerParamsDto,
     @Body() setAssetDocumentsDto: SetAssetDocumentsDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
     return handlePayload(result);
   }
@@ -239,7 +239,7 @@ export class AssetsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -250,7 +250,7 @@ export class AssetsController {
   public async issue(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: IssueDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.issue(ticker, params);
     return handlePayload(result);
   }
@@ -259,7 +259,7 @@ export class AssetsController {
     summary: 'Create an Asset',
     description: 'This endpoint allows for the creation of new assets',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -270,7 +270,7 @@ export class AssetsController {
     description: 'The ticker has already been used to create an asset',
   })
   @Post('create')
-  public async createAsset(@Body() params: CreateAssetDto): Promise<ApiTransactionResponse> {
+  public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionResponseModel> {
     const result = await this.assetsService.createAsset(params);
     return handlePayload(result);
   }
@@ -286,7 +286,7 @@ export class AssetsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedAuthorizationRequestModel,
   })
@@ -294,7 +294,7 @@ export class AssetsController {
   public async transferOwnership(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: TransferOwnershipDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const serviceResult = await this.assetsService.transferOwnership(ticker, params);
     const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
       new CreatedAuthorizationRequestModel({
@@ -310,7 +310,7 @@ export class AssetsController {
     description:
       "This endpoint allows to redeem (burn) an amount of an Asset tokens. These tokens are removed from Signer's Default Portfolio",
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -325,7 +325,7 @@ export class AssetsController {
   public async redeem(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: RedeemTokensDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.redeem(ticker, params);
     return handlePayload(result);
   }
@@ -341,7 +341,7 @@ export class AssetsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -355,7 +355,7 @@ export class AssetsController {
   public async freeze(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.freeze(ticker, params);
     return handlePayload(result);
   }
@@ -371,7 +371,7 @@ export class AssetsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -385,7 +385,7 @@ export class AssetsController {
   public async unfreeze(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: TransactionBaseDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.unfreeze(ticker, params);
     return handlePayload(result);
   }
@@ -401,7 +401,7 @@ export class AssetsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedOrSubscriptionResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -415,7 +415,7 @@ export class AssetsController {
   public async controllerTransfer(
     @Param() { ticker }: TickerParamsDto,
     @Body() params: ControllerTransferDto
-  ): Promise<ApiTransactionResponse> {
+  ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.controllerTransfer(ticker, params);
     return handlePayload(result);
   }

@@ -19,7 +19,7 @@ export function getTxTagsWithModuleNames(): string[] {
   return [...moduleNames, ...txTags];
 }
 
-export type ApiTransactionResponse = NotificationPayloadModel | TransactionQueueModel;
+export type TransactionResponseModel = NotificationPayloadModel | TransactionQueueModel;
 
 // A helper type that lets a service return a QueueResult or a Subscription Receipt
 export type ServiceReturn<T> = Promise<
