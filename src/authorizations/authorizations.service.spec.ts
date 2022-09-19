@@ -189,6 +189,7 @@ describe('AuthorizationsService', () => {
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
     });
+
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
         const expectedError = new Error('Accept error');
@@ -197,9 +198,7 @@ describe('AuthorizationsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockTransactionsService.submit.mockImplementation(() => {
-          throw expectedError;
-        });
+        mockTransactionsService.submit.mockRejectedValue(expectedError);
 
         await expect(() => service.accept(new BigNumber(1), '0x6000')).rejects.toThrowError(
           expectedError
@@ -249,11 +248,9 @@ describe('AuthorizationsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockTransactionsService.submit.mockImplementation(() => {
-          throw expectedError;
-        });
+        mockTransactionsService.submit.mockRejectedValueOnce(expectedError);
 
-        await expect(() => service.remove(new BigNumber(1), '0x6000')).rejects.toThrowError(
+        await expect(() => service.remove(new BigNumber(1), '0x4000')).rejects.toThrowError(
           expectedError
         );
         findOneSpy.mockRestore();
