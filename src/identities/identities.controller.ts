@@ -36,7 +36,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -424,7 +424,7 @@ export class IdentitiesController {
         authorizationRequest: createAuthorizationRequestModel(result),
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiTags('ticker-reservations')

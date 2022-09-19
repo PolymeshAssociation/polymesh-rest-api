@@ -8,7 +8,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
@@ -76,7 +76,7 @@ export class SettlementsController {
         transactions,
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiTags('instructions')
@@ -101,7 +101,7 @@ export class SettlementsController {
     @Body() signerDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.affirmInstruction(id, signerDto);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('instructions')
@@ -125,7 +125,7 @@ export class SettlementsController {
     @Body() signerDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.rejectInstruction(id, signerDto);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('instructions')
@@ -222,7 +222,7 @@ export class SettlementsController {
         transactions,
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiTags('venues')
@@ -239,7 +239,7 @@ export class SettlementsController {
     @Body() modifyVenueDto: ModifyVenueDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.modifyVenue(id, modifyVenueDto);
-    return handlePayload(serviceResult);
+    return handleServiceResult(serviceResult);
   }
 
   @ApiTags('assets')

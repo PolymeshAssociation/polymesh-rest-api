@@ -17,7 +17,7 @@ import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import {
   createDividendDistributionDetailsModel,
@@ -109,7 +109,7 @@ export class CorporateActionsController {
       ticker,
       corporateActionDefaultConfigDto
     );
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -228,7 +228,7 @@ export class CorporateActionsController {
         transactions,
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   // TODO @prashantasdeveloper: Move the signer to headers
@@ -261,7 +261,7 @@ export class CorporateActionsController {
     @Query() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -301,7 +301,7 @@ export class CorporateActionsController {
     @Body() payDividendsDto: PayDividendsDto
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.payDividends(ticker, id, payDividendsDto);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
@@ -335,7 +335,7 @@ export class CorporateActionsController {
     @Body() linkDocumentsDto: LinkDocumentsDto
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.linkDocuments(ticker, id, linkDocumentsDto);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -376,7 +376,7 @@ export class CorporateActionsController {
     @Body() { signer }: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.claimDividends(ticker, id, signer);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -420,7 +420,7 @@ export class CorporateActionsController {
       signer,
       webhookUrl
     );
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions', 'checkpoints')
@@ -475,6 +475,6 @@ export class CorporateActionsController {
       id,
       modifyDistributionCheckpointDto
     );
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 }

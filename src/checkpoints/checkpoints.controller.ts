@@ -28,7 +28,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 
 class DeleteCheckpointScheduleParamsDto extends IdParamsDto {
   @IsTicker()
@@ -163,7 +163,7 @@ export class CheckpointsController {
         transactions,
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiOperation({
@@ -291,7 +291,7 @@ export class CheckpointsController {
       });
     };
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiOperation({
@@ -420,6 +420,6 @@ export class CheckpointsController {
       signer,
       webhookUrl
     );
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 }

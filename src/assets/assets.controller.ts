@@ -33,7 +33,7 @@ import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ComplianceService } from '~/compliance/compliance.service';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
@@ -199,7 +199,7 @@ export class AssetsController {
     @Body() setAssetDocumentsDto: SetAssetDocumentsDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -252,7 +252,7 @@ export class AssetsController {
     @Body() params: IssueDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.issue(ticker, params);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -272,7 +272,7 @@ export class AssetsController {
   @Post('create')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionResponseModel> {
     const result = await this.assetsService.createAsset(params);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -302,7 +302,7 @@ export class AssetsController {
         authorizationRequest: createAuthorizationRequestModel(result),
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiOperation({
@@ -327,7 +327,7 @@ export class AssetsController {
     @Body() params: RedeemTokensDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.redeem(ticker, params);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -357,7 +357,7 @@ export class AssetsController {
     @Body() params: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.freeze(ticker, params);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -387,7 +387,7 @@ export class AssetsController {
     @Body() params: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.unfreeze(ticker, params);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -417,7 +417,7 @@ export class AssetsController {
     @Body() params: ControllerTransferDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.controllerTransfer(ticker, params);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({

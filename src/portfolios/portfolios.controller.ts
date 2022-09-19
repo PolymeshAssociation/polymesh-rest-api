@@ -14,7 +14,7 @@ import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
@@ -83,7 +83,7 @@ export class PortfoliosController {
     @Body() transferParams: AssetMovementDto
   ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.moveAssets(did, transferParams);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -104,7 +104,7 @@ export class PortfoliosController {
         portfolio: createPortfolioIdentifierModel(result),
         transactions,
       });
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
@@ -140,6 +140,6 @@ export class PortfoliosController {
     @Query() { signer, webhookUrl }: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.deletePortfolio(portfolio, signer, webhookUrl);
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 }

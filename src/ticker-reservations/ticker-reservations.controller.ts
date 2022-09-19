@@ -15,7 +15,7 @@ import { ApiTransactionResponse } from '~/common/decorators/swagger';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handlePayload, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ReserveTickerDto } from '~/ticker-reservations/dto/reserve-ticker.dto';
 import { ExtendedTickerReservationModel } from '~/ticker-reservations/models/extended-ticker-reservation.model';
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
@@ -44,7 +44,7 @@ export class TickerReservationsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.tickerReservationsService.reserve(ticker, signer, webhookUrl);
 
-    return handlePayload(result);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -98,7 +98,7 @@ export class TickerReservationsController {
         authorizationRequest: createAuthorizationRequestModel(result),
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiOperation({
@@ -136,6 +136,6 @@ export class TickerReservationsController {
         tickerReservation: await createTickerReservationModel(result),
       });
 
-    return handlePayload(serviceResult, resolver);
+    return handleServiceResult(serviceResult, resolver);
   }
 }

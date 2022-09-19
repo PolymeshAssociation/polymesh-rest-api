@@ -21,17 +21,24 @@ export function getTxTagsWithModuleNames(): string[] {
 
 export type TransactionResponseModel = NotificationPayloadModel | TransactionQueueModel;
 
-// A helper type that lets a service return a QueueResult or a Subscription Receipt
+/**
+ * A helper type that lets a service return a QueueResult or a Subscription Receipt
+ */
 export type ServiceReturn<T> = Promise<
   NotificationPayload<EventType.TransactionUpdate> | TransactionResult<T>
 >;
 
-// A helper type that lets a controller return a Model or a Subscription Receipt
+/**
+ * A helper type that lets a controller return a Model or a Subscription Receipt if webhookUrl is being used
+ */
 export type TransactionResolver<T> = (
   res: TransactionResult<T>
 ) => Promise<TransactionQueueModel> | TransactionQueueModel;
 
-export const handlePayload = <T>(
+/**
+ * A helper function that transforms a service result for a controller. A controller can pass a resolver for a detailed return model, otherwise the transaction details will be used as a default
+ */
+export const handleServiceResult = <T>(
   result: NotificationPayloadModel | TransactionResult<T>,
   resolver: TransactionResolver<T> = basicModelResolver
 ): NotificationPayloadModel | Promise<TransactionQueueModel> | TransactionQueueModel => {
