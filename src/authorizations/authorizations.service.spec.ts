@@ -153,9 +153,9 @@ describe('AuthorizationsService', () => {
 
         mockIsPolymeshError.mockReturnValue(true);
 
-        return expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toBeInstanceOf(
-          NotFoundException
-        );
+        return expect(() =>
+          service.findOneByDid('TICKER', new BigNumber(1))
+        ).rejects.toBeInstanceOf(NotFoundException);
       });
     });
 
@@ -166,7 +166,7 @@ describe('AuthorizationsService', () => {
           throw mockError;
         });
 
-        return expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toThrowError(
+        return expect(() => service.findOneByDid('TICKER', new BigNumber(1))).rejects.toThrowError(
           mockError
         );
       });
@@ -177,7 +177,7 @@ describe('AuthorizationsService', () => {
         const mockAuthorization = new MockAuthorizationRequest();
         mockIdentity.authorizations.getOne.mockResolvedValue(mockAuthorization);
 
-        const result = await service.findOne('0x6'.padEnd(66, '0'), new BigNumber(1));
+        const result = await service.findOneByDid('0x6'.padEnd(66, '0'), new BigNumber(1));
         expect(result).toEqual(mockAuthorization);
       });
     });

@@ -162,7 +162,7 @@ export class IdentitiesController {
   async getPendingAuthorization(
     @Param() { did, id }: AuthorizationParamsDto
   ): Promise<AuthorizationRequestModel> {
-    const authorizationRequest = await this.authorizationsService.findOne(did, id);
+    const authorizationRequest = await this.authorizationsService.findOneByDid(did, id);
     return createAuthorizationRequestModel(authorizationRequest);
   }
 

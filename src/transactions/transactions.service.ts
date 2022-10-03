@@ -62,13 +62,17 @@ export class TransactionsService {
     this.legitimacySecret = config.legitimacySecret;
   }
 
+  public async getSigningAccount(signer: string): Promise<string> {
+    return this.signingService.getAddressByHandle(signer);
+  }
+
   public async submit<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
     method: Method<MethodArgs, ReturnType, TransformedReturnType>,
     args: MethodArgs,
     transactionBaseDto: TransactionBaseDto
   ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
     const { signer, webhookUrl } = transactionBaseDto;
-    const signingAccount = await this.signingService.getAddressByHandle(signer);
+    const signingAccount = await this.getSigningAccount(signer);
     try {
       if (!webhookUrl) {
         return processTransaction(method, args, { signingAccount });
