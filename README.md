@@ -35,16 +35,33 @@ SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscripti
 SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscription handshake attempts ##
 NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
+NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
 ```
 
 ### Signing Transactions
 
 There are currently two configurations that the REST API maybe configured in to sign transactions. When Vault is configured it will override the local signers and those values will be ignored.
 
+Each signer in the API is referenced by an alias specified depending on which signing manager is being used. This is used in the `signer` field in non GET requests.
+
 1. Local Signing:
-   By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding entry in `LOCAL_SIGNERS` (by array offset).
+   By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
 1. Vault Signing:
    By setting `VAULT_URL` and `VAULT_SECRET`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`
+
+## Webhooks (alpha)
+
+Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. As an alternative a field `webhookUrl` can be passed in each non GET request. When given the http request will return after validation. A 202 (Accepted) status code will be returned instead of the usual 201 (Created).
+
+Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with the value echoed back in the headers.
+
+If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILS=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`. Note, the IsUrl validator doesn't recognize `localhost` as a valid URL, either use the IP `127.0.0.1` or create an entry in `/etc/hosts` like `127.0.0.1 rest.local` and use that instead.
+
+### Warning
+
+Webhooks are not ready for production use yet. The REST API is currently stateless. As such the subscription status is not persisted and can not guarantee delivery of the events.
+
+In its current state the transactions should be reconciled with chain events directly to ensure your system stays properly synced.
 
 ## Running the app
 

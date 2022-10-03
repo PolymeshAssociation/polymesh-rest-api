@@ -13,21 +13,21 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
-import { SignerDto } from '~/common/dto/signer.dto';
-import { processTransaction, TransactionResult } from '~/common/utils';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class SettlementsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
     private readonly polymeshService: PolymeshService,
-    private readonly signingService: SigningService,
+    private readonly transactionsService: TransactionsService,
     private readonly assetsService: AssetsService
   ) {}
 
@@ -62,11 +62,10 @@ export class SettlementsService {
   public async createInstruction(
     venueId: BigNumber,
     createInstructionDto: CreateInstructionDto
-  ): Promise<TransactionResult<Instruction>> {
-    const { signer, ...rest } = createInstructionDto;
+  ): ServiceReturn<Instruction> {
+    const { signer, webhookUrl, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
-    const address = await this.signingService.getAddressByHandle(signer);
 
     const params = {
       ...rest,
@@ -78,33 +77,29 @@ export class SettlementsService {
       })),
     };
 
-    return processTransaction(venue.addInstruction, params, { signingAccount: address });
+    return this.transactionsService.submit(venue.addInstruction, params, { signer, webhookUrl });
   }
 
   public async affirmInstruction(
     id: BigNumber,
-    signerDto: SignerDto
-  ): Promise<TransactionResult<Instruction>> {
-    const { signer } = signerDto;
+    signerDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { signer, webhookUrl } = signerDto;
 
     const instruction = await this.findInstruction(id);
 
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(instruction.affirm, { signingAccount: address }, {});
+    return this.transactionsService.submit(instruction.affirm, {}, { signer, webhookUrl });
   }
 
   public async rejectInstruction(
     id: BigNumber,
-    signerDto: SignerDto
-  ): Promise<TransactionResult<Instruction>> {
-    const { signer } = signerDto;
+    signerDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { signer, webhookUrl } = signerDto;
 
     const instruction = await this.findInstruction(id);
 
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(instruction.reject, { signingAccount: address }, {});
+    return this.transactionsService.submit(instruction.reject, {}, { signer, webhookUrl });
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -148,26 +143,25 @@ export class SettlementsService {
     return instruction.getAffirmations({ size, start });
   }
 
-  public async createVenue(createVenueDto: CreateVenueDto): Promise<TransactionResult<Venue>> {
-    const { signer, description, type } = createVenueDto;
+  public async createVenue(createVenueDto: CreateVenueDto): ServiceReturn<Venue> {
+    const { signer, webhookUrl, description, type } = createVenueDto;
     const params = {
       description,
       type,
     };
-    const address = await this.signingService.getAddressByHandle(signer);
+
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
-    return processTransaction(method, params, { signingAccount: address });
+    return this.transactionsService.submit(method, params, { signer, webhookUrl });
   }
 
   public async modifyVenue(
     venueId: BigNumber,
     modifyVenueDto: ModifyVenueDto
-  ): Promise<TransactionResult<void>> {
-    const { signer, ...rest } = modifyVenueDto;
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processTransaction(venue.modify, params, { signingAccount: address });
+    return this.transactionsService.submit(venue.modify, params, { signer, webhookUrl });
   }
 
   public async canTransfer(

@@ -228,7 +228,6 @@ export class SubscriptionsService {
     secret: string
   ): Promise<void> {
     const { status, headers } = response;
-
     if (status === HttpStatus.OK && headers[HANDSHAKE_HEADER_KEY] === secret) {
       await this.updateSubscription(id, {
         status: SubscriptionStatus.Active,

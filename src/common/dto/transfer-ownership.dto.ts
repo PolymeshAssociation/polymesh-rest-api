@@ -4,9 +4,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDate, IsOptional } from 'class-validator';
 
 import { IsDid } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
-export class TransferOwnershipDto extends SignerDto {
+export class TransferOwnershipDto extends TransactionBaseDto {
   @ApiProperty({
     type: 'string',
     description: 'DID of the target Identity',

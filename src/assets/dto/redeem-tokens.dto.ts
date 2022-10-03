@@ -5,9 +5,9 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
-export class RedeemTokensDto extends SignerDto {
+export class RedeemTokensDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'The amount of Asset tokens to be redeemed',
     example: '100',

@@ -8,11 +8,13 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { AuthorizationType, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import { MockAuthorizationRequest, MockIdentity, MockTransaction } from '~/test-utils/mocks';
-import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
+import {
+  MockIdentitiesService,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -25,13 +27,13 @@ describe('AuthorizationsService', () => {
 
   const mockIdentitiesService = new MockIdentitiesService();
 
-  let mockSigningService: MockSigningService;
+  let mockTransactionsService: MockTransactionsService;
 
   beforeEach(async () => {
-    mockSigningService = mockSigningProvider.useValue;
+    mockTransactionsService = mockTransactionsProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthorizationsService, IdentitiesService, mockSigningProvider],
+      providers: [AuthorizationsService, IdentitiesService, mockTransactionsProvider],
     })
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
@@ -186,19 +188,17 @@ describe('AuthorizationsService', () => {
 
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
+
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
-        const expectedError = new Error('Some error');
+        const expectedError = new Error('Accept error');
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.accept.mockImplementation(() => {
-          throw expectedError;
-        });
+        mockTransactionsService.submit.mockRejectedValue(expectedError);
 
         await expect(() => service.accept(new BigNumber(1), '0x6000')).rejects.toThrowError(
           expectedError
@@ -222,20 +222,12 @@ describe('AuthorizationsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.accept.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const result = await service.accept(new BigNumber(1), '0x6000');
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.portfolio.AcceptPortfolioCustody,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
       });
     });
@@ -246,22 +238,19 @@ describe('AuthorizationsService', () => {
 
     beforeEach(() => {
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error', () => {
       it('should pass it up the chain', async () => {
-        const expectedError = new Error('Some error');
+        const expectedError = new Error('Remove error');
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.remove.mockImplementation(() => {
-          throw expectedError;
-        });
+        mockTransactionsService.submit.mockRejectedValueOnce(expectedError);
 
-        await expect(() => service.remove(new BigNumber(1), '0x6000')).rejects.toThrowError(
+        await expect(() => service.remove(new BigNumber(1), '0x4000')).rejects.toThrowError(
           expectedError
         );
         findOneSpy.mockRestore();
@@ -282,20 +271,12 @@ describe('AuthorizationsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.remove.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const result = await service.remove(new BigNumber(2), '0x6000');
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.identity.RemoveAuthorization,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
       });
     });

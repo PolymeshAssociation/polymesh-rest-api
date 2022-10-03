@@ -14,14 +14,12 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockIdentity,
@@ -30,7 +28,11 @@ import {
   MockTransaction,
   MockVenue,
 } from '~/test-utils/mocks';
-import { MockAssetService, MockIdentitiesService } from '~/test-utils/service-mocks';
+import {
+  MockAssetService,
+  MockIdentitiesService,
+  mockTransactionsProvider,
+} from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -47,13 +49,13 @@ describe('SettlementsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockSigningService = mockSigningProvider.useValue;
+  const mockTransactionsService = mockTransactionsProvider.useValue;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [SettlementsService, AssetsService, IdentitiesService, mockSigningProvider],
+      providers: [SettlementsService, AssetsService, IdentitiesService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -240,8 +242,10 @@ describe('SettlementsService', () => {
       };
       const mockTransaction = new MockTransaction(transaction);
       const mockInstruction = 'instruction';
-      mockTransaction.run.mockResolvedValue(mockInstruction);
-      mockVenue.addInstruction.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockInstruction,
+        transactions: [mockTransaction],
+      });
 
       const findVenueSpy = jest.spyOn(service, 'findVenue');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -257,29 +261,22 @@ describe('SettlementsService', () => {
           },
         ],
       };
+
+      const signer = 'signer';
       const body = {
-        signer: 'signer',
+        signer,
         ...params,
       };
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.createInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: mockInstruction,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.AddInstruction,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockVenue.addInstruction).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockVenue.addInstruction,
         {
           legs: [
             {
@@ -290,7 +287,7 @@ describe('SettlementsService', () => {
             },
           ],
         },
-        { signingAccount: address }
+        { signer }
       );
       findVenueSpy.mockRestore();
     });
@@ -307,34 +304,29 @@ describe('SettlementsService', () => {
         tag: TxTags.settlement.CreateVenue,
       };
       const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
       mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockTransaction);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-
+      const signer = '0x6'.padEnd(66, '0');
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         description: 'A generic exchange',
         type: VenueType.Exchange,
       };
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.createVenue(body);
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.CreateVenue,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockPolymeshApi.settlements.createVenue).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.settlements.createVenue,
         { description: body.description, type: body.type },
-        { signingAccount: address }
+        { signer }
       );
     });
   });
@@ -349,7 +341,7 @@ describe('SettlementsService', () => {
           description: 'A generic exchange',
         };
         const mockVenue = new MockVenue();
-        mockVenue.modify.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
         const findVenueSpy = jest.spyOn(service, 'findVenue');
@@ -383,33 +375,25 @@ describe('SettlementsService', () => {
           tag: TxTags.settlement.UpdateVenueType,
         };
         const mockTransaction = new MockTransaction(transaction);
-        mockVenue.modify.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
+        const signer = '0x6'.padEnd(66, '0');
         const body = {
-          signer: '0x6'.padEnd(66, '0'),
+          signer,
           description: 'A generic exchange',
           type: VenueType.Exchange,
         };
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyVenue(new BigNumber(123), body);
 
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.settlement.UpdateVenueType,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(mockVenue.modify).toHaveBeenCalledWith(
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          mockVenue.modify,
           { description: body.description, type: body.type },
-          { signingAccount: address }
+          { signer }
         );
         findVenueSpy.mockRestore();
       });
@@ -426,34 +410,29 @@ describe('SettlementsService', () => {
         tag: TxTags.settlement.AffirmInstruction,
       };
       const mockTransaction = new MockTransaction(transaction);
-      mockInstruction.affirm.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
+      const signer = 'signer';
       const body = {
-        signer: 'signer',
+        signer,
       };
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.affirmInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.AffirmInstruction,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signingAccount: address }, {});
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.affirm,
+        {},
+        { signer }
+      );
       findInstructionSpy.mockRestore();
     });
   });
@@ -468,32 +447,26 @@ describe('SettlementsService', () => {
         tag: TxTags.settlement.RejectInstruction,
       };
       const mockTransaction = new MockTransaction(transaction);
-      mockInstruction.reject.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
-
+      const signer = 'signer';
       const result = await service.rejectInstruction(new BigNumber(123), {
-        signer: 'signer',
+        signer,
       });
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.RejectInstruction,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockInstruction.reject).toHaveBeenCalledWith({ signingAccount: address }, {});
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.reject,
+        {},
+        { signer }
+      );
       findInstructionSpy.mockRestore();
     });
   });

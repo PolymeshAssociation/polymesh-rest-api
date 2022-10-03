@@ -2,24 +2,25 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { CalendarUnit, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
-import { TransactionType } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockCheckpoint,
   MockCheckpointSchedule,
   MockTransaction,
 } from '~/test-utils/mocks';
-import { MockAssetService } from '~/test-utils/service-mocks';
-import { ErrorCase } from '~/test-utils/types';
+import {
+  MockAssetService,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -29,10 +30,9 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
 
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
+  let mockTransactionsService: MockTransactionsService;
 
   const mockAssetsService = new MockAssetService();
-
-  const mockSigningService = mockSigningProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,7 +40,7 @@ describe('CheckpointsService', () => {
         CheckpointsService,
         AssetsService,
         mockPolymeshLoggerProvider,
-        mockSigningProvider,
+        mockTransactionsProvider,
       ],
     })
       .overrideProvider(AssetsService)
@@ -48,6 +48,7 @@ describe('CheckpointsService', () => {
       .compile();
 
     service = module.get<CheckpointsService>(CheckpointsService);
+    mockTransactionsService = mockTransactionsProvider.useValue;
 
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
@@ -248,37 +249,32 @@ describe('CheckpointsService', () => {
         tag: TxTags.checkpoint.CreateCheckpoint,
       };
       const mockTransaction = new MockTransaction(transaction);
-      mockTransaction.run.mockResolvedValue(mockCheckpoint);
 
       const mockAsset = new MockAsset();
-      mockAsset.checkpoints.create.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockCheckpoint,
+        transactions: [mockTransaction],
+      });
 
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
+      const signer = 'signer';
+
       const body = {
-        signer: 'signer',
+        signer,
       };
 
       const result = await service.createByTicker('TICKER', body);
       expect(result).toEqual({
         result: mockCheckpoint,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.checkpoint.CreateCheckpoint,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockAsset.checkpoints.create).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.checkpoints.create,
+        {},
         {
-          signingAccount: address,
-        },
-        {}
+          signer,
+        }
       );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
     });
@@ -294,18 +290,20 @@ describe('CheckpointsService', () => {
         tag: TxTags.checkpoint.CreateSchedule,
       };
       const mockTransaction = new MockTransaction(transaction);
-      mockTransaction.run.mockResolvedValue(mockCheckpointSchedule);
 
       const mockAsset = new MockAsset();
-      mockAsset.checkpoints.schedules.create.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockCheckpointSchedule,
+        transactions: [mockTransaction],
+      });
 
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
+      const signer = 'signer';
+
       const mockDate = new Date();
       const params = {
-        signer: 'signer',
+        signer,
         start: mockDate,
         period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
         repetitions: new BigNumber(2),
@@ -314,24 +312,17 @@ describe('CheckpointsService', () => {
       const result = await service.createScheduleByTicker('TICKER', params);
       expect(result).toEqual({
         result: mockCheckpointSchedule,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.checkpoint.CreateSchedule,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockAsset.checkpoints.schedules.create).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.checkpoints.schedules.create,
         {
           start: mockDate,
           period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
           repetitions: new BigNumber(2),
         },
         {
-          signingAccount: address,
+          signer,
         }
       );
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
@@ -418,50 +409,6 @@ describe('CheckpointsService', () => {
   });
 
   describe('deleteScheduleByTicker', () => {
-    describe('if there is a error', () => {
-      const cases: ErrorCase[] = [
-        [
-          'Schedule does not exist',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Schedule no longer exists. It was either removed or it expired',
-          },
-          BadRequestException,
-        ],
-        [
-          'Schedule cannot be removed',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'You cannot remove this Schedule',
-          },
-          BadRequestException,
-        ],
-      ];
-      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
-        const signer = '0x6'.padEnd(66, '0');
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
-        const mockAsset = new MockAsset();
-        mockAsset.checkpoints.schedules.remove.mockImplementation(() => {
-          throw polymeshError;
-        });
-        mockAssetsService.findOne.mockReturnValue(mockAsset);
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.deleteScheduleByTicker('TICKER', new BigNumber(1), signer);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBeInstanceOf(HttpException);
-
-        mockIsPolymeshError.mockReset();
-      });
-    });
-
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
         const transaction = {
@@ -473,36 +420,28 @@ describe('CheckpointsService', () => {
         const mockTransaction = new MockTransaction(transaction);
 
         const mockAsset = new MockAsset();
-        mockAsset.checkpoints.schedules.remove.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: undefined,
+          transactions: [mockTransaction],
+        });
 
         mockAssetsService.findOne.mockResolvedValue(mockAsset);
-
         const signer = '0x6'.padEnd(66, '0');
         const ticker = 'TICKER';
         const id = new BigNumber(1);
 
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
         const result = await service.deleteScheduleByTicker(ticker, id, signer);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.checkpoint.RemoveSchedule,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(mockAsset.checkpoints.schedules.remove).toHaveBeenCalledWith(
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          mockAsset.checkpoints.schedules.remove,
           {
             schedule: id,
           },
           {
-            signingAccount: address,
+            signer,
           }
         );
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);

@@ -1,19 +1,14 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
@@ -72,16 +67,16 @@ export class SettlementsController {
   public async createInstruction(
     @Param() { id }: IdParamsDto,
     @Body() createInstructionDto: CreateInstructionDto
-  ): Promise<CreatedInstructionModel> {
-    const { result: instruction, transactions } = await this.settlementsService.createInstruction(
-      id,
-      createInstructionDto
-    );
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.settlementsService.createInstruction(id, createInstructionDto);
 
-    return new CreatedInstructionModel({
-      instruction,
-      transactions,
-    });
+    const resolver: TransactionResolver<Instruction> = ({ result: instruction, transactions }) =>
+      new CreatedInstructionModel({
+        instruction,
+        transactions,
+      });
+
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiTags('instructions')
@@ -103,11 +98,10 @@ export class SettlementsController {
   @Post('instructions/:id/affirm')
   public async affirmInstruction(
     @Param() { id }: IdParamsDto,
-    @Body() signerDto: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.settlementsService.affirmInstruction(id, signerDto);
-
-    return new TransactionQueueModel({ transactions });
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.affirmInstruction(id, signerDto);
+    return handleServiceResult(result);
   }
 
   @ApiTags('instructions')
@@ -128,11 +122,10 @@ export class SettlementsController {
   @Post('instructions/:id/reject')
   public async rejectInstruction(
     @Param() { id }: IdParamsDto,
-    @Body() signerDto: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.settlementsService.rejectInstruction(id, signerDto);
-
-    return new TransactionQueueModel({ transactions });
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.rejectInstruction(id, signerDto);
+    return handleServiceResult(result);
   }
 
   @ApiTags('instructions')
@@ -213,19 +206,23 @@ export class SettlementsController {
     summary: 'Create a Venue',
     description: 'This endpoint creates a new Venue',
   })
-  @ApiCreatedResponse({
+  @ApiTransactionResponse({
     description: 'Details about the newly created Venue',
     type: CreatedVenueModel,
   })
   @Post('/venues/create')
-  public async createVenue(@Body() createVenueDto: CreateVenueDto): Promise<CreatedVenueModel> {
-    const { result: venue, transactions } = await this.settlementsService.createVenue(
-      createVenueDto
-    );
-    return new CreatedVenueModel({
-      venue,
-      transactions,
-    });
+  public async createVenue(
+    @Body() createVenueDto: CreateVenueDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.settlementsService.createVenue(createVenueDto);
+
+    const resolver: TransactionResolver<Venue> = ({ result: venue, transactions }) =>
+      new CreatedVenueModel({
+        venue,
+        transactions,
+      });
+
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiTags('venues')
@@ -240,9 +237,9 @@ export class SettlementsController {
   public async modifyVenue(
     @Param() { id }: IdParamsDto,
     @Body() modifyVenueDto: ModifyVenueDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.settlementsService.modifyVenue(id, modifyVenueDto);
-    return new TransactionQueueModel({ transactions });
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.settlementsService.modifyVenue(id, modifyVenueDto);
+    return handleServiceResult(serviceResult);
   }
 
   @ApiTags('assets')

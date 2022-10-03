@@ -40,7 +40,7 @@ describe('AuthorizationsController', () => {
         result: undefined,
         transactions: ['transaction'],
       });
-      expect(mockAuthorizationsService.accept).toHaveBeenCalledWith(authId, signer);
+      expect(mockAuthorizationsService.accept).toHaveBeenCalledWith(authId, signer, undefined);
     });
   });
 
@@ -58,7 +58,7 @@ describe('AuthorizationsController', () => {
         result: undefined,
         transactions: ['transaction'],
       });
-      expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, signer);
+      expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, signer, undefined);
     });
   });
 });

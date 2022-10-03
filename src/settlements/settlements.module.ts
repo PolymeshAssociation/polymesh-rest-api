@@ -7,11 +7,11 @@ import { IdentitiesModule } from '~/identities/identities.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { SigningModule } from '~/signing/signing.module';
+import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({
   imports: [
-    SigningModule,
+    TransactionsModule,
     forwardRef(() => IdentitiesModule),
     PolymeshModule,
     forwardRef(() => AssetsModule),

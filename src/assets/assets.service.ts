@@ -16,17 +16,17 @@ import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { processTransaction, TransactionResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly signingService: SigningService
+    private readonly transactionsService: TransactionsService
   ) {}
 
   public async findOne(ticker: string): Promise<Asset> {
@@ -78,80 +78,71 @@ export class AssetsService {
     return asset.documents.get({ size, start });
   }
 
-  public async setDocuments(
-    ticker: string,
-    params: SetAssetDocumentsDto
-  ): Promise<TransactionResult<Asset>> {
+  public async setDocuments(ticker: string, params: SetAssetDocumentsDto): ServiceReturn<Asset> {
     const {
       documents: { set },
     } = await this.findOne(ticker);
-
-    const { signer, documents } = params;
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processTransaction(set, { documents }, { signingAccount: address });
+    const { signer, webhookUrl, documents } = params;
+    return this.transactionsService.submit(set, { documents }, { signer, webhookUrl });
   }
 
-  public async createAsset(params: CreateAssetDto): Promise<TransactionResult<Asset>> {
-    const { signer, ...rest } = params;
-    const signingAccount = await this.signingService.getAddressByHandle(signer);
+  public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {
+    const { signer, webhookUrl, ...rest } = params;
+
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return processTransaction(createAsset, rest, { signingAccount });
+    return this.transactionsService.submit(createAsset, rest, { signer, webhookUrl });
   }
 
-  public async issue(ticker: string, params: IssueDto): Promise<TransactionResult<Asset>> {
-    const { signer, ...rest } = params;
+  public async issue(ticker: string, params: IssueDto): ServiceReturn<Asset> {
+    const { signer, webhookUrl, ...rest } = params;
     const asset = await this.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processTransaction(asset.issuance.issue, rest, { signingAccount: address });
+
+    return this.transactionsService.submit(asset.issuance.issue, rest, { signer, webhookUrl });
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
-  ): Promise<TransactionResult<AuthorizationRequest>> {
-    const { signer, ...rest } = params;
-    const address = await this.signingService.getAddressByHandle(signer);
+  ): ServiceReturn<AuthorizationRequest> {
+    const { signer, webhookUrl, ...rest } = params;
+
     const { transferOwnership } = await this.findOne(ticker);
-    return processTransaction(transferOwnership, rest, { signingAccount: address });
+    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl });
   }
 
-  public async redeem(ticker: string, params: RedeemTokensDto): Promise<TransactionResult<void>> {
-    const { signer, amount } = params;
+  public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
+    const { signer, webhookUrl, amount } = params;
     const { redeem } = await this.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processTransaction(redeem, { amount }, { signingAccount: address });
+
+    return this.transactionsService.submit(redeem, { amount }, { signer, webhookUrl });
   }
 
-  public async freeze(ticker: string, params: SignerDto): Promise<TransactionResult<Asset>> {
-    const { signer } = params;
+  public async freeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
     const asset = await this.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(asset.freeze, { signingAccount: address }, {});
+
+    return this.transactionsService.submit(asset.freeze, {}, { signer, webhookUrl });
   }
 
-  public async unfreeze(ticker: string, params: SignerDto): Promise<TransactionResult<Asset>> {
-    const { signer } = params;
+  public async unfreeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
     const asset = await this.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(asset.unfreeze, { signingAccount: address }, {});
+
+    return this.transactionsService.submit(asset.unfreeze, {}, { signer, webhookUrl });
   }
 
   public async controllerTransfer(
     ticker: string,
     params: ControllerTransferDto
-  ): Promise<TransactionResult<void>> {
-    const { signer, origin, amount } = params;
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, origin, amount } = params;
 
     const { controllerTransfer } = await this.findOne(ticker);
 
-    const address = await this.signingService.getAddressByHandle(signer);
-
-    return processTransaction(
+    return this.transactionsService.submit(
       controllerTransfer,
       { originPortfolio: origin.toPortfolioLike(), amount },
-      { signingAccount: address }
+      { signer, webhookUrl }
     );
   }
 

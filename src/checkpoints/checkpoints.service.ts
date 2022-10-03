@@ -14,16 +14,16 @@ import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
-import { processTransaction, TransactionResult } from '~/common/utils';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class CheckpointsService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly signingService: SigningService,
+    private readonly transactionsService: TransactionsService,
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(CheckpointsService.name);
@@ -81,24 +81,24 @@ export class CheckpointsService {
 
   public async createByTicker(
     ticker: string,
-    signerDto: SignerDto
-  ): Promise<TransactionResult<Checkpoint>> {
-    const { signer } = signerDto;
+    signerDto: TransactionBaseDto
+  ): ServiceReturn<Checkpoint> {
+    const { signer, webhookUrl } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processTransaction(asset.checkpoints.create, { signingAccount: address }, {});
+
+    return this.transactionsService.submit(asset.checkpoints.create, {}, { signer, webhookUrl });
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
-  ): Promise<TransactionResult<CheckpointSchedule>> {
-    const { signer, ...rest } = createCheckpointScheduleDto;
+  ): ServiceReturn<CheckpointSchedule> {
+    const { signer, webhookUrl, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processTransaction(asset.checkpoints.schedules.create, rest, {
-      signingAccount: address,
+
+    return this.transactionsService.submit(asset.checkpoints.schedules.create, rest, {
+      signer,
+      webhookUrl,
     });
   }
 
@@ -125,14 +125,14 @@ export class CheckpointsService {
   public async deleteScheduleByTicker(
     ticker: string,
     id: BigNumber,
-    signer: string
-  ): Promise<TransactionResult<void>> {
-    const address = await this.signingService.getAddressByHandle(signer);
+    signer: string,
+    webhookUrl?: string
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
-    return processTransaction(
+    return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
-      { signingAccount: address }
+      { signer, webhookUrl }
     );
   }
 }

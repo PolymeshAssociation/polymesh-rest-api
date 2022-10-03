@@ -170,7 +170,8 @@ describe('CorporateActionsController', () => {
       expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
-        '0x6'.padEnd(66, '0')
+        '0x6'.padEnd(66, '0'),
+        undefined
       );
     });
   });
@@ -282,7 +283,8 @@ describe('CorporateActionsController', () => {
       expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
-        signer
+        signer,
+        undefined
       );
     });
   });

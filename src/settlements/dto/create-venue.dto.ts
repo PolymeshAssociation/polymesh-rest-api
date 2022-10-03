@@ -4,9 +4,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { VenueType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsString } from 'class-validator';
 
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
-export class CreateVenueDto extends SignerDto {
+export class CreateVenueDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Description of the Venue',
     example: 'A place to exchange commodity Assets',

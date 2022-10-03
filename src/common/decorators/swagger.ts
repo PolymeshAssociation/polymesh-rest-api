@@ -2,10 +2,13 @@
 
 import { applyDecorators, Type } from '@nestjs/common';
 import {
+  ApiAcceptedResponse,
+  ApiCreatedResponse,
   ApiExtraModels,
   ApiOkResponse,
   ApiProperty,
   ApiPropertyOptions,
+  ApiResponseOptions,
   getSchemaPath,
 } from '@nestjs/swagger';
 import {
@@ -13,10 +16,10 @@ import {
   SchemaObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
+import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
   {
@@ -32,7 +35,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   } = {
     paginated: true,
   }
-) => {
+): ReturnType<typeof applyDecorators> => {
   const extraModels = [];
   let items;
   if (typeof model === 'string') {
@@ -74,9 +77,10 @@ type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {
  *
  * @note Non-schema objects in `union` must be defined as extra models using the `ApiExtraModels` decorator(at the class-level)
  */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOneOfOptions) => {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+export const ApiPropertyOneOf = ({
+  union,
+  ...apiPropertyOptions
+}: ApiPropertyOneOfOptions): ReturnType<typeof applyDecorators> => {
   const oneOfItems: (SchemaObject | ReferenceObject)[] = [];
 
   union.forEach(item => {
@@ -89,3 +93,21 @@ export const ApiPropertyOneOf = ({ union, ...apiPropertyOptions }: ApiPropertyOn
 
   return applyDecorators(ApiProperty({ ...apiPropertyOptions, oneOf: oneOfItems }));
 };
+
+/**
+ * A helper that functions like `ApiCreatedResponse`, that also adds an `ApiAccepted` response in case `webhookUrl` is passed
+ *
+ * @param options - these will be passed to the `ApiCreatedResponse` decorator
+ */
+export function ApiTransactionResponse(
+  options: ApiResponseOptions
+): ReturnType<typeof applyDecorators> {
+  return applyDecorators(
+    ApiCreatedResponse(options),
+    ApiAcceptedResponse({
+      description:
+        'Returned if `webhookUrl` is passed in the body. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
+      type: NotificationPayloadModel,
+    })
+  );
+}
