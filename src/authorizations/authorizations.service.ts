@@ -42,13 +42,7 @@ export class AuthorizationsService {
     return identity.authorizations.getSent();
   }
 
-  public async findOneByDid(did: string, id: BigNumber): Promise<AuthorizationRequest> {
-    const identity = await this.identitiesService.findOne(did);
-
-    return this.findOne(identity, id);
-  }
-
-  private async findOne(
+  public async findOne(
     signatory: Identity | Account,
     id: BigNumber
   ): Promise<AuthorizationRequest> {
@@ -67,15 +61,29 @@ export class AuthorizationsService {
     }
   }
 
-  private async getAuthRequest(address: string, id: BigNumber): Promise<AuthorizationRequest> {
+  public async findOneByDid(did: string, id: BigNumber): Promise<AuthorizationRequest> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return this.findOne(identity, id);
+  }
+
+  public async getAuthRequest(address: string, id: BigNumber): Promise<AuthorizationRequest> {
     const account = await this.accountsService.findOne(address);
 
     const identity = await account.getIdentity();
 
-    let authRequest: AuthorizationRequest;
+    let authRequest: AuthorizationRequest | undefined;
     if (identity) {
-      authRequest = await this.findOne(identity, id);
-    } else {
+      authRequest = await this.findOne(identity, id).catch(error => {
+        if (error instanceof NotFoundException) {
+          return undefined;
+        } else {
+          throw error;
+        }
+      });
+    }
+
+    if (!authRequest) {
       authRequest = await this.findOne(account, id);
     }
 

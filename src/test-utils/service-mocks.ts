@@ -21,6 +21,7 @@ export class MockAssetService {
 
 export class MockTransactionsService {
   submit = jest.fn();
+  getSigningAccount = jest.fn();
 }
 
 export const mockTransactionsProvider = {

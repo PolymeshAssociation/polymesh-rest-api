@@ -10,7 +10,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({
-  imports: [PolymeshModule, TransactionsModule, forwardRef(() => IdentitiesModule), AccountsModule],
+  imports: [PolymeshModule, TransactionsModule, AccountsModule, forwardRef(() => IdentitiesModule)],
   providers: [AuthorizationsService],
   exports: [AuthorizationsService],
   controllers: [AuthorizationsController],
