@@ -50,7 +50,7 @@ export class MockTickerReservationsService {
 export class MockAuthorizationsService {
   findPendingByDid = jest.fn();
   findIssuedByDid = jest.fn();
-  findOne = jest.fn();
+  findOneByDid = jest.fn();
   accept = jest.fn();
   remove = jest.fn();
 }

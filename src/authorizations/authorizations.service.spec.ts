@@ -6,6 +6,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { AuthorizationType, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
@@ -238,6 +239,89 @@ describe('AuthorizationsService', () => {
 
       const result = await service.findOneByDid('0x6'.padEnd(66, '0'), new BigNumber(1));
       expect(result).toEqual(mockAuthorization);
+    });
+  });
+
+  describe('getAuthRequest', () => {
+    let mockAccount: MockAccount;
+    let mockIdentity: MockIdentity;
+    let mockAuthorizationRequest: MockAuthorizationRequest;
+    let address: string;
+    let id: BigNumber;
+    let findOneSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      address = 'address';
+      id = new BigNumber(1);
+      mockAccount = new MockAccount();
+      mockIdentity = new MockIdentity();
+      mockAuthorizationRequest = new MockAuthorizationRequest();
+      mockAccountsService.findOne.mockResolvedValue(mockAccount);
+      findOneSpy = jest.spyOn(service, 'findOne');
+    });
+
+    it('should throw an error if AuthorizationRequest does not exist for a given ID', async () => {
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+
+      const mockError = new Error('foo');
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockRejectedValue(mockError);
+
+      await expect(() => service.getAuthRequest(address, id)).rejects.toThrowError(mockError);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockRejectedValue(new NotFoundException());
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockAccount as any, id)
+        .mockRejectedValue(new NotFoundException());
+
+      await expect(() => service.getAuthRequest(address, id)).rejects.toBeInstanceOf(
+        NotFoundException
+      );
+
+      findOneSpy.mockRestore();
+    });
+
+    it('should return an AuthorizationRequest targeted to an Identity', async () => {
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockResolvedValue(mockAuthorizationRequest);
+
+      const result = await service.getAuthRequest(address, id);
+      expect(result).toBe(mockAuthorizationRequest);
+
+      findOneSpy.mockRestore();
+    });
+
+    it('should return an AuthorizationRequest targeted to an Account', async () => {
+      mockAccount.getIdentity.mockResolvedValue(null);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockAccount as any, id)
+        .mockResolvedValue(mockAuthorizationRequest);
+
+      let result = await service.getAuthRequest(address, id);
+      expect(result).toBe(mockAuthorizationRequest);
+
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockRejectedValue(new NotFoundException());
+
+      result = await service.getAuthRequest(address, id);
+      expect(result).toBe(mockAuthorizationRequest);
     });
   });
 

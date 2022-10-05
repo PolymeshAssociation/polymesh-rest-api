@@ -303,4 +303,5 @@ export class MockAccount {
   authorizations = new MockAuthorizations();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
+  getIdentity = jest.fn();
 }
