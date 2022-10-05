@@ -295,8 +295,13 @@ export class MockTickerReservation {
   public details = jest.fn();
 }
 
+export class MockAuthorizations {
+  getOne = jest.fn();
+}
 export class MockAccount {
   address = 'address';
+  authorizations = new MockAuthorizations();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
+  getIdentity = jest.fn();
 }

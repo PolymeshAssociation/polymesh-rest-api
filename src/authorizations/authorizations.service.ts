@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Account,
   AuthorizationRequest,
   AuthorizationType,
   ErrorCode,
+  Identity,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { AccountsService } from '~/accounts/accounts.service';
 import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -16,6 +19,7 @@ import { TransactionsService } from '~/transactions/transactions.service';
 export class AuthorizationsService {
   constructor(
     private readonly identitiesService: IdentitiesService,
+    private readonly accountsService: AccountsService,
     private readonly transactionsService: TransactionsService
   ) {}
 
@@ -38,10 +42,12 @@ export class AuthorizationsService {
     return identity.authorizations.getSent();
   }
 
-  public async findOne(did: string, id: BigNumber): Promise<AuthorizationRequest> {
-    const identity = await this.identitiesService.findOne(did);
+  public async findOne(
+    signatory: Identity | Account,
+    id: BigNumber
+  ): Promise<AuthorizationRequest> {
     try {
-      return await identity.authorizations.getOne({ id });
+      return await signatory.authorizations.getOne({ id });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code } = err;
@@ -55,14 +61,47 @@ export class AuthorizationsService {
     }
   }
 
+  public async findOneByDid(did: string, id: BigNumber): Promise<AuthorizationRequest> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return this.findOne(identity, id);
+  }
+
+  public async getAuthRequest(address: string, id: BigNumber): Promise<AuthorizationRequest> {
+    const account = await this.accountsService.findOne(address);
+
+    const identity = await account.getIdentity();
+
+    let authRequest: AuthorizationRequest | undefined;
+    if (identity) {
+      authRequest = await this.findOne(identity, id).catch(error => {
+        if (error instanceof NotFoundException) {
+          return undefined;
+        } else {
+          throw error;
+        }
+      });
+    }
+
+    if (!authRequest) {
+      authRequest = await this.findOne(account, id);
+    }
+
+    return authRequest;
+  }
+
   public async accept(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
-    const { accept } = await this.findOne(signer, id);
+    const address = await this.transactionsService.getSigningAccount(signer);
+
+    const { accept } = await this.getAuthRequest(address, id);
 
     return this.transactionsService.submit(accept, {}, { signer, webhookUrl });
   }
 
   public async remove(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
-    const { remove } = await this.findOne(signer, id);
+    const address = await this.transactionsService.getSigningAccount(signer);
+
+    const { remove } = await this.getAuthRequest(address, id);
 
     return this.transactionsService.submit(remove, {}, { signer, webhookUrl });
   }

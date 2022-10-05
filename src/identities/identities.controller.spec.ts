@@ -280,7 +280,7 @@ describe('IdentitiesController', () => {
   describe('getPendingAuthorization', () => {
     it('should call the service and return the AuthorizationRequest details', async () => {
       const mockAuthorization = new MockAuthorizationRequest();
-      mockAuthorizationsService.findOne.mockResolvedValue(mockAuthorization);
+      mockAuthorizationsService.findOneByDid.mockResolvedValue(mockAuthorization);
       const result = await controller.getPendingAuthorization({
         did: '0x6'.padEnd(66, '0'),
         id: new BigNumber(1),
