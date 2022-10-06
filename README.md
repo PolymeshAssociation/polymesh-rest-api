@@ -2,7 +2,7 @@
 
 A REST API wrapper for the Polymesh blockchain.
 
-This version is compatible with chain version 4.1.x
+This version is compatible with chain versions 5.0.x
 
 ## Setup
 
@@ -11,7 +11,7 @@ This version is compatible with chain version 4.1.x
 - node.js version 14.x
 - yarn version 1.x
 
-Note, if running with node v16+ the env `NODE_OPTIONS` should be set to `--unhandled-rejections=warn` to correctly handle errors
+Note, if running with node v16+ the env `NODE_OPTIONS` should be set to `--unhandled-rejections=warn`
 
 ### Installing Dependencies
 
@@ -40,9 +40,9 @@ NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
 
 ### Signing Transactions
 
-There are currently two configurations that the REST API maybe configured in to sign transactions. When Vault is configured it will override the local signers and those values will be ignored.
+There are currently two [signing managers](https://github.com/PolymeshAssociation/signing-managers#projects) the REST API can be configured with, the local, in memory, signer or the [Hashicorp Vault](https://www.vaultproject.io/) signer. If args for both are given, Vault takes precedence
 
-Each signer in the API is referenced by an alias specified depending on which signing manager is being used. This is used in the `signer` field in non GET requests.
+For any method that modifies chain state, the key to sign with can be controlled with the "signer" field.
 
 1. Local Signing:
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
@@ -51,17 +51,19 @@ Each signer in the API is referenced by an alias specified depending on which si
 
 ## Webhooks (alpha)
 
-Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. As an alternative a field `webhookUrl` can be passed in each non GET request. When given the http request will return after validation. A 202 (Accepted) status code will be returned instead of the usual 201 (Created).
+Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. Alternatively `webhookUrl` can be given in any state modifying endpoint. When given, the server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
 
-Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with the value echoed back in the headers.
+Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with this header copied into the response headers.
 
 If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILS=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`. Note, the IsUrl validator doesn't recognize `localhost` as a valid URL, either use the IP `127.0.0.1` or create an entry in `/etc/hosts` like `127.0.0.1 rest.local` and use that instead.
 
-### Warning
+### Warning - Not mainnet ready
 
-Webhooks are not ready for production use yet. The REST API is currently stateless. As such the subscription status is not persisted and can not guarantee delivery of the events.
+Webhooks are still being developed and should not be used against mainnet. However the API for them should be stable to develop against for testing and demo purposes
 
-In its current state the transactions should be reconciled with chain events directly to ensure your system stays properly synced.
+As the REST API is currently stateless (Look, no database!). As such the subscription status is not persisted and the service can not guarantee delivery in the face of ordinary compting faults.
+
+In its current state the transactions would have to be reconciled with chain events as there is a chance for notifications to not be delivered.
 
 ## Running the app
 
