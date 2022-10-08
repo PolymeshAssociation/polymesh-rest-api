@@ -1535,10 +1535,10 @@
     "@types/websocket" "^1.0.5"
     websocket "^1.0.34"
 
-"@polymeshassociation/hashicorp-vault-signing-manager@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/hashicorp-vault-signing-manager/-/hashicorp-vault-signing-manager-1.1.0.tgz#217bada2ad463ada4ad8628f19256081cd3ac4c8"
-  integrity sha512-8GPEC0KS2WqVe6yr2nNveohMr5sdw9kAY+kuzfKJdaZ4gT2zh423Ekr3J0bC5jrr6Nyu76vq0aa++tsV81n/hA==
+"@polymeshassociation/hashicorp-vault-signing-manager@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/hashicorp-vault-signing-manager/-/hashicorp-vault-signing-manager-1.1.1.tgz#7739d79121458055ae25634cba82bd427ea96e70"
+  integrity sha512-bsysoboPupgdjc4ir+P9fSUn/cMKBdT1sr3xl1EApLoEVz0xkTtflD5NO6rXg3wTLO0RCVH0mfsPWrJi4qRZyg==
   dependencies:
     "@polkadot/util" "^9.0.1"
     "@polkadot/util-crypto" "^9.0.1"
