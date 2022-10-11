@@ -20,6 +20,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
@@ -111,10 +112,14 @@ export class AssetsService {
   }
 
   public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
-    const { signer, webhookUrl, amount } = params;
+    const { signer, webhookUrl, amount, from } = params;
     const { redeem } = await this.findOne(ticker);
 
-    return this.transactionsService.submit(redeem, { amount }, { signer, webhookUrl });
+    return this.transactionsService.submit(
+      redeem,
+      { amount, from: toPortfolioId(from) },
+      { signer, webhookUrl }
+    );
   }
 
   public async freeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
