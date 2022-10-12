@@ -287,11 +287,12 @@ describe('AssetsController', () => {
       const signer = '0x6000';
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
+      const from = new BigNumber(1);
       mockAssetsService.redeem.mockResolvedValue({ transactions: ['transaction'] });
 
-      const result = await controller.redeem({ ticker }, { signer, amount });
+      const result = await controller.redeem({ ticker }, { signer, amount, from });
       expect(result).toEqual({ transactions: ['transaction'] });
-      expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount });
+      expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount, from });
     });
   });
 
