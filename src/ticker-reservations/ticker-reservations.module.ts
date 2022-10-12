@@ -3,12 +3,12 @@
 import { Module } from '@nestjs/common';
 
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { SigningModule } from '~/signing/signing.module';
 import { TickerReservationsController } from '~/ticker-reservations/ticker-reservations.controller';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
+import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({
-  imports: [PolymeshModule, SigningModule],
+  imports: [PolymeshModule, TransactionsModule],
   controllers: [TickerReservationsController],
   providers: [TickerReservationsService],
   exports: [TickerReservationsService],

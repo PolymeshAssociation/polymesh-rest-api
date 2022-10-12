@@ -3,25 +3,23 @@ const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TransactionType } from '~/common/types';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAuthorizationRequest,
   MockPolymesh,
   MockTickerReservation,
-  MockTransactionQueue,
+  MockTransaction,
 } from '~/test-utils/mocks';
-import { MockSigningService } from '~/test-utils/service-mocks';
+import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
@@ -30,15 +28,15 @@ describe('TickerReservationsService', () => {
   let service: TickerReservationsService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
-  let mockSigningService: MockSigningService;
+  let mockTransactionsService: MockTransactionsService;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
-    mockSigningService = mockSigningProvider.useValue;
+    mockTransactionsService = mockTransactionsProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [TickerReservationsService, mockSigningProvider],
+      providers: [TickerReservationsService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -76,15 +74,11 @@ describe('TickerReservationsService', () => {
     const ticker = 'TICKER';
     const signer = '0x6000';
 
-    beforeEach(() => {
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
-    });
-
     describe('if there is an error while reserving the ticker', () => {
       it('should pass it up the chain', async () => {
         const expectedError = new Error('Some error');
 
-        mockPolymeshApi.assets.reserveTicker.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -101,32 +95,24 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a reserveTicker procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.asset.RegisterTicker,
-          },
-        ];
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.RegisterTicker,
+        };
         const mockResult = new MockTickerReservation();
 
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(mockResult);
-        mockPolymeshApi.assets.reserveTicker.mockResolvedValue(mockQueue);
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: mockResult,
+          transactions: [mockTransaction],
+        });
 
         const result = await service.reserve(ticker, signer);
         expect(result).toEqual({
           result: mockResult,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.asset.RegisterTicker,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
       });
     });
@@ -143,7 +129,6 @@ describe('TickerReservationsService', () => {
 
     beforeEach(() => {
       mockTickerReservation = new MockTickerReservation();
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error while transferring the ownership of the ticker', () => {
@@ -154,7 +139,7 @@ describe('TickerReservationsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockTickerReservation as any);
 
-        mockTickerReservation.transferOwnership.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -172,37 +157,29 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a transferOwnership procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.identity.AddAuthorization,
-          },
-        ];
-
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.identity.AddAuthorization,
+        };
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockTickerReservation as any);
 
         const mockResult = new MockAuthorizationRequest();
 
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(mockResult);
-        mockTickerReservation.transferOwnership.mockResolvedValue(mockQueue);
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: mockResult,
+          transactions: [mockTransaction],
+        });
+        mockTickerReservation.transferOwnership.mockResolvedValue(mockTransaction);
 
         const result = await service.transferOwnership(ticker, body);
         expect(result).toEqual({
           result: mockResult,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.identity.AddAuthorization,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
         findOneSpy.mockRestore();
       });
@@ -216,7 +193,6 @@ describe('TickerReservationsService', () => {
 
     beforeEach(() => {
       mockTickerReservation = new MockTickerReservation();
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
     });
 
     describe('if there is an error while transferring the ownership of the ticker', () => {
@@ -227,7 +203,7 @@ describe('TickerReservationsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findOneSpy.mockResolvedValue(mockTickerReservation as any);
 
-        mockTickerReservation.extend.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -245,14 +221,12 @@ describe('TickerReservationsService', () => {
 
     describe('otherwise', () => {
       it('should run a extend procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.asset.RegisterTicker,
-          },
-        ];
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.asset.RegisterTicker,
+        };
 
         const findOneSpy = jest.spyOn(service, 'findOne');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -260,22 +234,16 @@ describe('TickerReservationsService', () => {
 
         const mockResult = new MockTickerReservation();
 
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockQueue.run.mockResolvedValue(mockResult);
-        mockTickerReservation.extend.mockResolvedValue(mockQueue);
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: mockResult,
+          transactions: [mockTransaction],
+        });
 
         const result = await service.extend(ticker, signer);
         expect(result).toEqual({
           result: mockResult,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.asset.RegisterTicker,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
         findOneSpy.mockRestore();
       });

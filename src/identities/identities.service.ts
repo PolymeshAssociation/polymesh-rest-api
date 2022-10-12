@@ -11,16 +11,16 @@ import {
   AuthorizationRequest,
   ErrorCode,
   Identity,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { processQueue, QueueResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class IdentitiesService {
@@ -29,7 +29,7 @@ export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
-    private readonly signingService: SigningService,
+    private readonly transactionsService: TransactionsService,
     private readonly accountsService: AccountsService
   ) {
     logger.setContext(IdentitiesService.name);
@@ -66,16 +66,17 @@ export class IdentitiesService {
 
   public async addSecondaryAccount(
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
-  ): Promise<QueueResult<AuthorizationRequest>> {
-    const { signer, expiry, permissions, secondaryAccount } = addSecondaryAccountParamsDto;
-    const address = await this.signingService.getAddressByHandle(signer);
+  ): ServiceReturn<AuthorizationRequest> {
+    const { signer, webhookUrl, expiry, permissions, secondaryAccount } =
+      addSecondaryAccountParamsDto;
+
     const params = {
       targetAccount: secondaryAccount,
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
-    return processQueue(inviteAccount, params, { signingAccount: address });
+    return this.transactionsService.submit(inviteAccount, params, { signer, webhookUrl });
   }
 
   /**

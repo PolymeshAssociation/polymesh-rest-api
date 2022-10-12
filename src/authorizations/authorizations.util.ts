@@ -1,6 +1,6 @@
 /** istanbul ignore file */
 
-import { AuthorizationRequest } from '@polymathnetwork/polymesh-sdk/types';
+import { AuthorizationRequest } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { createSignerModel } from '~/identities/identities.util';

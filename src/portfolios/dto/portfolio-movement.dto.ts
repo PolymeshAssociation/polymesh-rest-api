@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { IsByteLength, IsOptional, IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';

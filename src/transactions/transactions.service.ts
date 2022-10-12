@@ -1,19 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { TransactionStatus } from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshTransaction } from '@polymathnetwork/polymesh-sdk/utils';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
 import { EventType, TransactionUpdateEvent, TransactionUpdatePayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { NotificationPayload } from '~/notifications/types';
+import { SigningService } from '~/signing/signing.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
+import transactionsConfig from '~/transactions/config/transactions.config';
+import {
+  handleSdkError,
+  Method,
+  prepareProcedure,
+  processTransaction,
+  TransactionResult,
+} from '~/transactions/transactions.util';
 import { Transaction } from '~/transactions/types';
 
 @Injectable()
 export class TransactionsService {
-  // TODO @monitz87: use tx bytes instead of numeric id when we support transaction serdes in the SDK
+  // TODO @polymath-eric: use tx bytes instead of numeric id when we support transaction serdes in the SDK
   /**
    * in-memory transaction store by Transaction Identifier. We use a Map
    *   to be able to recycle indexes easily and remove elements in a performant way
@@ -37,14 +48,47 @@ export class TransactionsService {
   > = new Map();
 
   private currentId = 0;
+  private legitimacySecret: string;
 
   constructor(
+    @Inject(transactionsConfig.KEY) config: ConfigType<typeof transactionsConfig>,
     private readonly eventsService: EventsService,
     private readonly subscriptionsService: SubscriptionsService,
-    // TODO @monitz87: handle errors with specialized service
+    private readonly signingService: SigningService,
+    // TODO @polymath-eric handle errors with specialized service
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(TransactionsService.name);
+    this.legitimacySecret = config.legitimacySecret;
+  }
+
+  public async getSigningAccount(signer: string): Promise<string> {
+    return this.signingService.getAddressByHandle(signer);
+  }
+
+  public async submit<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
+    method: Method<MethodArgs, ReturnType, TransformedReturnType>,
+    args: MethodArgs,
+    transactionBaseDto: TransactionBaseDto
+  ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
+    const { signer, webhookUrl } = transactionBaseDto;
+    const signingAccount = await this.getSigningAccount(signer);
+    try {
+      if (!webhookUrl) {
+        return processTransaction(method, args, { signingAccount });
+      } else {
+        // prepare the procedure so the SDK will run its validation and throw if something isn't right
+        const transaction = await prepareProcedure(method, args, { signingAccount });
+
+        return this.submitAndSubscribe(
+          transaction as Transaction,
+          webhookUrl,
+          this.legitimacySecret
+        );
+      }
+    } catch (error) {
+      handleSdkError(error);
+    }
   }
 
   /**
@@ -52,13 +96,12 @@ export class TransactionsService {
    *
    * @returns initial transaction status notification
    */
-  public async submitAndSubscribe(
+  private async submitAndSubscribe(
     transaction: Transaction,
     webhookUrl: string,
     legitimacySecret: string
   ): Promise<NotificationPayload<EventType.TransactionUpdate>> {
     const { subscriptionsService, logger } = this;
-
     const id = this.addListener(transaction);
     const eventScope = String(id);
     const eventType = EventType.TransactionUpdate;
@@ -75,7 +118,7 @@ export class TransactionsService {
       nextNonce: 1,
     });
 
-    // TODO @monitz87: use dedicated error service
+    // TODO @polymath-eric: use dedicated error service
     // we don't propagate transaction errors because they're sent as status updates
     transaction
       .run()
@@ -131,7 +174,7 @@ export class TransactionsService {
       await this.eventsService.createEvent<TransactionUpdateEvent>({
         type: EventType.TransactionUpdate,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        scope: String(id), // TODO @monitz87: replace with bytes when we have tx serdes
+        scope: String(id), // TODO @polymath-eric: replace with bytes when we have tx serdes
         payload: this.assemblePayload(transaction),
       });
 
@@ -227,7 +270,7 @@ export class TransactionsService {
       };
 
       if (status === TransactionStatus.Succeeded) {
-        payload.result = 'placeholder'; // TODO @monitz87: use real result when we eliminate TQs
+        payload.result = 'placeholder'; // The SDK needs to support returning this (DA-407)
       }
     }
 

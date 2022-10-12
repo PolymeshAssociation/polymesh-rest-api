@@ -9,8 +9,9 @@ import {
 
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 
 @ApiTags('authorizations')
 @Controller('authorizations')
@@ -38,11 +39,11 @@ export class AuthorizationsController {
   @Post('/:id/accept')
   public async accept(
     @Param() { id }: IdParamsDto,
-    @Body() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.authorizationsService.accept(id, signer);
+    @Body() { signer, webhookUrl }: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.authorizationsService.accept(id, signer, webhookUrl);
 
-    return new TransactionQueueModel({ transactions });
+    return handleServiceResult(result);
   }
 
   @ApiOperation({
@@ -71,10 +72,10 @@ export class AuthorizationsController {
   @Post('/:id/remove')
   public async remove(
     @Param() { id }: IdParamsDto,
-    @Body() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.authorizationsService.remove(id, signer);
+    @Body() { signer, webhookUrl }: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.authorizationsService.remove(id, signer, webhookUrl);
 
-    return new TransactionQueueModel({ transactions });
+    return handleServiceResult(result);
   }
 }

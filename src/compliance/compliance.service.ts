@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { SetAssetRequirementsParams } from '@polymathnetwork/polymesh-sdk/api/procedures/setAssetRequirements';
 import {
   Asset,
   ComplianceRequirements,
+  SetAssetRequirementsParams,
   TrustedClaimIssuer,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { processQueue, QueueResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class ComplianceService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly signingService: SigningService
+    private readonly transactionsService: TransactionsService
   ) {}
 
   public async findComplianceRequirements(ticker: string): Promise<ComplianceRequirements> {
@@ -28,15 +28,16 @@ export class ComplianceService {
     return asset.compliance.trustedClaimIssuers.get();
   }
 
-  public async setRequirements(
-    ticker: string,
-    params: SetRequirementsDto
-  ): Promise<QueueResult<Asset>> {
-    const { signer } = params;
+  public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.compliance.requirements.set, params as SetAssetRequirementsParams, {
-      signingAccount: address,
-    });
+    return this.transactionsService.submit(
+      asset.compliance.requirements.set,
+      params as SetAssetRequirementsParams,
+      {
+        signer,
+        webhookUrl,
+      }
+    );
   }
 }

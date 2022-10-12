@@ -4,7 +4,7 @@ import {
   ConditionTarget,
   ConditionType,
   ScopeType,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 import { ConditionDto } from '~/compliance/dto/condition.dto';

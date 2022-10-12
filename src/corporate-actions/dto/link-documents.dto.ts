@@ -5,9 +5,9 @@ import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
-export class LinkDocumentsDto extends SignerDto {
+export class LinkDocumentsDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'List of documents to be linked to the Corporate Action',
     type: AssetDocumentDto,

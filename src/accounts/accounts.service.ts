@@ -6,20 +6,20 @@ import {
   ExtrinsicData,
   Permissions,
   ResultSet,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly signingService: SigningService
+    private readonly transactionsService: TransactionsService
   ) {}
 
   public async findOne(address: string): Promise<Account> {
@@ -27,7 +27,7 @@ export class AccountsService {
       polymeshService: { polymeshApi },
     } = this;
     try {
-      return await polymeshApi.accountManagement.getAccount({ address });
+      return polymeshApi.accountManagement.getAccount({ address });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code } = err;
@@ -51,15 +51,12 @@ export class AccountsService {
     return polymeshApi.accountManagement.getAccountBalance({ account });
   }
 
-  public async transferPolyx(params: TransferPolyxDto): Promise<QueueResult<void>> {
-    const { signer, ...rest } = params;
-    const { signingService, polymeshService } = this;
-
-    const address = await signingService.getAddressByHandle(signer);
+  public async transferPolyx(params: TransferPolyxDto): ServiceReturn<void> {
+    const { signer, webhookUrl, ...rest } = params;
+    const { polymeshService, transactionsService } = this;
 
     const { transferPolyx } = polymeshService.polymeshApi.network;
-
-    return processQueue(transferPolyx, rest, { signingAccount: address });
+    return transactionsService.submit(transferPolyx, rest, { signer, webhookUrl });
   }
 
   public async getTransactionHistory(

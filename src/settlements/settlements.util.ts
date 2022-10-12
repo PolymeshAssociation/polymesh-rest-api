@@ -2,7 +2,7 @@ import {
   Instruction,
   InstructionStatus,
   InstructionType,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';

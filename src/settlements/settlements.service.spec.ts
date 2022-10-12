@@ -4,36 +4,38 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
   ErrorCode,
   TransferError,
   TxTags,
   VenueType,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
 import {
   MockAsset,
   MockIdentity,
   MockInstruction,
   MockPolymesh,
-  MockTransactionQueue,
+  MockTransaction,
   MockVenue,
 } from '~/test-utils/mocks';
-import { MockAssetService, MockIdentitiesService } from '~/test-utils/service-mocks';
+import {
+  MockAssetService,
+  MockIdentitiesService,
+  mockTransactionsProvider,
+} from '~/test-utils/service-mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
@@ -47,13 +49,13 @@ describe('SettlementsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockSigningService = mockSigningProvider.useValue;
+  const mockTransactionsService = mockTransactionsProvider.useValue;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [SettlementsService, AssetsService, IdentitiesService, mockSigningProvider],
+      providers: [SettlementsService, AssetsService, IdentitiesService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -232,18 +234,18 @@ describe('SettlementsService', () => {
     it('should run an addInstruction procedure and return the queue data', async () => {
       const mockVenue = new MockVenue();
 
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.AddInstruction,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.AddInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
       const mockInstruction = 'instruction';
-      mockQueue.run.mockResolvedValue(mockInstruction);
-      mockVenue.addInstruction.mockResolvedValue(mockQueue);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockInstruction,
+        transactions: [mockTransaction],
+      });
 
       const findVenueSpy = jest.spyOn(service, 'findVenue');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -259,29 +261,22 @@ describe('SettlementsService', () => {
           },
         ],
       };
+
+      const signer = 'signer';
       const body = {
-        signer: 'signer',
+        signer,
         ...params,
       };
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.createInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: mockInstruction,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.AddInstruction,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockVenue.addInstruction).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockVenue.addInstruction,
         {
           legs: [
             {
@@ -292,7 +287,7 @@ describe('SettlementsService', () => {
             },
           ],
         },
-        { signingAccount: address }
+        { signer }
       );
       findVenueSpy.mockRestore();
     });
@@ -302,43 +297,36 @@ describe('SettlementsService', () => {
     it('should run a createVenue procedure and return the queue data', async () => {
       const mockIdentity = new MockIdentity();
 
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.CreateVenue,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockQueue);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.CreateVenue,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockTransaction);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-
+      const signer = '0x6'.padEnd(66, '0');
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         description: 'A generic exchange',
         type: VenueType.Exchange,
       };
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       const result = await service.createVenue(body);
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.CreateVenue,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockPolymeshApi.settlements.createVenue).toHaveBeenCalledWith(
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.settlements.createVenue,
         { description: body.description, type: body.type },
-        { signingAccount: address }
+        { signer }
       );
     });
   });
@@ -353,7 +341,7 @@ describe('SettlementsService', () => {
           description: 'A generic exchange',
         };
         const mockVenue = new MockVenue();
-        mockVenue.modify.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
         const findVenueSpy = jest.spyOn(service, 'findVenue');
@@ -380,42 +368,32 @@ describe('SettlementsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findVenueSpy.mockResolvedValue(mockVenue as any);
 
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.settlement.UpdateVenueType,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockVenue.modify.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.settlement.UpdateVenueType,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
+        const signer = '0x6'.padEnd(66, '0');
         const body = {
-          signer: '0x6'.padEnd(66, '0'),
+          signer,
           description: 'A generic exchange',
           type: VenueType.Exchange,
         };
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyVenue(new BigNumber(123), body);
 
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.settlement.UpdateVenueType,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(mockVenue.modify).toHaveBeenCalledWith(
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          mockVenue.modify,
           { description: body.description, type: body.type },
-          { signingAccount: address }
+          { signer }
         );
         findVenueSpy.mockRestore();
       });
@@ -425,43 +403,36 @@ describe('SettlementsService', () => {
   describe('affirmInstruction', () => {
     it('should run an affirm procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.AffirmInstruction,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockInstruction.affirm.mockResolvedValue(mockQueue);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.AffirmInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
+      const signer = 'signer';
       const body = {
-        signer: 'signer',
+        signer,
       };
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await service.affirmInstruction(new BigNumber(123), body as any);
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.AffirmInstruction,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockInstruction.affirm).toHaveBeenCalledWith({ signingAccount: address }, {});
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.affirm,
+        {},
+        { signer }
+      );
       findInstructionSpy.mockRestore();
     });
   });
@@ -469,41 +440,33 @@ describe('SettlementsService', () => {
   describe('rejectInstruction', () => {
     it('should run a reject procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
-      const transactions = [
-        {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.RejectInstruction,
-        },
-      ];
-      const mockQueue = new MockTransactionQueue(transactions);
-      mockInstruction.reject.mockResolvedValue(mockQueue);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.RejectInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const address = 'address';
-      mockSigningService.getAddressByHandle.mockReturnValue(address);
-
+      const signer = 'signer';
       const result = await service.rejectInstruction(new BigNumber(123), {
-        signer: 'signer',
+        signer,
       });
 
       expect(result).toEqual({
         result: undefined,
-        transactions: [
-          {
-            blockHash: '0x1',
-            transactionHash: '0x2',
-            blockNumber: new BigNumber(1),
-            transactionTag: TxTags.settlement.RejectInstruction,
-            type: TransactionType.Single,
-          },
-        ],
+        transactions: [mockTransaction],
       });
-      expect(mockInstruction.reject).toHaveBeenCalledWith({ signingAccount: address }, {});
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.reject,
+        {},
+        { signer }
+      );
       findInstructionSpy.mockRestore();
     });
   });

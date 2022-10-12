@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
-  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -16,10 +15,11 @@ import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { BalanceModel } from '~/assets/models/balance.model';
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -50,7 +50,7 @@ export class AccountsController {
     summary: 'Transfer an amount of POLYX to an account',
     description: 'This endpoint transfers an amount of POLYX to a specified Account',
   })
-  @ApiCreatedResponse({
+  @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
@@ -63,9 +63,9 @@ export class AccountsController {
       '</ul>',
   })
   @Post('transfer')
-  async transferPolyx(@Body() params: TransferPolyxDto): Promise<TransactionQueueModel> {
-    const { transactions } = await this.accountsService.transferPolyx(params);
-    return new TransactionQueueModel({ transactions });
+  async transferPolyx(@Body() params: TransferPolyxDto): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.transferPolyx(params);
+    return handleServiceResult(result);
   }
 
   @ApiOperation({

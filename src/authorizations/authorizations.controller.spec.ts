@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { AuthorizationsController } from '~/authorizations/authorizations.controller';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
@@ -40,7 +40,7 @@ describe('AuthorizationsController', () => {
         result: undefined,
         transactions: ['transaction'],
       });
-      expect(mockAuthorizationsService.accept).toHaveBeenCalledWith(authId, signer);
+      expect(mockAuthorizationsService.accept).toHaveBeenCalledWith(authId, signer, undefined);
     });
   });
 
@@ -58,7 +58,7 @@ describe('AuthorizationsController', () => {
         result: undefined,
         transactions: ['transaction'],
       });
-      expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, signer);
+      expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, signer, undefined);
     });
   });
 });

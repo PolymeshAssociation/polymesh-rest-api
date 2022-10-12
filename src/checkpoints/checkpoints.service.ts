@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Checkpoint,
   CheckpointSchedule,
@@ -8,22 +8,22 @@ import {
   IdentityBalance,
   ResultSet,
   ScheduleWithDetails,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
-import { processQueue, QueueResult } from '~/common/utils';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class CheckpointsService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly signingService: SigningService,
+    private readonly transactionsService: TransactionsService,
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(CheckpointsService.name);
@@ -81,23 +81,25 @@ export class CheckpointsService {
 
   public async createByTicker(
     ticker: string,
-    signerDto: SignerDto
-  ): Promise<QueueResult<Checkpoint>> {
-    const { signer } = signerDto;
+    signerDto: TransactionBaseDto
+  ): ServiceReturn<Checkpoint> {
+    const { signer, webhookUrl } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    // TODO: find a way of making processQueue type safe for NoArgsProcedureMethods
-    return processQueue(asset.checkpoints.create, { signingAccount: address }, {});
+
+    return this.transactionsService.submit(asset.checkpoints.create, {}, { signer, webhookUrl });
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
-  ): Promise<QueueResult<CheckpointSchedule>> {
-    const { signer, ...rest } = createCheckpointScheduleDto;
+  ): ServiceReturn<CheckpointSchedule> {
+    const { signer, webhookUrl, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.checkpoints.schedules.create, rest, { signingAccount: address });
+
+    return this.transactionsService.submit(asset.checkpoints.schedules.create, rest, {
+      signer,
+      webhookUrl,
+    });
   }
 
   public async getAssetBalance(
@@ -123,14 +125,14 @@ export class CheckpointsService {
   public async deleteScheduleByTicker(
     ticker: string,
     id: BigNumber,
-    signer: string
-  ): Promise<QueueResult<void>> {
-    const address = await this.signingService.getAddressByHandle(signer);
+    signer: string,
+    webhookUrl?: string
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
-    return processQueue(
+    return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
-      { signingAccount: address }
+      { signer, webhookUrl }
     );
   }
 }

@@ -1,100 +1,11 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import {
-  ErrorCode,
-  ModuleName,
-  NoArgsProcedureMethod,
-  ProcedureMethod,
-  ProcedureOpts,
-  TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
-import {
-  isPolymeshError,
-  isPolymeshTransaction,
-  isPolymeshTransactionBatch,
-} from '@polymathnetwork/polymesh-sdk/utils';
+import { ModuleName, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { flatten } from 'lodash';
 
-import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
-import { TransactionModel } from '~/common/models/transaction.model';
-
-export type QueueResult<T> = {
-  result: T;
-  transactions: (TransactionModel | BatchTransactionModel)[];
-};
-
-type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
-
-export async function processQueue<MethodArgs, ReturnType>(
-  method: WithArgsProcedureMethod<ProcedureMethod<MethodArgs, unknown, ReturnType>>,
-  args: MethodArgs,
-  opts: ProcedureOpts
-): Promise<QueueResult<ReturnType>> {
-  try {
-    const queue = await method(args, opts);
-    const result = await queue.run();
-
-    const assembleTransaction = (
-      transaction: unknown
-    ): TransactionModel | BatchTransactionModel => {
-      let tagDetails;
-      if (isPolymeshTransaction(transaction)) {
-        const { tag } = transaction;
-        tagDetails = { transactionTag: tag };
-      } else if (isPolymeshTransactionBatch(transaction)) {
-        const { transactions } = transaction;
-        tagDetails = {
-          transactionTags: transactions.map(({ tag }) => tag),
-        };
-      } else {
-        throw new Error(
-          'Unsupported transaction details received. Please report this issue to the Polymath team'
-        );
-      }
-
-      const { blockHash, txHash, blockNumber } = transaction;
-      const constructorParams = {
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        blockHash: blockHash!,
-        transactionHash: txHash!,
-        blockNumber: blockNumber!,
-        ...tagDetails,
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      };
-
-      if ('transactionTag' in constructorParams) {
-        return new TransactionModel(constructorParams);
-      }
-      return new BatchTransactionModel(constructorParams);
-    };
-
-    return {
-      result,
-      transactions: queue.transactions.map(assembleTransaction),
-    };
-  } catch (err) /* istanbul ignore next: not worth the trouble */ {
-    if (isPolymeshError(err)) {
-      const { message, code } = err;
-      switch (code) {
-        case ErrorCode.NoDataChange:
-        case ErrorCode.ValidationError:
-          throw new BadRequestException(message);
-        case ErrorCode.InsufficientBalance:
-        case ErrorCode.UnmetPrerequisite:
-          throw new UnprocessableEntityException(message);
-        case ErrorCode.DataUnavailable:
-          throw new NotFoundException(message);
-        default:
-          throw new InternalServerErrorException(message);
-      }
-    }
-    throw new InternalServerErrorException(err.message);
-  }
-}
+import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { EventType } from '~/events/types';
+import { NotificationPayload } from '~/notifications/types';
+import { TransactionResult } from '~/transactions/transactions.util';
 
 /* istanbul ignore next */
 export function getTxTags(): string[] {
@@ -107,3 +18,40 @@ export function getTxTagsWithModuleNames(): string[] {
   const moduleNames = Object.values(ModuleName);
   return [...moduleNames, ...txTags];
 }
+
+export type TransactionResponseModel = NotificationPayloadModel | TransactionQueueModel;
+
+/**
+ * A helper type that lets a service return a QueueResult or a Subscription Receipt
+ */
+export type ServiceReturn<T> = Promise<
+  NotificationPayload<EventType.TransactionUpdate> | TransactionResult<T>
+>;
+
+/**
+ * A helper type that lets a controller return a Model or a Subscription Receipt if webhookUrl is being used
+ */
+export type TransactionResolver<T> = (
+  res: TransactionResult<T>
+) => Promise<TransactionQueueModel> | TransactionQueueModel;
+
+/**
+ * A helper function that transforms a service result for a controller. A controller can pass a resolver for a detailed return model, otherwise the transaction details will be used as a default
+ */
+export const handleServiceResult = <T>(
+  result: NotificationPayloadModel | TransactionResult<T>,
+  resolver: TransactionResolver<T> = basicModelResolver
+): NotificationPayloadModel | Promise<TransactionQueueModel> | TransactionQueueModel => {
+  if ('transactions' in result) {
+    return resolver(result);
+  } else {
+    return new NotificationPayloadModel(result);
+  }
+};
+
+/**
+ * A helper function for controllers when they should return a basic TransactionQueueModel
+ */
+const basicModelResolver: TransactionResolver<unknown> = ({ transactions }) => {
+  return new TransactionQueueModel({ transactions });
+};

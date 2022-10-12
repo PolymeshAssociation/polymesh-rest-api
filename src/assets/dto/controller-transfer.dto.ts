@@ -1,16 +1,16 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
-export class ControllerTransferDto extends SignerDto {
+export class ControllerTransferDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Portfolio from which Asset tokens will be transferred',
     type: () => PortfolioDto,

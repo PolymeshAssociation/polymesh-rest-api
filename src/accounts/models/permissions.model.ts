@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { TxGroup } from '@polymathnetwork/polymesh-sdk/types';
+import { TxGroup } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
@@ -38,7 +38,7 @@ export class PermissionsModel {
 
   @ApiProperty({
     description:
-      'Transaction Groups that the Account can execute. Having permissions over a [TxGroup](https://github.com/PolymathNetwork/polymesh-sdk/blob/docs/v14/docs/enums/txgroup.md) means having permissions over every TxTag in said group. Note if `transactions` is null, ignore this value',
+      'Transaction Groups that the Account can execute. Having permissions over a [TxGroup](https://github.com/polymeshassociation/polymesh-sdk/blob/docs/v14/docs/enums/txgroup.md) means having permissions over every TxTag in said group. Note if `transactions` is null, ignore this value',
     isArray: true,
     enum: TxGroup,
     example: [TxGroup.PortfolioManagement],

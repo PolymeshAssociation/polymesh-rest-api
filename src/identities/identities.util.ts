@@ -1,7 +1,7 @@
 /** istanbul ignore file */
 
-import { Identity, Signer } from '@polymathnetwork/polymesh-sdk/types';
-import { isAccount } from '@polymathnetwork/polymesh-sdk/utils';
+import { Identity, Signer } from '@polymeshassociation/polymesh-sdk/types';
+import { isAccount } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { createPermissionedAccountModel } from '~/accounts/accounts.util';
 import { AccountModel } from '~/identities/models/account.model';
@@ -13,7 +13,7 @@ import { SignerModel } from '~/identities/models/signer.model';
  * Fetch and assemble data for an Identity
  */
 export async function createIdentityModel(identity: Identity): Promise<IdentityModel> {
-  const [primaryAccount, secondaryAccountsFrozen, secondaryAccounts] = await Promise.all([
+  const [primaryAccount, secondaryAccountsFrozen, { data: secondaryAccounts }] = await Promise.all([
     identity.getPrimaryAccount(),
     identity.areSecondaryAccountsFrozen(),
     identity.getSecondaryAccounts(),

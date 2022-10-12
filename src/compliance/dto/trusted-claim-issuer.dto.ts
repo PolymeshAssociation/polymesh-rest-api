@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsOptional } from 'class-validator';
 
 import { IsDid } from '~/common/decorators/validation';

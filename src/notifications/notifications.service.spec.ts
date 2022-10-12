@@ -3,7 +3,7 @@ const mockLastValueFrom = jest.fn();
 
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';

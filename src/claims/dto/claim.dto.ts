@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType, CountryCode } from '@polymathnetwork/polymesh-sdk/types';
+import { ClaimType, CountryCode } from '@polymeshassociation/polymesh-sdk/types';
 import {
   isCddClaim,
   isInvestorUniquenessV2Claim,
   isNoDataClaim,
-} from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/utils';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmptyObject, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 

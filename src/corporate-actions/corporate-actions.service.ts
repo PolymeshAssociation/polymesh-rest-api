@@ -1,28 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   CorporateActionDefaultConfig,
   DistributionWithDetails,
   DividendDistribution,
   ErrorCode,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isPolymeshError } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
-import { processQueue, QueueResult } from '~/common/utils';
+import { ServiceReturn } from '~/common/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
 import { ModifyDistributionCheckpointDto } from '~/corporate-actions/dto/modify-distribution-checkpoint.dto';
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
-import { SigningService } from '~/signing/signing.service';
+import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
 export class CorporateActionsService {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly signingService: SigningService
+    private readonly transactionService: TransactionsService
   ) {}
 
   public async findDefaultConfigByTicker(ticker: string): Promise<CorporateActionDefaultConfig> {
@@ -33,13 +33,18 @@ export class CorporateActionsService {
   public async updateDefaultConfigByTicker(
     ticker: string,
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
-  ): Promise<QueueResult<void>> {
-    const { signer, ...rest } = corporateActionDefaultConfigDto;
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, ...rest } = corporateActionDefaultConfigDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(asset.corporateActions.setDefaultConfig, rest as Required<typeof rest>, {
-      signingAccount: address,
-    });
+
+    return this.transactionService.submit(
+      asset.corporateActions.setDefaultConfig,
+      rest as Required<typeof rest>,
+      {
+        signer,
+        webhookUrl,
+      }
+    );
   }
 
   public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
@@ -69,18 +74,18 @@ export class CorporateActionsService {
   public async createDividendDistribution(
     ticker: string,
     dividendDistributionDto: DividendDistributionDto
-  ): Promise<QueueResult<DividendDistribution>> {
-    const { signer, originPortfolio, ...rest } = dividendDistributionDto;
+  ): ServiceReturn<DividendDistribution> {
+    const { signer, webhookUrl, originPortfolio, ...rest } = dividendDistributionDto;
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+    return this.transactionService.submit(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
         originPortfolio: toPortfolioId(originPortfolio),
         ...rest,
       },
       {
-        signingAccount: address,
+        signer,
+        webhookUrl,
       }
     );
   }
@@ -88,15 +93,16 @@ export class CorporateActionsService {
   public async remove(
     ticker: string,
     corporateAction: BigNumber,
-    signer: string
-  ): Promise<QueueResult<void>> {
+    signer: string,
+    webhookUrl?: string
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+    return this.transactionService.submit(
       asset.corporateActions.remove,
       { corporateAction },
       {
-        signingAccount: address,
+        signer,
+        webhookUrl,
       }
     );
   }
@@ -105,15 +111,16 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     payDividendsDto: PayDividendsDto
-  ): Promise<QueueResult<void>> {
-    const { signer, targets } = payDividendsDto;
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, targets } = payDividendsDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+
+    return this.transactionService.submit(
       distribution.pay,
       { targets },
       {
-        signingAccount: address,
+        signer,
+        webhookUrl,
       }
     );
   }
@@ -122,39 +129,43 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     linkDocumentsDto: LinkDocumentsDto
-  ): Promise<QueueResult<void>> {
-    const { signer, documents } = linkDocumentsDto;
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, documents } = linkDocumentsDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = await this.signingService.getAddressByHandle(signer);
+
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
     };
-    return processQueue(distribution.linkDocuments, params, {
-      signingAccount: address,
+    return this.transactionService.submit(distribution.linkDocuments, params, {
+      signer,
+      webhookUrl,
     });
   }
 
   public async claimDividends(
     ticker: string,
     id: BigNumber,
-    signer: string
-  ): Promise<QueueResult<void>> {
+    signer: string,
+    webhookUrl?: string
+  ): ServiceReturn<void> {
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(distribution.claim, undefined, {
-      signingAccount: address,
+    return this.transactionService.submit(distribution.claim, undefined, {
+      signer,
+      webhookUrl,
     });
   }
 
   public async reclaimRemainingFunds(
     ticker: string,
     id: BigNumber,
-    signer: string
-  ): Promise<QueueResult<void>> {
+    signer: string,
+    webhookUrl?: string
+  ): ServiceReturn<void> {
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(distribution.reclaimFunds, undefined, {
-      signingAccount: address,
+
+    return this.transactionService.submit(distribution.reclaimFunds, undefined, {
+      signer,
+      webhookUrl,
     });
   }
 
@@ -162,15 +173,16 @@ export class CorporateActionsService {
     ticker: string,
     id: BigNumber,
     modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
-  ): Promise<QueueResult<void>> {
-    const { signer, checkpoint } = modifyDistributionCheckpointDto;
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, checkpoint } = modifyDistributionCheckpointDto;
     const { distribution } = await this.findDistribution(ticker, id);
-    const address = await this.signingService.getAddressByHandle(signer);
-    return processQueue(
+
+    return this.transactionService.submit(
       distribution.modifyCheckpoint,
       { checkpoint },
       {
-        signingAccount: address,
+        signer,
+        webhookUrl,
       }
     );
   }

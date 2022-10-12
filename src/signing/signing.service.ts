@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { HashicorpVaultSigningManager } from '@polymathnetwork/hashicorp-vault-signing-manager';
-import { LocalSigningManager } from '@polymathnetwork/local-signing-manager';
-import { SigningManager } from '@polymathnetwork/signing-manager-types';
+import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
+import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
+import { SigningManager } from '@polymeshassociation/signing-manager-types';
 import { forEach } from 'lodash';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';

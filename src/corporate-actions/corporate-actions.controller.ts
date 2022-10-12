@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -9,14 +8,16 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { DividendDistribution } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import {
   createDividendDistributionDetailsModel,
@@ -103,12 +104,12 @@ export class CorporateActionsController {
   public async updateDefaultConfig(
     @Param() { ticker }: TickerParamsDto,
     @Body() corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.updateDefaultConfigByTicker(
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.updateDefaultConfigByTicker(
       ticker,
       corporateActionDefaultConfigDto
     );
-    return new TransactionQueueModel({ transactions });
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -181,7 +182,7 @@ export class CorporateActionsController {
     type: 'string',
     example: 'TICKER',
   })
-  @ApiCreatedResponse({
+  @ApiTransactionResponse({
     description: 'Details of the newly created Dividend Distribution',
     type: CreatedDividendDistributionModel,
   })
@@ -215,15 +216,19 @@ export class CorporateActionsController {
   public async createDividendDistribution(
     @Param() { ticker }: TickerParamsDto,
     @Body() dividendDistributionDto: DividendDistributionDto
-  ): Promise<CreatedDividendDistributionModel> {
-    const { result, transactions } = await this.corporateActionsService.createDividendDistribution(
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.corporateActionsService.createDividendDistribution(
       ticker,
       dividendDistributionDto
     );
-    return new CreatedDividendDistributionModel({
-      dividendDistribution: createDividendDistributionModel(result),
-      transactions,
-    });
+
+    const resolver: TransactionResolver<DividendDistribution> = ({ transactions, result }) =>
+      new CreatedDividendDistributionModel({
+        dividendDistribution: createDividendDistributionModel(result),
+        transactions,
+      });
+
+    return handleServiceResult(serviceResult, resolver);
   }
 
   // TODO @prashantasdeveloper: Move the signer to headers
@@ -253,10 +258,10 @@ export class CorporateActionsController {
   @Post(':id/delete')
   public async deleteCorporateAction(
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
-    @Query() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.remove(ticker, id, signer);
-    return new TransactionQueueModel({ transactions });
+    @Query() { signer, webhookUrl }: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -294,13 +299,9 @@ export class CorporateActionsController {
   public async payDividends(
     @Param() { id, ticker }: DistributeFundsParamsDto,
     @Body() payDividendsDto: PayDividendsDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.payDividends(
-      ticker,
-      id,
-      payDividendsDto
-    );
-    return new TransactionQueueModel({ transactions });
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.payDividends(ticker, id, payDividendsDto);
+    return handleServiceResult(result);
   }
 
   // TODO @prashantasdeveloper: Update error responses post handling error codes
@@ -332,13 +333,9 @@ export class CorporateActionsController {
   public async linkDocuments(
     @Param() { ticker, id }: DividendDistributionParamsDto,
     @Body() linkDocumentsDto: LinkDocumentsDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.linkDocuments(
-      ticker,
-      id,
-      linkDocumentsDto
-    );
-    return new TransactionQueueModel({ transactions });
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.linkDocuments(ticker, id, linkDocumentsDto);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -376,10 +373,10 @@ export class CorporateActionsController {
   @Post(':id/payments/claim')
   public async claimDividends(
     @Param() { id, ticker }: DividendDistributionParamsDto,
-    @Body() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.claimDividends(ticker, id, signer);
-    return new TransactionQueueModel({ transactions });
+    @Body() { signer }: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.claimDividends(ticker, id, signer);
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions')
@@ -415,14 +412,15 @@ export class CorporateActionsController {
   @Post(':id/reclaim-funds')
   public async reclaimRemainingFunds(
     @Param() { id, ticker }: DividendDistributionParamsDto,
-    @Body() { signer }: SignerDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.reclaimRemainingFunds(
+    @Body() { signer, webhookUrl }: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.reclaimRemainingFunds(
       ticker,
       id,
-      signer
+      signer,
+      webhookUrl
     );
-    return new TransactionQueueModel({ transactions });
+    return handleServiceResult(result);
   }
 
   @ApiTags('dividend-distributions', 'checkpoints')
@@ -471,12 +469,12 @@ export class CorporateActionsController {
   public async modifyDistributionCheckpoint(
     @Param() { id, ticker }: DividendDistributionParamsDto,
     @Body() modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
-  ): Promise<TransactionQueueModel> {
-    const { transactions } = await this.corporateActionsService.modifyCheckpoint(
+  ): Promise<TransactionResponseModel> {
+    const result = await this.corporateActionsService.modifyCheckpoint(
       ticker,
       id,
       modifyDistributionCheckpointDto
     );
-    return new TransactionQueueModel({ transactions });
+    return handleServiceResult(result);
   }
 }

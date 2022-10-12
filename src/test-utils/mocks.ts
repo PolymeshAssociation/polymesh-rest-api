@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
   TransactionStatus,
   TxTag,
   TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 export type Mocked<T> = T &
   {
@@ -240,15 +240,17 @@ export class MockAuthorizationRequest {
   public remove = jest.fn();
 }
 
-export class MockTransactionQueue {
+export class MockTransaction {
   constructor(
-    public readonly transactions: {
+    readonly transaction: {
       blockHash: string;
       txHash: string;
       tag: TxTag;
       blockNumber: BigNumber;
-    }[]
-  ) {}
+    }
+  ) {
+    Object.assign(this, transaction);
+  }
 
   public run = jest.fn();
 }
@@ -278,6 +280,8 @@ export class MockPolymeshTransactionBatch extends MockPolymeshTransactionBase {
   ];
 }
 
+export type CallbackFn<T extends MockPolymeshTransactionBase> = (tx: T) => Promise<void>;
+
 export class MockOffering {
   id = new BigNumber(1);
   ticker = 'TICKER';
@@ -291,8 +295,13 @@ export class MockTickerReservation {
   public details = jest.fn();
 }
 
+export class MockAuthorizations {
+  getOne = jest.fn();
+}
 export class MockAccount {
   address = 'address';
+  authorizations = new MockAuthorizations();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
+  getIdentity = jest.fn();
 }

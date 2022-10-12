@@ -1,13 +1,13 @@
-/** istanbul ignore file */
+/* istanbul ignore file */
 
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   DefaultPortfolio,
   Identity,
   NumberedPortfolio,
   PortfolioBalance,
-} from '@polymathnetwork/polymesh-sdk/types';
-import { isNumberedPortfolio } from '@polymathnetwork/polymesh-sdk/utils';
+} from '@polymeshassociation/polymesh-sdk/types';
+import { isNumberedPortfolio } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';

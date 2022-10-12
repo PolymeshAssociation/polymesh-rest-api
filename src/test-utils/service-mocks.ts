@@ -1,5 +1,7 @@
 /* istanbul ignore file */
 
+import { TransactionsService } from '~/transactions/transactions.service';
+
 export class MockAssetService {
   findOne = jest.fn();
   findHolders = jest.fn();
@@ -16,6 +18,16 @@ export class MockAssetService {
   controllerTransfer = jest.fn();
   getOperationHistory = jest.fn();
 }
+
+export class MockTransactionsService {
+  submit = jest.fn();
+  getSigningAccount = jest.fn();
+}
+
+export const mockTransactionsProvider = {
+  provide: TransactionsService,
+  useValue: new MockTransactionsService(),
+};
 
 export class MockComplianceService {
   setRequirements = jest.fn();
@@ -38,7 +50,7 @@ export class MockTickerReservationsService {
 export class MockAuthorizationsService {
   findPendingByDid = jest.fn();
   findIssuedByDid = jest.fn();
-  findOne = jest.fn();
+  findOneByDid = jest.fn();
   accept = jest.fn();
   remove = jest.fn();
 }

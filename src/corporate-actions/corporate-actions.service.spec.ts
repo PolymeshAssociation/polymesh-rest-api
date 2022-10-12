@@ -2,34 +2,27 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import {
-  BadRequestException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   CaCheckpointType,
   ErrorCode,
   TargetTreatment,
   TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { TransactionType } from '~/common/types';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAsset, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockAssetService } from '~/test-utils/service-mocks';
-import { ErrorCase } from '~/test-utils/types';
+import { MockAsset, MockTransaction } from '~/test-utils/mocks';
+import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
@@ -39,11 +32,11 @@ describe('CorporateActionsService', () => {
 
   const mockAssetsService = new MockAssetService();
 
-  const mockSigningService = mockSigningProvider.useValue;
+  const mockTransactionsService = mockTransactionsProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CorporateActionsService, AssetsService, mockSigningProvider],
+      providers: [CorporateActionsService, AssetsService, mockTransactionsProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
@@ -94,7 +87,7 @@ describe('CorporateActionsService', () => {
             identities: [],
           },
         };
-        mockAsset.corporateActions.setDefaultConfig.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -112,42 +105,32 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a setDefaultConfig procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.SetDefaultWithholdingTax,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.SetDefaultWithholdingTax,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
-        mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockQueue);
+        mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
+        const signer = '0x6'.padEnd(66, '0');
         const body = {
-          signer: '0x6'.padEnd(66, '0'),
+          signer,
           defaultTaxWithholding: new BigNumber(25),
         };
         const result = await service.updateDefaultConfigByTicker(ticker, body);
 
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.corporateAction.SetDefaultWithholdingTax,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(mockAsset.corporateActions.setDefaultConfig).toHaveBeenCalledWith(
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          mockAsset.corporateActions.setDefaultConfig,
           { defaultTaxWithholding: new BigNumber(25) },
-          { signingAccount: address }
+          { signer }
         );
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
@@ -259,111 +242,26 @@ describe('CorporateActionsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
     });
 
-    describe('distributions.configureDividendDistribution errors', () => {
-      const cases: ErrorCase[] = [
-        [
-          "Origin Portfolio doesn't exist",
-          {
-            code: ErrorCode.DataUnavailable,
-            message: "The origin Portfolio doesn't exist",
-          },
-          NotFoundException,
-        ],
-        [
-          'The Distribution is expired',
-          {
-            code: ErrorCode.InsufficientBalance,
-            message:
-              "The origin Portfolio's free balance is not enough to cover the Distribution amount",
-            data: {
-              free: new BigNumber(1),
-            },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Distribution expires before the payment date',
-          {
-            code: ErrorCode.ValidationError,
-            message: 'Expiry date must be after payment date',
-          },
-          BadRequestException,
-        ],
-        [
-          "Checkpoint doesn't exist",
-          {
-            code: ErrorCode.DataUnavailable,
-            message: "Checkpoint doesn't exist",
-          },
-          NotFoundException,
-        ],
-      ];
-      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
-        mockAsset.corporateActions.distributions.configureDividendDistribution.mockImplementation(
-          () => {
-            throw polymeshError;
-          }
-        );
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error = null;
-        try {
-          await service.createDividendDistribution(ticker, body);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBeInstanceOf(HttpException);
-        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
-        mockIsPolymeshError.mockReset();
-      });
-    });
     describe('otherwise', () => {
       it('should run a configureDividendDistribution procedure and return the created Dividend Distribution', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.InitiateCorporateAction,
-          },
-          {
-            blockHash: '0x3',
-            txHash: '0x4',
-            blockNumber: new BigNumber(2),
-            tag: TxTags.capitalDistribution.Distribute,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.InitiateCorporateActionAndDistribute,
+        };
+        const mockTransaction = new MockTransaction(transaction);
         const mockDistribution = new MockDistribution();
-        mockQueue.run.mockResolvedValue(mockDistribution);
-        mockAsset.corporateActions.distributions.configureDividendDistribution.mockResolvedValue(
-          mockQueue
-        );
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
+        mockTransactionsService.submit.mockResolvedValue({
+          result: mockDistribution,
+          transactions: [mockTransaction],
+        });
 
         const result = await service.createDividendDistribution(ticker, body);
 
         expect(result).toEqual({
           result: mockDistribution,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.corporateAction.InitiateCorporateAction,
-              type: TransactionType.Single,
-            },
-            {
-              blockHash: '0x3',
-              transactionHash: '0x4',
-              blockNumber: new BigNumber(2),
-              transactionTag: TxTags.capitalDistribution.Distribute,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
@@ -383,7 +281,7 @@ describe('CorporateActionsService', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error("The Corporate Action doesn't exist");
 
-        mockAsset.corporateActions.remove.mockImplementation(() => {
+        mockTransactionsService.submit.mockImplementation(() => {
           throw expectedError;
         });
 
@@ -402,32 +300,19 @@ describe('CorporateActionsService', () => {
     });
     describe('otherwise', () => {
       it('should run a remove procedure and return the delete the Corporate Action', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.RemoveCa,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockAsset.corporateActions.remove.mockResolvedValue(mockQueue);
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.RemoveCa,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
 
         expect(result).toEqual({
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.corporateAction.RemoveCa,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
         expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
       });
@@ -435,125 +320,41 @@ describe('CorporateActionsService', () => {
   });
 
   describe('payDividends', () => {
+    const signer = '0x6'.padEnd(66, '0');
     const body = {
-      signer: '0x6'.padEnd(66, '0'),
+      signer,
       targets: ['0x6'.padEnd(66, '1')],
     };
 
-    describe('distribution.pay errors', () => {
-      const cases: ErrorCase[] = [
-        [
-          "The Distribution's date has not been reached",
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: "The Distribution's payment date hasn't been reached",
-            data: { paymentDate: new Date() },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'The Distribution is expired',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'The Distribution has already expired',
-            data: {
-              expiryDate: new Date(),
-            },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Identities already claimed their Distribution',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message:
-              'Some of the supplied Identities have already either been paid or claimed their share of the Distribution',
-            data: {
-              targets: body.targets,
-            },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Supplied Identities are not included',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'Some of the supplied Identities are not included in this Distribution',
-            data: {
-              excluded: body.targets,
-            },
-          },
-          UnprocessableEntityException,
-        ],
-      ];
-      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
-        const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.pay.mockImplementation(() => {
-          throw polymeshError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
-
-        let error;
-        try {
-          await service.payDividends('TICKER', new BigNumber(1), body);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBeInstanceOf(HttpException);
-
-        mockIsPolymeshError.mockReset();
-        findDistributionSpy.mockRestore();
-      });
-    });
-
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.capitalDistribution.PushBenefit,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.capitalDistribution.PushBenefit,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.pay.mockResolvedValue(mockQueue);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.payDividends('TICKER', new BigNumber(1), body);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.capitalDistribution.PushBenefit,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(distributionWithDetails.distribution.pay).toHaveBeenCalledWith(
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          distributionWithDetails.distribution.pay,
           {
             targets: body.targets,
           },
           {
-            signingAccount: address,
+            signer,
           }
         );
         findDistributionSpy.mockRestore();
@@ -583,68 +384,26 @@ describe('CorporateActionsService', () => {
       mockIsPolymeshError.mockReset();
     });
 
-    describe('if some of the provided documents are not associated with the Asset of the Corporate Action', () => {
-      it('should throw an UnprocessableEntityException', async () => {
-        const mockError = {
-          code: ErrorCode.UnmetPrerequisite,
-          message: 'Some of the provided documents are not associated with the Asset',
-        };
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
-        mockDistributionWithDetails.distribution.linkDocuments.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.linkDocuments('TICKER', new BigNumber(1), body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(UnprocessableEntityException);
-        expect((error as UnprocessableEntityException).message).toEqual(
-          'Some of the provided documents are not associated with the Asset'
-        );
-        findDistributionSpy.mockRestore();
-      });
-    });
-
     describe('otherwise', () => {
       it('should run the linkDocuments procedure and return the queue results', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.LinkCaDoc,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.LinkCaDoc,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockDistributionWithDetails.distribution.linkDocuments.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.linkDocuments('TICKER', new BigNumber(1), body);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.corporateAction.LinkCaDoc,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
         findDistributionSpy.mockRestore();
       });
@@ -654,111 +413,36 @@ describe('CorporateActionsService', () => {
   describe('claimDividends', () => {
     const signer = '0x6'.padEnd(66, '0');
 
-    describe('distribution.claim errors', () => {
-      const cases: ErrorCase[] = [
-        [
-          "Distribution's payment date hasn't been reached",
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: "The Distribution's payment date hasn't been reached",
-            data: { paymentDate: new Date() },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Distribution is expired',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'The Distribution has already expired',
-            data: {
-              expiryDate: new Date(),
-            },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Target Identity is not included in the Distribution',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'The current Identity is not included in this Distribution',
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Target Identity has already claimed dividends',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'The current Identity has already claimed dividends',
-          },
-          UnprocessableEntityException,
-        ],
-      ];
-
-      test.each(cases)('%s', async (_, polymeshError, HttpException) => {
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
-        const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.claim.mockImplementation(() => {
-          throw polymeshError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
-
-        let error;
-        try {
-          await service.claimDividends('TICKER', new BigNumber(1), signer);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBeInstanceOf(HttpException);
-
-        mockIsPolymeshError.mockReset();
-        findDistributionSpy.mockRestore();
-      });
-    });
-
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.capitalDistribution.Claim,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.capitalDistribution.Claim,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.claim.mockResolvedValue(mockQueue);
+        distributionWithDetails.distribution.claim.mockResolvedValue(mockTransaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.claimDividends('TICKER', new BigNumber(1), signer);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.capitalDistribution.Claim,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(distributionWithDetails.distribution.claim).toHaveBeenCalledWith(undefined, {
-          signingAccount: address,
-        });
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          distributionWithDetails.distribution.claim,
+          undefined,
+          {
+            signer,
+          }
+        );
         findDistributionSpy.mockRestore();
       });
     });
@@ -766,94 +450,40 @@ describe('CorporateActionsService', () => {
 
   describe('reclaimRemainingFunds', () => {
     const signer = '0x6'.padEnd(66, '0');
-
-    describe('distribution.reclaimFunds errors', () => {
-      const cases: ErrorCase[] = [
-        [
-          'Distribution is expired',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'The Distribution must be expired',
-            data: {
-              expiryDate: new Date(),
-            },
-          },
-          UnprocessableEntityException,
-        ],
-        [
-          'Distribution funds already reclaimed',
-          {
-            code: ErrorCode.UnmetPrerequisite,
-            message: 'Distribution funds have already been reclaimed',
-          },
-          UnprocessableEntityException,
-        ],
-      ];
-      test.each(cases)('%s', async (_, polymeshError, httpException) => {
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
-        const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.reclaimFunds.mockImplementation(() => {
-          throw polymeshError;
-        });
-        mockIsPolymeshError.mockReturnValue(true);
-
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
-
-        let error;
-        try {
-          await service.reclaimRemainingFunds('TICKER', new BigNumber(1), signer);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toBeInstanceOf(httpException);
-
-        mockIsPolymeshError.mockReset();
-        findDistributionSpy.mockRestore();
-      });
-    });
+    const webhookUrl = 'http://example.com';
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.capitalDistribution.Reclaim,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.capitalDistribution.Reclaim,
+        };
+        const mockTransaction = new MockTransaction(transaction);
 
         const distributionWithDetails = new MockDistributionWithDetails();
-        distributionWithDetails.distribution.reclaimFunds.mockResolvedValue(mockQueue);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
-
-        const result = await service.reclaimRemainingFunds('TICKER', new BigNumber(1), signer);
+        const result = await service.reclaimRemainingFunds(
+          'TICKER',
+          new BigNumber(1),
+          signer,
+          webhookUrl
+        );
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.capitalDistribution.Reclaim,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
-        expect(distributionWithDetails.distribution.reclaimFunds).toHaveBeenCalledWith(undefined, {
-          signingAccount: address,
-        });
+        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+          distributionWithDetails.distribution.reclaimFunds,
+          undefined,
+          { signer, webhookUrl }
+        );
         findDistributionSpy.mockRestore();
       });
     });
@@ -878,65 +508,25 @@ describe('CorporateActionsService', () => {
       mockIsPolymeshError.mockReset();
     });
 
-    describe('if provided Checkpoint does not exist', () => {
-      it('should throw an NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: "Checkpoint doesn't exist",
-        };
-        const findDistributionSpy = jest.spyOn(service, 'findDistribution');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
-        mockDistributionWithDetails.distribution.modifyCheckpoint.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.modifyCheckpoint('TICKER', new BigNumber(1), body);
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-        findDistributionSpy.mockRestore();
-      });
-    });
-
     describe('otherwise', () => {
       it('should run the modifyCheckpoint procedure and return the queue results', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.corporateAction.ChangeRecordDate,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-        mockDistributionWithDetails.distribution.modifyCheckpoint.mockResolvedValue(mockQueue);
+        const transaction = {
+          blockHash: '0x1',
+          txHash: '0x2',
+          blockNumber: new BigNumber(1),
+          tag: TxTags.corporateAction.ChangeRecordDate,
+        };
+        const mockTransaction = new MockTransaction(transaction);
+        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
         const findDistributionSpy = jest.spyOn(service, 'findDistribution');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
-
-        const address = 'address';
-        mockSigningService.getAddressByHandle.mockReturnValue(address);
 
         const result = await service.modifyCheckpoint('TICKER', new BigNumber(1), body);
         expect(result).toEqual({
           result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.corporateAction.ChangeRecordDate,
-              type: TransactionType.Single,
-            },
-          ],
+          transactions: [mockTransaction],
         });
         findDistributionSpy.mockRestore();
       });

@@ -4,18 +4,28 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
-import { AuthorizationType, ErrorCode, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { AuthorizationType, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
+import { AccountsService } from '~/accounts/accounts.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { TransactionType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
-import { mockSigningProvider } from '~/signing/signing.mock';
-import { MockAuthorizationRequest, MockIdentity, MockTransactionQueue } from '~/test-utils/mocks';
-import { MockIdentitiesService, MockSigningService } from '~/test-utils/service-mocks';
+import {
+  MockAccount,
+  MockAuthorizationRequest,
+  MockIdentity,
+  MockTransaction,
+} from '~/test-utils/mocks';
+import {
+  MockAccountsService,
+  MockIdentitiesService,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 
-jest.mock('@polymathnetwork/polymesh-sdk/utils', () => ({
-  ...jest.requireActual('@polymathnetwork/polymesh-sdk/utils'),
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
@@ -24,17 +34,25 @@ describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
 
   const mockIdentitiesService = new MockIdentitiesService();
+  const mockAccountsService = new MockAccountsService();
 
-  let mockSigningService: MockSigningService;
+  let mockTransactionsService: MockTransactionsService;
 
   beforeEach(async () => {
-    mockSigningService = mockSigningProvider.useValue;
+    mockTransactionsService = mockTransactionsProvider.useValue;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthorizationsService, IdentitiesService, mockSigningProvider],
+      providers: [
+        AuthorizationsService,
+        IdentitiesService,
+        AccountsService,
+        mockTransactionsProvider,
+      ],
     })
       .overrideProvider(IdentitiesService)
       .useValue(mockIdentitiesService)
+      .overrideProvider(AccountsService)
+      .useValue(mockAccountsService)
       .compile();
 
     service = module.get<AuthorizationsService>(AuthorizationsService);
@@ -128,10 +146,12 @@ describe('AuthorizationsService', () => {
 
   describe('findOne', () => {
     let mockIdentity: MockIdentity;
+    let mockAccount: MockAccount;
+
     beforeEach(() => {
       mockIsPolymeshError.mockReturnValue(false);
       mockIdentity = new MockIdentity();
-      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+      mockAccount = new MockAccount();
     });
 
     afterAll(() => {
@@ -139,7 +159,7 @@ describe('AuthorizationsService', () => {
     });
 
     describe('if the AuthorizationRequest does not exist', () => {
-      it('should throw a NotFoundException', () => {
+      it('should throw a NotFoundException', async () => {
         const mockError = {
           code: ErrorCode.DataUnavailable,
           message: 'The Authorization Request does not exist',
@@ -151,22 +171,42 @@ describe('AuthorizationsService', () => {
 
         mockIsPolymeshError.mockReturnValue(true);
 
-        return expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toBeInstanceOf(
-          NotFoundException
-        );
+        await expect(() =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          service.findOne(mockIdentity as any, new BigNumber(1))
+        ).rejects.toBeInstanceOf(NotFoundException);
+
+        mockAccount.authorizations.getOne.mockImplementation(() => {
+          throw mockError;
+        });
+
+        await expect(() =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          service.findOne(mockAccount as any, new BigNumber(1))
+        ).rejects.toBeInstanceOf(NotFoundException);
       });
     });
 
     describe('if there is a different error', () => {
-      it('should pass the error along the chain', () => {
+      it('should pass the error along the chain', async () => {
         const mockError = new Error('foo');
         mockIdentity.authorizations.getOne.mockImplementation(() => {
           throw mockError;
         });
 
-        return expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toThrowError(
-          mockError
-        );
+        await expect(() =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          service.findOne(mockIdentity as any, new BigNumber(1))
+        ).rejects.toThrowError(mockError);
+
+        mockAccount.authorizations.getOne.mockImplementation(() => {
+          throw mockError;
+        });
+
+        await expect(() =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          service.findOne(mockAccount as any, new BigNumber(1))
+        ).rejects.toThrowError(mockError);
       });
     });
 
@@ -175,132 +215,170 @@ describe('AuthorizationsService', () => {
         const mockAuthorization = new MockAuthorizationRequest();
         mockIdentity.authorizations.getOne.mockResolvedValue(mockAuthorization);
 
-        const result = await service.findOne('0x6'.padEnd(66, '0'), new BigNumber(1));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let result = await service.findOne(mockIdentity as any, new BigNumber(1));
+        expect(result).toEqual(mockAuthorization);
+
+        mockAccount.authorizations.getOne.mockResolvedValue(mockAuthorization);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await service.findOne(mockAccount as any, new BigNumber(1));
         expect(result).toEqual(mockAuthorization);
       });
     });
   });
 
-  describe('accept', () => {
+  describe('findOneByDid', () => {
+    it('should return the AuthorizationRequest details', async () => {
+      const mockIdentity = new MockIdentity();
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+      const mockAuthorization = new MockAuthorizationRequest();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAuthorization as any);
+
+      const result = await service.findOneByDid('0x6'.padEnd(66, '0'), new BigNumber(1));
+      expect(result).toEqual(mockAuthorization);
+    });
+  });
+
+  describe('getAuthRequest', () => {
+    let mockAccount: MockAccount;
+    let mockIdentity: MockIdentity;
     let mockAuthorizationRequest: MockAuthorizationRequest;
+    let address: string;
+    let id: BigNumber;
+    let findOneSpy: jest.SpyInstance;
 
     beforeEach(() => {
+      address = 'address';
+      id = new BigNumber(1);
+      mockAccount = new MockAccount();
+      mockIdentity = new MockIdentity();
       mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
-    });
-    describe('if there is an error', () => {
-      it('should pass it up the chain', async () => {
-        const expectedError = new Error('Some error');
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
-
-        mockAuthorizationRequest.accept.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        await expect(() => service.accept(new BigNumber(1), '0x6000')).rejects.toThrowError(
-          expectedError
-        );
-        findOneSpy.mockRestore();
-      });
+      mockAccountsService.findOne.mockResolvedValue(mockAccount);
+      findOneSpy = jest.spyOn(service, 'findOne');
     });
 
-    describe('otherwise', () => {
-      it('should call the accept procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.portfolio.AcceptPortfolioCustody,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
+    it('should throw an error if AuthorizationRequest does not exist for a given ID', async () => {
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
 
-        const findOneSpy = jest.spyOn(service, 'findOne');
+      const mockError = new Error('foo');
+      when(findOneSpy)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
+        .calledWith(mockIdentity as any, id)
+        .mockRejectedValue(mockError);
 
-        mockAuthorizationRequest.accept.mockResolvedValue(mockQueue);
+      await expect(() => service.getAuthRequest(address, id)).rejects.toThrowError(mockError);
 
-        const result = await service.accept(new BigNumber(1), '0x6000');
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.portfolio.AcceptPortfolioCustody,
-              type: TransactionType.Single,
-            },
-          ],
-        });
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockRejectedValue(new NotFoundException());
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockAccount as any, id)
+        .mockRejectedValue(new NotFoundException());
+
+      await expect(() => service.getAuthRequest(address, id)).rejects.toBeInstanceOf(
+        NotFoundException
+      );
+
+      findOneSpy.mockRestore();
+    });
+
+    it('should return an AuthorizationRequest targeted to an Identity', async () => {
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockResolvedValue(mockAuthorizationRequest);
+
+      const result = await service.getAuthRequest(address, id);
+      expect(result).toBe(mockAuthorizationRequest);
+
+      findOneSpy.mockRestore();
+    });
+
+    it('should return an AuthorizationRequest targeted to an Account', async () => {
+      mockAccount.getIdentity.mockResolvedValue(null);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockAccount as any, id)
+        .mockResolvedValue(mockAuthorizationRequest);
+
+      let result = await service.getAuthRequest(address, id);
+      expect(result).toBe(mockAuthorizationRequest);
+
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+
+      when(findOneSpy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .calledWith(mockIdentity as any, id)
+        .mockRejectedValue(new NotFoundException());
+
+      result = await service.getAuthRequest(address, id);
+      expect(result).toBe(mockAuthorizationRequest);
+    });
+  });
+
+  describe('accept', () => {
+    it('should call the accept procedure and return the queue data', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.AcceptPortfolioCustody,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      const mockAuthorizationRequest = new MockAuthorizationRequest();
+
+      const getAuthRequestSpy = jest.spyOn(service, 'getAuthRequest');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      getAuthRequestSpy.mockResolvedValue(mockAuthorizationRequest as any);
+
+      mockTransactionsService.getSigningAccount.mockResolvedValue('address');
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.accept(new BigNumber(1), '0x6000');
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
       });
+      getAuthRequestSpy.mockRestore();
     });
   });
 
   describe('remove', () => {
-    let mockAuthorizationRequest: MockAuthorizationRequest;
+    it('should call the remove procedure and return the queue data', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.RemoveAuthorization,
+      };
 
-    beforeEach(() => {
-      mockAuthorizationRequest = new MockAuthorizationRequest();
-      mockSigningService.getAddressByHandle.mockReturnValue('address');
-    });
+      const mockTransaction = new MockTransaction(transaction);
 
-    describe('if there is an error', () => {
-      it('should pass it up the chain', async () => {
-        const expectedError = new Error('Some error');
+      const mockAuthorizationRequest = new MockAuthorizationRequest();
 
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
+      const getAuthRequestSpy = jest.spyOn(service, 'getAuthRequest');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      getAuthRequestSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
-        mockAuthorizationRequest.remove.mockImplementation(() => {
-          throw expectedError;
-        });
+      mockTransactionsService.getSigningAccount.mockResolvedValue('address');
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        await expect(() => service.remove(new BigNumber(1), '0x6000')).rejects.toThrowError(
-          expectedError
-        );
-        findOneSpy.mockRestore();
+      const result = await service.remove(new BigNumber(2), '0x6000');
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
       });
-    });
-
-    describe('otherwise', () => {
-      it('should call the remove procedure and return the queue data', async () => {
-        const transactions = [
-          {
-            blockHash: '0x1',
-            txHash: '0x2',
-            blockNumber: new BigNumber(1),
-            tag: TxTags.identity.RemoveAuthorization,
-          },
-        ];
-        const mockQueue = new MockTransactionQueue(transactions);
-
-        const findOneSpy = jest.spyOn(service, 'findOne');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findOneSpy.mockResolvedValue(mockAuthorizationRequest as any);
-
-        mockAuthorizationRequest.remove.mockResolvedValue(mockQueue);
-
-        const result = await service.remove(new BigNumber(2), '0x6000');
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [
-            {
-              blockHash: '0x1',
-              transactionHash: '0x2',
-              blockNumber: new BigNumber(1),
-              transactionTag: TxTags.identity.RemoveAuthorization,
-              type: TransactionType.Single,
-            },
-          ],
-        });
-      });
+      getAuthRequestSpy.mockRestore();
     });
   });
 });

@@ -1,5 +1,5 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
-import { CaCheckpointType } from '@polymathnetwork/polymesh-sdk/types';
+import { CaCheckpointType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { InvalidCase, ValidCase } from '~/test-utils/types';

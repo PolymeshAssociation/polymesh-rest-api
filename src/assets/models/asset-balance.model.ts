@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Asset } from '@polymathnetwork/polymesh-sdk/types';
+import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { BalanceModel } from '~/assets/models/balance.model';
 import { FromEntity } from '~/common/decorators/transformation';

@@ -2,7 +2,7 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
-import { Polymesh } from '@polymathnetwork/polymesh-sdk';
+import { Polymesh } from '@polymeshassociation/polymesh-sdk';
 
 import polymeshConfig from '~/polymesh/config/polymesh.config';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';

@@ -1,15 +1,15 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { MAX_MEMO_LENGTH } from '~/accounts/accounts.consts';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
-export class TransferPolyxDto extends SignerDto {
+export class TransferPolyxDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Account that will receive the POLYX',
     type: 'string',

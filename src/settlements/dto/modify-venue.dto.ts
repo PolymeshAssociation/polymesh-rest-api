@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { VenueType } from '@polymathnetwork/polymesh-sdk/types';
+import { VenueType } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsString, ValidateIf } from 'class-validator';
 
-import { SignerDto } from '~/common/dto/signer.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
-export class ModifyVenueDto extends SignerDto {
+export class ModifyVenueDto extends TransactionBaseDto {
   @ApiPropertyOptional({
     description: 'Details about the Venue',
     example: 'The TSX is an exchange located in Toronto, Ontario',

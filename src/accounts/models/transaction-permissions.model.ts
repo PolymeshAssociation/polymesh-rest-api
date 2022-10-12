@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ModuleName, TxTag, TxTags } from '@polymathnetwork/polymesh-sdk/types';
+import { ModuleName, TxTag, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { PermissionTypeModel } from '~/accounts/models/permission-type.model';
 import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TickerReservationStatus } from '@polymathnetwork/polymesh-sdk/types';
+import { TickerReservationStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';
@@ -39,7 +39,7 @@ describe('TickerReservationsController', () => {
       expect(result).toEqual({
         transactions: ['transaction'],
       });
-      expect(mockTickerReservationsService.reserve).toHaveBeenCalledWith(ticker, signer);
+      expect(mockTickerReservationsService.reserve).toHaveBeenCalledWith(ticker, signer, undefined);
     });
   });
 
@@ -104,15 +104,16 @@ describe('TickerReservationsController', () => {
       mockTickerReservationsService.extend.mockResolvedValue(mockData);
 
       const signer = '0x6000';
+      const webhookUrl = 'http://example.com/webhook';
       const ticker = 'SOME_TICKER';
 
-      const result = await controller.extendReservation({ ticker }, { signer });
+      const result = await controller.extendReservation({ ticker }, { signer, webhookUrl });
 
       expect(result).toEqual({
         tickerReservation: mockResult,
         transactions: ['transaction'],
       });
-      expect(mockTickerReservationsService.extend).toHaveBeenCalledWith(ticker, signer);
+      expect(mockTickerReservationsService.extend).toHaveBeenCalledWith(ticker, signer, webhookUrl);
     });
   });
 });

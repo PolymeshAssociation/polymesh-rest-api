@@ -6,7 +6,7 @@ import {
   TransactionPermissions,
   TxTag,
   TxTags,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 
 import { IsTxTag, IsTxTagOrModuleName } from '~/common/decorators/validation';

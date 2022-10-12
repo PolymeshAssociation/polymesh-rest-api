@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AssetDocument } from '@polymathnetwork/polymesh-sdk/types';
+import { AssetDocument } from '@polymeshassociation/polymesh-sdk/types';
 import { IsDate, IsHexadecimal, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';

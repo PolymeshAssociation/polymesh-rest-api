@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { TargetTreatment } from '@polymathnetwork/polymesh-sdk/types';
+import { TargetTreatment } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum } from 'class-validator';
 
 import { IsDid } from '~/common/decorators/validation';

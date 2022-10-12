@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -9,16 +8,17 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
+  AuthorizationRequest,
   AuthorizationType,
   Claim,
   ClaimType,
   Instruction,
   TickerReservation,
   Venue,
-} from '@polymathnetwork/polymesh-sdk/types';
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
@@ -31,11 +31,12 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
-import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -161,7 +162,7 @@ export class IdentitiesController {
   async getPendingAuthorization(
     @Param() { did, id }: AuthorizationParamsDto
   ): Promise<AuthorizationRequestModel> {
-    const authorizationRequest = await this.authorizationsService.findOne(did, id);
+    const authorizationRequest = await this.authorizationsService.findOneByDid(did, id);
     return createAuthorizationRequestModel(authorizationRequest);
   }
 
@@ -399,7 +400,7 @@ export class IdentitiesController {
     description:
       'This endpoint will send an invitation to a Secondary Account to join the Identity of the signer. It also defines the set of permissions the Secondary Account will have.',
   })
-  @ApiCreatedResponse({
+  @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedAuthorizationRequestModel,
   })
@@ -413,14 +414,17 @@ export class IdentitiesController {
   @Post('/secondary-accounts/invite')
   async addSecondaryAccount(
     @Body() addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
-  ): Promise<CreatedAuthorizationRequestModel> {
-    const { transactions, result } = await this.identitiesService.addSecondaryAccount(
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );
-    return new CreatedAuthorizationRequestModel({
-      transactions,
-      authorizationRequest: createAuthorizationRequestModel(result),
-    });
+    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
+      new CreatedAuthorizationRequestModel({
+        transactions,
+        authorizationRequest: createAuthorizationRequestModel(result),
+      });
+
+    return handleServiceResult(serviceResult, resolver);
   }
 
   @ApiTags('ticker-reservations')

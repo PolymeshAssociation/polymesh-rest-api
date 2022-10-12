@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from '~/app.module';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
+import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 async function bootstrap(): Promise<void> {
@@ -24,7 +25,8 @@ async function bootstrap(): Promise<void> {
   const logger = new PolymeshLogger();
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
-    new LoggingInterceptor(logger)
+    new LoggingInterceptor(logger),
+    new WebhookResponseCodeInterceptor()
   );
 
   // Swagger

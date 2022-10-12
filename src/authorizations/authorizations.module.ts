@@ -2,14 +2,15 @@
 
 import { forwardRef, Module } from '@nestjs/common';
 
+import { AccountsModule } from '~/accounts/accounts.module';
 import { AuthorizationsController } from '~/authorizations/authorizations.controller';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
-import { SigningModule } from '~/signing/signing.module';
+import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({
-  imports: [PolymeshModule, SigningModule, forwardRef(() => IdentitiesModule)],
+  imports: [PolymeshModule, TransactionsModule, AccountsModule, forwardRef(() => IdentitiesModule)],
   providers: [AuthorizationsService],
   exports: [AuthorizationsService],
   controllers: [AuthorizationsController],

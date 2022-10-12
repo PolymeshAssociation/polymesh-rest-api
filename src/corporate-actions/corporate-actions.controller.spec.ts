@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BigNumber } from '@polymathnetwork/polymesh-sdk';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { ResultsModel } from '~/common/models/results.model';
@@ -170,7 +170,8 @@ describe('CorporateActionsController', () => {
       expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
-        '0x6'.padEnd(66, '0')
+        '0x6'.padEnd(66, '0'),
+        undefined
       );
     });
   });
@@ -282,7 +283,8 @@ describe('CorporateActionsController', () => {
       expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
-        signer
+        signer,
+        undefined
       );
     });
   });
