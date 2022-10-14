@@ -13,7 +13,7 @@ export class AuthService {
   private userStore: Record<UserId, User> = {};
 
   constructor(config: ConfigService) {
-    const givenApiKeys = config.getOrThrow<string>('API_KEYS', '');
+    const givenApiKeys = config.getOrThrow<string>('API_KEYS');
     const apiKeys = parseApiKeysConfig(givenApiKeys);
 
     const configuredUserId = 'configured-user';
@@ -44,7 +44,7 @@ export class AuthService {
   public async deleteApiKey({ apiKey }: DeleteApiKeyDto): Promise<void> {
     const user = this.getUserByApiKey(apiKey);
     if (user) {
-      user.apiKeys = user.apiKeys.filter(k => k !== apiKey);
+      user.apiKeys = user.apiKeys.filter(key => key !== apiKey);
     } else {
       throw new NotFoundException('api key was not found');
     }

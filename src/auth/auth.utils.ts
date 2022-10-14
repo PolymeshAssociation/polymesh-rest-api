@@ -6,7 +6,7 @@ import { AuthStrategy, authStrategyValues } from '~/auth/strategies/strategies.c
  * @throws if given invalid values
  */
 export const parseAuthStrategyConfig = (rawStrategyConfig: string): AuthStrategy[] => {
-  const givenStrategies = rawStrategyConfig.split(',').map(s => s.trim());
+  const givenStrategies = rawStrategyConfig.split(',').map(strategy => strategy.trim());
 
   const filteredStrategies = givenStrategies.filter(isStrategyKey);
 
@@ -24,7 +24,7 @@ export const parseApiKeysConfig = (rawApiKeyConfig: string): string[] => {
 };
 
 const isStrategyKey = (key: string): key is AuthStrategy => {
-  return Object.values(AuthStrategy).includes(key as AuthStrategy);
+  return authStrategyValues.includes(key as AuthStrategy);
 };
 
 /**

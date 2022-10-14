@@ -63,7 +63,7 @@ Currently there are two strategies available:
 
 More can be added in. There are many [pre-made strategies](https://www.passportjs.org/packages/) that are available, or a custom one can be written.
 
-To implement a new strategy, create a new file in `~/auth/strategies/` and update the `strategies.consts` file with an appropriate name
+To implement a new strategy, create a new file in `~/auth/strategies/` and update the `strategies.consts` file with an appropriate name. Be sure to add some tests for it as well!
 
 ## Webhooks (alpha)
 
