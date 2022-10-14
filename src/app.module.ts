@@ -1,11 +1,13 @@
 /* istanbul ignore file */
 
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
 import { AccountsModule } from '~/accounts/accounts.module';
 import { AssetsModule } from '~/assets/assets.module';
+import { AuthModule } from '~/auth/auth.module';
+import { AuthStrategy } from '~/auth/strategies/strategies.conts';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
@@ -14,6 +16,7 @@ import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.mo
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
+import { AuthMiddleware } from '~/middleware/auth.middleware';
 import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -43,6 +46,14 @@ import { TransactionsModule } from '~/transactions/transactions.module';
         VAULT_TOKEN: Joi.string().allow(''),
         VAULT_URL: Joi.string().allow(''),
         DEVELOPER_UTILS: Joi.bool().default(false),
+        API_KEYS: Joi.string().default(''),
+        AUTH_STRATEGY: Joi.string().default(() => {
+          if (process.env.NODE_ENV === 'production') {
+            throw new Error('ENV "AUTH_STRATEGY" must be set in a production environment');
+          }
+          console.warn('Defaulting to "open" for "AUTH_STRATEGY"');
+          return AuthStrategy.open;
+        }),
       })
         .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')
         .and('LOCAL_SIGNERS', 'LOCAL_MNEMONICS')
@@ -68,6 +79,11 @@ import { TransactionsModule } from '~/transactions/transactions.module';
     NotificationsModule,
     ScheduleModule,
     DeveloperTestingModule.register(),
+    AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AuthMiddleware).forRoutes('');
+  }
+}
