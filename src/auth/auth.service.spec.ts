@@ -33,8 +33,8 @@ describe('AuthService', () => {
     });
   });
 
-  describe('removeApiKey', () => {
-    it('should remove an API key', async () => {
+  describe('deleteApiKey', () => {
+    it('should delete an API key', async () => {
       let result = service.validateApiKey(apiKey);
       expect(result).toBeDefined();
 

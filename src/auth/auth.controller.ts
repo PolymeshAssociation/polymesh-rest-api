@@ -24,19 +24,19 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: 'Remove an API Key',
+    summary: 'Delete an API Key',
     description: 'This endpoint invalidates the given API key',
   })
   @ApiOkResponse({
-    description: 'The API key was removed',
+    description: 'The API key was deleted',
   })
   @ApiNotFoundResponse({
     description: 'The API key was not found',
   })
-  @Post('/api-key/remove')
+  @Post('/api-key/delete')
   public async deleteApiKey(@Body() params: DeleteApiKeyDto): Promise<{ message: string }> {
     await this.authService.deleteApiKey(params);
 
-    return { message: 'key removed' };
+    return { message: 'key deleted' };
   }
 }
