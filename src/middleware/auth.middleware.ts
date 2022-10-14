@@ -14,9 +14,8 @@ export class AuthMiddleware implements NestMiddleware {
     this.strategies = parseAuthStrategyConfig(rawAuth);
   }
 
-  use(req: any, res: any, next: () => void) {
-    passport.authenticate(this.strategies, { session: false }, (request, user: User, info) => {
-      console.log('authenticated user: ', user);
+  use(req: unknown, res: unknown, next: () => void): void {
+    passport.authenticate(this.strategies, { session: false }, (request, user: User) => {
       if (user) {
         next();
       } else {

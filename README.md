@@ -36,6 +36,7 @@ SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscri
 NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
 NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
+AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
 ```
 
 ### Signing Transactions
@@ -48,6 +49,21 @@ For any method that modifies chain state, the key to sign with can be controlled
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
 1. Vault Signing:
    By setting `VAULT_URL` and `VAULT_SECRET`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`
+
+### Authentication
+
+The API uses [passport.js](https://www.passportjs.org/) for authentication. This allows the REST API to be configured with different strategies, depending on the use case.
+
+Currently there are two strategies available:
+
+1. Api Key:
+   By setting `apiKey` in the strategy any request that provides the header `x-api-key` that will server as the authentication mechanism. The env `API_KEYS` can be used to provide initial keys
+1. Open:
+   By setting `open` this strategy will authenticate all requests with a default user entity. Primarily intended for development, but can be useful to provide a "read only" API. It should never be used when in combination with a signing manager that holds valuable keys. This is the default strategy, although it must be explicitly passed in a production environment
+
+More can be added in. There are many [pre-made strategies](https://www.passportjs.org/packages/) that are available, or a custom one can be written.
+
+To implement a new strategy, create a new file in `~/auth/strategies/` and update the `strategies.consts` file with an appropriate name
 
 ## Webhooks (alpha)
 

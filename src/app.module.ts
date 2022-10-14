@@ -7,7 +7,7 @@ import Joi from 'joi';
 import { AccountsModule } from '~/accounts/accounts.module';
 import { AssetsModule } from '~/assets/assets.module';
 import { AuthModule } from '~/auth/auth.module';
-import { AuthStrategy } from '~/auth/strategies/strategies.conts';
+import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';

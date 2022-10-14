@@ -1,8 +1,4 @@
-import {
-  AuthStrategy,
-  authStrategyValues,
-  cmpAuthStrategyOrder,
-} from '~/auth/strategies/strategies.conts';
+import { AuthStrategy, authStrategyValues } from '~/auth/strategies/strategies.consts';
 
 /**
  * transforms a raw auth strategy config into valid strategy values
@@ -30,3 +26,11 @@ export const parseApiKeysConfig = (rawApiKeyConfig: string): string[] => {
 const isStrategyKey = (key: string): key is AuthStrategy => {
   return Object.values(AuthStrategy).includes(key as AuthStrategy);
 };
+
+/**
+ * A helper to be passed to `.sort`. The order is in which they will be evaluated.
+ *
+ * For example the the "open" strategy should always be last to allow for testing of other strategies
+ */
+const cmpAuthStrategyOrder = (a: AuthStrategy, b: AuthStrategy): number =>
+  authStrategyValues.indexOf(a) - authStrategyValues.indexOf(b);

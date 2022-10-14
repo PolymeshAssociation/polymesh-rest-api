@@ -3,9 +3,8 @@ import { ApiNotFoundResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagge
 
 import { AuthService } from '~/auth/auth.service';
 import { CreateApiKeyDto } from '~/auth/dto/create-api-key.dto';
-import { RemoveApiKeyDto } from '~/auth/dto/delete-api-key.dto';
+import { DeleteApiKeyDto } from '~/auth/dto/delete-api-key.dto';
 import { ApiKeyModel } from '~/auth/models/api-key.model';
-import { apiKeyHeader } from '~/auth/strategies/api-key.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -16,7 +15,7 @@ export class AuthController {
     description: 'This endpoint will create an API Key',
   })
   @ApiOkResponse({
-    description: `Details of the API key to be set for the request header: "${apiKeyHeader}"`,
+    description: 'Details of the API key created',
     type: ApiKeyModel,
   })
   @Post('api-key/create')
@@ -35,8 +34,9 @@ export class AuthController {
     description: 'The API key was not found',
   })
   @Post('/api-key/remove')
-  public async deleteApiKey(@Body() { apiKey }: RemoveApiKeyDto): Promise<{ message: string }> {
-    await this.authService.removeApiKey(apiKey);
+  public async deleteApiKey(@Body() params: DeleteApiKeyDto): Promise<{ message: string }> {
+    await this.authService.deleteApiKey(params);
+
     return { message: 'key removed' };
   }
 }

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { parseApiKeysConfig } from '~/auth/auth.utils';
 import { CreateApiKeyDto } from '~/auth/dto/create-api-key.dto';
+import { DeleteApiKeyDto } from '~/auth/dto/delete-api-key.dto';
 import { ApiKeyModel } from '~/auth/models/api-key.model';
 import { generateBase64Secret } from '~/common/utils';
 import { User, UserId } from '~/users/user.consts';
@@ -40,7 +41,7 @@ export class AuthService {
   /**
    * @param apiKey - key to delete
    */
-  public async removeApiKey(apiKey: string): Promise<void> {
+  public async deleteApiKey({ apiKey }: DeleteApiKeyDto): Promise<void> {
     const user = this.getUserByApiKey(apiKey);
     if (user) {
       user.apiKeys = user.apiKeys.filter(k => k !== apiKey);

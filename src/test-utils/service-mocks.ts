@@ -1,5 +1,9 @@
 /* istanbul ignore file */
 
+import { ConfigService } from '@nestjs/config';
+
+import { AuthService } from '~/auth/auth.service';
+import { Class } from '~/common/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 
 export class MockAssetService {
@@ -155,3 +159,32 @@ export class MockCheckpointsService {
   deleteScheduleByTicker = jest.fn();
   findOne = jest.fn();
 }
+
+export class MockAuthService {
+  createApiKey = jest.fn();
+  deleteApiKey = jest.fn();
+  validateApiKey = jest.fn();
+}
+
+export const mockAuthServiceProvider = {
+  provide: AuthService,
+  useValue: new MockAuthService(),
+};
+
+type ServiceProvider = {
+  useValue: unknown;
+  provide: Class;
+};
+
+/**
+ * Given a set of key values to use as config, will wrap and return as a Nest "provider"
+ */
+export const makeMockConfigProvider = (config: Record<string, unknown>): ServiceProvider => {
+  return {
+    useValue: {
+      getOrThrow: (key: string): unknown => config[key],
+      get: (key: string): unknown => config[key],
+    },
+    provide: ConfigService,
+  };
+};
