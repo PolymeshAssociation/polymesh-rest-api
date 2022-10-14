@@ -40,7 +40,7 @@ describe('AuthController', () => {
 
       const result = await controller.deleteApiKey({ apiKey });
 
-      expect(result).toEqual({ message: 'key removed' });
+      expect(result).toEqual({ message: 'key deleted' });
       expect(mockAuthService.deleteApiKey).toHaveBeenCalledWith({ apiKey });
     });
   });
