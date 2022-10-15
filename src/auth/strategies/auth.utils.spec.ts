@@ -6,6 +6,7 @@ describe('parseAuthStrategyConfig', () => {
     const result = parseAuthStrategyConfig('apiKey');
     expect(result).toEqual([AuthStrategy.apiKey]);
   });
+
   it('should split up valid options', () => {
     const result = parseAuthStrategyConfig('apiKey,open');
     expect(result).toEqual([AuthStrategy.apiKey, AuthStrategy.open]);

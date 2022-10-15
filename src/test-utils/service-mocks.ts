@@ -3,7 +3,7 @@
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
-import { Class } from '~/common/types';
+import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 
 export class MockAssetService {
@@ -171,19 +171,21 @@ export const mockAuthServiceProvider = {
   useValue: new MockAuthService(),
 };
 
-type ServiceProvider = {
-  useValue: unknown;
-  provide: Class;
-};
-
 /**
- * Given a set of key values to use as config, will wrap and return as a Nest "provider"
+ * Given a set of key values to use as config, will wrap and return as a Nest "provider" for config
  */
 export const makeMockConfigProvider = (config: Record<string, unknown>): ServiceProvider => {
   return {
     useValue: {
-      getOrThrow: (key: string): unknown => config[key],
       get: (key: string): unknown => config[key],
+      getOrThrow: (key: string): unknown => {
+        const value = config[key];
+        if (value) {
+          return value;
+        } else {
+          throw new Error(`mock config error: "${key}" was not found`);
+        }
+      },
     },
     provide: ConfigService,
   };

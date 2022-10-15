@@ -8,7 +8,7 @@ import { openAuthUser } from '~/users/user.consts';
 /**
  * authenticates with a default user
  *
- * @note this is intended for development or read only purposes. This strategy Should **not** be used with a signer holding production keys
+ * @note this is intended for development or read only purposes. This strategy should **not** be used with a signer holding production keys
  */
 @Injectable()
 export class OpenStrategy extends PassportStrategy(Strategy, AuthStrategy.open) {

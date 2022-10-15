@@ -5,6 +5,7 @@ import passport from 'passport';
 import { ApiKeyStrategy } from '~/auth/strategies/api-key.strategy';
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { MockAuthService, mockAuthServiceProvider } from '~/test-utils/service-mocks';
+
 describe('ApiKeyStrategy', () => {
   let strategy: ApiKeyStrategy;
   let authService: MockAuthService;
