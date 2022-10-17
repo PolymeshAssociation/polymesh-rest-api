@@ -1,3 +1,4 @@
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Account,
   Asset,
@@ -5,11 +6,16 @@ import {
   PermissionedAccount,
   Permissions,
   PermissionType,
+  SubsidyWithAllowance,
   TxGroup,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { createPermissionedAccountModel, createPermissionsModel } from '~/accounts/accounts.util';
+import {
+  createPermissionedAccountModel,
+  createPermissionsModel,
+  createSubsidyModel,
+} from '~/accounts/accounts.util';
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissions.model';
@@ -97,6 +103,28 @@ describe('createPermissionedAccountModel', () => {
     expect(result).toEqual({
       account: new AccountModel({ address }),
       permissions: new PermissionsModel(permissions),
+    });
+  });
+});
+
+describe('createSubsidyModel', () => {
+  it('should transform SubsidyWithAllowance to SubsidyModel', () => {
+    const subsidyWithAllowance = {
+      beneficiary: {
+        address: 'beneficiary',
+      },
+      subsidizer: {
+        address: 'subsidizer',
+      },
+      allowance: new BigNumber(10),
+    } as unknown as SubsidyWithAllowance;
+
+    const result = createSubsidyModel(subsidyWithAllowance);
+
+    expect(result).toEqual({
+      beneficiary: new AccountModel({ address: 'beneficiary' }),
+      subsidizer: new AccountModel({ address: 'subsidizer' }),
+      allowance: new BigNumber(10),
     });
   });
 });

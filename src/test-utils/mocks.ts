@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
@@ -8,6 +9,7 @@ import {
   TxTag,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { Response } from 'express';
 
 export type Mocked<T> = T &
   {
@@ -15,6 +17,13 @@ export type Mocked<T> = T &
       ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
       : T[K];
   };
+
+export const mockResponseObject = (): DeepMocked<Response> => {
+  return createMock<Response>({
+    json: jest.fn().mockReturnThis(),
+    status: jest.fn().mockReturnThis(),
+  });
+};
 
 /* Polymesh SDK */
 
@@ -299,9 +308,19 @@ export class MockAuthorizations {
   getOne = jest.fn();
 }
 export class MockAccount {
-  address = 'address';
+  address: string;
   authorizations = new MockAuthorizations();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
   getIdentity = jest.fn();
+  getSubsidy = jest.fn();
+
+  constructor(address = 'address') {
+    this.address = address;
+  }
+}
+
+export class MockSubsidy {
+  beneficiary = new MockAccount('beneficiary');
+  subsidizer = new MockAccount('subsidizer');
 }
