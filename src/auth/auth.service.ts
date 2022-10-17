@@ -45,8 +45,6 @@ export class AuthService {
     const user = this.getUserByApiKey(apiKey);
     if (user) {
       user.apiKeys = user.apiKeys.filter(key => key !== apiKey);
-    } else {
-      throw new NotFoundException('API key was not found');
     }
   }
 

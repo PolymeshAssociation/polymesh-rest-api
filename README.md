@@ -63,6 +63,7 @@ NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before i
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
 NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
 AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
+API_KEYS="## list of comma separated api keys to initialize the `apiKey` strategy with ##"
 ```
 
 ### Signing Transactions

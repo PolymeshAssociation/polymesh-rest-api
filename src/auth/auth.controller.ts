@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from '~/auth/auth.service';
 import { CreateApiKeyDto } from '~/auth/dto/create-api-key.dto';
@@ -28,16 +28,11 @@ export class AuthController {
     summary: 'Delete an API Key',
     description: 'This endpoint invalidates the given API key',
   })
-  @ApiOkResponse({
-    description: 'The API key was deleted',
-  })
-  @ApiNotFoundResponse({
-    description: 'The API key was not found',
+  @ApiNoContentResponse({
+    description: 'The API key is no longer valid',
   })
   @Post('/api-key/delete')
-  public async deleteApiKey(@Body() params: DeleteApiKeyDto): Promise<{ message: string }> {
+  public async deleteApiKey(@Body() params: DeleteApiKeyDto): Promise<void> {
     await this.authService.deleteApiKey(params);
-
-    return { message: 'key deleted' };
   }
 }
