@@ -35,7 +35,7 @@ describe('ApiKeyStrategy', () => {
     when(authService.validateApiKey).calledWith(mockApiKey).mockReturnValue(mockedUser);
 
     let authorizedUser;
-    passport.authenticate(AuthStrategy.apiKey, (request, user) => {
+    passport.authenticate(AuthStrategy.ApiKey, (request, user) => {
       authorizedUser = user;
     })(mockRequest, {}, {});
 
@@ -52,7 +52,7 @@ describe('ApiKeyStrategy', () => {
     when(authService.validateApiKey).calledWith(mockApiKey).mockReturnValue(mockedUser);
 
     let authorizedUser;
-    passport.authenticate(AuthStrategy.apiKey, (request, user) => {
+    passport.authenticate(AuthStrategy.ApiKey, (request, user) => {
       authorizedUser = user;
     })(mockRequest, {}, {});
 

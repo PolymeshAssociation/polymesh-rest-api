@@ -1,11 +1,12 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from '~/auth/auth.service';
 import { CreateApiKeyDto } from '~/auth/dto/create-api-key.dto';
 import { DeleteApiKeyDto } from '~/auth/dto/delete-api-key.dto';
 import { ApiKeyModel } from '~/auth/models/api-key.model';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

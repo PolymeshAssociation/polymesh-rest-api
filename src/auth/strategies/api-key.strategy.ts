@@ -14,7 +14,7 @@ type Callback = (err: Error | null, user?: Object, info?: Object) => void;
  * authenticate with an API key
  */
 @Injectable()
-export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, AuthStrategy.apiKey) {
+export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, AuthStrategy.ApiKey) {
   constructor(private authService: AuthService) {
     super({ header: apiKeyHeader }, false, (apiKey: string, done: Callback) => {
       const user = this.authService.validateApiKey(apiKey);

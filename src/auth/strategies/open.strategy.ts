@@ -11,7 +11,7 @@ import { openAuthUser } from '~/users/user.consts';
  * @note this is intended for development or read only purposes. This strategy should **not** be used with a signer holding production keys
  */
 @Injectable()
-export class OpenStrategy extends PassportStrategy(Strategy, AuthStrategy.open) {
+export class OpenStrategy extends PassportStrategy(Strategy, AuthStrategy.Open) {
   constructor() {
     const verifyEveryone: VerifyCallback = (req, done) => done(null, openAuthUser);
 

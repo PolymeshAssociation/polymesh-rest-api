@@ -46,7 +46,7 @@ export class AuthService {
     if (user) {
       user.apiKeys = user.apiKeys.filter(key => key !== apiKey);
     } else {
-      throw new NotFoundException('api key was not found');
+      throw new NotFoundException('API key was not found');
     }
   }
 
@@ -54,8 +54,6 @@ export class AuthService {
    * @note, will likely need to be a abstracted with a "repository" type interface when a data store is added
    */
   private getUserByApiKey(apiKey: string): User | undefined {
-    return Object.values(this.userStore)
-      .filter(user => user.apiKeys.includes(apiKey))
-      .find(user => user);
+    return Object.values(this.userStore).find(({ apiKeys }) => apiKeys.includes(apiKey));
   }
 }

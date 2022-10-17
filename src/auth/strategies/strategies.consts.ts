@@ -3,8 +3,8 @@
  */
 export enum AuthStrategy {
   // note - order here can affect the evaluation order, it is not arbitrary
-  apiKey = 'apiKey',
-  open = 'open',
+  ApiKey = 'apiKey',
+  Open = 'open',
 }
 
 export const authStrategyValues = Object.values(AuthStrategy);

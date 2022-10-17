@@ -52,7 +52,7 @@ import { TransactionsModule } from '~/transactions/transactions.module';
             throw new Error('ENV "AUTH_STRATEGY" must be set in a production environment');
           }
           console.warn('Defaulting to "open" for "AUTH_STRATEGY"');
-          return AuthStrategy.open;
+          return AuthStrategy.Open;
         }),
       })
         .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')

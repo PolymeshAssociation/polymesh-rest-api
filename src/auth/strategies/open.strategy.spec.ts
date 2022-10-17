@@ -22,7 +22,7 @@ describe('OpenStrategy', () => {
 
   it('should verify with the open user', async () => {
     let authorizedUser;
-    passport.authenticate(AuthStrategy.open, (request, user) => {
+    passport.authenticate(AuthStrategy.Open, (request, user) => {
       authorizedUser = user;
     })({}, {}, {});
 

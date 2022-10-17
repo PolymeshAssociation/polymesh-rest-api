@@ -85,7 +85,7 @@ Currently there are two strategies available:
 1. Api Key:
    By configuring `apiKey` as a strategy, any request with the header `x-api-key` will be authenticated with this strategy. The env `API_KEYS` can be used to provide initial keys
 1. Open:
-   By configuring `open` as a strategy any request will be authenticated with a default user. Primarily intended for development, but can be useful to provide a "read only" API. It should **never** be used in combination with a signing manager that holds valuable keys
+   By configuring `open` as a strategy any request will be authenticated with a default user. This is primarily intended for development, however it can be used to provide a "read only" API. It should **never** be used in combination with a signing manager that holds valuable keys
 
 More strategies can be added, there are many [pre-made strategies](https://www.passportjs.org/packages/) that are available, and custom ones can be written.
 
