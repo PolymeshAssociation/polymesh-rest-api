@@ -74,7 +74,7 @@ For any method that modifies chain state, the key to sign with can be controlled
 1. Local Signing:
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
 1. Vault Signing:
-   By setting `VAULT_URL` and `VAULT_SECRET`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`
+   By setting `VAULT_URL` and `VAULT_SECRET`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`.
 
 ### Authentication
 
@@ -83,9 +83,9 @@ The REST API uses [passport.js](https://www.passportjs.org/) for authentication.
 Currently there are two strategies available:
 
 1. Api Key:
-   By configuring `apiKey` as a strategy, any request with the header `x-api-key` will be authenticated with this strategy. The env `API_KEYS` can be used to provide initial keys
+   By configuring `apiKey` as a strategy, any request with the header `x-api-key` will be authenticated with this strategy. The env `API_KEYS` can be used to provide initial keys.
 1. Open:
-   By configuring `open` as a strategy any request will be authenticated with a default user. This is primarily intended for development, however it can be used to provide a "read only" API. It should **never** be used in combination with a signing manager that holds valuable keys
+   By configuring `open` as a strategy any request will be authenticated with a default user. This is primarily intended for development, however it can be used to provide a "read only" API. It should **never** be used in combination with a signing manager that holds valuable keys.
 
 More strategies can be added, there are many [pre-made strategies](https://www.passportjs.org/packages/) that are available, and custom ones can be written.
 
