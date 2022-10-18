@@ -144,9 +144,6 @@ export class AccountsController {
   @ApiNoContentResponse({
     description: 'Account is not being subsidized',
   })
-  @ApiNotFoundResponse({
-    description: 'Account is not associated with any Identity',
-  })
   @Get(':account/subsidy')
   async getSubsidy(@Param() { account }: AccountParamsDto, @Res() res: Response): Promise<void> {
     const result = await this.accountsService.getSubsidy(account);

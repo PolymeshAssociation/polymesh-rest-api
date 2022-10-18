@@ -18,7 +18,7 @@ export type Mocked<T> = T &
       : T[K];
   };
 
-export const mockResponseObject = (): DeepMocked<Response> => {
+export const createMockResponseObject = (): DeepMocked<Response> => {
   return createMock<Response>({
     json: jest.fn().mockReturnThis(),
     status: jest.fn().mockReturnThis(),

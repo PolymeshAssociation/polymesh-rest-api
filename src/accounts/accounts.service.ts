@@ -28,7 +28,7 @@ export class AccountsService {
       polymeshService: { polymeshApi },
     } = this;
     try {
-      return polymeshApi.accountManagement.getAccount({ address });
+      return await polymeshApi.accountManagement.getAccount({ address });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code } = err;

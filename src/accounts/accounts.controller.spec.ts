@@ -11,7 +11,12 @@ import { AccountsService } from '~/accounts/accounts.service';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { AccountModel } from '~/identities/models/account.model';
-import { MockAsset, MockPortfolio, mockResponseObject, MockSubsidy } from '~/test-utils/mocks';
+import {
+  createMockResponseObject,
+  MockAsset,
+  MockPortfolio,
+  MockSubsidy,
+} from '~/test-utils/mocks';
 import { MockAccountsService } from '~/test-utils/service-mocks';
 
 describe('AccountsController', () => {
@@ -162,7 +167,7 @@ describe('AccountsController', () => {
     let mockResponse: DeepMocked<Response>;
 
     beforeEach(() => {
-      mockResponse = mockResponseObject();
+      mockResponse = createMockResponseObject();
     });
     it(`should return the ${HttpStatus.NO_CONTENT} if the Account has no subsidy`, async () => {
       mockAccountsService.getSubsidy.mockResolvedValue(null);
