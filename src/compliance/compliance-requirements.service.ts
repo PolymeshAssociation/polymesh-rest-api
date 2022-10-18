@@ -12,7 +12,7 @@ import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
-export class ComplianceService {
+export class ComplianceRequirementsService {
   constructor(
     private readonly assetsService: AssetsService,
     private readonly transactionsService: TransactionsService

@@ -34,7 +34,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
-import { ComplianceService } from '~/compliance/compliance.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 @ApiTags('assets')
@@ -42,7 +42,7 @@ import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issue
 export class AssetsController {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly complianceService: ComplianceService
+    private readonly complianceRequirementsService: ComplianceRequirementsService
   ) {}
 
   @ApiOperation({
@@ -221,7 +221,7 @@ export class AssetsController {
   public async getTrustedClaimIssuers(
     @Param() { ticker }: TickerParamsDto
   ): Promise<ResultsModel<TrustedClaimIssuerModel>> {
-    const results = await this.complianceService.findTrustedClaimIssuers(ticker);
+    const results = await this.complianceRequirementsService.findTrustedClaimIssuers(ticker);
     return new ResultsModel({
       results: results.map(
         ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })

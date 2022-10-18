@@ -6,7 +6,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { ComplianceService } from '~/compliance/compliance.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
@@ -16,20 +16,20 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
-describe('ComplianceService', () => {
-  let service: ComplianceService;
+describe('ComplianceRequirementsService', () => {
+  let service: ComplianceRequirementsService;
   const mockAssetsService = new MockAssetService();
   const mockTransactionsService = mockTransactionsProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AssetsService, ComplianceService, mockTransactionsProvider],
+      providers: [AssetsService, ComplianceRequirementsService, mockTransactionsProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
       .compile();
 
-    service = module.get(ComplianceService);
+    service = module.get(ComplianceRequirementsService);
 
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
