@@ -22,7 +22,7 @@ import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissio
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
 import { AccountModel } from '~/identities/models/account.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
-import { MockAccount, MockAsset, MockPortfolio } from '~/test-utils/mocks';
+import { MockAccount, MockAsset, MockPortfolio, MockSubsidy } from '~/test-utils/mocks';
 
 describe('createPermissionsModel', () => {
   it('should transform Permissions to PermissionsModel', () => {
@@ -110,12 +110,7 @@ describe('createPermissionedAccountModel', () => {
 describe('createSubsidyModel', () => {
   it('should transform SubsidyWithAllowance to SubsidyModel', () => {
     const subsidyWithAllowance = {
-      beneficiary: {
-        address: 'beneficiary',
-      },
-      subsidizer: {
-        address: 'subsidizer',
-      },
+      subsidy: new MockSubsidy(),
       allowance: new BigNumber(10),
     } as unknown as SubsidyWithAllowance;
 
