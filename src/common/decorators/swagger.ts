@@ -3,12 +3,15 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import {
   ApiAcceptedResponse,
+  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiProperty,
   ApiPropertyOptions,
   ApiResponseOptions,
+  ApiUnprocessableEntityResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
 import {
@@ -108,6 +111,26 @@ export function ApiTransactionResponse(
       description:
         'Returned if `webhookUrl` is passed in the body. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
       type: NotificationPayloadModel,
+    })
+  );
+}
+
+/**
+ * A helper that combines responses for SDK Error like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`, `InternalServerErrorException`
+ *
+ * @param options - these will be passed to the `ApiNotFoundResponse` decorator
+ */
+export function ApiTransactionFailedResponse(
+  options: ApiResponseOptions
+): ReturnType<typeof applyDecorators> {
+  return applyDecorators(
+    ApiNotFoundResponse(options),
+    ApiBadRequestResponse({
+      description: 'Returned if transaction validation failed or same data already exists in chain',
+    }),
+    ApiUnprocessableEntityResponse({
+      description:
+        'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met',
     })
   );
 }

@@ -101,4 +101,54 @@ describe('ComplianceRequirementsService', () => {
       });
     });
   });
+
+  describe('pauseRequirements', () => {
+    it('should run a pause requirements procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.PauseAssetCompliance,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.pauseRequirements('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('unpauseRequirements', () => {
+    it('should run a unpause requirements procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.ResumeAssetCompliance,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.unpauseRequirements('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });

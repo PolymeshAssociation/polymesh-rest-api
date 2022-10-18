@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
@@ -67,6 +68,34 @@ describe('ComplianceRequirementsController', () => {
       };
       mockService.setRequirements.mockResolvedValue(response);
       const result = await controller.setRequirements({ ticker }, validBody as SetRequirementsDto);
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('pauseRequirements', () => {
+    it('should accept TransactionBaseDto and pause Asset Compliance Rules', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.pauseRequirements.mockResolvedValue(response);
+      const result = await controller.pauseRequirements(
+        { ticker },
+        validBody as TransactionBaseDto
+      );
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('unpauseRequirements', () => {
+    it('should accept TransactionBaseDto and unpause Asset Compliance Rules', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.unpauseRequirements.mockResolvedValue(response);
+      const result = await controller.pauseRequirements(
+        { ticker },
+        validBody as TransactionBaseDto
+      );
       expect(result).toEqual(response);
     });
   });
