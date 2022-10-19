@@ -6,6 +6,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -19,6 +20,7 @@ import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { SubsidyModel } from '~/accounts/models/subsidy.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -153,5 +155,43 @@ export class AccountsController {
     } else {
       res.status(HttpStatus.NO_CONTENT).send({});
     }
+  }
+
+  @ApiOperation({
+    summary: 'Freeze secondary accounts',
+    description: 'This endpoint freezes secondary accounts',
+  })
+  @ApiOkResponse({
+    description: 'Secondary accounts have been frozen',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+  })
+  @Post('freeze-secondary-accounts')
+  async freezeSecondaryAccounts(
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.freezeSecondaryAccounts(params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Unfreeze secondary accounts',
+    description: 'This endpoint unfreezes secondary accounts',
+  })
+  @ApiOkResponse({
+    description: 'Secondary accounts have been unfrozen',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+  })
+  @Post('unfreeze-secondary-accounts')
+  async unfreezeSecondaryAccounts(
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.unfreezeSecondaryAccounts(params);
+
+    return handleServiceResult(result);
   }
 }

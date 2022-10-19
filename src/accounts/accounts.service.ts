@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Account,
   AccountBalance,
@@ -12,6 +16,7 @@ import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -94,5 +99,23 @@ export class AccountsService {
   public async getSubsidy(address: string): Promise<SubsidyWithAllowance | null> {
     const account = await this.findOne(address);
     return account.getSubsidy();
+  }
+
+  public async freezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
+    const { signer, webhookUrl } = opts || {};
+    const { polymeshService, transactionsService } = this;
+
+    const { freezeSecondaryAccounts } = polymeshService.polymeshApi.accountManagement;
+
+    return transactionsService.submit(freezeSecondaryAccounts, undefined, { signer, webhookUrl });
+  }
+
+  public async unfreezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
+    const { signer, webhookUrl } = opts || {};
+    const { polymeshService, transactionsService } = this;
+
+    const { unfreezeSecondaryAccounts } = polymeshService.polymeshApi.accountManagement;
+
+    return transactionsService.submit(unfreezeSecondaryAccounts, undefined, { signer, webhookUrl });
   }
 }

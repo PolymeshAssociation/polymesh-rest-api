@@ -194,4 +194,36 @@ describe('AccountsController', () => {
       });
     });
   });
+
+  describe('freezeSecondaryAccounts', () => {
+    it('should freeze secondary accounts', async () => {
+      const transactions = ['transaction'];
+      mockAccountsService.freezeSecondaryAccounts.mockResolvedValue({ transactions });
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+      };
+
+      const result = await controller.freezeSecondaryAccounts(body);
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
+
+  describe('unfreezeSecondaryAccounts', () => {
+    it('should unfreeze secondary accounts', async () => {
+      const transactions = ['transaction'];
+      mockAccountsService.unfreezeSecondaryAccounts.mockResolvedValue({ transactions });
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+      };
+
+      const result = await controller.unfreezeSecondaryAccounts(body);
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
 });
