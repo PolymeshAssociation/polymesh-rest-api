@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`AuthMiddleware should throw an UnauthorizedException if no user is found 1`] = `"REST API user was not found"`;

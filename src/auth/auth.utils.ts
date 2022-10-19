@@ -1,11 +1,21 @@
+import { AuthGuard, IAuthGuard } from '@nestjs/passport';
+
 import { AuthStrategy, authStrategyValues } from '~/auth/strategies/strategies.consts';
+
+/**
+ *  Creates an AuthGuard using the configured strategies
+ */
+export const createAuthGuard = (rawStrategy: string): IAuthGuard => {
+  const strategies = parseAuthStrategyConfig(rawStrategy);
+  return new (class extends AuthGuard(strategies) {})();
+};
 
 /**
  * transforms a raw auth strategy config into valid strategy values
  *
  * @throws if given invalid values
  */
-export const parseAuthStrategyConfig = (rawStrategyConfig: string): AuthStrategy[] => {
+const parseAuthStrategyConfig = (rawStrategyConfig: string): AuthStrategy[] => {
   const givenStrategies = rawStrategyConfig.split(',').map(strategy => strategy.trim());
 
   const filteredStrategies = givenStrategies.filter(isStrategyKey);

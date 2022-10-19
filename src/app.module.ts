@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
@@ -16,7 +16,6 @@ import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.mo
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
-import { AuthMiddleware } from '~/middleware/auth.middleware';
 import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -82,8 +81,4 @@ import { TransactionsModule } from '~/transactions/transactions.module';
     AuthModule,
   ],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(AuthMiddleware).forRoutes('');
-  }
-}
+export class AppModule {}
