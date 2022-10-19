@@ -6,6 +6,7 @@ import {
   ExtrinsicData,
   Permissions,
   ResultSet,
+  SubsidyWithAllowance,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
@@ -27,7 +28,7 @@ export class AccountsService {
       polymeshService: { polymeshApi },
     } = this;
     try {
-      return polymeshApi.accountManagement.getAccount({ address });
+      return await polymeshApi.accountManagement.getAccount({ address });
     } catch (err: unknown) {
       if (isPolymeshError(err)) {
         const { code } = err;
@@ -88,5 +89,10 @@ export class AccountsService {
       }
       throw err;
     }
+  }
+
+  public async getSubsidy(address: string): Promise<SubsidyWithAllowance | null> {
+    const account = await this.findOne(address);
+    return account.getSubsidy();
   }
 }

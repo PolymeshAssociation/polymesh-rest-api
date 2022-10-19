@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
 import {
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -7,13 +8,15 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { createPermissionsModel } from '~/accounts/accounts.util';
+import { createPermissionsModel, createSubsidyModel } from '~/accounts/accounts.util';
 import { AccountParamsDto } from '~/accounts/dto/account-params.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
+import { SubsidyModel } from '~/accounts/models/subsidy.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
@@ -121,5 +124,34 @@ export class AccountsController {
   async getPermissions(@Param() { account }: AccountParamsDto): Promise<PermissionsModel> {
     const permissions = await this.accountsService.getPermissions(account);
     return createPermissionsModel(permissions);
+  }
+
+  @ApiOperation({
+    summary: 'Get Account Subsidy',
+    description:
+      'The endpoint retrieves the subsidized balance of this Account and the subsidizer Account',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address whose subsidy is to be fetched',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiOkResponse({
+    description: 'Subsidy details for the Account',
+    type: SubsidyModel,
+  })
+  @ApiNoContentResponse({
+    description: 'Account is not being subsidized',
+  })
+  @Get(':account/subsidy')
+  async getSubsidy(@Param() { account }: AccountParamsDto, @Res() res: Response): Promise<void> {
+    const result = await this.accountsService.getSubsidy(account);
+
+    if (result) {
+      res.status(HttpStatus.OK).json(createSubsidyModel(result));
+    } else {
+      res.status(HttpStatus.NO_CONTENT).send({});
+    }
   }
 }

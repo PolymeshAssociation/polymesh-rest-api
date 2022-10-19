@@ -65,6 +65,7 @@ export class MockAccountsService {
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
   findOne = jest.fn();
+  getSubsidy = jest.fn();
 }
 
 export class MockEventsService {
