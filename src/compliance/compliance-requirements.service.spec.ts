@@ -6,7 +6,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { ComplianceService } from '~/compliance/compliance.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
@@ -16,20 +16,20 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
-describe('ComplianceService', () => {
-  let service: ComplianceService;
+describe('ComplianceRequirementsService', () => {
+  let service: ComplianceRequirementsService;
   const mockAssetsService = new MockAssetService();
   const mockTransactionsService = mockTransactionsProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AssetsService, ComplianceService, mockTransactionsProvider],
+      providers: [AssetsService, ComplianceRequirementsService, mockTransactionsProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
       .compile();
 
-    service = module.get(ComplianceService);
+    service = module.get(ComplianceRequirementsService);
 
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
@@ -94,6 +94,56 @@ describe('ComplianceService', () => {
       const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
 
       const result = await service.setRequirements('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('pauseRequirements', () => {
+    it('should run a pause requirements procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.PauseAssetCompliance,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.pauseRequirements('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('unpauseRequirements', () => {
+    it('should run a unpause requirements procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.ResumeAssetCompliance,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.unpauseRequirements('TICKER', body);
 
       expect(result).toEqual({
         result: undefined,
