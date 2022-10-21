@@ -14,6 +14,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { RequirementParamsDto } from '~/compliance/dto/requirement-params.dto';
+import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
 import { RequirementModel } from '~/compliance/models/requirement.model';
@@ -198,6 +199,32 @@ export class ComplianceRequirementsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.deleteRequirements(ticker, params);
 
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Add new compliance requirement for an Asset',
+    description: 'This endpoint adds new compliance requirement for an Asset.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to which the compliance requirement is to be added to',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    description: 'The Asset was not found',
+  })
+  @Post('')
+  public async addRequirement(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: RequirementDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.complianceRequirementsService.addRequirement(ticker, params);
     return handleServiceResult(result);
   }
 }

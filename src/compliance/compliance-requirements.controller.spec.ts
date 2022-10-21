@@ -4,6 +4,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
+import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
@@ -127,6 +128,21 @@ describe('ComplianceRequirementsController', () => {
         validBody as TransactionBaseDto
       );
 
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('addRequirement', () => {
+    it('should accept AddRequirementDto and add an Asset Compliance rule', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.addRequirement.mockResolvedValue(response);
+      const { signer, requirements } = validBody;
+      const result = await controller.addRequirement({ ticker }, {
+        signer,
+        conditions: requirements[0],
+      } as RequirementDto);
       expect(result).toEqual(response);
     });
   });

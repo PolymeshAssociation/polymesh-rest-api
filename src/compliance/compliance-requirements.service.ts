@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  AddAssetRequirementParams,
   Asset,
   ComplianceRequirements,
   RemoveAssetRequirementParams,
@@ -11,6 +12,7 @@ import {
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
+import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
 
@@ -112,5 +114,19 @@ export class ComplianceRequirementsService {
       signer,
       webhookUrl,
     });
+  }
+
+  public async addRequirement(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
+    const asset = await this.assetsService.findOne(ticker);
+
+    return this.transactionsService.submit(
+      asset.compliance.requirements.add,
+      params as AddAssetRequirementParams,
+      {
+        signer,
+        webhookUrl,
+      }
+    );
   }
 }

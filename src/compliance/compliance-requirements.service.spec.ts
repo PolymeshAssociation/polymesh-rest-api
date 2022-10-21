@@ -207,4 +207,30 @@ describe('ComplianceRequirementsService', () => {
       });
     });
   });
+
+  describe('addRequirement', () => {
+    it('should run a add requirement procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.AddComplianceRequirement,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { conditions: [], signer: '0x6000' };
+
+      const result = await service.addRequirement('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });
