@@ -4,6 +4,7 @@ import {
   AddAssetRequirementParams,
   Asset,
   ComplianceRequirements,
+  ModifyComplianceRequirementParams,
   RemoveAssetRequirementParams,
   SetAssetRequirementsParams,
   TrustedClaimIssuer,
@@ -123,6 +124,30 @@ export class ComplianceRequirementsService {
     return this.transactionsService.submit(
       asset.compliance.requirements.add,
       params as AddAssetRequirementParams,
+      {
+        signer,
+        webhookUrl,
+      }
+    );
+  }
+
+  public async editRequirement(
+    ticker: string,
+    id: BigNumber,
+    params: RequirementDto
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl } = params;
+    const asset = await this.assetsService.findOne(ticker);
+
+    const { requirements } = await asset.compliance.requirements.get();
+
+    if (!requirements.find(requirement => requirement.id.eq(id))) {
+      throw new NotFoundException(`Requirement with id ${id} does not exist`);
+    }
+
+    return this.transactionsService.submit(
+      asset.compliance.requirements.modify,
+      { id, ...params } as ModifyComplianceRequirementParams,
       {
         signer,
         webhookUrl,

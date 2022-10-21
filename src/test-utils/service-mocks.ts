@@ -45,6 +45,7 @@ export class MockComplianceRequirementsService {
   deleteRequirement = jest.fn();
   deleteRequirements = jest.fn();
   addRequirement = jest.fn();
+  editRequirement = jest.fn();
 }
 
 export class MockSigningService {

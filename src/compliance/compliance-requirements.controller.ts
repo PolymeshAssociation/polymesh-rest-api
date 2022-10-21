@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -225,6 +225,39 @@ export class ComplianceRequirementsController {
     @Body() params: RequirementDto
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.addRequirement(ticker, params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Modify single compliance requirement for an Asset',
+    description: 'This endpoint modifies referenced compliance requirement for an Asset.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description:
+      'The ticker of the Asset for which the compliance requirements is to be modified for',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The id of the compliance requirement to be modified',
+    type: 'string',
+    example: '123',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    description: 'The Asset or compliance requirement was not found',
+  })
+  @Patch(':id')
+  public async modifyComplianceRequirement(
+    @Param() { id, ticker }: RequirementParamsDto,
+    @Body() params: RequirementDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.complianceRequirementsService.editRequirement(ticker, id, params);
     return handleServiceResult(result);
   }
 }

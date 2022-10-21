@@ -146,4 +146,22 @@ describe('ComplianceRequirementsController', () => {
       expect(result).toEqual(response);
     });
   });
+
+  describe('modifyComplianceRequirement', () => {
+    it('should accept AddRequirementDto and add an Asset Compliance rule', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.editRequirement.mockResolvedValue(response);
+      const { signer, requirements } = validBody;
+      const result = await controller.modifyComplianceRequirement(
+        { ticker, id: new BigNumber(1) },
+        {
+          signer,
+          conditions: requirements[0],
+        } as RequirementDto
+      );
+      expect(result).toEqual(response);
+    });
+  });
 });
