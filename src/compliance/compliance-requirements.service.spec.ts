@@ -151,4 +151,34 @@ describe('ComplianceRequirementsService', () => {
       });
     });
   });
+
+  describe('deleteRequirement', () => {
+    it('should run a delete requirement procedure and return the queue data', async () => {
+      const requirementId = new BigNumber(1);
+      const mockAsset = new MockAsset();
+      mockAsset.compliance.requirements.get.mockResolvedValue({
+        requirements: [{ id: requirementId }],
+      });
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.RemoveComplianceRequirement,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.deleteRequirement('TICKER', requirementId, body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });

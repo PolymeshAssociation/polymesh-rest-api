@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
   ComplianceRequirements,
+  RemoveAssetRequirementParams,
   SetAssetRequirementsParams,
   TrustedClaimIssuer,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -68,6 +70,30 @@ export class ComplianceRequirementsService {
     return this.transactionsService.submit(
       asset.compliance.requirements.unpause,
       {},
+      {
+        signer,
+        webhookUrl,
+      }
+    );
+  }
+
+  public async deleteRequirement(
+    ticker: string,
+    id: BigNumber,
+    params: TransactionBaseDto
+  ): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
+    const asset = await this.assetsService.findOne(ticker);
+
+    const { requirements } = await asset.compliance.requirements.get();
+
+    if (!requirements.find(requirement => requirement.id.eq(id))) {
+      throw new NotFoundException(`Requirement with id ${id} does not exist`);
+    }
+
+    return this.transactionsService.submit(
+      asset.compliance.requirements.remove,
+      { requirement: id } as unknown as RemoveAssetRequirementParams,
       {
         signer,
         webhookUrl,

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
@@ -96,6 +97,21 @@ describe('ComplianceRequirementsController', () => {
         { ticker },
         validBody as TransactionBaseDto
       );
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('deleteSingleRequirement', () => {
+    it('should accept TransactionBaseDto and compliance requirement id and delete Asset Compliance rule', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.deleteRequirement.mockResolvedValue(response);
+      const result = await controller.deleteSingleRequirement(
+        { ticker, id: new BigNumber(1) },
+        validBody as TransactionBaseDto
+      );
+
       expect(result).toEqual(response);
     });
   });

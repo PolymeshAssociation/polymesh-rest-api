@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -13,6 +13,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
+import { RequirementParamsDto } from '~/compliance/dto/requirement-params.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
 import { RequirementModel } from '~/compliance/models/requirement.model';
@@ -135,6 +136,40 @@ export class ComplianceRequirementsController {
     @Body() params: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.unpauseRequirements(ticker, params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Delete single compliance requirement for an Asset',
+    description: 'This endpoint removes referenced compliance requirement for an Asset.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description:
+      'The ticker of the Asset from which the compliance requirements is to be removed from',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The id of the compliance requirement to be deleted',
+    type: 'string',
+    example: '123',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    description: 'The Asset or compliance requirement was not found',
+  })
+  @Delete(':id')
+  public async deleteSingleRequirement(
+    @Param() { id, ticker }: RequirementParamsDto,
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.complianceRequirementsService.deleteRequirement(ticker, id, params);
+
     return handleServiceResult(result);
   }
 }
