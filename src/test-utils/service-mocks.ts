@@ -43,6 +43,7 @@ export class MockComplianceRequirementsService {
   pauseRequirements = jest.fn();
   unpauseRequirements = jest.fn();
   deleteRequirement = jest.fn();
+  deleteRequirements = jest.fn();
 }
 
 export class MockSigningService {

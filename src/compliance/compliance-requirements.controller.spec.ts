@@ -115,4 +115,19 @@ describe('ComplianceRequirementsController', () => {
       expect(result).toEqual(response);
     });
   });
+
+  describe('deleteAllRequirements', () => {
+    it('should accept TransactionBaseDto and delete all Asset Compliance rules', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.deleteRequirements.mockResolvedValue(response);
+      const result = await controller.deleteAllRequirements(
+        { ticker },
+        validBody as TransactionBaseDto
+      );
+
+      expect(result).toEqual(response);
+    });
+  });
 });

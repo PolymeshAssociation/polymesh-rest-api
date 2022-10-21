@@ -100,4 +100,17 @@ export class ComplianceRequirementsService {
       }
     );
   }
+
+  public async deleteRequirements(
+    ticker: string,
+    params: TransactionBaseDto
+  ): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
+    const asset = await this.assetsService.findOne(ticker);
+
+    return this.transactionsService.submit(asset.compliance.requirements.reset, undefined, {
+      signer,
+      webhookUrl,
+    });
+  }
 }

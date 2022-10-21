@@ -172,4 +172,32 @@ export class ComplianceRequirementsController {
 
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Delete all compliance requirements for an Asset',
+    description: 'This endpoint removes all compliance requirement for an Asset.',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description:
+      'The ticker of the Asset to which the compliance requirements are to be removed from',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    description: 'The Asset was not found',
+  })
+  @Delete('')
+  public async deleteAllRequirements(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.complianceRequirementsService.deleteRequirements(ticker, params);
+
+    return handleServiceResult(result);
+  }
 }

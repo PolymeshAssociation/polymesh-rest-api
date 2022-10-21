@@ -181,4 +181,30 @@ describe('ComplianceRequirementsService', () => {
       });
     });
   });
+
+  describe('deleteRequirements', () => {
+    it('should run a delete all requirements procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.ResetAssetCompliance,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.deleteRequirements('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });
