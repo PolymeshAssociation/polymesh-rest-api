@@ -195,4 +195,5 @@ export const makeMockConfigProvider = (config: Record<string, unknown>): Service
 };
 export class MockNetworkService {
   getNetworkProperties = jest.fn();
+  getLatestBlock = jest.fn();
 }

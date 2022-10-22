@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { MockNetworkProperties } from '~/network/mocks/network-properties.mock';
 import { NetworkService } from '~/network/network.service';
@@ -46,6 +47,18 @@ describe('NetworkService', () => {
       const result = await networkService.getNetworkProperties();
 
       expect(result).toBe(networkProperties);
+    });
+  });
+
+  describe('getLatestBlock', () => {
+    it('should latest block ID', async () => {
+      const mockResult = new BigNumber(1);
+
+      mockPolymeshApi.network.getLatestBlock.mockReturnValue(mockResult);
+
+      const result = await networkService.getLatestBlock();
+
+      expect(result).toBe(mockResult);
     });
   });
 });
