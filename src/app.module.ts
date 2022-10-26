@@ -13,6 +13,7 @@ import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
 import { ComplianceModule } from '~/compliance/compliance.module';
 import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.module';
+import { DatastoreModule } from '~/datastore/datastore.module';
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
@@ -26,6 +27,7 @@ import { SigningModule } from '~/signing/signing.module';
 import { SubscriptionsModule } from '~/subscriptions/subscriptions.module';
 import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
+import { UsersModule } from '~/users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -79,6 +81,8 @@ import { TransactionsModule } from '~/transactions/transactions.module';
     ScheduleModule,
     DeveloperTestingModule.register(),
     AuthModule,
+    UsersModule,
+    DatastoreModule.register(),
   ],
 })
 export class AppModule {}

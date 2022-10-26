@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:15
+    ports:
+      - $REST_POSTGRES_PORT:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: $REST_POSTGRES_USER
+      POSTGRES_PASSWORD: $REST_POSTGRES_PASSWORD
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:

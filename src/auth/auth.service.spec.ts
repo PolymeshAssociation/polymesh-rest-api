@@ -1,59 +1,80 @@
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { when } from 'jest-when';
 
 import { AuthService } from '~/auth/auth.service';
-import { makeMockConfigProvider } from '~/test-utils/service-mocks';
+import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
+import { AppNotFoundError } from '~/common/errors';
+import { testUser } from '~/test-utils/consts';
+import { mockApiKeyRepoProvider, mockUserRepoProvider } from '~/test-utils/repo-mocks';
+import { mockUserServiceProvider } from '~/test-utils/service-mocks';
+import { UsersService } from '~/users/users.service';
 
 describe('AuthService', () => {
+  const testApiKey = 'authServiceSecret';
+  const expectedNotFoundError = new AppNotFoundError('*REDACTED*', ApiKeyRepo.type);
+
   let service: AuthService;
-  const apiKey = 'abc';
+  let mockUsersService: DeepMocked<UsersService>;
+  let mockApiKeyRepo: DeepMocked<ApiKeyRepo>;
 
   beforeEach(async () => {
-    const mockConfig = {
-      API_KEYS: apiKey,
-    };
-    const mockConfigProvider = makeMockConfigProvider(mockConfig);
-
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, mockConfigProvider],
+      providers: [
+        AuthService,
+        mockUserServiceProvider,
+        mockApiKeyRepoProvider,
+        mockUserRepoProvider,
+      ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+    mockUsersService = mockUserServiceProvider.useValue as DeepMocked<UsersService>;
+    mockApiKeyRepo = mockApiKeyRepoProvider.useValue as DeepMocked<ApiKeyRepo>;
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('createApiKey', () => {
+  describe('method: createApiKey', () => {
     it('should create an API key', async () => {
-      const givenId = 'new-user';
-      const { userId, secret } = await service.createApiKey({ userId: givenId });
-      expect(userId).toEqual(givenId);
-      expect(secret.length).toBeGreaterThan(12);
+      when(mockUsersService.getByName).calledWith(testUser.name).mockResolvedValue(testUser);
+      when(mockApiKeyRepo.createApiKey)
+        .calledWith(testUser)
+        .mockResolvedValue({ userId: testUser.id, secret: testApiKey });
+
+      const { userId, secret } = await service.createApiKey({ userName: testUser.name });
+
+      expect(userId).toEqual(testUser.id);
+      expect(secret.length).toBeGreaterThan(8);
     });
   });
 
-  describe('deleteApiKey', () => {
+  describe('method: validateApiKey', () => {
+    it('should return the user when given a valid api key', async () => {
+      when(mockApiKeyRepo.getUserByApiKey).calledWith(testApiKey).mockResolvedValue(testUser);
+
+      const foundUser = await service.validateApiKey(testApiKey);
+      expect(foundUser).toEqual(testUser);
+    });
+
+    it('should throw a NotFoundError when given an unknown API key', () => {
+      mockApiKeyRepo.getUserByApiKey.mockRejectedValue(expectedNotFoundError);
+
+      return expect(service.validateApiKey('unknown-secret')).rejects.toThrow(
+        expectedNotFoundError
+      );
+    });
+  });
+
+  describe('method: deleteApiKey', () => {
     it('should delete an API key', async () => {
-      let result = service.validateApiKey(apiKey);
-      expect(result).toBeDefined();
+      mockApiKeyRepo.deleteApiKey.mockResolvedValue(undefined);
 
-      await service.deleteApiKey({ apiKey });
+      await service.deleteApiKey({ apiKey: testApiKey });
 
-      result = service.validateApiKey(apiKey);
-      expect(result).toBeUndefined();
-    });
-  });
-
-  describe('validateApiKey', () => {
-    it('should return the user when given a valid api key', () => {
-      const result = service.validateApiKey(apiKey);
-      expect(result).toMatchObject(expect.objectContaining({ id: 'configured-user' }));
-    });
-
-    it('should return undefined when the api key is not found', () => {
-      const result = service.validateApiKey('not-a-key');
-      expect(result).toBeUndefined();
+      expect(mockApiKeyRepo.deleteApiKey).toBeCalledWith(testApiKey);
     });
   });
 });

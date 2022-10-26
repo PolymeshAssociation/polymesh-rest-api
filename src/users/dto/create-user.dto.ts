@@ -3,12 +3,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class CreateApiKeyDto {
+export class CreateUserDto {
   @ApiProperty({
-    description: 'The name of the user to create the api key for',
+    description: 'The unique name of the user',
     example: 'Alice',
     type: 'string',
   })
   @IsString()
-  readonly userName: string;
+  readonly name: string;
 }

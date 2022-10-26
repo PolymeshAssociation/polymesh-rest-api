@@ -1,10 +1,13 @@
 /* istanbul ignore file */
 
+import { createMock } from '@golevelup/ts-jest';
+import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { UsersService } from '~/users/users.service';
 
 export class MockAssetService {
   findOne = jest.fn();
@@ -170,6 +173,11 @@ export class MockAuthService {
 export const mockAuthServiceProvider = {
   provide: AuthService,
   useValue: new MockAuthService(),
+};
+
+export const mockUserServiceProvider: ValueProvider<UsersService> = {
+  provide: UsersService,
+  useValue: createMock<UsersService>(),
 };
 
 /**
