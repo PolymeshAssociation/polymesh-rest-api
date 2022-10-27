@@ -1,5 +1,7 @@
 import { ModuleName, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { randomBytes } from 'crypto';
 import { flatten } from 'lodash';
+import { promisify } from 'util';
 
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -54,4 +56,15 @@ export const handleServiceResult = <T>(
  */
 const basicModelResolver: TransactionResolver<unknown> = ({ transactions }) => {
   return new TransactionQueueModel({ transactions });
+};
+
+/**
+ * Generate base64 encoded, cryptographically random bytes
+ *
+ * @note random byte length given, not the encoded string length
+ */
+export const generateBase64Secret = async (byteLength: number): Promise<string> => {
+  const buf = await promisify(randomBytes)(byteLength);
+
+  return buf.toString('base64');
 };
