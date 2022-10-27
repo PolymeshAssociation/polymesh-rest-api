@@ -36,10 +36,12 @@ export const mockTransactionsProvider = {
   useValue: new MockTransactionsService(),
 };
 
-export class MockComplianceService {
+export class MockComplianceRequirementsService {
   setRequirements = jest.fn();
   findComplianceRequirements = jest.fn();
   findTrustedClaimIssuers = jest.fn();
+  pauseRequirements = jest.fn();
+  unpauseRequirements = jest.fn();
 }
 
 export class MockSigningService {

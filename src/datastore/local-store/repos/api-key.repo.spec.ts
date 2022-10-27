@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { LocalApiKeysRepo } from '~/datastore/local-store/repos/api-key.repo';
-import { defaultUser } from '~/datastore/local-store/repos/users.repo';
+import { defaultUser } from '~/users/user.consts';
 
 describe(`LocalApiKeyRepo meets ${ApiKeyRepo.type} test suite requirements`, () => {
   const mockConfig = createMock<ConfigService>();

@@ -6,8 +6,8 @@ import { ApiKeyModel } from '~/auth/models/api-key.model';
 import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { AppNotFoundError } from '~/common/errors';
 import { generateBase64Secret } from '~/common/utils';
-import { defaultUser } from '~/datastore/local-store/repos/users.repo';
 import { UserModel } from '~/users/model/user.model';
+import { defaultUser } from '~/users/user.consts';
 
 @Injectable()
 export class LocalApiKeysRepo implements ApiKeyRepo {

@@ -104,6 +104,8 @@ More strategies can be added, there are many [pre-made strategies](https://www.p
 
 To implement a new strategy, create a new file in `~/auth/strategies/` and update the `strategies.consts` file with an appropriate name. Be sure to add some tests for your logic as well.
 
+<<<<<<< HEAD
+
 ### State
 
 The REST API has taken a plugin style approach to where it stores state. Do note, the Polymesh chain is responsible for processing most POST request. This only affects where REST API specific entities are tracked (e.g. Users and ApiKeys)
@@ -123,6 +125,10 @@ To implement a new repo for a service, first define an abstract class describing
 To implement a new data store create a new module in `~/datastores` and create a set of `Repos` that will implement the required functions. You will then need to set up the `DatastoreModule` to export the module when it is configured. For testing the each Repo should be able to pass the `test` method defined on the class it is implementing
 
 While it is possible to create and inject storage for only some of the Repos its preferable to have all storages provide all Repos.
+
+=======
+
+> > > > > > > origin/develop
 
 ### Webhooks (alpha)
 

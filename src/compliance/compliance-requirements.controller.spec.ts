@@ -1,16 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { ComplianceController } from '~/compliance/compliance.controller';
-import { ComplianceService } from '~/compliance/compliance.service';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
-import { MockComplianceService } from '~/test-utils/service-mocks';
+import { MockComplianceRequirementsService } from '~/test-utils/service-mocks';
 
-describe('ComplianceController', () => {
-  let controller: ComplianceController;
+describe('ComplianceRequirementsController', () => {
+  let controller: ComplianceRequirementsController;
 
-  const mockService = new MockComplianceService();
+  const mockService = new MockComplianceRequirementsService();
 
   const ticker = 'TICKER';
   const validBody = {
@@ -34,14 +35,14 @@ describe('ComplianceController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ComplianceController],
-      providers: [ComplianceService],
+      controllers: [ComplianceRequirementsController],
+      providers: [ComplianceRequirementsService],
     })
-      .overrideProvider(ComplianceService)
+      .overrideProvider(ComplianceRequirementsService)
       .useValue(mockService)
       .compile();
 
-    controller = module.get(ComplianceController);
+    controller = module.get(ComplianceRequirementsController);
   });
 
   it('should be defined', () => {
@@ -67,6 +68,34 @@ describe('ComplianceController', () => {
       };
       mockService.setRequirements.mockResolvedValue(response);
       const result = await controller.setRequirements({ ticker }, validBody as SetRequirementsDto);
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('pauseRequirements', () => {
+    it('should accept TransactionBaseDto and pause Asset Compliance Rules', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.pauseRequirements.mockResolvedValue(response);
+      const result = await controller.pauseRequirements(
+        { ticker },
+        validBody as TransactionBaseDto
+      );
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('unpauseRequirements', () => {
+    it('should accept TransactionBaseDto and unpause Asset Compliance Rules', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.unpauseRequirements.mockResolvedValue(response);
+      const result = await controller.pauseRequirements(
+        { ticker },
+        validBody as TransactionBaseDto
+      );
       expect(result).toEqual(response);
     });
   });

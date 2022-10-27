@@ -4,11 +4,8 @@ import { AppConflictError, AppNotFoundError } from '~/common/errors';
 import { CreateUserDto } from '~/users/dto/create-user.dto';
 import { UserModel } from '~/users/model/user.model';
 import { UsersRepo } from '~/users/repo/user.repo';
+import { defaultUser } from '~/users/user.consts';
 
-export const defaultUser = new UserModel({
-  id: '-1',
-  name: 'Default User',
-});
 @Injectable()
 export class LocalUserRepo implements UsersRepo {
   private users: Record<string, UserModel> = { [defaultUser.id]: defaultUser };
