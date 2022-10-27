@@ -8,11 +8,13 @@ import { defaultUser } from '~/users/user.consts';
 describe(`LocalApiKeyRepo meets ${ApiKeyRepo.type} test suite requirements`, () => {
   const mockConfig = createMock<ConfigService>();
   const repo = new LocalApiKeysRepo(mockConfig);
+
   ApiKeyRepo.test(repo);
 });
 
 describe('LocalApiKeyRepo', () => {
   const config = 'ConfiguredSecret';
+
   it('should be configured with keys from the config service', () => {
     const mockConfig = createMock<ConfigService>();
     mockConfig.getOrThrow.mockReturnValue(config);
