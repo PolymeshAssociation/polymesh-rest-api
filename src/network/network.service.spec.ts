@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
@@ -34,7 +33,6 @@ describe('NetworkService', () => {
   });
 
   it('should be defined', () => {
-    console.log(networkService);
     expect(networkService).toBeDefined();
   });
 

@@ -4,6 +4,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NetworkBlockModel } from '~/network/models/network-block.model';
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
 import { NetworkService } from '~/network/network.service';
+
 @ApiTags('network')
 @Controller('network')
 export class NetworkController {
@@ -11,7 +12,7 @@ export class NetworkController {
 
   @ApiOperation({
     summary: 'Fetch network properties',
-    description: 'This endpoint will provide network name and version',
+    description: 'This endpoint will provide the network name and version',
   })
   @ApiOkResponse({
     description: 'Network properties response',
@@ -19,7 +20,9 @@ export class NetworkController {
   })
   @Get()
   public async getNetworkProperties(): Promise<NetworkPropertiesModel> {
-    return new NetworkPropertiesModel(await this.networkService.getNetworkProperties());
+    const networkProperties = await this.networkService.getNetworkProperties();
+
+    return new NetworkPropertiesModel(networkProperties);
   }
 
   @ApiOperation({
@@ -27,7 +30,7 @@ export class NetworkController {
     description: 'This endpoint will provide the latest block ID',
   })
   @ApiOkResponse({
-    description: 'Latest block ID that has been added to the blockchain',
+    description: 'Latest block ID that has been added to the chain',
     type: NetworkBlockModel,
   })
   @Get('latest-block')

@@ -6,6 +6,9 @@ import { NetworkController } from '~/network/network.controller';
 import { NetworkService } from '~/network/network.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 
+/**
+ * NetworkModule responsible for the exposing the SDK network namespace
+ */
 @Module({
   imports: [PolymeshModule],
   providers: [NetworkService],
