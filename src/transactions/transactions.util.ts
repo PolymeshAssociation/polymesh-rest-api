@@ -110,6 +110,7 @@ export function handleSdkError(err: Error): never {
         throw new BadRequestException(message);
       case ErrorCode.InsufficientBalance:
       case ErrorCode.UnmetPrerequisite:
+      case ErrorCode.LimitExceeded:
         throw new UnprocessableEntityException(message);
       case ErrorCode.DataUnavailable:
         throw new NotFoundException(message);

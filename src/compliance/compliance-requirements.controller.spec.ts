@@ -102,13 +102,13 @@ describe('ComplianceRequirementsController', () => {
     });
   });
 
-  describe('deleteSingleRequirement', () => {
+  describe('deleteRequirement', () => {
     it('should accept TransactionBaseDto and compliance requirement id and delete Asset Compliance rule', async () => {
       const response = {
         transactions: [],
       };
-      mockService.deleteRequirement.mockResolvedValue(response);
-      const result = await controller.deleteSingleRequirement(
+      mockService.deleteOne.mockResolvedValue(response);
+      const result = await controller.deleteRequirement(
         { ticker, id: new BigNumber(1) },
         validBody as TransactionBaseDto
       );
@@ -117,13 +117,13 @@ describe('ComplianceRequirementsController', () => {
     });
   });
 
-  describe('deleteAllRequirements', () => {
+  describe('deleteRequirements', () => {
     it('should accept TransactionBaseDto and delete all Asset Compliance rules', async () => {
       const response = {
         transactions: [],
       };
-      mockService.deleteRequirements.mockResolvedValue(response);
-      const result = await controller.deleteAllRequirements(
+      mockService.deleteAll.mockResolvedValue(response);
+      const result = await controller.deleteRequirements(
         { ticker },
         validBody as TransactionBaseDto
       );
@@ -137,7 +137,7 @@ describe('ComplianceRequirementsController', () => {
       const response = {
         transactions: [],
       };
-      mockService.addRequirement.mockResolvedValue(response);
+      mockService.add.mockResolvedValue(response);
       const { signer, requirements } = validBody;
       const result = await controller.addRequirement({ ticker }, {
         signer,
@@ -152,7 +152,7 @@ describe('ComplianceRequirementsController', () => {
       const response = {
         transactions: [],
       };
-      mockService.editRequirement.mockResolvedValue(response);
+      mockService.modify.mockResolvedValue(response);
       const { signer, requirements } = validBody;
       const result = await controller.modifyComplianceRequirement(
         { ticker, id: new BigNumber(1) },

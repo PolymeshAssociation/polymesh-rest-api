@@ -42,10 +42,10 @@ export class MockComplianceRequirementsService {
   findTrustedClaimIssuers = jest.fn();
   pauseRequirements = jest.fn();
   unpauseRequirements = jest.fn();
-  deleteRequirement = jest.fn();
-  deleteRequirements = jest.fn();
-  addRequirement = jest.fn();
-  editRequirement = jest.fn();
+  deleteAll = jest.fn();
+  deleteOne = jest.fn();
+  add = jest.fn();
+  modify = jest.fn();
 }
 
 export class MockSigningService {

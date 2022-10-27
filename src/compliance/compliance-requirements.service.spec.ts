@@ -153,12 +153,9 @@ describe('ComplianceRequirementsService', () => {
   });
 
   describe('deleteRequirement', () => {
-    it('should run a delete requirement procedure and return the queue data', async () => {
+    it('should run the delete Requirement procedure and return the queue data', async () => {
       const requirementId = new BigNumber(1);
       const mockAsset = new MockAsset();
-      mockAsset.compliance.requirements.get.mockResolvedValue({
-        requirements: [{ id: requirementId }],
-      });
 
       const transaction = {
         blockHash: '0x1',
@@ -173,7 +170,7 @@ describe('ComplianceRequirementsService', () => {
 
       const body = { signer: '0x6000' };
 
-      const result = await service.deleteRequirement('TICKER', requirementId, body);
+      const result = await service.deleteOne('TICKER', requirementId, body);
 
       expect(result).toEqual({
         result: undefined,
@@ -183,7 +180,7 @@ describe('ComplianceRequirementsService', () => {
   });
 
   describe('deleteRequirements', () => {
-    it('should run a delete all requirements procedure and return the queue data', async () => {
+    it('should run the delete all Requirements procedure and return the queue data', async () => {
       const mockAsset = new MockAsset();
 
       const transaction = {
@@ -199,7 +196,7 @@ describe('ComplianceRequirementsService', () => {
 
       const body = { signer: '0x6000' };
 
-      const result = await service.deleteRequirements('TICKER', body);
+      const result = await service.deleteAll('TICKER', body);
 
       expect(result).toEqual({
         result: undefined,
@@ -209,7 +206,7 @@ describe('ComplianceRequirementsService', () => {
   });
 
   describe('addRequirement', () => {
-    it('should run a add requirement procedure and return the queue data', async () => {
+    it('should run the add Requirement procedure and return the queue data', async () => {
       const mockAsset = new MockAsset();
 
       const transaction = {
@@ -225,7 +222,7 @@ describe('ComplianceRequirementsService', () => {
 
       const body = { conditions: [], signer: '0x6000' };
 
-      const result = await service.addRequirement('TICKER', body);
+      const result = await service.add('TICKER', body);
 
       expect(result).toEqual({
         result: undefined,
@@ -235,12 +232,9 @@ describe('ComplianceRequirementsService', () => {
   });
 
   describe('editRequirement', () => {
-    it('should run an edit requirement procedure and return the queue data', async () => {
+    it('should run the modify Requirements procedure and return the queue data', async () => {
       const requirementId = new BigNumber(1);
       const mockAsset = new MockAsset();
-      mockAsset.compliance.requirements.get.mockResolvedValue({
-        requirements: [{ id: requirementId }],
-      });
 
       const transaction = {
         blockHash: '0x1',
@@ -255,7 +249,7 @@ describe('ComplianceRequirementsService', () => {
 
       const body = { conditions: [], signer: '0x6000' };
 
-      const result = await service.editRequirement('TICKER', requirementId, body);
+      const result = await service.modify('TICKER', requirementId, body);
 
       expect(result).toEqual({
         result: undefined,

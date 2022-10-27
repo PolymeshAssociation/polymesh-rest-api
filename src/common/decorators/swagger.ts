@@ -115,22 +115,32 @@ export function ApiTransactionResponse(
   );
 }
 
+type TransactionResponseMessages = Record<
+  'notFound' | 'badRequest' | 'unprocessableEntity',
+  string
+>;
+
 /**
  * A helper that combines responses for SDK Error like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`, `InternalServerErrorException`
  *
  * @param options - these will be passed to the `ApiNotFoundResponse` decorator
  */
 export function ApiTransactionFailedResponse(
-  options: ApiResponseOptions
+  messages: Partial<TransactionResponseMessages>
 ): ReturnType<typeof applyDecorators> {
+  const {
+    notFound = 'Returned if the Entity was not found',
+    badRequest = 'Returned if transaction validation failed or same data already exists in chain',
+    unprocessableEntity = 'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met',
+  } = messages;
+
   return applyDecorators(
-    ApiNotFoundResponse(options),
+    ApiNotFoundResponse({ description: notFound }),
     ApiBadRequestResponse({
-      description: 'Returned if transaction validation failed or same data already exists in chain',
+      description: badRequest,
     }),
     ApiUnprocessableEntityResponse({
-      description:
-        'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met',
+      description: unprocessableEntity,
     })
   );
 }

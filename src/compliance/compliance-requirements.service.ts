@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddAssetRequirementParams,
   Asset,
   ComplianceRequirements,
   ModifyComplianceRequirementParams,
-  RemoveAssetRequirementParams,
   SetAssetRequirementsParams,
   TrustedClaimIssuer,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -80,7 +79,7 @@ export class ComplianceRequirementsService {
     );
   }
 
-  public async deleteRequirement(
+  public async deleteOne(
     ticker: string,
     id: BigNumber,
     params: TransactionBaseDto
@@ -88,15 +87,9 @@ export class ComplianceRequirementsService {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
-    const { requirements } = await asset.compliance.requirements.get();
-
-    if (!requirements.find(requirement => requirement.id.eq(id))) {
-      throw new NotFoundException(`Requirement with id ${id} does not exist`);
-    }
-
     return this.transactionsService.submit(
       asset.compliance.requirements.remove,
-      { requirement: id } as unknown as RemoveAssetRequirementParams,
+      { requirement: id },
       {
         signer,
         webhookUrl,
@@ -104,10 +97,7 @@ export class ComplianceRequirementsService {
     );
   }
 
-  public async deleteRequirements(
-    ticker: string,
-    params: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  public async deleteAll(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
@@ -117,7 +107,7 @@ export class ComplianceRequirementsService {
     });
   }
 
-  public async addRequirement(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
+  public async add(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
@@ -131,19 +121,9 @@ export class ComplianceRequirementsService {
     );
   }
 
-  public async editRequirement(
-    ticker: string,
-    id: BigNumber,
-    params: RequirementDto
-  ): ServiceReturn<void> {
+  public async modify(ticker: string, id: BigNumber, params: RequirementDto): ServiceReturn<void> {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
-
-    const { requirements } = await asset.compliance.requirements.get();
-
-    if (!requirements.find(requirement => requirement.id.eq(id))) {
-      throw new NotFoundException(`Requirement with id ${id} does not exist`);
-    }
 
     return this.transactionsService.submit(
       asset.compliance.requirements.modify,
