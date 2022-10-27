@@ -9,7 +9,7 @@ import { LocalUserRepo } from '~/datastore/local-store/repos/users.repo';
 import { UsersRepo } from '~/users/repo/user.repo';
 
 /**
- * Provides Repos that use process memory to store state
+ * provides Repos that use process memory to store state
  */
 @Module({
   imports: [ConfigModule],

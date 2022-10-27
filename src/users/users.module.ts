@@ -5,7 +5,7 @@ import { UsersController } from '~/users/users.controller';
 import { UsersService } from '~/users/users.service';
 
 /**
- * Responsible for the REST API's users
+ * responsible for the REST API's users
  */
 @Module({
   imports: [DatastoreModule.register()],

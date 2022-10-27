@@ -8,6 +8,7 @@ import { testResource } from '~/test-utils/consts';
 
 type ExpectedReplyArgs = [{ message: string; statusCode: number }, HttpStatus];
 type Case = [AppError, ExpectedReplyArgs];
+
 describe('AppErrorToHttpResponseFilter', () => {
   const mockReplyFn = jest.fn();
   const mockHttpAdaptorHost = createMock<HttpAdapterHost>();
