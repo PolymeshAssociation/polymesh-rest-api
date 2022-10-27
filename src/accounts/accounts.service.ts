@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Account,
   AccountBalance,
@@ -102,20 +98,22 @@ export class AccountsService {
   }
 
   public async freezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
-    const { signer, webhookUrl } = opts || {};
-    const { polymeshService, transactionsService } = this;
+    const { signer, webhookUrl } = opts;
+    const { freezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
 
-    const { freezeSecondaryAccounts } = polymeshService.polymeshApi.accountManagement;
-
-    return transactionsService.submit(freezeSecondaryAccounts, undefined, { signer, webhookUrl });
+    return this.transactionsService.submit(freezeSecondaryAccounts, undefined, {
+      signer,
+      webhookUrl,
+    });
   }
 
   public async unfreezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
-    const { signer, webhookUrl } = opts || {};
-    const { polymeshService, transactionsService } = this;
+    const { signer, webhookUrl } = opts;
+    const { unfreezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
 
-    const { unfreezeSecondaryAccounts } = polymeshService.polymeshApi.accountManagement;
-
-    return transactionsService.submit(unfreezeSecondaryAccounts, undefined, { signer, webhookUrl });
+    return this.transactionsService.submit(unfreezeSecondaryAccounts, undefined, {
+      signer,
+      webhookUrl,
+    });
   }
 }
