@@ -7,7 +7,7 @@ import { PostgresApiKeyRepo } from '~/datastore/postgres/repos/api-keys.repo';
 import { testUser } from '~/test-utils/consts';
 import { MockPostgresApiRepository } from '~/test-utils/repo-mocks';
 
-describe(`PostgresApiKeyRepo meets ${ApiKeyRepo.type} requirements`, () => {
+describe(`PostgresApiKeyRepo does not meet ${ApiKeyRepo.type} requirements`, () => {
   const mockRepository = new MockPostgresApiRepository();
   const repo = new PostgresApiKeyRepo(mockRepository as unknown as Repository<ApiKey>);
   let _id = 1;

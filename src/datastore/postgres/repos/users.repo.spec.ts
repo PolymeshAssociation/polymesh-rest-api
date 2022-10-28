@@ -6,7 +6,7 @@ import { PostgresUsersRepo } from '~/datastore/postgres/repos/users.repo';
 import { MockPostgresUserRepository } from '~/test-utils/repo-mocks';
 import { UsersRepo } from '~/users/repo/user.repo';
 
-describe(`PostgresUsersRepo meets ${UsersRepo.type} requirements`, () => {
+describe(`PostgresUsersRepo does not meet ${UsersRepo.type} requirements`, () => {
   const mockRepository = new MockPostgresUserRepository();
   const repo = new PostgresUsersRepo(mockRepository as unknown as Repository<User>);
   let _id = 1;
