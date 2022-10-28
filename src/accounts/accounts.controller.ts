@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -19,6 +20,7 @@ import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { SubsidyModel } from '~/accounts/models/subsidy.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -153,5 +155,50 @@ export class AccountsController {
     } else {
       res.status(HttpStatus.NO_CONTENT).send({});
     }
+  }
+
+  @ApiOperation({
+    summary: 'Freeze secondary Accounts',
+    description:
+      'This endpoint freezes all the secondary Accounts in the signing Identity. This means revoking their permission to perform any operation on the chain and freezing their funds until the Accounts are unfrozen',
+  })
+  @ApiOkResponse({
+    description: 'Secondary Accounts have been frozen',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `signer` is not authorized to freeze their Identities secondary Accounts',
+  })
+  @ApiBadRequestResponse({
+    description: 'The secondary Accounts are already frozen',
+  })
+  @Post('freeze')
+  async freezeSecondaryAccounts(
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.freezeSecondaryAccounts(params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Unfreeze secondary Accounts',
+    description: 'This endpoint unfreezes all of the secondary Accounts in the signing Identity',
+  })
+  @ApiOkResponse({
+    description: 'Secondary Accounts have been unfrozen',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `signer` is not authorized to unfreeze their Identities secondary Accounts',
+  })
+  @ApiBadRequestResponse({
+    description: 'The secondary Accounts are already unfrozen',
+  })
+  @Post('unfreeze')
+  async unfreezeSecondaryAccounts(
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.unfreezeSecondaryAccounts(params);
+
+    return handleServiceResult(result);
   }
 }

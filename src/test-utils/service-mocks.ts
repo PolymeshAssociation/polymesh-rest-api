@@ -68,6 +68,8 @@ export class MockAccountsService {
   getPermissions = jest.fn();
   findOne = jest.fn();
   getSubsidy = jest.fn();
+  freezeSecondaryAccounts = jest.fn();
+  unfreezeSecondaryAccounts = jest.fn();
 }
 
 export class MockEventsService {
