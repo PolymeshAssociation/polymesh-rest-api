@@ -133,9 +133,9 @@ If you are a developer you can toggle an endpoint to aid with testing by setting
 
 #### Warning
 
-Webhooks are still being developed and should not be used against mainnet. However the API for them should be stable to develop against for testing and demo purposes
+Webhooks are still being developed and should not be used against mainnet. However the API should be stable to develop against for testing and demo purposes
 
-As the REST API is currently stateless (Look, no database!). As such the subscription status is not persisted and the service can not guarantee delivery in the face of ordinary compting faults.
+Webhooks have yet to implement a Repo. As such the subscription status is not persisted and the service can not guarantee delivery in the face of ordinary compting faults.
 
 In its current state the transactions would have to be reconciled with chain events as there is a chance for notifications to not be delivered.
 
