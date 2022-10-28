@@ -54,4 +54,23 @@ jobs:
         run: yarn --frozen-lockfile
       - name: test
         run: yarn test:cov
-      # TODO @polymath-eric: add SonarCloud step when the account confusion is sorted
+
+  release:
+    name: Building and releasing project
+    runs-on: ubuntu-latest
+    needs: [lint, build, test]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          cache: 'yarn'
+      - name: install dependencies
+        run: yarn --frozen-lockfile
+      - name: release
+        env:
+          DOCKER_USER: ${{ secrets.ASSOCIATION_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.ASSOCIATION_DOCKER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: yarn semantic-release
+# TODO @polymath-eric: add SonarCloud step when the account confusion is sorted
