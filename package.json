@@ -13,6 +13,7 @@
     "commit": "npx git-cz",
     "format": "prettier-eslint --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
+    "start:repl": "yarn start --entryFile repl",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV='production' node dist/main",
