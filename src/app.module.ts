@@ -28,6 +28,8 @@ import { SubscriptionsModule } from '~/subscriptions/subscriptions.module';
 import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
 import { UsersModule } from '~/users/users.module';
+
+import { ConfigModule } from './config/config.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -83,6 +85,7 @@ import { UsersModule } from '~/users/users.module';
     AuthModule,
     UsersModule,
     DatastoreModule.register(),
+    ConfigModule,
   ],
 })
 export class AppModule {}

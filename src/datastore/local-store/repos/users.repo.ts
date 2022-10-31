@@ -38,6 +38,9 @@ export class LocalUserRepo implements UsersRepo {
   }
 
   private nextId(): string {
-    return String(this._nextId++);
+    const id = this._nextId;
+    this._nextId += 1;
+
+    return String(id);
   }
 }

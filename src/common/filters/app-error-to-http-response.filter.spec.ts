@@ -14,7 +14,7 @@ describe('AppErrorToHttpResponseFilter', () => {
   const mockHttpAdaptorHost = createMock<HttpAdapterHost>();
   mockHttpAdaptorHost.httpAdapter.reply = mockReplyFn;
   const mockHost = createMock<ArgumentsHost>();
-  const httpFilter = new AppErrorToHttpResponseFilter(mockHttpAdaptorHost);
+  const errorToHttpResponseFilter = new AppErrorToHttpResponseFilter(mockHttpAdaptorHost);
 
   const notFoundError = new AppNotFoundError(testResource.id, testResource.type);
   const conflictError = new AppConflictError(testResource.id, testResource.type);
@@ -25,12 +25,12 @@ describe('AppErrorToHttpResponseFilter', () => {
   ];
 
   test.each(cases)('should transform %p into %p', async (error, expected) => {
-    httpFilter.catch(error, mockHost);
+    errorToHttpResponseFilter.catch(error, mockHost);
     expect(mockReplyFn).toHaveBeenCalledWith({}, ...expected);
   });
 
   it('should throw if an unknown Error is encountered', () => {
     const unknownError = new Error('unknown error') as AppError;
-    return expect(() => httpFilter.catch(unknownError, mockHost)).toThrow();
+    return expect(() => errorToHttpResponseFilter.catch(unknownError, mockHost)).toThrow();
   });
 });
