@@ -57,4 +57,34 @@ describe('ComplianceRequirementsService', () => {
       expect(result).toEqual(mockClaimIssuers);
     });
   });
+
+  describe('set', () => {
+    it('should set trusted Claim Issuers for an Asset', async () => {
+      const mockClaimIssuers = [
+        {
+          identity: 'Ox6'.padEnd(66, '0'),
+          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+        },
+      ];
+
+      const payload = {
+        signer: 'Alice',
+        claimIssuers: [
+          {
+            identity: 'Ox6'.padEnd(66, '0'),
+            trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+          },
+        ],
+      };
+
+      const mockAsset = new MockAsset();
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      mockAsset.compliance.trustedClaimIssuers.set.mockResolvedValue(mockClaimIssuers);
+
+      const result = await service.set('TICKER', payload);
+
+      expect(result).toEqual(mockClaimIssuers);
+    });
+  });
 });
