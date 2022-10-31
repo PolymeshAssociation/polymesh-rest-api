@@ -71,6 +71,6 @@ jobs:
         env:
           DOCKER_USER: ${{ secrets.ASSOCIATION_DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.ASSOCIATION_DOCKER_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: yarn semantic-release
 # TODO @polymath-eric: add SonarCloud step when the account confusion is sorted
