@@ -39,7 +39,6 @@ export const mockTransactionsProvider = {
 export class MockComplianceRequirementsService {
   setRequirements = jest.fn();
   findComplianceRequirements = jest.fn();
-  findTrustedClaimIssuers = jest.fn();
   pauseRequirements = jest.fn();
   unpauseRequirements = jest.fn();
   deleteAll = jest.fn();
@@ -178,6 +177,10 @@ export class MockAuthService {
   createApiKey = jest.fn();
   deleteApiKey = jest.fn();
   validateApiKey = jest.fn();
+}
+
+export class MockTrustedClaimIssuersService {
+  find = jest.fn();
 }
 
 export const mockAuthServiceProvider = {

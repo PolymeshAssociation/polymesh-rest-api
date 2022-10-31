@@ -6,7 +6,6 @@ import {
   ComplianceRequirements,
   ModifyComplianceRequirementParams,
   SetAssetRequirementsParams,
-  TrustedClaimIssuer,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -27,12 +26,6 @@ export class ComplianceRequirementsService {
     const asset = await this.assetsService.findOne(ticker);
 
     return asset.compliance.requirements.get();
-  }
-
-  public async findTrustedClaimIssuers(ticker: string): Promise<TrustedClaimIssuer<true>[]> {
-    const asset = await this.assetsService.findOne(ticker);
-
-    return asset.compliance.trustedClaimIssuers.get();
   }
 
   public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<Asset> {

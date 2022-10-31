@@ -57,26 +57,6 @@ describe('ComplianceRequirementsService', () => {
     });
   });
 
-  describe('findTrustedClaimIssuers', () => {
-    it('should return the list of trusted Claim Issuers of an Asset', async () => {
-      const mockClaimIssuers = [
-        {
-          did: 'Ox6'.padEnd(66, '0'),
-          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
-        },
-      ];
-
-      const mockAsset = new MockAsset();
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
-
-      mockAsset.compliance.trustedClaimIssuers.get.mockResolvedValue(mockClaimIssuers);
-
-      const result = await service.findTrustedClaimIssuers('TICKER');
-
-      expect(result).toEqual(mockClaimIssuers);
-    });
-  });
-
   describe('setRequirements', () => {
     it('should run a set rules procedure and return the queue data', async () => {
       const mockAsset = new MockAsset();
