@@ -40,6 +40,6 @@ export class LocalUserRepo implements UsersRepo {
   private nextId(): string {
     this._nextId += 1;
 
-    return String(this.nextId);
+    return String(this._nextId);
   }
 }
