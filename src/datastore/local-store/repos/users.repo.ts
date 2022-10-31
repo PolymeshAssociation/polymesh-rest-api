@@ -9,7 +9,7 @@ import { defaultUser } from '~/users/user.consts';
 @Injectable()
 export class LocalUserRepo implements UsersRepo {
   private users: Record<string, UserModel> = { [defaultUser.id]: defaultUser };
-  private _nextId = 1;
+  private _nextId = 0;
 
   public async createUser(params: CreateUserDto): Promise<UserModel> {
     const { name } = params;
@@ -38,9 +38,8 @@ export class LocalUserRepo implements UsersRepo {
   }
 
   private nextId(): string {
-    const id = this._nextId;
     this._nextId += 1;
 
-    return String(id);
+    return String(this.nextId);
   }
 }
