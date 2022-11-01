@@ -121,6 +121,7 @@ export class MockAsset {
     trustedClaimIssuers: {
       get: jest.fn(),
       set: jest.fn(),
+      add: jest.fn(),
     },
   };
 

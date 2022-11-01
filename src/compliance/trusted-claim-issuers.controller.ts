@@ -72,4 +72,31 @@ export class TrustedClaimIssuersController {
 
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Add trusted Claim Issuers of an Asset',
+    description: 'This endpoint will add trusted Claim Issuers for an Asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose trusted Claim Issuers are to be added',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    description: 'The Asset or identity was not found',
+  })
+  @Post('add')
+  public async addTrustedClaimIssuers(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: SetTrustedClaimIssuers
+  ): Promise<TransactionResponseModel> {
+    const result = await this.trustedClaimIssuersService.add(ticker, params);
+
+    return handleServiceResult(result);
+  }
 }

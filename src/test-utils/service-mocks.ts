@@ -182,6 +182,7 @@ export class MockAuthService {
 export class MockTrustedClaimIssuersService {
   find = jest.fn();
   set = jest.fn();
+  add = jest.fn();
 }
 
 export const mockAuthServiceProvider = {

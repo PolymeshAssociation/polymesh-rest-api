@@ -6,7 +6,7 @@ import { TrustedClaimIssuersController } from '~/compliance/trusted-claim-issuer
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { MockTrustedClaimIssuersService } from '~/test-utils/service-mocks';
 
-describe('ComplianceRequirementsController', () => {
+describe('TrustedClaimIssuersController', () => {
   let controller: TrustedClaimIssuersController;
 
   const mockService = new MockTrustedClaimIssuersService();
@@ -66,6 +66,24 @@ describe('ComplianceRequirementsController', () => {
       const result = await controller.setTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
 
       expect(mockService.set).toHaveBeenCalledWith('TICKER', mockPayload);
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('addTrustedClaimIssuers', () => {
+    it('should accept SetTrustedClaimIssuersDto and add Asset trusted claim issuers', async () => {
+      const mockPayload: SetTrustedClaimIssuers = {
+        claimIssuers: [],
+        signer: 'Alice',
+      };
+      const response = {
+        transactions: [],
+      };
+      mockService.add.mockResolvedValue(response);
+
+      const result = await controller.addTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+
+      expect(mockService.add).toHaveBeenCalledWith('TICKER', mockPayload);
       expect(result).toEqual(response);
     });
   });

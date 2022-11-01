@@ -36,4 +36,18 @@ export class TrustedClaimIssuersService {
       }
     );
   }
+
+  public async add(ticker: string, params: SetTrustedClaimIssuers): ServiceReturn<Asset> {
+    const { signer, webhookUrl } = params;
+    const asset = await this.assetsService.findOne(ticker);
+
+    return this.transactionsService.submit(
+      asset.compliance.trustedClaimIssuers.add,
+      params as ModifyAssetTrustedClaimIssuersAddSetParams,
+      {
+        signer,
+        webhookUrl,
+      }
+    );
+  }
 }
