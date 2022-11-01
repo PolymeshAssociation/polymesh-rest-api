@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { repl } from '@nestjs/core';
 
 import { AppModule } from '~/app.module';
