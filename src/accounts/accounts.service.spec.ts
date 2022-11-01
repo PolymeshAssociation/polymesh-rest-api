@@ -316,4 +316,66 @@ describe('AccountsService', () => {
       findOneSpy.mockRestore();
     });
   });
+
+  describe('freezeSecondaryAccounts', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.FreezeSecondaryKeys,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockPolymeshApi.accountManagement.freezeSecondaryAccounts.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const signer = '0x6'.padEnd(66, '0');
+      const body = {
+        signer,
+      };
+
+      const result = await service.freezeSecondaryAccounts(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.freezeSecondaryAccounts,
+        undefined,
+        { signer }
+      );
+    });
+  });
+
+  describe('unfreezeSecondaryAccounts', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.FreezeSecondaryKeys,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockPolymeshApi.accountManagement.unfreezeSecondaryAccounts.mockResolvedValue(
+        mockTransaction
+      );
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const signer = '0x6'.padEnd(66, '0');
+      const body = {
+        signer,
+      };
+
+      const result = await service.unfreezeSecondaryAccounts(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.unfreezeSecondaryAccounts,
+        undefined,
+        { signer }
+      );
+    });
+  });
 });

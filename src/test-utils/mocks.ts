@@ -52,6 +52,8 @@ export class MockPolymesh {
     getAccount: jest.fn(),
     getAccountBalance: jest.fn(),
     inviteAccount: jest.fn(),
+    freezeSecondaryAccounts: jest.fn(),
+    unfreezeSecondaryAccounts: jest.fn(),
   };
 
   public identities = {
