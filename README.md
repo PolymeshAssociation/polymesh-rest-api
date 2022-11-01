@@ -26,9 +26,14 @@ $ yarn start
 # watch mode
 $ yarn start:dev
 
+# REPL (interactive command line)
+$ yarn start:repl
+
 # production mode
 $ yarn start:prod
 ```
+
+Documentation for REPL mode can be found [here](https://docs.nestjs.com/recipes/repl)
 
 ## Test
 
