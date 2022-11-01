@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { createMock } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 

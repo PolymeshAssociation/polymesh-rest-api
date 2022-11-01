@@ -9,7 +9,7 @@ UserModel {
 
 exports[`PostgresUsersRepo does not meet User requirements method: findByName should find the created user 1`] = `
 UserModel {
-  "id": "undefined",
-  "name": undefined,
+  "id": "1",
+  "name": "Alice",
 }
 `;

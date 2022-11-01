@@ -5,6 +5,7 @@ import { AppConflictError } from '~/common/errors';
 const isTypeOrmError = (err: Error): err is TypeORMError => {
   return err instanceof TypeORMError;
 };
+
 export const convertTypeOrmErrorToAppError =
   (id: string, resourceType: string) =>
   (err: Error): void => {

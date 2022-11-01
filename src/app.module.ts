@@ -84,7 +84,6 @@ import { UsersModule } from '~/users/users.module';
     AuthModule,
     UsersModule,
     DatastoreModule.register(),
-    ConfigModule,
   ],
 })
 export class AppModule {}
