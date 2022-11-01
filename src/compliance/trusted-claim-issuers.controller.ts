@@ -10,6 +10,7 @@ import {
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { RemoveTrustedClaimIssuers } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
 import { SetTrustedClaimIssuers } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
@@ -96,6 +97,33 @@ export class TrustedClaimIssuersController {
     @Body() params: SetTrustedClaimIssuers
   ): Promise<TransactionResponseModel> {
     const result = await this.trustedClaimIssuersService.add(ticker, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Remove trusted Claim Issuers of an Asset',
+    description: 'This endpoint will remove trusted Claim Issuers for an Asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose trusted Claim Issuers are to be removed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    description: 'The Asset or identity was not found',
+  })
+  @Post('remove')
+  public async removeTrustedClaimIssuers(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: RemoveTrustedClaimIssuers
+  ): Promise<TransactionResponseModel> {
+    const result = await this.trustedClaimIssuersService.remove(ticker, params);
 
     return handleServiceResult(result);
   }

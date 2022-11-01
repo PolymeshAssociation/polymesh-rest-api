@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 
+import { RemoveTrustedClaimIssuers } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
 import { SetTrustedClaimIssuers } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TrustedClaimIssuersController } from '~/compliance/trusted-claim-issuers.controller';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
@@ -82,6 +83,24 @@ describe('TrustedClaimIssuersController', () => {
       mockService.add.mockResolvedValue(response);
 
       const result = await controller.addTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+
+      expect(mockService.add).toHaveBeenCalledWith('TICKER', mockPayload);
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('removeTrustedClaimIssuers', () => {
+    it('should accept RemoveTrustedClaimIssuersDto and remove trusted claim issuers for Asset', async () => {
+      const mockPayload: RemoveTrustedClaimIssuers = {
+        claimIssuers: [],
+        signer: 'Alice',
+      };
+      const response = {
+        transactions: [],
+      };
+      mockService.remove.mockResolvedValue(response);
+
+      const result = await controller.removeTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
 
       expect(mockService.add).toHaveBeenCalledWith('TICKER', mockPayload);
       expect(result).toEqual(response);

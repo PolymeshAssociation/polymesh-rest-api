@@ -119,4 +119,32 @@ describe('TrustedClaimIssuersService', () => {
       });
     });
   });
+
+  describe('remove', () => {
+    it('should remove trusted Claim Issuers for an Asset', async () => {
+      const mockAsset = new MockAsset();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAsset.compliance.trustedClaimIssuers.remove.mockResolvedValue(mockClaimIssuers);
+
+      const result = await service.remove('TICKER', {
+        signer: 'Alice',
+        claimIssuers: ['Ox6'.padEnd(66, '0')],
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });
