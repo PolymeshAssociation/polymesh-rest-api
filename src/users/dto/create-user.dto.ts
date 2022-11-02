@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -10,5 +10,6 @@ export class CreateUserDto {
     type: 'string',
   })
   @IsString()
+  @Length(3, 127)
   readonly name: string;
 }
