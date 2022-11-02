@@ -41,7 +41,7 @@ describe('NetworkController', () => {
   });
 
   describe('getLatestBlock', () => {
-    it('should return latest block ID as NetworkBlockModel', async () => {
+    it('should return latest block number as NetworkBlockModel', async () => {
       const mockLatestBlock = new BigNumber(1);
       const mockResult = new NetworkBlockModel({ id: mockLatestBlock });
       mockNetworkService.getLatestBlock.mockResolvedValue(mockLatestBlock);

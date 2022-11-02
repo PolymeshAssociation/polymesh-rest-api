@@ -26,11 +26,11 @@ export class NetworkController {
   }
 
   @ApiOperation({
-    summary: 'Get the latest block number',
-    description: 'This endpoint will provide the latest block ID',
+    summary: 'Get the latest block',
+    description: 'This endpoint will provide the latest block number',
   })
   @ApiOkResponse({
-    description: 'Latest block ID that has been added to the chain',
+    description: 'Latest block number that has been added to the chain',
     type: NetworkBlockModel,
   })
   @Get('latest-block')
