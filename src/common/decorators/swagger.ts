@@ -126,16 +126,20 @@ type FailedTransactionResponseCodes =
  * @param messages - key value map of API response descriptions that will be passed to appropriate `MethodDecorator`
  */
 export function ApiTransactionFailedResponse(
-  messages: Partial<Record<FailedTransactionResponseCodes, string>>
+  messages: Partial<Record<FailedTransactionResponseCodes, string | undefined>>
 ): ReturnType<typeof applyDecorators> {
   const decoratorMap: Record<
     FailedTransactionResponseCodes,
-    (description: string) => MethodDecorator
+    (description?: string) => MethodDecorator
   > = {
-    [HttpStatus.NOT_FOUND]: description => ApiNotFoundResponse({ description }),
-    [HttpStatus.BAD_REQUEST]: description => ApiBadRequestResponse({ description }),
-    [HttpStatus.UNPROCESSABLE_ENTITY]: description =>
-      ApiUnprocessableEntityResponse({ description }),
+    [HttpStatus.NOT_FOUND]: (description = 'Entity was not found') =>
+      ApiNotFoundResponse({ description }),
+    [HttpStatus.BAD_REQUEST]: (
+      description = 'Returned if transaction validation failed or same data already exists in chain'
+    ) => ApiBadRequestResponse({ description }),
+    [HttpStatus.UNPROCESSABLE_ENTITY]: (
+      description = 'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met'
+    ) => ApiUnprocessableEntityResponse({ description }),
   };
   const decorators: MethodDecorator[] = [];
 
