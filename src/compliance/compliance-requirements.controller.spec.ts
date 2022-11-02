@@ -103,7 +103,7 @@ describe('ComplianceRequirementsController', () => {
   });
 
   describe('deleteRequirement', () => {
-    it('should accept TransactionBaseDto and compliance requirement id and delete Asset Compliance rule', async () => {
+    it('should accept TransactionBaseDto and compliance requirement ID and delete the corresponding Asset Compliance rule for the given ticker', async () => {
       const response = {
         transactions: [],
       };
@@ -118,7 +118,7 @@ describe('ComplianceRequirementsController', () => {
   });
 
   describe('deleteRequirements', () => {
-    it('should accept TransactionBaseDto and delete all Asset Compliance rules', async () => {
+    it('should accept TransactionBaseDto and delete all the Asset Compliance rules for the given ticker', async () => {
       const response = {
         transactions: [],
       };
@@ -133,7 +133,7 @@ describe('ComplianceRequirementsController', () => {
   });
 
   describe('addRequirement', () => {
-    it('should accept AddRequirementDto and add an Asset Compliance rule', async () => {
+    it('should accept RequirementDto and add an Asset Compliance rule', async () => {
       const response = {
         transactions: [],
       };
@@ -148,7 +148,7 @@ describe('ComplianceRequirementsController', () => {
   });
 
   describe('modifyComplianceRequirement', () => {
-    it('should accept AddRequirementDto and add an Asset Compliance rule', async () => {
+    it('should accept RequirementDto and modify the corresponding Asset Compliance rule', async () => {
       const response = {
         transactions: [],
       };

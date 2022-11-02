@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { applyDecorators, Type } from '@nestjs/common';
+import { applyDecorators, HttpStatus, Type } from '@nestjs/common';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
@@ -115,32 +115,35 @@ export function ApiTransactionResponse(
   );
 }
 
-type TransactionResponseMessages = Record<
-  'notFound' | 'badRequest' | 'unprocessableEntity',
-  string
->;
+type FailedTransactionResponseCodes =
+  | HttpStatus.NOT_FOUND
+  | HttpStatus.BAD_REQUEST
+  | HttpStatus.UNPROCESSABLE_ENTITY;
 
 /**
- * A helper that combines responses for SDK Error like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`, `InternalServerErrorException`
+ * A helper that combines responses for SDK Errors like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`
  *
- * @param options - these will be passed to the `ApiNotFoundResponse` decorator
+ * @param messages - key value map of API response descriptions that will be passed to appropriate `MethodDecorator`
  */
 export function ApiTransactionFailedResponse(
-  messages: Partial<TransactionResponseMessages>
+  messages: Partial<Record<FailedTransactionResponseCodes, string>>
 ): ReturnType<typeof applyDecorators> {
-  const {
-    notFound = 'Returned if the Entity was not found',
-    badRequest = 'Returned if transaction validation failed or same data already exists in chain',
-    unprocessableEntity = 'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met',
-  } = messages;
+  const decoratorMap: Record<
+    FailedTransactionResponseCodes,
+    (description: string) => MethodDecorator
+  > = {
+    [HttpStatus.NOT_FOUND]: description => ApiNotFoundResponse({ description }),
+    [HttpStatus.BAD_REQUEST]: description => ApiBadRequestResponse({ description }),
+    [HttpStatus.UNPROCESSABLE_ENTITY]: description =>
+      ApiUnprocessableEntityResponse({ description }),
+  };
+  const decorators: MethodDecorator[] = [];
 
-  return applyDecorators(
-    ApiNotFoundResponse({ description: notFound }),
-    ApiBadRequestResponse({
-      description: badRequest,
-    }),
-    ApiUnprocessableEntityResponse({
-      description: unprocessableEntity,
-    })
-  );
+  for (const [key, value] of Object.entries(messages)) {
+    const decorator = decoratorMap[key as unknown as FailedTransactionResponseCodes];
+
+    decorators.push(decorator(value));
+  }
+
+  return applyDecorators(...decorators, ...decorators);
 }

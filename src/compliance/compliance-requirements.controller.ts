@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -103,7 +103,8 @@ export class ComplianceRequirementsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    notFound: 'The Asset was not found',
+    [HttpStatus.NOT_FOUND]: 'The Asset was not found',
+    [HttpStatus.UNPROCESSABLE_ENTITY]: 'Insufficient balance to perform transaction',
   })
   @Post('pause')
   public async pauseRequirements(
@@ -129,7 +130,7 @@ export class ComplianceRequirementsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    notFound: 'The Asset was not found',
+    [HttpStatus.NOT_FOUND]: 'The Asset was not found',
   })
   @Post('unpause')
   public async unpauseRequirements(
@@ -161,7 +162,8 @@ export class ComplianceRequirementsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    notFound: 'The Asset or compliance requirement was not found',
+    [HttpStatus.NOT_FOUND]: 'The Asset was not found',
+    [HttpStatus.UNPROCESSABLE_ENTITY]: 'Insufficient balance to perform transaction',
   })
   @Post(':id/delete')
   public async deleteRequirement(
@@ -179,7 +181,7 @@ export class ComplianceRequirementsController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset for which to delete compliance requirements',
+    description: 'The ticker of the Asset whose compliance requirements are to be deleted',
     type: 'string',
     example: 'TICKER',
   })
@@ -188,8 +190,9 @@ export class ComplianceRequirementsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    notFound: 'The Asset was not found',
-    badRequest: 'Returned if there are no existing compliance requirements for the Asset',
+    [HttpStatus.NOT_FOUND]: 'The Asset was not found',
+    [HttpStatus.BAD_REQUEST]:
+      'Returned if there are no existing compliance requirements for the Asset',
   })
   @Post('delete')
   public async deleteRequirements(
@@ -217,9 +220,9 @@ export class ComplianceRequirementsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    notFound: 'The Asset was not found',
-    badRequest: 'Returned if the transaction failed',
-    unprocessableEntity: 'Compliance Requirement complexity limit exceeded',
+    [HttpStatus.NOT_FOUND]: 'The Asset was not found',
+    [HttpStatus.BAD_REQUEST]: 'Returned if the transaction failed',
+    [HttpStatus.UNPROCESSABLE_ENTITY]: 'Compliance Requirement complexity limit exceeded',
   })
   @Post('add')
   public async addRequirement(
@@ -251,8 +254,8 @@ export class ComplianceRequirementsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    notFound: 'The Asset or compliance requirement was not found',
-    badRequest: 'Returned if the transaction failed',
+    [HttpStatus.NOT_FOUND]: 'The Asset or compliance requirement was not found',
+    [HttpStatus.BAD_REQUEST]: 'Returned if there is no change in data',
   })
   @Post(':id/modify')
   public async modifyComplianceRequirement(
