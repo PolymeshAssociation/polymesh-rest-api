@@ -14,7 +14,7 @@ import { DatastoreModule } from '~/datastore/datastore.module';
 import { UsersModule } from '~/users/users.module';
 
 /**
- * Responsible for the REST API's authentication strategies
+ * responsible for the REST API's authentication strategies
  *
  * @note authorization has not yet been implemented - all users have full access
  */

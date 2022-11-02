@@ -10,7 +10,7 @@ import { PostgresUsersRepo } from '~/datastore/postgres/repos/users.repo';
 import { UsersRepo } from '~/users/repo/user.repo';
 
 /**
- * Providers Repos that use Postgres to store state
+ * providers Repos that use Postgres to store state
  */
 @Module({
   providers: [

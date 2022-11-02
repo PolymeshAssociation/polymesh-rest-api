@@ -20,17 +20,17 @@ export class AppErrorToHttpResponseFilter implements ExceptionFilter {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
 
-    const httpStatusCode = this.appErrorCodeToHttpStatusCode(code);
-    if (httpStatusCode >= 500) {
+    const statusCode = this.appErrorCodeToHttpStatusCode(code);
+    if (statusCode >= 500) {
       message = 'Internal Server Error';
     }
 
     const responseBody = {
-      statusCode: httpStatusCode,
+      statusCode,
       message,
     };
 
-    httpAdapter.reply(ctx.getResponse(), responseBody, httpStatusCode);
+    httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
   }
 
   private appErrorCodeToHttpStatusCode(code: AppErrorCode): HttpStatus {
