@@ -11,9 +11,9 @@ import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
+import { AppConfigError } from '~/common/errors';
 import { ComplianceModule } from '~/compliance/compliance.module';
 import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.module';
-import { DatastoreModule } from '~/datastore/datastore.module';
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
@@ -51,7 +51,7 @@ import { UsersModule } from '~/users/users.module';
         API_KEYS: Joi.string().default(''),
         AUTH_STRATEGY: Joi.string().default(() => {
           if (process.env.NODE_ENV === 'production') {
-            throw new Error('ENV "AUTH_STRATEGY" must be set in a production environment');
+            throw new AppConfigError('AUTH_STRATEGY', 'must be set in a production environment');
           }
           console.warn('Defaulting to "open" for "AUTH_STRATEGY"');
           return AuthStrategy.Open;
@@ -83,7 +83,6 @@ import { UsersModule } from '~/users/users.module';
     DeveloperTestingModule.register(),
     AuthModule,
     UsersModule,
-    DatastoreModule.register(),
   ],
 })
 export class AppModule {}

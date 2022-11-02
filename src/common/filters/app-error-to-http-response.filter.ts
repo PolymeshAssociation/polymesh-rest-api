@@ -21,6 +21,9 @@ export class AppErrorToHttpResponseFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
 
     const httpStatusCode = this.appErrorCodeToHttpStatusCode(code);
+    if (httpStatusCode >= 500) {
+      message = 'Internal Server Error';
+    }
 
     const responseBody = {
       statusCode: httpStatusCode,
@@ -36,6 +39,8 @@ export class AppErrorToHttpResponseFilter implements ExceptionFilter {
         return HttpStatus.NOT_FOUND;
       case AppErrorCode.Conflict:
         return HttpStatus.CONFLICT;
+      case AppErrorCode.Config:
+        return HttpStatus.INTERNAL_SERVER_ERROR;
       default:
         throw new UnreachableCaseError(code);
     }

@@ -1,34 +1,28 @@
 /* istanbul ignore file */
 
-import { ValueProvider } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import path from 'path';
 import { DataSource } from 'typeorm';
 
-import { readPostgresConfig } from '~/datastore/datastore.utils';
+import { readPostgresConfigFromEnv } from '~/datastore/postgres/utils';
 
-dotenv.config(); // call dotenv for when the typeORM CLI is using this, normally NestJS calls dotenv for us
+dotenv.config(); // allows this file to be used with the TypeORM CLI directly for generating and running migrations
+const pgConfig = readPostgresConfigFromEnv();
 
-export const pgConfig = readPostgresConfig();
-
-export let dataSource: DataSource;
-export let dataSourceProvider: ValueProvider;
-export const PG_SOURCE = 'PG_SOURCE';
-
-if (pgConfig) {
+export const createDataSource = (): DataSource | undefined => {
   const migrations = [path.join(__dirname, 'migrations/*.{ts,js}')];
   const entities = [path.join(__dirname, 'entities/*.entity.{ts,js}')];
 
-  dataSource = new DataSource({
+  if (!pgConfig) {
+    return undefined;
+  }
+
+  return new DataSource({
     ...pgConfig,
     entities,
     migrations,
   });
+};
 
-  dataSource.initialize();
-
-  dataSourceProvider = {
-    useValue: dataSource,
-    provide: PG_SOURCE,
-  };
-}
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+export const dataSource: DataSource = createDataSource()!;

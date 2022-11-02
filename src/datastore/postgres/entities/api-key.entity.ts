@@ -23,5 +23,5 @@ export const apiKeyRepoProvider: FactoryProvider = {
   useFactory: async (dataSource: DataSource): Promise<Repository<ApiKey>> => {
     return dataSource.getRepository(ApiKey);
   },
-  inject: ['PG_SOURCE'],
+  inject: [DataSource],
 };

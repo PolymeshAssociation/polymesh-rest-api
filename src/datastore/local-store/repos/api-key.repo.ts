@@ -16,7 +16,6 @@ export class LocalApiKeysRepo implements ApiKeyRepo {
   constructor(readonly config: ConfigService) {
     const givenApiKeys = config.getOrThrow<string>('API_KEYS');
     const apiKeys = parseApiKeysConfig(givenApiKeys);
-
     apiKeys.forEach(key => {
       this.apiKeys[key] = defaultUser;
     });

@@ -21,7 +21,7 @@ import { UsersModule } from '~/users/users.module';
 @Module({
   imports: [
     ConfigModule,
-    DatastoreModule.register(),
+    DatastoreModule.registerAsync(),
     UsersModule,
     PassportModule.register({
       session: false,

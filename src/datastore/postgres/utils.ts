@@ -9,7 +9,7 @@ export interface PostgresConfig {
   port: number;
 }
 
-export const readPostgresConfig = (): PostgresConfig | undefined => {
+export const readPostgresConfigFromEnv = (): PostgresConfig | undefined => {
   const {
     REST_POSTGRES_HOST: host,
     REST_POSTGRES_PORT: port,

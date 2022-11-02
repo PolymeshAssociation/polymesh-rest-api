@@ -2,7 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ArgumentsHost, HttpStatus } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 
-import { AppConflictError, AppError, AppNotFoundError } from '~/common/errors';
+import { AppConfigError, AppConflictError, AppError, AppNotFoundError } from '~/common/errors';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
 import { testResource } from '~/test-utils/consts';
 
@@ -18,10 +18,15 @@ describe('AppErrorToHttpResponseFilter', () => {
 
   const notFoundError = new AppNotFoundError(testResource.id, testResource.type);
   const conflictError = new AppConflictError(testResource.id, testResource.type);
+  const configError = new AppConfigError('TEST_CONFIG', 'is a test error');
 
   const cases: Case[] = [
     [notFoundError, [{ message: notFoundError.message, statusCode: 404 }, HttpStatus.NOT_FOUND]],
     [conflictError, [{ message: conflictError.message, statusCode: 409 }, HttpStatus.CONFLICT]],
+    [
+      configError,
+      [{ message: 'Internal Server Error', statusCode: 500 }, HttpStatus.INTERNAL_SERVER_ERROR],
+    ],
   ];
 
   test.each(cases)('should transform %p into %p', async (error, expected) => {

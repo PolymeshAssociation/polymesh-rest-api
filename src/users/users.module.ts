@@ -8,7 +8,7 @@ import { UsersService } from '~/users/users.service';
  * responsible for the REST API's users
  */
 @Module({
-  imports: [DatastoreModule.register()],
+  imports: [DatastoreModule.registerAsync()],
   providers: [UsersService],
   exports: [UsersService],
   controllers: [UsersController],
