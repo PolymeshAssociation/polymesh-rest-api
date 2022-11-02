@@ -14,6 +14,8 @@ import { Response } from 'express';
 import { AccountsService } from '~/accounts/accounts.service';
 import { createPermissionsModel, createSubsidyModel } from '~/accounts/accounts.util';
 import { AccountParamsDto } from '~/accounts/dto/account-params.dto';
+import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
+import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
@@ -199,6 +201,43 @@ export class AccountsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.accountsService.unfreezeSecondaryAccounts(params);
 
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Revoke all permissions for any secondary Account',
+    description:
+      'This endpoint revokes all permissions of a list of secondary Accounts associated with the signing Identity',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'One of the Accounts is not a secondary Account for the signing Identity',
+  })
+  @Post('permissions/revoke')
+  async revokePermissions(@Body() params: RevokePermissionsDto): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.revokePermissions(params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Modify all permissions for any secondary Account',
+    description:
+      'This endpoint modifies all the permissions of a list of secondary Accounts associated with the signing Identity',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'One of the Accounts is not a secondary Account for the signing Identity',
+  })
+  @Post('permissions/modify')
+  async modifyPermissions(@Body() params: ModifyPermissionsDto): Promise<TransactionResponseModel> {
+    console.log(params);
+    const result = await this.accountsService.modifyPermissions(params);
     return handleServiceResult(result);
   }
 }

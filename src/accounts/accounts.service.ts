@@ -10,6 +10,8 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
+import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -115,5 +117,36 @@ export class AccountsService {
       signer,
       webhookUrl,
     });
+  }
+
+  public async revokePermissions(params: RevokePermissionsDto): ServiceReturn<void> {
+    const { signer, webhookUrl, secondaryAccounts } = params;
+
+    const { revokePermissions } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(
+      revokePermissions,
+      {
+        secondaryAccounts,
+      },
+      { signer, webhookUrl }
+    );
+  }
+
+  public async modifyPermissions(params: ModifyPermissionsDto): ServiceReturn<void> {
+    const { signer, webhookUrl, secondaryAccounts } = params;
+
+    const { modifyPermissions } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(
+      modifyPermissions,
+      {
+        secondaryAccounts: secondaryAccounts.map(({ secondaryAccount: account, permissions }) => ({
+          account,
+          permissions: permissions.toPermissionsLike(),
+        })),
+      },
+      { signer, webhookUrl }
+    );
   }
 }
