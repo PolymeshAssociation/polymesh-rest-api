@@ -1563,10 +1563,10 @@
   dependencies:
     "@polymeshassociation/signing-manager-types" "^1.1.0"
 
-"@polymeshassociation/polymesh-sdk@18.0.0-beta.6":
-  version "18.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-18.0.0-beta.6.tgz#e40e849e490af8a621d3465e09ae7beb44bc5f99"
-  integrity sha512-xkSJJrAyLNtExgBYRI6rhXEMTAa+DkqbkM+9f2KnBOTFhAd7Uoqi8SM/sk5j8UG1KKa3r/NUwO2NSYiaY5YcQw==
+"@polymeshassociation/polymesh-sdk@18.0.0-beta.7":
+  version "18.0.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-18.0.0-beta.7.tgz#111b6c42b256a6ab5eb2bcc6ce24ce3ca87191b3"
+  integrity sha512-iynAHY70/dYtyVaWH9spbChe1VomY96ReApbGBMRJiwekFl6v+3cMvpAHcc1AoGZMlcaM6AIJwpvwwi3z82uAA==
   dependencies:
     "@polkadot/api" "8.9.1"
     "@polkadot/util" "9.5.1"
