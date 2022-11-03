@@ -50,7 +50,6 @@
     "@babel/plugin-transform-modules-commonjs": "7.15.0",
     "@commitlint/cli": "12.1.4",
     "@commitlint/config-conventional": "12.1.4",
-    "@eclass/semantic-release-docker": "^3.0.1",
     "@nestjs/cli": "^8.2.6",
     "@nestjs/schematics": "^8.0.11",
     "@nestjs/testing": "^8.4.6",
