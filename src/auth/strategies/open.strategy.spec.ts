@@ -3,7 +3,7 @@ import passport from 'passport';
 
 import { OpenStrategy } from '~/auth/strategies/open.strategy';
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
-import { openAuthUser } from '~/users/user.consts';
+import { defaultUser } from '~/users/user.consts';
 
 describe('OpenStrategy', () => {
   let strategy: OpenStrategy;
@@ -26,6 +26,6 @@ describe('OpenStrategy', () => {
       authorizedUser = user;
     })({}, {}, {});
 
-    expect(authorizedUser).toEqual(openAuthUser);
+    expect(authorizedUser).toEqual(defaultUser);
   });
 });

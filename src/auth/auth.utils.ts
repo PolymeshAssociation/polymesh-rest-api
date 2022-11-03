@@ -30,6 +30,10 @@ const parseAuthStrategyConfig = (rawStrategyConfig: string): AuthStrategy[] => {
 };
 
 export const parseApiKeysConfig = (rawApiKeyConfig: string): string[] => {
+  if (rawApiKeyConfig.trim() === '') {
+    return [];
+  }
+
   return rawApiKeyConfig.split(',').map(rawKey => rawKey.trim());
 };
 

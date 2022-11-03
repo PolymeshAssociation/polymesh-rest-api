@@ -68,3 +68,13 @@ export const generateBase64Secret = async (byteLength: number): Promise<string> 
 
   return buf.toString('base64');
 };
+
+/**
+ * Helper class to ensure a code path is unreachable. For example this can be used for ensuring switch statements are exhaustive
+ */
+export class UnreachableCaseError extends Error {
+  /** This should never be called */
+  constructor(val: never) {
+    super(`Unreachable case: ${JSON.stringify(val)}`);
+  }
+}

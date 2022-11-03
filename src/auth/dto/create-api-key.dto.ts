@@ -5,10 +5,10 @@ import { IsString } from 'class-validator';
 
 export class CreateApiKeyDto {
   @ApiProperty({
-    description: 'The ID of the user to create the api key for',
-    example: '1',
+    description: 'The name of the user to create the API key for',
+    example: 'Alice',
     type: 'string',
   })
   @IsString()
-  readonly userId: string;
+  readonly userName: string;
 }

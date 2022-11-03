@@ -59,16 +59,28 @@ POLYMESH_MIDDLEWARE_URL=## URL for an instance of the Polymesh GraphQL Middlewar
 POLYMESH_MIDDLEWARE_API_KEY=## API key for the Middleware GraphQL service ##
 LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemonic ##
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##
+
+# Below are optional params that enable some features. The above should be good to get started with
+
+# Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_SECRET=## The access token for authorization with the Vault instance ##
+# Webhooks:
 SUBSCRIPTIONS_TTL=## Amount of milliseconds before a subscription is considered expired ##
 SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscription via handshake before it is considered rejected ##
 SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscription handshake attempts ##
 NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
 NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
+# Auth:
 AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
-API_KEYS="## list of comma separated api keys to initialize the `apiKey` strategy with ##"
+API_KEYS=## list of comma separated api keys to initialize the `apiKey` strategy with ##
+# Datastore
+REST_POSTGRES_HOST=## Domain or IP indicating of the DB ##
+REST_POSTGRES_PORT=## Port the DB is listening (usually 5432) ##
+REST_POSTGRES_USER=## DB user to use##
+REST_POSTGRES_PASSWORD=## Password of the user ##
+REST_POSTGRES_DATABASE=## Database to use ##
 ```
 
 ### Signing Transactions
@@ -97,6 +109,23 @@ More strategies can be added, there are many [pre-made strategies](https://www.p
 
 To implement a new strategy, create a new file in `~/auth/strategies/` and update the `strategies.consts` file with an appropriate name. Be sure to add some tests for your logic as well.
 
+### State
+
+The REST API has taken a plugin style approach to where it stores state. Do note, the Polymesh chain is responsible for processing most POST request. This only affects where REST API specific entities are stored (e.g. Users and ApiKeys). Most transactions are permanently stored on chain regardless of the datastore used
+
+Currently there are two datastore available:
+
+1. LocalStore:
+   This is the default setting. This uses the process memory to store state. This allows the REST API to be ran as a single process which is convenient for development purposes, or when an instance is intended for read only purposes (i.e. no `signers` are loaded). However all state will be lost when the process shuts down
+1. Postgres
+   This is the more production ready approach. This allows state to be persisted, and multiple server instances to user the same information. Internally this uses TypeORM to manage the database
+
+`package.json` contains scripts to help manage the development postgres service defined in `docker-compose.yml`. These are all prefixed with `postgres:dev`, e.g. `yarn postgres:dev:start`, which will use the configuration defined in `postgres.dev.config`.
+
+To implement a new repo for a service, first define an abstract class describing the desired interface. Also write a test suite to specify the expected behavior from an implementation. Then in the concrete implementations define a new Repo that satisfies the test suite.
+
+To implement a new datastore create a new module in `~/datastores` and create a set of `Repos` that will implement the abstract classes. You will then need to set up the `DatastoreModule` to export the module when it is configured. For testing, each implemented Repo should be able to pass the `test` method defined on the abstract class it is implementing.
+
 ### Webhooks (alpha)
 
 Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. Alternatively `webhookUrl` can be given in any state modifying endpoint. When given, the server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
@@ -107,9 +136,9 @@ If you are a developer you can toggle an endpoint to aid with testing by setting
 
 #### Warning
 
-Webhooks are still being developed and should not be used against mainnet. However the API for them should be stable to develop against for testing and demo purposes
+Webhooks are still being developed and should not be used against mainnet. However the API should be stable to develop against for testing and demo purposes
 
-As the REST API is currently stateless (Look, no database!). As such the subscription status is not persisted and the service can not guarantee delivery in the face of ordinary compting faults.
+Webhooks have yet to implement a Repo. As such the subscription status is not persisted and the service can not guarantee delivery in the face of ordinary compting faults.
 
 In its current state the transactions would have to be reconciled with chain events as there is a chance for notifications to not be delivered.
 

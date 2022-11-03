@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-custom';
 
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
-import { openAuthUser } from '~/users/user.consts';
+import { defaultUser } from '~/users/user.consts';
 
 /**
  * authenticates with a default user
@@ -13,7 +13,7 @@ import { openAuthUser } from '~/users/user.consts';
 @Injectable()
 export class OpenStrategy extends PassportStrategy(Strategy, AuthStrategy.Open) {
   constructor() {
-    const verifyEveryone: VerifyCallback = (req, done) => done(null, openAuthUser);
+    const verifyEveryone: VerifyCallback = (req, done) => done(null, defaultUser);
 
     super(verifyEveryone);
   }
