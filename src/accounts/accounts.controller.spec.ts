@@ -8,8 +8,10 @@ import { Response } from 'express';
 
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountsService } from '~/accounts/accounts.service';
+import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
 import {
   createMockResponseObject,
@@ -220,6 +222,51 @@ describe('AccountsController', () => {
       };
 
       const result = await controller.unfreezeSecondaryAccounts(body);
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
+
+  describe('revokePermissions', () => {
+    it('should call the service and return the transaction details', async () => {
+      const transactions = ['transaction'];
+      mockAccountsService.revokePermissions.mockResolvedValue({ transactions });
+
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        secondaryAccounts: ['someAddress'],
+      };
+
+      const result = await controller.revokePermissions(body);
+
+      expect(result).toEqual({
+        transactions,
+      });
+    });
+  });
+
+  describe('modifyPermissions', () => {
+    it('should call the service and return the transaction details', async () => {
+      const transactions = ['transaction'];
+      mockAccountsService.modifyPermissions.mockResolvedValue({ transactions });
+
+      const body = {
+        signer: '0x6'.padEnd(66, '0'),
+        secondaryAccounts: [
+          new PermissionedAccountDto({
+            secondaryAccount: 'someAddress',
+            permissions: new PermissionsLikeDto({
+              assets: null,
+              portfolios: null,
+              transactionGroups: [TxGroup.PortfolioManagement],
+            }),
+          }),
+        ],
+      };
+
+      const result = await controller.modifyPermissions(body);
 
       expect(result).toEqual({
         transactions,

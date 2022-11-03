@@ -37,6 +37,7 @@ export class MockPolymesh {
     getLatestBlock: jest.fn(),
     transferPolyx: jest.fn(),
     getSs58Format: jest.fn(),
+    getNetworkProperties: jest.fn(),
   };
 
   public assets = {
@@ -54,6 +55,8 @@ export class MockPolymesh {
     inviteAccount: jest.fn(),
     freezeSecondaryAccounts: jest.fn(),
     unfreezeSecondaryAccounts: jest.fn(),
+    revokePermissions: jest.fn(),
+    modifyPermissions: jest.fn(),
   };
 
   public identities = {

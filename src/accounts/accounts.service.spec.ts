@@ -14,6 +14,8 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
+import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -134,37 +136,35 @@ describe('AccountsService', () => {
   });
 
   describe('transferPolyx', () => {
-    describe('otherwise', () => {
-      it('should return the transaction details', async () => {
-        const transaction = {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.balances.TransferWithMemo,
-        };
-        const mockTransaction = new MockTransaction(transaction);
-        mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockTransaction);
-        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.balances.TransferWithMemo,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const signer = '0x6'.padEnd(66, '0');
-        const body = {
-          signer,
-          to: 'address',
-          amount: new BigNumber(10),
-          memo: 'Sample memo',
-        };
+      const signer = '0x6'.padEnd(66, '0');
+      const body = {
+        signer,
+        to: 'address',
+        amount: new BigNumber(10),
+        memo: 'Sample memo',
+      };
 
-        const result = await service.transferPolyx(body);
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [mockTransaction],
-        });
-        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
-          mockPolymeshApi.network.transferPolyx,
-          { amount: new BigNumber(10), memo: 'Sample memo', to: 'address' },
-          { signer }
-        );
+      const result = await service.transferPolyx(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
       });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.network.transferPolyx,
+        { amount: new BigNumber(10), memo: 'Sample memo', to: 'address' },
+        { signer }
+      );
     });
   });
 
@@ -374,6 +374,83 @@ describe('AccountsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.accountManagement.unfreezeSecondaryAccounts,
         undefined,
+        { signer }
+      );
+    });
+  });
+
+  describe('revokePermissions', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.SetPermissionToSigner,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockPolymeshApi.accountManagement.revokePermissions.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const signer = '0x6'.padEnd(66, '0');
+      const secondaryAccounts = ['someAddress'];
+      const body = {
+        signer,
+        secondaryAccounts,
+      };
+
+      const result = await service.revokePermissions(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.revokePermissions,
+        { secondaryAccounts },
+        { signer }
+      );
+    });
+  });
+
+  describe('modifyPermissions', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.SetPermissionToSigner,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockPolymeshApi.accountManagement.modifyPermissions.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const signer = '0x6'.padEnd(66, '0');
+      const account = 'someAddress';
+      const permissions = {
+        assets: null,
+        portfolios: null,
+        transactionGroups: [TxGroup.PortfolioManagement],
+      };
+      const secondaryAccounts = [
+        new PermissionedAccountDto({
+          secondaryAccount: account,
+          permissions: new PermissionsLikeDto(permissions),
+        }),
+      ];
+      const body = {
+        signer,
+        secondaryAccounts,
+      };
+
+      const result = await service.modifyPermissions(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.modifyPermissions,
+        { secondaryAccounts: [{ account, permissions }] },
         { signer }
       );
     });

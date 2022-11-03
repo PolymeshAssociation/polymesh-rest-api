@@ -73,6 +73,8 @@ export class MockAccountsService {
   getSubsidy = jest.fn();
   freezeSecondaryAccounts = jest.fn();
   unfreezeSecondaryAccounts = jest.fn();
+  modifyPermissions = jest.fn();
+  revokePermissions = jest.fn();
 }
 
 export class MockEventsService {
@@ -203,3 +205,7 @@ export const makeMockConfigProvider = (config: Record<string, unknown>): Service
     provide: ConfigService,
   };
 };
+export class MockNetworkService {
+  getNetworkProperties = jest.fn();
+  getLatestBlock = jest.fn();
+}

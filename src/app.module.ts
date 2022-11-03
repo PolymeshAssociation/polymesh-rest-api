@@ -17,6 +17,7 @@ import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.mo
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
+import { NetworkModule } from '~/network/network.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -80,9 +81,10 @@ import { UsersModule } from '~/users/users.module';
     EventsModule,
     NotificationsModule,
     ScheduleModule,
-    DeveloperTestingModule.register(),
+    NetworkModule,
     AuthModule,
     UsersModule,
+    DeveloperTestingModule.register(),
   ],
 })
 export class AppModule {}
