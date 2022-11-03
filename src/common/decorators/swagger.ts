@@ -22,6 +22,7 @@ import {
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { getTypeSafeObjectEntries } from '~/common/utils';
 
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
@@ -129,16 +130,18 @@ type SupportedHttpStatusCodes = keyof typeof httpStatusDecoratorMap;
  * @param messages - key value map of HTTP response code to their description that will be passed to appropriate `MethodDecorator`
  */
 export function ApiTransactionFailedResponse(
-  messages: Partial<Record<SupportedHttpStatusCodes, string | undefined>>
+  messages: Partial<Record<SupportedHttpStatusCodes, string>>
 ): ReturnType<typeof applyDecorators> {
   const decorators: MethodDecorator[] = [];
 
-  for (const [key, description] of Object.entries(messages)) {
-    const keyAsCode = Number(key) as SupportedHttpStatusCodes;
-    const decorator = httpStatusDecoratorMap[keyAsCode];
+  getTypeSafeObjectEntries(messages).forEach(entry => {
+    if (entry && entry[0]) {
+      const [key, description] = entry;
+      const decorator = httpStatusDecoratorMap[key];
 
-    decorators.push(decorator({ description }));
-  }
+      decorators.push(decorator({ description }));
+    }
+  });
 
   return applyDecorators(...decorators);
 }
