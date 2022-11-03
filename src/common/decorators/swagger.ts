@@ -22,7 +22,6 @@ import {
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { getTypeSafeObjectEntries } from '~/common/utils';
 
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
@@ -116,13 +115,10 @@ export function ApiTransactionResponse(
   );
 }
 
-const httpStatusDecoratorMap = {
-  [HttpStatus.NOT_FOUND]: ApiNotFoundResponse,
-  [HttpStatus.BAD_REQUEST]: ApiBadRequestResponse,
-  [HttpStatus.UNPROCESSABLE_ENTITY]: ApiUnprocessableEntityResponse,
-};
-
-type SupportedHttpStatusCodes = keyof typeof httpStatusDecoratorMap;
+type SupportedHttpStatusCodes =
+  | HttpStatus.NOT_FOUND
+  | HttpStatus.BAD_REQUEST
+  | HttpStatus.UNPROCESSABLE_ENTITY;
 
 /**
  * A helper that combines responses for SDK Errors like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`
@@ -134,12 +130,17 @@ export function ApiTransactionFailedResponse(
 ): ReturnType<typeof applyDecorators> {
   const decorators: MethodDecorator[] = [];
 
-  getTypeSafeObjectEntries(messages).forEach(entry => {
-    if (entry && entry[0]) {
-      const [key, description] = entry;
-      const decorator = httpStatusDecoratorMap[key];
-
-      decorators.push(decorator({ description }));
+  Object.entries(messages).forEach(([statusCode, description]) => {
+    switch (Number(statusCode)) {
+      case HttpStatus.NOT_FOUND:
+        decorators.push(ApiNotFoundResponse({ description }));
+        break;
+      case HttpStatus.BAD_REQUEST:
+        decorators.push(ApiBadRequestResponse({ description }));
+        break;
+      case HttpStatus.UNPROCESSABLE_ENTITY:
+        decorators.push(ApiUnprocessableEntityResponse({ description }));
+        break;
     }
   });
 

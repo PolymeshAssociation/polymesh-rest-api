@@ -78,16 +78,3 @@ export class UnreachableCaseError extends Error {
     super(`Unreachable case: ${JSON.stringify(val)}`);
   }
 }
-
-type ObjectType = Record<PropertyKey, unknown>;
-
-type PickByValue<T, V> = Pick<T, { [K in keyof T]: T[K] extends V ? K : never }[keyof T]>;
-
-type ObjectEntries<T> = { [K in keyof T]: [keyof PickByValue<T, T[K]>, T[K]] }[keyof T][];
-
-/**
- * A helper function to get typed Object.entries
- */
-export const getTypeSafeObjectEntries = <T extends ObjectType>(obj: T): ObjectEntries<T> => {
-  return Object.entries(obj) as ObjectEntries<T>;
-};
