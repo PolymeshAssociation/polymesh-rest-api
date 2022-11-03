@@ -115,39 +115,30 @@ export function ApiTransactionResponse(
   );
 }
 
-type FailedTransactionResponseCodes =
-  | HttpStatus.NOT_FOUND
-  | HttpStatus.BAD_REQUEST
-  | HttpStatus.UNPROCESSABLE_ENTITY;
+const httpStatusDecoratorMap = {
+  [HttpStatus.NOT_FOUND]: ApiNotFoundResponse,
+  [HttpStatus.BAD_REQUEST]: ApiBadRequestResponse,
+  [HttpStatus.UNPROCESSABLE_ENTITY]: ApiUnprocessableEntityResponse,
+};
+
+type SupportedHttpStatusCodes = keyof typeof httpStatusDecoratorMap;
 
 /**
  * A helper that combines responses for SDK Errors like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`
  *
- * @param messages - key value map of API response descriptions that will be passed to appropriate `MethodDecorator`
+ * @param messages - key value map of HTTP response code to their description that will be passed to appropriate `MethodDecorator`
  */
 export function ApiTransactionFailedResponse(
-  messages: Partial<Record<FailedTransactionResponseCodes, string | undefined>>
+  messages: Partial<Record<SupportedHttpStatusCodes, string | undefined>>
 ): ReturnType<typeof applyDecorators> {
-  const decoratorMap: Record<
-    FailedTransactionResponseCodes,
-    (description?: string) => MethodDecorator
-  > = {
-    [HttpStatus.NOT_FOUND]: (description = 'Entity was not found') =>
-      ApiNotFoundResponse({ description }),
-    [HttpStatus.BAD_REQUEST]: (
-      description = 'Returned if transaction validation failed or same data already exists in chain'
-    ) => ApiBadRequestResponse({ description }),
-    [HttpStatus.UNPROCESSABLE_ENTITY]: (
-      description = 'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met'
-    ) => ApiUnprocessableEntityResponse({ description }),
-  };
   const decorators: MethodDecorator[] = [];
 
-  for (const [key, value] of Object.entries(messages)) {
-    const decorator = decoratorMap[key as unknown as FailedTransactionResponseCodes];
+  for (const [key, description] of Object.entries(messages)) {
+    const keyAsCode = Number(key) as SupportedHttpStatusCodes;
+    const decorator = httpStatusDecoratorMap[keyAsCode];
 
-    decorators.push(decorator(value));
+    decorators.push(decorator({ description }));
   }
 
-  return applyDecorators(...decorators, ...decorators);
+  return applyDecorators(...decorators);
 }
