@@ -18,20 +18,6 @@ module.exports = {
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
     [
-      '@eclass/semantic-release-docker',
-      {
-        baseImageName: 'polymesh-rest-api ',
-        registries: [
-          {
-            url: 'hub.docker.com',
-            imageName: 'polymeshassociation/polymesh-rest-api',
-            user: 'DOCKER_USER',
-            password: 'DOCKER_PASSWORD',
-          },
-        ],
-      },
-    ],
-    [
       '@semantic-release/github',
       {
         assets: ['CHANGELOG.md'],

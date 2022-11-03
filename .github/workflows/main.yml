@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
+    branches: [master, develop, alpha]
   pull_request:
     types: [assigned, opened, synchronize, reopened]
 
@@ -69,8 +69,6 @@ jobs:
         run: yarn --frozen-lockfile
       - name: release
         env:
-          DOCKER_USER: ${{ secrets.ASSOCIATION_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.ASSOCIATION_DOCKER_TOKEN }}
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: yarn semantic-release
 # TODO @polymath-eric: add SonarCloud step when the account confusion is sorted
