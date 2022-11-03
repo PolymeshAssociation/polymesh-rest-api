@@ -35,7 +35,7 @@ POLYMESH_MIDDLEWARE_API_KEY=## API key for the Middleware GraphQL service ##
 LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemonic ##
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##
 VAULT_URL=## The URL of a Vault transit engine##
-VAULT_SECRET=## The access token for authorization with the Vault instance ##
+VAULT_TOKEN=## The access token for authorization with the Vault instance ##
 SUBSCRIPTIONS_TTL=## Amount of milliseconds before a subscription is considered expired ##
 SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscription via handshake before it is considered rejected ##
 SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscription handshake attempts ##
@@ -53,7 +53,7 @@ For any method that modifies chain state, the key to sign with can be controlled
 1. Local Signing:
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
 1. Vault Signing:
-   By setting `VAULT_URL` and `VAULT_SECRET`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`
+   By setting `VAULT_URL` and `VAULT_TOKEN`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`
 
 ## Webhooks (alpha)
 
