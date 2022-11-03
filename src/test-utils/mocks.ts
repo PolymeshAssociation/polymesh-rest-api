@@ -37,6 +37,7 @@ export class MockPolymesh {
     getLatestBlock: jest.fn(),
     transferPolyx: jest.fn(),
     getSs58Format: jest.fn(),
+    getNetworkProperties: jest.fn(),
   };
 
   public assets = {
