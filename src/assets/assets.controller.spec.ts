@@ -1,10 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import {
-  ClaimType,
-  KnownAssetType,
-  SecurityIdentifierType,
-} from '@polymeshassociation/polymesh-sdk/types';
+import { KnownAssetType, SecurityIdentifierType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';

@@ -132,7 +132,7 @@ export function ApiTransactionFailedResponse(
 
   Object.entries(messages).forEach(([statusCode, rawDescription]) => {
     const description = Array.isArray(rawDescription)
-      ? `<ul>${rawDescription.map(v => `<li>${v}</li>`).join(' ')}</ul>`
+      ? '<ul>' + rawDescription.map(v => `<li>${v}</li>`).join(' ') + '</ul>'
       : rawDescription;
 
     switch (Number(statusCode)) {
