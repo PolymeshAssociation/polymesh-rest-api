@@ -31,10 +31,10 @@
     "metatype",
     "nand",
     "Permissioned",
-    "polymeshassociation",
     "Polymesh",
+    "polymeshassociation",
     "POLYX",
     "serdes",
-    "unsub",
+    "unsub"
   ]
 }
