@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
+import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
@@ -95,6 +97,69 @@ describe('ComplianceRequirementsController', () => {
       const result = await controller.pauseRequirements(
         { ticker },
         validBody as TransactionBaseDto
+      );
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('deleteRequirement', () => {
+    it('should accept TransactionBaseDto and compliance requirement ID and delete the corresponding Asset Compliance rule for the given ticker', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.deleteOne.mockResolvedValue(response);
+      const result = await controller.deleteRequirement(
+        { ticker, id: new BigNumber(1) },
+        validBody as TransactionBaseDto
+      );
+
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('deleteRequirements', () => {
+    it('should accept TransactionBaseDto and delete all the Asset Compliance rules for the given ticker', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.deleteAll.mockResolvedValue(response);
+      const result = await controller.deleteRequirements(
+        { ticker },
+        validBody as TransactionBaseDto
+      );
+
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('addRequirement', () => {
+    it('should accept RequirementDto and add an Asset Compliance rule', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.add.mockResolvedValue(response);
+      const { signer, requirements } = validBody;
+      const result = await controller.addRequirement({ ticker }, {
+        signer,
+        conditions: requirements[0],
+      } as RequirementDto);
+      expect(result).toEqual(response);
+    });
+  });
+
+  describe('modifyComplianceRequirement', () => {
+    it('should accept RequirementDto and modify the corresponding Asset Compliance rule', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.modify.mockResolvedValue(response);
+      const { signer, requirements } = validBody;
+      const result = await controller.modifyComplianceRequirement(
+        { ticker, id: new BigNumber(1) },
+        {
+          signer,
+          conditions: requirements[0],
+        } as RequirementDto
       );
       expect(result).toEqual(response);
     });

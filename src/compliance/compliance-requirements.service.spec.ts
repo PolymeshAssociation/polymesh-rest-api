@@ -151,4 +151,110 @@ describe('ComplianceRequirementsService', () => {
       });
     });
   });
+
+  describe('deleteRequirement', () => {
+    it('should run the delete Requirement procedure and return the queue data', async () => {
+      const requirementId = new BigNumber(1);
+      const mockAsset = new MockAsset();
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.RemoveComplianceRequirement,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.deleteOne('TICKER', requirementId, body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('deleteRequirements', () => {
+    it('should run the delete all Requirements procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.ResetAssetCompliance,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { signer: '0x6000' };
+
+      const result = await service.deleteAll('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('addRequirement', () => {
+    it('should run the add Requirement procedure and return the queue data', async () => {
+      const mockAsset = new MockAsset();
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.AddComplianceRequirement,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { conditions: [], signer: '0x6000' };
+
+      const result = await service.add('TICKER', body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('editRequirement', () => {
+    it('should run the modify Requirements procedure and return the queue data', async () => {
+      const requirementId = new BigNumber(1);
+      const mockAsset = new MockAsset();
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.complianceManager.ChangeComplianceRequirement,
+      };
+
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const body = { conditions: [], signer: '0x6000' };
+
+      const result = await service.modify('TICKER', requirementId, body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });

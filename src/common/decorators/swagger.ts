@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { applyDecorators, Type } from '@nestjs/common';
+import { applyDecorators, HttpStatus, Type } from '@nestjs/common';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
@@ -115,22 +115,34 @@ export function ApiTransactionResponse(
   );
 }
 
+type SupportedHttpStatusCodes =
+  | HttpStatus.NOT_FOUND
+  | HttpStatus.BAD_REQUEST
+  | HttpStatus.UNPROCESSABLE_ENTITY;
+
 /**
- * A helper that combines responses for SDK Error like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`, `InternalServerErrorException`
+ * A helper that combines responses for SDK Errors like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`
  *
- * @param options - these will be passed to the `ApiNotFoundResponse` decorator
+ * @param messages - key value map of HTTP response code to their description that will be passed to appropriate `MethodDecorator`
  */
 export function ApiTransactionFailedResponse(
-  options: ApiResponseOptions
+  messages: Partial<Record<SupportedHttpStatusCodes, string>>
 ): ReturnType<typeof applyDecorators> {
-  return applyDecorators(
-    ApiNotFoundResponse(options),
-    ApiBadRequestResponse({
-      description: 'Returned if transaction validation failed or same data already exists in chain',
-    }),
-    ApiUnprocessableEntityResponse({
-      description:
-        'Returned if there is insufficient balance to perform action or required perquisites for transaction have not been met',
-    })
-  );
+  const decorators: MethodDecorator[] = [];
+
+  Object.entries(messages).forEach(([statusCode, description]) => {
+    switch (Number(statusCode)) {
+      case HttpStatus.NOT_FOUND:
+        decorators.push(ApiNotFoundResponse({ description }));
+        break;
+      case HttpStatus.BAD_REQUEST:
+        decorators.push(ApiBadRequestResponse({ description }));
+        break;
+      case HttpStatus.UNPROCESSABLE_ENTITY:
+        decorators.push(ApiUnprocessableEntityResponse({ description }));
+        break;
+    }
+  });
+
+  return applyDecorators(...decorators);
 }
