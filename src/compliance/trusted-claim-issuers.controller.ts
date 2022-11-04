@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -62,7 +62,8 @@ export class TrustedClaimIssuersController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    description: 'The Asset or identity was not found',
+    [HttpStatus.NOT_FOUND]: ['Asset was not found', 'Some of the supplied Identities do not exist'],
+    [HttpStatus.BAD_REQUEST]: 'The supplied claim issuer list is equal to the current one',
   })
   @Post('set')
   public async setTrustedClaimIssuers(
@@ -89,7 +90,9 @@ export class TrustedClaimIssuersController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    description: 'The Asset or identity was not found',
+    [HttpStatus.NOT_FOUND]: ['Asset was not found', 'Some of the supplied Identities do not exist'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]:
+      'One or more of the supplied Identities already are Trusted Claim Issuers',
   })
   @Post('add')
   public async addTrustedClaimIssuers(
@@ -116,7 +119,9 @@ export class TrustedClaimIssuersController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    description: 'The Asset or identity was not found',
+    [HttpStatus.NOT_FOUND]: ['Asset was not found', 'Some of the supplied Identities do not exist'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]:
+      'One or more of the supplied Identities are not Trusted Claim Issuers',
   })
   @Post('remove')
   public async removeTrustedClaimIssuers(

@@ -126,11 +126,15 @@ type SupportedHttpStatusCodes =
  * @param messages - key value map of HTTP response code to their description that will be passed to appropriate `MethodDecorator`
  */
 export function ApiTransactionFailedResponse(
-  messages: Partial<Record<SupportedHttpStatusCodes, string>>
+  messages: Partial<Record<SupportedHttpStatusCodes, string | string[]>>
 ): ReturnType<typeof applyDecorators> {
   const decorators: MethodDecorator[] = [];
 
-  Object.entries(messages).forEach(([statusCode, description]) => {
+  Object.entries(messages).forEach(([statusCode, rawDescription]) => {
+    const description = Array.isArray(rawDescription)
+      ? `<ul>${rawDescription.map(v => `<li>${v}</li>`).join(' ')}</ul>`
+      : rawDescription;
+
     switch (Number(statusCode)) {
       case HttpStatus.NOT_FOUND:
         decorators.push(ApiNotFoundResponse({ description }));
