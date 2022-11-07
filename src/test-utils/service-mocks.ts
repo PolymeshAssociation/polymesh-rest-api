@@ -1,6 +1,13 @@
 /* istanbul ignore file */
 
+import { createMock } from '@golevelup/ts-jest';
+import { ValueProvider } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+import { AuthService } from '~/auth/auth.service';
+import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { UsersService } from '~/users/users.service';
 
 export class MockAssetService {
   findOne = jest.fn();
@@ -29,10 +36,16 @@ export const mockTransactionsProvider = {
   useValue: new MockTransactionsService(),
 };
 
-export class MockComplianceService {
+export class MockComplianceRequirementsService {
   setRequirements = jest.fn();
   findComplianceRequirements = jest.fn();
   findTrustedClaimIssuers = jest.fn();
+  pauseRequirements = jest.fn();
+  unpauseRequirements = jest.fn();
+  deleteAll = jest.fn();
+  deleteOne = jest.fn();
+  add = jest.fn();
+  modify = jest.fn();
 }
 
 export class MockSigningService {
@@ -61,6 +74,11 @@ export class MockAccountsService {
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
   findOne = jest.fn();
+  getSubsidy = jest.fn();
+  freezeSecondaryAccounts = jest.fn();
+  unfreezeSecondaryAccounts = jest.fn();
+  modifyPermissions = jest.fn();
+  revokePermissions = jest.fn();
 }
 
 export class MockEventsService {
@@ -154,4 +172,44 @@ export class MockCheckpointsService {
   getHolders = jest.fn();
   deleteScheduleByTicker = jest.fn();
   findOne = jest.fn();
+}
+
+export class MockAuthService {
+  createApiKey = jest.fn();
+  deleteApiKey = jest.fn();
+  validateApiKey = jest.fn();
+}
+
+export const mockAuthServiceProvider = {
+  provide: AuthService,
+  useValue: new MockAuthService(),
+};
+
+export const mockUserServiceProvider: ValueProvider<UsersService> = {
+  provide: UsersService,
+  useValue: createMock<UsersService>(),
+};
+
+/**
+ * Given a set of key values to use as config, will wrap and return as a Nest "provider" for config
+ */
+export const makeMockConfigProvider = (config: Record<string, unknown>): ServiceProvider => {
+  return {
+    useValue: {
+      get: (key: string): unknown => config[key],
+      getOrThrow: (key: string): unknown => {
+        const value = config[key];
+        if (value) {
+          return value;
+        } else {
+          throw new Error(`mock config error: "${key}" was not found`);
+        }
+      },
+    },
+    provide: ConfigService,
+  };
+};
+export class MockNetworkService {
+  getNetworkProperties = jest.fn();
+  getLatestBlock = jest.fn();
 }

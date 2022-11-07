@@ -16,7 +16,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
     instruction.getStatus(),
   ]);
 
-  const { status, createdAt, tradeDate, valueDate, venue, type } = details;
+  const { status, createdAt, tradeDate, valueDate, venue, type, memo } = details;
 
   let instructionModelParams: ConstructorParameters<typeof InstructionModel>[0] = {
     status,
@@ -41,6 +41,10 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
   if (tradeDate !== null) {
     instructionModelParams = { ...instructionModelParams, tradeDate };
+  }
+
+  if (memo !== null) {
+    instructionModelParams = { ...instructionModelParams, memo };
   }
 
   if (details.type === InstructionType.SettleOnBlock) {

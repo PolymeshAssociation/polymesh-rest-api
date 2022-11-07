@@ -1,5 +1,7 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -7,15 +9,20 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { createPermissionsModel } from '~/accounts/accounts.util';
+import { createPermissionsModel, createSubsidyModel } from '~/accounts/accounts.util';
 import { AccountParamsDto } from '~/accounts/dto/account-params.dto';
+import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
+import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
+import { SubsidyModel } from '~/accounts/models/subsidy.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -121,5 +128,116 @@ export class AccountsController {
   async getPermissions(@Param() { account }: AccountParamsDto): Promise<PermissionsModel> {
     const permissions = await this.accountsService.getPermissions(account);
     return createPermissionsModel(permissions);
+  }
+
+  @ApiOperation({
+    summary: 'Get Account Subsidy',
+    description:
+      'The endpoint retrieves the subsidized balance of this Account and the subsidizer Account',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address whose subsidy is to be fetched',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiOkResponse({
+    description: 'Subsidy details for the Account',
+    type: SubsidyModel,
+  })
+  @ApiNoContentResponse({
+    description: 'Account is not being subsidized',
+  })
+  @Get(':account/subsidy')
+  async getSubsidy(@Param() { account }: AccountParamsDto, @Res() res: Response): Promise<void> {
+    const result = await this.accountsService.getSubsidy(account);
+
+    if (result) {
+      res.status(HttpStatus.OK).json(createSubsidyModel(result));
+    } else {
+      res.status(HttpStatus.NO_CONTENT).send({});
+    }
+  }
+
+  @ApiOperation({
+    summary: 'Freeze secondary Accounts',
+    description:
+      'This endpoint freezes all the secondary Accounts in the signing Identity. This means revoking their permission to perform any operation on the chain and freezing their funds until the Accounts are unfrozen',
+  })
+  @ApiOkResponse({
+    description: 'Secondary Accounts have been frozen',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `signer` is not authorized to freeze their Identities secondary Accounts',
+  })
+  @ApiBadRequestResponse({
+    description: 'The secondary Accounts are already frozen',
+  })
+  @Post('freeze')
+  async freezeSecondaryAccounts(
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.freezeSecondaryAccounts(params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Unfreeze secondary Accounts',
+    description: 'This endpoint unfreezes all of the secondary Accounts in the signing Identity',
+  })
+  @ApiOkResponse({
+    description: 'Secondary Accounts have been unfrozen',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The `signer` is not authorized to unfreeze their Identities secondary Accounts',
+  })
+  @ApiBadRequestResponse({
+    description: 'The secondary Accounts are already unfrozen',
+  })
+  @Post('unfreeze')
+  async unfreezeSecondaryAccounts(
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.unfreezeSecondaryAccounts(params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Revoke all permissions for any secondary Account',
+    description:
+      'This endpoint revokes all permissions of a list of secondary Accounts associated with the signing Identity',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'One of the Accounts is not a secondary Account for the signing Identity',
+  })
+  @Post('permissions/revoke')
+  async revokePermissions(@Body() params: RevokePermissionsDto): Promise<TransactionResponseModel> {
+    const result = await this.accountsService.revokePermissions(params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Modify all permissions for any secondary Account',
+    description:
+      'This endpoint modifies all the permissions of a list of secondary Accounts associated with the signing Identity',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'One of the Accounts is not a secondary Account for the signing Identity',
+  })
+  @Post('permissions/modify')
+  async modifyPermissions(@Body() params: ModifyPermissionsDto): Promise<TransactionResponseModel> {
+    console.log(params);
+    const result = await this.accountsService.modifyPermissions(params);
+    return handleServiceResult(result);
   }
 }

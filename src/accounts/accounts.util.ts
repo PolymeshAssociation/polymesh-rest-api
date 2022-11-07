@@ -1,9 +1,14 @@
-import { PermissionedAccount, Permissions } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  PermissionedAccount,
+  Permissions,
+  SubsidyWithAllowance,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
 import { PermissionedAccountModel } from '~/accounts/models/permissioned-account.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissions.model';
+import { SubsidyModel } from '~/accounts/models/subsidy.model';
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
 import { AccountModel } from '~/identities/models/account.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
@@ -56,5 +61,21 @@ export function createPermissionedAccountModel(
   return new PermissionedAccountModel({
     account: new AccountModel({ address }),
     permissions: createPermissionsModel(permissions),
+  });
+}
+
+export function createSubsidyModel(subsidy: SubsidyWithAllowance): SubsidyModel {
+  const {
+    subsidy: {
+      beneficiary: { address: beneficiaryAddress },
+      subsidizer: { address: subsidizerAddress },
+    },
+    allowance,
+  } = subsidy;
+
+  return new SubsidyModel({
+    beneficiary: new AccountModel({ address: beneficiaryAddress }),
+    subsidizer: new AccountModel({ address: subsidizerAddress }),
+    allowance,
   });
 }

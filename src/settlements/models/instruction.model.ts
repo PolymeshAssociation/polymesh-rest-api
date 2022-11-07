@@ -72,6 +72,12 @@ export class InstructionModel {
   @Type(() => EventIdentifierModel)
   readonly eventIdentifier?: EventIdentifierModel;
 
+  @ApiPropertyOptional({
+    description: 'Identifier string provided while creating the Instruction',
+    example: 'Transfer of GROWTH Asset',
+  })
+  readonly memo?: string;
+
   @ApiProperty({
     description: 'List of Legs in the Instruction',
     type: LegModel,

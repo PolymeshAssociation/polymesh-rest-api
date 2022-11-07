@@ -2,10 +2,11 @@
 
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from '~/app.module';
+import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -28,6 +29,9 @@ async function bootstrap(): Promise<void> {
     new LoggingInterceptor(logger),
     new WebhookResponseCodeInterceptor()
   );
+
+  const httpAdapter = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AppErrorToHttpResponseFilter(httpAdapter));
 
   // Swagger
   const options = new DocumentBuilder()

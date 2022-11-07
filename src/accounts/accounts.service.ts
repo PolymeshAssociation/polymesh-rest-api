@@ -6,11 +6,15 @@ import {
   ExtrinsicData,
   Permissions,
   ResultSet,
+  SubsidyWithAllowance,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
+import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -88,5 +92,61 @@ export class AccountsService {
       }
       throw err;
     }
+  }
+
+  public async getSubsidy(address: string): Promise<SubsidyWithAllowance | null> {
+    const account = await this.findOne(address);
+    return account.getSubsidy();
+  }
+
+  public async freezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
+    const { signer, webhookUrl } = opts;
+    const { freezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(freezeSecondaryAccounts, undefined, {
+      signer,
+      webhookUrl,
+    });
+  }
+
+  public async unfreezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
+    const { signer, webhookUrl } = opts;
+    const { unfreezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(unfreezeSecondaryAccounts, undefined, {
+      signer,
+      webhookUrl,
+    });
+  }
+
+  public async revokePermissions(params: RevokePermissionsDto): ServiceReturn<void> {
+    const { signer, webhookUrl, secondaryAccounts } = params;
+
+    const { revokePermissions } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(
+      revokePermissions,
+      {
+        secondaryAccounts,
+      },
+      { signer, webhookUrl }
+    );
+  }
+
+  public async modifyPermissions(params: ModifyPermissionsDto): ServiceReturn<void> {
+    const { signer, webhookUrl, secondaryAccounts } = params;
+
+    const { modifyPermissions } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(
+      modifyPermissions,
+      {
+        secondaryAccounts: secondaryAccounts.map(({ secondaryAccount: account, permissions }) => ({
+          account,
+          permissions: permissions.toPermissionsLike(),
+        })),
+      },
+      { signer, webhookUrl }
+    );
   }
 }

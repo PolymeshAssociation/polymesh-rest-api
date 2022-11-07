@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, develop, alpha]
+    branches: [master, alpha]
   pull_request:
     types: [assigned, opened, synchronize, reopened]
 

@@ -1,14 +1,17 @@
 /* istanbul ignore file */
 
-import { applyDecorators, Type } from '@nestjs/common';
+import { applyDecorators, HttpStatus, Type } from '@nestjs/common';
 import {
   ApiAcceptedResponse,
+  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiProperty,
   ApiPropertyOptions,
   ApiResponseOptions,
+  ApiUnprocessableEntityResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
 import {
@@ -110,4 +113,36 @@ export function ApiTransactionResponse(
       type: NotificationPayloadModel,
     })
   );
+}
+
+type SupportedHttpStatusCodes =
+  | HttpStatus.NOT_FOUND
+  | HttpStatus.BAD_REQUEST
+  | HttpStatus.UNPROCESSABLE_ENTITY;
+
+/**
+ * A helper that combines responses for SDK Errors like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`
+ *
+ * @param messages - key value map of HTTP response code to their description that will be passed to appropriate `MethodDecorator`
+ */
+export function ApiTransactionFailedResponse(
+  messages: Partial<Record<SupportedHttpStatusCodes, string>>
+): ReturnType<typeof applyDecorators> {
+  const decorators: MethodDecorator[] = [];
+
+  Object.entries(messages).forEach(([statusCode, description]) => {
+    switch (Number(statusCode)) {
+      case HttpStatus.NOT_FOUND:
+        decorators.push(ApiNotFoundResponse({ description }));
+        break;
+      case HttpStatus.BAD_REQUEST:
+        decorators.push(ApiBadRequestResponse({ description }));
+        break;
+      case HttpStatus.UNPROCESSABLE_ENTITY:
+        decorators.push(ApiUnprocessableEntityResponse({ description }));
+        break;
+    }
+  });
+
+  return applyDecorators(...decorators);
 }

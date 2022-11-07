@@ -12,26 +12,26 @@ import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { ComplianceService } from '~/compliance/compliance.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
-import { MockAssetService, MockComplianceService } from '~/test-utils/service-mocks';
+import { MockAssetService, MockComplianceRequirementsService } from '~/test-utils/service-mocks';
 
 describe('AssetsController', () => {
   let controller: AssetsController;
 
   const mockAssetsService = new MockAssetService();
-  const mockComplianceService = new MockComplianceService();
+  const mockComplianceRequirementsService = new MockComplianceRequirementsService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AssetsController],
-      providers: [AssetsService, ComplianceService],
+      providers: [AssetsService, ComplianceRequirementsService],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(ComplianceService)
-      .useValue(mockComplianceService)
+      .overrideProvider(ComplianceRequirementsService)
+      .useValue(mockComplianceRequirementsService)
       .compile();
 
     controller = module.get<AssetsController>(AssetsController);
@@ -213,7 +213,7 @@ describe('AssetsController', () => {
           trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
         },
       ];
-      mockComplianceService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
+      mockComplianceRequirementsService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
 
       const result = await controller.getTrustedClaimIssuers({ ticker: 'TICKER' });
 
@@ -287,11 +287,12 @@ describe('AssetsController', () => {
       const signer = '0x6000';
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
+      const from = new BigNumber(1);
       mockAssetsService.redeem.mockResolvedValue({ transactions: ['transaction'] });
 
-      const result = await controller.redeem({ ticker }, { signer, amount });
+      const result = await controller.redeem({ ticker }, { signer, amount, from });
       expect(result).toEqual({ transactions: ['transaction'] });
-      expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount });
+      expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount, from });
     });
   });
 

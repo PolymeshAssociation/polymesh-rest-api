@@ -6,6 +6,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ErrorCode, KnownAssetType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
@@ -412,10 +413,15 @@ describe('AssetsService', () => {
   });
 
   describe('redeem', () => {
+    const amount = new BigNumber(1000);
+    const from = new BigNumber(1);
+    const signer = '0x6000';
     const redeemBody = {
-      signer: '0x6000',
-      amount: new BigNumber(1000),
+      signer,
+      amount,
+      from,
     };
+
     it('should run a redeem procedure and return the queue results', async () => {
       const transaction = {
         blockHash: '0x1',
@@ -427,15 +433,29 @@ describe('AssetsService', () => {
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
-      const result = await service.redeem('TICKER', redeemBody);
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.redeem, { amount, from }, { signer })
+        .mockResolvedValue({ transactions: [mockTransaction] });
+
+      let result = await service.redeem('TICKER', redeemBody);
       expect(result).toEqual({
         result: undefined,
         transactions: [mockTransaction],
       });
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.redeem, { amount }, { signer })
+        .mockResolvedValue({ transactions: [mockTransaction] });
+
+      result = await service.redeem('TICKER', { ...redeemBody, from: new BigNumber(0) });
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
       findSpy.mockRestore();
     });
   });
