@@ -10,8 +10,8 @@ import {
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
-import { RemoveTrustedClaimIssuers } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
-import { SetTrustedClaimIssuers } from '~/compliance/dto/set-trusted-claim-issuers.dto';
+import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
+import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 
@@ -49,7 +49,8 @@ export class TrustedClaimIssuersController {
 
   @ApiOperation({
     summary: 'Set trusted Claim Issuers of an Asset',
-    description: 'This endpoint will set default trusted Claim Issuers of an Asset',
+    description:
+      'This endpoint will assign a new default list of trusted Claim Issuers to the Asset by replacing the existing ones',
   })
   @ApiParam({
     name: 'ticker',
@@ -63,12 +64,12 @@ export class TrustedClaimIssuersController {
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.NOT_FOUND]: ['Asset was not found', 'Some of the supplied Identities do not exist'],
-    [HttpStatus.BAD_REQUEST]: 'The supplied claim issuer list is equal to the current one',
+    [HttpStatus.BAD_REQUEST]: ['The supplied claim issuer list is equal to the current one'],
   })
   @Post('set')
   public async setTrustedClaimIssuers(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: SetTrustedClaimIssuers
+    @Body() params: SetTrustedClaimIssuersDto
   ): Promise<TransactionResponseModel> {
     const result = await this.trustedClaimIssuersService.set(ticker, params);
 
@@ -77,7 +78,8 @@ export class TrustedClaimIssuersController {
 
   @ApiOperation({
     summary: 'Add trusted Claim Issuers of an Asset',
-    description: 'This endpoint will add trusted Claim Issuers for an Asset',
+    description:
+      "This endpoint will add the supplied Identities to the Asset's list of trusted claim issuers",
   })
   @ApiParam({
     name: 'ticker',
@@ -91,13 +93,14 @@ export class TrustedClaimIssuersController {
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.NOT_FOUND]: ['Asset was not found', 'Some of the supplied Identities do not exist'],
-    [HttpStatus.UNPROCESSABLE_ENTITY]:
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
       'One or more of the supplied Identities already are Trusted Claim Issuers',
+    ],
   })
   @Post('add')
   public async addTrustedClaimIssuers(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: SetTrustedClaimIssuers
+    @Body() params: SetTrustedClaimIssuersDto
   ): Promise<TransactionResponseModel> {
     const result = await this.trustedClaimIssuersService.add(ticker, params);
 
@@ -106,7 +109,8 @@ export class TrustedClaimIssuersController {
 
   @ApiOperation({
     summary: 'Remove trusted Claim Issuers of an Asset',
-    description: 'This endpoint will remove trusted Claim Issuers for an Asset',
+    description:
+      "This endpoint will remove the supplied Identities from the Asset's list of trusted claim issuers",
   })
   @ApiParam({
     name: 'ticker',
@@ -120,13 +124,14 @@ export class TrustedClaimIssuersController {
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.NOT_FOUND]: ['Asset was not found', 'Some of the supplied Identities do not exist'],
-    [HttpStatus.UNPROCESSABLE_ENTITY]:
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
       'One or more of the supplied Identities are not Trusted Claim Issuers',
+    ],
   })
   @Post('remove')
   public async removeTrustedClaimIssuers(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: RemoveTrustedClaimIssuers
+    @Body() params: RemoveTrustedClaimIssuersDto
   ): Promise<TransactionResponseModel> {
     const result = await this.trustedClaimIssuersService.remove(ticker, params);
 

@@ -5,6 +5,7 @@ import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
+import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -194,6 +195,11 @@ export const mockAuthServiceProvider = {
 export const mockUserServiceProvider: ValueProvider<UsersService> = {
   provide: UsersService,
   useValue: createMock<UsersService>(),
+};
+
+export const mockTrustedClaimIssuersServiceProvider: ValueProvider<TrustedClaimIssuersService> = {
+  provide: TrustedClaimIssuersService,
+  useValue: createMock<TrustedClaimIssuersService>(),
 };
 
 /**

@@ -8,8 +8,8 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { ServiceReturn } from '~/common/utils';
-import { RemoveTrustedClaimIssuers } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
-import { SetTrustedClaimIssuers } from '~/compliance/dto/set-trusted-claim-issuers.dto';
+import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
+import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class TrustedClaimIssuersService {
     return asset.compliance.trustedClaimIssuers.get();
   }
 
-  public async set(ticker: string, params: SetTrustedClaimIssuers): ServiceReturn<Asset> {
+  public async set(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
@@ -39,7 +39,7 @@ export class TrustedClaimIssuersService {
     );
   }
 
-  public async add(ticker: string, params: SetTrustedClaimIssuers): ServiceReturn<Asset> {
+  public async add(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
@@ -53,7 +53,7 @@ export class TrustedClaimIssuersService {
     );
   }
 
-  public async remove(ticker: string, params: RemoveTrustedClaimIssuers): ServiceReturn<Asset> {
+  public async remove(ticker: string, params: RemoveTrustedClaimIssuersDto): ServiceReturn<Asset> {
     const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 

@@ -6,6 +6,7 @@ import {
   AuthorizationType,
   CalendarUnit,
   TransactionStatus,
+  TrustedClaimIssuer,
   TxTag,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -17,6 +18,8 @@ export type Mocked<T> = T &
       ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
       : T[K];
   };
+
+export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
 
 export const createMockResponseObject = (): DeepMocked<Response> => {
   return createMock<Response>({
