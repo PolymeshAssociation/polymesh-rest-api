@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { Asset, ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { TransactionType } from '~/common/types';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
-import { MockAsset, MockTransaction } from '~/test-utils/mocks';
+import { createMockTransactionResult, MockAsset } from '~/test-utils/mocks';
 import {
   MockAssetService,
   MockComplianceRequirementsService,
@@ -75,23 +76,22 @@ describe('TrustedClaimIssuersService', () => {
       const mockAsset = new MockAsset();
       const transaction = {
         blockHash: '0x1',
-        txHash: '0x2',
+        transactionHash: '0x2',
         blockNumber: new BigNumber(1),
-        tag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
+        type: TransactionType.Single,
+        transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
 
-      const mockTransaction = new MockTransaction(transaction);
+      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockTransactionsService.submit.mockResolvedValue(createMockTransactionResult(testTxResult));
+
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockAsset.compliance.trustedClaimIssuers.set.mockResolvedValue(mockClaimIssuers);
 
       const result = await service.set('TICKER', mockPayload);
 
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [mockTransaction],
-      });
+      expect(result).toEqual(testTxResult);
     });
   });
 
@@ -100,23 +100,22 @@ describe('TrustedClaimIssuersService', () => {
       const mockAsset = new MockAsset();
       const transaction = {
         blockHash: '0x1',
-        txHash: '0x2',
+        transactionHash: '0x2',
         blockNumber: new BigNumber(1),
-        tag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
+        type: TransactionType.Single,
+        transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
 
-      const mockTransaction = new MockTransaction(transaction);
+      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockTransactionsService.submit.mockResolvedValue(createMockTransactionResult(testTxResult));
+
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockAsset.compliance.trustedClaimIssuers.add.mockResolvedValue(mockClaimIssuers);
 
-      const result = await service.add('TICKER', mockPayload);
+      const result = await service.set('TICKER', mockPayload);
 
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [mockTransaction],
-      });
+      expect(result).toEqual(testTxResult);
     });
   });
 
@@ -125,26 +124,22 @@ describe('TrustedClaimIssuersService', () => {
       const mockAsset = new MockAsset();
       const transaction = {
         blockHash: '0x1',
-        txHash: '0x2',
+        transactionHash: '0x2',
         blockNumber: new BigNumber(1),
-        tag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
+        type: TransactionType.Single,
+        transactionTag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
       };
 
-      const mockTransaction = new MockTransaction(transaction);
+      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockTransactionsService.submit.mockResolvedValue(createMockTransactionResult(testTxResult));
+
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockAsset.compliance.trustedClaimIssuers.remove.mockResolvedValue(mockClaimIssuers);
 
-      const result = await service.remove('TICKER', {
-        signer: 'Alice',
-        claimIssuers: ['Ox6'.padEnd(66, '0')],
-      });
+      const result = await service.set('TICKER', mockPayload);
 
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [mockTransaction],
-      });
+      expect(result).toEqual(testTxResult);
     });
   });
 });

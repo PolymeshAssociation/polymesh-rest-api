@@ -12,6 +12,8 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { TransactionResult } from '~/transactions/transactions.util';
+
 export type Mocked<T> = T &
   {
     [K in keyof T]: T[K] extends (...args: infer Args) => unknown
@@ -20,6 +22,16 @@ export type Mocked<T> = T &
   };
 
 export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
+
+export const createMockTransactionResult = <T>({
+  transactions,
+  result,
+}: {
+  transactions: TransactionResult<any>['transactions'];
+  result?: TransactionResult<any>['result'];
+}): DeepMocked<TransactionResult<T>> => {
+  return { transactions, result } as DeepMocked<TransactionResult<T>>;
+};
 
 export const createMockResponseObject = (): DeepMocked<Response> => {
   return createMock<Response>({

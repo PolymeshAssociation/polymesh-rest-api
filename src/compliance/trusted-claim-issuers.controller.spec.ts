@@ -1,7 +1,7 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { Asset, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { TransactionType } from '~/common/types';
@@ -9,24 +9,8 @@ import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-cl
 import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TrustedClaimIssuersController } from '~/compliance/trusted-claim-issuers.controller';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
-import { mockTrustedClaimIssuer } from '~/test-utils/mocks';
+import { createMockTransactionResult, mockTrustedClaimIssuer } from '~/test-utils/mocks';
 import { mockTrustedClaimIssuersServiceProvider } from '~/test-utils/service-mocks';
-
-class CorrectPolymeshTransaction {
-  blockNumber: BigNumber;
-  type: TransactionType.Batch;
-  blockHash: string;
-  transactionHash: string;
-
-  constructor(transaction: {
-    blockNumber: BigNumber;
-    type: string;
-    blockHash: string;
-    transactionHash: string;
-  }) {
-    Object.assign(this, transaction);
-  }
-}
 
 describe('TrustedClaimIssuersController', () => {
   const mockParams = { ticker: 'TICKER' };
@@ -73,96 +57,73 @@ describe('TrustedClaimIssuersController', () => {
         blockHash: '0x1',
         transactionHash: '0x2',
         blockNumber: new BigNumber(1),
-        type: 'single',
+        type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
-
-      const mockTransaction = new CorrectPolymeshTransaction(transaction);
-
+      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
       const mockPayload: SetTrustedClaimIssuersDto = {
         claimIssuers: [],
         signer: 'Alice',
       };
 
-      const response = {
-        transactions: [transaction],
-      };
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       when(mockService.set)
         .calledWith(mockParams.ticker, mockPayload)
-        .mockResolvedValue({ transactions: [mockTransaction] });
+        .mockResolvedValue(testTxResult);
 
       const result = await controller.setTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
 
-      expect(result).toEqual(response);
+      expect(result).toEqual(testTxResult);
     });
   });
 
-  describe.skip('addTrustedClaimIssuers', () => {
+  describe('addTrustedClaimIssuers', () => {
     it('should accept SetTrustedClaimIssuersDto and add Asset trusted claim issuers', async () => {
       const transaction = {
         blockHash: '0x1',
         transactionHash: '0x2',
         blockNumber: new BigNumber(1),
-        type: 'single',
+        type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
-
-      const mockTransaction = new CorrectPolymeshTransaction(transaction);
-
+      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
       const mockPayload: SetTrustedClaimIssuersDto = {
         claimIssuers: [],
         signer: 'Alice',
       };
 
-      const response = {
-        transactions: [transaction],
-      };
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       when(mockService.add)
         .calledWith(mockParams.ticker, mockPayload)
-        .mockResolvedValue({ transactions: [mockTransaction] });
+        .mockResolvedValue(testTxResult);
 
       const result = await controller.addTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
 
-      expect(result).toEqual(response);
+      expect(result).toEqual(testTxResult);
     });
   });
 
-  describe.skip('removeTrustedClaimIssuers', () => {
+  describe('removeTrustedClaimIssuers', () => {
     it('should accept RemoveTrustedClaimIssuersDto and remove trusted claim issuers for Asset', async () => {
       const transaction = {
         blockHash: '0x1',
         transactionHash: '0x2',
         blockNumber: new BigNumber(1),
-        type: 'single',
+        type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
       };
-
-      const mockTransaction = new CorrectPolymeshTransaction(transaction);
+      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
       const mockPayload: RemoveTrustedClaimIssuersDto = {
         claimIssuers: [],
         signer: 'Alice',
       };
 
-      const response = {
-        transactions: [transaction],
-      };
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       when(mockService.remove)
         .calledWith(mockParams.ticker, mockPayload)
-        .mockResolvedValue({ transactions: [mockTransaction] });
+        .mockResolvedValue(testTxResult);
 
       const result = await controller.removeTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
 
-      expect(result).toEqual(response);
+      expect(result).toEqual(testTxResult);
     });
   });
 });
