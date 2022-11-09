@@ -84,7 +84,7 @@ describe('TrustedClaimIssuersService', () => {
 
       const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
-      mockTransactionsService.submit.mockResolvedValue(createMockTransactionResult(testTxResult));
+      mockTransactionsService.submit.mockResolvedValue(testTxResult);
 
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockAsset.compliance.trustedClaimIssuers.set.mockResolvedValue(mockClaimIssuers);
@@ -108,7 +108,7 @@ describe('TrustedClaimIssuersService', () => {
 
       const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
-      mockTransactionsService.submit.mockResolvedValue(createMockTransactionResult(testTxResult));
+      mockTransactionsService.submit.mockResolvedValue(testTxResult);
 
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockAsset.compliance.trustedClaimIssuers.add.mockResolvedValue(mockClaimIssuers);
@@ -132,7 +132,7 @@ describe('TrustedClaimIssuersService', () => {
 
       const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
-      mockTransactionsService.submit.mockResolvedValue(createMockTransactionResult(testTxResult));
+      mockTransactionsService.submit.mockResolvedValue(testTxResult);
 
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
       mockAsset.compliance.trustedClaimIssuers.remove.mockResolvedValue(mockClaimIssuers);
