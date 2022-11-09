@@ -11,10 +11,11 @@ export class TrustedClaimIssuerDto {
     enum: ClaimType,
     isArray: true,
     nullable: true,
+    default: null,
   })
   @IsOptional()
   @IsEnum(ClaimType, { each: true })
-  readonly trustedFor?: ClaimType[] | null;
+  readonly trustedFor: ClaimType[] | null;
 
   @ApiPropertyOptional({
     description: 'The Identity of the Claim Issuer',

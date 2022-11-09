@@ -27,8 +27,8 @@ export const createMockTransactionResult = <T>({
   transactions,
   result,
 }: {
-  transactions: TransactionResult<any>['transactions'];
-  result?: TransactionResult<any>['result'];
+  transactions: TransactionResult<T>['transactions'];
+  result?: TransactionResult<T>['result'];
 }): DeepMocked<TransactionResult<T>> => {
   return { transactions, result } as DeepMocked<TransactionResult<T>>;
 };
