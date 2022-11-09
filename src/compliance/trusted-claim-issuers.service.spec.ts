@@ -19,22 +19,13 @@ describe('TrustedClaimIssuersService', () => {
   const mockComplianceRequirementsService = new MockComplianceRequirementsService();
   const mockTransactionsService = mockTransactionsProvider.useValue;
 
-  const mockPayload = {
-    signer: 'Alice',
-    claimIssuers: [
-      {
-        identity: 'Ox6'.padEnd(66, '0'),
-        trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
-      },
-    ],
-  };
-
   const mockClaimIssuers = [
     {
       identity: 'Ox6'.padEnd(66, '0'),
       trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
     },
   ];
+  const signer = 'Alice';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -52,6 +43,10 @@ describe('TrustedClaimIssuersService', () => {
       .compile();
 
     service = module.get(TrustedClaimIssuersService);
+  });
+
+  afterEach(() => {
+    mockTransactionsService.submit.mockReset();
   });
 
   it('should be defined', () => {
@@ -85,11 +80,9 @@ describe('TrustedClaimIssuersService', () => {
       const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
       mockTransactionsService.submit.mockResolvedValue(testTxResult);
-
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockAsset.compliance.trustedClaimIssuers.set.mockResolvedValue(mockClaimIssuers);
 
-      const result = await service.set('TICKER', mockPayload);
+      const result = await service.set('TICKER', { signer, claimIssuers: mockClaimIssuers });
 
       expect(result).toEqual(testTxResult);
     });
@@ -109,12 +102,15 @@ describe('TrustedClaimIssuersService', () => {
       const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
       mockTransactionsService.submit.mockResolvedValue(testTxResult);
-
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockAsset.compliance.trustedClaimIssuers.add.mockResolvedValue(mockClaimIssuers);
 
-      const result = await service.set('TICKER', mockPayload);
+      const result = await service.add('TICKER', { signer, claimIssuers: mockClaimIssuers });
 
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.compliance.trustedClaimIssuers.add,
+        { claimIssuers: mockClaimIssuers },
+        { signer }
+      );
       expect(result).toEqual(testTxResult);
     });
   });
@@ -133,12 +129,18 @@ describe('TrustedClaimIssuersService', () => {
       const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
 
       mockTransactionsService.submit.mockResolvedValue(testTxResult);
-
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
-      mockAsset.compliance.trustedClaimIssuers.remove.mockResolvedValue(mockClaimIssuers);
 
-      const result = await service.set('TICKER', mockPayload);
+      const result = await service.remove('TICKER', {
+        signer,
+        claimIssuers: [mockClaimIssuers[0].identity],
+      });
 
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.compliance.trustedClaimIssuers.remove,
+        { claimIssuers: [mockClaimIssuers[0].identity] },
+        { signer }
+      );
       expect(result).toEqual(testTxResult);
     });
   });
