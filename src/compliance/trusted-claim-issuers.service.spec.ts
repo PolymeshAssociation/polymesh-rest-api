@@ -3,6 +3,8 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Asset, ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
+import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionType } from '~/common/types';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
@@ -18,6 +20,15 @@ describe('TrustedClaimIssuersService', () => {
   const mockAssetsService = new MockAssetService();
   const mockComplianceRequirementsService = new MockComplianceRequirementsService();
   const mockTransactionsService = mockTransactionsProvider.useValue;
+  const getMockTransaction = (
+    transactionTag: string
+  ): TransactionModel | BatchTransactionModel => ({
+    blockHash: '0x1',
+    transactionHash: '0x2',
+    blockNumber: new BigNumber(1),
+    type: TransactionType.Single,
+    transactionTag,
+  });
 
   const mockClaimIssuers = [
     {
@@ -69,15 +80,9 @@ describe('TrustedClaimIssuersService', () => {
   describe('set', () => {
     it('should set trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
-      const transaction = {
-        blockHash: '0x1',
-        transactionHash: '0x2',
-        blockNumber: new BigNumber(1),
-        type: TransactionType.Single,
-        transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
-      };
-
-      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
+      const testTxResult = createMockTransactionResult<Asset>({
+        transactions: [getMockTransaction(TxTags.complianceManager.AddDefaultTrustedClaimIssuer)],
+      });
 
       mockTransactionsService.submit.mockResolvedValue(testTxResult);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
@@ -91,15 +96,9 @@ describe('TrustedClaimIssuersService', () => {
   describe('add', () => {
     it('should add trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
-      const transaction = {
-        blockHash: '0x1',
-        transactionHash: '0x2',
-        blockNumber: new BigNumber(1),
-        type: TransactionType.Single,
-        transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
-      };
-
-      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
+      const testTxResult = createMockTransactionResult<Asset>({
+        transactions: [getMockTransaction(TxTags.complianceManager.AddDefaultTrustedClaimIssuer)],
+      });
 
       mockTransactionsService.submit.mockResolvedValue(testTxResult);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
@@ -118,15 +117,11 @@ describe('TrustedClaimIssuersService', () => {
   describe('remove', () => {
     it('should remove trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
-      const transaction = {
-        blockHash: '0x1',
-        transactionHash: '0x2',
-        blockNumber: new BigNumber(1),
-        type: TransactionType.Single,
-        transactionTag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
-      };
-
-      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
+      const testTxResult = createMockTransactionResult<Asset>({
+        transactions: [
+          getMockTransaction(TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer),
+        ],
+      });
 
       mockTransactionsService.submit.mockResolvedValue(testTxResult);
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
