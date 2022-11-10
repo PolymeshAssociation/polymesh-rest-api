@@ -13,6 +13,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
+import { testDid, testSigner as signer } from '~/test-utils/consts';
 import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
 import {
   MockIdentitiesService,
@@ -71,7 +72,6 @@ describe('PortfoliosService', () => {
   describe('findAllByOwner', () => {
     it('should return a list of Portfolios for a given DID', async () => {
       const mockIdentity = new MockIdentity();
-      const did = '0x6'.padEnd(66, '0');
       const mockPortfolios = [
         {
           name: 'Default',
@@ -89,7 +89,7 @@ describe('PortfoliosService', () => {
       ];
       mockIdentity.portfolios.getPortfolios.mockResolvedValue(mockPortfolios);
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findAllByOwner(did);
+      const result = await service.findAllByOwner(testDid);
       expect(result).toEqual(mockPortfolios);
     });
   });
@@ -263,10 +263,9 @@ describe('PortfoliosService', () => {
         mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
         mockIdentity.portfolios.delete.mockResolvedValue(mockTransaction);
 
-        const signer = '0x6'.padEnd(66, '0');
         const portfolio = new PortfolioDto({
           id: new BigNumber(1),
-          did: '0x6'.padEnd(66, '0'),
+          did: testDid,
         });
 
         mockTransactionsService.submit.mockResolvedValue({

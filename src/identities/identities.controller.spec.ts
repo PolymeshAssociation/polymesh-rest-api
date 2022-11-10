@@ -21,6 +21,7 @@ import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { testDid } from '~/test-utils/consts';
 import {
   MockAuthorizationRequest,
   MockIdentity,
@@ -112,7 +113,7 @@ describe('IdentitiesController', () => {
       const mockResults = [new MockVenue()];
       mockSettlementsService.findVenuesByOwner.mockResolvedValue(mockResults);
 
-      const result = await controller.getVenues({ did: '0x6'.padEnd(66, '0') });
+      const result = await controller.getVenues({ did: testDid });
       expect(result).toEqual({
         results: [
           expect.objectContaining({
@@ -125,7 +126,7 @@ describe('IdentitiesController', () => {
 
   describe('getIdentityDetails', () => {
     it("should return the Identity's details", async () => {
-      const did = '0x6'.padEnd(66, '0');
+      const did = testDid;
 
       const mockIdentityDetails = new IdentityModel({
         did,
@@ -168,7 +169,7 @@ describe('IdentitiesController', () => {
   });
 
   describe('getPendingAuthorizations', () => {
-    const did = '0x6'.padEnd(66, '0');
+    const did = testDid;
     const targetDid = '0x1'.padEnd(66, '0');
     const pendingAuthorization = {
       authId: new BigNumber(2236),
@@ -282,7 +283,7 @@ describe('IdentitiesController', () => {
       const mockAuthorization = new MockAuthorizationRequest();
       mockAuthorizationsService.findOneByDid.mockResolvedValue(mockAuthorization);
       const result = await controller.getPendingAuthorization({
-        did: '0x6'.padEnd(66, '0'),
+        did: testDid,
         id: new BigNumber(1),
       });
       expect(result).toEqual({
@@ -302,7 +303,7 @@ describe('IdentitiesController', () => {
   });
 
   describe('getIssuedClaims', () => {
-    const did = '0x6'.padEnd(66, '0');
+    const did = testDid;
     const targetDid = '0x6'.padEnd(66, '1');
     const claims = [
       {
@@ -355,7 +356,7 @@ describe('IdentitiesController', () => {
   });
 
   describe('getAssociatedClaims', () => {
-    const did = '0x6'.padEnd(66, '0');
+    const did = testDid;
     const mockAssociatedClaims = {
       data: [
         {
@@ -419,7 +420,7 @@ describe('IdentitiesController', () => {
 
   describe('getTrustingAssets', () => {
     it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
-      const did = '0x6'.padEnd(66, '0');
+      const did = testDid;
       const mockAssets = [
         {
           ticker: 'BAR_TICKER',
@@ -464,7 +465,7 @@ describe('IdentitiesController', () => {
 
       mockTickerReservationsService.findAllByOwner.mockResolvedValue([mockTickerReservation]);
 
-      const did = '0x6'.padEnd(66, '0');
+      const did = testDid;
 
       const result = await controller.getTickerReservations({ did });
       expect(result).toEqual({

@@ -14,6 +14,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { testDid } from '~/test-utils/consts';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceRequirementsService } from '~/test-utils/service-mocks';
 
@@ -48,7 +49,7 @@ describe('AssetsController', () => {
         isDivisible: false,
         name: 'NAME',
         owner: {
-          did: '0x6'.padEnd(66, '0'),
+          did: testDid,
         },
         totalSupply: new BigNumber(1),
       };
@@ -86,7 +87,7 @@ describe('AssetsController', () => {
     const mockHolders = {
       data: [
         {
-          identity: { did: '0x6'.padEnd(66, '0') },
+          identity: { did: testDid },
           balance: new BigNumber(1),
         },
       ],

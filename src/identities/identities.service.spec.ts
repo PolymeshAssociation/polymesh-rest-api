@@ -14,6 +14,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
+import { testSigner as signer } from '~/test-utils/consts';
 import { MockIdentity, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import {
   MockAccountsService,
@@ -153,7 +154,6 @@ describe('IdentitiesService', () => {
         const mockTransaction = new MockTransaction(transaction);
         mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const signer = '0x6'.padEnd(66, '0');
         const body = {
           signer,
           secondaryAccount: 'address',

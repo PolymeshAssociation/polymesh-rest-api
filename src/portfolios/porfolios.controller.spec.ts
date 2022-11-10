@@ -1,5 +1,3 @@
-/* eslint-disable import/first */
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
@@ -9,6 +7,7 @@ import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
+import { testDid, testSigner as signer } from '~/test-utils/consts';
 import { MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
@@ -34,7 +33,7 @@ describe('PortfoliosController', () => {
 
   describe('getPortfolios', () => {
     it('should return list of all portfolios of an identity', async () => {
-      const did = '0x6'.padEnd(66, '0');
+      const did = testDid;
       const mockPortfolio = new MockPortfolio();
       mockPortfolio.getAssetBalances.mockResolvedValue([]);
       mockPortfolio.getCustodian.mockResolvedValue({ did });
@@ -100,8 +99,8 @@ describe('PortfoliosController', () => {
       mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
 
       const result = await controller.deletePortfolio(
-        new PortfolioDto({ id: new BigNumber(1), did: '0x6'.padEnd(66, '0') }),
-        { signer: '0x6'.padEnd(66, '0') }
+        new PortfolioDto({ id: new BigNumber(1), did: testDid }),
+        { signer }
       );
 
       expect(result).toEqual({

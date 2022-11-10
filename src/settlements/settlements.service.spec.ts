@@ -20,6 +20,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { testDid, testSigner as signer } from '~/test-utils/consts';
 import {
   MockAsset,
   MockIdentity,
@@ -262,7 +263,6 @@ describe('SettlementsService', () => {
         ],
       };
 
-      const signer = 'signer';
       const body = {
         signer,
         ...params,
@@ -310,7 +310,6 @@ describe('SettlementsService', () => {
       });
       mockPolymeshApi.settlements.createVenue.mockResolvedValue(mockTransaction);
       mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
-      const signer = '0x6'.padEnd(66, '0');
       const body = {
         signer,
         description: 'A generic exchange',
@@ -336,7 +335,7 @@ describe('SettlementsService', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('New type is the same as the current one');
         const body = {
-          signer: '0x6'.padEnd(66, '0'),
+          signer,
           type: VenueType.Exchange,
           description: 'A generic exchange',
         };
@@ -377,7 +376,6 @@ describe('SettlementsService', () => {
         const mockTransaction = new MockTransaction(transaction);
         mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const signer = '0x6'.padEnd(66, '0');
         const body = {
           signer,
           description: 'A generic exchange',
@@ -416,7 +414,6 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const signer = 'signer';
       const body = {
         signer,
       };
@@ -453,7 +450,6 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const signer = 'signer';
       const result = await service.rejectInstruction(new BigNumber(123), {
         signer,
       });
@@ -475,7 +471,7 @@ describe('SettlementsService', () => {
     it('should return the Venue details', async () => {
       const mockDetails = {
         owner: {
-          did: '0x6'.padEnd(66, '0'),
+          did: testDid,
         },
         description: 'Venue desc',
         type: VenueType.Distribution,
@@ -500,7 +496,7 @@ describe('SettlementsService', () => {
         data: [
           {
             identity: {
-              did: '0x6'.padEnd(66, '0'),
+              did: testDid,
             },
             status: AffirmationStatus.Pending,
           },

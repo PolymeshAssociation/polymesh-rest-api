@@ -12,6 +12,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { testDid, testSigner as signer } from '~/test-utils/consts';
 import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
 
@@ -141,7 +142,7 @@ describe('SettlementsController', () => {
         data: [
           {
             identity: {
-              did: '0x6'.padEnd(66, '0'),
+              did: testDid,
             },
             status: AffirmationStatus.Pending,
           },
@@ -168,7 +169,7 @@ describe('SettlementsController', () => {
     it('should return the details of the Venue', async () => {
       const mockVenueDetails = {
         owner: {
-          did: '0x6'.padEnd(66, '0'),
+          did: testDid,
         },
         description: 'Venue desc',
         type: VenueType.Distribution,
@@ -184,7 +185,7 @@ describe('SettlementsController', () => {
   describe('createVenue', () => {
     it('should create a Venue and return the data returned by the service', async () => {
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         description: 'Generic Exchange',
         type: VenueType.Exchange,
       };
@@ -212,7 +213,7 @@ describe('SettlementsController', () => {
       mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
 
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         description: 'A generic exchange',
         type: VenueType.Exchange,
       };

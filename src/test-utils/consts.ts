@@ -1,6 +1,7 @@
 import { UserModel } from '~/users/model/user.model';
 
-export const testSigner = '0x6'.padEnd(66, '0');
+export const testSigner = 'alice';
+export const testDid = '0x01'.padEnd(66, '0');
 
 export const testUser = new UserModel({
   id: '-1',

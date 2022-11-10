@@ -13,6 +13,7 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
+import { testSigner as signer } from '~/test-utils/consts';
 import {
   createMockResponseObject,
   MockAsset,
@@ -63,7 +64,7 @@ describe('AccountsController', () => {
       mockAccountsService.transferPolyx.mockResolvedValue({ transactions });
 
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         to: 'address',
         amount: new BigNumber(10),
         memo: 'Sample memo',
@@ -202,7 +203,7 @@ describe('AccountsController', () => {
       const transactions = ['transaction'];
       mockAccountsService.freezeSecondaryAccounts.mockResolvedValue({ transactions });
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
       };
 
       const result = await controller.freezeSecondaryAccounts(body);
@@ -218,7 +219,7 @@ describe('AccountsController', () => {
       const transactions = ['transaction'];
       mockAccountsService.unfreezeSecondaryAccounts.mockResolvedValue({ transactions });
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
       };
 
       const result = await controller.unfreezeSecondaryAccounts(body);
@@ -235,7 +236,7 @@ describe('AccountsController', () => {
       mockAccountsService.revokePermissions.mockResolvedValue({ transactions });
 
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         secondaryAccounts: ['someAddress'],
       };
 
@@ -253,7 +254,7 @@ describe('AccountsController', () => {
       mockAccountsService.modifyPermissions.mockResolvedValue({ transactions });
 
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         secondaryAccounts: [
           new PermissionedAccountDto({
             secondaryAccount: 'someAddress',

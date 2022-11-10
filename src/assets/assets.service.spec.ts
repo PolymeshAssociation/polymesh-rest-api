@@ -15,6 +15,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { testDid } from '~/test-utils/consts';
 import {
   MockAsset,
   MockAuthorizationRequest,
@@ -172,7 +173,7 @@ describe('AssetsService', () => {
     const mockHolders = {
       data: [
         {
-          identity: '0x6'.padEnd(66, '0'),
+          identity: testDid,
           balance: new BigNumber(1),
         },
       ],
