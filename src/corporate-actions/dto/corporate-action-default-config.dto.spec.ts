@@ -2,8 +2,10 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { TargetTreatment } from '@polymeshassociation/polymesh-sdk/types';
 
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { InvalidCase, ValidCase } from '~/test-utils/types';
+
+const { did, signer } = testValues;
 
 describe('corporateActionDefaultConfigDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
@@ -19,12 +21,12 @@ describe('corporateActionDefaultConfigDto', () => {
         {
           targets: {
             treatment: TargetTreatment.Include,
-            identities: [testDid],
+            identities: [did],
           },
           defaultTaxWithholding: '25',
           taxWithholdings: [
             {
-              identity: testDid,
+              identity: did,
               percentage: '10',
             },
           ],
@@ -36,7 +38,7 @@ describe('corporateActionDefaultConfigDto', () => {
         {
           targets: {
             treatment: TargetTreatment.Include,
-            identities: [testDid],
+            identities: [did],
           },
           signer,
         },
@@ -53,7 +55,7 @@ describe('corporateActionDefaultConfigDto', () => {
         {
           taxWithholdings: [
             {
-              identity: testDid,
+              identity: did,
               percentage: '10',
             },
           ],

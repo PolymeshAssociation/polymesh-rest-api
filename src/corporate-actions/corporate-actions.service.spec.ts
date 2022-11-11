@@ -18,9 +18,11 @@ import { CorporateActionsService } from '~/corporate-actions/corporate-actions.s
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
+
+const { signer } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),

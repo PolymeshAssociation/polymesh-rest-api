@@ -1,6 +1,8 @@
 import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { AppNotFoundError } from '~/common/errors';
-import { testUser } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
+
+const { user } = testValues;
 
 export const testApiKeyRepo = async (repo: ApiKeyRepo): Promise<void> => {
   let secret: string;
@@ -10,8 +12,8 @@ export const testApiKeyRepo = async (repo: ApiKeyRepo): Promise<void> => {
 
   describe('method: createApiKey', () => {
     it('should create an API key', async () => {
-      ({ secret, userId } = await repo.createApiKey(testUser));
-      expect(userId).toEqual(testUser.id);
+      ({ secret, userId } = await repo.createApiKey(user));
+      expect(userId).toEqual(user.id);
       expect(secret).toBeDefined();
     });
   });
@@ -19,7 +21,7 @@ export const testApiKeyRepo = async (repo: ApiKeyRepo): Promise<void> => {
   describe('method: getByApiKey', () => {
     it('should return the User associated to the API key', async () => {
       const foundUser = await repo.getUserByApiKey(secret);
-      expect(foundUser).toEqual(testUser);
+      expect(foundUser).toEqual(user);
     });
 
     it('should throw NotFoundError if the API key does not exist', () => {

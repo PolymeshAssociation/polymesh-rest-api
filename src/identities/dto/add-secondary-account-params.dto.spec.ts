@@ -8,7 +8,9 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
+
+const { signer, did } = testValues;
 
 type ValidInviteCase = [string, Record<string, unknown>];
 type InvalidInviteCase = [string, Record<string, unknown>, string[]];
@@ -71,11 +73,11 @@ describe('addSecondaryAccountParamsDto', () => {
               values: [
                 {
                   id: new BigNumber(1),
-                  did: testDid,
+                  did,
                 },
                 {
                   id: new BigNumber(2),
-                  did: testDid,
+                  did,
                 },
               ],
               type: PermissionType.Exclude,
@@ -97,11 +99,11 @@ describe('addSecondaryAccountParamsDto', () => {
               values: [
                 {
                   id: new BigNumber(1),
-                  did: testDid,
+                  did,
                 },
                 {
                   id: new BigNumber(2),
-                  did: testDid,
+                  did,
                 },
               ],
               type: PermissionType.Exclude,

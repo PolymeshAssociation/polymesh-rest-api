@@ -2,11 +2,12 @@ import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { when } from 'jest-when';
 
-import { testUser } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { mockUserServiceProvider } from '~/test-utils/service-mocks';
 import { UsersController } from '~/users/users.controller';
 import { UsersService } from '~/users/users.service';
 
+const { user } = testValues;
 describe('UsersController', () => {
   let controller: UsersController;
   let mockUsersService: DeepMocked<UsersService>;
@@ -27,11 +28,11 @@ describe('UsersController', () => {
   });
 
   describe('createUser', () => {
-    const params = { name: testUser.name };
+    const params = { name: user.name };
     it('should call the service and return the result', () => {
-      when(mockUsersService.createUser).calledWith(params).mockResolvedValue(testUser);
+      when(mockUsersService.createUser).calledWith(params).mockResolvedValue(user);
 
-      return expect(controller.createUser(params)).resolves.toEqual(testUser);
+      return expect(controller.createUser(params)).resolves.toEqual(user);
     });
   });
 });
