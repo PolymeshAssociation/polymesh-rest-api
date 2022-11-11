@@ -5,6 +5,7 @@ import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
+import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -39,7 +40,6 @@ export const mockTransactionsProvider = {
 export class MockComplianceRequirementsService {
   setRequirements = jest.fn();
   findComplianceRequirements = jest.fn();
-  findTrustedClaimIssuers = jest.fn();
   pauseRequirements = jest.fn();
   unpauseRequirements = jest.fn();
   deleteAll = jest.fn();
@@ -180,6 +180,13 @@ export class MockAuthService {
   validateApiKey = jest.fn();
 }
 
+export class MockTrustedClaimIssuersService {
+  find = jest.fn();
+  set = jest.fn();
+  add = jest.fn();
+  remove = jest.fn();
+}
+
 export const mockAuthServiceProvider = {
   provide: AuthService,
   useValue: new MockAuthService(),
@@ -188,6 +195,11 @@ export const mockAuthServiceProvider = {
 export const mockUserServiceProvider: ValueProvider<UsersService> = {
   provide: UsersService,
   useValue: createMock<UsersService>(),
+};
+
+export const mockTrustedClaimIssuersServiceProvider: ValueProvider<TrustedClaimIssuersService> = {
+  provide: TrustedClaimIssuersService,
+  useValue: createMock<TrustedClaimIssuersService>(),
 };
 
 /**

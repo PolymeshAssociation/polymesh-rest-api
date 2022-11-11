@@ -6,10 +6,13 @@ import {
   AuthorizationType,
   CalendarUnit,
   TransactionStatus,
+  TrustedClaimIssuer,
   TxTag,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
+
+import { TransactionResult } from '~/transactions/transactions.util';
 
 export type Mocked<T> = T &
   {
@@ -17,6 +20,18 @@ export type Mocked<T> = T &
       ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
       : T[K];
   };
+
+export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
+
+export const createMockTransactionResult = <T>({
+  transactions,
+  result,
+}: {
+  transactions: TransactionResult<T>['transactions'];
+  result?: TransactionResult<T>['result'];
+}): DeepMocked<TransactionResult<T>> => {
+  return { transactions, result } as DeepMocked<TransactionResult<T>>;
+};
 
 export const createMockResponseObject = (): DeepMocked<Response> => {
   return createMock<Response>({
@@ -120,6 +135,9 @@ export class MockAsset {
     },
     trustedClaimIssuers: {
       get: jest.fn(),
+      set: jest.fn(),
+      add: jest.fn(),
+      remove: jest.fn(),
     },
   };
 

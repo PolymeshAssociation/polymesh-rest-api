@@ -1,10 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import {
-  ClaimType,
-  KnownAssetType,
-  SecurityIdentifierType,
-} from '@polymeshassociation/polymesh-sdk/types';
+import { KnownAssetType, SecurityIdentifierType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
@@ -200,31 +196,6 @@ describe('AssetsController', () => {
       const result = await controller.setDocuments({ ticker }, body);
       expect(result).toEqual({ transactions });
       expect(mockAssetsService.setDocuments).toHaveBeenCalledWith(ticker, body);
-    });
-  });
-
-  describe('getTrustedClaimIssuers', () => {
-    it('should return the list of all trusted Claim Issuers of an Asset', async () => {
-      const mockClaimIssuers = [
-        {
-          identity: {
-            did: 'Ox6'.padEnd(66, '0'),
-          },
-          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
-        },
-      ];
-      mockComplianceRequirementsService.findTrustedClaimIssuers.mockResolvedValue(mockClaimIssuers);
-
-      const result = await controller.getTrustedClaimIssuers({ ticker: 'TICKER' });
-
-      expect(result).toEqual({
-        results: [
-          {
-            did: 'Ox6'.padEnd(66, '0'),
-            trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
-          },
-        ],
-      });
     });
   });
 

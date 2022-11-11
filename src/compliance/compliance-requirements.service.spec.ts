@@ -3,7 +3,7 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
@@ -54,26 +54,6 @@ describe('ComplianceRequirementsService', () => {
       const result = await service.findComplianceRequirements('TICKER');
 
       expect(result).toEqual(mockRequirements);
-    });
-  });
-
-  describe('findTrustedClaimIssuers', () => {
-    it('should return the list of trusted Claim Issuers of an Asset', async () => {
-      const mockClaimIssuers = [
-        {
-          did: 'Ox6'.padEnd(66, '0'),
-          trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
-        },
-      ];
-
-      const mockAsset = new MockAsset();
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
-
-      mockAsset.compliance.trustedClaimIssuers.get.mockResolvedValue(mockClaimIssuers);
-
-      const result = await service.findTrustedClaimIssuers('TICKER');
-
-      expect(result).toEqual(mockClaimIssuers);
     });
   });
 
