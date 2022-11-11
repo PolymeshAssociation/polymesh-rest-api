@@ -10,7 +10,7 @@ import { CalendarUnit, ErrorCode, TxTags } from '@polymeshassociation/polymesh-s
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAsset,
   MockCheckpoint,
@@ -28,6 +28,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer } = testValues;
 
 describe('CheckpointsService', () => {
   let service: CheckpointsService;

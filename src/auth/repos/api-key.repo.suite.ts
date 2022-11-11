@@ -24,9 +24,9 @@ export const testApiKeyRepo = async (repo: ApiKeyRepo): Promise<void> => {
       expect(foundUser).toEqual(user);
     });
 
-    it('should throw NotFoundError if the API key does not exist', () => {
+    it('should throw NotFoundError if the API key does not exist', async () => {
       const unknownApiKey = 'unknownApiKey';
-      return expect(repo.getUserByApiKey(unknownApiKey)).rejects.toThrow(expectedNotFoundError);
+      await expect(repo.getUserByApiKey(unknownApiKey)).rejects.toThrow(expectedNotFoundError);
     });
   });
 
@@ -38,7 +38,7 @@ export const testApiKeyRepo = async (repo: ApiKeyRepo): Promise<void> => {
     });
 
     it('should be a no-op on if the API key is not found', () => {
-      expect(repo.deleteApiKey(secret)).resolves.not.toThrow();
+      return expect(repo.deleteApiKey(secret)).resolves.not.toThrow();
     });
   });
 };

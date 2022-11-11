@@ -13,7 +13,7 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
-import { testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
   MockAsset,
@@ -21,6 +21,8 @@ import {
   MockSubsidy,
 } from '~/test-utils/mocks';
 import { MockAccountsService } from '~/test-utils/service-mocks';
+
+const { signer } = testValues;
 
 describe('AccountsController', () => {
   let controller: AccountsController;

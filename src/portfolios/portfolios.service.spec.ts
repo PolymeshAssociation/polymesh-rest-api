@@ -13,13 +13,15 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
 import {
   MockIdentitiesService,
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+
+const { signer, did } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -89,7 +91,7 @@ describe('PortfoliosService', () => {
       ];
       mockIdentity.portfolios.getPortfolios.mockResolvedValue(mockPortfolios);
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-      const result = await service.findAllByOwner(testDid);
+      const result = await service.findAllByOwner(did);
       expect(result).toEqual(mockPortfolios);
     });
   });
@@ -265,7 +267,7 @@ describe('PortfoliosService', () => {
 
         const portfolio = new PortfolioDto({
           id: new BigNumber(1),
-          did: testDid,
+          did,
         });
 
         mockTransactionsService.submit.mockResolvedValue({

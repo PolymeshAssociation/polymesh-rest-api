@@ -15,7 +15,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { testDid } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAsset,
   MockAuthorizationRequest,
@@ -23,6 +23,8 @@ import {
   MockTransaction,
 } from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
+
+const { did } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -173,7 +175,7 @@ describe('AssetsService', () => {
     const mockHolders = {
       data: [
         {
-          identity: testDid,
+          identity: did,
           balance: new BigNumber(1),
         },
       ],

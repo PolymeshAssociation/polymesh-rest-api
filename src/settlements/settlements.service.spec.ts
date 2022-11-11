@@ -20,7 +20,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAsset,
   MockIdentity,
@@ -40,6 +40,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer, did } = testValues;
 
 describe('SettlementsService', () => {
   let service: SettlementsService;
@@ -471,7 +473,7 @@ describe('SettlementsService', () => {
     it('should return the Venue details', async () => {
       const mockDetails = {
         owner: {
-          did: testDid,
+          did,
         },
         description: 'Venue desc',
         type: VenueType.Distribution,
@@ -496,7 +498,7 @@ describe('SettlementsService', () => {
         data: [
           {
             identity: {
-              did: testDid,
+              did,
             },
             status: AffirmationStatus.Pending,
           },

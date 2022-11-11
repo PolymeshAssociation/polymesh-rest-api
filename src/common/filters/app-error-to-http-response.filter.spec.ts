@@ -33,7 +33,7 @@ describe('AppErrorToHttpResponseFilter', () => {
 
   test.each(cases)('should transform %p into %p', async (error, expected) => {
     errorToHttpResponseFilter.catch(error, mockHost);
-    expect(mockReplyFn).toHaveBeenCalledWith({}, ...expected);
+    return expect(mockReplyFn).toHaveBeenCalledWith({}, ...expected);
   });
 
   it('should throw if an unknown Error is encountered', () => {

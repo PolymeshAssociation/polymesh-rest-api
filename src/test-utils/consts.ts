@@ -5,7 +5,7 @@ const did = '0x01'.padEnd(66, '0');
 
 const user = new UserModel({
   id: '-1',
-  name: 'TestUtilUser',
+  name: 'TestUser',
 });
 
 const resource = {

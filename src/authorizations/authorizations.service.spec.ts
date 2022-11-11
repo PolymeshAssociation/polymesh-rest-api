@@ -11,7 +11,7 @@ import { when } from 'jest-when';
 import { AccountsService } from '~/accounts/accounts.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesService } from '~/identities/identities.service';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAccount,
   MockAuthorizationRequest,
@@ -30,6 +30,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer, did } = testValues;
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
@@ -70,7 +72,6 @@ describe('AuthorizationsService', () => {
 
   describe('findPendingByDid', () => {
     const mockIdentity = new MockIdentity();
-    const did = testDid;
     const mockAuthorizations = [
       {
         id: '1',
@@ -114,7 +115,6 @@ describe('AuthorizationsService', () => {
 
   describe('findIssuedByDid', () => {
     const mockIdentity = new MockIdentity();
-    const did = testDid;
     const mockIssuedAuthorizations = {
       data: [
         {

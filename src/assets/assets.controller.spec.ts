@@ -14,9 +14,11 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { testDid } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceRequirementsService } from '~/test-utils/service-mocks';
+
+const { signer, did } = testValues;
 
 describe('AssetsController', () => {
   let controller: AssetsController;
@@ -49,7 +51,7 @@ describe('AssetsController', () => {
         isDivisible: false,
         name: 'NAME',
         owner: {
-          did: testDid,
+          did,
         },
         totalSupply: new BigNumber(1),
       };
@@ -87,7 +89,7 @@ describe('AssetsController', () => {
     const mockHolders = {
       data: [
         {
-          identity: { did: testDid },
+          identity: { did },
           balance: new BigNumber(1),
         },
       ],
@@ -249,7 +251,6 @@ describe('AssetsController', () => {
 
   describe('issue', () => {
     it('should call the service and return the results', async () => {
-      const signer = '0x6000';
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
       mockAssetsService.issue.mockResolvedValue({ transactions: ['transaction'] });
@@ -285,7 +286,6 @@ describe('AssetsController', () => {
 
   describe('redeem', () => {
     it('should call the service and return the results', async () => {
-      const signer = '0x6000';
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
       const from = new BigNumber(1);
@@ -299,7 +299,6 @@ describe('AssetsController', () => {
 
   describe('freeze', () => {
     it('should call the service and return the results', async () => {
-      const signer = '0x6000';
       const ticker = 'TICKER';
       mockAssetsService.freeze.mockResolvedValue({ transactions: ['transaction'] });
 
@@ -311,7 +310,6 @@ describe('AssetsController', () => {
 
   describe('unfreeze', () => {
     it('should call the service and return the results', async () => {
-      const signer = '0x6000';
       const ticker = 'TICKER';
       mockAssetsService.unfreeze.mockResolvedValue({ transactions: ['transaction'] });
 
@@ -323,7 +321,6 @@ describe('AssetsController', () => {
 
   describe('controllerTransfer', () => {
     it('should call the service and return the results', async () => {
-      const signer = '0x6000';
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
       const origin = new PortfolioDto({ id: new BigNumber(1), did: '0x1000' });

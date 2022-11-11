@@ -12,9 +12,11 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
+
+const { did, signer } = testValues;
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -142,7 +144,7 @@ describe('SettlementsController', () => {
         data: [
           {
             identity: {
-              did: testDid,
+              did,
             },
             status: AffirmationStatus.Pending,
           },
@@ -169,7 +171,7 @@ describe('SettlementsController', () => {
     it('should return the details of the Venue', async () => {
       const mockVenueDetails = {
         owner: {
-          did: testDid,
+          did,
         },
         description: 'Venue desc',
         type: VenueType.Distribution,

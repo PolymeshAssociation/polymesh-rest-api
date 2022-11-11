@@ -12,7 +12,9 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { testDid, testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
+
+const { did, signer } = testValues;
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -186,7 +188,7 @@ describe('CorporateActionsController', () => {
 
       const body = {
         signer,
-        targets: [testDid],
+        targets: [did],
       };
       const result = await controller.payDividends(
         {

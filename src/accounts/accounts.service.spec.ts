@@ -20,7 +20,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningModule } from '~/signing/signing.module';
-import { testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAccount,
   MockAsset,
@@ -35,6 +35,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer } = testValues;
 
 describe('AccountsService', () => {
   let service: AccountsService;

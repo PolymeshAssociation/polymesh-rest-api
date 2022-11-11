@@ -14,13 +14,15 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
-import { testSigner as signer } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockIdentity, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+
+const { signer } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),

@@ -236,7 +236,6 @@ export class AccountsController {
   })
   @Post('permissions/modify')
   async modifyPermissions(@Body() params: ModifyPermissionsDto): Promise<TransactionResponseModel> {
-    console.log(params);
     const result = await this.accountsService.modifyPermissions(params);
     return handleServiceResult(result);
   }
