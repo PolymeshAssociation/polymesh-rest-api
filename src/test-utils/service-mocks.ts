@@ -1,14 +1,21 @@
 /* istanbul ignore file */
 
 import { createMock } from '@golevelup/ts-jest';
-import { ValueProvider } from '@nestjs/common';
+import { ClassProvider, ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ClassConstructor } from 'class-transformer';
 
 import { AuthService } from '~/auth/auth.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
+
+const createMockServiceValueProvider = (service: any): ValueProvider<typeof service> => ({
+  provide: service,
+  useValue: createMock<typeof service>(),
+});
 
 export class MockAssetService {
   findOne = jest.fn();
@@ -47,6 +54,12 @@ export class MockComplianceRequirementsService {
   add = jest.fn();
   modify = jest.fn();
 }
+
+export const mockComplianceRequirementsServiceProvider: ValueProvider<ComplianceRequirementsService> =
+  {
+    provide: ComplianceRequirementsService,
+    useValue: createMock<ComplianceRequirementsService>(),
+  };
 
 export class MockSigningService {
   public getAddressByHandle = jest.fn();
