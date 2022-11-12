@@ -283,7 +283,7 @@ describe('AccountsController', () => {
     it('should call the service and return treasury Account details', async () => {
       mockNetworkService.getTreasuryAccount.mockReturnValue(testAccount);
 
-      const result = await controller.getTreasuryAccount();
+      const result = controller.getTreasuryAccount();
 
       expect(result).toEqual(new AccountModel({ address: testAccount.address }));
     });
