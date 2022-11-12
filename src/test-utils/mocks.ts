@@ -3,6 +3,7 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Account,
   AuthorizationType,
   CalendarUnit,
   TransactionStatus,
@@ -53,6 +54,7 @@ export class MockPolymesh {
     transferPolyx: jest.fn(),
     getSs58Format: jest.fn(),
     getNetworkProperties: jest.fn(),
+    getTreasuryAccount: jest.fn(),
   };
 
   public assets = {
@@ -342,6 +344,8 @@ export class MockAccount {
     this.address = address;
   }
 }
+
+export const testAccount = createMock<Account>({ address: 'address' });
 
 export class MockSubsidy {
   beneficiary = new MockAccount('beneficiary');

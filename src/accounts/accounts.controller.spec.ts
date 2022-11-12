@@ -13,31 +13,33 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
+import { NetworkService } from '~/network/network.service';
 import { testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
   MockAsset,
   MockPortfolio,
   MockSubsidy,
+  testAccount,
 } from '~/test-utils/mocks';
-import { MockAccountsService } from '~/test-utils/service-mocks';
+import { MockAccountsService, mockNetworkServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer } = testValues;
 
 describe('AccountsController', () => {
   let controller: AccountsController;
-
+  let mockNetworkService: DeepMocked<NetworkService>;
   const mockAccountsService = new MockAccountsService();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountsController],
-      providers: [AccountsService],
+      providers: [AccountsService, mockNetworkServiceProvider],
     })
       .overrideProvider(AccountsService)
       .useValue(mockAccountsService)
       .compile();
-
+    mockNetworkService = mockNetworkServiceProvider.useValue as DeepMocked<NetworkService>;
     controller = module.get<AccountsController>(AccountsController);
   });
 
@@ -274,6 +276,16 @@ describe('AccountsController', () => {
       expect(result).toEqual({
         transactions,
       });
+    });
+  });
+
+  describe('getTreasuryAccount', () => {
+    it('should call the service and return treasury Account details', async () => {
+      mockNetworkService.getTreasuryAccount.mockReturnValue(testAccount);
+
+      const result = await controller.getTreasuryAccount();
+
+      expect(result).toEqual(new AccountModel({ address: testAccount.address }));
     });
   });
 });
