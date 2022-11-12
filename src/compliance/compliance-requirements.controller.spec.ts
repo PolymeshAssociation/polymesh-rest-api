@@ -164,4 +164,15 @@ describe('ComplianceRequirementsController', () => {
       expect(result).toEqual(response);
     });
   });
+
+  describe('areRequirementsPaused', () => {
+    it('should return the result of arePaused method', async () => {
+      const response = {
+        transactions: [],
+      };
+      mockService.setRequirements.mockResolvedValue(response);
+      const result = await controller.setRequirements({ ticker }, validBody as SetRequirementsDto);
+      expect(result).toEqual(response);
+    });
+  });
 });

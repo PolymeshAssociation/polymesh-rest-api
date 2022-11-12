@@ -266,4 +266,30 @@ export class ComplianceRequirementsController {
     const result = await this.complianceRequirementsService.modify(ticker, id, params);
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Check if the requirements are paused',
+    description: 'This endpoint checks if the requirements are paused',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose compliance requirements status are to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Compliance Requirement status',
+    schema: {
+      type: 'boolean',
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Post('are-paused')
+  public async areRequirementsPaused(@Param() { ticker }: TickerParamsDto): Promise<boolean> {
+    const result = await this.complianceRequirementsService.arePaused(ticker);
+
+    return result;
+  }
 }
