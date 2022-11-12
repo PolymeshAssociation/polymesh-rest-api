@@ -237,4 +237,17 @@ describe('ComplianceRequirementsService', () => {
       });
     });
   });
+
+  describe('arePaused', () => {
+    it('should return ', async () => {
+      const mockAsset = new MockAsset();
+      const arePaused = true;
+      mockAsset.compliance.requirements.arePaused.mockReturnValue(arePaused);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const result = await service.arePaused('TICKER');
+
+      expect(result).toEqual(arePaused);
+    });
+  });
 });
