@@ -269,7 +269,8 @@ export class ComplianceRequirementsController {
 
   @ApiOperation({
     summary: 'Check if the requirements are paused',
-    description: 'This endpoint checks if the requirements are paused',
+    description:
+      'This endpoint checks if the compliance requirements are paused for a given ticker',
   })
   @ApiParam({
     name: 'ticker',
@@ -286,10 +287,8 @@ export class ComplianceRequirementsController {
   @ApiNotFoundResponse({
     description: 'The Asset does not exist',
   })
-  @Post('are-paused')
+  @Get('are-paused')
   public async areRequirementsPaused(@Param() { ticker }: TickerParamsDto): Promise<boolean> {
-    const result = await this.complianceRequirementsService.arePaused(ticker);
-
-    return result;
+    return this.complianceRequirementsService.arePaused(ticker);
   }
 }
