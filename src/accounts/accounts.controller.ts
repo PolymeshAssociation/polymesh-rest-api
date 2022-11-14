@@ -255,8 +255,8 @@ export class AccountsController {
   })
   @Get('treasury')
   getTreasuryAccount(): AccountModel {
-    const result = this.networkService.getTreasuryAccount();
+    const { address } = this.networkService.getTreasuryAccount();
 
-    return new AccountModel({ address: result.address });
+    return new AccountModel({ address });
   }
 }

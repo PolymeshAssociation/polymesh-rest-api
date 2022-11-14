@@ -61,10 +61,10 @@ describe('NetworkService', () => {
   });
 
   describe('getTreasuryAccount', () => {
-    it('should latest block ID', async () => {
+    it("should return the chain's treasury Account", async () => {
       mockPolymeshApi.network.getTreasuryAccount.mockReturnValue(testAccount);
 
-      const result = await networkService.getTreasuryAccount();
+      const result = networkService.getTreasuryAccount();
 
       expect(result).toBe(testAccount);
     });
