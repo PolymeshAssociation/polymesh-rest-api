@@ -105,4 +105,6 @@ $ yarn test:cov
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project uses [NestJS](https://nestjs.com/), which is [MIT licensed](./LICENSE.MIT).
+
+The project itself is [Apache 2.0 licensed](./LICENSE).
