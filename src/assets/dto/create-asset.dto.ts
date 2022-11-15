@@ -55,7 +55,7 @@ export class CreateAssetDto extends TransactionBaseDto {
   @ApiProperty({
     description:
       'Specifies whether Identities must have an Investor Uniqueness Claim in order to be able to hold this Asset. More info [here](https://developers.polymesh.live/introduction/identity#polymesh-unique-identity-system-puis)',
-    example: true,
+    example: false,
   })
   @IsBoolean()
   readonly requireInvestorUniqueness: boolean;

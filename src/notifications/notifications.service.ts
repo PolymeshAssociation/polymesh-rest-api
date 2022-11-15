@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from '@nestjs/axios/node_modules/axios';
 import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { AxiosResponse } from 'axios';
 import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 

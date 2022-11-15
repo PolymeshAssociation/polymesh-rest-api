@@ -1,13 +1,18 @@
 /* istanbul ignore file */
 
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
   TransactionStatus,
+  TrustedClaimIssuer,
   TxTag,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { Response } from 'express';
+
+import { TransactionResult } from '~/transactions/transactions.util';
 
 export type Mocked<T> = T &
   {
@@ -15,6 +20,25 @@ export type Mocked<T> = T &
       ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
       : T[K];
   };
+
+export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
+
+export const createMockTransactionResult = <T>({
+  transactions,
+  result,
+}: {
+  transactions: TransactionResult<T>['transactions'];
+  result?: TransactionResult<T>['result'];
+}): DeepMocked<TransactionResult<T>> => {
+  return { transactions, result } as DeepMocked<TransactionResult<T>>;
+};
+
+export const createMockResponseObject = (): DeepMocked<Response> => {
+  return createMock<Response>({
+    json: jest.fn().mockReturnThis(),
+    status: jest.fn().mockReturnThis(),
+  });
+};
 
 /* Polymesh SDK */
 
@@ -28,6 +52,7 @@ export class MockPolymesh {
     getLatestBlock: jest.fn(),
     transferPolyx: jest.fn(),
     getSs58Format: jest.fn(),
+    getNetworkProperties: jest.fn(),
   };
 
   public assets = {
@@ -43,6 +68,10 @@ export class MockPolymesh {
     getAccount: jest.fn(),
     getAccountBalance: jest.fn(),
     inviteAccount: jest.fn(),
+    freezeSecondaryAccounts: jest.fn(),
+    unfreezeSecondaryAccounts: jest.fn(),
+    revokePermissions: jest.fn(),
+    modifyPermissions: jest.fn(),
   };
 
   public identities = {
@@ -106,6 +135,9 @@ export class MockAsset {
     },
     trustedClaimIssuers: {
       get: jest.fn(),
+      set: jest.fn(),
+      add: jest.fn(),
+      remove: jest.fn(),
     },
   };
 
@@ -299,9 +331,19 @@ export class MockAuthorizations {
   getOne = jest.fn();
 }
 export class MockAccount {
-  address = 'address';
+  address: string;
   authorizations = new MockAuthorizations();
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
   getIdentity = jest.fn();
+  getSubsidy = jest.fn();
+
+  constructor(address = 'address') {
+    this.address = address;
+  }
+}
+
+export class MockSubsidy {
+  beneficiary = new MockAccount('beneficiary');
+  subsidizer = new MockAccount('subsidizer');
 }

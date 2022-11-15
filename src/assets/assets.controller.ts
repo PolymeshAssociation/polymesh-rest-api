@@ -31,18 +31,16 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
-import { ComplianceService } from '~/compliance/compliance.service';
-import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 
 @ApiTags('assets')
 @Controller('assets')
 export class AssetsController {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly complianceService: ComplianceService
+    private readonly complianceRequirementsService: ComplianceRequirementsService
   ) {}
 
   @ApiOperation({
@@ -200,33 +198,6 @@ export class AssetsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
     return handleServiceResult(result);
-  }
-
-  @ApiOperation({
-    summary: 'Fetch trusted Claim Issuers of an Asset',
-    description:
-      'This endpoint will provide the list of all default trusted Claim Issuers of an Asset',
-  })
-  @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose trusted Claim Issuers are to be fetched',
-    type: 'string',
-    example: 'TICKER',
-  })
-  @ApiArrayResponse(TrustedClaimIssuerModel, {
-    description: 'List of trusted Claim Issuers of the Asset',
-    paginated: false,
-  })
-  @Get(':ticker/trusted-claim-issuers')
-  public async getTrustedClaimIssuers(
-    @Param() { ticker }: TickerParamsDto
-  ): Promise<ResultsModel<TrustedClaimIssuerModel>> {
-    const results = await this.complianceService.findTrustedClaimIssuers(ticker);
-    return new ResultsModel({
-      results: results.map(
-        ({ identity: { did }, trustedFor }) => new TrustedClaimIssuerModel({ did, trustedFor })
-      ),
-    });
   }
 
   @ApiOperation({

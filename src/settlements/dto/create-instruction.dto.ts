@@ -2,7 +2,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, ValidateNested } from 'class-validator';
+import { IsByteLength, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -40,4 +40,13 @@ export class CreateInstructionDto extends TransactionBaseDto {
   @IsBigNumber()
   @ToBigNumber()
   readonly endBlock?: BigNumber;
+
+  @ApiPropertyOptional({
+    description: 'Identifier string to help differentiate instructions. Maximum 32 bytes',
+    example: 'Transfer of GROWTH Asset',
+  })
+  @IsOptional()
+  @IsString()
+  @IsByteLength(0, 32)
+  readonly memo?: string;
 }

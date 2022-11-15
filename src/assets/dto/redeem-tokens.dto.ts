@@ -16,4 +16,14 @@ export class RedeemTokensDto extends TransactionBaseDto {
   @ToBigNumber()
   @IsBigNumber()
   readonly amount: BigNumber;
+
+  @ApiProperty({
+    description:
+      'Portfolio number from which the Asset tokens must be redeemed. Use 0 for the Default Portfolio',
+    example: '1',
+    type: 'string',
+  })
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly from: BigNumber;
 }

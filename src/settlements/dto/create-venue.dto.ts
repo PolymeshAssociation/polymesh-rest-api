@@ -9,7 +9,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 export class CreateVenueDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Description of the Venue',
-    example: 'A place to exchange commodity Assets',
+    example: 'A place to exchange Assets',
   })
   @IsString()
   readonly description: string;

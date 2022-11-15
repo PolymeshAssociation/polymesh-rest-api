@@ -76,7 +76,7 @@ export class PermissionsLikeDto {
     return permissionsLike;
   }
 
-  constructor(dto: Omit<PermissionsLikeDto, 'toPermissionLike'>) {
+  constructor(dto: Omit<PermissionsLikeDto, 'toPermissionsLike'>) {
     Object.assign(this, dto);
   }
 }

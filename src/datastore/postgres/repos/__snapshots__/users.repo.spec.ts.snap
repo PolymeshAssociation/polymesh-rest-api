@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostgresUsersRepo does not meet User requirements method: createUser should create a user 1`] = `
+UserModel {
+  "id": "1",
+  "name": "Alice",
+}
+`;
+
+exports[`PostgresUsersRepo does not meet User requirements method: findByName should find the created user 1`] = `
+UserModel {
+  "id": "1",
+  "name": "Alice",
+}
+`;

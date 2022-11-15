@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createAuthGuard should throw if an invalid option is given 1`] = `"Auth config error! \\"open,apiKey,NOT_A_STRATEGY\\" contains an unrecognized option. Valid values are: \\"apiKey,open\\""`;
