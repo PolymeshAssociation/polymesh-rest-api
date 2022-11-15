@@ -4,13 +4,13 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
-import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { mockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
+import { ComplianceStatusModel } from '~/compliance/models/compliance-status.model';
 import { createMockTransactionResult } from '~/test-utils/mocks';
 import { mockComplianceRequirementsServiceProvider } from '~/test-utils/service-mocks';
 
@@ -61,7 +61,7 @@ describe('ComplianceRequirementsController', () => {
         .calledWith(ticker)
         .mockResolvedValue(mockComplianceRequirements);
 
-      const result = await controller.getComplianceRequirements({ ticker: 'TICKER' });
+      const result = await controller.getComplianceRequirements({ ticker });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
@@ -84,13 +84,10 @@ describe('ComplianceRequirementsController', () => {
   describe('pauseRequirements', () => {
     it('should accept TransactionBaseDto and pause Asset Compliance Rules', async () => {
       when(mockService.pauseRequirements)
-        .calledWith(ticker, validBody as TransactionBaseDto)
+        .calledWith(ticker, validBody)
         .mockResolvedValue(txResponse);
 
-      const result = await controller.pauseRequirements(
-        { ticker },
-        validBody as TransactionBaseDto
-      );
+      const result = await controller.pauseRequirements({ ticker }, validBody);
       expect(result).toEqual(txResponse);
     });
   });
@@ -98,27 +95,19 @@ describe('ComplianceRequirementsController', () => {
   describe('unpauseRequirements', () => {
     it('should accept TransactionBaseDto and unpause Asset Compliance Rules', async () => {
       when(mockService.unpauseRequirements)
-        .calledWith(ticker, validBody as TransactionBaseDto)
+        .calledWith(ticker, validBody)
         .mockResolvedValue(txResponse);
 
-      const result = await controller.pauseRequirements(
-        { ticker },
-        validBody as TransactionBaseDto
-      );
+      const result = await controller.pauseRequirements({ ticker }, validBody);
       expect(result).toEqual(txResponse);
     });
   });
 
   describe('deleteRequirement', () => {
     it('should accept TransactionBaseDto and compliance requirement ID and delete the corresponding Asset Compliance rule for the given ticker', async () => {
-      when(mockService.deleteOne)
-        .calledWith(ticker, new BigNumber(1), validBody as TransactionBaseDto)
-        .mockResolvedValue(txResponse);
+      when(mockService.deleteOne).calledWith(ticker, id, validBody).mockResolvedValue(txResponse);
 
-      const result = await controller.deleteRequirement(
-        { ticker, id },
-        validBody as TransactionBaseDto
-      );
+      const result = await controller.deleteRequirement({ ticker, id }, validBody);
 
       expect(result).toEqual(txResponse);
     });
@@ -126,14 +115,9 @@ describe('ComplianceRequirementsController', () => {
 
   describe('deleteRequirements', () => {
     it('should accept TransactionBaseDto and delete all the Asset Compliance rules for the given ticker', async () => {
-      when(mockService.deleteAll)
-        .calledWith(ticker, validBody as TransactionBaseDto)
-        .mockResolvedValue(txResponse);
+      when(mockService.deleteAll).calledWith(ticker, validBody).mockResolvedValue(txResponse);
 
-      const result = await controller.deleteRequirements(
-        { ticker },
-        validBody as TransactionBaseDto
-      );
+      const result = await controller.deleteRequirements({ ticker }, validBody);
 
       expect(result).toEqual(txResponse);
     });
@@ -187,7 +171,7 @@ describe('ComplianceRequirementsController', () => {
 
       const result = await controller.areRequirementsPaused({ ticker });
 
-      expect(result).toEqual(response);
+      expect(result).toEqual(new ComplianceStatusModel({ arePaused: response }));
     });
   });
 });

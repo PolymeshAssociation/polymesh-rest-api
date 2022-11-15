@@ -17,6 +17,7 @@ import { RequirementParamsDto } from '~/compliance/dto/requirement-params.dto';
 import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
+import { ComplianceStatusModel } from '~/compliance/models/compliance-status.model';
 import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
@@ -280,15 +281,17 @@ export class ComplianceRequirementsController {
   })
   @ApiOkResponse({
     description: 'Compliance Requirement status',
-    schema: {
-      type: 'boolean',
-    },
+    type: ComplianceStatusModel,
   })
   @ApiNotFoundResponse({
     description: 'The Asset does not exist',
   })
-  @Get('are-paused')
-  public async areRequirementsPaused(@Param() { ticker }: TickerParamsDto): Promise<boolean> {
-    return this.complianceRequirementsService.arePaused(ticker);
+  @Get('status')
+  public async areRequirementsPaused(
+    @Param() { ticker }: TickerParamsDto
+  ): Promise<ComplianceStatusModel> {
+    const arePaused = await this.complianceRequirementsService.arePaused(ticker);
+
+    return new ComplianceStatusModel({ arePaused });
   }
 }
