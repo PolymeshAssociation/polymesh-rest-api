@@ -1,10 +1,10 @@
 {
   "name": "polymesh-rest-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Provides a REST like interface for interacting with the Polymesh blockchain",
+  "author": "Polymesh Association",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "scripts": {
     "prepare": "husky install",
     "prebuild": "rimraf dist",
