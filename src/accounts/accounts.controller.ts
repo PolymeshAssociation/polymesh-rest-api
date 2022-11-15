@@ -247,7 +247,8 @@ export class AccountsController {
 
   @ApiOperation({
     summary: "Get chain's treasury Account",
-    description: 'This endpoint retrieves treasury Account details',
+    description:
+      'This endpoint retrieves treasury Account details which holds the accumulated fees used for chain development and can only be accessed through governance',
   })
   @ApiOkResponse({
     description: 'Details about the treasury Account',
