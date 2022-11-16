@@ -11,6 +11,7 @@ import { when } from 'jest-when';
 import { AccountsService } from '~/accounts/accounts.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { IdentitiesService } from '~/identities/identities.service';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAccount,
   MockAuthorizationRequest,
@@ -29,6 +30,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer, did } = testValues;
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
@@ -69,7 +72,6 @@ describe('AuthorizationsService', () => {
 
   describe('findPendingByDid', () => {
     const mockIdentity = new MockIdentity();
-    const did = '0x6'.padEnd(66, '0');
     const mockAuthorizations = [
       {
         id: '1',
@@ -113,7 +115,6 @@ describe('AuthorizationsService', () => {
 
   describe('findIssuedByDid', () => {
     const mockIdentity = new MockIdentity();
-    const did = '0x6'.padEnd(66, '0');
     const mockIssuedAuthorizations = {
       data: [
         {
@@ -237,7 +238,7 @@ describe('AuthorizationsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jest.spyOn(service, 'findOne').mockResolvedValue(mockAuthorization as any);
 
-      const result = await service.findOneByDid('0x6'.padEnd(66, '0'), new BigNumber(1));
+      const result = await service.findOneByDid(signer, new BigNumber(1));
       expect(result).toEqual(mockAuthorization);
     });
   });

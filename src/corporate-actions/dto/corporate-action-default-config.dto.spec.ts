@@ -2,11 +2,13 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { TargetTreatment } from '@polymeshassociation/polymesh-sdk/types';
 
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
+import { testValues } from '~/test-utils/consts';
 import { InvalidCase, ValidCase } from '~/test-utils/types';
+
+const { did, signer } = testValues;
 
 describe('corporateActionDefaultConfigDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
-  const signer = '0x6'.padEnd(66, '0');
   const metadata: ArgumentMetadata = {
     type: 'body',
     metatype: CorporateActionDefaultConfigDto,
@@ -19,12 +21,12 @@ describe('corporateActionDefaultConfigDto', () => {
         {
           targets: {
             treatment: TargetTreatment.Include,
-            identities: ['0x6'.padEnd(66, '0')],
+            identities: [did],
           },
           defaultTaxWithholding: '25',
           taxWithholdings: [
             {
-              identity: '0x6'.padEnd(66, '0'),
+              identity: did,
               percentage: '10',
             },
           ],
@@ -36,7 +38,7 @@ describe('corporateActionDefaultConfigDto', () => {
         {
           targets: {
             treatment: TargetTreatment.Include,
-            identities: ['0x6'.padEnd(66, '0')],
+            identities: [did],
           },
           signer,
         },
@@ -53,7 +55,7 @@ describe('corporateActionDefaultConfigDto', () => {
         {
           taxWithholdings: [
             {
-              identity: '0x6'.padEnd(66, '0'),
+              identity: did,
               percentage: '10',
             },
           ],

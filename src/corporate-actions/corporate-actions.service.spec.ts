@@ -18,8 +18,11 @@ import { CorporateActionsService } from '~/corporate-actions/corporate-actions.s
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
+import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
+
+const { signer } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -81,7 +84,7 @@ describe('CorporateActionsService', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('New targets are the same as the current ones');
         const body = {
-          signer: '0x6'.padEnd(66, '0'),
+          signer,
           targets: {
             treatment: TargetTreatment.Exclude,
             identities: [],
@@ -116,7 +119,6 @@ describe('CorporateActionsService', () => {
         mockAsset.corporateActions.setDefaultConfig.mockResolvedValue(mockTransaction);
         mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const signer = '0x6'.padEnd(66, '0');
         const body = {
           signer,
           defaultTaxWithholding: new BigNumber(25),
@@ -227,7 +229,7 @@ describe('CorporateActionsService', () => {
     const ticker = 'TICKER';
     const mockDate = new Date();
     const body = {
-      signer: '0x6'.padEnd(66, '0'),
+      signer,
       description: 'Corporate Action description',
       checkpoint: mockDate,
       originPortfolio: new BigNumber(0),
@@ -289,7 +291,7 @@ describe('CorporateActionsService', () => {
 
         let error = null;
         try {
-          await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+          await service.remove(ticker, new BigNumber(1), signer);
         } catch (err) {
           error = err;
         }
@@ -309,7 +311,7 @@ describe('CorporateActionsService', () => {
         const mockTransaction = new MockTransaction(transaction);
         mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const result = await service.remove(ticker, new BigNumber(1), '0x6'.padEnd(66, '0'));
+        const result = await service.remove(ticker, new BigNumber(1), signer);
 
         expect(result).toEqual({
           transactions: [mockTransaction],
@@ -320,7 +322,6 @@ describe('CorporateActionsService', () => {
   });
 
   describe('payDividends', () => {
-    const signer = '0x6'.padEnd(66, '0');
     const body = {
       signer,
       targets: ['0x6'.padEnd(66, '1')],
@@ -372,7 +373,7 @@ describe('CorporateActionsService', () => {
           type: 'DOC_TYPE',
         }),
       ],
-      signer: '0x6'.padEnd(66, '0'),
+      signer,
     };
 
     beforeEach(() => {
@@ -411,8 +412,6 @@ describe('CorporateActionsService', () => {
   });
 
   describe('claimDividends', () => {
-    const signer = '0x6'.padEnd(66, '0');
-
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
         const transaction = {
@@ -449,7 +448,6 @@ describe('CorporateActionsService', () => {
   });
 
   describe('reclaimRemainingFunds', () => {
-    const signer = '0x6'.padEnd(66, '0');
     const webhookUrl = 'http://example.com';
 
     describe('otherwise', () => {
@@ -496,7 +494,7 @@ describe('CorporateActionsService', () => {
         id: new BigNumber(1),
         type: CaCheckpointType.Existing,
       },
-      signer: '0x6'.padEnd(66, '0'),
+      signer,
     };
 
     beforeEach(() => {

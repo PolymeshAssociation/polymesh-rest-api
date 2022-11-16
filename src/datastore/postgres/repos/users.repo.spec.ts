@@ -4,11 +4,12 @@ import { Repository, TypeORMError } from 'typeorm';
 import { AppConflictError } from '~/common/errors';
 import { User } from '~/datastore/postgres/entities/user.entity';
 import { PostgresUsersRepo } from '~/datastore/postgres/repos/users.repo';
-import { testUser } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockPostgresUserRepository } from '~/test-utils/repo-mocks';
 import { UsersRepo } from '~/users/repo/user.repo';
 
 const uniqueViolation = new TypeORMError('duplicate key value violates unique constraint');
+const { user: testUser } = testValues;
 
 describe(`PostgresUsersRepo does not meet ${UsersRepo.type} requirements`, () => {
   const mockRepository = new MockPostgresUserRepository();

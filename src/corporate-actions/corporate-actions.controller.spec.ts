@@ -12,6 +12,9 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
+import { testValues } from '~/test-utils/consts';
+
+const { did, signer } = testValues;
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -67,7 +70,7 @@ describe('CorporateActionsController', () => {
       };
       mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(response);
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         defaultTaxWithholding: new BigNumber(25),
       };
 
@@ -128,7 +131,7 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
       const mockDate = new Date();
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
         description: 'Corporate Action description',
         checkpoint: mockDate,
         originPortfolio: new BigNumber(0),
@@ -161,7 +164,7 @@ describe('CorporateActionsController', () => {
 
       const result = await controller.deleteCorporateAction(
         { id: new BigNumber(1), ticker: 'TICKER' },
-        { signer: '0x6'.padEnd(66, '0') }
+        { signer }
       );
 
       expect(result).toEqual({
@@ -170,7 +173,7 @@ describe('CorporateActionsController', () => {
       expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
-        '0x6'.padEnd(66, '0'),
+        signer,
         undefined
       );
     });
@@ -184,8 +187,8 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.payDividends.mockResolvedValue(response);
 
       const body = {
-        signer: '0x6'.padEnd(66, '0'),
-        targets: ['0x6'.padEnd(66, '0')],
+        signer,
+        targets: [did],
       };
       const result = await controller.payDividends(
         {
@@ -218,7 +221,7 @@ describe('CorporateActionsController', () => {
             type: 'DOC_TYPE',
           }),
         ],
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
       };
 
       mockCorporateActionsService.linkDocuments.mockResolvedValue({ transactions });
@@ -241,7 +244,6 @@ describe('CorporateActionsController', () => {
       };
       mockCorporateActionsService.claimDividends.mockResolvedValue(response);
 
-      const signer = '0x6'.padEnd(66, '0');
       const result = await controller.claimDividends(
         {
           id: new BigNumber(1),
@@ -268,7 +270,6 @@ describe('CorporateActionsController', () => {
       };
       mockCorporateActionsService.reclaimRemainingFunds.mockResolvedValue(response);
 
-      const signer = '0x6'.padEnd(66, '0');
       const result = await controller.reclaimRemainingFunds(
         {
           id: new BigNumber(1),
@@ -295,7 +296,7 @@ describe('CorporateActionsController', () => {
 
       const body = {
         checkpoint: new Date(),
-        signer: '0x6'.padEnd(66, '0'),
+        signer,
       };
 
       mockCorporateActionsService.modifyCheckpoint.mockResolvedValue({ transactions });

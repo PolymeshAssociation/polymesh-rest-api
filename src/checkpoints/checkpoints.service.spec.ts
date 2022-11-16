@@ -10,6 +10,7 @@ import { CalendarUnit, ErrorCode, TxTags } from '@polymeshassociation/polymesh-s
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAsset,
   MockCheckpoint,
@@ -27,6 +28,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer } = testValues;
 
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
@@ -258,8 +261,6 @@ describe('CheckpointsService', () => {
 
       mockAssetsService.findOne.mockReturnValue(mockAsset);
 
-      const signer = 'signer';
-
       const body = {
         signer,
       };
@@ -298,8 +299,6 @@ describe('CheckpointsService', () => {
       });
 
       mockAssetsService.findOne.mockReturnValue(mockAsset);
-
-      const signer = 'signer';
 
       const mockDate = new Date();
       const params = {
@@ -426,7 +425,6 @@ describe('CheckpointsService', () => {
         });
 
         mockAssetsService.findOne.mockResolvedValue(mockAsset);
-        const signer = '0x6'.padEnd(66, '0');
         const ticker = 'TICKER';
         const id = new BigNumber(1);
 

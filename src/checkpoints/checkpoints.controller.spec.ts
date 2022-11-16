@@ -9,8 +9,11 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { testValues } from '~/test-utils/consts';
 import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 import { MockCheckpointsService } from '~/test-utils/service-mocks';
+
+const { did, signer } = testValues;
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -278,7 +281,6 @@ describe('CheckpointsController', () => {
     it('should return the balance of an Asset for an Identity at a given Checkpoint', async () => {
       const balance = new BigNumber(10);
       const ticker = 'TICKER';
-      const did = '0x0600';
       const id = new BigNumber(1);
 
       const balanceModel = new IdentityBalanceModel({ balance, identity: did });
@@ -305,7 +307,7 @@ describe('CheckpointsController', () => {
 
       const result = await controller.deleteSchedule(
         { id: new BigNumber(1), ticker: 'TICKER' },
-        { signer: '0x6'.padEnd(66, '0') }
+        { signer }
       );
 
       expect(result).toEqual({

@@ -2,11 +2,13 @@ import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { CaCheckpointType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
+import { testValues } from '~/test-utils/consts';
 import { InvalidCase, ValidCase } from '~/test-utils/types';
+
+const { signer } = testValues;
 
 describe('dividendDistributionDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
-  const signer = '0x6'.padEnd(66, '0');
   const mockDate = new Date();
   const metadata: ArgumentMetadata = {
     type: 'body',
