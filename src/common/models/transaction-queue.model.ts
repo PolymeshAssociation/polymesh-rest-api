@@ -41,7 +41,7 @@ export class TransactionQueueModel {
   })
   details: TransactionDetailsModel;
 
-  constructor(model: TransactionQueueModel) {
-    Object.assign(this, model);
+  constructor({ details, ...rest }: TransactionQueueModel) {
+    Object.assign(this, { ...rest, details: new TransactionDetailsModel(details) });
   }
 }

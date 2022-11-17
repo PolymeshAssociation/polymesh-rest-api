@@ -1,25 +1,37 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FeesModel } from '~/common/models/fees.model';
-import { TransactionDetails } from '~/transactions/transactions.util';
+import { PayingAccountModel } from '~/common/models/paying-account.model';
 
 export class TransactionDetailsModel {
-  @ApiProperty({ type: 'string', example: 'pending' })
+  @ApiProperty({
+    description: 'Transaction status',
+    enum: TransactionStatus,
+    example: TransactionStatus.Idle,
+  })
   readonly status: string;
 
-  @ApiProperty({ type: 'string', example: '2' })
+  @ApiProperty({ description: 'Transaction fees', type: FeesModel })
   readonly fees: FeesModel;
 
   @ApiProperty({ type: 'boolean', example: true })
   readonly supportsSubsidy: boolean;
 
-  // TODO: define a model for this
-  @ApiProperty({ type: 'string', example: '2' })
-  readonly payingAccount: TransactionDetails['payingAccount'];
+  @ApiProperty({
+    description: 'Paying account details',
+    type: PayingAccountModel,
+  })
+  readonly payingAccount: PayingAccountModel;
 
-  constructor(model: TransactionDetails) {
-    Object.assign(this, model);
+  constructor({ status, fees, supportsSubsidy, payingAccount }: TransactionDetailsModel) {
+    Object.assign(this, {
+      status,
+      supportsSubsidy,
+      payingAccount: new PayingAccountModel(payingAccount),
+      fees: new FeesModel(fees),
+    });
   }
 }
