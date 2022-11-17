@@ -99,9 +99,10 @@ export class PortfoliosController {
     @Body() createPortfolioParams: CreatePortfolioDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.portfoliosService.createPortfolio(createPortfolioParams);
-    const resolver: TransactionResolver<NumberedPortfolio> = ({ transactions, result }) =>
+    const resolver: TransactionResolver<NumberedPortfolio> = ({ transactions, details, result }) =>
       new CreatedPortfolioModel({
         portfolio: createPortfolioIdentifierModel(result),
+        details,
         transactions,
       });
     return handleServiceResult(serviceResult, resolver);
@@ -137,7 +138,7 @@ export class PortfoliosController {
   @Post('/identities/:did/portfolios/:id/delete')
   public async deletePortfolio(
     @Param() portfolio: PortfolioDto,
-    @Query() { signer, webhookUrl }: TransactionBaseDto
+    @Query() { signer, webhookUrl, dryRun }: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.deletePortfolio(portfolio, signer, webhookUrl);
     return handleServiceResult(result);

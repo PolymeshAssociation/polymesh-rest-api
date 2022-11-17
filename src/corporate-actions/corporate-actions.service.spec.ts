@@ -480,7 +480,7 @@ describe('CorporateActionsService', () => {
         expect(mockTransactionsService.submit).toHaveBeenCalledWith(
           distributionWithDetails.distribution.reclaimFunds,
           undefined,
-          { signer, webhookUrl }
+          { signer, webhookUrl, dryRun }
         );
         findDistributionSpy.mockRestore();
       });

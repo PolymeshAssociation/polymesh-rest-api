@@ -52,7 +52,7 @@ export class PortfoliosService {
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {
-    const { signer, webhookUrl, to, items, from } = params;
+    const { signer, webhookUrl, dryRun, to, items, from } = params;
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
     const args = {
       to: toPortfolioId(to),
@@ -64,30 +64,36 @@ export class PortfoliosService {
         };
       }),
     };
-    return this.transactionsService.submit(fromPortfolio.moveFunds, args, { signer, webhookUrl });
+    return this.transactionsService.submit(fromPortfolio.moveFunds, args, {
+      signer,
+      webhookUrl,
+      dryRun,
+    });
   }
 
   public async createPortfolio(params: CreatePortfolioDto): ServiceReturn<NumberedPortfolio> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     return this.transactionsService.submit(polymeshApi.identities.createPortfolio, rest, {
       signer,
       webhookUrl,
+      dryRun,
     });
   }
 
   public async deletePortfolio(
     portfolio: PortfolioDto,
     signer: string,
-    webhookUrl?: string
+    webhookUrl?: string,
+    dryRun?: boolean
   ): ServiceReturn<void> {
     const identity = await this.identitiesService.findOne(portfolio.did);
     return this.transactionsService.submit(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      { signer, webhookUrl }
+      { signer, webhookUrl, dryRun }
     );
   }
 }

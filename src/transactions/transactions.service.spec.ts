@@ -158,7 +158,7 @@ describe('TransactionsService', () => {
 
       mockIsPolymeshTransaction.mockReturnValue(true);
 
-      const result = await service.submit(mockMethod, {}, { signer, webhookUrl });
+      const result = await service.submit(mockMethod, {}, { signer, webhookUrl, dryRun });
 
       const expectedPayload = {
         type: TransactionType.Single,
@@ -236,7 +236,7 @@ describe('TransactionsService', () => {
 
       const mockMethod = makeMockMethod(transaction);
 
-      const result = await service.submit(mockMethod, {}, { signer, webhookUrl });
+      const result = await service.submit(mockMethod, {}, { signer, webhookUrl, dryRun });
 
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();
 

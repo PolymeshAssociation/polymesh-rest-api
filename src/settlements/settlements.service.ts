@@ -63,7 +63,7 @@ export class SettlementsService {
     venueId: BigNumber,
     createInstructionDto: CreateInstructionDto
   ): ServiceReturn<Instruction> {
-    const { signer, webhookUrl, ...rest } = createInstructionDto;
+    const { signer, webhookUrl, dryRun, ...rest } = createInstructionDto;
 
     const venue = await this.findVenue(venueId);
 
@@ -77,29 +77,33 @@ export class SettlementsService {
       })),
     };
 
-    return this.transactionsService.submit(venue.addInstruction, params, { signer, webhookUrl });
+    return this.transactionsService.submit(venue.addInstruction, params, {
+      signer,
+      webhookUrl,
+      dryRun,
+    });
   }
 
   public async affirmInstruction(
     id: BigNumber,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Instruction> {
-    const { signer, webhookUrl } = signerDto;
+    const { signer, webhookUrl, dryRun } = signerDto;
 
     const instruction = await this.findInstruction(id);
 
-    return this.transactionsService.submit(instruction.affirm, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(instruction.affirm, {}, { signer, webhookUrl, dryRun });
   }
 
   public async rejectInstruction(
     id: BigNumber,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Instruction> {
-    const { signer, webhookUrl } = signerDto;
+    const { signer, webhookUrl, dryRun } = signerDto;
 
     const instruction = await this.findInstruction(id);
 
-    return this.transactionsService.submit(instruction.reject, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(instruction.reject, {}, { signer, webhookUrl, dryRun });
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -144,24 +148,24 @@ export class SettlementsService {
   }
 
   public async createVenue(createVenueDto: CreateVenueDto): ServiceReturn<Venue> {
-    const { signer, webhookUrl, description, type } = createVenueDto;
+    const { signer, webhookUrl, dryRun, description, type } = createVenueDto;
     const params = {
       description,
       type,
     };
 
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
-    return this.transactionsService.submit(method, params, { signer, webhookUrl });
+    return this.transactionsService.submit(method, params, { signer, webhookUrl, dryRun });
   }
 
   public async modifyVenue(
     venueId: BigNumber,
     modifyVenueDto: ModifyVenueDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, ...rest } = modifyVenueDto;
+    const { signer, webhookUrl, dryRun, ...rest } = modifyVenueDto;
     const venue = await this.findVenue(venueId);
     const params = rest as Required<typeof rest>;
-    return this.transactionsService.submit(venue.modify, params, { signer, webhookUrl });
+    return this.transactionsService.submit(venue.modify, params, { signer, webhookUrl, dryRun });
   }
 
   public async canTransfer(

@@ -11,6 +11,7 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -90,19 +91,21 @@ export class AuthorizationsService {
     return authRequest;
   }
 
-  public async accept(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
+  public async accept(id: BigNumber, transactionBaseDto: TransactionBaseDto): ServiceReturn<void> {
+    const { signer } = transactionBaseDto;
     const address = await this.transactionsService.getSigningAccount(signer);
 
     const { accept } = await this.getAuthRequest(address, id);
 
-    return this.transactionsService.submit(accept, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(accept, {}, transactionBaseDto);
   }
 
-  public async remove(id: BigNumber, signer: string, webhookUrl?: string): ServiceReturn<void> {
+  public async remove(id: BigNumber, transactionBaseDto: TransactionBaseDto): ServiceReturn<void> {
+    const { signer } = transactionBaseDto;
     const address = await this.transactionsService.getSigningAccount(signer);
 
     const { remove } = await this.getAuthRequest(address, id);
 
-    return this.transactionsService.submit(remove, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(remove, {}, transactionBaseDto);
   }
 }

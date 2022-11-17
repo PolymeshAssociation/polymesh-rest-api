@@ -9,6 +9,7 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
@@ -34,7 +35,7 @@ export class CorporateActionsService {
     ticker: string,
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, ...rest } = corporateActionDefaultConfigDto;
+    const { signer, webhookUrl, dryRun, ...rest } = corporateActionDefaultConfigDto;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionService.submit(
@@ -43,6 +44,7 @@ export class CorporateActionsService {
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }
@@ -75,7 +77,7 @@ export class CorporateActionsService {
     ticker: string,
     dividendDistributionDto: DividendDistributionDto
   ): ServiceReturn<DividendDistribution> {
-    const { signer, webhookUrl, originPortfolio, ...rest } = dividendDistributionDto;
+    const { signer, webhookUrl, dryRun, originPortfolio, ...rest } = dividendDistributionDto;
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionService.submit(
       asset.corporateActions.distributions.configureDividendDistribution,
@@ -86,6 +88,7 @@ export class CorporateActionsService {
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }
@@ -94,7 +97,8 @@ export class CorporateActionsService {
     ticker: string,
     corporateAction: BigNumber,
     signer: string,
-    webhookUrl?: string
+    webhookUrl?: string,
+    dryRun?: boolean
   ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionService.submit(
@@ -103,6 +107,7 @@ export class CorporateActionsService {
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }
@@ -112,7 +117,7 @@ export class CorporateActionsService {
     id: BigNumber,
     payDividendsDto: PayDividendsDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, targets } = payDividendsDto;
+    const { signer, webhookUrl, dryRun, targets } = payDividendsDto;
     const { distribution } = await this.findDistribution(ticker, id);
 
     return this.transactionService.submit(
@@ -121,6 +126,7 @@ export class CorporateActionsService {
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }
@@ -130,7 +136,7 @@ export class CorporateActionsService {
     id: BigNumber,
     linkDocumentsDto: LinkDocumentsDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, documents } = linkDocumentsDto;
+    const { signer, webhookUrl, dryRun, documents } = linkDocumentsDto;
     const { distribution } = await this.findDistribution(ticker, id);
 
     const params = {
@@ -139,34 +145,27 @@ export class CorporateActionsService {
     return this.transactionService.submit(distribution.linkDocuments, params, {
       signer,
       webhookUrl,
+      dryRun,
     });
   }
 
   public async claimDividends(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { distribution } = await this.findDistribution(ticker, id);
-    return this.transactionService.submit(distribution.claim, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionService.submit(distribution.claim, undefined, transactionBaseDto);
   }
 
   public async reclaimRemainingFunds(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(distribution.reclaimFunds, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionService.submit(distribution.reclaimFunds, undefined, transactionBaseDto);
   }
 
   public async modifyCheckpoint(
@@ -174,7 +173,7 @@ export class CorporateActionsService {
     id: BigNumber,
     modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, checkpoint } = modifyDistributionCheckpointDto;
+    const { signer, webhookUrl, dryRun, checkpoint } = modifyDistributionCheckpointDto;
     const { distribution } = await this.findDistribution(ticker, id);
 
     return this.transactionService.submit(
@@ -183,6 +182,7 @@ export class CorporateActionsService {
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }

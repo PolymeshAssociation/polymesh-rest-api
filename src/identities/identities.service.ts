@@ -67,7 +67,7 @@ export class IdentitiesService {
   public async addSecondaryAccount(
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, expiry, permissions, secondaryAccount } =
+    const { signer, webhookUrl, dryRun, expiry, permissions, secondaryAccount } =
       addSecondaryAccountParamsDto;
 
     const params = {
@@ -76,7 +76,7 @@ export class IdentitiesService {
       expiry,
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
-    return this.transactionsService.submit(inviteAccount, params, { signer, webhookUrl });
+    return this.transactionsService.submit(inviteAccount, params, { signer, webhookUrl, dryRun });
   }
 
   /**

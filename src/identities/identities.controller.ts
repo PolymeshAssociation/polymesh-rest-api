@@ -418,9 +418,14 @@ export class IdentitiesController {
     const serviceResult = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );
-    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
+    const resolver: TransactionResolver<AuthorizationRequest> = ({
+      transactions,
+      details,
+      result,
+    }) =>
       new CreatedAuthorizationRequestModel({
         transactions,
+        details,
         authorizationRequest: createAuthorizationRequestModel(result),
       });
 

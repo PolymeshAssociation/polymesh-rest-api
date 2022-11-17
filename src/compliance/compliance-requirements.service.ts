@@ -29,7 +29,7 @@ export class ComplianceRequirementsService {
   }
 
   public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+    const { signer, webhookUrl, dryRun } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
@@ -38,92 +38,89 @@ export class ComplianceRequirementsService {
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }
 
-  public async pauseRequirements(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async pauseRequirements(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionsService.submit(
       asset.compliance.requirements.pause,
       {},
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
   public async unpauseRequirements(
     ticker: string,
-    params: TransactionBaseDto
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.unpause,
       {},
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
   public async deleteOne(
     ticker: string,
     id: BigNumber,
-    params: TransactionBaseDto
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.remove,
       { requirement: id },
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
-  public async deleteAll(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async deleteAll(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.requirements.reset, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(
+      asset.compliance.requirements.reset,
+      undefined,
+      transactionBaseDto
+    );
   }
 
   public async add(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.add,
-      params as AddAssetRequirementParams,
+      rest as AddAssetRequirementParams,
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }
 
   public async modify(ticker: string, id: BigNumber, params: RequirementDto): ServiceReturn<void> {
-    const { signer, webhookUrl } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.modify,
-      { id, ...params } as ModifyComplianceRequirementParams,
+      { id, ...rest } as ModifyComplianceRequirementParams,
       {
         signer,
         webhookUrl,
+        dryRun,
       }
     );
   }

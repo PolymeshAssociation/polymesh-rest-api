@@ -4,12 +4,16 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ErrorCode,
+  Fees,
   GenericPolymeshTransaction,
   NoArgsProcedureMethod,
+  PayingAccount,
   ProcedureMethod,
   ProcedureOpts,
+  TransactionStatus,
 } from '@polymeshassociation/polymesh-sdk/types';
 import {
   isPolymeshError,
@@ -20,9 +24,21 @@ import {
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 
+export type TransactionDetails = {
+  status: TransactionStatus;
+  fees: Fees;
+  supportsSubsidy: boolean;
+  payingAccount: {
+    address: PayingAccount['account']['address'];
+    balance: BigNumber;
+    type: PayingAccount['type'];
+  };
+};
+
 export type TransactionResult<T> = {
   result: T;
   transactions: (TransactionModel | BatchTransactionModel)[];
+  details: TransactionDetails;
 };
 
 type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
@@ -53,11 +69,35 @@ export async function processTransaction<
 >(
   method: Method<MethodArgs, ReturnType, TransformedReturnType>,
   args: MethodArgs,
-  opts: ProcedureOpts
+  opts: ProcedureOpts,
+  dryRun = false
 ): Promise<TransactionResult<TransformedReturnType>> {
   try {
     const procedure = await prepareProcedure(method, args, opts);
-    const result = await procedure.run();
+    const {
+      fees,
+      payingAccountData: { balance, type, account },
+    } = await procedure.getTotalFees();
+    const supportsSubsidy = await procedure.supportsSubsidy();
+
+    const details: TransactionDetails = {
+      status: procedure.status,
+      fees,
+      supportsSubsidy,
+      payingAccount: {
+        balance,
+        type,
+        address: account.address,
+      },
+    };
+
+    let result = undefined as unknown as TransformedReturnType;
+
+    if (dryRun) {
+      return { details, result, transactions: [] };
+    }
+
+    result = await procedure.run();
 
     const assembleTransactionResponse = <T, R = T>(
       transaction: GenericPolymeshTransaction<T, R>
@@ -95,6 +135,10 @@ export async function processTransaction<
     return {
       result,
       transactions: [assembleTransactionResponse(procedure)],
+      details: {
+        ...details,
+        status: procedure.status,
+      },
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     handleSdkError(err);

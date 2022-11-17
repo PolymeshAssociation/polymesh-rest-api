@@ -83,17 +83,21 @@ export class CheckpointsService {
     ticker: string,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Checkpoint> {
-    const { signer, webhookUrl } = signerDto;
+    const { signer, webhookUrl, dryRun } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.create, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(
+      asset.checkpoints.create,
+      {},
+      { signer, webhookUrl, dryRun }
+    );
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
   ): ServiceReturn<CheckpointSchedule> {
-    const { signer, webhookUrl, ...rest } = createCheckpointScheduleDto;
+    const { signer, webhookUrl, dryRun, ...rest } = createCheckpointScheduleDto;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(asset.checkpoints.schedules.create, rest, {
@@ -125,14 +129,13 @@ export class CheckpointsService {
   public async deleteScheduleByTicker(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
-      { signer, webhookUrl }
+      transactionBaseDto
     );
   }
 }

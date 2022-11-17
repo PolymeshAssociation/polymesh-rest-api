@@ -1,10 +1,11 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
+import { TransactionDetailsModel } from '~/common/models/transaction-details.model';
 import { TransactionIdentifierModel } from '~/common/models/transaction-identifier.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionType } from '~/common/types';
@@ -33,6 +34,12 @@ export class TransactionQueueModel {
     },
   })
   transactions: (TransactionModel | BatchTransactionModel)[];
+
+  @ApiProperty({
+    description: 'Transaction details',
+    isArray: true,
+  })
+  details: TransactionDetailsModel;
 
   constructor(model: TransactionQueueModel) {
     Object.assign(this, model);

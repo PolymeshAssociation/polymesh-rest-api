@@ -109,9 +109,12 @@ export class ComplianceRequirementsController {
   @Post('pause')
   public async pauseRequirements(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.pauseRequirements(ticker, params);
+    const result = await this.complianceRequirementsService.pauseRequirements(
+      ticker,
+      transactionBaseDto
+    );
     return handleServiceResult(result);
   }
 
@@ -135,9 +138,12 @@ export class ComplianceRequirementsController {
   @Post('unpause')
   public async unpauseRequirements(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.unpauseRequirements(ticker, params);
+    const result = await this.complianceRequirementsService.unpauseRequirements(
+      ticker,
+      transactionBaseDto
+    );
     return handleServiceResult(result);
   }
 
@@ -168,9 +174,13 @@ export class ComplianceRequirementsController {
   @Post(':id/delete')
   public async deleteRequirement(
     @Param() { id, ticker }: RequirementParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.deleteOne(ticker, id, params);
+    const result = await this.complianceRequirementsService.deleteOne(
+      ticker,
+      id,
+      transactionBaseDto
+    );
 
     return handleServiceResult(result);
   }
@@ -198,9 +208,9 @@ export class ComplianceRequirementsController {
   @Post('delete')
   public async deleteRequirements(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.deleteAll(ticker, params);
+    const result = await this.complianceRequirementsService.deleteAll(ticker, transactionBaseDto);
 
     return handleServiceResult(result);
   }

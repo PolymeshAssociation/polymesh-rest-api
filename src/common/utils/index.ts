@@ -46,16 +46,16 @@ export const handleServiceResult = <T>(
 ): NotificationPayloadModel | Promise<TransactionQueueModel> | TransactionQueueModel => {
   if ('transactions' in result) {
     return resolver(result);
-  } else {
-    return new NotificationPayloadModel(result);
   }
+
+  return new NotificationPayloadModel(result);
 };
 
 /**
  * A helper function for controllers when they should return a basic TransactionQueueModel
  */
-const basicModelResolver: TransactionResolver<unknown> = ({ transactions }) => {
-  return new TransactionQueueModel({ transactions });
+const basicModelResolver: TransactionResolver<unknown> = ({ transactions, details }) => {
+  return new TransactionQueueModel({ transactions, details });
 };
 
 /**

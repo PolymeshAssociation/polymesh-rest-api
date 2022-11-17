@@ -107,7 +107,7 @@ describe('TickerReservationsController', () => {
       const webhookUrl = 'http://example.com/webhook';
       const ticker = 'SOME_TICKER';
 
-      const result = await controller.extendReservation({ ticker }, { signer, webhookUrl });
+      const result = await controller.extendReservation({ ticker }, { signer, webhookUrl, dryRun });
 
       expect(result).toEqual({
         tickerReservation: mockResult,

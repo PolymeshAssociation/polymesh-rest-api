@@ -83,71 +83,79 @@ export class AssetsService {
     const {
       documents: { set },
     } = await this.findOne(ticker);
-    const { signer, webhookUrl, documents } = params;
-    return this.transactionsService.submit(set, { documents }, { signer, webhookUrl });
+    const { signer, webhookUrl, dryRun, documents } = params;
+    return this.transactionsService.submit(set, { documents }, { signer, webhookUrl, dryRun });
   }
 
   public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
 
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return this.transactionsService.submit(createAsset, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(createAsset, rest, { signer, webhookUrl, dryRun });
   }
 
   public async issue(ticker: string, params: IssueDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.issuance.issue, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.issuance.issue, rest, {
+      signer,
+      webhookUrl,
+      dryRun,
+    });
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
 
     const { transferOwnership } = await this.findOne(ticker);
-    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl, dryRun });
   }
 
   public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
-    const { signer, webhookUrl, amount, from } = params;
+    const { signer, webhookUrl, dryRun, amount, from } = params;
     const { redeem } = await this.findOne(ticker);
 
     return this.transactionsService.submit(
       redeem,
       { amount, from: toPortfolioId(from) },
-      { signer, webhookUrl }
+      { signer, webhookUrl, dryRun }
     );
   }
 
-  public async freeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async freeze(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.freeze, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.freeze, {}, transactionBaseDto);
   }
 
-  public async unfreeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async unfreeze(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.unfreeze, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.unfreeze, {}, transactionBaseDto);
   }
 
   public async controllerTransfer(
     ticker: string,
     params: ControllerTransferDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, origin, amount } = params;
+    const { signer, webhookUrl, dryRun, origin, amount } = params;
 
     const { controllerTransfer } = await this.findOne(ticker);
 
     return this.transactionsService.submit(
       controllerTransfer,
       { originPortfolio: origin.toPortfolioLike(), amount },
-      { signer, webhookUrl }
+      { signer, webhookUrl, dryRun }
     );
   }
 
