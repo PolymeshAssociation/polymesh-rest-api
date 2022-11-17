@@ -428,7 +428,7 @@ describe('CheckpointsService', () => {
         const ticker = 'TICKER';
         const id = new BigNumber(1);
 
-        const result = await service.deleteScheduleByTicker(ticker, id, signer);
+        const result = await service.deleteScheduleByTicker(ticker, id, { signer });
         expect(result).toEqual({
           result: undefined,
           transactions: [mockTransaction],

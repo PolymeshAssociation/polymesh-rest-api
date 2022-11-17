@@ -430,7 +430,7 @@ describe('CorporateActionsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
-        const result = await service.claimDividends('TICKER', new BigNumber(1), signer);
+        const result = await service.claimDividends('TICKER', new BigNumber(1), { signer });
         expect(result).toEqual({
           result: undefined,
           transactions: [mockTransaction],
@@ -449,6 +449,7 @@ describe('CorporateActionsService', () => {
 
   describe('reclaimRemainingFunds', () => {
     const webhookUrl = 'http://example.com';
+    const dryRun = false;
 
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
@@ -467,12 +468,11 @@ describe('CorporateActionsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
-        const result = await service.reclaimRemainingFunds(
-          'TICKER',
-          new BigNumber(1),
+        const result = await service.reclaimRemainingFunds('TICKER', new BigNumber(1), {
           signer,
-          webhookUrl
-        );
+          webhookUrl,
+          dryRun,
+        });
         expect(result).toEqual({
           result: undefined,
           transactions: [mockTransaction],

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TickerReservationStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { testValues } from '~/test-utils/consts';
 import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';
 import { MockTickerReservationsService } from '~/test-utils/service-mocks';
 import { TickerReservationsController } from '~/ticker-reservations/ticker-reservations.controller';
@@ -9,7 +10,7 @@ import { TickerReservationsService } from '~/ticker-reservations/ticker-reservat
 
 describe('TickerReservationsController', () => {
   let controller: TickerReservationsController;
-
+  const { signer, txResult, dryRun } = testValues;
   const mockTickerReservationsService = new MockTickerReservationsService();
 
   beforeEach(async () => {
@@ -30,16 +31,13 @@ describe('TickerReservationsController', () => {
 
   describe('reserve', () => {
     it('should call the service and return the results', async () => {
-      mockTickerReservationsService.reserve.mockResolvedValue({ transactions: ['transaction'] });
+      mockTickerReservationsService.reserve.mockResolvedValue(txResult);
 
       const ticker = 'SOME_TICKER';
-      const signer = '0x6000';
       const result = await controller.reserve({ ticker, signer });
 
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
-      expect(mockTickerReservationsService.reserve).toHaveBeenCalledWith(ticker, signer, undefined);
+      expect(result).toEqual(txResult);
+      expect(mockTickerReservationsService.reserve).toHaveBeenCalledWith(ticker, { signer });
     });
   });
 
@@ -66,20 +64,20 @@ describe('TickerReservationsController', () => {
     it('should call the service and return the results', async () => {
       const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
+        ...txResult,
         result: mockAuthorization,
-        transactions: ['transaction'],
       };
       mockTickerReservationsService.transferOwnership.mockResolvedValue(mockData);
 
-      const body = { signer: '0x6000', target: '0x1000' };
+      const body = { signer, target: '0x1000' };
       const ticker = 'SOME_TICKER';
 
       const result = await controller.transferOwnership({ ticker }, body);
 
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...txResult,
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-        transactions: ['transaction'],
       });
       expect(mockTickerReservationsService.transferOwnership).toHaveBeenCalledWith(ticker, body);
     });
@@ -98,22 +96,25 @@ describe('TickerReservationsController', () => {
       mockTickerReservation.details.mockResolvedValue(mockResult);
 
       const mockData = {
+        ...txResult,
         result: mockTickerReservation,
-        transactions: ['transaction'],
       };
       mockTickerReservationsService.extend.mockResolvedValue(mockData);
 
-      const signer = '0x6000';
       const webhookUrl = 'http://example.com/webhook';
       const ticker = 'SOME_TICKER';
 
       const result = await controller.extendReservation({ ticker }, { signer, webhookUrl, dryRun });
 
       expect(result).toEqual({
+        ...txResult,
         tickerReservation: mockResult,
-        transactions: ['transaction'],
       });
-      expect(mockTickerReservationsService.extend).toHaveBeenCalledWith(ticker, signer, webhookUrl);
+      expect(mockTickerReservationsService.extend).toHaveBeenCalledWith(ticker, {
+        signer,
+        webhookUrl,
+        dryRun,
+      });
     });
   });
 });

@@ -11,7 +11,7 @@ import { testValues } from '~/test-utils/consts';
 import { MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
-const { did, signer } = testValues;
+const { did, signer, txResult } = testValues;
 
 describe('PortfoliosController', () => {
   let controller: PortfoliosController;
@@ -52,8 +52,7 @@ describe('PortfoliosController', () => {
 
   describe('moveAssets', () => {
     it('should return the transaction details', async () => {
-      const response = { transactions: ['transaction'] };
-      mockPortfoliosService.moveAssets.mockResolvedValue(response);
+      mockPortfoliosService.moveAssets.mockResolvedValue(txResult);
       const params = {
         signer: '0x6000',
         to: new BigNumber(2),
@@ -63,7 +62,7 @@ describe('PortfoliosController', () => {
 
       const result = await controller.moveAssets({ did: '0x6000' }, params);
 
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
     });
   });
 
@@ -71,8 +70,8 @@ describe('PortfoliosController', () => {
     it('should return the transaction details', async () => {
       const mockPortfolio = new MockPortfolio();
       const response = {
+        ...txResult,
         result: mockPortfolio,
-        transactions: ['transaction'],
       };
       mockPortfoliosService.createPortfolio.mockResolvedValue(response);
       const params = {
@@ -83,30 +82,25 @@ describe('PortfoliosController', () => {
       const result = await controller.createPortfolio(params);
 
       expect(result).toEqual({
+        ...txResult,
         portfolio: {
           id: '1',
           did,
         },
-        transactions: ['transaction'],
       });
     });
   });
 
   describe('deletePortfolio', () => {
     it('should return the transaction details', async () => {
-      const response = {
-        transactions: ['transaction'],
-      };
-      mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
+      mockPortfoliosService.deletePortfolio.mockResolvedValue(txResult);
 
       const result = await controller.deletePortfolio(
         new PortfolioDto({ id: new BigNumber(1), did }),
         { signer }
       );
 
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
+      expect(result).toEqual(txResult);
     });
   });
 });

@@ -14,7 +14,7 @@ import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, MockComplianceRequirementsService } from '~/test-utils/service-mocks';
 
-const { signer, did } = testValues;
+const { signer, did, txResult } = testValues;
 
 describe('AssetsController', () => {
   let controller: AssetsController;
@@ -182,7 +182,6 @@ describe('AssetsController', () => {
 
   describe('setDocuments', () => {
     it('should call the service and return the results', async () => {
-      const transactions = ['transaction'];
       const body = {
         signer: '0x6000',
         documents: [
@@ -194,10 +193,10 @@ describe('AssetsController', () => {
         ],
       };
       const ticker = 'TICKER';
-      mockAssetsService.setDocuments.mockResolvedValue({ transactions });
+      mockAssetsService.setDocuments.mockResolvedValue(txResult);
 
       const result = await controller.setDocuments({ ticker }, body);
-      expect(result).toEqual({ transactions });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.setDocuments).toHaveBeenCalledWith(ticker, body);
     });
   });
@@ -212,10 +211,10 @@ describe('AssetsController', () => {
         assetType: KnownAssetType.EquityCommon,
         requireInvestorUniqueness: false,
       };
-      mockAssetsService.createAsset.mockResolvedValue({ transactions: ['transaction'] });
+      mockAssetsService.createAsset.mockResolvedValue(txResult);
 
       const result = await controller.createAsset(input);
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
     });
   });
@@ -224,10 +223,10 @@ describe('AssetsController', () => {
     it('should call the service and return the results', async () => {
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
-      mockAssetsService.issue.mockResolvedValue({ transactions: ['transaction'] });
+      mockAssetsService.issue.mockResolvedValue(txResult);
 
       const result = await controller.issue({ ticker }, { signer, amount });
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
     });
   });
@@ -236,8 +235,8 @@ describe('AssetsController', () => {
     it('should call the service and return the results', async () => {
       const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
+        ...txResult,
         result: mockAuthorization,
-        transactions: ['transaction'],
       };
       mockAssetsService.transferOwnership.mockResolvedValue(mockData);
 
@@ -247,9 +246,9 @@ describe('AssetsController', () => {
       const result = await controller.transferOwnership({ ticker }, body);
 
       expect(result).toEqual({
+        ...txResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-        transactions: ['transaction'],
       });
       expect(mockAssetsService.transferOwnership).toHaveBeenCalledWith(ticker, body);
     });
@@ -260,10 +259,10 @@ describe('AssetsController', () => {
       const ticker = 'TICKER';
       const amount = new BigNumber(1000);
       const from = new BigNumber(1);
-      mockAssetsService.redeem.mockResolvedValue({ transactions: ['transaction'] });
+      mockAssetsService.redeem.mockResolvedValue(txResult);
 
       const result = await controller.redeem({ ticker }, { signer, amount, from });
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount, from });
     });
   });
@@ -271,10 +270,10 @@ describe('AssetsController', () => {
   describe('freeze', () => {
     it('should call the service and return the results', async () => {
       const ticker = 'TICKER';
-      mockAssetsService.freeze.mockResolvedValue({ transactions: ['transaction'] });
+      mockAssetsService.freeze.mockResolvedValue(txResult);
 
       const result = await controller.freeze({ ticker }, { signer });
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.freeze).toHaveBeenCalledWith(ticker, { signer });
     });
   });
@@ -282,10 +281,10 @@ describe('AssetsController', () => {
   describe('unfreeze', () => {
     it('should call the service and return the results', async () => {
       const ticker = 'TICKER';
-      mockAssetsService.unfreeze.mockResolvedValue({ transactions: ['transaction'] });
+      mockAssetsService.unfreeze.mockResolvedValue(txResult);
 
       const result = await controller.unfreeze({ ticker }, { signer });
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.unfreeze).toHaveBeenCalledWith(ticker, { signer });
     });
   });
@@ -296,11 +295,11 @@ describe('AssetsController', () => {
       const amount = new BigNumber(1000);
       const origin = new PortfolioDto({ id: new BigNumber(1), did: '0x1000' });
 
-      mockAssetsService.controllerTransfer.mockResolvedValue({ transactions: ['transaction'] });
+      mockAssetsService.controllerTransfer.mockResolvedValue(txResult);
 
       const result = await controller.controllerTransfer({ ticker }, { signer, origin, amount });
 
-      expect(result).toEqual({ transactions: ['transaction'] });
+      expect(result).toEqual(txResult);
       expect(mockAssetsService.controllerTransfer).toHaveBeenCalledWith(ticker, {
         signer,
         origin,

@@ -5,6 +5,7 @@ import { UserModel } from '~/users/model/user.model';
 
 const signer = 'alice';
 const did = '0x01'.padEnd(66, '0');
+const dryRun = false;
 
 const user = new UserModel({
   id: '-1',
@@ -17,6 +18,16 @@ const resource = {
 } as const;
 
 export const testAccount = createMock<Account>({ address: 'address' });
+export const txResult = {
+  transactions: ['transaction'],
+  details: {
+    status: '',
+    fees: {},
+    payingAccount: {
+      did,
+    },
+  },
+};
 
 export const testValues = {
   signer,
@@ -24,4 +35,6 @@ export const testValues = {
   user,
   resource,
   testAccount,
+  txResult,
+  dryRun,
 };
