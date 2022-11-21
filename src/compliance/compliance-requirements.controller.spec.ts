@@ -11,16 +11,18 @@ import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { mockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
 import { ComplianceStatusModel } from '~/compliance/models/compliance-status.model';
+import { testValues } from '~/test-utils/consts';
 import { createMockTransactionResult } from '~/test-utils/mocks';
 import { mockComplianceRequirementsServiceProvider } from '~/test-utils/service-mocks';
 
 describe('ComplianceRequirementsController', () => {
   let controller: ComplianceRequirementsController;
   let mockService: ComplianceRequirementsService;
+  const { did, signer } = testValues;
 
   const ticker = 'TICKER';
   const validBody = {
-    signer: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    signer,
     requirements: [
       [
         {
@@ -30,7 +32,7 @@ describe('ComplianceRequirementsController', () => {
             type: 'Accredited',
             scope: {
               type: 'Identity',
-              value: '0x0600000000000000000000000000000000000000000000000000000000000000',
+              value: did,
             },
           },
         },
@@ -125,7 +127,7 @@ describe('ComplianceRequirementsController', () => {
 
   describe('addRequirement', () => {
     it('should accept RequirementDto and add an Asset Compliance rule', async () => {
-      const { signer, requirements } = validBody;
+      const { requirements } = validBody;
 
       when(mockService.add)
         .calledWith(ticker, {
@@ -145,7 +147,7 @@ describe('ComplianceRequirementsController', () => {
   describe('modifyComplianceRequirement', () => {
     it('should accept RequirementDto and modify the corresponding Asset Compliance rule', async () => {
       const response = createMockTransactionResult<void>({ transactions: [] });
-      const { signer, requirements } = validBody;
+      const { requirements } = validBody;
 
       when(mockService.modify)
         .calledWith(ticker, id, {

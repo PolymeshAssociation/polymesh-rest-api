@@ -8,6 +8,8 @@ import {
   ScopeType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { testValues } from '~/test-utils/consts';
+
 export class MockComplianceRequirements {
   requirements = [
     {
@@ -19,7 +21,7 @@ export class MockComplianceRequirements {
             type: ClaimType.Accredited,
             scope: {
               type: ScopeType.Identity,
-              value: 'Ox6'.padEnd(66, '0'),
+              value: did,
             },
           },
           target: 'Receiver',
@@ -32,6 +34,8 @@ export class MockComplianceRequirements {
   defaultTrustedClaimIssuers = [];
 }
 
+const { did } = testValues;
+
 export const mockComplianceRequirements = createMock<ComplianceRequirements>({
   requirements: [
     {
@@ -43,11 +47,11 @@ export const mockComplianceRequirements = createMock<ComplianceRequirements>({
             type: ClaimType.Accredited,
             scope: {
               type: ScopeType.Identity,
-              value: 'Ox6'.padEnd(66, '0'),
+              value: did,
             },
           },
           target: ConditionTarget.Receiver,
-          trustedClaimIssuers: [{ identity: { did: 'Ox6'.padEnd(66, '0') } }],
+          trustedClaimIssuers: [{ identity: { did } }],
         },
       ],
     },
