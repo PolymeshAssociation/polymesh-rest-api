@@ -20,11 +20,10 @@ import {
   MockAsset,
   MockPortfolio,
   MockSubsidy,
-  testAccount,
 } from '~/test-utils/mocks';
 import { MockAccountsService, mockNetworkServiceProvider } from '~/test-utils/service-mocks';
 
-const { signer } = testValues;
+const { signer, did, testAccount } = testValues;
 
 describe('AccountsController', () => {
   let controller: AccountsController;
@@ -157,7 +156,7 @@ describe('AccountsController', () => {
           values: [
             {
               id: '1',
-              did: '0x06'.padEnd(66, '0'),
+              did,
             },
           ],
         },

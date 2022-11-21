@@ -6,12 +6,15 @@ import { NetworkService } from '~/network/network.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymesh, testAccount } from '~/test-utils/mocks';
+import { testValues } from '~/test-utils/consts';
+import { MockPolymesh } from '~/test-utils/mocks';
 
 describe('NetworkService', () => {
   let networkService: NetworkService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
+
+  const { testAccount } = testValues;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
