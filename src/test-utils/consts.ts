@@ -1,5 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
-import { Account } from '@polymeshassociation/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Account , PayingAccountType, TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { UserModel } from '~/users/model/user.model';
 
@@ -21,10 +22,17 @@ export const testAccount = createMock<Account>({ address: 'address' });
 export const txResult = {
   transactions: ['transaction'],
   details: {
-    status: '',
-    fees: {},
+    status: TransactionStatus.Succeeded,
+    fees: {
+      gas: new BigNumber(1),
+      protocol: new BigNumber(1),
+      total: new BigNumber(1),
+    },
+    supportsSubsidy: false,
     payingAccount: {
-      did,
+      address: did,
+      balance: new BigNumber(1),
+      type: PayingAccountType.Caller,
     },
   },
 };

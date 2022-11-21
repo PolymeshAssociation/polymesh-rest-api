@@ -84,7 +84,7 @@ describe('TickerReservationsService', () => {
 
         let error;
         try {
-          await service.reserve(ticker, signer);
+          await service.reserve(ticker, { signer });
         } catch (err) {
           error = err;
         }
@@ -109,7 +109,7 @@ describe('TickerReservationsService', () => {
           transactions: [mockTransaction],
         });
 
-        const result = await service.reserve(ticker, signer);
+        const result = await service.reserve(ticker, { signer });
         expect(result).toEqual({
           result: mockResult,
           transactions: [mockTransaction],
@@ -209,7 +209,7 @@ describe('TickerReservationsService', () => {
 
         let error;
         try {
-          await service.extend(ticker, signer);
+          await service.extend(ticker, { signer });
         } catch (err) {
           error = err;
         }
@@ -240,7 +240,7 @@ describe('TickerReservationsService', () => {
           transactions: [mockTransaction],
         });
 
-        const result = await service.extend(ticker, signer);
+        const result = await service.extend(ticker, { signer });
         expect(result).toEqual({
           result: mockResult,
           transactions: [mockTransaction],

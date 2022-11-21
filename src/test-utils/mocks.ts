@@ -27,13 +27,15 @@ export type Mocked<T> = T &
 export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
 
 export const createMockTransactionResult = <T>({
+  details,
   transactions,
   result,
 }: {
+  details: TransactionResult<T>['details'];
   transactions: TransactionResult<T>['transactions'];
   result?: TransactionResult<T>['result'];
 }): DeepMocked<TransactionResult<T>> => {
-  return { transactions, result, details: {} } as DeepMocked<TransactionResult<T>>;
+  return { transactions, result, details } as DeepMocked<TransactionResult<T>>;
 };
 
 export const createMockResponseObject = (): DeepMocked<Response> => {
@@ -297,14 +299,12 @@ class MockPolymeshTransactionBase {
   blockNumber?: BigNumber;
   status: TransactionStatus = TransactionStatus.Unapproved;
   error: Error;
-  getTotalFees = jest
-    .fn()
-    .mockReturnValue(
-      Promise.resolve({
-        total: new BigNumber(1),
-        payingAccountData: { account: { address: '0x06'.padEnd(66, '0') } },
-      })
-    );
+  getTotalFees = jest.fn().mockReturnValue(
+    Promise.resolve({
+      total: new BigNumber(1),
+      payingAccountData: { account: { address: '0x06'.padEnd(66, '0') } },
+    })
+  );
 
   supportsSubsidy = jest.fn().mockReturnValue(false);
   run = jest.fn().mockReturnValue(Promise.resolve());

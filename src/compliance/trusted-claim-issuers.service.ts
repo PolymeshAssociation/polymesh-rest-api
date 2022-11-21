@@ -21,32 +21,35 @@ export class TrustedClaimIssuersService {
   }
 
   public async set(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.set, rest, {
       signer,
       webhookUrl,
+      dryRun,
     });
   }
 
   public async add(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.add, rest, {
       signer,
       webhookUrl,
+      dryRun,
     });
   }
 
   public async remove(ticker: string, params: RemoveTrustedClaimIssuersDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { signer, webhookUrl, dryRun, ...rest } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.remove, rest, {
       signer,
       webhookUrl,
+      dryRun,
     });
   }
 }
