@@ -76,7 +76,7 @@ describe('PortfoliosController', () => {
       };
       mockPortfoliosService.createPortfolio.mockResolvedValue(response);
       const params = {
-        signer: '0x06'.padEnd(66, '0'),
+        signer,
         name: 'FOLIO-1',
       };
 
@@ -85,7 +85,7 @@ describe('PortfoliosController', () => {
       expect(result).toEqual({
         portfolio: {
           id: '1',
-          did: '0x06'.padEnd(66, '0'),
+          did,
         },
         transactions: ['transaction'],
       });
