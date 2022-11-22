@@ -17,7 +17,12 @@ export class TransactionDetailsModel {
   @ApiProperty({ description: 'Transaction fees', type: FeesModel })
   readonly fees: FeesModel;
 
-  @ApiProperty({ type: 'boolean', example: true })
+  @ApiProperty({
+    type: 'boolean',
+    example: true,
+    description:
+      'Not all transaction can be subsidized. Can be used to check if the transaction can be subsidized',
+  })
   readonly supportsSubsidy: boolean;
 
   @ApiProperty({

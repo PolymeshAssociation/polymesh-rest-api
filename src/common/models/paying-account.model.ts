@@ -21,15 +21,13 @@ export class PayingAccountModel {
     enum: PayingAccountType,
     example: PayingAccountType.Caller,
   })
-  @FromBigNumber()
   readonly type: string;
 
   @ApiProperty({
     type: 'string',
-    description: 'Paying account address on the chain',
+    description: 'The paying account address',
     example: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
   })
-  @FromBigNumber()
   readonly address: string;
 
   constructor(model: PayingAccountModel) {

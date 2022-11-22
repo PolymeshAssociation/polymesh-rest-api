@@ -36,7 +36,7 @@ export type TransactionDetails = {
 };
 
 export type TransactionResult<T> = {
-  result: T;
+  result?: T;
   transactions: (TransactionModel | BatchTransactionModel)[];
   details: TransactionDetails;
 };
@@ -91,13 +91,11 @@ export async function processTransaction<
       },
     };
 
-    let result = undefined as unknown as TransformedReturnType;
-
     if (dryRun) {
-      return { details, result, transactions: [] };
+      return { details, transactions: [] };
     }
 
-    result = await procedure.run();
+    const result = await procedure.run();
 
     const assembleTransactionResponse = <T, R = T>(
       transaction: GenericPolymeshTransaction<T, R>

@@ -448,8 +448,8 @@ describe('IdentitiesController', () => {
       });
 
       expect(result).toEqual({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...txResult,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
     });

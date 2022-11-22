@@ -291,7 +291,7 @@ describe('CorporateActionsService', () => {
 
         let error = null;
         try {
-          await service.remove(ticker, new BigNumber(1), signer);
+          await service.remove(ticker, new BigNumber(1), { signer });
         } catch (err) {
           error = err;
         }
@@ -311,7 +311,7 @@ describe('CorporateActionsService', () => {
         const mockTransaction = new MockTransaction(transaction);
         mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-        const result = await service.remove(ticker, new BigNumber(1), signer);
+        const result = await service.remove(ticker, new BigNumber(1), { signer });
 
         expect(result).toEqual({
           transactions: [mockTransaction],
