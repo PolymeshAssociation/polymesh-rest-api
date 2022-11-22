@@ -18,7 +18,7 @@ import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -88,41 +88,38 @@ export class AssetsService {
   }
 
   public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, dryRun, ...rest } = params;
+    const { base, args } = extractTxBase(params);
 
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return this.transactionsService.submit(createAsset, rest, { signer, webhookUrl, dryRun });
+    return this.transactionsService.submit(createAsset, args, base);
   }
 
   public async issue(ticker: string, params: IssueDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, dryRun, ...rest } = params;
+    const { base, args } = extractTxBase(params);
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.issuance.issue, rest, {
-      signer,
-      webhookUrl,
-      dryRun,
-    });
+    return this.transactionsService.submit(asset.issuance.issue, args, base);
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, dryRun, ...rest } = params;
+    const { base, args } = extractTxBase(params);
 
     const { transferOwnership } = await this.findOne(ticker);
-    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl, dryRun });
+    return this.transactionsService.submit(transferOwnership, args, base);
   }
 
   public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
-    const { signer, webhookUrl, dryRun, amount, from } = params;
+    const { base, args } = extractTxBase(params);
+
     const { redeem } = await this.findOne(ticker);
 
     return this.transactionsService.submit(
       redeem,
-      { amount, from: toPortfolioId(from) },
-      { signer, webhookUrl, dryRun }
+      { ...args, from: toPortfolioId(args.from) },
+      base
     );
   }
 
@@ -148,14 +145,16 @@ export class AssetsService {
     ticker: string,
     params: ControllerTransferDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, dryRun, origin, amount } = params;
-
+    const {
+      base,
+      args: { origin, amount },
+    } = extractTxBase(params);
     const { controllerTransfer } = await this.findOne(ticker);
 
     return this.transactionsService.submit(
       controllerTransfer,
       { originPortfolio: origin.toPortfolioLike(), amount },
-      { signer, webhookUrl, dryRun }
+      base
     );
   }
 

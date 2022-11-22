@@ -3,7 +3,7 @@ import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/po
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 
@@ -34,9 +34,10 @@ export class TickerReservationsService {
     ticker: string,
     params: TransferOwnershipDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, dryRun, ...rest } = params;
+    const { base, args } = extractTxBase(params);
+
     const { transferOwnership } = await this.findOne(ticker);
-    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl, dryRun });
+    return this.transactionsService.submit(transferOwnership, args, base);
   }
 
   public async extend(

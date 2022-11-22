@@ -263,9 +263,9 @@ export class CorporateActionsController {
   @Post(':id/delete')
   public async deleteCorporateAction(
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
-    @Query() { signer, webhookUrl, dryRun }: TransactionBaseDto
+    @Query() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
+    const result = await this.corporateActionsService.remove(ticker, id, transactionBaseDto);
     return handleServiceResult(result);
   }
 

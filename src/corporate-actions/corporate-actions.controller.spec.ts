@@ -161,12 +161,9 @@ describe('CorporateActionsController', () => {
       );
 
       expect(result).toEqual(txResult);
-      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(
-        'TICKER',
-        new BigNumber(1),
+      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith('TICKER', new BigNumber(1), {
         signer,
-        undefined
-      );
+      });
     });
   });
 

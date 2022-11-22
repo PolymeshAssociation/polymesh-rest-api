@@ -10,7 +10,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -29,17 +29,14 @@ export class ComplianceRequirementsService {
   }
 
   public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, dryRun } = params;
+    const { base, args } = extractTxBase(params);
+
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.set,
-      params as SetAssetRequirementsParams,
-      {
-        signer,
-        webhookUrl,
-        dryRun,
-      }
+      args as SetAssetRequirementsParams,
+      base
     );
   }
 
@@ -96,32 +93,26 @@ export class ComplianceRequirementsService {
   }
 
   public async add(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, dryRun, ...rest } = params;
+    const { base, args } = extractTxBase(params);
+
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.add,
-      rest as AddAssetRequirementParams,
-      {
-        signer,
-        webhookUrl,
-        dryRun,
-      }
+      args as AddAssetRequirementParams,
+      base
     );
   }
 
   public async modify(ticker: string, id: BigNumber, params: RequirementDto): ServiceReturn<void> {
-    const { signer, webhookUrl, dryRun, ...rest } = params;
+    const { base, args } = extractTxBase(params);
+
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.modify,
-      { id, ...rest } as ModifyComplianceRequirementParams,
-      {
-        signer,
-        webhookUrl,
-        dryRun,
-      }
+      { id, ...args } as ModifyComplianceRequirementParams,
+      base
     );
   }
 }

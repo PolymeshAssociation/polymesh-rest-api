@@ -7,7 +7,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
@@ -52,9 +52,11 @@ export class PortfoliosService {
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {
-    const { signer, webhookUrl, dryRun, to, items, from } = params;
+    const { base, args } = extractTxBase(params);
+    const { to, items, from } = args;
+
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
-    const args = {
+    const formattedArgs = {
       to: toPortfolioId(to),
       items: items.map(({ ticker: asset, amount, memo }) => {
         return {
@@ -64,11 +66,8 @@ export class PortfoliosService {
         };
       }),
     };
-    return this.transactionsService.submit(fromPortfolio.moveFunds, args, {
-      signer,
-      webhookUrl,
-      dryRun,
-    });
+
+    return this.transactionsService.submit(fromPortfolio.moveFunds, formattedArgs, base);
   }
 
   public async createPortfolio(params: CreatePortfolioDto): ServiceReturn<NumberedPortfolio> {

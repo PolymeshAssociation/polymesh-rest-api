@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 import { flatten } from 'lodash';
 import { promisify } from 'util';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { EventType } from '~/events/types';
@@ -78,3 +79,16 @@ export class UnreachableCaseError extends Error {
     super(`Unreachable case: ${JSON.stringify(val)}`);
   }
 }
+
+export const extractTxBase = <T extends TransactionBaseDto>(
+  params: T
+): {
+  base: TransactionBaseDto;
+  args: Omit<T, keyof TransactionBaseDto>;
+} => {
+  const { signer, webhookUrl, dryRun, ...args } = params;
+  return {
+    base: { signer, webhookUrl, dryRun },
+    args,
+  };
+};
