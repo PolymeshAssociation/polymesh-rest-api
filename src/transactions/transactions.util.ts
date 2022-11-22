@@ -36,7 +36,7 @@ export type TransactionDetails = {
 };
 
 export type TransactionResult<T> = {
-  result?: T;
+  result: T;
   transactions: (TransactionModel | BatchTransactionModel)[];
   details: TransactionDetails;
 };
@@ -92,7 +92,7 @@ export async function processTransaction<
     };
 
     if (dryRun) {
-      return { details, transactions: [] };
+      return { details, result: {} as TransformedReturnType, transactions: [] };
     }
 
     const result = await procedure.run();
