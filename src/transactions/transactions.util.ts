@@ -78,11 +78,11 @@ export async function processTransaction<
 
     const batch: [
       feesPromise: Promise<PayingAccountFees>,
-      resultPromise: Promise<TransformedReturnType | void>
+      resultPromise: Promise<TransformedReturnType | undefined>
     ] = [
       procedure.getTotalFees(),
       new Promise(resolve => {
-        resolve();
+        resolve(undefined);
       }),
     ];
 
@@ -91,9 +91,10 @@ export async function processTransaction<
     }
 
     const supportsSubsidy = procedure.supportsSubsidy();
-    const [totalFees, result] = await Promise.all<PayingAccountFees, TransformedReturnType | void>(
-      batch
-    );
+    const [totalFees, result] = await Promise.all<
+      PayingAccountFees,
+      TransformedReturnType | undefined
+    >(batch);
 
     const {
       fees,
@@ -112,7 +113,7 @@ export async function processTransaction<
     };
 
     if (dryRun) {
-      return { details, result: {} as TransformedReturnType, transactions: [] };
+      return { details, result: result as unknown as TransformedReturnType, transactions: [] };
     }
 
     const assembleTransactionResponse = <T, R = T>(
@@ -149,7 +150,7 @@ export async function processTransaction<
     };
 
     return {
-      result: result || ({} as TransformedReturnType),
+      result: result as unknown as TransformedReturnType,
       transactions: [assembleTransactionResponse(procedure)],
       details: {
         ...details,
