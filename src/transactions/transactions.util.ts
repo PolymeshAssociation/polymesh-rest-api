@@ -79,16 +79,7 @@ export async function processTransaction<
     const batch: [
       feesPromise: Promise<PayingAccountFees>,
       resultPromise: Promise<TransformedReturnType | undefined>
-    ] = [
-      procedure.getTotalFees(),
-      new Promise(resolve => {
-        resolve(undefined);
-      }),
-    ];
-
-    if (!dryRun) {
-      batch[1] = procedure.run();
-    }
+    ] = [procedure.getTotalFees(), dryRun ? Promise.resolve(undefined) : procedure.run()];
 
     const supportsSubsidy = procedure.supportsSubsidy();
     const [totalFees, result] = await Promise.all<
