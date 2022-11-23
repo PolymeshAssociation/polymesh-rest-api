@@ -5,6 +5,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
+  MetadataType,
   TransactionStatus,
   TrustedClaimIssuer,
   TxTag,
@@ -62,6 +63,7 @@ export class MockPolymesh {
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
     getTickerReservations: jest.fn(),
+    getGlobalMetadataKeys: jest.fn(),
   };
 
   public accountManagement = {
@@ -171,6 +173,12 @@ export class MockAsset {
 
   public issuance = {
     issue: jest.fn(),
+  };
+
+  public metadata = {
+    register: jest.fn(),
+    get: jest.fn(),
+    getOne: jest.fn(),
   };
 
   public toHuman = jest.fn().mockImplementation(() => this.ticker);
@@ -346,4 +354,14 @@ export class MockAccount {
 export class MockSubsidy {
   beneficiary = new MockAccount('beneficiary');
   subsidizer = new MockAccount('subsidizer');
+}
+
+export class MockMetadataEntry {
+  id = new BigNumber(1);
+  type = MetadataType.Local;
+  asset = new MockAsset();
+
+  details = jest.fn();
+  value = jest.fn();
+  set = jest.fn();
 }

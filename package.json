@@ -6,6 +6,7 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
+    "nest": "nest",
     "prepare": "husky install",
     "prebuild": "rimraf dist",
     "postinstall": "rimraf node_modules/@polymeshassociation/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto,util,wasm-bridge} && rimraf node_modules/@polymeshassociation/hashicorp-vault-signing-manager/node_modules/@polkadot/{util,util-crypto}",
@@ -44,7 +45,7 @@
     "@nestjs/typeorm": "^9.0.1",
     "@polymeshassociation/hashicorp-vault-signing-manager": "1.1.1",
     "@polymeshassociation/local-signing-manager": "1.2.0",
-    "@polymeshassociation/polymesh-sdk": "18.0.0-beta.7",
+    "@polymeshassociation/polymesh-sdk": "19.0.0-beta.1",
     "@polymeshassociation/signing-manager-types": "1.0.0",
     "class-transformer": "0.5.1",
     "class-validator": "^0.13.2",
@@ -105,7 +106,7 @@
     "ts-loader": "8.0.18",
     "ts-node": "9.1.1",
     "tsconfig-paths": "3.9.0",
-    "typescript": "4.3.5"
+    "typescript": "4.6.2"
   },
   "config": {
     "commitizen": {

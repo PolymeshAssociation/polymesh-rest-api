@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { MetadataService } from '~/metadata/metadata.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -200,6 +201,11 @@ export const mockUserServiceProvider: ValueProvider<UsersService> = {
 export const mockTrustedClaimIssuersServiceProvider: ValueProvider<TrustedClaimIssuersService> = {
   provide: TrustedClaimIssuersService,
   useValue: createMock<TrustedClaimIssuersService>(),
+};
+
+export const mockMetadataServiceProvider: ValueProvider<MetadataService> = {
+  provide: MetadataService,
+  useValue: createMock<MetadataService>(),
 };
 
 /**

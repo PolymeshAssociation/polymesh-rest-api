@@ -205,9 +205,9 @@ export class IdentitiesController {
   public async getPendingInstructions(
     @Param() { did }: DidDto
   ): Promise<ResultsModel<Instruction>> {
-    const pendingInstructions = await this.settlementsService.findPendingInstructionsByDid(did);
+    const { pending } = await this.settlementsService.findPendingInstructionsByDid(did);
 
-    return new ResultsModel({ results: pendingInstructions });
+    return new ResultsModel({ results: pending });
   }
 
   @ApiTags('settlements')

@@ -14,7 +14,7 @@ export class ScopeDto {
     example: ScopeType.Identity,
   })
   @IsEnum(ScopeType)
-  type: ScopeType;
+  readonly type: ScopeType;
 
   @ApiProperty({
     description:
@@ -22,5 +22,5 @@ export class ScopeDto {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @IsValidScopeValue('type')
-  value: string;
+  readonly value: string;
 }
