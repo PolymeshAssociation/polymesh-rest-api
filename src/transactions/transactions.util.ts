@@ -11,6 +11,7 @@ import {
   GenericPolymeshTransaction,
   NoArgsProcedureMethod,
   PayingAccount,
+  PayingAccountFees,
   ProcedureMethod,
   ProcedureOpts,
   TransactionStatus,
@@ -74,11 +75,30 @@ export async function processTransaction<
 ): Promise<TransactionResult<TransformedReturnType>> {
   try {
     const procedure = await prepareProcedure(method, args, opts);
+
+    const batch: [
+      feesPromise: Promise<PayingAccountFees>,
+      resultPromise: Promise<TransformedReturnType | void>
+    ] = [
+      procedure.getTotalFees(),
+      new Promise(resolve => {
+        resolve();
+      }),
+    ];
+
+    if (!dryRun) {
+      batch[1] = procedure.run();
+    }
+
+    const supportsSubsidy = procedure.supportsSubsidy();
+    const [totalFees, result] = await Promise.all<PayingAccountFees, TransformedReturnType | void>(
+      batch
+    );
+
     const {
       fees,
       payingAccountData: { balance, type, account },
-    } = await procedure.getTotalFees();
-    const supportsSubsidy = await procedure.supportsSubsidy();
+    } = totalFees;
 
     const details: TransactionDetails = {
       status: procedure.status,
@@ -94,8 +114,6 @@ export async function processTransaction<
     if (dryRun) {
       return { details, result: {} as TransformedReturnType, transactions: [] };
     }
-
-    const result = await procedure.run();
 
     const assembleTransactionResponse = <T, R = T>(
       transaction: GenericPolymeshTransaction<T, R>
@@ -131,7 +149,7 @@ export async function processTransaction<
     };
 
     return {
-      result,
+      result: result || ({} as TransformedReturnType),
       transactions: [assembleTransactionResponse(procedure)],
       details: {
         ...details,

@@ -15,7 +15,6 @@ export class PayingAccountModel {
   @FromBigNumber()
   readonly balance: BigNumber;
 
-  @ApiProperty({ type: 'string', description: 'Paying account type', example: 'Caller' })
   @ApiProperty({
     description: 'Paying account type',
     enum: PayingAccountType,
