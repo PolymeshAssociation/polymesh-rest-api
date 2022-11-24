@@ -83,8 +83,9 @@ export class AssetsService {
     const {
       documents: { set },
     } = await this.findOne(ticker);
-    const { signer, webhookUrl, dryRun, documents } = params;
-    return this.transactionsService.submit(set, { documents }, { signer, webhookUrl, dryRun });
+    const { base, args } = extractTxBase(params);
+
+    return this.transactionsService.submit(set, args, base);
   }
 
   public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {

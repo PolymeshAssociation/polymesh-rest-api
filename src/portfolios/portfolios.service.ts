@@ -7,6 +7,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -74,25 +75,20 @@ export class PortfoliosService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    const { signer, webhookUrl, dryRun, ...rest } = params;
-    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, rest, {
-      signer,
-      webhookUrl,
-      dryRun,
-    });
+    const { base, args } = extractTxBase(params);
+
+    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, args, base);
   }
 
   public async deletePortfolio(
     portfolio: PortfolioDto,
-    signer: string,
-    webhookUrl?: string,
-    dryRun?: boolean
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const identity = await this.identitiesService.findOne(portfolio.did);
     return this.transactionsService.submit(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      { signer, webhookUrl, dryRun }
+      transactionBaseDto
     );
   }
 }
