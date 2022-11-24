@@ -241,7 +241,7 @@ describe('ComplianceRequirementsService', () => {
   });
 
   describe('arePaused', () => {
-    it('should return ', async () => {
+    it('should return the Asset compliance requirement state', async () => {
       const mockAsset = new MockAsset();
       const arePaused = true;
       mockAsset.compliance.requirements.arePaused.mockReturnValue(arePaused);

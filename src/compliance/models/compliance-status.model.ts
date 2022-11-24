@@ -6,11 +6,10 @@ import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class ComplianceStatusModel {
   @ApiProperty({
-    description: 'Are the compliance requirements paused',
+    description: 'Indicator to know if compliance requirements are paused or not',
     type: 'boolean',
     example: true,
   })
-  @FromBigNumber()
   readonly arePaused: boolean;
 
   constructor(model: ComplianceStatusModel) {
