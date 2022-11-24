@@ -1,8 +1,5 @@
 /* istanbul ignore file */
-
 import { ApiProperty } from '@nestjs/swagger';
-
-import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class ComplianceStatusModel {
   @ApiProperty({
