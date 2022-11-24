@@ -6,12 +6,15 @@ import { NetworkService } from '~/network/network.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { testValues } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
 
 describe('NetworkService', () => {
   let networkService: NetworkService;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
+
+  const { testAccount } = testValues;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
@@ -57,6 +60,16 @@ describe('NetworkService', () => {
       const result = await networkService.getLatestBlock();
 
       expect(result).toBe(mockResult);
+    });
+  });
+
+  describe('getTreasuryAccount', () => {
+    it("should return the chain's treasury Account", async () => {
+      mockPolymeshApi.network.getTreasuryAccount.mockReturnValue(testAccount);
+
+      const result = networkService.getTreasuryAccount();
+
+      expect(result).toBe(testAccount);
     });
   });
 });

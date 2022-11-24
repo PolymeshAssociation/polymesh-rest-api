@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from '~/auth/auth.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { MetadataService } from '~/metadata/metadata.service';
+import { NetworkService } from '~/network/network.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -80,6 +81,7 @@ export class MockAccountsService {
   unfreezeSecondaryAccounts = jest.fn();
   modifyPermissions = jest.fn();
   revokePermissions = jest.fn();
+  getTreasuryAccount = jest.fn();
 }
 
 export class MockEventsService {
@@ -227,7 +229,8 @@ export const makeMockConfigProvider = (config: Record<string, unknown>): Service
     provide: ConfigService,
   };
 };
-export class MockNetworkService {
-  getNetworkProperties = jest.fn();
-  getLatestBlock = jest.fn();
-}
+
+export const mockNetworkServiceProvider: ValueProvider<NetworkService> = {
+  provide: NetworkService,
+  useValue: createMock<NetworkService>(),
+};

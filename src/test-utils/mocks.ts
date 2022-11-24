@@ -13,7 +13,10 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { testValues } from '~/test-utils/consts';
 import { TransactionResult } from '~/transactions/transactions.util';
+
+const { did } = testValues;
 
 export type Mocked<T> = T &
   {
@@ -54,6 +57,7 @@ export class MockPolymesh {
     transferPolyx: jest.fn(),
     getSs58Format: jest.fn(),
     getNetworkProperties: jest.fn(),
+    getTreasuryAccount: jest.fn(),
   };
 
   public assets = {
@@ -214,7 +218,7 @@ export class MockPortfolios {
 }
 
 export class MockIdentity {
-  did = '0x06'.padEnd(66, '0');
+  did = did;
   portfolios = new MockPortfolios();
   authorizations = new MockIdentityAuthorization();
   public getPrimaryAccount = jest.fn();
@@ -237,7 +241,7 @@ export class MockPortfolio {
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',
-      did: '0x06'.padEnd(66, '0'),
+      did,
     };
   });
 }
@@ -266,14 +270,14 @@ export class MockAuthorizationRequest {
   data = {
     type: AuthorizationType.PortfolioCustody,
     value: {
-      did: '0x6'.padEnd(66, '1a'),
+      did,
       id: new BigNumber(1),
     },
   };
 
   issuer = new MockIdentity();
   target = {
-    did: '0x6'.padEnd(66, '1a'),
+    did,
   };
 
   public accept = jest.fn();

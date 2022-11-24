@@ -27,11 +27,16 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { AccountModel } from '~/identities/models/account.model';
+import { NetworkService } from '~/network/network.service';
 
 @ApiTags('accounts')
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) {}
+  constructor(
+    private readonly accountsService: AccountsService,
+    private readonly networkService: NetworkService
+  ) {}
 
   @ApiOperation({
     summary: 'Get POLYX balance of an Account',
@@ -238,5 +243,21 @@ export class AccountsController {
   async modifyPermissions(@Body() params: ModifyPermissionsDto): Promise<TransactionResponseModel> {
     const result = await this.accountsService.modifyPermissions(params);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: "Get chain's treasury Account",
+    description:
+      'This endpoint retrieves treasury Account details which holds the accumulated fees used for chain development and can only be accessed through governance',
+  })
+  @ApiOkResponse({
+    description: 'Details about the treasury Account',
+    type: AccountModel,
+  })
+  @Get('treasury')
+  getTreasuryAccount(): AccountModel {
+    const { address } = this.networkService.getTreasuryAccount();
+
+    return new AccountModel({ address });
   }
 }

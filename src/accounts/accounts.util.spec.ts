@@ -22,9 +22,12 @@ import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissio
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
 import { AccountModel } from '~/identities/models/account.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
+import { testValues } from '~/test-utils/consts';
 import { MockAccount, MockAsset, MockPortfolio, MockSubsidy } from '~/test-utils/mocks';
 
 describe('createPermissionsModel', () => {
+  const { did } = testValues;
+
   it('should transform Permissions to PermissionsModel', () => {
     let permissions: Permissions = {
       assets: {
@@ -54,7 +57,7 @@ describe('createPermissionsModel', () => {
         values: [
           new PortfolioIdentifierModel({
             id: '1',
-            did: '0x06'.padEnd(66, '0'),
+            did,
           }),
         ],
       }),
