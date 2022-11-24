@@ -275,7 +275,7 @@ describe('PortfoliosService', () => {
           transactions: [mockTransaction],
         });
 
-        const result = await service.deletePortfolio(portfolio, signer);
+        const result = await service.deletePortfolio(portfolio, { signer });
         expect(result).toEqual({
           result: undefined,
           transactions: [mockTransaction],

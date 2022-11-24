@@ -138,9 +138,9 @@ export class PortfoliosController {
   @Post('/identities/:did/portfolios/:id/delete')
   public async deletePortfolio(
     @Param() portfolio: PortfolioDto,
-    @Query() { signer, webhookUrl, dryRun }: TransactionBaseDto
+    @Query() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.portfoliosService.deletePortfolio(portfolio, signer, webhookUrl);
+    const result = await this.portfoliosService.deletePortfolio(portfolio, transactionBaseDto);
     return handleServiceResult(result);
   }
 }
