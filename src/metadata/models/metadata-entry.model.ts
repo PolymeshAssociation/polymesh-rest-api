@@ -22,7 +22,7 @@ export class MetadataEntryModel {
   readonly type: MetadataType;
 
   @ApiProperty({
-    description: 'ID of the MetadataEntry',
+    description: 'ID corresponding to defined `type` of Metadata',
     type: 'string',
     example: '1',
   })

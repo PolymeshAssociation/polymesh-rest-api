@@ -219,7 +219,7 @@ export class MockIdentity {
   authorizations = new MockIdentityAuthorization();
   public getPrimaryAccount = jest.fn();
   public areSecondaryAccountsFrozen = jest.fn();
-  public getPendingInstructions = jest.fn();
+  public getInstructions = jest.fn();
   public getVenues = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryAccounts = jest.fn();

@@ -5,7 +5,7 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class MetadataSpecDto {
   @ApiPropertyOptional({
-    description: 'URL describing the Asset metadata',
+    description: 'Off-chain specs or documentation link',
     type: 'string',
     example: 'https://www.someexample.com',
   })
@@ -14,18 +14,18 @@ export class MetadataSpecDto {
   readonly url?: string;
 
   @ApiPropertyOptional({
-    description: 'Description about the Asset metadata',
+    description: 'Description of metadata type',
     type: 'string',
-    example: 'https://www.someexample.com',
+    example: 'Some description',
   })
   @IsOptional()
   @IsString()
   readonly description?: string;
 
   @ApiPropertyOptional({
-    description: 'Type definition describing the metadata',
+    description: 'SCALE encoded `AssetMetadataTypeDef`',
     type: 'string',
-    example: 'https://www.someexample.com',
+    example: 'Some example',
   })
   @IsOptional()
   @IsString()

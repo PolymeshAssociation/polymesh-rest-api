@@ -101,12 +101,14 @@ describe('IdentitiesController', () => {
 
   describe('getPendingInstructions', () => {
     it("should return the Identity's pending Instructions", async () => {
-      const expectedInstructions = ['1', '2', '3'];
-      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue(expectedInstructions);
+      const expectedInstructionIds = [new BigNumber(1), new BigNumber(2), new BigNumber(3)];
+      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue({
+        pending: expectedInstructionIds.map(id => ({ id })),
+      });
 
       const result = await controller.getPendingInstructions({ did: '0x1' });
 
-      expect(result).toEqual({ results: expectedInstructions });
+      expect(result).toEqual({ results: expectedInstructionIds });
     });
   });
 

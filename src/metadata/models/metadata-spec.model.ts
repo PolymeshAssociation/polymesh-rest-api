@@ -4,23 +4,27 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MetadataSpecModel {
   @ApiPropertyOptional({
-    description: 'URL describing the Asset metadata',
+    description: 'Off-chain specs or documentation link',
     type: 'string',
     example: 'https://www.someexample.com',
   })
   readonly url?: string;
 
   @ApiPropertyOptional({
-    description: 'Description about the Asset metadata',
+    description: 'Description of metadata type',
     type: 'string',
     example: 'https://www.someexample.com',
   })
   readonly description?: string;
 
   @ApiPropertyOptional({
-    description: 'Type definition describing the metadata',
+    description: 'SCALE encoded `AssetMetadataTypeDef`',
     type: 'string',
     example: 'https://www.someexample.com',
   })
   readonly typedef?: string;
+
+  constructor(model: MetadataSpecModel) {
+    Object.assign(this, model);
+  }
 }
