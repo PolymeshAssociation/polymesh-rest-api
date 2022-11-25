@@ -5,6 +5,7 @@ import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { NetworkService } from '~/network/network.service';
 import { ServiceProvider } from '~/test-utils/types';
@@ -48,6 +49,12 @@ export class MockComplianceRequirementsService {
   add = jest.fn();
   modify = jest.fn();
 }
+
+export const mockComplianceRequirementsServiceProvider: ValueProvider<ComplianceRequirementsService> =
+  {
+    provide: ComplianceRequirementsService,
+    useValue: createMock<ComplianceRequirementsService>(),
+  };
 
 export class MockSigningService {
   public getAddressByHandle = jest.fn();

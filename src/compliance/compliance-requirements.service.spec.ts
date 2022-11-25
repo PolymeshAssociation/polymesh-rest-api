@@ -8,6 +8,7 @@ import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { AssetsService } from '~/assets/assets.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { MockComplianceRequirements } from '~/compliance/mocks/compliance-requirements.mock';
+import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
 
@@ -20,6 +21,7 @@ describe('ComplianceRequirementsService', () => {
   let service: ComplianceRequirementsService;
   const mockAssetsService = new MockAssetService();
   const mockTransactionsService = mockTransactionsProvider.useValue;
+  const { signer } = testValues;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -71,7 +73,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { requirements: [], signer: '0x6000', asSetAssetRequirementsParams: jest.fn() };
+      const body = { requirements: [], signer, asSetAssetRequirementsParams: jest.fn() };
 
       const result = await service.setRequirements('TICKER', body);
 
@@ -96,7 +98,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { signer: '0x6000' };
+      const body = { signer };
 
       const result = await service.pauseRequirements('TICKER', body);
 
@@ -121,7 +123,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { signer: '0x6000' };
+      const body = { signer };
 
       const result = await service.unpauseRequirements('TICKER', body);
 
@@ -148,7 +150,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { signer: '0x6000' };
+      const body = { signer };
 
       const result = await service.deleteOne('TICKER', requirementId, body);
 
@@ -174,7 +176,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { signer: '0x6000' };
+      const body = { signer };
 
       const result = await service.deleteAll('TICKER', body);
 
@@ -200,7 +202,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { conditions: [], signer: '0x6000' };
+      const body = { conditions: [], signer };
 
       const result = await service.add('TICKER', body);
 
@@ -227,7 +229,7 @@ describe('ComplianceRequirementsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
-      const body = { conditions: [], signer: '0x6000' };
+      const body = { conditions: [], signer };
 
       const result = await service.modify('TICKER', requirementId, body);
 
@@ -235,6 +237,19 @@ describe('ComplianceRequirementsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
+    });
+  });
+
+  describe('arePaused', () => {
+    it('should return the Asset compliance requirement state', async () => {
+      const mockAsset = new MockAsset();
+      const arePaused = true;
+      mockAsset.compliance.requirements.arePaused.mockReturnValue(arePaused);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+      const result = await service.arePaused('TICKER');
+
+      expect(result).toEqual(arePaused);
     });
   });
 });

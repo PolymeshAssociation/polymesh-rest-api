@@ -17,6 +17,7 @@ import { RequirementParamsDto } from '~/compliance/dto/requirement-params.dto';
 import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { ComplianceRequirementsModel } from '~/compliance/models/compliance-requirements.model';
+import { ComplianceStatusModel } from '~/compliance/models/compliance-status.model';
 import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
@@ -265,5 +266,32 @@ export class ComplianceRequirementsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.modify(ticker, id, params);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Check if the requirements are paused',
+    description:
+      'This endpoint checks if the compliance requirements are paused for a given ticker',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose compliance requirements status are to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'Compliance Requirement status',
+    type: ComplianceStatusModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Get('status')
+  public async areRequirementsPaused(
+    @Param() { ticker }: TickerParamsDto
+  ): Promise<ComplianceStatusModel> {
+    const arePaused = await this.complianceRequirementsService.arePaused(ticker);
+
+    return new ComplianceStatusModel({ arePaused });
   }
 }

@@ -136,6 +136,7 @@ export class MockAsset {
     requirements: {
       get: jest.fn(),
       set: jest.fn(),
+      arePaused: jest.fn(),
     },
     trustedClaimIssuers: {
       get: jest.fn(),
