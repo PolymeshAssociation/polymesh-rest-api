@@ -12,14 +12,13 @@ import {
 import { Response } from 'express';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { createPermissionsModel, createSubsidyModel } from '~/accounts/accounts.util';
+import { createPermissionsModel } from '~/accounts/accounts.util';
 import { AccountParamsDto } from '~/accounts/dto/account-params.dto';
 import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
 import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
-import { SubsidyModel } from '~/accounts/models/subsidy.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -29,13 +28,17 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { AccountModel } from '~/identities/models/account.model';
 import { NetworkService } from '~/network/network.service';
+import { SubsidyModel } from '~/subsidy/models/subsidy.model';
+import { SubsidyService } from '~/subsidy/subsidy.service';
+import { createSubsidyModel } from '~/subsidy/subsidy.util';
 
 @ApiTags('accounts')
 @Controller('accounts')
 export class AccountsController {
   constructor(
     private readonly accountsService: AccountsService,
-    private readonly networkService: NetworkService
+    private readonly networkService: NetworkService,
+    private readonly subsidyService: SubsidyService
   ) {}
 
   @ApiOperation({
@@ -155,7 +158,7 @@ export class AccountsController {
   })
   @Get(':account/subsidy')
   async getSubsidy(@Param() { account }: AccountParamsDto, @Res() res: Response): Promise<void> {
-    const result = await this.accountsService.getSubsidy(account);
+    const result = await this.subsidyService.getSubsidy(account);
 
     if (result) {
       res.status(HttpStatus.OK).json(createSubsidyModel(result));

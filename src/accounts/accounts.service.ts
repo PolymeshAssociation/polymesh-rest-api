@@ -6,7 +6,6 @@ import {
   ExtrinsicData,
   Permissions,
   ResultSet,
-  SubsidyWithAllowance,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
@@ -92,11 +91,6 @@ export class AccountsService {
       }
       throw err;
     }
-  }
-
-  public async getSubsidy(address: string): Promise<SubsidyWithAllowance | null> {
-    const account = await this.findOne(address);
-    return account.getSubsidy();
   }
 
   public async freezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {

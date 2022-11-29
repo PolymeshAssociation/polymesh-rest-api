@@ -26,6 +26,7 @@ import { ScheduleModule } from '~/schedule/schedule.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
 import { SigningModule } from '~/signing/signing.module';
 import { SubscriptionsModule } from '~/subscriptions/subscriptions.module';
+import { SubsidyModule } from '~/subsidy/subsidy.module';
 import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
 import { UsersModule } from '~/users/users.module';
@@ -85,6 +86,7 @@ import { UsersModule } from '~/users/users.module';
     AuthModule,
     UsersModule,
     DeveloperTestingModule.register(),
+    SubsidyModule,
   ],
 })
 export class AppModule {}
