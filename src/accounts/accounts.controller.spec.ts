@@ -14,6 +14,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
 import { NetworkService } from '~/network/network.service';
+import { SubsidyService } from '~/subsidy/subsidy.service';
 import { testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
@@ -21,7 +22,11 @@ import {
   MockPortfolio,
   MockSubsidy,
 } from '~/test-utils/mocks';
-import { MockAccountsService, mockNetworkServiceProvider } from '~/test-utils/service-mocks';
+import {
+  MockAccountsService,
+  mockNetworkServiceProvider,
+  mockSubsidyServiceProvider,
+} from '~/test-utils/service-mocks';
 
 const { signer, did, testAccount } = testValues;
 
@@ -29,16 +34,18 @@ describe('AccountsController', () => {
   let controller: AccountsController;
   let mockNetworkService: DeepMocked<NetworkService>;
   const mockAccountsService = new MockAccountsService();
+  let mockSubsidyService: DeepMocked<SubsidyService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountsController],
-      providers: [AccountsService, mockNetworkServiceProvider],
+      providers: [AccountsService, mockNetworkServiceProvider, mockSubsidyServiceProvider],
     })
       .overrideProvider(AccountsService)
       .useValue(mockAccountsService)
       .compile();
     mockNetworkService = mockNetworkServiceProvider.useValue as DeepMocked<NetworkService>;
+    mockSubsidyService = mockSubsidyServiceProvider.useValue as DeepMocked<SubsidyService>;
     controller = module.get<AccountsController>(AccountsController);
   });
 
@@ -176,7 +183,7 @@ describe('AccountsController', () => {
       mockResponse = createMockResponseObject();
     });
     it(`should return the ${HttpStatus.NO_CONTENT} if the Account has no subsidy`, async () => {
-      mockAccountsService.getSubsidy.mockResolvedValue(null);
+      mockSubsidyService.getSubsidy.mockResolvedValue(null);
 
       await controller.getSubsidy({ account: 'someAccount' }, mockResponse);
 
@@ -188,7 +195,8 @@ describe('AccountsController', () => {
         subsidy: new MockSubsidy(),
         allowance: new BigNumber(10),
       };
-      mockAccountsService.getSubsidy.mockResolvedValue(subsidyWithAllowance);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSubsidyService.getSubsidy.mockResolvedValue(subsidyWithAllowance as any);
 
       await controller.getSubsidy({ account: 'someAccount' }, mockResponse);
 

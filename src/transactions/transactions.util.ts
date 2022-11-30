@@ -97,7 +97,7 @@ export async function processTransaction<
       transactions: [assembleTransactionResponse(procedure)],
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
-    handleSdkError(err as any);
+    handleSdkError(err as Error);
   }
 }
 

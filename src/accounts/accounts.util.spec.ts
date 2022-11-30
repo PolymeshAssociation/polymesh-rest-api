@@ -11,17 +11,14 @@ import {
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import {
-  createPermissionedAccountModel,
-  createPermissionsModel,
-  createSubsidyModel,
-} from '~/accounts/accounts.util';
+import { createPermissionedAccountModel, createPermissionsModel } from '~/accounts/accounts.util';
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissions.model';
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
 import { AccountModel } from '~/identities/models/account.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
+import { createSubsidyModel } from '~/subsidy/subsidy.util';
 import { testValues } from '~/test-utils/consts';
 import { MockAccount, MockAsset, MockPortfolio, MockSubsidy } from '~/test-utils/mocks';
 

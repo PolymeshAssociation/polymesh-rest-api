@@ -86,8 +86,8 @@ export class TransactionsService {
           this.legitimacySecret
         );
       }
-    } catch (error: any) {
-      handleSdkError(error);
+    } catch (error) {
+      handleSdkError(error as Error);
     }
   }
 

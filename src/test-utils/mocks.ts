@@ -76,6 +76,8 @@ export class MockPolymesh {
     unfreezeSecondaryAccounts: jest.fn(),
     revokePermissions: jest.fn(),
     modifyPermissions: jest.fn(),
+    subsidizeAccount: jest.fn(),
+    getSubsidy: jest.fn(),
   };
 
   public identities = {
@@ -216,7 +218,7 @@ export class MockIdentity {
   authorizations = new MockIdentityAuthorization();
   public getPrimaryAccount = jest.fn();
   public areSecondaryAccountsFrozen = jest.fn();
-  public getPendingInstructions = jest.fn();
+  public getInstructions = jest.fn();
   public getVenues = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryAccounts = jest.fn();
@@ -351,4 +353,9 @@ export class MockAccount {
 export class MockSubsidy {
   beneficiary = new MockAccount('beneficiary');
   subsidizer = new MockAccount('subsidizer');
+  getAllowance = jest.fn();
+  quit = jest.fn();
+  increaseAllowance = jest.fn();
+  decreaseAllowance = jest.fn();
+  setAllowance = jest.fn();
 }
