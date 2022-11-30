@@ -64,7 +64,7 @@ describe('MetadataController', () => {
   });
 
   describe('getSingleMetadata', () => {
-    it('should return the list of all trusted Claim Issuers of an Asset', async () => {
+    it('should return the Metadata details for a specific type and ID', async () => {
       const mockMetadataEntry = new MockMetadataEntry();
       const mockDetails = {
         name: 'Some metadata',
