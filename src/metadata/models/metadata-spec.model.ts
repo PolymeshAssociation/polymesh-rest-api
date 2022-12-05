@@ -6,21 +6,22 @@ export class MetadataSpecModel {
   @ApiPropertyOptional({
     description: 'Off-chain specs or documentation link',
     type: 'string',
-    example: 'https://www.someexample.com',
+    example: 'https://example.com',
   })
   readonly url?: string;
 
   @ApiPropertyOptional({
-    description: 'Description of metadata type',
+    description: 'Description of the Metadata type',
     type: 'string',
-    example: 'https://www.someexample.com',
+    example: 'Some description',
   })
   readonly description?: string;
 
   @ApiPropertyOptional({
-    description: 'SCALE encoded `AssetMetadataTypeDef`',
+    description:
+      '[SCALE](https://wiki.polkadot.network/docs/build-tools-index#scale-codec) encoded `AssetMetadataTypeDef`',
     type: 'string',
-    example: 'https://www.someexample.com',
+    example: 'https://example.com',
   })
   readonly typedef?: string;
 

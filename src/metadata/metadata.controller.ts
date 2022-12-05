@@ -1,5 +1,11 @@
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MetadataEntry, MetadataType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -79,6 +85,9 @@ export class MetadataController {
     description: 'Details of an Asset Metadata including name, specs and value',
     type: MetadataDetailsModel,
   })
+  @ApiNotFoundResponse({
+    description: 'Asset Metadata does not exists',
+  })
   @Get(':type/:id')
   public async getSingleMetadata(
     @Param() params: MetadataParamsDto
@@ -100,7 +109,7 @@ export class MetadataController {
     example: 'TICKER',
   })
   @ApiTransactionResponse({
-    description: 'Newly created Metadata entry along with transaction details',
+    description: 'The newly created Metadata entry along with transaction details',
     type: CreatedMetadataEntryModel,
   })
   @ApiTransactionFailedResponse({
@@ -139,13 +148,13 @@ export class MetadataController {
   }
 
   @ApiOperation({
-    summary: 'Set Asset Metadata value and/or its details',
+    summary: "Set an Asset's Metadata value and details",
     description:
-      'This endpoint assigns a new value for the Metadata along with its details or optionally only set the details (expiry + lock status) of the Metadata value. Note that the value of a locked Metadata cannot be altered',
+      'This endpoint assigns a new value for the Metadata along with its expiry and lock status (when provided with `details`) of the Metadata value. Note that the value of a locked Metadata cannot be altered',
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset for which the metadata value is to be set',
+    description: 'The ticker of the Asset for which the Metadata value is to be set',
     type: 'string',
     example: 'TICKER',
   })
@@ -166,12 +175,12 @@ export class MetadataController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    [HttpStatus.NOT_FOUND]: ['The Asset was not found'],
+    [HttpStatus.NOT_FOUND]: ['The Asset was not found', 'Asset Metadata does not exists'],
     [HttpStatus.BAD_REQUEST]: ['Asset Metadata name length exceeded'],
     [HttpStatus.UNPROCESSABLE_ENTITY]: [
       'Details cannot be set for a locked Metadata value',
       'Metadata value is currently locked',
-      'Metadata value details cannot be set for a metadata with no value',
+      'Details cannot be set for a metadata without a value',
     ],
   })
   @Post(':type/:id/set')

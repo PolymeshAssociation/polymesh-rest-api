@@ -18,6 +18,7 @@ import { MetadataService } from '~/metadata/metadata.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockMetadataEntry, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import {
   MockAssetService,
@@ -40,11 +41,13 @@ describe('MetadataService', () => {
   let ticker: string;
   let type: MetadataType;
   let id: BigNumber;
+  let signer: string;
 
   beforeEach(async () => {
     ticker = 'TICKER';
     type = MetadataType.Local;
     id = new BigNumber(1);
+    signer = testValues.signer;
     mockPolymeshApi = new MockPolymesh();
 
     mockTransactionsService = mockTransactionsProvider.useValue;
@@ -124,7 +127,7 @@ describe('MetadataService', () => {
     });
 
     describe('if the Metadata does not exist', () => {
-      it('should throw a NotFoundException', async () => {
+      it('should throw a NotFoundException', () => {
         const mockError = {
           code: ErrorCode.DataUnavailable,
           message: 'There is no Metadata with given type and id',
@@ -135,48 +138,25 @@ describe('MetadataService', () => {
 
         mockIsPolymeshError.mockReturnValue(true);
 
-        let error;
-        try {
-          await service.findOne({ ticker, type, id });
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
+        return expect(service.findOne({ ticker, type, id })).rejects.toBeInstanceOf(
+          NotFoundException
+        );
       });
     });
+
     describe('if there is a different error', () => {
       it('should pass the error along the chain', async () => {
-        let expectedError = new Error('foo');
+        const expectedError = new Error('foo');
         mockAsset.metadata.getOne.mockImplementation(() => {
           throw expectedError;
         });
 
-        let error;
-        try {
-          await service.findOne({ ticker, type, id });
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-
-        expectedError = new Error('Something else');
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        error = null;
-        try {
-          await service.findOne({ ticker, type, id });
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
+        await expect(service.findOne({ ticker, type, id })).rejects.toThrowError('foo');
       });
     });
+
     describe('otherwise', () => {
-      it('should return the Asset', async () => {
+      it('should return the Metadata entry', async () => {
         const mockMetadataEntry = new MockMetadataEntry();
         mockAsset.metadata.getOne.mockReturnValue(mockMetadataEntry);
 
@@ -206,7 +186,6 @@ describe('MetadataService', () => {
         transactions: [mockTransaction],
       });
 
-      const signer = 'signer';
       const body = {
         signer,
         name: 'Some Metadata',
@@ -250,7 +229,6 @@ describe('MetadataService', () => {
         transactions: [mockTransaction],
       });
 
-      const signer = 'signer';
       const body = {
         signer,
         value: 'some value',

@@ -8,14 +8,14 @@ import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class MetadataEntryModel {
   @ApiProperty({
-    description: 'Ticker of the Asset for which this is the metadata',
+    description: 'The ticker of the Asset for which this is the Metadata for',
     type: 'string',
     example: 'TICKER',
   })
   readonly asset: string;
 
   @ApiProperty({
-    description: 'Type of metadata represented by this instance',
+    description: 'The type of metadata represented by this instance',
     type: 'string',
     enum: MetadataType,
   })

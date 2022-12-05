@@ -26,7 +26,7 @@ export class MetadataValueDetailsDto {
 
   @ApiPropertyOptional({
     description:
-      'Date till which the Metadata value will be locked. This only applies when `status` is `LockedUntil`',
+      'Date till which the Metadata value will be locked. This is required when `status` is `LockedUntil`',
     type: 'string',
     example: new Date('05/23/2021').toISOString(),
   })

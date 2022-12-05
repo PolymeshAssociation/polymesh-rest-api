@@ -27,7 +27,7 @@ export class CreateMetadataDto extends TransactionBaseDto {
   @ApiPropertyOptional({
     description: 'Value for the Asset Metadata',
     type: 'string',
-    example: 'SOME_VALUE',
+    example: 'Some value',
   })
   @ValidateIf(({ details, value }: CreateMetadataDto) => !!value || !!details)
   @IsString()

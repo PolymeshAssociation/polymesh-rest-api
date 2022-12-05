@@ -1,11 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
-  ErrorCode,
   GlobalMetadataKey,
   MetadataEntry,
   SetMetadataParams,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { ServiceReturn } from '~/common/utils';
@@ -14,6 +12,7 @@ import { MetadataParamsDto } from '~/metadata/dto/metadata-params.dto';
 import { SetMetadataDto } from '~/metadata/dto/set-metadata.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class MetadataService {
@@ -39,14 +38,7 @@ export class MetadataService {
     try {
       return await metadata.getOne({ type, id });
     } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          throw new NotFoundException(message);
-        }
-      }
-
-      throw err;
+      handleSdkError(err as Error);
     }
   }
 

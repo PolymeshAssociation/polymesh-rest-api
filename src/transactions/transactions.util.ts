@@ -113,6 +113,7 @@ export function handleSdkError(err: Error): never {
       case ErrorCode.LimitExceeded:
         throw new UnprocessableEntityException(message);
       case ErrorCode.DataUnavailable:
+        console.log('hjere');
         throw new NotFoundException(message);
       default:
         throw new InternalServerErrorException(message);
