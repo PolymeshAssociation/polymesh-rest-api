@@ -18,7 +18,7 @@ import { CreatedMetadataEntryModel } from '~/metadata/models/created-metadata-en
 import { MetadataDetailsModel } from '~/metadata/models/metadata-details.model';
 import { MetadataEntryModel } from '~/metadata/models/metadata-entry.model';
 import { MetadataValueModel } from '~/metadata/models/metadata-value.model';
-import { createMockTransactionResult, MockMetadataEntry } from '~/test-utils/mocks';
+import { createMockMetadataEntry, createMockTransactionResult } from '~/test-utils/mocks';
 import { mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
 describe('MetadataController', () => {
@@ -49,11 +49,8 @@ describe('MetadataController', () => {
 
   describe('getMetadata', () => {
     it('should return the list of all metadata for a given ticker', async () => {
-      const mockMetadataEntry = new MockMetadataEntry();
-      when(mockService.findAll)
-        .calledWith(ticker)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValue([mockMetadataEntry as any]);
+      const mockMetadataEntry = createMockMetadataEntry();
+      when(mockService.findAll).calledWith(ticker).mockResolvedValue([mockMetadataEntry]);
 
       const result = await controller.getMetadata({ ticker });
 
@@ -65,7 +62,7 @@ describe('MetadataController', () => {
 
   describe('getSingleMetadata', () => {
     it('should return the Metadata details for a specific type and ID', async () => {
-      const mockMetadataEntry = new MockMetadataEntry();
+      const mockMetadataEntry = createMockMetadataEntry();
       const mockDetails = {
         name: 'Some metadata',
         specs: {
@@ -85,8 +82,7 @@ describe('MetadataController', () => {
 
       when(mockService.findOne)
         .calledWith({ ticker, type, id })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValue(mockMetadataEntry as any);
+        .mockResolvedValue(mockMetadataEntry);
 
       const result = await controller.getSingleMetadata({ ticker, type, id });
 
@@ -111,8 +107,8 @@ describe('MetadataController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.asset.RegisterAssetMetadataLocalType,
       };
-      const mockMetadataEntry = new MockMetadataEntry();
-      const testTxResult = createMockTransactionResult<MockMetadataEntry>({
+      const mockMetadataEntry = createMockMetadataEntry();
+      const testTxResult = createMockTransactionResult<MetadataEntry>({
         transactions: [transaction],
         result: mockMetadataEntry,
       });
@@ -124,10 +120,7 @@ describe('MetadataController', () => {
         signer: 'Alice',
       };
 
-      when(mockService.create)
-        .calledWith(ticker, mockPayload)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValue(testTxResult as any);
+      when(mockService.create).calledWith(ticker, mockPayload).mockResolvedValue(testTxResult);
 
       const result = await controller.createMetadata({ ticker }, mockPayload);
 

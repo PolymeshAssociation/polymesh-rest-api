@@ -19,7 +19,12 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
-import { MockAsset, MockMetadataEntry, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockMetadataEntry,
+  MockAsset,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockAssetService,
   mockTransactionsProvider,
@@ -101,7 +106,7 @@ describe('MetadataService', () => {
 
   describe('findAll', () => {
     it('should return all Metadata entries for a given ticker', async () => {
-      const metadata = [new MockMetadataEntry()];
+      const metadata = [createMockMetadataEntry()];
       const mockAsset = new MockAsset();
       mockAsset.metadata.get.mockResolvedValue(metadata);
 
@@ -157,7 +162,7 @@ describe('MetadataService', () => {
 
     describe('otherwise', () => {
       it('should return the Metadata entry', async () => {
-        const mockMetadataEntry = new MockMetadataEntry();
+        const mockMetadataEntry = createMockMetadataEntry();
         mockAsset.metadata.getOne.mockReturnValue(mockMetadataEntry);
 
         const result = await service.findOne({ ticker, type, id });
@@ -169,7 +174,7 @@ describe('MetadataService', () => {
 
   describe('create', () => {
     it('should run a register procedure and return the queue results', async () => {
-      const mockMetadataEntry = new MockMetadataEntry();
+      const mockMetadataEntry = createMockMetadataEntry();
       const mockTransactions = {
         blockHash: '0x1',
         txHash: '0x2',
@@ -209,7 +214,7 @@ describe('MetadataService', () => {
 
   describe('setValue', () => {
     it('should run a set procedure and return the queue results', async () => {
-      const mockMetadataEntry = new MockMetadataEntry();
+      const mockMetadataEntry = createMockMetadataEntry();
       const mockTransactions = {
         blockHash: '0x1',
         txHash: '0x2',

@@ -1,10 +1,11 @@
 /* istanbul ignore file */
 
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
+  MetadataEntry,
   MetadataType,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -360,12 +361,12 @@ export class MockSubsidy {
   subsidizer = new MockAccount('subsidizer');
 }
 
-export class MockMetadataEntry {
-  id = new BigNumber(1);
-  type = MetadataType.Local;
-  asset = new MockAsset();
-
-  details = jest.fn();
-  value = jest.fn();
-  set = jest.fn();
+export function createMockMetadataEntry(
+  partial: PartialFuncReturn<MetadataEntry> = {
+    id: new BigNumber(1),
+    type: MetadataType.Local,
+    asset: { ticker: 'TICKER' },
+  }
+): DeepMocked<MetadataEntry> {
+  return createMock<MetadataEntry>(partial);
 }
