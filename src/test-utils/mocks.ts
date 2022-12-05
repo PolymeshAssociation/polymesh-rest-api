@@ -302,7 +302,7 @@ class MockPolymeshTransactionBase {
   getTotalFees = jest.fn().mockReturnValue(
     Promise.resolve({
       total: new BigNumber(1),
-      payingAccountData: { account: { address: '0x06'.padEnd(66, '0') } },
+      payingAccountData: { account: { address: 'address' } },
     })
   );
 

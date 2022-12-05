@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Account,
   ErrorCode,
   Fees,
   GenericPolymeshTransaction,
   NoArgsProcedureMethod,
   PayingAccount,
-  PayingAccountFees,
   ProcedureMethod,
   ProcedureOpts,
   TransactionStatus,
@@ -29,11 +29,10 @@ export type TransactionDetails = {
   status: TransactionStatus;
   fees: Fees;
   supportsSubsidy: boolean;
-  payingAccount: {
-    address: PayingAccount['account']['address'];
-    balance: BigNumber;
-    type: PayingAccount['type'];
-  };
+  payingAccount: Pick<PayingAccount, 'type'> &
+    Pick<Account, 'address'> & {
+      balance: BigNumber;
+    };
 };
 
 export type TransactionResult<T> = {
@@ -75,17 +74,12 @@ export async function processTransaction<
 ): Promise<TransactionResult<TransformedReturnType>> {
   try {
     const procedure = await prepareProcedure(method, args, opts);
-
-    const batch: [
-      feesPromise: Promise<PayingAccountFees>,
-      resultPromise: Promise<TransformedReturnType>
-    ] = [
-      procedure.getTotalFees(),
-      dryRun ? Promise.resolve({} as TransformedReturnType) : procedure.run(),
-    ];
-
     const supportsSubsidy = procedure.supportsSubsidy();
-    const [totalFees, result] = await Promise.all<PayingAccountFees, TransformedReturnType>(batch);
+
+    const [totalFees, result] = await Promise.all([
+      procedure.getTotalFees(),
+      dryRun ? ({} as TransformedReturnType) : procedure.run(),
+    ]);
 
     const {
       fees,
@@ -143,10 +137,7 @@ export async function processTransaction<
     return {
       result,
       transactions: [assembleTransactionResponse(procedure)],
-      details: {
-        ...details,
-        status: procedure.status,
-      },
+      details,
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
     handleSdkError(err);

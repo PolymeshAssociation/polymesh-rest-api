@@ -6,15 +6,27 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class FeesModel {
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({
+    type: 'string',
+    description: 'The amount of POLYX that will be charged for the transaction as protocol fee',
+    example: '0.5',
+  })
   @FromBigNumber()
   readonly protocol: BigNumber;
 
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({
+    type: 'string',
+    description: 'The amount of POLYX that will be charged for the transaction as GAS fee',
+    example: '0.5',
+  })
   @FromBigNumber()
   readonly gas: BigNumber;
 
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({
+    type: 'string',
+    description: 'The total amount of POLYX that will be charged for the transaction',
+    example: '1',
+  })
   @FromBigNumber()
   readonly total: BigNumber;
 

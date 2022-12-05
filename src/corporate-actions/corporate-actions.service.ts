@@ -73,14 +73,17 @@ export class CorporateActionsService {
     ticker: string,
     dividendDistributionDto: DividendDistributionDto
   ): ServiceReturn<DividendDistribution> {
-    const { base, args } = extractTxBase(dividendDistributionDto);
+    const {
+      base,
+      args: { originPortfolio, ...rest },
+    } = extractTxBase(dividendDistributionDto);
 
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionService.submit(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
-        ...args,
-        originPortfolio: toPortfolioId(args.originPortfolio),
+        ...rest,
+        originPortfolio: toPortfolioId(originPortfolio),
       },
       base
     );
@@ -115,12 +118,15 @@ export class CorporateActionsService {
     id: BigNumber,
     linkDocumentsDto: LinkDocumentsDto
   ): ServiceReturn<void> {
-    const { base, args } = extractTxBase(linkDocumentsDto);
+    const {
+      base,
+      args: { documents },
+    } = extractTxBase(linkDocumentsDto);
 
     const { distribution } = await this.findDistribution(ticker, id);
 
     const params = {
-      documents: args.documents.map(document => document.toAssetDocument()),
+      documents: documents.map(document => document.toAssetDocument()),
     };
     return this.transactionService.submit(distribution.linkDocuments, params, base);
   }

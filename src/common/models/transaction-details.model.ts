@@ -2,6 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import { Type } from 'class-transformer';
 
 import { FeesModel } from '~/common/models/fees.model';
 import { PayingAccountModel } from '~/common/models/paying-account.model';
@@ -15,13 +16,13 @@ export class TransactionDetailsModel {
   readonly status: string;
 
   @ApiProperty({ description: 'Transaction fees', type: FeesModel })
+  @Type(() => FeesModel)
   readonly fees: FeesModel;
 
   @ApiProperty({
     type: 'boolean',
     example: true,
-    description:
-      'Not all transaction can be subsidized. Can be used to check if the transaction can be subsidized',
+    description: 'Indicates if the transaction can be subsidized',
   })
   readonly supportsSubsidy: boolean;
 
@@ -29,14 +30,15 @@ export class TransactionDetailsModel {
     description: 'Paying account details',
     type: PayingAccountModel,
   })
+  @Type(() => PayingAccountModel)
   readonly payingAccount: PayingAccountModel;
 
   constructor({ status, fees, supportsSubsidy, payingAccount }: TransactionDetailsModel) {
     Object.assign(this, {
       status,
       supportsSubsidy,
-      payingAccount: new PayingAccountModel(payingAccount),
-      fees: new FeesModel(fees),
+      payingAccount,
+      fees,
     });
   }
 }

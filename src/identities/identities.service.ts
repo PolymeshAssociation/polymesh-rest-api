@@ -67,11 +67,14 @@ export class IdentitiesService {
   public async addSecondaryAccount(
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { base, args } = extractTxBase(addSecondaryAccountParamsDto);
+    const {
+      base,
+      args: { secondaryAccount: targetAccount, permissions, expiry },
+    } = extractTxBase(addSecondaryAccountParamsDto);
     const params = {
-      targetAccount: args.secondaryAccount,
-      permissions: args.permissions?.toPermissionsLike(),
-      expiry: args.expiry,
+      targetAccount,
+      permissions: permissions?.toPermissionsLike(),
+      expiry,
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
 

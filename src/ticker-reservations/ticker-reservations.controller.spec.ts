@@ -75,8 +75,8 @@ describe('TickerReservationsController', () => {
       const result = await controller.transferOwnership({ ticker }, body);
 
       expect(result).toEqual({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...txResult,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
       expect(mockTickerReservationsService.transferOwnership).toHaveBeenCalledWith(ticker, body);

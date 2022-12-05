@@ -21,7 +21,7 @@ export class TransactionBaseDto {
   @ApiProperty({
     description:
       'An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain',
-    example: true,
+    example: false,
   })
   @IsBoolean()
   @IsOptional()

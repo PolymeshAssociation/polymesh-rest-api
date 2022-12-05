@@ -53,8 +53,10 @@ export class PortfoliosService {
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
-    const { to, items, from } = args;
+    const {
+      base,
+      args: { to, items, from },
+    } = extractTxBase(params);
 
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
     const formattedArgs = {

@@ -39,9 +39,10 @@ export class TransactionQueueModel {
     description: 'Transaction details',
     isArray: true,
   })
+  @Type(() => TransactionDetailsModel)
   details: TransactionDetailsModel;
 
-  constructor({ details, ...rest }: TransactionQueueModel) {
-    Object.assign(this, { ...rest, details: new TransactionDetailsModel(details) });
+  constructor(transactionDetails: TransactionQueueModel) {
+    Object.assign(this, transactionDetails);
   }
 }
