@@ -5,7 +5,10 @@ import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
+import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { MetadataService } from '~/metadata/metadata.service';
+import { NetworkService } from '~/network/network.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -48,6 +51,12 @@ export class MockComplianceRequirementsService {
   modify = jest.fn();
 }
 
+export const mockComplianceRequirementsServiceProvider: ValueProvider<ComplianceRequirementsService> =
+  {
+    provide: ComplianceRequirementsService,
+    useValue: createMock<ComplianceRequirementsService>(),
+  };
+
 export class MockSigningService {
   public getAddressByHandle = jest.fn();
 }
@@ -79,6 +88,7 @@ export class MockAccountsService {
   unfreezeSecondaryAccounts = jest.fn();
   modifyPermissions = jest.fn();
   revokePermissions = jest.fn();
+  getTreasuryAccount = jest.fn();
 }
 
 export class MockEventsService {
@@ -202,6 +212,11 @@ export const mockTrustedClaimIssuersServiceProvider: ValueProvider<TrustedClaimI
   useValue: createMock<TrustedClaimIssuersService>(),
 };
 
+export const mockMetadataServiceProvider: ValueProvider<MetadataService> = {
+  provide: MetadataService,
+  useValue: createMock<MetadataService>(),
+};
+
 /**
  * Given a set of key values to use as config, will wrap and return as a Nest "provider" for config
  */
@@ -221,7 +236,8 @@ export const makeMockConfigProvider = (config: Record<string, unknown>): Service
     provide: ConfigService,
   };
 };
-export class MockNetworkService {
-  getNetworkProperties = jest.fn();
-  getLatestBlock = jest.fn();
-}
+
+export const mockNetworkServiceProvider: ValueProvider<NetworkService> = {
+  provide: NetworkService,
+  useValue: createMock<NetworkService>(),
+};

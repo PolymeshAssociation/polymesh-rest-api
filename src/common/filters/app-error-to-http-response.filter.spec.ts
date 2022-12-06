@@ -4,7 +4,9 @@ import { HttpAdapterHost } from '@nestjs/core';
 
 import { AppConfigError, AppConflictError, AppError, AppNotFoundError } from '~/common/errors';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
-import { testResource } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
+
+const { resource } = testValues;
 
 type ExpectedReplyArgs = [{ message: string; statusCode: number }, HttpStatus];
 type Case = [AppError, ExpectedReplyArgs];
@@ -16,8 +18,8 @@ describe('AppErrorToHttpResponseFilter', () => {
   const mockHost = createMock<ArgumentsHost>();
   const errorToHttpResponseFilter = new AppErrorToHttpResponseFilter(mockHttpAdaptorHost);
 
-  const notFoundError = new AppNotFoundError(testResource.id, testResource.type);
-  const conflictError = new AppConflictError(testResource.id, testResource.type);
+  const notFoundError = new AppNotFoundError(resource.id, resource.type);
+  const conflictError = new AppConflictError(resource.id, resource.type);
   const configError = new AppConfigError('TEST_CONFIG', 'is a test error');
 
   const cases: Case[] = [
@@ -31,7 +33,7 @@ describe('AppErrorToHttpResponseFilter', () => {
 
   test.each(cases)('should transform %p into %p', async (error, expected) => {
     errorToHttpResponseFilter.catch(error, mockHost);
-    expect(mockReplyFn).toHaveBeenCalledWith({}, ...expected);
+    return expect(mockReplyFn).toHaveBeenCalledWith({}, ...expected);
   });
 
   it('should throw if an unknown Error is encountered', () => {

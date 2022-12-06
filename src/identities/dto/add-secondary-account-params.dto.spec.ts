@@ -8,13 +8,15 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { testValues } from '~/test-utils/consts';
+
+const { signer, did } = testValues;
 
 type ValidInviteCase = [string, Record<string, unknown>];
 type InvalidInviteCase = [string, Record<string, unknown>, string[]];
 
 describe('addSecondaryAccountParamsDto', () => {
   const target: ValidationPipe = new ValidationPipe({ transform: true });
-  const signer = '0x6'.padEnd(66, '0');
   const metadata: ArgumentMetadata = {
     type: 'body',
     metatype: AddSecondaryAccountParamsDto,
@@ -71,11 +73,11 @@ describe('addSecondaryAccountParamsDto', () => {
               values: [
                 {
                   id: new BigNumber(1),
-                  did: '0x6'.padEnd(66, '0'),
+                  did,
                 },
                 {
                   id: new BigNumber(2),
-                  did: '0x6'.padEnd(66, '0'),
+                  did,
                 },
               ],
               type: PermissionType.Exclude,
@@ -97,11 +99,11 @@ describe('addSecondaryAccountParamsDto', () => {
               values: [
                 {
                   id: new BigNumber(1),
-                  did: '0x6'.padEnd(66, '0'),
+                  did,
                 },
                 {
                   id: new BigNumber(2),
-                  did: '0x6'.padEnd(66, '0'),
+                  did,
                 },
               ],
               type: PermissionType.Exclude,

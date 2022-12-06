@@ -1,10 +1,12 @@
 /* istanbul ignore file */
 
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
+  MetadataEntry,
+  MetadataType,
   TransactionStatus,
   TrustedClaimIssuer,
   TxTag,
@@ -12,7 +14,10 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { testValues } from '~/test-utils/consts';
 import { TransactionResult } from '~/transactions/transactions.util';
+
+const { did } = testValues;
 
 export type Mocked<T> = T &
   {
@@ -53,6 +58,7 @@ export class MockPolymesh {
     transferPolyx: jest.fn(),
     getSs58Format: jest.fn(),
     getNetworkProperties: jest.fn(),
+    getTreasuryAccount: jest.fn(),
   };
 
   public assets = {
@@ -62,6 +68,7 @@ export class MockPolymesh {
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
     getTickerReservations: jest.fn(),
+    getGlobalMetadataKeys: jest.fn(),
   };
 
   public accountManagement = {
@@ -132,6 +139,7 @@ export class MockAsset {
     requirements: {
       get: jest.fn(),
       set: jest.fn(),
+      arePaused: jest.fn(),
     },
     trustedClaimIssuers: {
       get: jest.fn(),
@@ -173,6 +181,12 @@ export class MockAsset {
     issue: jest.fn(),
   };
 
+  public metadata = {
+    register: jest.fn(),
+    get: jest.fn(),
+    getOne: jest.fn(),
+  };
+
   public toHuman = jest.fn().mockImplementation(() => this.ticker);
 }
 
@@ -206,12 +220,12 @@ export class MockPortfolios {
 }
 
 export class MockIdentity {
-  did = '0x06'.padEnd(66, '0');
+  did = did;
   portfolios = new MockPortfolios();
   authorizations = new MockIdentityAuthorization();
   public getPrimaryAccount = jest.fn();
   public areSecondaryAccountsFrozen = jest.fn();
-  public getPendingInstructions = jest.fn();
+  public getInstructions = jest.fn();
   public getVenues = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryAccounts = jest.fn();
@@ -229,7 +243,7 @@ export class MockPortfolio {
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',
-      did: '0x06'.padEnd(66, '0'),
+      did,
     };
   });
 }
@@ -258,14 +272,14 @@ export class MockAuthorizationRequest {
   data = {
     type: AuthorizationType.PortfolioCustody,
     value: {
-      did: '0x6'.padEnd(66, '1a'),
+      did,
       id: new BigNumber(1),
     },
   };
 
   issuer = new MockIdentity();
   target = {
-    did: '0x6'.padEnd(66, '1a'),
+    did,
   };
 
   public accept = jest.fn();
@@ -346,4 +360,14 @@ export class MockAccount {
 export class MockSubsidy {
   beneficiary = new MockAccount('beneficiary');
   subsidizer = new MockAccount('subsidizer');
+}
+
+export function createMockMetadataEntry(
+  partial: PartialFuncReturn<MetadataEntry> = {
+    id: new BigNumber(1),
+    type: MetadataType.Local,
+    asset: { ticker: 'TICKER' },
+  }
+): DeepMocked<MetadataEntry> {
+  return createMock<MetadataEntry>(partial);
 }

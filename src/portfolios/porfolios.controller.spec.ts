@@ -1,5 +1,3 @@
-/* eslint-disable import/first */
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
@@ -9,8 +7,11 @@ import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
+import { testValues } from '~/test-utils/consts';
 import { MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
+
+const { did, signer } = testValues;
 
 describe('PortfoliosController', () => {
   let controller: PortfoliosController;
@@ -34,7 +35,6 @@ describe('PortfoliosController', () => {
 
   describe('getPortfolios', () => {
     it('should return list of all portfolios of an identity', async () => {
-      const did = '0x6'.padEnd(66, '0');
       const mockPortfolio = new MockPortfolio();
       mockPortfolio.getAssetBalances.mockResolvedValue([]);
       mockPortfolio.getCustodian.mockResolvedValue({ did });
@@ -76,7 +76,7 @@ describe('PortfoliosController', () => {
       };
       mockPortfoliosService.createPortfolio.mockResolvedValue(response);
       const params = {
-        signer: '0x06'.padEnd(66, '0'),
+        signer,
         name: 'FOLIO-1',
       };
 
@@ -85,7 +85,7 @@ describe('PortfoliosController', () => {
       expect(result).toEqual({
         portfolio: {
           id: '1',
-          did: '0x06'.padEnd(66, '0'),
+          did,
         },
         transactions: ['transaction'],
       });
@@ -100,8 +100,8 @@ describe('PortfoliosController', () => {
       mockPortfoliosService.deletePortfolio.mockResolvedValue(response);
 
       const result = await controller.deletePortfolio(
-        new PortfolioDto({ id: new BigNumber(1), did: '0x6'.padEnd(66, '0') }),
-        { signer: '0x6'.padEnd(66, '0') }
+        new PortfolioDto({ id: new BigNumber(1), did }),
+        { signer }
       );
 
       expect(result).toEqual({

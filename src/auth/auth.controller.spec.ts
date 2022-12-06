@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthController } from '~/auth/auth.controller';
-import { testUser } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { MockAuthService, mockAuthServiceProvider } from '~/test-utils/service-mocks';
+
+const { user } = testValues;
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -25,7 +27,7 @@ describe('AuthController', () => {
   describe('createApiKey', () => {
     it('should call the service and return the result', async () => {
       const fakeResult = 'fake-result';
-      const userName = testUser.name;
+      const userName = user.name;
       mockAuthService.createApiKey.mockResolvedValue(fakeResult);
 
       const result = await controller.createApiKey({ userName });

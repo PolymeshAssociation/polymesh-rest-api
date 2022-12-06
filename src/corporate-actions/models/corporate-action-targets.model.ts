@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Identity, TargetTreatment } from '@polymeshassociation/polymesh-sdk/types';
 
-import { FromMaybeEntityArray } from '~/common/decorators/transformation';
+import { FromEntityObject } from '~/common/decorators/transformation';
 
 export class CorporateActionTargetsModel {
   @ApiProperty({
@@ -24,7 +24,7 @@ export class CorporateActionTargetsModel {
       '0x0611111111111111111111111111111111111111111111111111111111111111',
     ],
   })
-  @FromMaybeEntityArray()
+  @FromEntityObject()
   readonly identities: Identity[];
 
   constructor(model: CorporateActionTargetsModel) {

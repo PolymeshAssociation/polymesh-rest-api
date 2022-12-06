@@ -20,6 +20,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningModule } from '~/signing/signing.module';
+import { testValues } from '~/test-utils/consts';
 import {
   MockAccount,
   MockAsset,
@@ -34,6 +35,8 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
+
+const { signer } = testValues;
 
 describe('AccountsService', () => {
   let service: AccountsService;
@@ -147,7 +150,6 @@ describe('AccountsService', () => {
       mockPolymeshApi.network.transferPolyx.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const signer = '0x6'.padEnd(66, '0');
       const body = {
         signer,
         to: 'address',
@@ -329,7 +331,6 @@ describe('AccountsService', () => {
       mockPolymeshApi.accountManagement.freezeSecondaryAccounts.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const signer = '0x6'.padEnd(66, '0');
       const body = {
         signer,
       };
@@ -361,7 +362,6 @@ describe('AccountsService', () => {
       );
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const signer = '0x6'.padEnd(66, '0');
       const body = {
         signer,
       };
@@ -391,7 +391,6 @@ describe('AccountsService', () => {
       mockPolymeshApi.accountManagement.revokePermissions.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const signer = '0x6'.padEnd(66, '0');
       const secondaryAccounts = ['someAddress'];
       const body = {
         signer,
@@ -424,7 +423,6 @@ describe('AccountsService', () => {
       mockPolymeshApi.accountManagement.modifyPermissions.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const signer = '0x6'.padEnd(66, '0');
       const account = 'someAddress';
       const permissions = {
         assets: null,

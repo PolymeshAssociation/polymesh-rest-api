@@ -5,10 +5,12 @@ import { when } from 'jest-when';
 import { AuthService } from '~/auth/auth.service';
 import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { AppNotFoundError } from '~/common/errors';
-import { testUser } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
 import { mockApiKeyRepoProvider, mockUserRepoProvider } from '~/test-utils/repo-mocks';
 import { mockUserServiceProvider } from '~/test-utils/service-mocks';
 import { UsersService } from '~/users/users.service';
+
+const { user } = testValues;
 
 describe('AuthService', () => {
   const testApiKey = 'authServiceSecret';
@@ -39,24 +41,24 @@ describe('AuthService', () => {
 
   describe('method: createApiKey', () => {
     it('should create an API key', async () => {
-      when(mockUsersService.getByName).calledWith(testUser.name).mockResolvedValue(testUser);
+      when(mockUsersService.getByName).calledWith(user.name).mockResolvedValue(user);
       when(mockApiKeyRepo.createApiKey)
-        .calledWith(testUser)
-        .mockResolvedValue({ userId: testUser.id, secret: testApiKey });
+        .calledWith(user)
+        .mockResolvedValue({ userId: user.id, secret: testApiKey });
 
-      const { userId, secret } = await service.createApiKey({ userName: testUser.name });
+      const { userId, secret } = await service.createApiKey({ userName: user.name });
 
-      expect(userId).toEqual(testUser.id);
+      expect(userId).toEqual(user.id);
       expect(secret.length).toBeGreaterThan(8);
     });
   });
 
   describe('method: validateApiKey', () => {
     it('should return the user when given a valid api key', async () => {
-      when(mockApiKeyRepo.getUserByApiKey).calledWith(testApiKey).mockResolvedValue(testUser);
+      when(mockApiKeyRepo.getUserByApiKey).calledWith(testApiKey).mockResolvedValue(user);
 
       const foundUser = await service.validateApiKey(testApiKey);
-      expect(foundUser).toEqual(testUser);
+      expect(foundUser).toEqual(user);
     });
 
     it('should throw a NotFoundError when given an unknown API key', () => {

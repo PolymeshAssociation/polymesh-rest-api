@@ -24,22 +24,6 @@ export function FromEntity() {
 }
 
 /**
- * Transforms every Entity in an array to its POJO version
- */
-export function FromMaybeEntityArray() {
-  return applyDecorators(
-    Transform(({ value }: { value: unknown[] }) =>
-      value.map(val => {
-        if (isEntity(val)) {
-          return val.toHuman();
-        }
-
-        return val;
-      })
-    )
-  );
-}
-/**
  * Transform all SDK Entities in the object/array into their serialized versions,
  *   or serialize the value if it is an SDK Entity in
  */
