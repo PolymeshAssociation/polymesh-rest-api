@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ErrorCode,
+  GroupedInstructions,
   Instruction,
   InstructionAffirmation,
   PortfolioLike,
@@ -31,10 +32,10 @@ export class SettlementsService {
     private readonly assetsService: AssetsService
   ) {}
 
-  public async findPendingInstructionsByDid(did: string): Promise<Instruction[]> {
+  public async findPendingInstructionsByDid(did: string): Promise<GroupedInstructions> {
     const identity = await this.identitiesService.findOne(did);
 
-    return identity.getPendingInstructions();
+    return identity.getInstructions();
   }
 
   public async findInstruction(id: BigNumber): Promise<Instruction> {

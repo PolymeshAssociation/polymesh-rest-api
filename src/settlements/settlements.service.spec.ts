@@ -93,13 +93,11 @@ describe('SettlementsService', () => {
       const mockIdentity = new MockIdentity();
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
 
-      const mockInstructions = [
-        { id: new BigNumber(1) },
-        { id: new BigNumber(2) },
-        { id: new BigNumber(3) },
-      ];
+      const mockInstructions = {
+        pending: [{ id: new BigNumber(1) }, { id: new BigNumber(2) }, { id: new BigNumber(3) }],
+      };
 
-      mockIdentity.getPendingInstructions.mockResolvedValue(mockInstructions);
+      mockIdentity.getInstructions.mockResolvedValue(mockInstructions);
 
       const result = await service.findPendingInstructionsByDid('0x01');
 
