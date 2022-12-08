@@ -32,15 +32,33 @@ import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
-import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
+import { MetadataService } from '~/metadata/metadata.service';
+import { GlobalMetadataModel } from '~/metadata/models/global-metadata.model';
 
 @ApiTags('assets')
 @Controller('assets')
 export class AssetsController {
   constructor(
     private readonly assetsService: AssetsService,
-    private readonly complianceRequirementsService: ComplianceRequirementsService
+    private readonly metadataService: MetadataService
   ) {}
+
+  @ApiTags('metadata')
+  @ApiOperation({
+    summary: 'Fetch an Global Asset Metadata',
+    description: 'This endpoint retrieves all the Asset Global Metadata on chain',
+  })
+  @ApiOkResponse({
+    description: 'List of Asset Global Metadata which includes id, name and specs',
+    isArray: true,
+    type: GlobalMetadataModel,
+  })
+  @Get('global-metadata')
+  public async getGlobalMetadataKeys(): Promise<GlobalMetadataModel[]> {
+    const result = await this.metadataService.findGlobalKeys();
+
+    return result.map(globalKey => new GlobalMetadataModel(globalKey));
+  }
 
   @ApiOperation({
     summary: 'Fetch Asset details',

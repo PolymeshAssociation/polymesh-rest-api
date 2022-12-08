@@ -17,6 +17,7 @@ import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.mo
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
+import { MetadataModule } from '~/metadata/metadata.module';
 import { NetworkModule } from '~/network/network.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
@@ -86,6 +87,7 @@ import { UsersModule } from '~/users/users.module';
     AuthModule,
     UsersModule,
     DeveloperTestingModule.register(),
+    MetadataModule,
     SubsidyModule,
   ],
 })

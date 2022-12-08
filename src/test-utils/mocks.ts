@@ -1,10 +1,12 @@
 /* istanbul ignore file */
 
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
+  MetadataEntry,
+  MetadataType,
   TransactionStatus,
   TrustedClaimIssuer,
   TxTag,
@@ -66,6 +68,7 @@ export class MockPolymesh {
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
     getTickerReservations: jest.fn(),
+    getGlobalMetadataKeys: jest.fn(),
   };
 
   public accountManagement = {
@@ -178,6 +181,12 @@ export class MockAsset {
 
   public issuance = {
     issue: jest.fn(),
+  };
+
+  public metadata = {
+    register: jest.fn(),
+    get: jest.fn(),
+    getOne: jest.fn(),
   };
 
   public toHuman = jest.fn().mockImplementation(() => this.ticker);
@@ -358,4 +367,14 @@ export class MockSubsidy {
   increaseAllowance = jest.fn();
   decreaseAllowance = jest.fn();
   setAllowance = jest.fn();
+}
+
+export function createMockMetadataEntry(
+  partial: PartialFuncReturn<MetadataEntry> = {
+    id: new BigNumber(1),
+    type: MetadataType.Local,
+    asset: { ticker: 'TICKER' },
+  }
+): DeepMocked<MetadataEntry> {
+  return createMock<MetadataEntry>(partial);
 }

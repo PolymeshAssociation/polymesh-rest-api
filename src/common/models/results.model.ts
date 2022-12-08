@@ -2,11 +2,11 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
-import { FromMaybeEntityArray } from '~/common/decorators/transformation';
+import { FromEntityObject } from '~/common/decorators/transformation';
 
 export class ResultsModel<DataType> {
   @ApiProperty({ type: 'generic array' })
-  @FromMaybeEntityArray()
+  @FromEntityObject()
   readonly results: DataType[];
 
   constructor(model: ResultsModel<DataType>) {
