@@ -221,6 +221,14 @@ describe('SubsidyService', () => {
         BadRequestException
       );
     });
+
+    it('should throw an error if both beneficiary and subsidizer are passed', () => {
+      mockTransactionsService.getSigningAccount.mockResolvedValueOnce('address');
+
+      return expect(() =>
+        service.quit({ signer: 'signer', beneficiary, subsidizer })
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
   });
 
   describe('modifyAllowance', () => {
@@ -236,7 +244,6 @@ describe('SubsidyService', () => {
         signer,
         beneficiary,
         allowance,
-        operation: AllowanceOperation.Set,
       };
 
       const mockTransactions = {
@@ -263,7 +270,7 @@ describe('SubsidyService', () => {
     });
 
     it('should run a setAllowance procedure and return the queue results', async () => {
-      const result = await service.modifyAllowance(body);
+      const result = await service.modifyAllowance(body, AllowanceOperation.Set);
       expect(result).toEqual({
         transactions: [mockTransaction],
       });
@@ -278,10 +285,7 @@ describe('SubsidyService', () => {
     });
 
     it('should run a increaseAllowance procedure and return the queue results', async () => {
-      const result = await service.modifyAllowance({
-        ...body,
-        operation: AllowanceOperation.Increase,
-      });
+      const result = await service.modifyAllowance(body, AllowanceOperation.Increase);
       expect(result).toEqual({
         transactions: [mockTransaction],
       });
@@ -296,10 +300,7 @@ describe('SubsidyService', () => {
     });
 
     it('should run a decreaseAllowance procedure and return the queue results', async () => {
-      const result = await service.modifyAllowance({
-        ...body,
-        operation: AllowanceOperation.Decrease,
-      });
+      const result = await service.modifyAllowance(body, AllowanceOperation.Decrease);
       expect(result).toEqual({
         transactions: [mockTransaction],
       });
@@ -353,6 +354,7 @@ describe('SubsidyService', () => {
         findOneSpy.mockRestore();
       });
     });
+
     describe('if there is a different error', () => {
       it('should pass the error along the chain', async () => {
         const expectedError = new Error('Something else');
@@ -368,6 +370,7 @@ describe('SubsidyService', () => {
         findOneSpy.mockRestore();
       });
     });
+
     describe('otherwise', () => {
       it('should return the Subsidy allowance', async () => {
         mockSubsidy.getAllowance.mockResolvedValue(allowance);

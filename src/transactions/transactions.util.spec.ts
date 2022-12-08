@@ -51,13 +51,21 @@ describe('processTransaction', () => {
   describe('it should handle non polymesh errors', () => {
     it('should transform errors into InternalServerException', async () => {
       const mockVenue = new MockVenue();
-      mockVenue.modify.mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = processTransaction(mockVenue.modify as any, {}, {});
+
+      mockVenue.modify.mockImplementationOnce(() => {
         throw new Error('Foo');
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await expect(processTransaction(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(
-        InternalServerErrorException
-      );
+
+      await expect(result).rejects.toBeInstanceOf(InternalServerErrorException);
+
+      mockVenue.modify.mockImplementationOnce(() => {
+        // eslint-disable-next-line no-throw-literal
+        throw 'Some unexpected error';
+      });
+
+      await expect(result).rejects.toBeInstanceOf(InternalServerErrorException);
     });
   });
 });

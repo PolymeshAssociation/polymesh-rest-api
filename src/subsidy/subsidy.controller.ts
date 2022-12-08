@@ -1,5 +1,12 @@
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AllowanceOperation } from '@polymeshassociation/polymesh-sdk/types';
 
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
@@ -14,6 +21,7 @@ import { SubsidyParamsDto } from '~/subsidy/dto/subsidy-params.dto';
 import { SubsidyModel } from '~/subsidy/models/subsidy.model';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 
+@ApiTags('accounts', 'subsidy')
 @Controller('accounts/subsidy')
 export class SubsidyController {
   constructor(private readonly subsidyService: SubsidyService) {}
@@ -75,22 +83,68 @@ export class SubsidyController {
   }
 
   @ApiOperation({
-    summary: 'Modify allowance for a Subsidy relationship an account',
+    summary: 'Set allowance for a Subsidy relationship',
     description:
-      'This endpoint allows to set/increase/decrease allowance of a Subsidy relationship. Note that only the subsidizer is allowed to modify the allowance',
+      'This endpoint allows to set allowance of a Subsidy relationship. Note that only the subsidizer is allowed to set the allowance',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    [HttpStatus.BAD_REQUEST]: [
-      'The Beneficiary Account already has a pending invitation to add this account as a subsidizer with the same allowance',
-    ],
+    [HttpStatus.BAD_REQUEST]: ['Amount of allowance to set is equal to the current allowance'],
+    [HttpStatus.NOT_FOUND]: ['The Subsidy no longer exists'],
   })
-  @Post('allowance/modify')
-  async modifyAllowance(@Body() params: ModifyAllowanceDto): Promise<TransactionResponseModel> {
-    const serviceResult = await this.subsidyService.modifyAllowance(params);
+  @Post('allowance/set')
+  async setAllowance(@Body() params: ModifyAllowanceDto): Promise<TransactionResponseModel> {
+    const serviceResult = await this.subsidyService.modifyAllowance(params, AllowanceOperation.Set);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Increase the allowance for a Subsidy relationship',
+    description:
+      'This endpoint allows to increase the allowance of a Subsidy relationship. Note that only the subsidizer is allowed to increase the allowance',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Subsidy no longer exists'],
+  })
+  @Post('allowance/increase')
+  async increaseAllowance(@Body() params: ModifyAllowanceDto): Promise<TransactionResponseModel> {
+    const serviceResult = await this.subsidyService.modifyAllowance(
+      params,
+      AllowanceOperation.Increase
+    );
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Decrease the allowance for a Subsidy relationship',
+    description:
+      'This endpoint allows to decrease the allowance of a Subsidy relationship. Note that only the subsidizer is allowed to decrease the allowance',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'Amount of allowance to decrease is more than the current allowance',
+    ],
+    [HttpStatus.NOT_FOUND]: ['The Subsidy no longer exists'],
+  })
+  @Post('allowance/decrease')
+  async decreaseAllowance(@Body() params: ModifyAllowanceDto): Promise<TransactionResponseModel> {
+    const serviceResult = await this.subsidyService.modifyAllowance(
+      params,
+      AllowanceOperation.Decrease
+    );
 
     return handleServiceResult(serviceResult);
   }

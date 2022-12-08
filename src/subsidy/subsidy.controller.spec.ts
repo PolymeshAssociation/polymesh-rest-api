@@ -44,7 +44,6 @@ describe('SubsidyController', () => {
     it('should return subsidy details for a given beneficiary and subsidizer', async () => {
       when(mockService.getAllowance)
         .calledWith(beneficiary, subsidizer)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValue(allowance);
 
       const result = await controller.getSubsidy({ beneficiary, subsidizer });
@@ -94,7 +93,7 @@ describe('SubsidyController', () => {
     });
   });
 
-  describe('modifyAllowance', () => {
+  describe('setAllowance, increaseAllowance, decreaseAllowance', () => {
     it('should accept ModifyAllowanceDto and return the transaction details', async () => {
       const transaction = {
         blockHash: '0x1',
@@ -110,15 +109,36 @@ describe('SubsidyController', () => {
         signer: 'Alice',
         beneficiary,
         allowance,
-        operation: AllowanceOperation.Set,
       };
 
       when(mockService.modifyAllowance)
-        .calledWith(mockPayload)
+        .calledWith(mockPayload, AllowanceOperation.Set)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValue(testTxResult as any);
 
-      const result = await controller.modifyAllowance(mockPayload);
+      let result = await controller.setAllowance(mockPayload);
+
+      expect(result).toEqual({
+        transactions: [transaction],
+      });
+
+      when(mockService.modifyAllowance)
+        .calledWith(mockPayload, AllowanceOperation.Increase)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(testTxResult as any);
+
+      result = await controller.increaseAllowance(mockPayload);
+
+      expect(result).toEqual({
+        transactions: [transaction],
+      });
+
+      when(mockService.modifyAllowance)
+        .calledWith(mockPayload, AllowanceOperation.Decrease)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(testTxResult as any);
+
+      result = await controller.decreaseAllowance(mockPayload);
 
       expect(result).toEqual({
         transactions: [transaction],

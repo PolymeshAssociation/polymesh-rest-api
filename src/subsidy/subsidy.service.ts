@@ -1,13 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AllowanceOperation,
   AuthorizationRequest,
-  ErrorCode,
   Subsidy,
   SubsidyWithAllowance,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { ServiceReturn } from '~/common/utils';
@@ -16,6 +14,7 @@ import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class SubsidyService {
@@ -55,19 +54,24 @@ export class SubsidyService {
     const address = await this.transactionsService.getSigningAccount(signer);
 
     let subsidy: Subsidy;
-    if (beneficiary) {
+    if (beneficiary && subsidizer) {
+      throw new BadRequestException('Only beneficiary or subsidizer should be provided');
+    } else if (beneficiary) {
       subsidy = this.findOne(beneficiary, address);
     } else if (subsidizer) {
       subsidy = this.findOne(address, subsidizer);
     } else {
-      throw new BadRequestException('Beneficiary or subsidizer should be specified');
+      throw new BadRequestException('Either beneficiary or subsidizer should be provided');
     }
 
     return this.transactionsService.submit(subsidy.quit, {}, { signer, webhookUrl });
   }
 
-  public async modifyAllowance(params: ModifyAllowanceDto): ServiceReturn<void> {
-    const { signer, webhookUrl, beneficiary, allowance, operation } = params;
+  public async modifyAllowance(
+    params: ModifyAllowanceDto,
+    operation: AllowanceOperation
+  ): ServiceReturn<void> {
+    const { signer, webhookUrl, beneficiary, allowance } = params;
 
     const address = await this.transactionsService.getSigningAccount(signer);
 
@@ -91,15 +95,8 @@ export class SubsidyService {
 
     try {
       return await subsidy.getAllowance();
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          throw new NotFoundException('The Subsidy no longer exists');
-        }
-      }
-
-      throw err;
+    } catch (err) {
+      handleSdkError(err);
     }
   }
 }

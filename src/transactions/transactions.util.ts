@@ -96,12 +96,12 @@ export async function processTransaction<
       result,
       transactions: [assembleTransactionResponse(procedure)],
     };
-  } catch (err) /* istanbul ignore next: not worth the trouble */ {
-    handleSdkError(err as Error);
+  } catch (err) {
+    handleSdkError(err);
   }
 }
 
-export function handleSdkError(err: Error): never {
+export function handleSdkError(err: unknown): never {
   if (isPolymeshError(err)) {
     const { message, code } = err;
     switch (code) {
@@ -118,5 +118,10 @@ export function handleSdkError(err: Error): never {
         throw new InternalServerErrorException(message);
     }
   }
-  throw new InternalServerErrorException(err.message);
+
+  if (err instanceof Error) {
+    throw new InternalServerErrorException(err.message);
+  }
+
+  throw new InternalServerErrorException('An unexpected error occurred');
 }

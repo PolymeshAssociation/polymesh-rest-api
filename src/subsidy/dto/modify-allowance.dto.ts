@@ -2,8 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { AllowanceOperation } from '@polymeshassociation/polymesh-sdk/types';
-import { IsEnum, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -19,20 +18,11 @@ export class ModifyAllowanceDto extends TransactionBaseDto {
   readonly beneficiary: string;
 
   @ApiProperty({
-    description:
-      'Amount of POLYX to set the allowance to or increase/decrease/set the allowance by',
+    description: 'Amount of POLYX to set the allowance to or increase/decrease the allowance by',
     type: 'string',
     example: '1000',
   })
   @IsBigNumber()
   @ToBigNumber()
   readonly allowance: BigNumber;
-
-  @ApiProperty({
-    description: 'Allowance operation to be performed',
-    enum: AllowanceOperation,
-    example: AllowanceOperation.Set,
-  })
-  @IsEnum(AllowanceOperation)
-  readonly operation: AllowanceOperation;
 }

@@ -37,8 +37,8 @@ export class MetadataService {
 
     try {
       return await metadata.getOne({ type, id });
-    } catch (err: unknown) {
-      handleSdkError(err as Error);
+    } catch (err) {
+      handleSdkError(err);
     }
   }
 
