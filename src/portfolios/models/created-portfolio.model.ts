@@ -15,8 +15,8 @@ export class CreatedPortfolioModel extends TransactionQueueModel {
   readonly portfolio: PortfolioIdentifierModel;
 
   constructor(model: CreatedPortfolioModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

@@ -13,7 +13,7 @@ import { testValues } from '~/test-utils/consts';
 import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 import { MockCheckpointsService } from '~/test-utils/service-mocks';
 
-const { did, signer } = testValues;
+const { did, signer, txResult } = testValues;
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -107,8 +107,8 @@ describe('CheckpointsController', () => {
     it('should return the details of newly created Checkpoint', async () => {
       const mockCheckpoint = new MockCheckpoint();
       const response = {
+        ...txResult,
         result: mockCheckpoint,
-        transactions: ['transaction'],
       };
       mockCheckpointsService.createByTicker.mockResolvedValue(response);
       const body = {
@@ -118,8 +118,8 @@ describe('CheckpointsController', () => {
       const result = await controller.createCheckpoint({ ticker: 'TICKER' }, body);
 
       expect(result).toEqual({
+        ...txResult,
         checkpoint: mockCheckpoint,
-        transactions: ['transaction'],
       });
     });
   });
@@ -198,8 +198,8 @@ describe('CheckpointsController', () => {
 
       const mockCheckpointSchedule = new MockCheckpointSchedule();
       const response = {
+        ...txResult,
         result: mockCheckpointSchedule,
-        transactions: ['transaction'],
       };
       mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
 
@@ -226,8 +226,8 @@ describe('CheckpointsController', () => {
         ...mockScheduleWithDetails.details,
       });
       expect(result).toEqual({
+        ...txResult,
         schedule: mockCreatedSchedule,
-        transactions: ['transaction'],
       });
     });
   });
@@ -300,19 +300,14 @@ describe('CheckpointsController', () => {
 
   describe('deleteSchedule', () => {
     it('should return the transaction details', async () => {
-      const response = {
-        transactions: ['transaction'],
-      };
-      mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(response);
+      mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(txResult);
 
       const result = await controller.deleteSchedule(
         { id: new BigNumber(1), ticker: 'TICKER' },
         { signer }
       );
 
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
+      expect(result).toEqual(txResult);
     });
   });
 });

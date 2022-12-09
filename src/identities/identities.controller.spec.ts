@@ -38,7 +38,7 @@ import {
 } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-const { did } = testValues;
+const { did, txResult } = testValues;
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -439,8 +439,8 @@ describe('IdentitiesController', () => {
     it('should return the transaction details on adding a Secondary Account', async () => {
       const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
+        ...txResult,
         result: mockAuthorization,
-        transactions: ['transaction'],
       };
       mockIdentitiesService.addSecondaryAccount.mockResolvedValue(mockData);
 
@@ -450,9 +450,9 @@ describe('IdentitiesController', () => {
       });
 
       expect(result).toEqual({
+        ...txResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-        transactions: ['transaction'],
       });
     });
   });

@@ -8,7 +8,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
@@ -37,20 +37,20 @@ export class SubsidyService {
   }
 
   public async subsidizeAccount(params: CreateSubsidyDto): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, beneficiary, allowance } = params;
+    const { base, args } = extractTxBase(params);
 
     const { subsidizeAccount } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(
-      subsidizeAccount,
-      { beneficiary, allowance },
-      { signer, webhookUrl }
-    );
+    return this.transactionsService.submit(subsidizeAccount, args, base);
   }
 
   public async quit(params: QuitSubsidyDto): ServiceReturn<void> {
-    const { signer, webhookUrl, beneficiary, subsidizer } = params;
+    const {
+      base,
+      args: { beneficiary, subsidizer },
+    } = extractTxBase(params);
 
+    const { signer } = base;
     const address = await this.transactionsService.getSigningAccount(signer);
 
     let subsidy: Subsidy;
@@ -64,14 +64,19 @@ export class SubsidyService {
       throw new BadRequestException('Either beneficiary or subsidizer should be provided');
     }
 
-    return this.transactionsService.submit(subsidy.quit, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(subsidy.quit, {}, base);
   }
 
   public async modifyAllowance(
     params: ModifyAllowanceDto,
     operation: AllowanceOperation
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, beneficiary, allowance } = params;
+    const {
+      base,
+      args: { beneficiary, allowance },
+    } = extractTxBase(params);
+
+    const { signer } = base;
 
     const address = await this.transactionsService.getSigningAccount(signer);
 
@@ -83,11 +88,7 @@ export class SubsidyService {
       [AllowanceOperation.Decrease]: subsidy.decreaseAllowance,
     };
 
-    return this.transactionsService.submit(
-      procedureMap[operation],
-      { allowance },
-      { signer, webhookUrl }
-    );
+    return this.transactionsService.submit(procedureMap[operation], { allowance }, base);
   }
 
   public async getAllowance(beneficiary: string, subsidizer: string): Promise<BigNumber> {

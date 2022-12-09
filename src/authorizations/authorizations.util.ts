@@ -22,9 +22,11 @@ export function createAuthorizationRequestModel(
 
 export const authorizationRequestResolver: TransactionResolver<AuthorizationRequest> = ({
   transactions,
+  details,
   result,
 }) =>
   new CreatedAuthorizationRequestModel({
     transactions,
+    details,
     authorizationRequest: createAuthorizationRequestModel(result),
   });

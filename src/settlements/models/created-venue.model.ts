@@ -16,8 +16,8 @@ export class CreatedVenueModel extends TransactionQueueModel {
   readonly venue: Venue;
 
   constructor(model: CreatedVenueModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

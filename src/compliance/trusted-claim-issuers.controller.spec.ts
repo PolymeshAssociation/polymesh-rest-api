@@ -9,11 +9,13 @@ import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-cl
 import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TrustedClaimIssuersController } from '~/compliance/trusted-claim-issuers.controller';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { testValues } from '~/test-utils/consts';
 import { createMockTransactionResult, mockTrustedClaimIssuer } from '~/test-utils/mocks';
 import { mockTrustedClaimIssuersServiceProvider } from '~/test-utils/service-mocks';
 
 describe('TrustedClaimIssuersController', () => {
   const mockParams = { ticker: 'TICKER' };
+  const { txResult } = testValues;
   let controller: TrustedClaimIssuersController;
   let mockService: DeepMocked<TrustedClaimIssuersService>;
 
@@ -60,7 +62,10 @@ describe('TrustedClaimIssuersController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
-      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
+      const testTxResult = createMockTransactionResult<Asset>({
+        ...txResult,
+        transactions: [transaction],
+      });
       const mockPayload: SetTrustedClaimIssuersDto = {
         claimIssuers: [],
         signer: 'Alice',
@@ -85,7 +90,10 @@ describe('TrustedClaimIssuersController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
-      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
+      const testTxResult = createMockTransactionResult<Asset>({
+        ...txResult,
+        transactions: [transaction],
+      });
       const mockPayload: SetTrustedClaimIssuersDto = {
         claimIssuers: [],
         signer: 'Alice',
@@ -110,7 +118,10 @@ describe('TrustedClaimIssuersController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
       };
-      const testTxResult = createMockTransactionResult<Asset>({ transactions: [transaction] });
+      const testTxResult = createMockTransactionResult<Asset>({
+        ...txResult,
+        transactions: [transaction],
+      });
 
       const mockPayload: RemoveTrustedClaimIssuersDto = {
         claimIssuers: [],

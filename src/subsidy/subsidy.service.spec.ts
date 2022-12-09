@@ -2,10 +2,16 @@
 const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
+import { DeepMocked } from '@golevelup/ts-jest';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { AllowanceOperation, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  AllowanceOperation,
+  ErrorCode,
+  Subsidy,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -15,11 +21,12 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
 import { SubsidyService } from '~/subsidy/subsidy.service';
+import { testValues } from '~/test-utils/consts';
 import {
+  createMockSubsidy,
   MockAccount,
   MockAuthorizationRequest,
   MockPolymesh,
-  MockSubsidy,
   MockTransaction,
 } from '~/test-utils/mocks';
 import {
@@ -43,13 +50,17 @@ describe('SubsidyService', () => {
   let beneficiary: string;
   let subsidizer: string;
   let allowance: BigNumber;
+  let signer: string;
+  let mockSubsidy: DeepMocked<Subsidy>;
 
   beforeEach(async () => {
+    ({ signer } = testValues);
     beneficiary = 'beneficiary';
     subsidizer = 'subsidizer';
     allowance = new BigNumber(100);
 
     mockPolymeshApi = new MockPolymesh();
+    mockSubsidy = createMockSubsidy();
 
     mockTransactionsService = mockTransactionsProvider.useValue;
     mockAccountsService = new MockAccountsService();
@@ -85,7 +96,7 @@ describe('SubsidyService', () => {
   describe('getSubsidy', () => {
     it('should return the Account Subsidy', async () => {
       const mockSubsidyWithAllowance = {
-        subsidy: new MockSubsidy(),
+        subsidy: mockSubsidy,
         allowance: new BigNumber(10),
       };
 
@@ -102,7 +113,6 @@ describe('SubsidyService', () => {
 
   describe('findOne', () => {
     it('should return a Subsidy instance for a given beneficiary and subsidizer', () => {
-      const mockSubsidy = new MockSubsidy();
       when(mockPolymeshApi.accountManagement.getSubsidy)
         .calledWith({ beneficiary, subsidizer })
         .mockReturnValue(mockSubsidy);
@@ -129,7 +139,6 @@ describe('SubsidyService', () => {
         transactions: [mockTransaction],
       });
 
-      const signer = 'signer';
       const body = {
         signer,
         beneficiary,
@@ -160,13 +169,9 @@ describe('SubsidyService', () => {
       };
       const mockTransaction = new MockTransaction(mockTransactions);
 
-      const mockSubsidy = new MockSubsidy();
-
       const findOneSpy = jest.spyOn(service, 'findOne');
-      when(findOneSpy)
-        .calledWith(beneficiary, subsidizer)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockReturnValue(mockSubsidy as any);
+
+      when(findOneSpy).calledWith(beneficiary, subsidizer).mockReturnValue(mockSubsidy);
 
       mockTransactionsService.getSigningAccount.mockResolvedValueOnce(subsidizer);
 
@@ -189,10 +194,7 @@ describe('SubsidyService', () => {
         { signer: subsidizer }
       );
 
-      when(findOneSpy)
-        .calledWith(subsidizer, beneficiary)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockReturnValue(mockSubsidy as any);
+      when(findOneSpy).calledWith(subsidizer, beneficiary).mockReturnValue(mockSubsidy);
 
       mockTransactionsService.getSigningAccount.mockResolvedValueOnce(beneficiary);
 
@@ -233,13 +235,10 @@ describe('SubsidyService', () => {
 
   describe('modifyAllowance', () => {
     let findOneSpy: jest.SpyInstance;
-    let mockSubsidy: MockSubsidy;
-    let signer: string;
     let body: ModifyAllowanceDto;
     let mockTransaction: MockTransaction;
 
     beforeEach(() => {
-      signer = 'signer';
       body = {
         signer,
         beneficiary,
@@ -260,13 +259,8 @@ describe('SubsidyService', () => {
 
       mockTransactionsService.getSigningAccount.mockResolvedValue(subsidizer);
 
-      mockSubsidy = new MockSubsidy();
-
       findOneSpy = jest.spyOn(service, 'findOne');
-      when(findOneSpy)
-        .calledWith(beneficiary, subsidizer)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockReturnValue(mockSubsidy as any);
+      when(findOneSpy).calledWith(beneficiary, subsidizer).mockReturnValue(mockSubsidy);
     });
 
     it('should run a setAllowance procedure and return the queue results', async () => {
@@ -316,19 +310,14 @@ describe('SubsidyService', () => {
   });
 
   describe('getAllowance', () => {
-    let mockSubsidy: MockSubsidy;
     let findOneSpy: jest.SpyInstance;
 
     beforeEach(() => {
       mockIsPolymeshError.mockReturnValue(false);
 
-      mockSubsidy = new MockSubsidy();
-
       findOneSpy = jest.spyOn(service, 'findOne');
-      when(findOneSpy)
-        .calledWith(beneficiary, subsidizer)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockReturnValue(mockSubsidy as any);
+
+      when(findOneSpy).calledWith(beneficiary, subsidizer).mockReturnValue(mockSubsidy);
     });
 
     afterAll(() => {

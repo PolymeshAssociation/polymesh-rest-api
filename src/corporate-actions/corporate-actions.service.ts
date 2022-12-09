@@ -9,7 +9,8 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
-import { ServiceReturn } from '~/common/utils';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
@@ -34,16 +35,13 @@ export class CorporateActionsService {
     ticker: string,
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, ...rest } = corporateActionDefaultConfigDto;
+    const { base, args } = extractTxBase(corporateActionDefaultConfigDto);
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionService.submit(
       asset.corporateActions.setDefaultConfig,
-      rest as Required<typeof rest>,
-      {
-        signer,
-        webhookUrl,
-      }
+      args as Required<typeof args>,
+      base
     );
   }
 
@@ -75,35 +73,32 @@ export class CorporateActionsService {
     ticker: string,
     dividendDistributionDto: DividendDistributionDto
   ): ServiceReturn<DividendDistribution> {
-    const { signer, webhookUrl, originPortfolio, ...rest } = dividendDistributionDto;
+    const {
+      base,
+      args: { originPortfolio, ...rest },
+    } = extractTxBase(dividendDistributionDto);
+
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionService.submit(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
-        originPortfolio: toPortfolioId(originPortfolio),
         ...rest,
+        originPortfolio: toPortfolioId(originPortfolio),
       },
-      {
-        signer,
-        webhookUrl,
-      }
+      base
     );
   }
 
   public async remove(
     ticker: string,
     corporateAction: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionService.submit(
       asset.corporateActions.remove,
       { corporateAction },
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
@@ -112,17 +107,10 @@ export class CorporateActionsService {
     id: BigNumber,
     payDividendsDto: PayDividendsDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, targets } = payDividendsDto;
+    const { base, args } = extractTxBase(payDividendsDto);
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(
-      distribution.pay,
-      { targets },
-      {
-        signer,
-        webhookUrl,
-      }
-    );
+    return this.transactionService.submit(distribution.pay, args, base);
   }
 
   public async linkDocuments(
@@ -130,43 +118,36 @@ export class CorporateActionsService {
     id: BigNumber,
     linkDocumentsDto: LinkDocumentsDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, documents } = linkDocumentsDto;
+    const {
+      base,
+      args: { documents },
+    } = extractTxBase(linkDocumentsDto);
+
     const { distribution } = await this.findDistribution(ticker, id);
 
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
     };
-    return this.transactionService.submit(distribution.linkDocuments, params, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionService.submit(distribution.linkDocuments, params, base);
   }
 
   public async claimDividends(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { distribution } = await this.findDistribution(ticker, id);
-    return this.transactionService.submit(distribution.claim, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionService.submit(distribution.claim, undefined, transactionBaseDto);
   }
 
   public async reclaimRemainingFunds(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(distribution.reclaimFunds, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionService.submit(distribution.reclaimFunds, undefined, transactionBaseDto);
   }
 
   public async modifyCheckpoint(
@@ -174,16 +155,10 @@ export class CorporateActionsService {
     id: BigNumber,
     modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, checkpoint } = modifyDistributionCheckpointDto;
+    const { base, args } = extractTxBase(modifyDistributionCheckpointDto);
+
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(
-      distribution.modifyCheckpoint,
-      { checkpoint },
-      {
-        signer,
-        webhookUrl,
-      }
-    );
+    return this.transactionService.submit(distribution.modifyCheckpoint, args, base);
   }
 }

@@ -222,10 +222,15 @@ export class CorporateActionsController {
       dividendDistributionDto
     );
 
-    const resolver: TransactionResolver<DividendDistribution> = ({ transactions, result }) =>
+    const resolver: TransactionResolver<DividendDistribution> = ({
+      transactions,
+      result,
+      details,
+    }) =>
       new CreatedDividendDistributionModel({
         dividendDistribution: createDividendDistributionModel(result),
         transactions,
+        details,
       });
 
     return handleServiceResult(serviceResult, resolver);
@@ -258,9 +263,9 @@ export class CorporateActionsController {
   @Post(':id/delete')
   public async deleteCorporateAction(
     @Param() { id, ticker }: DeleteCorporateActionParamsDto,
-    @Query() { signer, webhookUrl }: TransactionBaseDto
+    @Query() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.corporateActionsService.remove(ticker, id, signer, webhookUrl);
+    const result = await this.corporateActionsService.remove(ticker, id, transactionBaseDto);
     return handleServiceResult(result);
   }
 
@@ -373,9 +378,13 @@ export class CorporateActionsController {
   @Post(':id/payments/claim')
   public async claimDividends(
     @Param() { id, ticker }: DividendDistributionParamsDto,
-    @Body() { signer }: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.corporateActionsService.claimDividends(ticker, id, signer);
+    const result = await this.corporateActionsService.claimDividends(
+      ticker,
+      id,
+      transactionBaseDto
+    );
     return handleServiceResult(result);
   }
 
@@ -412,13 +421,12 @@ export class CorporateActionsController {
   @Post(':id/reclaim-funds')
   public async reclaimRemainingFunds(
     @Param() { id, ticker }: DividendDistributionParamsDto,
-    @Body() { signer, webhookUrl }: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.reclaimRemainingFunds(
       ticker,
       id,
-      signer,
-      webhookUrl
+      transactionBaseDto
     );
     return handleServiceResult(result);
   }

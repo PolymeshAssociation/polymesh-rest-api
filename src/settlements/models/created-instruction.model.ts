@@ -16,8 +16,8 @@ export class CreatedInstructionModel extends TransactionQueueModel {
   readonly instruction: Instruction;
 
   constructor(model: CreatedInstructionModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

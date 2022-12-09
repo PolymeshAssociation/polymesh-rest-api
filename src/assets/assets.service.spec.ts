@@ -24,7 +24,7 @@ import {
 } from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 
-const { did } = testValues;
+const { did, signer } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -270,7 +270,6 @@ describe('AssetsService', () => {
         transactions: [mockTransaction],
       });
 
-      const signer = 'signer';
       const body = {
         signer,
         documents: [
@@ -298,7 +297,7 @@ describe('AssetsService', () => {
 
   describe('createAsset', () => {
     const createBody = {
-      signer: '0x6000',
+      signer,
       name: 'Ticker Corp',
       ticker: 'TICKER',
       isDivisible: false,
@@ -349,7 +348,7 @@ describe('AssetsService', () => {
 
   describe('issue', () => {
     const issueBody = {
-      signer: '0x6000',
+      signer,
       amount: new BigNumber(1000),
     };
     it('should issue the asset', async () => {
@@ -379,7 +378,7 @@ describe('AssetsService', () => {
   describe('transferOwnership', () => {
     const ticker = 'TICKER';
     const body = {
-      signer: '0x6000',
+      signer,
       target: '0x1000',
       expiry: new Date(),
     };
@@ -418,7 +417,6 @@ describe('AssetsService', () => {
   describe('redeem', () => {
     const amount = new BigNumber(1000);
     const from = new BigNumber(1);
-    const signer = '0x6000';
     const redeemBody = {
       signer,
       amount,
@@ -465,7 +463,7 @@ describe('AssetsService', () => {
 
   describe('freeze', () => {
     const freezeBody = {
-      signer: '0x6000',
+      signer,
     };
     it('should freeze the asset', async () => {
       const transaction = {
@@ -493,7 +491,7 @@ describe('AssetsService', () => {
 
   describe('unfreeze', () => {
     const unfreezeBody = {
-      signer: '0x6000',
+      signer,
     };
     it('should unfreeze the asset', async () => {
       const transaction = {
@@ -521,8 +519,7 @@ describe('AssetsService', () => {
 
   describe('controllerTransfer', () => {
     it('should run a controllerTransfer procedure and return the queue results', async () => {
-      const signer = '0x6000';
-      const origin = new PortfolioDto({ id: new BigNumber(1), did: '0x1000' });
+      const origin = new PortfolioDto({ id: new BigNumber(1), did });
       const amount = new BigNumber(100);
 
       const transaction = {
@@ -552,7 +549,7 @@ describe('AssetsService', () => {
         mockAsset.controllerTransfer,
         {
           originPortfolio: {
-            identity: '0x1000',
+            identity: did,
             id: new BigNumber(1),
           },
           amount,

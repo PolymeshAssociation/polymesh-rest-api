@@ -31,7 +31,7 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
-const { signer, did } = testValues;
+const { signer, did, txResult } = testValues;
 
 describe('AuthorizationsService', () => {
   let service: AuthorizationsService;
@@ -343,10 +343,14 @@ describe('AuthorizationsService', () => {
       getAuthRequestSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
       mockTransactionsService.getSigningAccount.mockResolvedValue('address');
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockTransactionsService.submit.mockResolvedValue({
+        ...txResult,
+        transactions: [mockTransaction],
+      });
 
-      const result = await service.accept(new BigNumber(1), '0x6000');
+      const result = await service.accept(new BigNumber(1), { signer });
       expect(result).toEqual({
+        ...txResult,
         result: undefined,
         transactions: [mockTransaction],
       });
@@ -372,10 +376,14 @@ describe('AuthorizationsService', () => {
       getAuthRequestSpy.mockResolvedValue(mockAuthorizationRequest as any);
 
       mockTransactionsService.getSigningAccount.mockResolvedValue('address');
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockTransactionsService.submit.mockResolvedValue({
+        ...txResult,
+        transactions: [mockTransaction],
+      });
 
-      const result = await service.remove(new BigNumber(2), '0x6000');
+      const result = await service.remove(new BigNumber(2), { signer });
       expect(result).toEqual({
+        ...txResult,
         result: undefined,
         transactions: [mockTransaction],
       });

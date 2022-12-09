@@ -10,7 +10,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -29,102 +29,90 @@ export class ComplianceRequirementsService {
   }
 
   public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+    const { base, args } = extractTxBase(params);
+
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.set,
-      params as SetAssetRequirementsParams,
-      {
-        signer,
-        webhookUrl,
-      }
+      args as SetAssetRequirementsParams,
+      base
     );
   }
 
-  public async pauseRequirements(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async pauseRequirements(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionsService.submit(
       asset.compliance.requirements.pause,
       {},
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
   public async unpauseRequirements(
     ticker: string,
-    params: TransactionBaseDto
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.unpause,
       {},
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
   public async deleteOne(
     ticker: string,
     id: BigNumber,
-    params: TransactionBaseDto
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.remove,
       { requirement: id },
-      {
-        signer,
-        webhookUrl,
-      }
+      transactionBaseDto
     );
   }
 
-  public async deleteAll(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async deleteAll(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.requirements.reset, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(
+      asset.compliance.requirements.reset,
+      undefined,
+      transactionBaseDto
+    );
   }
 
   public async add(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+    const { base, args } = extractTxBase(params);
+
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.add,
-      params as AddAssetRequirementParams,
-      {
-        signer,
-        webhookUrl,
-      }
+      args as AddAssetRequirementParams,
+      base
     );
   }
 
   public async modify(ticker: string, id: BigNumber, params: RequirementDto): ServiceReturn<void> {
-    const { signer, webhookUrl } = params;
+    const { base, args } = extractTxBase(params);
+
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.modify,
-      { id, ...params } as ModifyComplianceRequirementParams,
-      {
-        signer,
-        webhookUrl,
-      }
+      { id, ...args } as ModifyComplianceRequirementParams,
+      base
     );
   }
 

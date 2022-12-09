@@ -15,8 +15,8 @@ export class CreatedAuthorizationRequestModel extends TransactionQueueModel {
   readonly authorizationRequest: AuthorizationRequestModel;
 
   constructor(model: CreatedAuthorizationRequestModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }
