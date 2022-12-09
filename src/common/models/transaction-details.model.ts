@@ -33,12 +33,7 @@ export class TransactionDetailsModel {
   @Type(() => PayingAccountModel)
   readonly payingAccount: PayingAccountModel;
 
-  constructor({ status, fees, supportsSubsidy, payingAccount }: TransactionDetailsModel) {
-    Object.assign(this, {
-      status,
-      supportsSubsidy,
-      payingAccount,
-      fees,
-    });
+  constructor(model: TransactionDetailsModel) {
+    Object.assign(this, model);
   }
 }

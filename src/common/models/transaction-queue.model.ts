@@ -42,7 +42,7 @@ export class TransactionQueueModel {
   @Type(() => TransactionDetailsModel)
   details: TransactionDetailsModel;
 
-  constructor(transactionDetails: TransactionQueueModel) {
-    Object.assign(this, transactionDetails);
+  constructor(model: TransactionQueueModel) {
+    Object.assign(this, model);
   }
 }

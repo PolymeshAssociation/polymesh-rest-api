@@ -299,12 +299,10 @@ class MockPolymeshTransactionBase {
   blockNumber?: BigNumber;
   status: TransactionStatus = TransactionStatus.Unapproved;
   error: Error;
-  getTotalFees = jest.fn().mockReturnValue(
-    Promise.resolve({
-      total: new BigNumber(1),
-      payingAccountData: { account: { address: 'address' } },
-    })
-  );
+  getTotalFees = jest.fn().mockResolvedValue({
+    total: new BigNumber(1),
+    payingAccountData: { account: { address: 'address' } },
+  });
 
   supportsSubsidy = jest.fn().mockReturnValue(false);
   run = jest.fn().mockReturnValue(Promise.resolve());

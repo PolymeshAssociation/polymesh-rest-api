@@ -11,7 +11,7 @@ import {
   Fees,
   GenericPolymeshTransaction,
   NoArgsProcedureMethod,
-  PayingAccount,
+  PayingAccountType,
   ProcedureMethod,
   ProcedureOpts,
   TransactionStatus,
@@ -29,10 +29,11 @@ export type TransactionDetails = {
   status: TransactionStatus;
   fees: Fees;
   supportsSubsidy: boolean;
-  payingAccount: Pick<PayingAccount, 'type'> &
-    Pick<Account, 'address'> & {
-      balance: BigNumber;
-    };
+  payingAccount: {
+    type: PayingAccountType;
+    address: string;
+    balance: BigNumber;
+  };
 };
 
 export type TransactionResult<T> = {
