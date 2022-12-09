@@ -15,7 +15,7 @@ import {
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -67,16 +67,18 @@ export class IdentitiesService {
   public async addSecondaryAccount(
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, expiry, permissions, secondaryAccount } =
-      addSecondaryAccountParamsDto;
-
+    const {
+      base,
+      args: { secondaryAccount: targetAccount, permissions, expiry },
+    } = extractTxBase(addSecondaryAccountParamsDto);
     const params = {
-      targetAccount: secondaryAccount,
+      targetAccount,
       permissions: permissions?.toPermissionsLike(),
       expiry,
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
-    return this.transactionsService.submit(inviteAccount, params, { signer, webhookUrl });
+
+    return this.transactionsService.submit(inviteAccount, params, base);
   }
 
   /**

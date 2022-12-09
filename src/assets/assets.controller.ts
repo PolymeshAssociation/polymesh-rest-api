@@ -285,9 +285,14 @@ export class AssetsController {
     @Body() params: TransferOwnershipDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.assetsService.transferOwnership(ticker, params);
-    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
+    const resolver: TransactionResolver<AuthorizationRequest> = ({
+      transactions,
+      details,
+      result,
+    }) =>
       new CreatedAuthorizationRequestModel({
         transactions,
+        details,
         authorizationRequest: createAuthorizationRequestModel(result),
       });
 
@@ -343,9 +348,9 @@ export class AssetsController {
   @Post(':ticker/freeze')
   public async freeze(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.freeze(ticker, params);
+    const result = await this.assetsService.freeze(ticker, transactionBaseDto);
     return handleServiceResult(result);
   }
 
@@ -373,9 +378,9 @@ export class AssetsController {
   @Post(':ticker/unfreeze')
   public async unfreeze(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.unfreeze(ticker, params);
+    const result = await this.assetsService.unfreeze(ticker, transactionBaseDto);
     return handleServiceResult(result);
   }
 

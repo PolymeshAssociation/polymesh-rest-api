@@ -18,8 +18,8 @@ export class CreatedCheckpointModel extends TransactionQueueModel {
   readonly checkpoint: Checkpoint;
 
   constructor(model: CreatedCheckpointModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

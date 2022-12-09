@@ -20,6 +20,7 @@ import {
 import { MockEventsService, MockSubscriptionsService } from '~/test-utils/service-mocks';
 import transactionsConfig from '~/transactions/config/transactions.config';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { TransactionResult } from '~/transactions/transactions.util';
 import { Transaction } from '~/transactions/types';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
@@ -46,6 +47,7 @@ const makeMockMethod = (
 describe('TransactionsService', () => {
   const signer = 'signer';
   const legitimacySecret = 'someSecret';
+  const dryRun = false;
   let service: TransactionsService;
 
   let mockEventsService: MockEventsService;
@@ -92,19 +94,23 @@ describe('TransactionsService', () => {
       mockIsPolymeshTransaction.mockReturnValue(true);
       const mockMethod = makeMockMethod(transaction);
 
-      const result = await service.submit(mockMethod, {}, { signer });
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [
-          {
-            blockHash: undefined,
-            blockNumber: undefined,
-            transactionHash: undefined,
-            transactionTag: TxTags.asset.RegisterTicker,
-            type: TransactionType.Single,
-          },
-        ],
-      });
+      const { result, transactions, details } = (await service.submit(
+        mockMethod,
+        {},
+        { signer }
+      )) as TransactionResult<undefined>;
+
+      expect(result).toBeUndefined();
+      expect(transactions).toEqual([
+        {
+          blockHash: undefined,
+          blockNumber: undefined,
+          transactionHash: undefined,
+          transactionTag: TxTags.asset.RegisterTicker,
+          type: TransactionType.Single,
+        },
+      ]);
+      expect(details).toBeDefined();
     });
 
     it('should process batch transactions and return the result', async () => {
@@ -113,19 +119,25 @@ describe('TransactionsService', () => {
       mockIsPolymeshTransactionBatch.mockReturnValue(true);
       const mockMethod = makeMockMethod(transaction);
 
-      const result = await service.submit(mockMethod, {}, { signer });
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [
-          {
-            blockHash: undefined,
-            blockNumber: undefined,
-            transactionHash: undefined,
-            transactionTags: [TxTags.asset.RegisterTicker, TxTags.asset.CreateAsset],
-            type: TransactionType.Batch,
-          },
-        ],
-      });
+      const { result, transactions, details } = (await service.submit(
+        mockMethod,
+        {},
+        { signer }
+      )) as TransactionResult<undefined>;
+
+      expect(result).toBeUndefined();
+
+      expect(transactions).toEqual([
+        {
+          blockHash: undefined,
+          blockNumber: undefined,
+          transactionHash: undefined,
+          transactionTags: [TxTags.asset.RegisterTicker, TxTags.asset.CreateAsset],
+          type: TransactionType.Batch,
+        },
+      ]);
+
+      expect(details).toBeDefined();
     });
   });
 
@@ -158,7 +170,7 @@ describe('TransactionsService', () => {
 
       mockIsPolymeshTransaction.mockReturnValue(true);
 
-      const result = await service.submit(mockMethod, {}, { signer, webhookUrl });
+      const result = await service.submit(mockMethod, {}, { signer, webhookUrl, dryRun });
 
       const expectedPayload = {
         type: TransactionType.Single,
@@ -236,7 +248,7 @@ describe('TransactionsService', () => {
 
       const mockMethod = makeMockMethod(transaction);
 
-      const result = await service.submit(mockMethod, {}, { signer, webhookUrl });
+      const result = await service.submit(mockMethod, {}, { signer, webhookUrl, dryRun });
 
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();
 

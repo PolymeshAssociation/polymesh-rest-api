@@ -18,10 +18,12 @@ import { CreatedMetadataEntryModel } from '~/metadata/models/created-metadata-en
 import { MetadataDetailsModel } from '~/metadata/models/metadata-details.model';
 import { MetadataEntryModel } from '~/metadata/models/metadata-entry.model';
 import { MetadataValueModel } from '~/metadata/models/metadata-value.model';
+import { testValues } from '~/test-utils/consts';
 import { createMockMetadataEntry, createMockTransactionResult } from '~/test-utils/mocks';
 import { mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
 describe('MetadataController', () => {
+  const { txResult } = testValues;
   let controller: MetadataController;
   let mockService: DeepMocked<MetadataService>;
   let ticker: string;
@@ -109,6 +111,7 @@ describe('MetadataController', () => {
       };
       const mockMetadataEntry = createMockMetadataEntry();
       const testTxResult = createMockTransactionResult<MetadataEntry>({
+        ...txResult,
         transactions: [transaction],
         result: mockMetadataEntry,
       });
@@ -126,6 +129,7 @@ describe('MetadataController', () => {
 
       expect(result).toEqual(
         new CreatedMetadataEntryModel({
+          ...txResult,
           transactions: [transaction],
           metadata: new MetadataEntryModel({ asset: ticker, type, id }),
         })
@@ -143,6 +147,7 @@ describe('MetadataController', () => {
         transactionTag: TxTags.asset.RegisterAssetMetadataLocalType,
       };
       const testTxResult = createMockTransactionResult<MetadataEntry>({
+        ...txResult,
         transactions: [transaction],
       });
       const mockPayload: SetMetadataDto = {

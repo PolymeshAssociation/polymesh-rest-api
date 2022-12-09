@@ -180,9 +180,9 @@ export class AccountsController {
   })
   @Post('freeze')
   async freezeSecondaryAccounts(
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.accountsService.freezeSecondaryAccounts(params);
+    const result = await this.accountsService.freezeSecondaryAccounts(transactionBaseDto);
 
     return handleServiceResult(result);
   }
@@ -202,9 +202,9 @@ export class AccountsController {
   })
   @Post('unfreeze')
   async unfreezeSecondaryAccounts(
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.accountsService.unfreezeSecondaryAccounts(params);
+    const result = await this.accountsService.unfreezeSecondaryAccounts(transactionBaseDto);
 
     return handleServiceResult(result);
   }

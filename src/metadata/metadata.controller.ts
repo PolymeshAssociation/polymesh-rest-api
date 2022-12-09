@@ -132,6 +132,7 @@ export class MetadataController {
     const serviceResult = await this.metadataService.create(ticker, params);
 
     const resolver: TransactionResolver<MetadataEntry> = ({
+      details,
       transactions,
       result: {
         asset: { ticker: assetTicker },
@@ -140,6 +141,7 @@ export class MetadataController {
       },
     }) =>
       new CreatedMetadataEntryModel({
+        details,
         transactions,
         metadata: new MetadataEntryModel({ asset: assetTicker, id, type }),
       });

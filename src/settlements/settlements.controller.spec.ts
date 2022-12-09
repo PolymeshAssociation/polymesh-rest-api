@@ -16,7 +16,7 @@ import { testValues } from '~/test-utils/consts';
 import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
 
-const { did, signer } = testValues;
+const { did, signer, txResult } = testValues;
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -89,8 +89,8 @@ describe('SettlementsController', () => {
   describe('createInstruction', () => {
     it('should create an instruction and return the data returned by the service', async () => {
       const mockData = {
+        ...txResult,
         result: 'fakeInstruction',
-        transactions: ['transaction'],
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
@@ -98,43 +98,33 @@ describe('SettlementsController', () => {
       const result = await controller.createInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
+        ...txResult,
         instruction: 'fakeInstruction',
-        transactions: ['transaction'],
       });
     });
   });
 
   describe('affirmInstruction', () => {
     it('should affirm an instruction and return the data returned by the service', async () => {
-      const mockData = {
-        transactions: ['transaction'],
-      };
-      mockSettlementsService.affirmInstruction.mockResolvedValue(mockData);
+      mockSettlementsService.affirmInstruction.mockResolvedValue(txResult);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await controller.affirmInstruction({ id: new BigNumber(3) }, {} as any);
 
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
+      expect(result).toEqual(txResult);
     });
   });
 
   describe('rejectInstruction', () => {
     it('should reject an instruction and return the data returned by the service', async () => {
-      const mockData = {
-        transactions: ['transaction'],
-      };
-      mockSettlementsService.rejectInstruction.mockResolvedValue(mockData);
+      mockSettlementsService.rejectInstruction.mockResolvedValue(txResult);
 
       const result = await controller.affirmInstruction(
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
 
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
+      expect(result).toEqual(txResult);
     });
   });
 
@@ -193,26 +183,23 @@ describe('SettlementsController', () => {
       };
       const mockVenue = new MockVenue();
       const mockData = {
+        ...txResult,
         result: mockVenue,
-        transactions: ['transaction'],
       };
       mockSettlementsService.createVenue.mockResolvedValue(mockData);
 
       const result = await controller.createVenue(body);
 
       expect(result).toEqual({
+        ...txResult,
         venue: mockVenue,
-        transactions: ['transaction'],
       });
     });
   });
 
   describe('modifyVenue', () => {
     it('should modify a venue and return the data returned by the service', async () => {
-      const mockData = {
-        transactions: ['transaction'],
-      };
-      mockSettlementsService.modifyVenue.mockResolvedValue(mockData);
+      mockSettlementsService.modifyVenue.mockResolvedValue(txResult);
 
       const body = {
         signer,
@@ -222,9 +209,7 @@ describe('SettlementsController', () => {
 
       const result = await controller.modifyVenue({ id: new BigNumber(3) }, body);
 
-      expect(result).toEqual({
-        transactions: ['transaction'],
-      });
+      expect(result).toEqual(txResult);
     });
   });
 

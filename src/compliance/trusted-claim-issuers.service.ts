@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Asset, TrustedClaimIssuer } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
 import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -21,32 +21,23 @@ export class TrustedClaimIssuersService {
   }
 
   public async set(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.set, rest, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.set, args, base);
   }
 
   public async add(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.add, rest, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.add, args, base);
   }
 
   public async remove(ticker: string, params: RemoveTrustedClaimIssuersDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.remove, rest, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.remove, args, base);
   }
 }

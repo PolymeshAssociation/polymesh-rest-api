@@ -71,11 +71,11 @@ export class TransactionsService {
     args: MethodArgs,
     transactionBaseDto: TransactionBaseDto
   ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
-    const { signer, webhookUrl } = transactionBaseDto;
+    const { signer, webhookUrl, dryRun } = transactionBaseDto;
     const signingAccount = await this.getSigningAccount(signer);
     try {
       if (!webhookUrl) {
-        return processTransaction(method, args, { signingAccount });
+        return processTransaction(method, args, { signingAccount }, dryRun);
       } else {
         // prepare the procedure so the SDK will run its validation and throw if something isn't right
         const transaction = await prepareProcedure(method, args, { signingAccount });

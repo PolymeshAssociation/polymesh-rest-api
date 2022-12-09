@@ -7,7 +7,8 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { ServiceReturn } from '~/common/utils';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
@@ -52,9 +53,13 @@ export class PortfoliosService {
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {
-    const { signer, webhookUrl, to, items, from } = params;
+    const {
+      base,
+      args: { to, items, from },
+    } = extractTxBase(params);
+
     const fromPortfolio = await this.findOne(owner, toPortfolioId(from));
-    const args = {
+    const formattedArgs = {
       to: toPortfolioId(to),
       items: items.map(({ ticker: asset, amount, memo }) => {
         return {
@@ -64,30 +69,28 @@ export class PortfoliosService {
         };
       }),
     };
-    return this.transactionsService.submit(fromPortfolio.moveFunds, args, { signer, webhookUrl });
+
+    return this.transactionsService.submit(fromPortfolio.moveFunds, formattedArgs, base);
   }
 
   public async createPortfolio(params: CreatePortfolioDto): ServiceReturn<NumberedPortfolio> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    const { signer, webhookUrl, ...rest } = params;
-    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, rest, {
-      signer,
-      webhookUrl,
-    });
+    const { base, args } = extractTxBase(params);
+
+    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, args, base);
   }
 
   public async deletePortfolio(
     portfolio: PortfolioDto,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const identity = await this.identitiesService.findOne(portfolio.did);
     return this.transactionsService.submit(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      { signer, webhookUrl }
+      transactionBaseDto
     );
   }
 }

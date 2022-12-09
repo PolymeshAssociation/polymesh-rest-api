@@ -18,7 +18,7 @@ import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -83,71 +83,79 @@ export class AssetsService {
     const {
       documents: { set },
     } = await this.findOne(ticker);
-    const { signer, webhookUrl, documents } = params;
-    return this.transactionsService.submit(set, { documents }, { signer, webhookUrl });
+    const { base, args } = extractTxBase(params);
+
+    return this.transactionsService.submit(set, args, base);
   }
 
   public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
 
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
-    return this.transactionsService.submit(createAsset, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(createAsset, args, base);
   }
 
   public async issue(ticker: string, params: IssueDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.issuance.issue, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.issuance.issue, args, base);
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
 
     const { transferOwnership } = await this.findOne(ticker);
-    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(transferOwnership, args, base);
   }
 
   public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
-    const { signer, webhookUrl, amount, from } = params;
+    const { base, args } = extractTxBase(params);
+
     const { redeem } = await this.findOne(ticker);
 
     return this.transactionsService.submit(
       redeem,
-      { amount, from: toPortfolioId(from) },
-      { signer, webhookUrl }
+      { ...args, from: toPortfolioId(args.from) },
+      base
     );
   }
 
-  public async freeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async freeze(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.freeze, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.freeze, {}, transactionBaseDto);
   }
 
-  public async unfreeze(ticker: string, params: TransactionBaseDto): ServiceReturn<Asset> {
-    const { signer, webhookUrl } = params;
+  public async unfreeze(
+    ticker: string,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Asset> {
     const asset = await this.findOne(ticker);
 
-    return this.transactionsService.submit(asset.unfreeze, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.unfreeze, {}, transactionBaseDto);
   }
 
   public async controllerTransfer(
     ticker: string,
     params: ControllerTransferDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, origin, amount } = params;
-
+    const {
+      base,
+      args: { origin, amount },
+    } = extractTxBase(params);
     const { controllerTransfer } = await this.findOne(ticker);
 
     return this.transactionsService.submit(
       controllerTransfer,
       { originPortfolio: origin.toPortfolioLike(), amount },
-      { signer, webhookUrl }
+      base
     );
   }
 

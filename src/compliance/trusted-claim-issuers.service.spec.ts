@@ -8,6 +8,7 @@ import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionType } from '~/common/types';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { testValues } from '~/test-utils/consts';
 import { createMockTransactionResult, MockAsset } from '~/test-utils/mocks';
 import {
   MockAssetService,
@@ -29,6 +30,7 @@ describe('TrustedClaimIssuersService', () => {
     type: TransactionType.Single,
     transactionTag,
   });
+  const { txResult, signer } = testValues;
 
   const mockClaimIssuers = [
     {
@@ -36,7 +38,6 @@ describe('TrustedClaimIssuersService', () => {
       trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
     },
   ];
-  const signer = 'Alice';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -81,6 +82,7 @@ describe('TrustedClaimIssuersService', () => {
     it('should set trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
       const testTxResult = createMockTransactionResult<Asset>({
+        ...txResult,
         transactions: [getMockTransaction(TxTags.complianceManager.AddDefaultTrustedClaimIssuer)],
       });
 
@@ -97,6 +99,7 @@ describe('TrustedClaimIssuersService', () => {
     it('should add trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
       const testTxResult = createMockTransactionResult<Asset>({
+        ...txResult,
         transactions: [getMockTransaction(TxTags.complianceManager.AddDefaultTrustedClaimIssuer)],
       });
 
@@ -118,6 +121,7 @@ describe('TrustedClaimIssuersService', () => {
     it('should remove trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
       const testTxResult = createMockTransactionResult<Asset>({
+        ...txResult,
         transactions: [
           getMockTransaction(TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer),
         ],

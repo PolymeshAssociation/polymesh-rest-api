@@ -15,8 +15,8 @@ export class CreatedDividendDistributionModel extends TransactionQueueModel {
   readonly dividendDistribution: DividendDistributionModel;
 
   constructor(model: CreatedDividendDistributionModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

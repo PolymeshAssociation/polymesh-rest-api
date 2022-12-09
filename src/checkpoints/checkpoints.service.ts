@@ -15,7 +15,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 
@@ -83,23 +83,20 @@ export class CheckpointsService {
     ticker: string,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Checkpoint> {
-    const { signer, webhookUrl } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.create, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.checkpoints.create, {}, signerDto);
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
   ): ServiceReturn<CheckpointSchedule> {
-    const { signer, webhookUrl, ...rest } = createCheckpointScheduleDto;
+    const { base, args } = extractTxBase(createCheckpointScheduleDto);
+
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.schedules.create, rest, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(asset.checkpoints.schedules.create, args, base);
   }
 
   public async getAssetBalance(
@@ -125,14 +122,13 @@ export class CheckpointsService {
   public async deleteScheduleByTicker(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
-      { signer, webhookUrl }
+      transactionBaseDto
     );
   }
 }
