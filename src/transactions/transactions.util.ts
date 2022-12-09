@@ -141,7 +141,7 @@ export async function processTransaction<
       details,
     };
   } catch (err) /* istanbul ignore next: not worth the trouble */ {
-    handleSdkError(err);
+    handleSdkError(err as Error);
   }
 }
 
@@ -157,6 +157,7 @@ export function handleSdkError(err: Error): never {
       case ErrorCode.LimitExceeded:
         throw new UnprocessableEntityException(message);
       case ErrorCode.DataUnavailable:
+        console.log('hjere');
         throw new NotFoundException(message);
       default:
         throw new InternalServerErrorException(message);

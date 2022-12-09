@@ -1,3 +1,4 @@
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { KnownAssetType, SecurityIdentifierType } from '@polymeshassociation/polymesh-sdk/types';
@@ -8,11 +9,11 @@ import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
+import { MetadataService } from '~/metadata/metadata.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { testValues } from '~/test-utils/consts';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
-import { MockAssetService, MockComplianceRequirementsService } from '~/test-utils/service-mocks';
+import { MockAssetService, mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer, did, txResult } = testValues;
 
@@ -20,24 +21,41 @@ describe('AssetsController', () => {
   let controller: AssetsController;
 
   const mockAssetsService = new MockAssetService();
-  const mockComplianceRequirementsService = new MockComplianceRequirementsService();
+  let mockMetadataService: DeepMocked<MetadataService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AssetsController],
-      providers: [AssetsService, ComplianceRequirementsService],
+      providers: [AssetsService, mockMetadataServiceProvider],
     })
       .overrideProvider(AssetsService)
       .useValue(mockAssetsService)
-      .overrideProvider(ComplianceRequirementsService)
-      .useValue(mockComplianceRequirementsService)
       .compile();
+
+    mockMetadataService = mockMetadataServiceProvider.useValue as DeepMocked<MetadataService>;
 
     controller = module.get<AssetsController>(AssetsController);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getGlobalMetadataKeys', () => {
+    it('should return all global metadata keys', async () => {
+      const mockGlobalMetadata = [
+        {
+          name: 'Global Metadata',
+          id: new BigNumber(1),
+          specs: { description: 'Some description' },
+        },
+      ];
+      mockMetadataService.findGlobalKeys.mockResolvedValue(mockGlobalMetadata);
+
+      const result = await controller.getGlobalMetadataKeys();
+
+      expect(result).toEqual(mockGlobalMetadata);
+    });
   });
 
   describe('getDetails', () => {

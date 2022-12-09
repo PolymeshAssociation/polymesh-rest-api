@@ -115,4 +115,10 @@ export class ComplianceRequirementsService {
       base
     );
   }
+
+  public async arePaused(ticker: string): Promise<boolean> {
+    const asset = await this.assetsService.findOne(ticker);
+
+    return asset.compliance.requirements.arePaused();
+  }
 }

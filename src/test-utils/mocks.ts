@@ -1,10 +1,12 @@
 /* istanbul ignore file */
 
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   CalendarUnit,
+  MetadataEntry,
+  MetadataType,
   TransactionStatus,
   TrustedClaimIssuer,
   TxTag,
@@ -68,6 +70,7 @@ export class MockPolymesh {
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
     getTickerReservations: jest.fn(),
+    getGlobalMetadataKeys: jest.fn(),
   };
 
   public accountManagement = {
@@ -138,6 +141,7 @@ export class MockAsset {
     requirements: {
       get: jest.fn(),
       set: jest.fn(),
+      arePaused: jest.fn(),
     },
     trustedClaimIssuers: {
       get: jest.fn(),
@@ -179,6 +183,12 @@ export class MockAsset {
     issue: jest.fn(),
   };
 
+  public metadata = {
+    register: jest.fn(),
+    get: jest.fn(),
+    getOne: jest.fn(),
+  };
+
   public toHuman = jest.fn().mockImplementation(() => this.ticker);
 }
 
@@ -217,7 +227,7 @@ export class MockIdentity {
   authorizations = new MockIdentityAuthorization();
   public getPrimaryAccount = jest.fn();
   public areSecondaryAccountsFrozen = jest.fn();
-  public getPendingInstructions = jest.fn();
+  public getInstructions = jest.fn();
   public getVenues = jest.fn();
   public createVenue = jest.fn();
   public getSecondaryAccounts = jest.fn();
@@ -357,4 +367,14 @@ export class MockAccount {
 export class MockSubsidy {
   beneficiary = new MockAccount('beneficiary');
   subsidizer = new MockAccount('subsidizer');
+}
+
+export function createMockMetadataEntry(
+  partial: PartialFuncReturn<MetadataEntry> = {
+    id: new BigNumber(1),
+    type: MetadataType.Local,
+    asset: { ticker: 'TICKER' },
+  }
+): DeepMocked<MetadataEntry> {
+  return createMock<MetadataEntry>(partial);
 }

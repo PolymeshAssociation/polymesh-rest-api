@@ -15,7 +15,6 @@ import {
   AuthorizationType,
   Claim,
   ClaimType,
-  Instruction,
   TickerReservation,
   Venue,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -202,12 +201,10 @@ export class IdentitiesController {
     example: ['123', '456', '789'],
   })
   @Get(':did/pending-instructions')
-  public async getPendingInstructions(
-    @Param() { did }: DidDto
-  ): Promise<ResultsModel<Instruction>> {
-    const pendingInstructions = await this.settlementsService.findPendingInstructionsByDid(did);
+  public async getPendingInstructions(@Param() { did }: DidDto): Promise<ResultsModel<BigNumber>> {
+    const { pending } = await this.settlementsService.findPendingInstructionsByDid(did);
 
-    return new ResultsModel({ results: pendingInstructions });
+    return new ResultsModel({ results: pending.map(({ id }) => id) });
   }
 
   @ApiTags('settlements')

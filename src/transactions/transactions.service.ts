@@ -87,7 +87,7 @@ export class TransactionsService {
         );
       }
     } catch (error) {
-      handleSdkError(error);
+      handleSdkError(error as Error);
     }
   }
 
