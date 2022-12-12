@@ -1,17 +1,10 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
-import {
-  ErrorCode,
-  PermissionType,
-  TxGroup,
-  TxTags,
-} from '@polymeshassociation/polymesh-sdk/types';
+import { PermissionType, TxGroup, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
@@ -23,10 +16,10 @@ import { SigningModule } from '~/signing/signing.module';
 import { testValues } from '~/test-utils/consts';
 import { MockAccount, MockAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -57,7 +50,6 @@ describe('AccountsService', () => {
 
   afterAll(() => {
     mockIsPolymeshTransaction.mockReset();
-    mockIsPolymeshError.mockReset();
   });
 
   afterEach(async () => {
@@ -69,53 +61,30 @@ describe('AccountsService', () => {
   });
 
   describe('findOne', () => {
-    describe("if the Account address is not encoded with the chain's SS58 format", () => {
-      it('should throw a BadRequestException', async () => {
-        const mockError = {
-          code: ErrorCode.ValidationError,
-          message: "The supplied address is not encoded with the chain's SS58 format",
-        };
+    it('should return the Account for valid Account address', async () => {
+      const mockAccount = 'account';
 
-        const ss58Format = new BigNumber(42);
-        mockPolymeshApi.network.getSs58Format.mockReturnValue(ss58Format);
+      mockPolymeshApi.accountManagement.getAccount.mockReturnValue(mockAccount);
 
+      const result = await service.findOne('address');
+
+      expect(result).toBe(mockAccount);
+    });
+
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
         mockPolymeshApi.accountManagement.getAccount.mockImplementation(() => {
           throw mockError;
         });
 
-        mockIsPolymeshError.mockReturnValue(true);
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
         const address = 'address';
 
-        const expectedError = await expect(() => service.findOne(address)).rejects;
-        expectedError.toBeInstanceOf(BadRequestException);
-        expectedError.toThrowError(
-          `The address "${address}" is not encoded with the chain's SS58 format "${ss58Format.toString()}"`
-        );
-      });
-    });
+        await expect(() => service.findOne(address)).rejects.toThrowError();
 
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('Something else');
-
-        mockPolymeshApi.accountManagement.getAccount.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        return expect(() => service.findOne('address')).rejects.toThrowError('Something else');
-      });
-    });
-
-    describe('otherwise', () => {
-      it('should return the Account', async () => {
-        const mockAccount = 'account';
-
-        mockPolymeshApi.accountManagement.getAccount.mockReturnValue(mockAccount);
-
-        const result = await service.findOne('address');
-
-        expect(result).toBe(mockAccount);
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
@@ -233,55 +202,28 @@ describe('AccountsService', () => {
       findOneSpy.mockResolvedValue(mockAccount as any);
     });
 
-    describe('if the Account address is not associated with any Identity', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: 'There is no Identity associated with Account',
-        };
+    it('should return the Account Permissions for a valid address', async () => {
+      mockAccount.getPermissions.mockResolvedValue(mockPermissions);
 
+      const result = await service.getPermissions('address');
+
+      expect(result).toEqual(mockPermissions);
+
+      findOneSpy.mockRestore();
+    });
+
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
         mockAccount.getPermissions.mockImplementation(() => {
           throw mockError;
         });
 
-        mockIsPolymeshError.mockReturnValue(true);
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        const address = 'address';
+        await expect(() => service.getPermissions('address')).rejects.toThrowError();
 
-        const expectedError = await expect(() => service.getPermissions(address)).rejects;
-
-        expectedError.toBeInstanceOf(NotFoundException);
-        expectedError.toThrowError(`There is no Identity associated with Account "${address}"`);
-
-        findOneSpy.mockRestore();
-      });
-    });
-
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('Something else');
-
-        mockAccount.getPermissions.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        await expect(() => service.getPermissions('address')).rejects.toThrowError(
-          'Something else'
-        );
-
-        findOneSpy.mockRestore();
-      });
-    });
-
-    describe('otherwise', () => {
-      it('should return the Account Permissions', async () => {
-        mockAccount.getPermissions.mockResolvedValue(mockPermissions);
-
-        const result = await service.getPermissions('address');
-
-        expect(result).toEqual(mockPermissions);
-
-        findOneSpy.mockRestore();
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });

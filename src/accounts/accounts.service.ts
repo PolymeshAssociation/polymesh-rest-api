@@ -1,13 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   Account,
   AccountBalance,
-  ErrorCode,
   ExtrinsicData,
   Permissions,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
 import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
@@ -17,6 +15,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class AccountsService {
@@ -30,20 +29,9 @@ export class AccountsService {
       polymeshService: { polymeshApi },
     } = this;
     try {
-      return polymeshApi.accountManagement.getAccount({ address });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.ValidationError) {
-          throw new BadRequestException(
-            `The address "${address}" is not encoded with the chain's SS58 format "${polymeshApi.network
-              .getSs58Format()
-              .toString()}"`
-          );
-        }
-      }
-
-      throw err;
+      return await polymeshApi.accountManagement.getAccount({ address });
+    } catch (err) {
+      handleSdkError(err);
     }
   }
 
@@ -83,13 +71,7 @@ export class AccountsService {
     try {
       return await account.getPermissions();
     } catch (err) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          throw new NotFoundException(`There is no Identity associated with Account "${address}"`);
-        }
-      }
-      throw err;
+      handleSdkError(err);
     }
   }
 

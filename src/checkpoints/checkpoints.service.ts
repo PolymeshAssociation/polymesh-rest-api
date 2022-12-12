@@ -1,15 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Checkpoint,
   CheckpointSchedule,
   CheckpointWithData,
-  ErrorCode,
   IdentityBalance,
   ResultSet,
   ScheduleWithDetails,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
@@ -18,6 +16,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class CheckpointsService {
@@ -43,16 +42,7 @@ export class CheckpointsService {
     try {
       return await asset.checkpoints.getOne({ id });
     } catch (err) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          this.logger.warn(`No Checkpoint exists for ticker "${ticker}" with ID "${id}"`);
-          throw new NotFoundException(
-            `There is no Checkpoint for ticker "${ticker}" with ID "${id}"`
-          );
-        }
-      }
-      throw err;
+      handleSdkError(err);
     }
   }
 
@@ -65,17 +55,8 @@ export class CheckpointsService {
     const asset = await this.assetsService.findOne(ticker);
     try {
       return await asset.checkpoints.schedules.getOne({ id });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          this.logger.warn(`No Schedule exists for ticker "${ticker}" with ID "${id}"`);
-          throw new NotFoundException(
-            `There is no Schedule for ticker "${ticker}" with ID "${id}"`
-          );
-        }
-      }
-      throw err;
+    } catch (err) {
+      handleSdkError(err);
     }
   }
 

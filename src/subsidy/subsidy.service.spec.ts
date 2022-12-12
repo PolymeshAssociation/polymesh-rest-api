@@ -1,17 +1,11 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
 import { DeepMocked } from '@golevelup/ts-jest';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import {
-  AllowanceOperation,
-  ErrorCode,
-  Subsidy,
-  TxTags,
-} from '@polymeshassociation/polymesh-sdk/types';
+import { AllowanceOperation, Subsidy, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -34,10 +28,10 @@ import {
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -313,61 +307,32 @@ describe('SubsidyService', () => {
     let findOneSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      mockIsPolymeshError.mockReturnValue(false);
-
       findOneSpy = jest.spyOn(service, 'findOne');
 
       when(findOneSpy).calledWith(beneficiary, subsidizer).mockReturnValue(mockSubsidy);
     });
 
-    afterAll(() => {
-      mockIsPolymeshError.mockReset();
+    it('should return the Subsidy allowance', async () => {
+      mockSubsidy.getAllowance.mockResolvedValue(allowance);
+
+      const result = await service.getAllowance(beneficiary, subsidizer);
+
+      expect(result).toEqual(allowance);
+      findOneSpy.mockRestore();
     });
 
-    describe('if the Subsidy no longer exists', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: 'The Subsidy no longer exists',
-        };
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
         mockSubsidy.getAllowance.mockImplementation(() => {
           throw mockError;
         });
 
-        mockIsPolymeshError.mockReturnValue(true);
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.getAllowance(beneficiary, subsidizer)).rejects.toBeInstanceOf(
-          NotFoundException
-        );
+        await expect(() => service.getAllowance(beneficiary, subsidizer)).rejects.toThrowError();
 
-        findOneSpy.mockRestore();
-      });
-    });
-
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('Something else');
-
-        mockSubsidy.getAllowance.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        await expect(() => service.getAllowance(beneficiary, subsidizer)).rejects.toThrowError(
-          'Something else'
-        );
-
-        findOneSpy.mockRestore();
-      });
-    });
-
-    describe('otherwise', () => {
-      it('should return the Subsidy allowance', async () => {
-        mockSubsidy.getAllowance.mockResolvedValue(allowance);
-
-        const result = await service.getAllowance(beneficiary, subsidizer);
-
-        expect(result).toEqual(allowance);
-        findOneSpy.mockRestore();
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });

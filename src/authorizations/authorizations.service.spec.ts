@@ -1,11 +1,10 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { AuthorizationType, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { AuthorizationType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -24,10 +23,10 @@ import {
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -150,81 +149,40 @@ describe('AuthorizationsService', () => {
     let mockAccount: MockAccount;
 
     beforeEach(() => {
-      mockIsPolymeshError.mockReturnValue(false);
       mockIdentity = new MockIdentity();
       mockAccount = new MockAccount();
     });
 
-    afterAll(() => {
-      mockIsPolymeshError.mockReset();
-    });
+    it('should return the AuthorizationRequest details', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      mockIdentity.authorizations.getOne.mockResolvedValue(mockAuthorization);
 
-    describe('if the AuthorizationRequest does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: 'The Authorization Request does not exist',
-        };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let result = await service.findOne(mockIdentity as any, new BigNumber(1));
+      expect(result).toEqual(mockAuthorization);
 
-        mockIdentity.authorizations.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+      mockAccount.authorizations.getOne.mockResolvedValue(mockAuthorization);
 
-        mockIsPolymeshError.mockReturnValue(true);
-
-        await expect(() =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          service.findOne(mockIdentity as any, new BigNumber(1))
-        ).rejects.toBeInstanceOf(NotFoundException);
-
-        mockAccount.authorizations.getOne.mockImplementation(() => {
-          throw mockError;
-        });
-
-        await expect(() =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          service.findOne(mockAccount as any, new BigNumber(1))
-        ).rejects.toBeInstanceOf(NotFoundException);
-      });
-    });
-
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const mockError = new Error('foo');
-        mockIdentity.authorizations.getOne.mockImplementation(() => {
-          throw mockError;
-        });
-
-        await expect(() =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          service.findOne(mockIdentity as any, new BigNumber(1))
-        ).rejects.toThrowError(mockError);
-
-        mockAccount.authorizations.getOne.mockImplementation(() => {
-          throw mockError;
-        });
-
-        await expect(() =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          service.findOne(mockAccount as any, new BigNumber(1))
-        ).rejects.toThrowError(mockError);
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      result = await service.findOne(mockAccount as any, new BigNumber(1));
+      expect(result).toEqual(mockAuthorization);
     });
 
     describe('otherwise', () => {
-      it('should return the AuthorizationRequest details', async () => {
-        const mockAuthorization = new MockAuthorizationRequest();
-        mockIdentity.authorizations.getOne.mockResolvedValue(mockAuthorization);
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockAccount.authorizations.getOne.mockImplementation(() => {
+          throw mockError;
+        });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let result = await service.findOne(mockIdentity as any, new BigNumber(1));
-        expect(result).toEqual(mockAuthorization);
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        mockAccount.authorizations.getOne.mockResolvedValue(mockAuthorization);
+        await expect(() =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          service.findOne(mockAccount as any, new BigNumber(1))
+        ).rejects.toThrowError();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        result = await service.findOne(mockAccount as any, new BigNumber(1));
-        expect(result).toEqual(mockAuthorization);
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });

@@ -1,11 +1,9 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { CalendarUnit, ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { CalendarUnit, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
@@ -22,10 +20,10 @@ import {
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -102,44 +100,7 @@ describe('CheckpointsService', () => {
   });
 
   describe('findOne', () => {
-    it('should return NotFoundException if the asset does not exist', async () => {
-      mockAssetsService.findOne.mockImplementation(() => {
-        throw new NotFoundException('Asset does not exist');
-      });
-
-      let error;
-      try {
-        await service.findOne('TICKER', new BigNumber(1));
-      } catch (err) {
-        error = err;
-      }
-
-      expect(error).toBeInstanceOf(NotFoundException);
-    });
-
-    it('should return NotFoundException if the checkpoint does not exist', async () => {
-      mockIsPolymeshError.mockReturnValue(true);
-      const mockAsset = new MockAsset();
-      const mockError = {
-        code: ErrorCode.DataUnavailable,
-        message: 'The checkpoint was not found',
-      };
-      mockAsset.checkpoints.getOne.mockImplementation(() => {
-        throw mockError;
-      });
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
-
-      let error;
-      try {
-        await service.findOne('TICKER', new BigNumber(1));
-      } catch (err) {
-        error = err;
-      }
-
-      expect(error).toBeInstanceOf(NotFoundException);
-    });
-
-    it('should return a checkpoint given a ticker and id', async () => {
+    it('should return a checkpoint for a valid ticker and id', async () => {
       const mockAsset = new MockAsset();
       const mockCheckpoint = new MockCheckpoint();
       mockAsset.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
@@ -148,6 +109,23 @@ describe('CheckpointsService', () => {
       const result = await service.findOne('TICKER', new BigNumber(1));
       expect(result).toEqual(mockCheckpoint);
       expect(mockAssetsService.findOne).toBeCalledWith('TICKER');
+    });
+
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        const mockAsset = new MockAsset();
+        mockAsset.checkpoints.getOne.mockImplementation(() => {
+          throw mockError;
+        });
+        mockAssetsService.findOne.mockResolvedValue(mockAsset);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
+      });
     });
   });
 
@@ -193,44 +171,33 @@ describe('CheckpointsService', () => {
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
     });
 
-    describe('if the Schedule does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: 'The Schedule does not exist',
-        };
+    it('should return the Schedule for a valid ticker and id', async () => {
+      const mockScheduleWithDetails = {
+        schedule: new MockCheckpointSchedule(),
+        details: {
+          remainingCheckpoints: 1,
+          nextCheckpointDate: new Date(),
+        },
+      };
+      mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
+
+      const result = await service.findScheduleById(ticker, id);
+
+      expect(result).toEqual(mockScheduleWithDetails);
+    });
+
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
         mockAsset.checkpoints.schedules.getOne.mockImplementation(() => {
           throw mockError;
         });
 
-        mockIsPolymeshError.mockReturnValue(true);
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        let error;
-        try {
-          await service.findScheduleById(ticker, id);
-        } catch (err) {
-          error = err;
-        }
+        await expect(() => service.findScheduleById(ticker, id)).rejects.toThrowError();
 
-        expect(error).toBeInstanceOf(NotFoundException);
-        mockIsPolymeshError.mockReset();
-      });
-    });
-
-    describe('otherwise', () => {
-      it('should return the Schedule', async () => {
-        const mockScheduleWithDetails = {
-          schedule: new MockCheckpointSchedule(),
-          details: {
-            remainingCheckpoints: 1,
-            nextCheckpointDate: new Date(),
-          },
-        };
-        mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
-
-        const result = await service.findScheduleById(ticker, id);
-
-        expect(result).toEqual(mockScheduleWithDetails);
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
 
