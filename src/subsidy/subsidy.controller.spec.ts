@@ -5,12 +5,14 @@ import { AllowanceOperation, TxTags } from '@polymeshassociation/polymesh-sdk/ty
 import { when } from 'jest-when';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { TransactionType } from '~/common/types';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
 import { SubsidyController } from '~/subsidy/subsidy.controller';
 import { SubsidyService } from '~/subsidy/subsidy.service';
+import { txResult } from '~/test-utils/consts';
 import { createMockTransactionResult, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { mockSubsidyServiceProvider } from '~/test-utils/service-mocks';
 
@@ -69,6 +71,7 @@ describe('SubsidyController', () => {
       };
       const mockAuthorization = new MockAuthorizationRequest();
       const testTxResult = createMockTransactionResult<MockAuthorizationRequest>({
+        ...txResult,
         transactions: [transaction],
         result: mockAuthorization,
       });
@@ -85,11 +88,14 @@ describe('SubsidyController', () => {
 
       const result = await controller.subsidizeAccount(mockPayload);
 
-      expect(result).toEqual({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-        transactions: [transaction],
-      });
+      expect(result).toEqual(
+        new CreatedAuthorizationRequestModel({
+          ...txResult,
+          transactions: [transaction],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+        })
+      );
     });
   });
 
@@ -103,6 +109,7 @@ describe('SubsidyController', () => {
         transactionTag: TxTags.relayer.UpdatePolyxLimit,
       };
       const testTxResult = createMockTransactionResult({
+        ...txResult,
         transactions: [transaction],
       });
       const mockPayload: ModifyAllowanceDto = {
@@ -118,9 +125,7 @@ describe('SubsidyController', () => {
 
       let result = await controller.setAllowance(mockPayload);
 
-      expect(result).toEqual({
-        transactions: [transaction],
-      });
+      expect(result).toEqual(testTxResult);
 
       when(mockService.modifyAllowance)
         .calledWith(mockPayload, AllowanceOperation.Increase)
@@ -129,9 +134,7 @@ describe('SubsidyController', () => {
 
       result = await controller.increaseAllowance(mockPayload);
 
-      expect(result).toEqual({
-        transactions: [transaction],
-      });
+      expect(result).toEqual(testTxResult);
 
       when(mockService.modifyAllowance)
         .calledWith(mockPayload, AllowanceOperation.Decrease)
@@ -140,9 +143,7 @@ describe('SubsidyController', () => {
 
       result = await controller.decreaseAllowance(mockPayload);
 
-      expect(result).toEqual({
-        transactions: [transaction],
-      });
+      expect(result).toEqual(testTxResult);
     });
   });
 
@@ -156,6 +157,7 @@ describe('SubsidyController', () => {
         transactionTag: TxTags.relayer.RemovePayingKey,
       };
       const testTxResult = createMockTransactionResult({
+        ...txResult,
         transactions: [transaction],
       });
       const mockPayload: QuitSubsidyDto = {
@@ -170,9 +172,7 @@ describe('SubsidyController', () => {
 
       const result = await controller.quitSubsidy(mockPayload);
 
-      expect(result).toEqual({
-        transactions: [transaction],
-      });
+      expect(result).toEqual(testTxResult);
     });
   });
 });
