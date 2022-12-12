@@ -139,12 +139,12 @@ export async function processTransaction<
       transactions: [assembleTransactionResponse(procedure)],
       details,
     };
-  } catch (err) /* istanbul ignore next: not worth the trouble */ {
-    handleSdkError(err as Error);
+  } catch (err) {
+    handleSdkError(err);
   }
 }
 
-export function handleSdkError(err: Error): never {
+export function handleSdkError(err: unknown): never {
   if (isPolymeshError(err)) {
     const { message, code } = err;
     switch (code) {
@@ -156,11 +156,15 @@ export function handleSdkError(err: Error): never {
       case ErrorCode.LimitExceeded:
         throw new UnprocessableEntityException(message);
       case ErrorCode.DataUnavailable:
-        console.log('hjere');
         throw new NotFoundException(message);
       default:
         throw new InternalServerErrorException(message);
     }
   }
-  throw new InternalServerErrorException(err.message);
+
+  if (err instanceof Error) {
+    throw new InternalServerErrorException(err.message);
+  }
+
+  throw new InternalServerErrorException('An unexpected error occurred');
 }

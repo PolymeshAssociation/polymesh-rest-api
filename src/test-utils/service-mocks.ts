@@ -9,6 +9,7 @@ import { ComplianceRequirementsService } from '~/compliance/compliance-requireme
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
+import { SubsidyService } from '~/subsidy/subsidy.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -83,7 +84,6 @@ export class MockAccountsService {
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
   findOne = jest.fn();
-  getSubsidy = jest.fn();
   freezeSecondaryAccounts = jest.fn();
   unfreezeSecondaryAccounts = jest.fn();
   modifyPermissions = jest.fn();
@@ -215,6 +215,11 @@ export const mockTrustedClaimIssuersServiceProvider: ValueProvider<TrustedClaimI
 export const mockMetadataServiceProvider: ValueProvider<MetadataService> = {
   provide: MetadataService,
   useValue: createMock<MetadataService>(),
+};
+
+export const mockSubsidyServiceProvider: ValueProvider<SubsidyService> = {
+  provide: SubsidyService,
+  useValue: createMock<SubsidyService>(),
 };
 
 /**

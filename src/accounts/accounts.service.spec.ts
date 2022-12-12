@@ -21,13 +21,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningModule } from '~/signing/signing.module';
 import { testValues } from '~/test-utils/consts';
-import {
-  MockAccount,
-  MockAsset,
-  MockPolymesh,
-  MockSubsidy,
-  MockTransaction,
-} from '~/test-utils/mocks';
+import { MockAccount, MockAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
@@ -289,33 +283,6 @@ describe('AccountsService', () => {
 
         findOneSpy.mockRestore();
       });
-    });
-  });
-
-  describe('getSubsidy', () => {
-    const mockSubsidyWithAllowance = {
-      subsidy: new MockSubsidy(),
-      allowance: new BigNumber(10),
-    };
-
-    let findOneSpy: jest.SpyInstance;
-    let mockAccount: MockAccount;
-
-    beforeEach(() => {
-      mockAccount = new MockAccount();
-      findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockAccount as any);
-    });
-
-    it('should return the Account Subsidy', async () => {
-      mockAccount.getSubsidy.mockResolvedValue(mockSubsidyWithAllowance);
-
-      const result = await service.getSubsidy('address');
-
-      expect(result).toEqual(mockSubsidyWithAllowance);
-
-      findOneSpy.mockRestore();
     });
   });
 

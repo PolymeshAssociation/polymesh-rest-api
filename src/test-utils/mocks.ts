@@ -7,6 +7,7 @@ import {
   CalendarUnit,
   MetadataEntry,
   MetadataType,
+  Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
   TxTag,
@@ -81,6 +82,8 @@ export class MockPolymesh {
     unfreezeSecondaryAccounts: jest.fn(),
     revokePermissions: jest.fn(),
     modifyPermissions: jest.fn(),
+    subsidizeAccount: jest.fn(),
+    getSubsidy: jest.fn(),
   };
 
   public identities = {
@@ -364,11 +367,6 @@ export class MockAccount {
   }
 }
 
-export class MockSubsidy {
-  beneficiary = new MockAccount('beneficiary');
-  subsidizer = new MockAccount('subsidizer');
-}
-
 export function createMockMetadataEntry(
   partial: PartialFuncReturn<MetadataEntry> = {
     id: new BigNumber(1),
@@ -377,4 +375,13 @@ export function createMockMetadataEntry(
   }
 ): DeepMocked<MetadataEntry> {
   return createMock<MetadataEntry>(partial);
+}
+
+export function createMockSubsidy(
+  partial: PartialFuncReturn<Subsidy> = {
+    beneficiary: { address: 'beneficiary' },
+    subsidizer: { address: 'subsidizer' },
+  }
+): DeepMocked<Subsidy> {
+  return createMock<Subsidy>(partial);
 }

@@ -11,7 +11,6 @@ import {
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
-  AuthorizationRequest,
   AuthorizationType,
   Claim,
   ClaimType,
@@ -21,7 +20,10 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import {
+  authorizationRequestResolver,
+  createAuthorizationRequestModel,
+} from '~/authorizations/authorizations.util';
 import { AuthorizationParamsDto } from '~/authorizations/dto/authorization-params.dto';
 import { AuthorizationsFilterDto } from '~/authorizations/dto/authorizations-filter.dto';
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
@@ -35,7 +37,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -415,18 +417,8 @@ export class IdentitiesController {
     const serviceResult = await this.identitiesService.addSecondaryAccount(
       addSecondaryAccountParamsDto
     );
-    const resolver: TransactionResolver<AuthorizationRequest> = ({
-      transactions,
-      details,
-      result,
-    }) =>
-      new CreatedAuthorizationRequestModel({
-        transactions,
-        details,
-        authorizationRequest: createAuthorizationRequestModel(result),
-      });
 
-    return handleServiceResult(serviceResult, resolver);
+    return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
 
   @ApiTags('ticker-reservations')

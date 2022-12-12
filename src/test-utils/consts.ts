@@ -1,6 +1,10 @@
 import { createMock } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Account , PayingAccountType, TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  Account,
+  PayingAccountType,
+  TransactionStatus,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { UserModel } from '~/users/model/user.model';
 
