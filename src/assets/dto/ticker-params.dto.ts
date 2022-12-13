@@ -1,8 +1,9 @@
 /* istanbul ignore file */
 
-import { IsTicker } from '~/common/decorators/validation';
+import { IsString } from 'class-validator';
 
 export class TickerParamsDto {
-  @IsTicker()
+  // @IsTicker()
+  @IsString()
   readonly ticker: string;
 }

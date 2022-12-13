@@ -117,9 +117,7 @@ describe('PortfoliosService', () => {
         const mockError = new Error('foo');
         const mockIdentity = new MockIdentity();
         const owner = '0x6000';
-        mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
-          throw mockError;
-        });
+        mockIdentity.portfolios.getPortfolio.mockRejectedValue(mockError);
 
         mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
 

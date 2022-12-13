@@ -324,9 +324,7 @@ describe('SubsidyService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockSubsidy.getAllowance.mockImplementation(() => {
-          throw mockError;
-        });
+        mockSubsidy.getAllowance.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

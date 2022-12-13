@@ -52,11 +52,7 @@ export class CorporateActionsService {
   public async findDistribution(ticker: string, id: BigNumber): Promise<DistributionWithDetails> {
     const asset = await this.assetsService.findOne(ticker);
 
-    try {
-      return await asset.corporateActions.distributions.getOne({ id });
-    } catch (err: unknown) {
-      handleSdkError(err);
-    }
+    return await asset.corporateActions.distributions.getOne({ id }).catch(handleSdkError);
   }
 
   public async createDividendDistribution(

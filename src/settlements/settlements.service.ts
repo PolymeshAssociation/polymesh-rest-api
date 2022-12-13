@@ -38,13 +38,11 @@ export class SettlementsService {
   }
 
   public async findInstruction(id: BigNumber): Promise<Instruction> {
-    try {
-      return await this.polymeshService.polymeshApi.settlements.getInstruction({
+    return await this.polymeshService.polymeshApi.settlements
+      .getInstruction({
         id,
-      });
-    } catch (err) {
-      handleSdkError(err);
-    }
+      })
+      .catch(handleSdkError);
   }
 
   public async createInstruction(
@@ -91,13 +89,11 @@ export class SettlementsService {
   }
 
   public async findVenue(id: BigNumber): Promise<Venue> {
-    try {
-      return await this.polymeshService.polymeshApi.settlements.getVenue({
+    return await this.polymeshService.polymeshApi.settlements
+      .getVenue({
         id,
-      });
-    } catch (err) {
-      handleSdkError(err);
-    }
+      })
+      .catch(handleSdkError);
   }
 
   public async findVenueDetails(id: BigNumber): Promise<VenueDetails> {

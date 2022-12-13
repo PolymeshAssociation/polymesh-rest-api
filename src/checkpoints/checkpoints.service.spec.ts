@@ -115,9 +115,7 @@ describe('CheckpointsService', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
         const mockAsset = new MockAsset();
-        mockAsset.checkpoints.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+        mockAsset.checkpoints.getOne.mockRejectedValue(mockError);
         mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
@@ -189,9 +187,7 @@ describe('CheckpointsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockAsset.checkpoints.schedules.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+        mockAsset.checkpoints.schedules.getOne.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

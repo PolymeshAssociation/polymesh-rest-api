@@ -137,9 +137,7 @@ describe('CorporateActionsService', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockAsset = new MockAsset();
         const mockError = new Error('Some Error');
-        mockAsset.corporateActions.distributions.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+        mockAsset.corporateActions.distributions.getOne.mockRejectedValue(mockError);
         mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');

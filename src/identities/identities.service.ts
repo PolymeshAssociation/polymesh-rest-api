@@ -32,11 +32,7 @@ export class IdentitiesService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    try {
-      return await polymeshApi.identities.getIdentity({ did });
-    } catch (err: unknown) {
-      handleSdkError(err);
-    }
+    return await polymeshApi.identities.getIdentity({ did }).catch(handleSdkError);
   }
 
   /**

@@ -31,15 +31,10 @@ export class PortfoliosService {
     portfolioId?: BigNumber
   ): Promise<DefaultPortfolio | NumberedPortfolio> {
     const identity = await this.identitiesService.findOne(did);
-    try {
-      if (portfolioId) {
-        return await identity.portfolios.getPortfolio({ portfolioId });
-      } else {
-        return await identity.portfolios.getPortfolio();
-      }
-    } catch (err) {
-      handleSdkError(err);
+    if (portfolioId) {
+      return await identity.portfolios.getPortfolio({ portfolioId }).catch(handleSdkError);
     }
+    return await identity.portfolios.getPortfolio().catch(handleSdkError);
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {

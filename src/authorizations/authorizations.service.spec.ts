@@ -171,9 +171,7 @@ describe('AuthorizationsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockAccount.authorizations.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+        mockAccount.authorizations.getOne.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

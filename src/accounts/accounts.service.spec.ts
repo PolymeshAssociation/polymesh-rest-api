@@ -64,7 +64,7 @@ describe('AccountsService', () => {
     it('should return the Account for valid Account address', async () => {
       const mockAccount = 'account';
 
-      mockPolymeshApi.accountManagement.getAccount.mockReturnValue(mockAccount);
+      mockPolymeshApi.accountManagement.getAccount.mockResolvedValue(mockAccount);
 
       const result = await service.findOne('address');
 
@@ -74,9 +74,7 @@ describe('AccountsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockPolymeshApi.accountManagement.getAccount.mockImplementation(() => {
-          throw mockError;
-        });
+        mockPolymeshApi.accountManagement.getAccount.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
@@ -215,9 +213,7 @@ describe('AccountsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockAccount.getPermissions.mockImplementation(() => {
-          throw mockError;
-        });
+        mockAccount.getPermissions.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

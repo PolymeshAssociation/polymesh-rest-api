@@ -111,9 +111,7 @@ describe('SettlementsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw mockError;
-        });
+        mockPolymeshApi.settlements.getInstruction.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
@@ -135,9 +133,7 @@ describe('SettlementsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw mockError;
-        });
+        mockPolymeshApi.settlements.getVenue.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

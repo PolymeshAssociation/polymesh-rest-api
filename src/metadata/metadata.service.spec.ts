@@ -121,7 +121,7 @@ describe('MetadataService', () => {
 
     it('should return the Metadata entry', async () => {
       const mockMetadataEntry = createMockMetadataEntry();
-      mockAsset.metadata.getOne.mockReturnValue(mockMetadataEntry);
+      mockAsset.metadata.getOne.mockResolvedValue(mockMetadataEntry);
 
       const result = await service.findOne({ ticker, type, id });
 
@@ -131,9 +131,7 @@ describe('MetadataService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockAsset.metadata.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+        mockAsset.metadata.getOne.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

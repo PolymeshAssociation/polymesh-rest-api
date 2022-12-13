@@ -85,7 +85,7 @@ describe('IdentitiesService', () => {
     it('should return the Identity for a valid DID', async () => {
       const fakeResult = 'identity';
 
-      mockPolymeshApi.identities.getIdentity.mockReturnValue(fakeResult);
+      mockPolymeshApi.identities.getIdentity.mockResolvedValue(fakeResult);
 
       const result = await service.findOne('realDid');
 
@@ -95,9 +95,7 @@ describe('IdentitiesService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockPolymeshApi.identities.getIdentity.mockImplementation(() => {
-          throw mockError;
-        });
+        mockPolymeshApi.identities.getIdentity.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 

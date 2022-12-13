@@ -39,11 +39,7 @@ export class CheckpointsService {
 
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
     const asset = await this.assetsService.findOne(ticker);
-    try {
-      return await asset.checkpoints.getOne({ id });
-    } catch (err) {
-      handleSdkError(err);
-    }
+    return await asset.checkpoints.getOne({ id }).catch(handleSdkError);
   }
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
@@ -53,11 +49,7 @@ export class CheckpointsService {
 
   public async findScheduleById(ticker: string, id: BigNumber): Promise<ScheduleWithDetails> {
     const asset = await this.assetsService.findOne(ticker);
-    try {
-      return await asset.checkpoints.schedules.getOne({ id });
-    } catch (err) {
-      handleSdkError(err);
-    }
+    return await asset.checkpoints.schedules.getOne({ id }).catch(handleSdkError);
   }
 
   public async createByTicker(

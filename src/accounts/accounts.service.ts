@@ -28,11 +28,7 @@ export class AccountsService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    try {
-      return await polymeshApi.accountManagement.getAccount({ address });
-    } catch (err) {
-      handleSdkError(err);
-    }
+    return await polymeshApi.accountManagement.getAccount({ address }).catch(handleSdkError);
   }
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {
@@ -68,11 +64,7 @@ export class AccountsService {
 
   public async getPermissions(address: string): Promise<Permissions> {
     const account = await this.findOne(address);
-    try {
-      return await account.getPermissions();
-    } catch (err) {
-      handleSdkError(err);
-    }
+    return await account.getPermissions().catch(handleSdkError);
   }
 
   public async freezeSecondaryAccounts(
