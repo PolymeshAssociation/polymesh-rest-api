@@ -319,7 +319,6 @@ describe('CheckpointsService', () => {
         size: new BigNumber(1),
         start: undefined,
       });
-      findOneSpy.mockRestore();
     });
 
     it('should return the list of Asset holders at a Checkpoint from a start key', async () => {
@@ -341,7 +340,6 @@ describe('CheckpointsService', () => {
         start: 'START_KEY',
         size: new BigNumber(10),
       });
-      findOneSpy.mockRestore();
     });
   });
 
@@ -365,8 +363,6 @@ describe('CheckpointsService', () => {
       expect(result).toEqual({ balance, identity: did });
       expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
       expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
-
-      findOneSpy.mockRestore();
     });
   });
 

@@ -260,7 +260,6 @@ describe('CorporateActionsService', () => {
           signer,
         }
       );
-      findDistributionSpy.mockRestore();
     });
   });
 
@@ -298,7 +297,6 @@ describe('CorporateActionsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      findDistributionSpy.mockRestore();
     });
   });
 
@@ -333,7 +331,6 @@ describe('CorporateActionsService', () => {
             signer,
           }
         );
-        findDistributionSpy.mockRestore();
       });
     });
   });
@@ -372,7 +369,6 @@ describe('CorporateActionsService', () => {
         undefined,
         { signer, webhookUrl, dryRun }
       );
-      findDistributionSpy.mockRestore();
     });
   });
 
@@ -405,7 +401,6 @@ describe('CorporateActionsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      findDistributionSpy.mockRestore();
     });
   });
 });

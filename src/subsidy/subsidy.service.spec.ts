@@ -206,8 +206,6 @@ describe('SubsidyService', () => {
         {},
         { signer: beneficiary }
       );
-
-      findOneSpy.mockRestore();
     });
 
     it('should throw an error if no beneficiary or subsidizer is passed', () => {
@@ -268,8 +266,6 @@ describe('SubsidyService', () => {
         { allowance },
         { signer }
       );
-
-      findOneSpy.mockRestore();
     });
 
     it('should run a increaseAllowance procedure and return the queue results', async () => {
@@ -283,8 +279,6 @@ describe('SubsidyService', () => {
         { allowance },
         { signer }
       );
-
-      findOneSpy.mockRestore();
     });
 
     it('should run a decreaseAllowance procedure and return the queue results', async () => {
@@ -298,8 +292,6 @@ describe('SubsidyService', () => {
         { allowance },
         { signer }
       );
-
-      findOneSpy.mockRestore();
     });
   });
 
@@ -318,7 +310,6 @@ describe('SubsidyService', () => {
       const result = await service.getAllowance(beneficiary, subsidizer);
 
       expect(result).toEqual(allowance);
-      findOneSpy.mockRestore();
     });
 
     describe('otherwise', () => {

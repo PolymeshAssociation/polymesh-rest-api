@@ -134,7 +134,6 @@ describe('TickerReservationsService', () => {
         result: mockResult,
         transactions: [mockTransaction],
       });
-      findOneSpy.mockRestore();
     });
   });
 
@@ -171,7 +170,6 @@ describe('TickerReservationsService', () => {
         result: mockResult,
         transactions: [mockTransaction],
       });
-      findOneSpy.mockRestore();
     });
   });
 

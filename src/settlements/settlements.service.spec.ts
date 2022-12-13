@@ -202,7 +202,6 @@ describe('SettlementsService', () => {
         },
         { signer }
       );
-      findVenueSpy.mockRestore();
     });
   });
 
@@ -277,7 +276,6 @@ describe('SettlementsService', () => {
         { description: body.description, type: body.type },
         { signer }
       );
-      findVenueSpy.mockRestore();
     });
   });
 
@@ -313,7 +311,6 @@ describe('SettlementsService', () => {
         {},
         { signer }
       );
-      findInstructionSpy.mockRestore();
     });
   });
 
@@ -346,7 +343,6 @@ describe('SettlementsService', () => {
         {},
         { signer }
       );
-      findInstructionSpy.mockRestore();
     });
   });
 
@@ -369,7 +365,6 @@ describe('SettlementsService', () => {
       const result = await service.findVenueDetails(new BigNumber(123));
 
       expect(result).toEqual(mockDetails);
-      findVenueSpy.mockRestore();
     });
   });
 
@@ -397,7 +392,6 @@ describe('SettlementsService', () => {
       const result = await service.findAffirmations(new BigNumber(123), new BigNumber(10));
 
       expect(result).toEqual(mockAffirmations);
-      findInstructionSpy.mockRestore();
     });
   });
 

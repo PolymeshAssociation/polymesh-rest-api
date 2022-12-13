@@ -223,7 +223,6 @@ describe('MetadataService', () => {
         { value: body.value, details: body.details },
         { signer }
       );
-      findOneSpy.mockRestore();
     });
   });
 });

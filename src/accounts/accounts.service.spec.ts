@@ -169,7 +169,6 @@ describe('AccountsService', () => {
         order: Order.Desc,
       });
       expect(result).toEqual(mockTransactions);
-      findOneSpy.mockRestore();
     });
   });
 
@@ -206,8 +205,6 @@ describe('AccountsService', () => {
       const result = await service.getPermissions('address');
 
       expect(result).toEqual(mockPermissions);
-
-      findOneSpy.mockRestore();
     });
 
     describe('otherwise', () => {

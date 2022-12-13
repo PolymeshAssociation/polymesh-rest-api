@@ -145,7 +145,6 @@ describe('AssetsService', () => {
 
       const result = await service.findHolders('TICKER', new BigNumber(10));
       expect(result).toEqual(mockHolders);
-      findOneSpy.mockRestore();
     });
 
     it('should return the list of Asset holders from a start value', async () => {
@@ -158,7 +157,6 @@ describe('AssetsService', () => {
 
       const result = await service.findHolders('TICKER', new BigNumber(10), 'NEXT_KEY');
       expect(result).toEqual(mockHolders);
-      findOneSpy.mockRestore();
     });
   });
 
@@ -185,7 +183,6 @@ describe('AssetsService', () => {
 
       const result = await service.findDocuments('TICKER', new BigNumber(10));
       expect(result).toEqual(mockAssetDocuments);
-      findOneSpy.mockRestore();
     });
 
     it('should return the list of Asset documents from a start value', async () => {
@@ -198,7 +195,6 @@ describe('AssetsService', () => {
 
       const result = await service.findDocuments('TICKER', new BigNumber(10), 'NEXT_KEY');
       expect(result).toEqual(mockAssetDocuments);
-      findOneSpy.mockRestore();
     });
   });
 
@@ -243,7 +239,6 @@ describe('AssetsService', () => {
         { documents: body.documents },
         { signer }
       );
-      findOneSpy.mockRestore();
     });
   });
 
@@ -304,7 +299,6 @@ describe('AssetsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      findSpy.mockRestore();
     });
   });
 
@@ -343,7 +337,6 @@ describe('AssetsService', () => {
         result: mockResult,
         transactions: [mockTransaction],
       });
-      findOneSpy.mockRestore();
     });
   });
 
@@ -389,8 +382,6 @@ describe('AssetsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-
-      findSpy.mockRestore();
     });
   });
 
@@ -418,7 +409,6 @@ describe('AssetsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      findSpy.mockRestore();
     });
   });
 
@@ -446,7 +436,6 @@ describe('AssetsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      findSpy.mockRestore();
     });
   });
 
@@ -489,7 +478,6 @@ describe('AssetsService', () => {
         },
         { signer }
       );
-      findSpy.mockRestore();
     });
   });
 
@@ -520,7 +508,6 @@ describe('AssetsService', () => {
 
       const result = await service.getOperationHistory('TICKER');
       expect(result).toEqual(mockOperations);
-      findOneSpy.mockRestore();
     });
   });
 });

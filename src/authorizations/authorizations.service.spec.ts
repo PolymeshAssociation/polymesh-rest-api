@@ -241,8 +241,6 @@ describe('AuthorizationsService', () => {
       await expect(() => service.getAuthRequest(address, id)).rejects.toBeInstanceOf(
         NotFoundException
       );
-
-      findOneSpy.mockRestore();
     });
 
     it('should return an AuthorizationRequest targeted to an Identity', async () => {
@@ -255,8 +253,6 @@ describe('AuthorizationsService', () => {
 
       const result = await service.getAuthRequest(address, id);
       expect(result).toBe(mockAuthorizationRequest);
-
-      findOneSpy.mockRestore();
     });
 
     it('should return an AuthorizationRequest targeted to an Account', async () => {
@@ -310,7 +306,6 @@ describe('AuthorizationsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      getAuthRequestSpy.mockRestore();
     });
   });
 
@@ -343,7 +338,6 @@ describe('AuthorizationsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
-      getAuthRequestSpy.mockRestore();
     });
   });
 });

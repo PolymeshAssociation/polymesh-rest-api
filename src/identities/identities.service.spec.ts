@@ -125,8 +125,6 @@ describe('IdentitiesService', () => {
 
       const result = await service.findTrustingAssets('TICKER');
       expect(result).toEqual(mockAssets);
-
-      findOneSpy.mockRestore();
     });
   });
 

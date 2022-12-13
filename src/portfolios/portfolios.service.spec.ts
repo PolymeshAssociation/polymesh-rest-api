@@ -176,7 +176,6 @@ describe('PortfoliosService', () => {
         },
         { signer: '0x6000' }
       );
-      findOneSpy.mockRestore();
     });
   });
 

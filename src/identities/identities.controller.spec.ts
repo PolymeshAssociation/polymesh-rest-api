@@ -487,7 +487,6 @@ describe('IdentitiesController', () => {
       const result = await controller.createMockCdd(params);
       expect(result).toEqual(fakeIdentityModel);
       expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
-      createIdentityModelSpy.mockRestore();
     });
   });
 });
