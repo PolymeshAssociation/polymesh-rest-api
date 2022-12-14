@@ -141,7 +141,7 @@ describe('CorporateActionsController', () => {
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         dividendDistribution: createDividendDistributionModel(mockDistribution as any),
-        transactions: ['transaction'],
+        transactions: txResult.transactions,
         details: txResult.details,
       });
       expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
