@@ -18,8 +18,8 @@ export class ClaimsController {
   }
 
   @ApiOperation({
-    summary: 'Get all Claims targeting an Identity',
-    description: 'This endpoint will provide a list of all the Claims made about an Identity',
+    summary: 'Add Claims targeting an Identity',
+    description: 'This endpoint will add Claims to an Identity',
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
@@ -52,8 +52,8 @@ export class ClaimsController {
   }
 
   @ApiOperation({
-    summary: 'Get all Claims targeting an Identity',
-    description: 'This endpoint will provide a list of all the Claims made about an Identity',
+    summary: 'Remove provided Claims from an Identity',
+    description: 'This endpoint will remove Claims from an Identity',
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
