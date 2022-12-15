@@ -1,6 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ClaimData, ClaimType, ResultSet, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ClaimData,
+  ClaimType,
+  ResultSet,
+  ScopeType,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimsService } from '~/claims/claims.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -178,6 +184,37 @@ describe('ClaimsService', () => {
         mockPolymeshApi.claims.revokeClaims,
         { claims: mockModifyClaimsArgs.claims },
         { signer: mockModifyClaimsArgs.signer }
+      );
+    });
+  });
+
+  describe('addInvestorUniqueness', () => {
+    it('should run a addInvestorUniquenessClaim procedure and return the queue results', async () => {
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddInvestorUniquenessClaim,
+      };
+
+      const mockArgs = {
+        scope: { type: ScopeType.Identity, value: did },
+        cddId: '0x1',
+        proof: 'proof',
+        scopeId: 'id',
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      mockTransactionsService.submit.mockResolvedValue(mockTransaction);
+
+      const result = await claimsService.addInvestorUniqueness({ signer, ...mockArgs });
+
+      expect(result).toBe(mockTransaction);
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.claims.addInvestorUniquenessClaim,
+        mockArgs,
+        { signer }
       );
     });
   });
