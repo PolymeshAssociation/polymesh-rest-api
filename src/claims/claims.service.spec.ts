@@ -218,4 +218,16 @@ describe('ClaimsService', () => {
       );
     });
   });
+
+  describe('getInvestorUniqueness', () => {
+    it('should run a getInvestorUniquenessClaims procedure and return the result', async () => {
+      const claimsResult = [] as ClaimData[];
+
+      mockPolymeshApi.claims.getInvestorUniquenessClaims.mockResolvedValue(claimsResult);
+
+      const result = await claimsService.getInvestorUniquenessClaims(did, true);
+
+      expect(result).toBe(claimsResult);
+    });
+  });
 });
