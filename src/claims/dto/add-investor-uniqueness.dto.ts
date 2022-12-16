@@ -2,8 +2,6 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { ScopeClaimProof } from '@polymeshassociation/polymesh-sdk/types';
-import { Type } from 'class-transformer';
-import { IsNotEmpty, ValidateNested } from 'class-validator';
 
 import { ScopeDto } from '~/claims/dto/scope.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
