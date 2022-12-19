@@ -104,6 +104,7 @@ export class MockPolymesh {
     addClaims: jest.fn(),
     editClaims: jest.fn(),
     revokeClaims: jest.fn(),
+    getClaimScopes: jest.fn(),
   };
 
   public _polkadotApi = {

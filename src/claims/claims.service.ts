@@ -3,6 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimsParams,
   ClaimData,
+  ClaimScope,
   ClaimType,
   ModifyClaimsParams,
   ResultSet,
@@ -82,5 +83,12 @@ export class ClaimsService {
     const { revokeClaims } = this.polymeshService.polymeshApi.claims;
 
     return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, base);
+  
+  }
+
+  public async findClaimScopesByDid(target: string): Promise<ClaimScope[]> {
+    return this.polymeshService.polymeshApi.claims.getClaimScopes({
+      target,
+    });
   }
 }
