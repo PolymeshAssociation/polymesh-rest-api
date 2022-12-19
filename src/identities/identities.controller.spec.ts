@@ -487,4 +487,37 @@ describe('IdentitiesController', () => {
       expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
     });
   });
+
+  describe('getCddClaims', () => {
+    const date = new Date().toISOString();
+    const mockCddClaims = [
+      {
+        target: did,
+        issuer: did,
+        issuedAt: date,
+        expiry: date,
+        claim: {
+          type: 'Accredited',
+          scope: {
+            type: 'Identity',
+            value: did,
+          },
+        },
+      },
+    ];
+
+    it('should call the service and return list of CDD Claims', async () => {
+      mockClaimsService.findCddClaimsByDid.mockResolvedValue(mockCddClaims);
+      const result = await controller.getCddClaims({ did }, { includeExpired: false });
+      expect(result).toEqual(new ResultsModel({ results: mockCddClaims }));
+      expect(mockClaimsService.findCddClaimsByDid).toHaveBeenCalledWith(did, false);
+    });
+
+    it('should call the service and return list of CDD Claims including expired claims', async () => {
+      mockClaimsService.findCddClaimsByDid.mockResolvedValue(mockCddClaims);
+      const result = await controller.getCddClaims({ did }, { includeExpired: true });
+      expect(result).toEqual(new ResultsModel({ results: mockCddClaims }));
+      expect(mockClaimsService.findCddClaimsByDid).toHaveBeenCalledWith(did, true);
+    });
+  });
 });

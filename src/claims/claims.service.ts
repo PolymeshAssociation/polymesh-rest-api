@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimsParams,
+  CddClaim,
   ClaimData,
   ClaimType,
   ModifyClaimsParams,
@@ -82,5 +83,15 @@ export class ClaimsService {
     const { revokeClaims } = this.polymeshService.polymeshApi.claims;
 
     return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, base);
+  }
+
+  public async findCddClaimsByDid(
+    target: string,
+    includeExpired = true
+  ): Promise<ClaimData<CddClaim>[]> {
+    return await this.polymeshService.polymeshApi.claims.getCddClaims({
+      target,
+      includeExpired,
+    });
   }
 }

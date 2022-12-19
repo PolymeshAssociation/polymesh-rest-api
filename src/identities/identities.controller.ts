@@ -12,6 +12,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
   AuthorizationType,
+  CddClaim,
   Claim,
   ClaimType,
   TickerReservation,
@@ -464,5 +465,37 @@ export class IdentitiesController {
   public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
     const identity = await this.identitiesService.createMockCdd(params);
     return createIdentityModel(identity);
+  }
+
+  @ApiTags('claims')
+  @ApiOperation({
+    summary: 'Fetch all CDD claims for an Identity',
+    description: 'This endpoint will fetch the list of CDD claims for a target DID',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose CDD claims are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiQuery({
+    name: 'includeExpired',
+    description: 'Indicates whether to include expired CDD claims or not. Defaults to true',
+    type: 'boolean',
+    required: false,
+  })
+  @ApiArrayResponse(ClaimModel, {
+    description: 'List of CDD claims for the target DID',
+    paginated: false,
+  })
+  @Get(':did/cdd-claims')
+  public async getCddClaims(
+    @Param() { did }: DidDto,
+    @Query() { includeExpired }: IncludeExpiredFilterDto
+  ): Promise<ResultsModel<ClaimModel<CddClaim>>> {
+    const results = await this.claimsService.findCddClaimsByDid(did, includeExpired);
+
+    return new ResultsModel({ results });
   }
 }
