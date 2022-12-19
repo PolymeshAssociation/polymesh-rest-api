@@ -83,7 +83,7 @@ export class ClaimsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
   })
-  @Post('claims/remove')
+  @Post('add-investor-uniqueness')
   async addInvestorUniqueness(
     @Body() args: AddInvestorUniquenessDto
   ): Promise<TransactionResponseModel> {
