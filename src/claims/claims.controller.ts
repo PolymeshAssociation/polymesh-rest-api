@@ -29,7 +29,7 @@ export class ClaimsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
   })
-  @Post('claims/add')
+  @Post('add')
   async addClaims(@Body() args: ModifyClaimsDto): Promise<TransactionResponseModel> {
     const serviceResult = await this.claimsService.addClaimsOnDid(args);
 
@@ -47,7 +47,7 @@ export class ClaimsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
   })
-  @Post('claims/edit')
+  @Post('edit')
   async editClaims(@Body() args: ModifyClaimsDto): Promise<TransactionResponseModel> {
     const serviceResult = await this.claimsService.editClaimsOnDid(args);
 
@@ -65,7 +65,7 @@ export class ClaimsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
   })
-  @Post('claims/remove')
+  @Post('remove')
   async revokeClaims(@Body() args: ModifyClaimsDto): Promise<TransactionResponseModel> {
     const serviceResult = await this.claimsService.revokeClaimsFromDid(args);
 
