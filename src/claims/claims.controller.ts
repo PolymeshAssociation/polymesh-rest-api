@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClaimsService } from '~/claims/claims.service';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
@@ -23,6 +24,7 @@ export class ClaimsController {
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
+    type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
@@ -40,6 +42,7 @@ export class ClaimsController {
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
+    type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
@@ -57,6 +60,7 @@ export class ClaimsController {
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
+    type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],

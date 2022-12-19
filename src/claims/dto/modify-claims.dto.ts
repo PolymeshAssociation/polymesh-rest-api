@@ -9,7 +9,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class ModifyClaimsDto extends TransactionBaseDto {
   @ApiProperty({
-    description: 'The type of Claim. Note that different types require different fields',
+    description: 'An array of Claims. Note that different types of Claims require different fields',
   })
   @Type(() => ClaimTargetDto)
   @IsNotEmpty()
