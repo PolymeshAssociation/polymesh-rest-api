@@ -1,9 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { FireblocksSigningManager } from '@polymeshassociation/fireblocks-signing-manager';
+import { DerivationPath } from '@polymeshassociation/fireblocks-signing-manager/lib/fireblocks';
 import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 import { SigningManager } from '@polymeshassociation/signing-manager-types';
 import { forEach } from 'lodash';
 
+import { AppValidationError } from '~/common/errors';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
@@ -99,5 +102,49 @@ export class VaultSigningService extends SigningService {
 
   private logKey(handle: string, address: string): void {
     this.logger.log(`Key "${handle}" with address "${address}" was loaded`);
+  }
+}
+
+export class FireblocksSigningService extends SigningService {
+  constructor(
+    protected readonly signingManager: FireblocksSigningManager,
+    protected readonly polymeshService: PolymeshService,
+    private readonly logger: PolymeshLogger
+  ) {
+    super();
+    this.logger.setContext(FireblocksSigningService.name);
+  }
+
+  public async getAddressByHandle(handle: string): Promise<string> {
+    const derivePath = this.handleToDerivationPath(handle);
+
+    const key = await this.signingManager.deriveAccount(derivePath);
+    return key.address;
+  }
+
+  private handleToDerivationPath(handle: string): DerivationPath {
+    const sections = handle.split('-').map(Number);
+
+    if (sections.some(isNaN)) {
+      throw new AppValidationError(
+        'Fireblocks `signer` field should be 3 numbers formatted like: `x-y-z`'
+      );
+    }
+
+    if (sections.length > 3) {
+      throw new AppValidationError(
+        'Fireblocks `signer` field should be at most 3 numbers formatted like: `x-y-z`'
+      );
+    }
+
+    /**
+     * Mainnet should use `595` as the coinType, otherwise it should be `1` to indicate a test net
+     * reference: https://github.com/satoshilabs/slips/blob/2a2f4c79508749f7e679a127d5a56da079b8d2d8/slip-0044.md?plain=1#L32
+     */
+    const coinType = this.signingManager.ss58Format === 12 ? 595 : 1;
+
+    const [accountId, change, accountIndex] = sections;
+
+    return [44, coinType, accountId, change || 0, accountIndex || 0];
   }
 }

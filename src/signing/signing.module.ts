@@ -2,6 +2,7 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
+import { FireblocksSigningManager } from '@polymeshassociation/fireblocks-signing-manager';
 import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 
@@ -10,7 +11,9 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import signersConfig from '~/signing/config/signers.config';
+import { SigningController } from '~/signing/signing.controller';
 import {
+  FireblocksSigningService,
   LocalSigningService,
   SigningService,
   VaultSigningService,
@@ -28,10 +31,14 @@ import {
         logger: PolymeshLogger
       ): Promise<SigningService> => {
         let service;
-        const { vault, local } = configuration;
+        const { vault, local, fireblocks } = configuration;
         if (vault) {
           const manager = new HashicorpVaultSigningManager(vault);
           service = new VaultSigningService(manager, polymeshService, logger);
+          await service.initialize();
+        } else if (fireblocks) {
+          const manager = await FireblocksSigningManager.create(fireblocks);
+          service = new FireblocksSigningService(manager, polymeshService, logger);
           await service.initialize();
         } else {
           const manager = await LocalSigningManager.create({ accounts: [] });
@@ -43,5 +50,6 @@ import {
     },
   ],
   exports: [SigningService],
+  controllers: [SigningController],
 })
 export class SigningModule {}

@@ -1,16 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { FireblocksSigningManager } from '@polymeshassociation/fireblocks-signing-manager';
+import { DerivationPath } from '@polymeshassociation/fireblocks-signing-manager/lib/fireblocks';
 import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 
+import { AppValidationError } from '~/common/errors';
 import { LoggerModule } from '~/logger/logger.module';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockHashicorpVaultSigningManager } from '~/signing/signing.mock';
+import {
+  MockFireblocksSigningManager,
+  MockHashicorpVaultSigningManager,
+} from '~/signing/signing.mock';
 import { SigningModule } from '~/signing/signing.module';
-import { LocalSigningService, VaultSigningService } from '~/signing/signing.service';
+import {
+  FireblocksSigningService,
+  LocalSigningService,
+  VaultSigningService,
+} from '~/signing/signing.service';
+import { testAccount } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
 
 describe('LocalSigningService', () => {
@@ -43,7 +54,7 @@ describe('LocalSigningService', () => {
 
   describe('initialize', () => {
     it('should call polymeshApi setSigningManager method', async () => {
-      await service.initialize({});
+      await service.initialize();
       expect(mockPolymeshApi.setSigningManager).toHaveBeenCalled();
     });
 
@@ -144,6 +155,102 @@ describe('VaultSigningService', () => {
       return expect(service.getAddressByHandle('badId')).rejects.toThrowError(
         'There is no signer associated to "badId'
       );
+    });
+  });
+});
+
+describe('FireblocksSigningService', () => {
+  let service: FireblocksSigningService;
+  let logger: PolymeshLogger;
+  let polymeshService: PolymeshService;
+  let mockPolymeshApi: MockPolymesh;
+  let manager: MockFireblocksSigningManager;
+
+  beforeEach(async () => {
+    mockPolymeshApi = new MockPolymesh();
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [PolymeshModule, SigningModule, LoggerModule],
+      providers: [mockPolymeshLoggerProvider],
+    })
+      .overrideProvider(POLYMESH_API)
+      .useValue(mockPolymeshApi)
+      .compile();
+
+    logger = mockPolymeshLoggerProvider.useValue as unknown as PolymeshLogger;
+    polymeshService = module.get<PolymeshService>(PolymeshService);
+    manager = new MockFireblocksSigningManager();
+
+    service = new FireblocksSigningService(
+      manager as unknown as FireblocksSigningManager,
+      polymeshService,
+      logger
+    );
+  });
+
+  describe('getAddressByHandle', () => {
+    const { address } = testAccount;
+    const mockDeriveResponse = {
+      publicKey: '01000',
+      address,
+      status: 0,
+      algorithm: 'TEST-ALGO',
+      derivationPath: [44, 1, 0, 0, 0] as DerivationPath,
+    };
+
+    it('should return the address associated to the derivation path', async () => {
+      const handle = '1-2-3';
+      const expectedDerivationPath = [44, 1, 1, 2, 3] as DerivationPath;
+
+      manager.deriveAccount.mockResolvedValue(mockDeriveResponse);
+
+      const result = await service.getAddressByHandle(handle);
+
+      expect(result).toEqual(address);
+      expect(manager.deriveAccount).toHaveBeenCalledWith(expectedDerivationPath);
+    });
+
+    it('should default non specified sections to 0 for the derivation path', async () => {
+      const handle = '1';
+      const expectedDerivationPath = [44, 1, 1, 0, 0] as DerivationPath;
+
+      manager.deriveAccount.mockResolvedValue(mockDeriveResponse);
+
+      await service.getAddressByHandle(handle);
+
+      expect(manager.deriveAccount).toHaveBeenCalledWith(expectedDerivationPath);
+    });
+
+    it('should infer POLYX BIP-44 path from the ss58Format', async () => {
+      const handle = '0';
+
+      const expectedDerivationPath = [44, 595, 0, 0, 0] as DerivationPath;
+
+      manager.deriveAccount.mockResolvedValue(mockDeriveResponse);
+      manager.ss58Format = 12;
+
+      await service.getAddressByHandle(handle);
+
+      expect(manager.deriveAccount).toHaveBeenCalledWith(expectedDerivationPath);
+    });
+
+    it('should error if given a signer with a non number section', () => {
+      const handle = 'aaa-bbb-ccc';
+
+      const expectedError = new AppValidationError(
+        'Fireblocks `signer` field should be 3 numbers formatted like: `x-y-z`'
+      );
+
+      return expect(service.getAddressByHandle(handle)).rejects.toThrow(expectedError);
+    });
+
+    it('should error if given a signer with more than 3 sections', () => {
+      const handle = '1-2-3-4';
+
+      const expectedError = new AppValidationError(
+        'Fireblocks `signer` field should be at most 3 numbers formatted like: `x-y-z`'
+      );
+
+      return expect(service.getAddressByHandle(handle)).rejects.toThrow(expectedError);
     });
   });
 });
