@@ -475,9 +475,7 @@ describe('IdentitiesController', () => {
     it('should call the service and return the Identity', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fakeIdentityModel = 'fakeIdentityModel' as any;
-      const createIdentityModelSpy = jest
-        .spyOn(identityUtil, 'createIdentityModel')
-        .mockResolvedValue(fakeIdentityModel);
+      jest.spyOn(identityUtil, 'createIdentityModel').mockResolvedValue(fakeIdentityModel);
 
       const params = {
         address: '5abc',
