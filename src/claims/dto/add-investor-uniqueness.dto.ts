@@ -12,11 +12,23 @@ export class AddInvestorUniquenessDto extends TransactionBaseDto {
   })
   scope: ScopeDto;
 
+  @ApiProperty({
+    description: 'The CDD ID of the investor',
+  })
   cddId: string;
 
+  @ApiProperty({
+    description: 'The proof of the claim',
+  })
   proof: string | ScopeClaimProof;
 
+  @ApiProperty({
+    description: 'The scope ID of the claim',
+  })
   scopeId: string;
 
+  @ApiProperty({
+    description: 'The expiry date of the claim',
+  })
   expiry?: Date;
 }

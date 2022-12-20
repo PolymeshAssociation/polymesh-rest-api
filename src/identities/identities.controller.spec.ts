@@ -514,7 +514,7 @@ describe('IdentitiesController', () => {
 
       const result = await controller.getInvestorUniquenessClaims({ did }, { includeExpired });
 
-      expect(result).toEqual(mockClaimList);
+      expect(result).toEqual({ results: mockClaimList });
       expect(mockClaimsService.getInvestorUniquenessClaims).toHaveBeenCalledWith(
         did,
         includeExpired

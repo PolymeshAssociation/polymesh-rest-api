@@ -494,7 +494,7 @@ export class IdentitiesController {
   async getInvestorUniquenessClaims(
     @Param() { did }: DidDto,
     @Query() { includeExpired }: IncludeExpiredFilterDto
-  ): Promise<InvestorUniquenessModel[]> {
+  ): Promise<ResultsModel<InvestorUniquenessModel>> {
     const investorUniquenessClaims = await this.claimsService.getInvestorUniquenessClaims(
       did,
       includeExpired
@@ -511,6 +511,6 @@ export class IdentitiesController {
         })
     );
 
-    return results;
+    return { results };
   }
 }
