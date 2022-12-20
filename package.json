@@ -9,7 +9,7 @@
     "nest": "nest",
     "prepare": "husky install",
     "prebuild": "rimraf dist",
-    "postinstall": "rimraf node_modules/@polymeshassociation/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto,util,wasm-bridge} && rimraf node_modules/@polymeshassociation/hashicorp-vault-signing-manager/node_modules/@polkadot/{util,util-crypto,wasm-bridge} && rimraf node_modules/@polymeshassociation/fireblocks-signing-manager/node_modules/@polkadot/{util,util-crypto,wasm-bridge}",
+    "postinstall": "rimraf node_modules/@polymeshassociation/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto,util,wasm-bridge} && rimraf node_modules/@polymeshassociation/{hashicorp-vault-signing-manager,fireblocks-signing-manager}/node_modules/@polkadot/{util,util-crypto,wasm-bridge}",
     "build": "nest build",
     "commit": "npx git-cz",
     "format": "prettier-eslint --write \"src/**/*.ts\" \"test/**/*.ts\"",

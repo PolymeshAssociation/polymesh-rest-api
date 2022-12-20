@@ -237,7 +237,7 @@ describe('FireblocksSigningService', () => {
       expect(manager.deriveAccount).toHaveBeenCalledWith(expectedDerivationPath);
     });
 
-    it('should error if given a signer with a non number section', async () => {
+    it('should error if given an invalid signer', async () => {
       const invalidSigners = ['aaa-bbb-ccc', '', '1-2-3-4', '0-a-1', '0--1-2'];
 
       const expectedError = new AppValidationError(
