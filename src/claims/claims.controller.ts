@@ -27,7 +27,10 @@ export class ClaimsController {
     type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
-    [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      "A target Identity cannot have CDD claims with different IDs' this should also be added",
+    ],
+    [HttpStatus.NOT_FOUND]: ['Some of the supplied Identity IDs do not exist'],
   })
   @Post('add')
   async addClaims(@Body() args: ModifyClaimsDto): Promise<TransactionResponseModel> {
@@ -38,7 +41,7 @@ export class ClaimsController {
 
   @ApiOperation({
     summary: 'Edit Claims targeting an Identity',
-    description: 'This endpoint will provide a list of all the Claims made about an Identity',
+    description: 'This endpoint allows changing the expiry of a Claim',
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
@@ -64,6 +67,9 @@ export class ClaimsController {
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
+    [HttpStatus.BAD_REQUEST]: [
+      'Attempt to revoke Investor Uniqueness claims from investors with positive balance',
+    ],
   })
   @Post('remove')
   async revokeClaims(@Body() args: ModifyClaimsDto): Promise<TransactionResponseModel> {
