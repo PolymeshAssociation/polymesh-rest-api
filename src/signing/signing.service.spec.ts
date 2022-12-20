@@ -24,6 +24,10 @@ import {
 import { testAccount } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
 
+describe('true', () => {
+  it('is true', () => expect(true).toBe(true));
+});
+
 // describe('LocalSigningService', () => {
 //   let service: LocalSigningService;
 //   let logger: PolymeshLogger;
