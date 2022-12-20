@@ -7,9 +7,10 @@ import { mockSigningProvider } from '~/signing/signing.mock';
 import { testAccount } from '~/test-utils/consts';
 
 describe('SigningController', () => {
-  let controller: SigningController;
   const signingService = mockSigningProvider.useValue;
   const { address } = testAccount;
+
+  let controller: SigningController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
