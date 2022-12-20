@@ -125,15 +125,9 @@ export class FireblocksSigningService extends SigningService {
   private handleToDerivationPath(handle: string): DerivationPath {
     const sections = handle.split('-').map(Number);
 
-    if (sections.some(isNaN)) {
+    if (sections.some(isNaN) || sections.length > 3 || handle === '') {
       throw new AppValidationError(
-        'Fireblocks `signer` field should be 3 numbers formatted like: `x-y-z`'
-      );
-    }
-
-    if (sections.length > 3) {
-      throw new AppValidationError(
-        'Fireblocks `signer` field should be at most 3 numbers formatted like: `x-y-z`'
+        'Fireblocks `signer` field should be 3 integers formatted like: `x-y-z`'
       );
     }
 

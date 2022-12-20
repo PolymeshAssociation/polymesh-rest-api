@@ -233,24 +233,16 @@ describe('FireblocksSigningService', () => {
       expect(manager.deriveAccount).toHaveBeenCalledWith(expectedDerivationPath);
     });
 
-    it('should error if given a signer with a non number section', () => {
-      const handle = 'aaa-bbb-ccc';
+    it('should error if given a signer with a non number section', async () => {
+      const invalidSigners = ['aaa-bbb-ccc', '', '1-2-3-4', '0-a-1', '0--1-2'];
 
       const expectedError = new AppValidationError(
-        'Fireblocks `signer` field should be 3 numbers formatted like: `x-y-z`'
+        'Fireblocks `signer` field should be 3 integers formatted like: `x-y-z`'
       );
 
-      return expect(service.getAddressByHandle(handle)).rejects.toThrow(expectedError);
-    });
-
-    it('should error if given a signer with more than 3 sections', () => {
-      const handle = '1-2-3-4';
-
-      const expectedError = new AppValidationError(
-        'Fireblocks `signer` field should be at most 3 numbers formatted like: `x-y-z`'
-      );
-
-      return expect(service.getAddressByHandle(handle)).rejects.toThrow(expectedError);
+      for (const signer of invalidSigners) {
+        await expect(service.getAddressByHandle(signer)).rejects.toThrow(expectedError);
+      }
     });
   });
 });
