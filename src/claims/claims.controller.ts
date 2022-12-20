@@ -79,6 +79,7 @@ export class ClaimsController {
   })
   @ApiTransactionResponse({
     description: 'Transaction response',
+    type: TransactionQueueModel,
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: ['Account does not have the required roles or permissions'],
