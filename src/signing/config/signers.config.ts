@@ -3,7 +3,15 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('signer-accounts', () => {
-  const { LOCAL_SIGNERS, LOCAL_MNEMONICS, VAULT_URL, VAULT_TOKEN } = process.env;
+  const {
+    LOCAL_SIGNERS,
+    LOCAL_MNEMONICS,
+    VAULT_URL,
+    VAULT_TOKEN,
+    FIREBLOCKS_URL,
+    FIREBLOCKS_API_KEY,
+    FIREBLOCKS_SECRET_PATH,
+  } = process.env;
 
   if (VAULT_URL && VAULT_TOKEN) {
     const vault = {
@@ -11,6 +19,16 @@ export default registerAs('signer-accounts', () => {
       token: VAULT_TOKEN,
     };
     return { vault };
+  }
+
+  if (FIREBLOCKS_URL && FIREBLOCKS_API_KEY && FIREBLOCKS_SECRET_PATH) {
+    const fireblocks = {
+      url: FIREBLOCKS_URL,
+      apiKey: FIREBLOCKS_API_KEY,
+      secretPath: FIREBLOCKS_SECRET_PATH,
+    };
+
+    return { fireblocks };
   }
 
   const signers = LOCAL_SIGNERS?.split(',').map(d => d.trim()) || [];
