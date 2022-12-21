@@ -4,12 +4,10 @@ import {
   Asset,
   AssetDocument,
   AuthorizationRequest,
-  ErrorCode,
   HistoricAgentOperation,
   IdentityBalance,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
@@ -22,6 +20,7 @@ import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class AssetsService {
@@ -31,21 +30,7 @@ export class AssetsService {
   ) {}
 
   public async findOne(ticker: string): Promise<Asset> {
-    try {
-      return await this.polymeshService.polymeshApi.assets.getAsset({ ticker });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (
-          code === ErrorCode.DataUnavailable &&
-          message.startsWith('There is no Asset with ticker')
-        ) {
-          throw new NotFoundException(`There is no Asset with ticker "${ticker}"`);
-        }
-      }
-
-      throw err;
-    }
+    return await this.polymeshService.polymeshApi.assets.getAsset({ ticker }).catch(handleSdkError);
   }
 
   public async findAllByOwner(owner: string): Promise<Asset[]> {
