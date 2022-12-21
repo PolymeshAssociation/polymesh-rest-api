@@ -1,11 +1,9 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -21,12 +19,12 @@ import {
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 const { signer } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -84,38 +82,26 @@ describe('IdentitiesService', () => {
   });
 
   describe('findOne', () => {
-    describe('if the Identity does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: 'The Identity does not exist',
-        };
-        mockPolymeshApi.identities.getIdentity.mockImplementation(() => {
-          throw mockError;
-        });
+    it('should return the Identity for a valid DID', async () => {
+      const fakeResult = 'identity';
 
-        mockIsPolymeshError.mockReturnValue(true);
+      mockPolymeshApi.identities.getIdentity.mockResolvedValue(fakeResult);
 
-        let error;
-        try {
-          await service.findOne('falseDid');
-        } catch (err) {
-          error = err;
-        }
+      const result = await service.findOne('realDid');
 
-        expect(error).toBeInstanceOf(NotFoundException);
-        mockIsPolymeshError.mockReset();
-      });
+      expect(result).toBe(fakeResult);
     });
+
     describe('otherwise', () => {
-      it('should return the Identity', async () => {
-        const fakeResult = 'identity';
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockPolymeshApi.identities.getIdentity.mockRejectedValue(mockError);
 
-        mockPolymeshApi.identities.getIdentity.mockReturnValue(fakeResult);
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        const result = await service.findOne('realDid');
+        await expect(() => service.findOne('invalidDID')).rejects.toThrowError();
 
-        expect(result).toBe(fakeResult);
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
@@ -139,8 +125,6 @@ describe('IdentitiesService', () => {
 
       const result = await service.findTrustingAssets('TICKER');
       expect(result).toEqual(mockAssets);
-
-      findOneSpy.mockRestore();
     });
   });
 

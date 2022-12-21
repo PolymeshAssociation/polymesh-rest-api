@@ -52,7 +52,6 @@ describe('LocalSigningService', () => {
       await service.initialize({ Alice: '//Alice', Bob: '//Bob' });
       expect(spy).toHaveBeenCalledWith('Alice', '15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5');
       expect(spy).toHaveBeenCalledWith('Bob', '14E5nqKAp3oAJcmzgZhUD2RcptBeUBScxKHgJKU4HPNcKVf3');
-      spy.mockRestore();
     });
   });
 
@@ -131,7 +130,6 @@ describe('VaultSigningService', () => {
       expect(logKeySpy).toHaveBeenCalledWith('alice-1', 'ABC');
       expect(logKeySpy).toHaveBeenCalledWith('bob-1', 'DEF');
       expect(logKeySpy).toHaveBeenCalledWith('bob-2', 'GHI');
-      logKeySpy.mockRestore();
     });
   });
 

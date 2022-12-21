@@ -1,18 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import {
-  Asset,
-  AuthorizationRequest,
-  ErrorCode,
-  Identity,
-} from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
+import { Asset, AuthorizationRequest, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
@@ -21,6 +10,7 @@ import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class IdentitiesService {
@@ -42,18 +32,7 @@ export class IdentitiesService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    try {
-      return await polymeshApi.identities.getIdentity({ did });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          this.logger.error(`No valid identity found for did "${did}"`);
-          throw new NotFoundException(`There is no Identity with DID "${did}"`);
-        }
-      }
-      throw err;
-    }
+    return await polymeshApi.identities.getIdentity({ did }).catch(handleSdkError);
   }
 
   /**

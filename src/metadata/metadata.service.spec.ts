@@ -1,16 +1,9 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import {
-  ErrorCode,
-  MetadataLockStatus,
-  MetadataType,
-  TxTags,
-} from '@polymeshassociation/polymesh-sdk/types';
+import { MetadataLockStatus, MetadataType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -30,10 +23,10 @@ import {
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -122,52 +115,29 @@ describe('MetadataService', () => {
     let mockAsset: MockAsset;
 
     beforeEach(() => {
-      mockIsPolymeshError.mockReturnValue(false);
       mockAsset = new MockAsset();
       when(mockAssetsService.findOne).calledWith(ticker).mockResolvedValue(mockAsset);
     });
 
-    afterAll(() => {
-      mockIsPolymeshError.mockReset();
-    });
+    it('should return the Metadata entry', async () => {
+      const mockMetadataEntry = createMockMetadataEntry();
+      mockAsset.metadata.getOne.mockResolvedValue(mockMetadataEntry);
 
-    describe('if the Metadata does not exist', () => {
-      it('should throw a NotFoundException', () => {
-        const mockError = {
-          code: ErrorCode.DataUnavailable,
-          message: 'There is no Metadata with given type and id',
-        };
-        mockAsset.metadata.getOne.mockImplementation(() => {
-          throw mockError;
-        });
+      const result = await service.findOne({ ticker, type, id });
 
-        mockIsPolymeshError.mockReturnValue(true);
-
-        return expect(service.findOne({ ticker, type, id })).rejects.toBeInstanceOf(
-          NotFoundException
-        );
-      });
-    });
-
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('foo');
-        mockAsset.metadata.getOne.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        await expect(service.findOne({ ticker, type, id })).rejects.toThrowError('foo');
-      });
+      expect(result).toEqual(mockMetadataEntry);
     });
 
     describe('otherwise', () => {
-      it('should return the Metadata entry', async () => {
-        const mockMetadataEntry = createMockMetadataEntry();
-        mockAsset.metadata.getOne.mockReturnValue(mockMetadataEntry);
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockAsset.metadata.getOne.mockRejectedValue(mockError);
 
-        const result = await service.findOne({ ticker, type, id });
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        expect(result).toEqual(mockMetadataEntry);
+        await expect(service.findOne({ ticker, type, id })).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
@@ -253,7 +223,6 @@ describe('MetadataService', () => {
         { value: body.value, details: body.details },
         { signer }
       );
-      findOneSpy.mockRestore();
     });
   });
 });

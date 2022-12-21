@@ -1,11 +1,9 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ErrorCode, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -20,12 +18,12 @@ import {
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 const { signer, did } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -59,7 +57,6 @@ describe('PortfoliosService', () => {
   });
 
   afterAll(() => {
-    mockIsPolymeshError.mockReset();
     mockIsPolymeshTransaction.mockReset();
   });
 
@@ -97,75 +94,38 @@ describe('PortfoliosService', () => {
   });
 
   describe('findOne', () => {
-    describe('if the Portfolio does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockIdentity = new MockIdentity();
-        const owner = '0x6000';
-
-        const mockError = {
-          code: ErrorCode.ValidationError,
-          message: "The Portfolio doesn't exist",
-        };
-        mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findOne(owner, new BigNumber(1));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
-    });
-
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('foo');
-        const mockIdentity = new MockIdentity();
-        const owner = '0x6000';
-        mockIdentity.portfolios.getPortfolio.mockImplementation(() => {
-          throw expectedError;
-        });
-
-        mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-
-        mockIsPolymeshError.mockReturnValue(false);
-
-        let error;
-        try {
-          await service.findOne(owner, new BigNumber(2));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
+    it('should return the Portfolio if it exists', async () => {
+      const mockIdentity = new MockIdentity();
+      const mockPortfolio = {
+        name: 'Growth',
+        id: new BigNumber(1),
+        assetBalances: [],
+      };
+      const owner = '0x6000';
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+      const result = await service.findOne(owner, new BigNumber(1));
+      expect(result).toEqual({
+        id: new BigNumber(1),
+        name: 'Growth',
+        assetBalances: [],
       });
     });
 
     describe('otherwise', () => {
-      it('should return the portfolio', async () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('foo');
         const mockIdentity = new MockIdentity();
-        const mockPortfolio = {
-          name: 'Growth',
-          id: new BigNumber(1),
-          assetBalances: [],
-        };
         const owner = '0x6000';
-        mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+        mockIdentity.portfolios.getPortfolio.mockRejectedValue(mockError);
+
         mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
-        const result = await service.findOne(owner, new BigNumber(1));
-        expect(result).toEqual({
-          id: new BigNumber(1),
-          name: 'Growth',
-          assetBalances: [],
-        });
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() => service.findOne(owner, new BigNumber(2))).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
@@ -216,7 +176,6 @@ describe('PortfoliosService', () => {
         },
         { signer: '0x6000' }
       );
-      findOneSpy.mockRestore();
     });
   });
 
