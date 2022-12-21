@@ -15,6 +15,7 @@ describe('LocalSigningService', () => {
   let logger: PolymeshLogger;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
+
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +58,7 @@ describe('LocalSigningService', () => {
       service.setAddressByHandle('humanId', 'someAddress');
       return expect(service.getAddressByHandle('humanId')).resolves.toEqual('someAddress');
     });
+
     it('should throw if an Account is not loaded', () => {
       expect(() => service.getAddressByHandle('badId')).toThrowError(
         'There is no signer associated to "badId"'

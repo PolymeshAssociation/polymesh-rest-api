@@ -21,6 +21,7 @@ export class VaultSigningService extends SigningService {
 
   public async getAddressByHandle(handle: string): Promise<string> {
     const keys = await this.signingManager.getVaultKeys();
+
     const key = keys.find(({ name, version }) => `${name}-${version}` === handle);
     if (key) {
       this.logKey(handle, key.address);
@@ -32,6 +33,7 @@ export class VaultSigningService extends SigningService {
 
   public async logKeys(): Promise<void> {
     const keys = await this.signingManager.getVaultKeys();
+
     keys.forEach(({ name, version, address }) => {
       const keyName = `${name}-${version}`;
       this.logKey(keyName, address);

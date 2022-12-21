@@ -33,6 +33,7 @@ export class LocalSigningService extends SigningService {
 
   public override async initialize(accounts: Record<string, string> = {}): Promise<void> {
     await super.initialize();
+
     forEach(accounts, (mnemonic, handle) => {
       const address = this.signingManager.addAccount({ mnemonic });
       this.setAddressByHandle(handle, address);

@@ -24,7 +24,7 @@ export class SigningController {
   @ApiParam({
     name: 'signer',
     description:
-      'The value of the `signer` to fetch the address for. Note, the format depends on the signing manager the API is configured with. Fireblocks signer uses three numbers `x-y-z`, Vault will be `{name}-{version}, while Local can take on any string, like `alice`',
+      'The value of the `signer` to fetch the address for. Note, the format depends on the signing manager the API is configured with. A Fireblocks signer is up to three numbers like `x-y-z`, Vault will be `{name}-{version}, while a Local signer can be any string, like `alice`',
     type: 'string',
     example: 'alice',
   })
