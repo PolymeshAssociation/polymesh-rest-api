@@ -1,23 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ClaimData, ClaimType, ResultSet } from '@polymeshassociation/polymesh-sdk/types';
+import { ClaimData, ClaimType, ResultSet, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimsService } from '~/claims/claims.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { MockPolymesh } from '~/test-utils/mocks';
+import { testValues } from '~/test-utils/consts';
+import { MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 
 describe('ClaimsService', () => {
   let claimsService: ClaimsService;
   let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
+  let mockTransactionsService: MockTransactionsService;
+
+  const { did, signer } = testValues;
+
+  const mockModifyClaimsArgs = {
+    claims: [
+      {
+        target: did,
+        claim: {
+          type: ClaimType.Accredited,
+        },
+      },
+    ],
+    signer,
+  };
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [ClaimsService],
+      providers: [ClaimsService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -25,6 +42,7 @@ describe('ClaimsService', () => {
 
     claimsService = module.get<ClaimsService>(ClaimsService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+    mockTransactionsService = mockTransactionsProvider.useValue;
   });
 
   afterEach(async () => {
@@ -50,7 +68,6 @@ describe('ClaimsService', () => {
 
   describe('findAssociatedByDid', () => {
     it('should return the associated Claims', async () => {
-      const did = '0x6'.padEnd(66, '1');
       const mockAssociatedClaims = [
         {
           issuedAt: '2020-08-21T16:36:55.000Z',
@@ -75,7 +92,7 @@ describe('ClaimsService', () => {
         data: [
           {
             identity: {
-              did: '0x6',
+              did,
             },
             claims: mockAssociatedClaims,
           },
@@ -90,6 +107,78 @@ describe('ClaimsService', () => {
         next: null,
         count: new BigNumber(1),
       });
+    });
+  });
+
+  describe('addClaimsToDid', () => {
+    it('should run a addClaims procedure and return the queue results', async () => {
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddClaim,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      mockTransactionsService.submit.mockResolvedValue(mockTransaction);
+
+      const result = await claimsService.addClaimsOnDid(mockModifyClaimsArgs);
+
+      expect(result).toBe(mockTransaction);
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.claims.addClaims,
+        { claims: mockModifyClaimsArgs.claims },
+        { signer: mockModifyClaimsArgs.signer }
+      );
+    });
+  });
+
+  describe('editClaimsToDid', () => {
+    it('should run a editClaims procedure and return the queue results', async () => {
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddClaim, // hmm thought it would be edit claim
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      mockTransactionsService.submit.mockResolvedValue(mockTransaction);
+
+      const result = await claimsService.editClaimsOnDid(mockModifyClaimsArgs);
+
+      expect(result).toBe(mockTransaction);
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.claims.editClaims,
+        { claims: mockModifyClaimsArgs.claims },
+        { signer: mockModifyClaimsArgs.signer }
+      );
+    });
+  });
+
+  describe('revokeClaimsFromDid', () => {
+    it('should run a revokeClaims procedure and return the queue results', async () => {
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.RevokeClaim,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      mockTransactionsService.submit.mockResolvedValue(mockTransaction);
+
+      const result = await claimsService.revokeClaimsFromDid(mockModifyClaimsArgs);
+
+      expect(result).toBe(mockTransaction);
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.claims.revokeClaims,
+        { claims: mockModifyClaimsArgs.claims },
+        { signer: mockModifyClaimsArgs.signer }
+      );
     });
   });
 });
