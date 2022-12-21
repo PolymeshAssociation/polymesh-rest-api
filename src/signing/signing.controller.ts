@@ -10,7 +10,7 @@ import {
 
 import { SignerDetailsDto } from '~/signing/dto/signer-details.dto';
 import { SignerModel } from '~/signing/models/signer.model';
-import { SigningService } from '~/signing/signing.service';
+import { SigningService } from '~/signing/services';
 
 @ApiTags('signer')
 @Controller('signer')
@@ -24,7 +24,7 @@ export class SigningController {
   @ApiParam({
     name: 'signer',
     description:
-      'The value of the `signer` to fetch the address for. Note, the format depends on the signing manager the API is configured with',
+      'The value of the `signer` to fetch the address for. Note, the format depends on the signing manager the API is configured with. Fireblocks signer uses three numbers `x-y-z`, Vault will be `{name}-{version}, while Local can take on any string, like `alice`',
     type: 'string',
     example: 'alice',
   })

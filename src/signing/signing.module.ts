@@ -11,13 +11,10 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import signersConfig from '~/signing/config/signers.config';
+import { LocalSigningService, SigningService } from '~/signing/services';
+import { FireblocksSigningService } from '~/signing/services/fireblocks-signing.service';
+import { VaultSigningService } from '~/signing/services/vault-signing.service';
 import { SigningController } from '~/signing/signing.controller';
-import {
-  FireblocksSigningService,
-  LocalSigningService,
-  SigningService,
-  VaultSigningService,
-} from '~/signing/signing.service';
 
 @Module({
   imports: [ConfigModule.forFeature(signersConfig), PolymeshModule, LoggerModule],
