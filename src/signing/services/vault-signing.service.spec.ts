@@ -74,7 +74,6 @@ describe('VaultSigningService', () => {
       expect(logKeySpy).toHaveBeenCalledWith('alice-1', 'ABC');
       expect(logKeySpy).toHaveBeenCalledWith('bob-1', 'DEF');
       expect(logKeySpy).toHaveBeenCalledWith('bob-2', 'GHI');
-      logKeySpy.mockRestore();
     });
   });
 

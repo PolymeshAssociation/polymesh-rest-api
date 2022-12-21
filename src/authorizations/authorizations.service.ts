@@ -4,17 +4,16 @@ import {
   Account,
   AuthorizationRequest,
   AuthorizationType,
-  ErrorCode,
   Identity,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class AuthorizationsService {
@@ -47,19 +46,7 @@ export class AuthorizationsService {
     signatory: Identity | Account,
     id: BigNumber
   ): Promise<AuthorizationRequest> {
-    try {
-      return await signatory.authorizations.getOne({ id });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          throw new NotFoundException(
-            `There is no pending Authorization with ID "${id.toString()}"`
-          );
-        }
-      }
-      throw err;
-    }
+    return await signatory.authorizations.getOne({ id }).catch(handleSdkError);
   }
 
   public async findOneByDid(did: string, id: BigNumber): Promise<AuthorizationRequest> {

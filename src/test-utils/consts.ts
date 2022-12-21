@@ -6,6 +6,7 @@ import {
   TransactionStatus,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { TransactionType } from '~/common/types';
 import { UserModel } from '~/users/model/user.model';
 
 const signer = 'alice';
@@ -24,7 +25,15 @@ const resource = {
 
 export const testAccount = createMock<Account>({ address: 'address' });
 export const txResult = {
-  transactions: ['transaction'],
+  transactions: [
+    {
+      transactionTag: 'tag',
+      type: TransactionType.Single,
+      blockNumber: new BigNumber(1),
+      blockHash: 'hash',
+      transactionHash: 'hash',
+    },
+  ],
   details: {
     status: TransactionStatus.Succeeded,
     fees: {

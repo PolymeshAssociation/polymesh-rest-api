@@ -1,11 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import {
-  DefaultPortfolio,
-  ErrorCode,
-  NumberedPortfolio,
-} from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
+import { DefaultPortfolio, NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
@@ -16,6 +11,7 @@ import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class PortfoliosService {
@@ -35,21 +31,10 @@ export class PortfoliosService {
     portfolioId?: BigNumber
   ): Promise<DefaultPortfolio | NumberedPortfolio> {
     const identity = await this.identitiesService.findOne(did);
-    try {
-      if (portfolioId) {
-        return await identity.portfolios.getPortfolio({ portfolioId });
-      } else {
-        return await identity.portfolios.getPortfolio();
-      }
-    } catch (err) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-        if (code === ErrorCode.ValidationError && message.startsWith("The Portfolio doesn't")) {
-          throw new NotFoundException(`There is no portfolio with ID: "${portfolioId}"`);
-        }
-      }
-      throw err;
+    if (portfolioId) {
+      return await identity.portfolios.getPortfolio({ portfolioId }).catch(handleSdkError);
     }
+    return await identity.portfolios.getPortfolio().catch(handleSdkError);
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {

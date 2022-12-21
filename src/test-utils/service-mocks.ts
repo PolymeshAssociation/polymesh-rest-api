@@ -5,6 +5,7 @@ import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
+import { ClaimsService } from '~/claims/claims.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { MetadataService } from '~/metadata/metadata.service';
@@ -245,4 +246,9 @@ export const makeMockConfigProvider = (config: Record<string, unknown>): Service
 export const mockNetworkServiceProvider: ValueProvider<NetworkService> = {
   provide: NetworkService,
   useValue: createMock<NetworkService>(),
+};
+
+export const mockClaimsServiceProvider: ValueProvider<ClaimsService> = {
+  provide: ClaimsService,
+  useValue: createMock<ClaimsService>(),
 };
