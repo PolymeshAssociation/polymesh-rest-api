@@ -13,12 +13,16 @@ import {
   ApiResponseOptions,
   ApiUnprocessableEntityResponse,
   getSchemaPath,
+  OmitType,
+  PartialType,
 } from '@nestjs/swagger';
 import {
   ReferenceObject,
   SchemaObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { Type as TransformType } from 'class-transformer';
 
+import { ClaimModel } from '~/claims/models/claim.model';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -37,7 +41,8 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     description?: string;
   } = {
     paginated: true,
-  }
+  },
+  extendItems: Record<string, any> = {}
 ): ReturnType<typeof applyDecorators> => {
   const extraModels = [];
   let items;
@@ -45,9 +50,27 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     items = { type: model };
   } else {
     extraModels.push(model);
+    console.log(model);
+
     items = { $ref: getSchemaPath(model) };
   }
-  return applyDecorators(
+
+  if (extendItems) {
+    items = { allOf: [{ ...items }] };
+
+    for (const [key, value] of Object.entries(extendItems)) {
+      // @ts-expect-error test
+      items.allOf.push({ type: 'object', properties: { [key]: { $ref: getSchemaPath(value) } } });
+    }
+  }
+
+  console.log(items);
+
+  const result = applyDecorators(
+    ApiProperty({
+      name: 'test',
+      type: 'string',
+    }),
     ApiOkResponse({
       description,
       schema: {
@@ -69,6 +92,9 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     }),
     ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
   );
+  console.log(result);
+
+  return result;
 };
 
 type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {

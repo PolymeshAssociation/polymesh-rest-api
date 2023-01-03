@@ -10,25 +10,25 @@ export class AddInvestorUniquenessDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'The type of Claim. Note that different types require different fields',
   })
-  scope: ScopeDto;
+  readonly scope: ScopeDto;
 
   @ApiProperty({
     description: 'The CDD ID of the investor',
   })
-  cddId: string;
+  readonly cddId: string;
 
   @ApiProperty({
     description: 'The proof of the claim',
   })
-  proof: string | ScopeClaimProof;
+  readonly proof: string | ScopeClaimProof;
 
   @ApiProperty({
     description: 'The scope ID of the claim',
   })
-  scopeId: string;
+  readonly scopeId: string;
 
   @ApiProperty({
     description: 'The expiry date of the claim',
   })
-  expiry?: Date;
+  readonly expiry?: Date;
 }

@@ -2,9 +2,9 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
+import { Type } from 'class-transformer';
 
 import { ScopeModel } from '~/claims/models/scope.model';
-import { FromEntity } from '~/common/decorators/transformation';
 
 export class InvestorUniquenessClaimModel {
   @ApiProperty({
@@ -12,14 +12,13 @@ export class InvestorUniquenessClaimModel {
     description: 'Claim type',
     example: 'InvestorUniqueness',
   })
-  @FromEntity()
   readonly type: ClaimType.InvestorUniqueness;
 
   @ApiProperty({
     type: ScopeModel,
     description: 'Scope of the Claim',
   })
-  @FromEntity()
+  @Type(() => ScopeModel)
   readonly scope: ScopeModel;
 
   @ApiProperty({

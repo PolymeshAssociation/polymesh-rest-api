@@ -32,6 +32,7 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
+import { InvestorUniquenessClaimModel } from '~/claims/models/investor-uniqueness-claim.model';
 import { InvestorUniquenessModel } from '~/claims/models/investor-uniqueness.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
@@ -486,15 +487,19 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse(InvestorUniquenessModel, {
-    description: 'List of InvestorUniquenessClaims for the given DID',
-    paginated: false,
-  })
+  @ApiArrayResponse(
+    InvestorUniquenessModel,
+    {
+      description: 'List of InvestorUniquenessClaims for the given DID',
+      paginated: false,
+    },
+    { claim: InvestorUniquenessClaimModel }
+  )
   @Get(':did/investor-uniqueness-claims')
   async getInvestorUniquenessClaims(
     @Param() { did }: DidDto,
     @Query() { includeExpired }: IncludeExpiredFilterDto
-  ): Promise<ResultsModel<InvestorUniquenessModel>> {
+  ): Promise<ResultsModel<ClaimModel<InvestorUniquenessClaimModel>>> {
     const investorUniquenessClaims = await this.claimsService.getInvestorUniquenessClaims(
       did,
       includeExpired
@@ -502,7 +507,7 @@ export class IdentitiesController {
 
     const results = investorUniquenessClaims.map(
       ({ issuedAt, expiry, claim, target, issuer }) =>
-        new InvestorUniquenessModel({
+        new ClaimModel<InvestorUniquenessClaimModel>({
           issuedAt,
           expiry,
           claim,
