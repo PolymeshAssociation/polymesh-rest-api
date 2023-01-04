@@ -1,9 +1,16 @@
+/* istanbul ignore file */
+
 import { DynamicModule, Module } from '@nestjs/common';
 
+import { AccountsModule } from '~/accounts/accounts.module';
 import { DeveloperTestingController } from '~/developer-testing/developer-testing.controller';
-import { LoggerModule } from '~/logger/logger.module';
+import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
+import { PolymeshModule } from '~/polymesh/polymesh.module';
+import { SigningModule } from '~/signing/signing.module';
 
-@Module({})
+@Module({
+  providers: [DeveloperTestingService],
+})
 export class DeveloperTestingModule {
   static register(): DynamicModule {
     const controllers = [];
@@ -17,7 +24,7 @@ export class DeveloperTestingModule {
 
     return {
       module: DeveloperTestingModule,
-      imports: [LoggerModule],
+      imports: [PolymeshModule, AccountsModule, SigningModule],
       controllers,
       providers: [],
     };

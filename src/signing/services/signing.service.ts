@@ -17,4 +17,8 @@ export abstract class SigningService {
   protected throwNoSigner(handle: string): never {
     throw new NotFoundException(`There is no signer associated to "${handle}"`);
   }
+
+  public getSigningManager(): SigningManager {
+    return this.signingManager;
+  }
 }
