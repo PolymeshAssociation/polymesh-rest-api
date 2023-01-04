@@ -42,7 +42,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   } = {
     paginated: true,
   },
-  extendItems: Record<string, any> = {}
+  extendItems: Record<string, Type | string> = {}
 ): ReturnType<typeof applyDecorators> => {
   const extraModels = [];
   let items;
@@ -50,23 +50,57 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     items = { type: model };
   } else {
     extraModels.push(model);
-    console.log(model);
-
     items = { $ref: getSchemaPath(model) };
   }
 
-  if (extendItems) {
+  if (Object.keys(extendItems).length > 0) {
     items = { allOf: [{ ...items }] };
 
-    for (const [key, value] of Object.entries(extendItems)) {
-      // @ts-expect-error test
-      items.allOf.push({ type: 'object', properties: { [key]: { $ref: getSchemaPath(value) } } });
+    const keys = Object.keys(extendItems);
+    if (typeof model !== 'string') {
+      // @ts-expect-error TODO: fix this
+      // eslint-disable-next-line new-cap
+      const obj = new model();
+
+      let name = obj.constructor.name;
+
+      keys.forEach(key => {
+        if (typeof extendItems[key] === 'string') {
+          name += key;
+        } else {
+          // @ts-expect-error TODO: fix this
+          const mod = new extendItems[key]();
+
+          name += mod.constructor.name;
+        }
+      });
+
+      const intermediate = {
+        [name]: class extends OmitType(model, keys) {},
+      };
+
+      extraModels.push(intermediate[name]);
+      items = { allOf: [{ $ref: getSchemaPath(intermediate[name]) }] };
     }
+
+    for (const [key, value] of Object.entries(extendItems)) {
+      console.log(value);
+      if (typeof value !== 'string') {
+        extraModels.push(value);
+      }
+      // @ts-expect-error TODO: fix this
+      items.allOf.push({
+        type: 'object',
+        properties: {
+          [key]: value === 'string' ? { type: value } : { $ref: getSchemaPath(value) },
+        },
+      });
+    }
+
+    console.log(JSON.stringify(items, null, 2));
   }
 
-  console.log(items);
-
-  const result = applyDecorators(
+  return applyDecorators(
     ApiProperty({
       name: 'test',
       type: 'string',
@@ -92,9 +126,6 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     }),
     ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
   );
-  console.log(result);
-
-  return result;
 };
 
 type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {

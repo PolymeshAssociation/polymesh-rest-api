@@ -33,7 +33,7 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
 import { InvestorUniquenessClaimModel } from '~/claims/models/investor-uniqueness-claim.model';
-import { InvestorUniquenessModel } from '~/claims/models/investor-uniqueness.model';
+import { PartialClaimModel } from '~/claims/models/partial-claim.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
@@ -488,7 +488,7 @@ export class IdentitiesController {
     required: false,
   })
   @ApiArrayResponse(
-    InvestorUniquenessModel,
+    ClaimModel,
     {
       description: 'List of InvestorUniquenessClaims for the given DID',
       paginated: false,
