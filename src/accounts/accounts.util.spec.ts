@@ -1,4 +1,3 @@
-import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Account,
   Asset,
@@ -6,16 +5,11 @@ import {
   PermissionedAccount,
   Permissions,
   PermissionType,
-  SubsidyWithAllowance,
   TxGroup,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import {
-  createPermissionedAccountModel,
-  createPermissionsModel,
-  createSubsidyModel,
-} from '~/accounts/accounts.util';
+import { createPermissionedAccountModel, createPermissionsModel } from '~/accounts/accounts.util';
 import { AssetPermissionsModel } from '~/accounts/models/asset-permissions.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { PortfolioPermissionsModel } from '~/accounts/models/portfolio-permissions.model';
@@ -23,7 +17,7 @@ import { TransactionPermissionsModel } from '~/accounts/models/transaction-permi
 import { AccountModel } from '~/identities/models/account.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { testValues } from '~/test-utils/consts';
-import { MockAccount, MockAsset, MockPortfolio, MockSubsidy } from '~/test-utils/mocks';
+import { MockAccount, MockAsset, MockPortfolio } from '~/test-utils/mocks';
 
 describe('createPermissionsModel', () => {
   const { did } = testValues;
@@ -106,23 +100,6 @@ describe('createPermissionedAccountModel', () => {
     expect(result).toEqual({
       account: new AccountModel({ address }),
       permissions: new PermissionsModel(permissions),
-    });
-  });
-});
-
-describe('createSubsidyModel', () => {
-  it('should transform SubsidyWithAllowance to SubsidyModel', () => {
-    const subsidyWithAllowance = {
-      subsidy: new MockSubsidy(),
-      allowance: new BigNumber(10),
-    } as unknown as SubsidyWithAllowance;
-
-    const result = createSubsidyModel(subsidyWithAllowance);
-
-    expect(result).toEqual({
-      beneficiary: new AccountModel({ address: 'beneficiary' }),
-      subsidizer: new AccountModel({ address: 'subsidizer' }),
-      allowance: new BigNumber(10),
     });
   });
 });

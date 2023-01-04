@@ -21,7 +21,7 @@ describe(`PostgresApiKeyRepo does not meet ${ApiKeyRepo.type} requirements`, () 
     return { secret, user };
   });
 
-  mockRepository.delete.mockImplementation(secret => {
+  mockRepository.delete.mockImplementation(({ secret }) => {
     when(mockRepository.findOneBy).calledWith({ secret }).mockResolvedValue(null);
   });
 

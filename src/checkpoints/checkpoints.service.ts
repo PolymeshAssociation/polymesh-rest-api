@@ -1,23 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Checkpoint,
   CheckpointSchedule,
   CheckpointWithData,
-  ErrorCode,
   IdentityBalance,
   ResultSet,
   ScheduleWithDetails,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class CheckpointsService {
@@ -40,20 +39,7 @@ export class CheckpointsService {
 
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
     const asset = await this.assetsService.findOne(ticker);
-    try {
-      return await asset.checkpoints.getOne({ id });
-    } catch (err) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          this.logger.warn(`No Checkpoint exists for ticker "${ticker}" with ID "${id}"`);
-          throw new NotFoundException(
-            `There is no Checkpoint for ticker "${ticker}" with ID "${id}"`
-          );
-        }
-      }
-      throw err;
-    }
+    return await asset.checkpoints.getOne({ id }).catch(handleSdkError);
   }
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
@@ -63,43 +49,27 @@ export class CheckpointsService {
 
   public async findScheduleById(ticker: string, id: BigNumber): Promise<ScheduleWithDetails> {
     const asset = await this.assetsService.findOne(ticker);
-    try {
-      return await asset.checkpoints.schedules.getOne({ id });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          this.logger.warn(`No Schedule exists for ticker "${ticker}" with ID "${id}"`);
-          throw new NotFoundException(
-            `There is no Schedule for ticker "${ticker}" with ID "${id}"`
-          );
-        }
-      }
-      throw err;
-    }
+    return await asset.checkpoints.schedules.getOne({ id }).catch(handleSdkError);
   }
 
   public async createByTicker(
     ticker: string,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Checkpoint> {
-    const { signer, webhookUrl } = signerDto;
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.create, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(asset.checkpoints.create, {}, signerDto);
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
   ): ServiceReturn<CheckpointSchedule> {
-    const { signer, webhookUrl, ...rest } = createCheckpointScheduleDto;
+    const { base, args } = extractTxBase(createCheckpointScheduleDto);
+
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.schedules.create, rest, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(asset.checkpoints.schedules.create, args, base);
   }
 
   public async getAssetBalance(
@@ -125,14 +95,13 @@ export class CheckpointsService {
   public async deleteScheduleByTicker(
     ticker: string,
     id: BigNumber,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
-      { signer, webhookUrl }
+      transactionBaseDto
     );
   }
 }

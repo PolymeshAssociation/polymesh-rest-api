@@ -35,11 +35,7 @@ export class MetadataService {
   public async findOne({ ticker, type, id }: MetadataParamsDto): Promise<MetadataEntry> {
     const { metadata } = await this.assetsService.findOne(ticker);
 
-    try {
-      return await metadata.getOne({ type, id });
-    } catch (err: unknown) {
-      handleSdkError(err as Error);
-    }
+    return await metadata.getOne({ type, id }).catch(handleSdkError);
   }
 
   public async create(ticker: string, params: CreateMetadataDto): ServiceReturn<MetadataEntry> {

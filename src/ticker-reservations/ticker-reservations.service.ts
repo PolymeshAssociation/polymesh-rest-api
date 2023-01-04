@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/polymesh-sdk/types';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 
@@ -21,32 +22,31 @@ export class TickerReservationsService {
 
   public async reserve(
     ticker: string,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<TickerReservation> {
     const { transactionsService, polymeshService } = this;
     const { reserveTicker } = polymeshService.polymeshApi.assets;
 
-    return transactionsService.submit(reserveTicker, { ticker }, { signer, webhookUrl });
+    return transactionsService.submit(reserveTicker, { ticker }, transactionBaseDto);
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
+
     const { transferOwnership } = await this.findOne(ticker);
-    return this.transactionsService.submit(transferOwnership, rest, { signer, webhookUrl });
+    return this.transactionsService.submit(transferOwnership, args, base);
   }
 
   public async extend(
     ticker: string,
-    signer: string,
-    webhookUrl?: string
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<TickerReservation> {
     const { extend } = await this.findOne(ticker);
 
-    return this.transactionsService.submit(extend, {}, { webhookUrl, signer });
+    return this.transactionsService.submit(extend, {}, transactionBaseDto);
   }
 
   public async findAllByOwner(owner: string): Promise<TickerReservation[]> {

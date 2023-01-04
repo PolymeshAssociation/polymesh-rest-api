@@ -5,10 +5,12 @@ import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuthService } from '~/auth/auth.service';
+import { ClaimsService } from '~/claims/claims.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
+import { SubsidyService } from '~/subsidy/subsidy.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { UsersService } from '~/users/users.service';
@@ -83,7 +85,6 @@ export class MockAccountsService {
   getTransactionHistory = jest.fn();
   getPermissions = jest.fn();
   findOne = jest.fn();
-  getSubsidy = jest.fn();
   freezeSecondaryAccounts = jest.fn();
   unfreezeSecondaryAccounts = jest.fn();
   modifyPermissions = jest.fn();
@@ -217,6 +218,11 @@ export const mockMetadataServiceProvider: ValueProvider<MetadataService> = {
   useValue: createMock<MetadataService>(),
 };
 
+export const mockSubsidyServiceProvider: ValueProvider<SubsidyService> = {
+  provide: SubsidyService,
+  useValue: createMock<SubsidyService>(),
+};
+
 /**
  * Given a set of key values to use as config, will wrap and return as a Nest "provider" for config
  */
@@ -240,4 +246,9 @@ export const makeMockConfigProvider = (config: Record<string, unknown>): Service
 export const mockNetworkServiceProvider: ValueProvider<NetworkService> = {
   provide: NetworkService,
   useValue: createMock<NetworkService>(),
+};
+
+export const mockClaimsServiceProvider: ValueProvider<ClaimsService> = {
+  provide: ClaimsService,
+  useValue: createMock<ClaimsService>(),
 };

@@ -7,6 +7,7 @@ import {
   CalendarUnit,
   MetadataEntry,
   MetadataType,
+  Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
   TxTag,
@@ -29,13 +30,15 @@ export type Mocked<T> = T &
 export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
 
 export const createMockTransactionResult = <T>({
+  details,
   transactions,
   result,
 }: {
+  details: TransactionResult<T>['details'];
   transactions: TransactionResult<T>['transactions'];
   result?: TransactionResult<T>['result'];
 }): DeepMocked<TransactionResult<T>> => {
-  return { transactions, result } as DeepMocked<TransactionResult<T>>;
+  return { transactions, result, details } as DeepMocked<TransactionResult<T>>;
 };
 
 export const createMockResponseObject = (): DeepMocked<Response> => {
@@ -79,6 +82,8 @@ export class MockPolymesh {
     unfreezeSecondaryAccounts: jest.fn(),
     revokePermissions: jest.fn(),
     modifyPermissions: jest.fn(),
+    subsidizeAccount: jest.fn(),
+    getSubsidy: jest.fn(),
   };
 
   public identities = {
@@ -96,6 +101,9 @@ export class MockPolymesh {
   public claims = {
     getIssuedClaims: jest.fn(),
     getIdentitiesWithClaims: jest.fn(),
+    addClaims: jest.fn(),
+    editClaims: jest.fn(),
+    revokeClaims: jest.fn(),
   };
 
   public _polkadotApi = {
@@ -307,7 +315,12 @@ class MockPolymeshTransactionBase {
   blockNumber?: BigNumber;
   status: TransactionStatus = TransactionStatus.Unapproved;
   error: Error;
+  getTotalFees = jest.fn().mockResolvedValue({
+    total: new BigNumber(1),
+    payingAccountData: { account: { address: 'address' } },
+  });
 
+  supportsSubsidy = jest.fn().mockReturnValue(false);
   run = jest.fn().mockReturnValue(Promise.resolve());
   onStatusChange = jest.fn();
 }
@@ -357,11 +370,6 @@ export class MockAccount {
   }
 }
 
-export class MockSubsidy {
-  beneficiary = new MockAccount('beneficiary');
-  subsidizer = new MockAccount('subsidizer');
-}
-
 export function createMockMetadataEntry(
   partial: PartialFuncReturn<MetadataEntry> = {
     id: new BigNumber(1),
@@ -370,4 +378,13 @@ export function createMockMetadataEntry(
   }
 ): DeepMocked<MetadataEntry> {
   return createMock<MetadataEntry>(partial);
+}
+
+export function createMockSubsidy(
+  partial: PartialFuncReturn<Subsidy> = {
+    beneficiary: { address: 'beneficiary' },
+    subsidizer: { address: 'subsidizer' },
+  }
+): DeepMocked<Subsidy> {
+  return createMock<Subsidy>(partial);
 }

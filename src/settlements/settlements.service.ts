@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
-  ErrorCode,
   GroupedInstructions,
   Instruction,
   InstructionAffirmation,
@@ -11,17 +10,17 @@ import {
   Venue,
   VenueDetails,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class SettlementsService {
@@ -39,38 +38,23 @@ export class SettlementsService {
   }
 
   public async findInstruction(id: BigNumber): Promise<Instruction> {
-    let instruction: Instruction;
-
-    try {
-      instruction = await this.polymeshService.polymeshApi.settlements.getInstruction({
+    return await this.polymeshService.polymeshApi.settlements
+      .getInstruction({
         id,
-      });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-
-        if (code === ErrorCode.ValidationError) {
-          throw new NotFoundException(`There is no Instruction with ID ${id.toString()}`);
-        }
-      }
-
-      throw err;
-    }
-
-    return instruction;
+      })
+      .catch(handleSdkError);
   }
 
   public async createInstruction(
     venueId: BigNumber,
     createInstructionDto: CreateInstructionDto
   ): ServiceReturn<Instruction> {
-    const { signer, webhookUrl, ...rest } = createInstructionDto;
-
+    const { base, args } = extractTxBase(createInstructionDto);
     const venue = await this.findVenue(venueId);
 
     const params = {
-      ...rest,
-      legs: rest.legs.map(({ amount, asset, from, to }) => ({
+      ...args,
+      legs: args.legs.map(({ amount, asset, from, to }) => ({
         amount,
         asset,
         from: from.toPortfolioLike(),
@@ -78,29 +62,25 @@ export class SettlementsService {
       })),
     };
 
-    return this.transactionsService.submit(venue.addInstruction, params, { signer, webhookUrl });
+    return this.transactionsService.submit(venue.addInstruction, params, base);
   }
 
   public async affirmInstruction(
     id: BigNumber,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Instruction> {
-    const { signer, webhookUrl } = signerDto;
-
     const instruction = await this.findInstruction(id);
 
-    return this.transactionsService.submit(instruction.affirm, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(instruction.affirm, {}, signerDto);
   }
 
   public async rejectInstruction(
     id: BigNumber,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Instruction> {
-    const { signer, webhookUrl } = signerDto;
-
     const instruction = await this.findInstruction(id);
 
-    return this.transactionsService.submit(instruction.reject, {}, { signer, webhookUrl });
+    return this.transactionsService.submit(instruction.reject, {}, signerDto);
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -109,23 +89,11 @@ export class SettlementsService {
   }
 
   public async findVenue(id: BigNumber): Promise<Venue> {
-    let venue: Venue;
-    try {
-      venue = await this.polymeshService.polymeshApi.settlements.getVenue({
+    return await this.polymeshService.polymeshApi.settlements
+      .getVenue({
         id,
-      });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code, message } = err;
-
-        if (code === ErrorCode.ValidationError && message.startsWith("The Venue doesn't")) {
-          throw new NotFoundException(`There is no Venue with ID "${id.toString()}"`);
-        }
-      }
-
-      throw err;
-    }
-    return venue;
+      })
+      .catch(handleSdkError);
   }
 
   public async findVenueDetails(id: BigNumber): Promise<VenueDetails> {
@@ -145,24 +113,20 @@ export class SettlementsService {
   }
 
   public async createVenue(createVenueDto: CreateVenueDto): ServiceReturn<Venue> {
-    const { signer, webhookUrl, description, type } = createVenueDto;
-    const params = {
-      description,
-      type,
-    };
+    const { base, args } = extractTxBase(createVenueDto);
 
     const method = this.polymeshService.polymeshApi.settlements.createVenue;
-    return this.transactionsService.submit(method, params, { signer, webhookUrl });
+    return this.transactionsService.submit(method, args, base);
   }
 
   public async modifyVenue(
     venueId: BigNumber,
     modifyVenueDto: ModifyVenueDto
   ): ServiceReturn<void> {
-    const { signer, webhookUrl, ...rest } = modifyVenueDto;
+    const { base, args } = extractTxBase(modifyVenueDto);
     const venue = await this.findVenue(venueId);
-    const params = rest as Required<typeof rest>;
-    return this.transactionsService.submit(venue.modify, params, { signer, webhookUrl });
+
+    return this.transactionsService.submit(venue.modify, args as Required<typeof args>, base);
   }
 
   public async canTransfer(

@@ -14,31 +14,38 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
 import { NetworkService } from '~/network/network.service';
+import { SubsidyService } from '~/subsidy/subsidy.service';
 import { testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
+  createMockSubsidy,
   MockAsset,
   MockPortfolio,
-  MockSubsidy,
 } from '~/test-utils/mocks';
-import { MockAccountsService, mockNetworkServiceProvider } from '~/test-utils/service-mocks';
+import {
+  MockAccountsService,
+  mockNetworkServiceProvider,
+  mockSubsidyServiceProvider,
+} from '~/test-utils/service-mocks';
 
-const { signer, did, testAccount } = testValues;
+const { signer, did, testAccount, txResult } = testValues;
 
 describe('AccountsController', () => {
   let controller: AccountsController;
   let mockNetworkService: DeepMocked<NetworkService>;
   const mockAccountsService = new MockAccountsService();
+  let mockSubsidyService: DeepMocked<SubsidyService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountsController],
-      providers: [AccountsService, mockNetworkServiceProvider],
+      providers: [AccountsService, mockNetworkServiceProvider, mockSubsidyServiceProvider],
     })
       .overrideProvider(AccountsService)
       .useValue(mockAccountsService)
       .compile();
     mockNetworkService = mockNetworkServiceProvider.useValue as DeepMocked<NetworkService>;
+    mockSubsidyService = mockSubsidyServiceProvider.useValue as DeepMocked<SubsidyService>;
     controller = module.get<AccountsController>(AccountsController);
   });
 
@@ -63,8 +70,7 @@ describe('AccountsController', () => {
 
   describe('transferPolyx', () => {
     it('should return the transaction details on transferring POLYX balance', async () => {
-      const transactions = ['transaction'];
-      mockAccountsService.transferPolyx.mockResolvedValue({ transactions });
+      mockAccountsService.transferPolyx.mockResolvedValue(txResult);
 
       const body = {
         signer,
@@ -75,9 +81,7 @@ describe('AccountsController', () => {
 
       const result = await controller.transferPolyx(body);
 
-      expect(result).toEqual({
-        transactions,
-      });
+      expect(result).toEqual(txResult);
     });
   });
 
@@ -176,7 +180,7 @@ describe('AccountsController', () => {
       mockResponse = createMockResponseObject();
     });
     it(`should return the ${HttpStatus.NO_CONTENT} if the Account has no subsidy`, async () => {
-      mockAccountsService.getSubsidy.mockResolvedValue(null);
+      mockSubsidyService.getSubsidy.mockResolvedValue(null);
 
       await controller.getSubsidy({ account: 'someAccount' }, mockResponse);
 
@@ -185,10 +189,11 @@ describe('AccountsController', () => {
 
     it('should return the Account Subsidy', async () => {
       const subsidyWithAllowance = {
-        subsidy: new MockSubsidy(),
+        subsidy: createMockSubsidy(),
         allowance: new BigNumber(10),
       };
-      mockAccountsService.getSubsidy.mockResolvedValue(subsidyWithAllowance);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSubsidyService.getSubsidy.mockResolvedValue(subsidyWithAllowance as any);
 
       await controller.getSubsidy({ account: 'someAccount' }, mockResponse);
 
@@ -203,40 +208,33 @@ describe('AccountsController', () => {
 
   describe('freezeSecondaryAccounts', () => {
     it('should freeze secondary accounts', async () => {
-      const transactions = ['transaction'];
-      mockAccountsService.freezeSecondaryAccounts.mockResolvedValue({ transactions });
+      mockAccountsService.freezeSecondaryAccounts.mockResolvedValue(txResult);
       const body = {
         signer,
       };
 
       const result = await controller.freezeSecondaryAccounts(body);
 
-      expect(result).toEqual({
-        transactions,
-      });
+      expect(result).toEqual(txResult);
     });
   });
 
   describe('unfreezeSecondaryAccounts', () => {
     it('should unfreeze secondary accounts', async () => {
-      const transactions = ['transaction'];
-      mockAccountsService.unfreezeSecondaryAccounts.mockResolvedValue({ transactions });
+      mockAccountsService.unfreezeSecondaryAccounts.mockResolvedValue(txResult);
       const body = {
         signer,
       };
 
       const result = await controller.unfreezeSecondaryAccounts(body);
 
-      expect(result).toEqual({
-        transactions,
-      });
+      expect(result).toEqual(txResult);
     });
   });
 
   describe('revokePermissions', () => {
     it('should call the service and return the transaction details', async () => {
-      const transactions = ['transaction'];
-      mockAccountsService.revokePermissions.mockResolvedValue({ transactions });
+      mockAccountsService.revokePermissions.mockResolvedValue(txResult);
 
       const body = {
         signer,
@@ -245,16 +243,13 @@ describe('AccountsController', () => {
 
       const result = await controller.revokePermissions(body);
 
-      expect(result).toEqual({
-        transactions,
-      });
+      expect(result).toEqual(txResult);
     });
   });
 
   describe('modifyPermissions', () => {
     it('should call the service and return the transaction details', async () => {
-      const transactions = ['transaction'];
-      mockAccountsService.modifyPermissions.mockResolvedValue({ transactions });
+      mockAccountsService.modifyPermissions.mockResolvedValue(txResult);
 
       const body = {
         signer,
@@ -272,9 +267,7 @@ describe('AccountsController', () => {
 
       const result = await controller.modifyPermissions(body);
 
-      expect(result).toEqual({
-        transactions,
-      });
+      expect(result).toEqual(txResult);
     });
   });
 

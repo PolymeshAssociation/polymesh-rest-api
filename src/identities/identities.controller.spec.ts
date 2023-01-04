@@ -38,7 +38,7 @@ import {
 } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-const { did } = testValues;
+const { did, txResult } = testValues;
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -439,8 +439,8 @@ describe('IdentitiesController', () => {
     it('should return the transaction details on adding a Secondary Account', async () => {
       const mockAuthorization = new MockAuthorizationRequest();
       const mockData = {
+        ...txResult,
         result: mockAuthorization,
-        transactions: ['transaction'],
       };
       mockIdentitiesService.addSecondaryAccount.mockResolvedValue(mockData);
 
@@ -450,9 +450,9 @@ describe('IdentitiesController', () => {
       });
 
       expect(result).toEqual({
+        ...txResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-        transactions: ['transaction'],
       });
     });
   });
@@ -475,9 +475,7 @@ describe('IdentitiesController', () => {
     it('should call the service and return the Identity', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fakeIdentityModel = 'fakeIdentityModel' as any;
-      const createIdentityModelSpy = jest
-        .spyOn(identityUtil, 'createIdentityModel')
-        .mockResolvedValue(fakeIdentityModel);
+      jest.spyOn(identityUtil, 'createIdentityModel').mockResolvedValue(fakeIdentityModel);
 
       const params = {
         address: '5abc',
@@ -487,7 +485,6 @@ describe('IdentitiesController', () => {
       const result = await controller.createMockCdd(params);
       expect(result).toEqual(fakeIdentityModel);
       expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
-      createIdentityModelSpy.mockRestore();
     });
   });
 });

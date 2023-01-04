@@ -40,9 +40,9 @@ export class TickerReservationsController {
   })
   @Post('reserve-ticker')
   public async reserve(
-    @Body() { ticker, signer, webhookUrl }: ReserveTickerDto
+    @Body() { ticker, ...transactionBaseDto }: ReserveTickerDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.tickerReservationsService.reserve(ticker, signer, webhookUrl);
+    const result = await this.tickerReservationsService.reserve(ticker, transactionBaseDto);
 
     return handleServiceResult(result);
   }
@@ -92,9 +92,14 @@ export class TickerReservationsController {
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.tickerReservationsService.transferOwnership(ticker, params);
 
-    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
+    const resolver: TransactionResolver<AuthorizationRequest> = ({
+      transactions,
+      details,
+      result,
+    }) =>
       new CreatedAuthorizationRequestModel({
         transactions,
+        details,
         authorizationRequest: createAuthorizationRequestModel(result),
       });
 
@@ -126,13 +131,18 @@ export class TickerReservationsController {
   @Post(':ticker/extend')
   public async extendReservation(
     @Param() { ticker }: TickerParamsDto,
-    @Body() { signer, webhookUrl }: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.tickerReservationsService.extend(ticker, signer, webhookUrl);
+    const serviceResult = await this.tickerReservationsService.extend(ticker, transactionBaseDto);
 
-    const resolver: TransactionResolver<TickerReservation> = async ({ transactions, result }) =>
+    const resolver: TransactionResolver<TickerReservation> = async ({
+      transactions,
+      details,
+      result,
+    }) =>
       new ExtendedTickerReservationModel({
         transactions,
+        details,
         tickerReservation: await createTickerReservationModel(result),
       });
 

@@ -15,8 +15,8 @@ export class ExtendedTickerReservationModel extends TransactionQueueModel {
   readonly tickerReservation: TickerReservationModel;
 
   constructor(model: ExtendedTickerReservationModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

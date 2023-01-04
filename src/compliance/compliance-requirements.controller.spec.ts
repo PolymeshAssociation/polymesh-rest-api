@@ -18,7 +18,7 @@ import { mockComplianceRequirementsServiceProvider } from '~/test-utils/service-
 describe('ComplianceRequirementsController', () => {
   let controller: ComplianceRequirementsController;
   let mockService: ComplianceRequirementsService;
-  const { did, signer } = testValues;
+  const { did, signer, txResult } = testValues;
 
   const ticker = 'TICKER';
   const validBody = {
@@ -39,7 +39,7 @@ describe('ComplianceRequirementsController', () => {
       ],
     ],
   };
-  const txResponse = createMockTransactionResult<Asset>({ transactions: [] });
+  const txResponse = createMockTransactionResult<Asset>({ ...txResult, transactions: [] });
   const id = new BigNumber(1);
 
   beforeEach(async () => {
@@ -72,7 +72,7 @@ describe('ComplianceRequirementsController', () => {
 
   describe('setRequirements', () => {
     it('should accept SetRulesDto and set new Asset Compliance Rules', async () => {
-      const response = createMockTransactionResult<Asset>({ transactions: [] });
+      const response = createMockTransactionResult<Asset>({ ...txResult, transactions: [] });
 
       when(mockService.setRequirements)
         .calledWith(ticker, validBody as SetRequirementsDto)
@@ -146,7 +146,7 @@ describe('ComplianceRequirementsController', () => {
 
   describe('modifyComplianceRequirement', () => {
     it('should accept RequirementDto and modify the corresponding Asset Compliance rule', async () => {
-      const response = createMockTransactionResult<void>({ transactions: [] });
+      const response = createMockTransactionResult<void>({ ...txResult, transactions: [] });
       const { requirements } = validBody;
 
       when(mockService.modify)

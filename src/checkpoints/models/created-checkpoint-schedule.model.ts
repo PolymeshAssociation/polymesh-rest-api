@@ -15,8 +15,8 @@ export class CreatedCheckpointScheduleModel extends TransactionQueueModel {
   readonly schedule: CheckpointScheduleModel;
 
   constructor(model: CreatedCheckpointScheduleModel) {
-    const { transactions, ...rest } = model;
-    super({ transactions });
+    const { transactions, details, ...rest } = model;
+    super({ transactions, details });
 
     Object.assign(this, rest);
   }

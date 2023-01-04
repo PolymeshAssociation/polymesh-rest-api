@@ -1,23 +1,21 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   Account,
   AccountBalance,
-  ErrorCode,
   ExtrinsicData,
   Permissions,
   ResultSet,
-  SubsidyWithAllowance,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
 import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class AccountsService {
@@ -30,22 +28,7 @@ export class AccountsService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    try {
-      return polymeshApi.accountManagement.getAccount({ address });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.ValidationError) {
-          throw new BadRequestException(
-            `The address "${address}" is not encoded with the chain's SS58 format "${polymeshApi.network
-              .getSs58Format()
-              .toString()}"`
-          );
-        }
-      }
-
-      throw err;
-    }
+    return await polymeshApi.accountManagement.getAccount({ address }).catch(handleSdkError);
   }
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {
@@ -56,11 +39,11 @@ export class AccountsService {
   }
 
   public async transferPolyx(params: TransferPolyxDto): ServiceReturn<void> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { base, args } = extractTxBase(params);
     const { polymeshService, transactionsService } = this;
 
     const { transferPolyx } = polymeshService.polymeshApi.network;
-    return transactionsService.submit(transferPolyx, rest, { signer, webhookUrl });
+    return transactionsService.submit(transferPolyx, args, base);
   }
 
   public async getTransactionHistory(
@@ -81,72 +64,47 @@ export class AccountsService {
 
   public async getPermissions(address: string): Promise<Permissions> {
     const account = await this.findOne(address);
-    try {
-      return await account.getPermissions();
-    } catch (err) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          throw new NotFoundException(`There is no Identity associated with Account "${address}"`);
-        }
-      }
-      throw err;
-    }
+    return await account.getPermissions().catch(handleSdkError);
   }
 
-  public async getSubsidy(address: string): Promise<SubsidyWithAllowance | null> {
-    const account = await this.findOne(address);
-    return account.getSubsidy();
-  }
-
-  public async freezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
-    const { signer, webhookUrl } = opts;
+  public async freezeSecondaryAccounts(
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<void> {
     const { freezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(freezeSecondaryAccounts, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(freezeSecondaryAccounts, undefined, transactionBaseDto);
   }
 
   public async unfreezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
-    const { signer, webhookUrl } = opts;
     const { unfreezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(unfreezeSecondaryAccounts, undefined, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(unfreezeSecondaryAccounts, undefined, opts);
   }
 
   public async revokePermissions(params: RevokePermissionsDto): ServiceReturn<void> {
-    const { signer, webhookUrl, secondaryAccounts } = params;
+    const { base, args } = extractTxBase(params);
 
     const { revokePermissions } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(
-      revokePermissions,
-      {
-        secondaryAccounts,
-      },
-      { signer, webhookUrl }
-    );
+    return this.transactionsService.submit(revokePermissions, args, base);
   }
 
   public async modifyPermissions(params: ModifyPermissionsDto): ServiceReturn<void> {
-    const { signer, webhookUrl, secondaryAccounts } = params;
+    const { base, args } = extractTxBase(params);
 
     const { modifyPermissions } = this.polymeshService.polymeshApi.accountManagement;
 
     return this.transactionsService.submit(
       modifyPermissions,
       {
-        secondaryAccounts: secondaryAccounts.map(({ secondaryAccount: account, permissions }) => ({
-          account,
-          permissions: permissions.toPermissionsLike(),
-        })),
+        secondaryAccounts: args.secondaryAccounts.map(
+          ({ secondaryAccount: account, permissions }) => ({
+            account,
+            permissions: permissions.toPermissionsLike(),
+          })
+        ),
       },
-      { signer, webhookUrl }
+      base
     );
   }
 }

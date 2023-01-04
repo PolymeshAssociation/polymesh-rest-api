@@ -157,10 +157,15 @@ export class CheckpointsController {
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.checkpointsService.createByTicker(ticker, signerDto);
 
-    const resolver: TransactionResolver<Checkpoint> = ({ result: checkpoint, transactions }) =>
+    const resolver: TransactionResolver<Checkpoint> = ({
+      result: checkpoint,
+      transactions,
+      details,
+    }) =>
       new CreatedCheckpointModel({
         checkpoint,
         transactions,
+        details,
       });
 
     return handleServiceResult(serviceResult, resolver);
@@ -271,10 +276,11 @@ export class CheckpointsController {
     const resolver: TransactionResolver<CheckpointSchedule> = async ({
       result: { id: createdScheduleId },
       transactions,
+      details,
     }) => {
       const {
         schedule: { id, period, start, complexity, expiryDate },
-        details,
+        details: scheduleDetails,
       } = await this.checkpointsService.findScheduleById(ticker, createdScheduleId);
 
       return new CreatedCheckpointScheduleModel({
@@ -285,9 +291,10 @@ export class CheckpointsController {
           start,
           complexity,
           expiryDate,
-          ...details,
+          ...scheduleDetails,
         }),
         transactions,
+        details,
       });
     };
 
@@ -412,13 +419,12 @@ export class CheckpointsController {
   @Post('schedules/:id/delete')
   public async deleteSchedule(
     @Param() { ticker, id }: DeleteCheckpointScheduleParamsDto,
-    @Query() { signer, webhookUrl }: TransactionBaseDto
+    @Query() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.checkpointsService.deleteScheduleByTicker(
       ticker,
       id,
-      signer,
-      webhookUrl
+      transactionBaseDto
     );
     return handleServiceResult(result);
   }

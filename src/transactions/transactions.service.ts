@@ -9,7 +9,7 @@ import { EventsService } from '~/events/events.service';
 import { EventType, TransactionUpdateEvent, TransactionUpdatePayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { NotificationPayload } from '~/notifications/types';
-import { SigningService } from '~/signing/signing.service';
+import { SigningService } from '~/signing/services/signing.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
 import transactionsConfig from '~/transactions/config/transactions.config';
@@ -71,11 +71,11 @@ export class TransactionsService {
     args: MethodArgs,
     transactionBaseDto: TransactionBaseDto
   ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
-    const { signer, webhookUrl } = transactionBaseDto;
+    const { signer, webhookUrl, dryRun } = transactionBaseDto;
     const signingAccount = await this.getSigningAccount(signer);
     try {
       if (!webhookUrl) {
-        return processTransaction(method, args, { signingAccount });
+        return processTransaction(method, args, { signingAccount }, dryRun);
       } else {
         // prepare the procedure so the SDK will run its validation and throw if something isn't right
         const transaction = await prepareProcedure(method, args, { signingAccount });
@@ -87,7 +87,7 @@ export class TransactionsService {
         );
       }
     } catch (error) {
-      handleSdkError(error as Error);
+      handleSdkError(error);
     }
   }
 

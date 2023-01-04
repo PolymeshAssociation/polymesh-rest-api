@@ -1,13 +1,10 @@
 /* eslint-disable import/first */
-const mockIsPolymeshError = jest.fn();
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
-  ErrorCode,
   TransferError,
   TxTags,
   VenueType,
@@ -34,10 +31,10 @@ import {
   MockIdentitiesService,
   mockTransactionsProvider,
 } from '~/test-utils/service-mocks';
+import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
-  isPolymeshError: mockIsPolymeshError,
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
@@ -71,12 +68,10 @@ describe('SettlementsService', () => {
     service = module.get<SettlementsService>(SettlementsService);
     polymeshService = module.get<PolymeshService>(PolymeshService);
 
-    mockIsPolymeshError.mockReturnValue(false);
     mockIsPolymeshTransaction.mockReturnValue(true);
   });
 
   afterAll(() => {
-    mockIsPolymeshError.mockReset();
     mockIsPolymeshTransaction.mockReset();
   });
 
@@ -106,127 +101,45 @@ describe('SettlementsService', () => {
   });
 
   describe('findInstruction', () => {
-    describe('if the instruction does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.ValidationError,
-          message: "The Instruction doesn't",
-        };
-        mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findInstruction(new BigNumber(123));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
+    it('should return the Instruction entity for a given ID', async () => {
+      const mockInstruction = new MockInstruction();
+      mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
+      const result = await service.findInstruction(new BigNumber(123));
+      expect(result).toEqual(mockInstruction);
     });
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        let expectedError = new Error('foo');
-        mockPolymeshApi.settlements.getInstruction.mockImplementation(() => {
-          throw expectedError;
-        });
 
-        let error;
-        try {
-          await service.findInstruction(new BigNumber(123));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-
-        expectedError = new Error('Something else');
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        error = null;
-        try {
-          await service.findInstruction(new BigNumber(123));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-      });
-    });
     describe('otherwise', () => {
-      it('should return the Instruction entity', async () => {
-        const mockInstruction = new MockInstruction();
-        mockPolymeshApi.settlements.getInstruction.mockResolvedValue(mockInstruction);
-        const result = await service.findInstruction(new BigNumber(123));
-        expect(result).toEqual(mockInstruction);
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockPolymeshApi.settlements.getInstruction.mockRejectedValue(mockError);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() => service.findInstruction(new BigNumber(123))).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
 
   describe('findVenue', () => {
-    describe('if the Venue does not exist', () => {
-      it('should throw a NotFoundException', async () => {
-        const mockError = {
-          code: ErrorCode.ValidationError,
-          message: "The Venue doesn't",
-        };
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw mockError;
-        });
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        let error;
-        try {
-          await service.findVenue(new BigNumber(123));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toBeInstanceOf(NotFoundException);
-      });
+    it('should return the Venue entity for a given ID', async () => {
+      const mockVenue = new MockVenue();
+      mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
+      const result = await service.findVenue(new BigNumber(123));
+      expect(result).toEqual(mockVenue);
     });
-    describe('if there is a different error', () => {
-      it('should pass the error along the chain', async () => {
-        let expectedError = new Error('foo');
-        mockPolymeshApi.settlements.getVenue.mockImplementation(() => {
-          throw expectedError;
-        });
 
-        let error;
-        try {
-          await service.findVenue(new BigNumber(123));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-
-        expectedError = new Error('Something else');
-
-        mockIsPolymeshError.mockReturnValue(true);
-
-        error = null;
-        try {
-          await service.findVenue(new BigNumber(123));
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).toEqual(expectedError);
-      });
-    });
     describe('otherwise', () => {
-      it('should return the Venue entity', async () => {
-        const mockVenue = new MockVenue();
-        mockPolymeshApi.settlements.getVenue.mockResolvedValue(mockVenue);
-        const result = await service.findVenue(new BigNumber(123));
-        expect(result).toEqual(mockVenue);
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockPolymeshApi.settlements.getVenue.mockRejectedValue(mockError);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() => service.findVenue(new BigNumber(123))).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
@@ -289,7 +202,6 @@ describe('SettlementsService', () => {
         },
         { signer }
       );
-      findVenueSpy.mockRestore();
     });
   });
 
@@ -331,70 +243,39 @@ describe('SettlementsService', () => {
   });
 
   describe('modifyVenue', () => {
-    describe('if there is an error when updating the venue', () => {
-      it('should pass the error along the chain', async () => {
-        const expectedError = new Error('New type is the same as the current one');
-        const body = {
-          signer,
-          type: VenueType.Exchange,
-          description: 'A generic exchange',
-        };
-        const mockVenue = new MockVenue();
-        mockTransactionsService.submit.mockImplementation(() => {
-          throw expectedError;
-        });
-        const findVenueSpy = jest.spyOn(service, 'findVenue');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findVenueSpy.mockResolvedValue(mockVenue as any);
+    it('should run a modify procedure and return the queue data', async () => {
+      const mockVenue = new MockVenue();
 
-        mockIsPolymeshError.mockReturnValue(true);
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
 
-        let error = null;
-        try {
-          await service.modifyVenue(new BigNumber(123), body);
-        } catch (err) {
-          error = err;
-        }
-        expect(error).toEqual(expectedError);
-        findVenueSpy.mockRestore();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.UpdateVenueType,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const body = {
+        signer,
+        description: 'A generic exchange',
+        type: VenueType.Exchange,
+      };
+
+      const result = await service.modifyVenue(new BigNumber(123), body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
       });
-    });
-    describe('otherwise', () => {
-      it('should run a modify procedure and return the queue data', async () => {
-        const mockVenue = new MockVenue();
-
-        const findVenueSpy = jest.spyOn(service, 'findVenue');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        findVenueSpy.mockResolvedValue(mockVenue as any);
-
-        const transaction = {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.settlement.UpdateVenueType,
-        };
-        const mockTransaction = new MockTransaction(transaction);
-        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
-
-        const body = {
-          signer,
-          description: 'A generic exchange',
-          type: VenueType.Exchange,
-        };
-
-        const result = await service.modifyVenue(new BigNumber(123), body);
-
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [mockTransaction],
-        });
-        expect(mockTransactionsService.submit).toHaveBeenCalledWith(
-          mockVenue.modify,
-          { description: body.description, type: body.type },
-          { signer }
-        );
-        findVenueSpy.mockRestore();
-      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockVenue.modify,
+        { description: body.description, type: body.type },
+        { signer }
+      );
     });
   });
 
@@ -430,7 +311,6 @@ describe('SettlementsService', () => {
         {},
         { signer }
       );
-      findInstructionSpy.mockRestore();
     });
   });
 
@@ -463,7 +343,6 @@ describe('SettlementsService', () => {
         {},
         { signer }
       );
-      findInstructionSpy.mockRestore();
     });
   });
 
@@ -486,7 +365,6 @@ describe('SettlementsService', () => {
       const result = await service.findVenueDetails(new BigNumber(123));
 
       expect(result).toEqual(mockDetails);
-      findVenueSpy.mockRestore();
     });
   });
 
@@ -514,7 +392,6 @@ describe('SettlementsService', () => {
       const result = await service.findAffirmations(new BigNumber(123), new BigNumber(10));
 
       expect(result).toEqual(mockAffirmations);
-      findInstructionSpy.mockRestore();
     });
   });
 

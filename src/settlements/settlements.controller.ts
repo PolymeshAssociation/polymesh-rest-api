@@ -70,9 +70,14 @@ export class SettlementsController {
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.createInstruction(id, createInstructionDto);
 
-    const resolver: TransactionResolver<Instruction> = ({ result: instruction, transactions }) =>
+    const resolver: TransactionResolver<Instruction> = ({
+      result: instruction,
+      transactions,
+      details,
+    }) =>
       new CreatedInstructionModel({
         instruction,
+        details,
         transactions,
       });
 
@@ -216,9 +221,10 @@ export class SettlementsController {
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.createVenue(createVenueDto);
 
-    const resolver: TransactionResolver<Venue> = ({ result: venue, transactions }) =>
+    const resolver: TransactionResolver<Venue> = ({ result: venue, transactions, details }) =>
       new CreatedVenueModel({
         venue,
+        details,
         transactions,
       });
 

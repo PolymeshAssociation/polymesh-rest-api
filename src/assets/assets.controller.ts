@@ -10,7 +10,6 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { AuthorizationRequest } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -24,7 +23,7 @@ import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
-import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
@@ -32,7 +31,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { MetadataService } from '~/metadata/metadata.service';
 import { GlobalMetadataModel } from '~/metadata/models/global-metadata.model';
 
@@ -285,13 +284,8 @@ export class AssetsController {
     @Body() params: TransferOwnershipDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.assetsService.transferOwnership(ticker, params);
-    const resolver: TransactionResolver<AuthorizationRequest> = ({ transactions, result }) =>
-      new CreatedAuthorizationRequestModel({
-        transactions,
-        authorizationRequest: createAuthorizationRequestModel(result),
-      });
 
-    return handleServiceResult(serviceResult, resolver);
+    return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
 
   @ApiOperation({
@@ -343,9 +337,9 @@ export class AssetsController {
   @Post(':ticker/freeze')
   public async freeze(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.freeze(ticker, params);
+    const result = await this.assetsService.freeze(ticker, transactionBaseDto);
     return handleServiceResult(result);
   }
 
@@ -373,9 +367,9 @@ export class AssetsController {
   @Post(':ticker/unfreeze')
   public async unfreeze(
     @Param() { ticker }: TickerParamsDto,
-    @Body() params: TransactionBaseDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.unfreeze(ticker, params);
+    const result = await this.assetsService.unfreeze(ticker, transactionBaseDto);
     return handleServiceResult(result);
   }
 
