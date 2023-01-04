@@ -14,15 +14,12 @@ import {
   ApiUnprocessableEntityResponse,
   getSchemaPath,
   OmitType,
-  PartialType,
 } from '@nestjs/swagger';
 import {
   ReferenceObject,
   SchemaObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { Type as TransformType } from 'class-transformer';
 
-import { ClaimModel } from '~/claims/models/claim.model';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -88,8 +85,8 @@ export const ApiArrayResponse = <TModel extends Type | string>(
       if (typeof value !== 'string') {
         extraModels.push(value);
       }
-      // @ts-expect-error TODO: fix this
       items.allOf.push({
+        // @ts-expect-error TODO: fix this
         type: 'object',
         properties: {
           [key]: value === 'string' ? { type: value } : { $ref: getSchemaPath(value) },
