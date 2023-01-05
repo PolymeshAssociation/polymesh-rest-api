@@ -38,8 +38,7 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     description?: string;
   } = {
     paginated: true,
-  },
-  extendItems: Record<string, Type | string> = {}
+  }
 ): ReturnType<typeof applyDecorators> => {
   const extraModels = [];
   let items;
@@ -50,58 +49,86 @@ export const ApiArrayResponse = <TModel extends Type | string>(
     items = { $ref: getSchemaPath(model) };
   }
 
-  if (Object.keys(extendItems).length > 0) {
-    items = { allOf: [{ ...items }] };
+  return applyDecorators(
+    ApiOkResponse({
+      description,
+      schema: {
+        allOf: [
+          { $ref: getSchemaPath(paginated ? PaginatedResultsModel : ResultsModel) },
+          {
+            properties: {
+              results: {
+                type: 'array',
+                items,
+                example,
+                examples,
+                description,
+              },
+            },
+          },
+        ],
+      },
+    }),
+    ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
+  );
+};
 
-    const keys = Object.keys(extendItems);
-    if (typeof model !== 'string') {
-      // @ts-expect-error TODO: fix this
-      // eslint-disable-next-line new-cap
-      const obj = new model();
+export const ApiArrayResponseReplaceModelProperties = <T, K extends keyof T>(
+  Model: Type<T>,
+  {
+    paginated,
+    example,
+    examples,
+    description,
+  }: {
+    paginated: boolean;
+    example?: unknown;
+    examples?: unknown[] | Record<string, unknown>;
+    description?: string;
+  } = {
+    paginated: true,
+  },
+  extendItems: Record<K, Type | string>
+): ReturnType<typeof applyDecorators> => {
+  const extraModels = [];
+  const items: SchemaObject = {};
+  const keys = Object.keys(extendItems) as K[];
 
-      let name = obj.constructor.name;
+  const obj = new Model() as unknown as Type;
+  const name = `${obj.constructor.name}-Omit-${keys.join('-')}`;
 
-      keys.forEach(key => {
-        if (typeof extendItems[key] === 'string') {
-          name += key;
-        } else {
-          // @ts-expect-error TODO: fix this
-          const mod = new extendItems[key]();
+  const intermediary = {
+    // @ts-expect-error todo: fix this
+    [name]: class extends OmitType(Model, keys) {},
+  };
 
-          name += mod.constructor.name;
-        }
-      });
+  items.allOf = [{ $ref: getSchemaPath(intermediary[name]) }];
+  extraModels.push(intermediary[name]);
 
-      const intermediate = {
-        [name]: class extends OmitType(model, keys) {},
-      };
-
-      extraModels.push(intermediate[name]);
-      items = { allOf: [{ $ref: getSchemaPath(intermediate[name]) }] };
-    }
-
-    for (const [key, value] of Object.entries(extendItems)) {
-      console.log(value);
-      if (typeof value !== 'string') {
-        extraModels.push(value);
-      }
+  for (const [key, value] of Object.entries(extendItems)) {
+    if (typeof value === 'function') {
+      extraModels.push(value);
       items.allOf.push({
-        // @ts-expect-error TODO: fix this
         type: 'object',
         properties: {
-          [key]: value === 'string' ? { type: value } : { $ref: getSchemaPath(value) },
+          [key]: { $ref: getSchemaPath(value) },
         },
       });
     }
 
-    console.log(JSON.stringify(items, null, 2));
+    if (typeof value === 'string') {
+      items.allOf.push({
+        type: 'object',
+        properties: {
+          [key]: { type: value },
+        },
+      });
+    }
   }
 
+  console.log(JSON.stringify(items, null, 2));
+
   return applyDecorators(
-    ApiProperty({
-      name: 'test',
-      type: 'string',
-    }),
     ApiOkResponse({
       description,
       schema: {

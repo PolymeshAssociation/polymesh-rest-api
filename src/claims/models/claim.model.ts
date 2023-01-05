@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Claim, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
