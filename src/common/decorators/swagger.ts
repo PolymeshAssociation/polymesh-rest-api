@@ -126,8 +126,6 @@ export const ApiArrayResponseReplaceModelProperties = <T, K extends keyof T>(
     }
   }
 
-  console.log(JSON.stringify(items, null, 2));
-
   return applyDecorators(
     ApiOkResponse({
       description,
@@ -169,7 +167,6 @@ export const ApiPropertyOneOf = ({
 
   union.forEach(item => {
     if (typeof item === 'object') {
-      console.log(item);
       oneOfItems.push(item);
     } else {
       oneOfItems.push({ $ref: getSchemaPath(item) });
