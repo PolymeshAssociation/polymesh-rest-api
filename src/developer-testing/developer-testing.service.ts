@@ -1,58 +1,65 @@
-/* istanbul ignore file */
-
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SubmittableExtrinsic } from '@polkadot/api-base/types';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { ISubmittableResult } from '@polkadot/types/types';
 import { Account, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { AppInternalError } from '~/common/errors';
 import { isNotNull } from '~/common/utils';
-import { CreateCddProviders } from '~/developer-testing/dto/create-admin.dto';
-import { CreateMockIdentityBatchDto } from '~/developer-testing/dto/create-mock-identity-batch';
+import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
+import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
+import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services';
 
 const unitsPerPolyx = 1000000;
-const initialAdminPolyx = 100000000 * unitsPerPolyx;
 
 @Injectable()
 export class DeveloperTestingService {
-  private _alicePair: KeyringPair;
+  private _sudoPair: KeyringPair;
 
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly accountsService: AccountsService,
-    private readonly signingService: SigningService
+    private readonly signingService: SigningService,
+    private readonly configService: ConfigService
   ) {}
+
+  /**
+   * @note relies on having a sudo account configured
+   */
+  public async createTestAdmins({ accounts }: CreateTestAdminsDto): Promise<Identity[]> {
+    const identities = await this.batchSudoInitIdentities(accounts);
+
+    await this.createCddProvidersBatch(identities);
+
+    return identities;
+  }
 
   /**
    * @note the `signer` must be a CDD provider and have sufficient POLYX to cover the `initialPolyx`
    */
-  public async batchCddClaimsWithSigner({
+  public async createTestAccounts({
     accounts,
     signer,
-  }: CreateMockIdentityBatchDto): Promise<Identity[]> {
+  }: CreateTestAccountsDto): Promise<Identity[]> {
     const {
       _polkadotApi: {
         tx: { utility, balances, identity },
       },
     } = this.polymeshService.polymeshApi;
 
-    // The external signer does not need to be set after v19-alpha.3 is merged into beta
-    const externalSigner = this.signingService.getSigningManager().getExternalSigner();
-    this.polymeshService.polymeshApi._polkadotApi.setSigner(externalSigner);
-
     const signerAddress = await this.signingService.getAddressByHandle(signer);
-    const addresses = accounts.map(({ address }) => address);
 
     // Create a DID to attach claim too
-    const createDidCalls = addresses.map(address => identity.cddRegisterDid(address, []));
+    const createDidCalls = accounts.map(({ address }) => identity.cddRegisterDid(address, []));
     await this.polymeshService.execTransaction(signerAddress, utility.batchAtomic, createDidCalls);
 
     // Fetch the Account and Identity that was made
-    const madeAccounts = await this.fetchAccountsForAddresses(addresses);
+    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
     const identities = await this.fetchAccountsIdentities(madeAccounts);
 
     // Now create a CDD claim for each Identity
@@ -76,9 +83,9 @@ export class DeveloperTestingService {
   }
 
   /**
-   * @note relies on `//Alice` having `sudo` permission
+   * @note relies on having a sudo account configured
    */
-  public async batchCreateCddProviders(identities: Identity[]): Promise<void> {
+  private async createCddProvidersBatch(identities: Identity[]): Promise<void> {
     const {
       polymeshService: {
         polymeshApi: {
@@ -87,35 +94,22 @@ export class DeveloperTestingService {
           },
         },
       },
-      alicePair,
+      sudoPair,
     } = this;
-    const cddCalls: SubmittableExtrinsic<'promise'>[] = [];
 
-    identities.forEach(({ did }) => {
-      const addCddProviderTx = cddServiceProviders.addMember(did);
-      cddCalls.push(addCddProviderTx);
+    const cddCalls = identities.map(({ did }) => {
+      return cddServiceProviders.addMember(did);
     });
 
     const batchTx = utility.batchAtomic(cddCalls);
 
-    await this.polymeshService.execTransaction(alicePair, sudo.sudo, batchTx);
+    await this.polymeshService.execTransaction(sudoPair, sudo.sudo, batchTx);
   }
 
   /**
-   * @note relies on `//Alice` having `sudo` permission
+   * @note relies on having a sudo account configured
    */
-  public async batchCreateAdmins({ addresses }: CreateCddProviders): Promise<Identity[]> {
-    const identities = await this.batchMockCddClaim(addresses);
-
-    await this.batchCreateCddProviders(identities);
-
-    return identities;
-  }
-
-  /**
-   * @note relies on `//Alice` having `sudo` permission
-   */
-  public async batchMockCddClaim(addresses: string[]): Promise<Identity[]> {
+  private async batchSudoInitIdentities(accounts: CreateMockIdentityDto[]): Promise<Identity[]> {
     const {
       polymeshService: {
         polymeshApi: {
@@ -124,39 +118,47 @@ export class DeveloperTestingService {
           },
         },
       },
-      alicePair,
+      sudoPair,
     } = this;
 
-    const cddCalls = addresses.map(address => testUtils.mockCddRegisterDid(address));
-    const balanceCalls = addresses.map(address =>
-      balances.setBalance(address, initialAdminPolyx, 0)
-    );
+    const cddCalls: SubmittableExtrinsic<'promise', ISubmittableResult>[] = [];
+    const balanceCalls: SubmittableExtrinsic<'promise', ISubmittableResult>[] = [];
+
+    accounts.forEach(({ address, initialPolyx }) => {
+      cddCalls.push(testUtils.mockCddRegisterDid(address));
+      if (initialPolyx.gt(0)) {
+        const polyx = initialPolyx.toNumber() * unitsPerPolyx;
+        balanceCalls.push(balances.setBalance(address, polyx, 0));
+      }
+    });
+
     const balanceTx = sudo.sudo(utility.batchAtomic(balanceCalls));
 
-    await this.polymeshService.execTransaction(alicePair, utility.batchAtomic, [
+    await this.polymeshService.execTransaction(sudoPair, utility.batchAtomic, [
       ...cddCalls,
       balanceTx,
     ]);
 
-    await this.polymeshService.execTransaction(alicePair, sudo.sudo, balanceTx);
+    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
 
-    const accounts = await this.fetchAccountsForAddresses(addresses);
-
-    return this.fetchAccountsIdentities(accounts);
+    return this.fetchAccountsIdentities(madeAccounts);
   }
 
-  private get alicePair(): KeyringPair {
-    if (!this._alicePair) {
+  private get sudoPair(): KeyringPair {
+    if (!this._sudoPair) {
+      const sudoMnemonic = this.configService.getOrThrow('DEV_SUDO_MNEMONIC');
       const ss58Format = this.polymeshService.polymeshApi.network.getSs58Format().toNumber();
       const keyring = new Keyring({ type: 'sr25519', ss58Format });
-      this._alicePair = keyring.addFromUri('//Alice');
+      this._sudoPair = keyring.addFromUri(sudoMnemonic);
     }
 
-    return this._alicePair;
+    return this._sudoPair;
   }
 
-  private async fetchAccountsForAddresses(addresses: string[]): Promise<Account[]> {
-    return Promise.all(addresses.map(address => this.accountsService.findOne(address)));
+  private async fetchAccountForAccountParams(
+    accounts: CreateMockIdentityDto[]
+  ): Promise<Account[]> {
+    return Promise.all(accounts.map(({ address }) => this.accountsService.findOne(address)));
   }
 
   private async fetchAccountsIdentities(accounts: Account[]): Promise<Identity[]> {

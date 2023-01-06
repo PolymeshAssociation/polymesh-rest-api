@@ -1,12 +1,12 @@
-/* istanbul ignore file */
-
 import { Body, Controller, Headers, Post, Res } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
+import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { ResultsModel } from '~/common/models/results.model';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
-import { CreateCddProviders } from '~/developer-testing/dto/create-admin.dto';
-import { CreateMockIdentityBatchDto } from '~/developer-testing/dto/create-mock-identity-batch';
+import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
+import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
@@ -19,7 +19,11 @@ export class DeveloperTestingController {
   @ApiOperation({
     summary: `Returns a 200 response and echos ${HANDSHAKE_HEADER_KEY} if present in the request`,
     description:
-      'This endpoint is meant to aid testing webhook functionality for developers. It has no use for a regular user of the API',
+      'This endpoint is meant to aid testing webhook functionality for developers. It has no use for a regular user of the API (DEV ONLY)',
+  })
+  @ApiResponse({
+    description:
+      'An empty object will be returned. The handshake secret given will be set in the response headers',
   })
   @Post('/webhook')
   async handleWebhook(
@@ -39,22 +43,38 @@ export class DeveloperTestingController {
     description:
       'This endpoint initializes a set of addresses to be chain admin accounts. The signer must best a CDD provider and have sufficient POLYX to cover the initial amounts (DEV ONLY)',
   })
-  @Post('/create-admins')
-  async createAdmins(@Body() params: CreateCddProviders): Promise<IdentityModel[]> {
-    const ids = await this.developerTestingService.batchCreateAdmins(params);
+  @ApiArrayResponse(IdentityModel, {
+    description: 'List of Identities that were made CDD providers and given POLYX',
+    paginated: true,
+  })
+  @Post('/create-test-admins')
+  async createTestAdmins(
+    @Body() params: CreateTestAdminsDto
+  ): Promise<ResultsModel<IdentityModel>> {
+    const identities = await this.developerTestingService.createTestAdmins(params);
+    const results = await Promise.all(identities.map(id => createIdentityModel(id)));
 
-    return Promise.all(ids.map(id => createIdentityModel(id)));
+    return new ResultsModel({
+      results,
+    });
   }
 
   @ApiOperation({
     summary: 'Creates a set of CDD claims for each address given',
     description:
-      'This endpoint creates Identities for multiple accounts. Intended for testing purposes only',
+      'This endpoint creates Identities for multiple accounts. The signer must be a CDD provider and have sufficient POLYX to cover the initialPolyx amounts. (DEV ONLY)',
   })
-  @Post('/create-identity-batch')
-  async createIdentityBatch(@Body() params: CreateMockIdentityBatchDto): Promise<IdentityModel[]> {
-    const ids = await this.developerTestingService.batchCddClaimsWithSigner(params);
+  @ApiArrayResponse(IdentityModel, {
+    description: 'List of Identities were created with a CDD claim by the signer',
+    paginated: true,
+  })
+  @Post('/create-test-accounts')
+  async createTestAccounts(
+    @Body() params: CreateTestAccountsDto
+  ): Promise<ResultsModel<IdentityModel>> {
+    const ids = await this.developerTestingService.createTestAccounts(params);
+    const results = await Promise.all(ids.map(id => createIdentityModel(id)));
 
-    return Promise.all(ids.map(id => createIdentityModel(id)));
+    return new ResultsModel({ results });
   }
 }

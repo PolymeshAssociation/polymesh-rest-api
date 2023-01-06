@@ -7,9 +7,9 @@ import { IsArray, ValidateNested } from 'class-validator';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 
-export class CreateMockIdentityBatchDto extends TransactionBaseDto {
+export class CreateTestAccountsDto extends TransactionBaseDto {
   @ApiProperty({
-    description: 'The addresses to create CDD claims for',
+    description: 'The addresses to create an Identity for',
     type: CreateMockIdentityDto,
     isArray: true,
   })

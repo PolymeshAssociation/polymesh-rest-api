@@ -52,6 +52,7 @@ import { UsersModule } from '~/users/users.module';
         VAULT_URL: Joi.string().allow(''),
         DEVELOPER_UTILS: Joi.bool().default(false),
         API_KEYS: Joi.string().default(''),
+        DEV_SUDO_MNEMONIC: Joi.string().default('//Alice'),
         AUTH_STRATEGY: Joi.string().default(() => {
           if (process.env.NODE_ENV === 'production') {
             throw new AppConfigError('AUTH_STRATEGY', 'must be set in a production environment');

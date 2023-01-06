@@ -68,6 +68,8 @@ LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (eac
 
 # Below are optional params that enable some features. The above should be good to get started with
 
+DEV_SUDO_MNEMONIC=## a mnemonic that has `sudo` privileges for a chain. Defaults to `//Alice` ##
+
 # Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_TOKEN=## The access token for authorization with the Vault instance ##
