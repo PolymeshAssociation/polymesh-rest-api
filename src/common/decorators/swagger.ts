@@ -169,6 +169,7 @@ export const ApiPropertyOneOf = ({
 
   union.forEach(item => {
     if (typeof item === 'object') {
+      console.log(item);
       oneOfItems.push(item);
     } else {
       oneOfItems.push({ $ref: getSchemaPath(item) });

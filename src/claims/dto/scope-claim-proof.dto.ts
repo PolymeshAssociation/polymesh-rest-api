@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
 import { ProofScopeIdCddIdMatchDto } from '~/claims/dto/proof-scope-id-cdd-id-match.dto';
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 
+@ApiExtraModels(ProofScopeIdCddIdMatchDto)
 export class ScopeClaimProofDto {
   @ApiProperty({
     description: 'The proof scope Id of the claim',

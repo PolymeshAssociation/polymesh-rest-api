@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { ScopeClaimProof } from '@polymeshassociation/polymesh-sdk/types';
 import { IsString } from 'class-validator';
 
@@ -9,6 +9,7 @@ import { ScopeDto } from '~/claims/dto/scope.dto';
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
+@ApiExtraModels(ScopeClaimProofDto)
 export class AddInvestorUniquenessDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'The type of Claim. Note that different types require different fields',
