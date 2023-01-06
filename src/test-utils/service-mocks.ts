@@ -152,6 +152,7 @@ export class MockPortfoliosService {
   findAllByOwner = jest.fn();
   createPortfolio = jest.fn();
   deletePortfolio = jest.fn();
+  findOne = jest.fn();
 }
 
 export class MockOfferingsService {
