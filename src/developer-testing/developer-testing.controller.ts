@@ -39,9 +39,9 @@ export class DeveloperTestingController {
 
   @ApiOperation({
     summary:
-      'Given a set of addresses this generates CDD claims, provides with a large amount of POLYX and makes them CDD providers',
+      'Given a set of addresses this generates creates an Identity and transfers some POLYX to the address and makes them a CDD provider',
     description:
-      'This endpoint initializes a set of addresses to be chain admin accounts. The signer must best a CDD provider and have sufficient POLYX to cover the initial amounts (DEV ONLY)',
+      'This endpoint initializes a set of addresses to be chain admin accounts. The signer must be a CDD provider and have sufficient POLYX to cover the initial amounts (DEV ONLY)',
   })
   @ApiArrayResponse(IdentityModel, {
     description: 'List of Identities that were made CDD providers and given POLYX',

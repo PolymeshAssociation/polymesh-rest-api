@@ -2,6 +2,7 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Identity } from '@polymeshassociation/polymesh-sdk/types';
+import { Response } from 'express';
 import { when } from 'jest-when';
 
 import { DeveloperTestingController } from '~/developer-testing/developer-testing.controller';
@@ -33,9 +34,9 @@ describe('DeveloperTestingController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('webhook', () => {
+  describe('handleWebhook', () => {
     it('should return an empty object', async () => {
-      const mockResponse = createMock<Response>() as any;
+      const mockResponse = createMock<Response>();
 
       await controller.handleWebhook({}, '', mockResponse);
 
@@ -43,8 +44,9 @@ describe('DeveloperTestingController', () => {
     });
 
     it('should set the header if provided', async () => {
-      const mockResponse = createMock<Response>() as any;
-      const secret = 'abc';
+      const mockResponse = createMock<Response>();
+      const secret = 'someSecret';
+
       await controller.handleWebhook({}, secret, mockResponse);
 
       expect(mockResponse.header).toHaveBeenCalledWith(HANDSHAKE_HEADER_KEY, secret);
@@ -62,6 +64,7 @@ describe('DeveloperTestingController', () => {
       when(mockService.createTestAdmins).calledWith(params).mockResolvedValue(serviceResponse);
 
       const result = await controller.createTestAdmins(params);
+
       expect(result).toEqual({ results: serviceResponse });
       expect(mockService.createTestAdmins).toHaveBeenCalledWith(params);
     });
@@ -69,7 +72,7 @@ describe('DeveloperTestingController', () => {
 
   describe('createTestAccount', () => {
     it('call the service with the params and return the result', async () => {
-      const serviceResponse = [] as Identity[];
+      const serviceResponse: Identity[] = ['fakeId' as unknown as Identity];
 
       const params = {
         accounts: [{ address, initialPolyx: new BigNumber(10) }],

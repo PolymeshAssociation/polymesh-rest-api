@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { cryptoWaitReady } from '@polymeshassociation/polymesh-sdk/utils';
+import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { AppInternalError } from '~/common/errors';
@@ -63,20 +64,29 @@ describe('DeveloperTestingService', () => {
 
   describe('createTestAdmins', () => {
     it('should return test admin Identities', async () => {
-      mockAccountsService.findOne.mockResolvedValue({
-        getIdentity: jest.fn().mockResolvedValue('fakeId'),
-      });
+      const secondaryAddress = 'someSecondaryAddress';
+      when(mockAccountsService.findOne)
+        .calledWith(address)
+        .mockResolvedValue({
+          getIdentity: jest.fn().mockResolvedValue('fakeId'),
+        });
+
+      when(mockAccountsService.findOne)
+        .calledWith(secondaryAddress)
+        .mockResolvedValue({
+          getIdentity: jest.fn().mockResolvedValue('fakeSecondaryId'),
+        });
 
       const params = {
         accounts: [
           { address, initialPolyx: new BigNumber(100) },
-          { address: 'abc', initialPolyx: new BigNumber(0) },
+          { address: secondaryAddress, initialPolyx: new BigNumber(0) },
         ],
       };
 
       const identities = await service.createTestAdmins(params);
 
-      expect(identities).toEqual(['fakeId']);
+      expect(identities).toEqual(['fakeId', 'fakeSecondaryId']);
     });
   });
 

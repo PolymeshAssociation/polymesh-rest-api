@@ -8,6 +8,7 @@
   "scripts": {
     "nest": "nest",
     "prepare": "husky install",
+    "dedupe": "npx yarn-deduplicate yarn.lock",
     "prebuild": "rimraf dist",
     "postinstall": "rimraf node_modules/@polymeshassociation/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto,util,wasm-bridge} && rimraf node_modules/@polymeshassociation/{hashicorp-vault-signing-manager,fireblocks-signing-manager}/node_modules/@polkadot/{util,util-crypto,wasm-bridge}",
     "build": "nest build",
