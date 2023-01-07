@@ -72,7 +72,7 @@ describe('DeveloperTestingController', () => {
 
   describe('createTestAccount', () => {
     it('call the service with the params and return the result', async () => {
-      const serviceResponse: Identity[] = ['fakeId' as unknown as Identity];
+      const serviceResponse: Identity[] = [];
 
       const params = {
         accounts: [{ address, initialPolyx: new BigNumber(10) }],
