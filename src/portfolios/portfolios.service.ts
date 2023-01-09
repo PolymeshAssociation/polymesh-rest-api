@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { DefaultPortfolio, NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -8,6 +8,7 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -77,5 +78,21 @@ export class PortfoliosService {
       { portfolio: portfolio.id },
       transactionBaseDto
     );
+  }
+
+  public async updatePortfolioName(
+    portfolioParams: PortfolioDto,
+    params: ModifyPortfolioDto
+  ): ServiceReturn<NumberedPortfolio> {
+    const { did, id } = portfolioParams;
+    const { base, args } = extractTxBase(params);
+
+    const portfolio = (await this.findOne(did, id)) as NumberedPortfolio;
+
+    if (!portfolio.modifyName) {
+      throw new BadRequestException('Default portfolio name cannot be modified');
+    }
+
+    return this.transactionsService.submit(portfolio.modifyName, args, base);
   }
 }

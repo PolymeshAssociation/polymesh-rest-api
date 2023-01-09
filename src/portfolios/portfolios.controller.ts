@@ -18,6 +18,7 @@ import { handleServiceResult, TransactionResolver, TransactionResponseModel } fr
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
@@ -142,5 +143,37 @@ export class PortfoliosController {
   ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.deletePortfolio(portfolio, transactionBaseDto);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Modify Portfolio name',
+    description: 'This endpoint modifies Portfolio name for a numbered portfolio',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Portfolio number for which name is to be modified',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('/identities/:did/portfolios/:id/modify-name')
+  public async modifyPortfolioName(
+    @Param() portfolioParams: PortfolioDto,
+    @Body() modifyPortfolioParams: ModifyPortfolioDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.portfoliosService.updatePortfolioName(
+      portfolioParams,
+      modifyPortfolioParams
+    );
+
+    return handleServiceResult(serviceResult);
   }
 }

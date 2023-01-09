@@ -242,4 +242,51 @@ describe('PortfoliosService', () => {
       });
     });
   });
+
+  describe('updatePortfolioName', () => {
+    it('should rename a Portfolio and return the queue results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.RenamePortfolio,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockIdentity = new MockIdentity();
+      const modifyName = jest.fn();
+
+      modifyName.mockReturnValue(mockTransaction);
+
+      const mockPortfolio = {
+        name: 'Growth',
+        id: new BigNumber(1),
+        assetBalances: [],
+        modifyName,
+      };
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
+
+      const portfolio = new PortfolioDto({
+        id: new BigNumber(1),
+        did,
+      });
+
+      const body = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = await service.updatePortfolioName(portfolio, body);
+      expect(result).toEqual({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });
