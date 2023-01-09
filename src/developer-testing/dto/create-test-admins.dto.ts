@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, ValidateNested } from 'class-validator';
 
-import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
+import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 
 export class CreateTestAdminsDto {
   @ApiProperty({

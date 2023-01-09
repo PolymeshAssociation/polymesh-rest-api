@@ -26,6 +26,7 @@ export class DeveloperTestingModule {
       imports: [PolymeshModule, AccountsModule, SigningModule, ConfigModule],
       controllers,
       providers: [DeveloperTestingService],
+      exports: [DeveloperTestingService],
     };
   }
 }

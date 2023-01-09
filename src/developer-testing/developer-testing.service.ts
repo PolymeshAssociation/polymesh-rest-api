@@ -7,11 +7,11 @@ import { ISubmittableResult } from '@polkadot/types/types';
 import { Account, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { AppInternalError } from '~/common/errors';
+import { AppInternalError, AppValidationError } from '~/common/errors';
 import { isNotNull } from '~/common/utils';
+import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
 import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
-import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services';
 
@@ -52,7 +52,9 @@ export class DeveloperTestingService {
       },
     } = this.polymeshService.polymeshApi;
 
-    const signerAddress = await this.signingService.getAddressByHandle(signer);
+    const signerAddress = signer
+      ? await this.signingService.getAddressByHandle(signer)
+      : this.sudoPair.address;
 
     // Create a DID to attach claim too
     const createDidCalls = accounts.map(({ address }) => identity.cddRegisterDid(address, []));
@@ -146,7 +148,8 @@ export class DeveloperTestingService {
 
   private get sudoPair(): KeyringPair {
     if (!this._sudoPair) {
-      const sudoMnemonic = this.configService.getOrThrow('DEV_SUDO_MNEMONIC');
+      const sudoMnemonic = this.configService.getOrThrow('DEVELOPER_SUDO_MNEMONIC');
+      console.log({ sudoMnemonic });
       const ss58Format = this.polymeshService.polymeshApi.network.getSs58Format().toNumber();
       const keyring = new Keyring({ type: 'sr25519', ss58Format });
       this._sudoPair = keyring.addFromUri(sudoMnemonic);
@@ -170,5 +173,41 @@ export class DeveloperTestingService {
     }
 
     return identities;
+  }
+
+  /**
+   * @deprecated Use @link{DeveloperTestingService.createAccount} (the batched version) instead
+   * @note intended for development chains only (i.e. Alice exists and can call `testUtils.createMockCddClaim`)
+   */
+  public async createMockCdd({ address, initialPolyx }: CreateMockIdentityDto): Promise<Identity> {
+    const {
+      _polkadotApi: {
+        tx: { testUtils, balances, sudo },
+      },
+    } = this.polymeshService.polymeshApi;
+
+    if (!testUtils) {
+      throw new AppValidationError(
+        'The chain does not have the `testUtils` pallet enabled. This endpoint is intended for development use only'
+      );
+    }
+
+    const targetAccount = await this.accountsService.findOne(address);
+
+    await this.polymeshService.execTransaction(
+      this.sudoPair,
+      testUtils.mockCddRegisterDid,
+      address
+    );
+    const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
+    await this.polymeshService.execTransaction(this.sudoPair, sudo.sudo, setBalance);
+
+    const id = await targetAccount.getIdentity();
+
+    if (!id) {
+      throw new AppInternalError('The Identity was not created');
+    }
+
+    return id;
   }
 }

@@ -38,7 +38,7 @@ describe('DeveloperTestingService', () => {
         DeveloperTestingService,
         AccountsService,
         mockSigningProvider,
-        makeMockConfigProvider({ DEV_SUDO_MNEMONIC: '//Bob' }),
+        makeMockConfigProvider({ DEVELOPER_SUDO_MNEMONIC: '//Bob' }),
       ],
     })
       .overrideProvider(AccountsService)
@@ -121,6 +121,39 @@ describe('DeveloperTestingService', () => {
       );
 
       return expect(service.createTestAccounts(params)).rejects.toThrowError(expectedError);
+    });
+
+    it('should call execTransaction with the default sudo signer if `signer` is not specified', async () => {
+      const params = { accounts: [{ address, initialPolyx: new BigNumber(10) }] };
+
+      const defaultAdminAddress = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
+
+      when(mockAccountsService.findOne)
+        .calledWith(address)
+        .mockResolvedValue({
+          getIdentity: jest.fn().mockResolvedValue('fakeId'),
+        });
+
+      await service.createTestAccounts(params);
+
+      expect(polymeshService.execTransaction).toHaveBeenCalledWith(
+        defaultAdminAddress,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('createMockCdd', () => {
+    it('should return a promise', async () => {
+      const params = {
+        address: 'address',
+        initialPolyx: new BigNumber(10),
+      };
+      mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
+
+      const result = service.createMockCdd(params);
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 });
