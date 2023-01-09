@@ -149,7 +149,6 @@ export class DeveloperTestingService {
   private get sudoPair(): KeyringPair {
     if (!this._sudoPair) {
       const sudoMnemonic = this.configService.getOrThrow('DEVELOPER_SUDO_MNEMONIC');
-      console.log({ sudoMnemonic });
       const ss58Format = this.polymeshService.polymeshApi.network.getSs58Format().toNumber();
       const keyring = new Keyring({ type: 'sr25519', ss58Format });
       this._sudoPair = keyring.addFromUri(sudoMnemonic);
