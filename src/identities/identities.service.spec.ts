@@ -154,16 +154,4 @@ describe('IdentitiesService', () => {
       });
     });
   });
-
-  describe('createMockCdd', () => {
-    it('should return a promise', async () => {
-      const params = {
-        address: 'address',
-        initialPolyx: new BigNumber(10),
-      };
-      mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
-      const result = service.createMockCdd(params);
-      expect(result).toBeInstanceOf(Promise);
-    });
-  });
 });
