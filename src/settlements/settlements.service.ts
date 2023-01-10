@@ -138,4 +138,13 @@ export class SettlementsService {
     const assetDetails = await this.assetsService.findOne(ticker);
     return assetDetails.settlements.canTransfer({ from, to, amount });
   }
+
+  public async withdrawAffirmation(
+    id: BigNumber,
+    signerDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.withdraw, {}, signerDto);
+  }
 }

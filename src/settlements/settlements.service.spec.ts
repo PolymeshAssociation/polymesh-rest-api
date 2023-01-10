@@ -422,4 +422,36 @@ describe('SettlementsService', () => {
       expect(result).toEqual(mockTransferBreakdown);
     });
   });
+
+  describe('withdrawAffirmation', () => {
+    it('should run a withdraw affirmation procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.WithdrawAffirmation,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.withdrawAffirmation(new BigNumber(123), {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.withdraw,
+        {},
+        { signer }
+      );
+    });
+  });
 });
