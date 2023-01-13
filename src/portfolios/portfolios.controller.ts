@@ -22,6 +22,7 @@ import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -156,7 +157,7 @@ export class PortfoliosController {
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiArrayResponse(PortfolioModel, {
+  @ApiArrayResponse(PortfolioIdentifierModel, {
     description: 'Returns the list of all custodied Portfolios of the given Identity',
     paginated: true,
   })
@@ -164,7 +165,7 @@ export class PortfoliosController {
   async getCustodiedPortfolios(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto
-  ): Promise<PaginatedResultsModel<PortfolioModel>> {
+  ): Promise<PaginatedResultsModel<PortfolioIdentifierModel>> {
     const {
       data,
       count: total,
@@ -174,7 +175,9 @@ export class PortfoliosController {
       start: start?.toString(),
     });
 
-    const results = await Promise.all(data.map(portfolio => createPortfolioModel(portfolio, did)));
+    const results = await Promise.all(
+      data.map(portfolio => createPortfolioIdentifierModel(portfolio))
+    );
 
     return new PaginatedResultsModel({
       results,

@@ -391,6 +391,7 @@ export function createMockSubsidy(
   return createMock<Subsidy>(partial);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createMockResultSet<T extends any[]>(data: T): ResultSet<T> {
   return {
     data,

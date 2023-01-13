@@ -7,7 +7,7 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
-import { createPortfolioModel } from '~/portfolios/portfolios.util';
+import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
 import { testValues } from '~/test-utils/consts';
 import { createMockResultSet, MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
@@ -116,7 +116,7 @@ describe('PortfoliosController', () => {
       );
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mockDetails = await createPortfolioModel(mockPortfolio as any, did);
+      const mockDetails = await createPortfolioIdentifierModel(mockPortfolio as any);
 
       const result = await controller.getCustodiedPortfolios(
         { did },
