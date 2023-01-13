@@ -32,6 +32,7 @@ import {
   MockAssetService,
   MockAuthorizationsService,
   MockClaimsService,
+  mockDeveloperServiceProvider,
   MockIdentitiesService,
   MockSettlementsService,
   MockTickerReservationsService,
@@ -54,6 +55,8 @@ describe('IdentitiesController', () => {
 
   const mockTickerReservationsService = new MockTickerReservationsService();
 
+  const mockDeveloperTestingService = mockDeveloperServiceProvider.useValue;
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       controllers: [IdentitiesController],
@@ -65,6 +68,7 @@ describe('IdentitiesController', () => {
         ClaimsService,
         TickerReservationsService,
         mockPolymeshLoggerProvider,
+        mockDeveloperServiceProvider,
       ],
     })
       .overrideProvider(AssetsService)
@@ -484,7 +488,7 @@ describe('IdentitiesController', () => {
 
       const result = await controller.createMockCdd(params);
       expect(result).toEqual(fakeIdentityModel);
-      expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
+      expect(mockDeveloperTestingService.createMockCdd).toHaveBeenCalledWith(params);
     });
   });
 
