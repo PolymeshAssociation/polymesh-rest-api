@@ -36,6 +36,7 @@ import {
   MockAssetService,
   MockAuthorizationsService,
   mockClaimsServiceProvider,
+  mockDeveloperServiceProvider,
   MockIdentitiesService,
   MockSettlementsService,
   MockTickerReservationsService,
@@ -58,6 +59,8 @@ describe('IdentitiesController', () => {
 
   const mockTickerReservationsService = new MockTickerReservationsService();
 
+  const mockDeveloperTestingService = mockDeveloperServiceProvider.useValue;
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       controllers: [IdentitiesController],
@@ -69,6 +72,7 @@ describe('IdentitiesController', () => {
         mockClaimsServiceProvider,
         TickerReservationsService,
         mockPolymeshLoggerProvider,
+        mockDeveloperServiceProvider,
       ],
     })
       .overrideProvider(AssetsService)
@@ -487,9 +491,7 @@ describe('IdentitiesController', () => {
     it('should call the service and return the Identity', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fakeIdentityModel = 'fakeIdentityModel' as any;
-      const createIdentityModelSpy = jest
-        .spyOn(identityUtil, 'createIdentityModel')
-        .mockResolvedValue(fakeIdentityModel);
+      jest.spyOn(identityUtil, 'createIdentityModel').mockResolvedValue(fakeIdentityModel);
 
       const params = {
         address: '5abc',
@@ -498,8 +500,7 @@ describe('IdentitiesController', () => {
 
       const result = await controller.createMockCdd(params);
       expect(result).toEqual(fakeIdentityModel);
-      expect(mockIdentitiesService.createMockCdd).toHaveBeenCalledWith(params);
-      createIdentityModelSpy.mockRestore();
+      expect(mockDeveloperTestingService.createMockCdd).toHaveBeenCalledWith(params);
     });
   });
 

@@ -43,8 +43,9 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
+import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
-import { CreateMockIdentityDto } from '~/identities/dto/create-mock-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
@@ -62,6 +63,7 @@ export class IdentitiesController {
     private readonly authorizationsService: AuthorizationsService,
     private readonly claimsService: ClaimsService,
     private readonly tickerReservationsService: TickerReservationsService,
+    private readonly developerTestingService: DeveloperTestingService,
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(IdentitiesController.name);
@@ -452,10 +454,12 @@ export class IdentitiesController {
     return new ResultsModel({ results });
   }
 
+  @ApiTags('developer-testing')
   @ApiOperation({
-    summary: 'Creates a fake Identity for an Account and sets its POLYX balance (DEV ONLY)',
+    summary:
+      'Creates a fake Identity for an Account and sets its POLYX balance (DEPRECATED: Use `/developer-testing/create-test-account` instead)',
     description:
-      'This endpoint creates a Identity for an Account and sets its POLYX balance. Will only work with development chains. Alice must exist, be able to call `testUtils.mockCddRegisterDid` and have `sudo` permission',
+      'This endpoint creates a Identity for an Account and sets its POLYX balance. A sudo account must be configured.',
   })
   @ApiOkResponse({ description: 'The details of the newly created Identity' })
   @ApiBadRequestResponse({
@@ -467,7 +471,7 @@ export class IdentitiesController {
   })
   @Post('/mock-cdd')
   public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
-    const identity = await this.identitiesService.createMockCdd(params);
+    const identity = await this.developerTestingService.createMockCdd(params);
     return createIdentityModel(identity);
   }
 

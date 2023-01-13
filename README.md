@@ -68,6 +68,9 @@ LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (eac
 
 # Below are optional params that enable some features. The above should be good to get started with
 
+DEVELOPER_SUDO_MNEMONIC=## a mnemonic that has `sudo` privileges for a chain. Defaults to `//Alice` ##
+DEVELOPER_UTILS=## set to `true` to enable developer testing endpoints ##
+
 # Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_TOKEN=## The access token for authorization with the Vault instance ##
@@ -91,14 +94,24 @@ REST_POSTGRES_DATABASE=## Database to use ##
 
 ### Signing Transactions
 
-There are currently two [signing managers](https://github.com/PolymeshAssociation/signing-managers#projects) the REST API can be configured with, the local signer or the [Hashicorp Vault](https://www.vaultproject.io/) signer. If args for both are given, Vault takes precedence
+There are currently three [signing managers](https://github.com/PolymeshAssociation/signing-managers#projects) the REST API can be configured with, the local signer, the [Hashicorp Vault](https://www.vaultproject.io/) signer or the [Fireblocks](https://www.fireblocks.com/) signing manager. If args for multiple are given the precedence order is Vault over Fireblocks over Local.
 
 For any method that modifies chain state, the key to sign with can be controlled with the "signer" field.
 
+1. Vault Signing:
+   By setting `VAULT_URL` and `VAULT_TOKEN` an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it.
+
+   To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`.
+
+1. Fireblocks Signing
+   By setting `FIREBLOCKS_URL`, `FIREBLOCKS_API_KEY` and `FIREBLOCKS_SECRET_PATH` Fireblocks raw signing API will be used to sign transactions. The secret path should point to a file containing the secret setup in the Fireblocks platform, along with the API Key.
+
+   The signer consists of 3 integers separated by `-`, as in `1-0-0`. This correspond to `account`, `change` and `address_index` from the [BIP-44 standard](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki). If `change` and `address` portion are left out they will default to `0`. Each combination refers to a unique address that must be on boarded on chain before it can be used.
+
+   Note, if using the docker image the secret file will need to be mounted into the container with the flag `--volume $HOST_SECRET_PATH:$FIREBLOCKS_SECRET_PATH` being passed to `docker run`.
+
 1. Local Signing:
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
-1. Vault Signing:
-   By setting `VAULT_URL` and `VAULT_TOKEN`an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it. To refer to a key when signing use the Vault name and version `${name}-${version}` e.g. `alice-1`.
 
 ### Authentication
 

@@ -10,4 +10,5 @@ module.exports = {
   testRegex: '.*\\.spec\\.ts$',
   coverageDirectory: './coverage',
   collectCoverage: true,
+  restoreMocks: true,
 };

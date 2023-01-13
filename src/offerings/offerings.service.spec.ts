@@ -77,7 +77,6 @@ describe('OfferingsService', () => {
         count: mockInvestments.count,
         next: mockInvestments.next,
       });
-      findSpy.mockRestore();
     });
   });
 
@@ -95,7 +94,6 @@ describe('OfferingsService', () => {
           error = err;
         }
         expect(error).toBeInstanceOf(NotFoundException);
-        findSpy.mockRestore();
       });
     });
     describe('otherwise', () => {
@@ -106,7 +104,6 @@ describe('OfferingsService', () => {
 
         const result = await service.findOne('TICKER', new BigNumber(1));
         expect(result).toEqual(mockOfferingWithDetails);
-        findSpy.mockRestore();
       });
     });
   });

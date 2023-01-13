@@ -40,7 +40,10 @@ export class AppErrorToHttpResponseFilter implements ExceptionFilter {
       case AppErrorCode.Conflict:
         return HttpStatus.CONFLICT;
       case AppErrorCode.Config:
+      case AppErrorCode.Internal:
         return HttpStatus.INTERNAL_SERVER_ERROR;
+      case AppErrorCode.Validation:
+        return HttpStatus.BAD_REQUEST;
       default:
         throw new UnreachableCaseError(code);
     }

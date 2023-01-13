@@ -1,12 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   CorporateActionDefaultConfig,
   DistributionWithDetails,
   DividendDistribution,
-  ErrorCode,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { isPolymeshError } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -18,6 +16,7 @@ import { ModifyDistributionCheckpointDto } from '~/corporate-actions/dto/modify-
 import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
+import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class CorporateActionsService {
@@ -53,20 +52,7 @@ export class CorporateActionsService {
   public async findDistribution(ticker: string, id: BigNumber): Promise<DistributionWithDetails> {
     const asset = await this.assetsService.findOne(ticker);
 
-    try {
-      return await asset.corporateActions.distributions.getOne({ id });
-    } catch (err: unknown) {
-      if (isPolymeshError(err)) {
-        const { code } = err;
-        if (code === ErrorCode.DataUnavailable) {
-          throw new NotFoundException(
-            `The Dividend Distribution with id: "${id.toString()}" does not exist for ticker: "${ticker}"`
-          );
-        }
-      }
-
-      throw err;
-    }
+    return await asset.corporateActions.distributions.getOne({ id }).catch(handleSdkError);
   }
 
   public async createDividendDistribution(

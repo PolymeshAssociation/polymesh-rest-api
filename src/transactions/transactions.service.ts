@@ -9,7 +9,7 @@ import { EventsService } from '~/events/events.service';
 import { EventType, TransactionUpdateEvent, TransactionUpdatePayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { NotificationPayload } from '~/notifications/types';
-import { SigningService } from '~/signing/signing.service';
+import { SigningService } from '~/signing/services/signing.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
 import transactionsConfig from '~/transactions/config/transactions.config';

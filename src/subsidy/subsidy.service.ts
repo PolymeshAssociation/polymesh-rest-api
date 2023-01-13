@@ -94,10 +94,6 @@ export class SubsidyService {
   public async getAllowance(beneficiary: string, subsidizer: string): Promise<BigNumber> {
     const subsidy = this.findOne(beneficiary, subsidizer);
 
-    try {
-      return await subsidy.getAllowance();
-    } catch (err) {
-      handleSdkError(err);
-    }
+    return await subsidy.getAllowance().catch(handleSdkError);
   }
 }

@@ -150,6 +150,7 @@ export function handleSdkError(err: unknown): never {
     switch (code) {
       case ErrorCode.NoDataChange:
       case ErrorCode.ValidationError:
+      case ErrorCode.EntityInUse:
         throw new BadRequestException(message);
       case ErrorCode.InsufficientBalance:
       case ErrorCode.UnmetPrerequisite:

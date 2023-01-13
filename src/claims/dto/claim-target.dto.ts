@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDate, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 import { IsDid } from '~/common/decorators/validation';
@@ -12,11 +13,14 @@ export class ClaimTargetDto {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @IsDid()
-  target: string;
+  readonly target: string;
 
   @ApiProperty({
     description: 'The Claim to be added, modified or removed',
+    type: ClaimDto,
   })
+  @ValidateNested()
+  @Type(() => ClaimDto)
   claim: ClaimDto;
 
   @ApiPropertyOptional({

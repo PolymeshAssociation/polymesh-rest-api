@@ -42,7 +42,7 @@ describe('ClaimsController', () => {
   });
 
   describe('addClaims', () => {
-    it('should call addClaimsToDid method and return transaction data', async () => {
+    it('should call addClaimsOnDid method and return transaction data', async () => {
       mockClaimsService.addClaimsOnDid.mockResolvedValue({ ...txResult, result: undefined });
 
       const result = await controller.addClaims(mockPayload);
