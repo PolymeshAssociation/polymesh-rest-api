@@ -23,6 +23,7 @@ import {
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { Class } from '~/common/types';
 
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
@@ -98,8 +99,10 @@ export const ApiArrayResponseReplaceModelProperties = <T, K extends keyof T>(
   const name = `${obj.constructor.name}-Omit-${keys.join('-')}`;
 
   const intermediary = {
-    // @ts-expect-error todo: fix this
-    [name]: class extends OmitType(Model, keys) {},
+    [name]: class extends OmitType(
+      Model as unknown as Class,
+      keys as unknown as readonly never[]
+    ) {},
   };
 
   items.allOf = [{ $ref: getSchemaPath(intermediary[name]) }];
