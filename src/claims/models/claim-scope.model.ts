@@ -1,30 +1,28 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Scope } from '@polymeshassociation/polymesh-sdk/types';
+import { Type } from 'class-transformer';
+
+import { ScopeModel } from '~/claims/models/scope.model';
 
 export class ClaimScopeModel {
   @ApiProperty({
     description: 'The scope that has been assigned to Identity',
-    example: {
-      type: 'Identity',
-      value: '0x6'.padEnd(66, '1a'),
-    },
+    nullable: true,
+    type: ScopeModel,
   })
-  readonly scope: Scope | null;
+  @Type(() => ScopeModel)
+  readonly scope: ScopeModel | null;
 
   @ApiPropertyOptional({
+    type: 'string',
     description: 'The ticker to which the scope is valid for',
     example: 'TICKER',
+    nullable: true,
   })
   readonly ticker?: string;
 
   constructor(model: ClaimScopeModel) {
     Object.assign(this, model);
   }
-}
-
-export interface ClaimScope {
-  scope: Scope | null;
-  ticker?: string;
 }
