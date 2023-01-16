@@ -155,21 +155,20 @@ export class PortfoliosController {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiParam({
-    name: 'portfolioId',
-    description: 'The portfolioId for which details are to be fetched',
+    name: 'id',
+    description:
+      'The ID of the portfolio for which details are to be fetched. Use 0 for default Portfolio',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
-  @ApiArrayResponse(PortfolioModel, {
-    description: 'Return the list of all Portfolios of the given Identity',
-    paginated: false,
+  @ApiOkResponse({
+    description: 'Portfolio details',
+    type: PortfolioModel,
   })
   @Get('/identities/:did/portfolios/:id')
   async getPortfolio(@Param() { did, id }: PortfolioDto): Promise<PortfolioModel> {
     const portfolio = await this.portfoliosService.findOne(did, id);
 
-    const result = await createPortfolioModel(portfolio, did);
-
-    return result;
+    return createPortfolioModel(portfolio, did);
   }
 }
