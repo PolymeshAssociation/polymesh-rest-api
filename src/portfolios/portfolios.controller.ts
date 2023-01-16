@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
@@ -9,7 +9,11 @@ import {
 } from '@nestjs/swagger';
 import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import {
+  ApiArrayResponse,
+  ApiTransactionFailedResponse,
+  ApiTransactionResponse,
+} from '~/common/decorators/swagger';
 import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
@@ -163,6 +167,9 @@ export class PortfoliosController {
   @ApiTransactionResponse({
     description: 'Information about the transaction',
     type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Portfolio was not found'],
   })
   @Post('/identities/:did/portfolios/:id/modify-name')
   public async modifyPortfolioName(
