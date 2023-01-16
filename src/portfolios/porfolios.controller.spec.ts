@@ -116,7 +116,7 @@ describe('PortfoliosController', () => {
       );
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mockDetails = await createPortfolioIdentifierModel(mockPortfolio as any);
+      const mockDetails = createPortfolioIdentifierModel(mockPortfolio as any);
 
       const result = await controller.getCustodiedPortfolios(
         { did },
