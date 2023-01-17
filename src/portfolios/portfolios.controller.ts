@@ -143,4 +143,32 @@ export class PortfoliosController {
     const result = await this.portfoliosService.deletePortfolio(portfolio, transactionBaseDto);
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Get details of a Portfolio for an Identity',
+    description: 'This endpoint will provide details for the provided Portfolio of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose Portfolio details are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which details are to be fetched. Use 0 for default Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Portfolio details',
+    type: PortfolioModel,
+  })
+  @Get('/identities/:did/portfolios/:id')
+  async getPortfolio(@Param() { did, id }: PortfolioDto): Promise<PortfolioModel> {
+    const portfolio = await this.portfoliosService.findOne(did, id);
+
+    return createPortfolioModel(portfolio, did);
+  }
 }
