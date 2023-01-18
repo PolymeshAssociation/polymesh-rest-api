@@ -55,7 +55,7 @@ export class SettlementsController {
     type: InstructionModel,
   })
   @ApiNotFoundResponse({
-    description: 'The instruction with the given ID was not found',
+    description: 'The Instruction with the given ID was not found',
   })
   @Get('instructions/:id')
   public async getInstruction(@Param() { id }: IdParamsDto): Promise<InstructionModel> {
@@ -166,7 +166,7 @@ export class SettlementsController {
     [HttpStatus.UNPROCESSABLE_ENTITY]: [
       'Only transaction with status code `Failed` can be rescheduled',
     ],
-    [HttpStatus.NOT_FOUND]: ['The instruction with the given ID was not found'],
+    [HttpStatus.NOT_FOUND]: ['The Instruction with the given ID was not found'],
   })
   @Post('instructions/:id/reschedule')
   public async rescheduleInstruction(
