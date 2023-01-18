@@ -1,5 +1,12 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
 import {
@@ -46,6 +53,9 @@ export class SettlementsController {
   @ApiOkResponse({
     description: 'Details of the Instruction',
     type: InstructionModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The instruction with the given ID was not found',
   })
   @Get('instructions/:id')
   public async getInstruction(@Param() { id }: IdParamsDto): Promise<InstructionModel> {
