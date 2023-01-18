@@ -175,9 +175,7 @@ export class PortfoliosController {
       start: start?.toString(),
     });
 
-    const results = await Promise.all(
-      data.map(portfolio => createPortfolioIdentifierModel(portfolio))
-    );
+    const results = data.map(portfolio => createPortfolioIdentifierModel(portfolio));
 
     return new PaginatedResultsModel({
       results,
