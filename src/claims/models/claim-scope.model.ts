@@ -18,7 +18,6 @@ export class ClaimScopeModel {
     type: 'string',
     description: 'The ticker to which the scope is valid for',
     example: 'TICKER',
-    nullable: true,
   })
   readonly ticker?: string;
 
