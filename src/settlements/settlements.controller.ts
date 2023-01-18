@@ -1,5 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
@@ -147,6 +154,9 @@ export class SettlementsController {
   @ApiOkResponse({
     description: 'Details of the transaction',
     type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The requested Instruction was not found',
   })
   @Post('instructions/:id/withdraw')
   public async withdrawAffirmation(
