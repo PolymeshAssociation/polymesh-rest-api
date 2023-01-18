@@ -156,6 +156,7 @@ export class SettlementsController {
     [HttpStatus.UNPROCESSABLE_ENTITY]: [
       'Only transaction with status code `Failed` can be rescheduled',
     ],
+    [HttpStatus.NOT_FOUND]: ['The instruction with the given ID was not found'],
   })
   @Post('instructions/:id/reschedule')
   public async rescheduleInstruction(
