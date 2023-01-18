@@ -5,8 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AugmentedSubmittable, SubmittableExtrinsic } from '@polkadot/api/types';
-import { KeyringPair } from '@polkadot/keyring/types';
+import { AddressOrPair, AugmentedSubmittable, SubmittableExtrinsic } from '@polkadot/api/types';
 import { ISubmittableResult } from '@polkadot/types/types';
 import { Polymesh } from '@polymeshassociation/polymesh-sdk';
 
@@ -38,7 +37,7 @@ export class PolymeshService {
    * SDK methods should be used instead of this where possible
    */
   public async execTransaction<Args extends unknown[]>(
-    signer: KeyringPair,
+    signer: AddressOrPair,
     tx: AugmentedSubmittable<(...args: Args) => SubmittableExtrinsic<'promise'>>,
     ...params: Args
   ): Promise<void> {
