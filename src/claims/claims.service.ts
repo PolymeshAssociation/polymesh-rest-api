@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimsParams,
+  AddInvestorUniquenessClaimParams,
   ClaimData,
   ClaimType,
   InvestorUniquenessClaim,
@@ -93,7 +94,11 @@ export class ClaimsService {
 
     const { addInvestorUniquenessClaim } = this.polymeshService.polymeshApi.claims;
 
-    return this.transactionsService.submit(addInvestorUniquenessClaim, args, base);
+    return this.transactionsService.submit(
+      addInvestorUniquenessClaim,
+      args as AddInvestorUniquenessClaimParams,
+      base
+    );
   }
 
   public async getInvestorUniquenessClaims(

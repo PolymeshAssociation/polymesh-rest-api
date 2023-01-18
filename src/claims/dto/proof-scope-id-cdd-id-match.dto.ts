@@ -6,6 +6,11 @@ export class ProofScopeIdCddIdMatchDto {
     type: 'string',
     isArray: true,
     required: true,
+    description: 'Challenge responses',
+    example: [
+      '0x0600000000000000000000000000000000000000000000000000000000000000',
+      '0x0700000000000000000000000000000000000000000000000000000000000000',
+    ],
   })
   @IsArray()
   @ArrayMinSize(2)
@@ -15,14 +20,18 @@ export class ProofScopeIdCddIdMatchDto {
 
   @ApiProperty({
     type: 'string',
+    description: 'The subtracted expressions result',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
+  @IsString()
   readonly subtractExpressionsRes: string;
 
   @ApiProperty({
     type: 'string',
     description: 'The blinded scope DID hash',
-    example: '0x060000',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
     required: true,
   })
+  @IsString()
   readonly blindedScopeDidHash: string;
 }

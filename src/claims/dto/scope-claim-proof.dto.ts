@@ -1,5 +1,6 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, ValidateIf } from 'class-validator';
 
 import { ProofScopeIdCddIdMatchDto } from '~/claims/dto/proof-scope-id-cdd-id-match.dto';
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
@@ -23,5 +24,7 @@ export class ScopeClaimProofDto {
       ProofScopeIdCddIdMatchDto,
     ],
   })
+  @ValidateIf(({ proofScopeIdCddIdMatch }) => typeof proofScopeIdCddIdMatch !== 'string')
+  @Type(() => ProofScopeIdCddIdMatchDto)
   readonly proofScopeIdCddIdMatch: string | ProofScopeIdCddIdMatchDto;
 }

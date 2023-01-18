@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
-import { ScopeClaimProof } from '@polymeshassociation/polymesh-sdk/types';
-import { IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { ScopeClaimProofDto } from '~/claims/dto/scope-claim-proof.dto';
 import { ScopeDto } from '~/claims/dto/scope.dto';
@@ -14,6 +14,7 @@ export class AddInvestorUniquenessDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'The type of Claim. Note that different types require different fields',
   })
+  @Type(() => ScopeDto)
   readonly scope: ScopeDto;
 
   @ApiProperty({
@@ -33,7 +34,9 @@ export class AddInvestorUniquenessDto extends TransactionBaseDto {
       ScopeClaimProofDto,
     ],
   })
-  readonly proof: string | ScopeClaimProof;
+  @ValidateIf(({ proof }) => typeof proof !== 'string')
+  @Type(() => ScopeClaimProofDto)
+  readonly proof: string | ScopeClaimProofDto;
 
   @ApiProperty({
     description: 'The scope ID of the claim',
@@ -46,5 +49,7 @@ export class AddInvestorUniquenessDto extends TransactionBaseDto {
     description: 'The expiry date of the claim',
     example: '2020-01-01',
   })
+  @IsOptional()
+  @IsDate()
   readonly expiry?: Date;
 }
