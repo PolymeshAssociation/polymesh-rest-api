@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - v*
+  release:
+    type: [published]
 
 jobs:
   push_to_registry:
