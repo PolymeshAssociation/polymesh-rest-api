@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AppValidationError } from '~/common/errors';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -257,13 +258,7 @@ describe('PortfoliosService', () => {
       const modifyName = jest.fn();
 
       modifyName.mockReturnValue(mockTransaction);
-
-      const mockPortfolio = {
-        name: 'Growth',
-        id: new BigNumber(1),
-        assetBalances: [],
-        modifyName,
-      };
+      const mockPortfolio = new MockPortfolio();
       mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
       mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
 
@@ -287,6 +282,22 @@ describe('PortfoliosService', () => {
         result: mockPortfolio,
         transactions: [mockTransaction],
       });
+    });
+
+    it('should throw an error on Default portfolio', async () => {
+      const portfolio = new PortfolioDto({
+        id: new BigNumber(0),
+        did,
+      });
+
+      const body = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = service.updatePortfolioName(portfolio, body);
+
+      await expect(result).rejects.toBeInstanceOf(AppValidationError);
     });
   });
 });

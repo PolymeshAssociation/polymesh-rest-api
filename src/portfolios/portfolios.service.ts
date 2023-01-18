@@ -87,7 +87,7 @@ export class PortfoliosService {
   ): ServiceReturn<NumberedPortfolio> {
     const { did, id } = portfolioParams;
 
-    if (id.toNumber() <= 0) {
+    if (id.lte(0)) {
       throw new AppValidationError('Default portfolio name cannot be modified');
     }
 
