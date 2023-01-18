@@ -111,6 +111,7 @@ describe('PortfoliosController', () => {
       mockPortfolio.getAssetBalances.mockResolvedValue([]);
       mockPortfolio.getCustodian.mockResolvedValue({ did });
       mockPortfolio.getName.mockResolvedValue('P-1');
+
       mockPortfoliosService.getCustodiedPortfolios.mockResolvedValue(
         createMockResultSet([mockPortfolio])
       );
@@ -126,6 +127,25 @@ describe('PortfoliosController', () => {
       expect(result).toEqual(
         new PaginatedResultsModel({ results: [mockDetails], next: '0', total: new BigNumber(1) })
       );
+    });
+  });
+
+  describe('getPortfolio', () => {
+    it('should get the portfolio details', async () => {
+      const mockPortfolio = new MockPortfolio();
+      mockPortfolio.getAssetBalances.mockResolvedValue([]);
+      mockPortfolio.getCustodian.mockResolvedValue({ did });
+      mockPortfolio.getName.mockResolvedValue('P-1');
+      mockPortfoliosService.findOne.mockResolvedValue(mockPortfolio);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockDetails = await createPortfolioModel(mockPortfolio as any, did);
+
+      const result = await controller.getPortfolio(
+        new PortfolioDto({ id: new BigNumber(mockPortfolio.id), did })
+      );
+
+      expect(result).toEqual(mockDetails);
     });
   });
 });

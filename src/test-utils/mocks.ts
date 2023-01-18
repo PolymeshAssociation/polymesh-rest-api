@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
+import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
@@ -16,6 +17,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
 import { TransactionResult } from '~/transactions/transactions.util';
 
@@ -47,6 +49,13 @@ export const createMockResponseObject = (): DeepMocked<Response> => {
     json: jest.fn().mockReturnThis(),
     status: jest.fn().mockReturnThis(),
   });
+};
+
+export const MockPolymeshService = createMock<PolymeshService>();
+
+export const mockPolymeshServiceProvider: ValueProvider<PolymeshService> = {
+  provide: PolymeshService,
+  useValue: createMock<PolymeshService>(),
 };
 
 /* Polymesh SDK */
@@ -109,10 +118,27 @@ export class MockPolymesh {
 
   public _polkadotApi = {
     tx: {
+      balances: {
+        transfer: jest.fn(),
+        setBalance: jest.fn(),
+      },
+      cddServiceProviders: {
+        addMember: jest.fn(),
+      },
+      identity: {
+        addClaim: jest.fn(),
+        cddRegisterDid: jest.fn(),
+      },
+      sudo: {
+        sudo: jest.fn(),
+      },
       testUtils: {
         mockCddRegisterDid: jest.fn().mockReturnValue({
           signAndSend: jest.fn(),
         }),
+      },
+      utility: {
+        batchAtomic: jest.fn(),
       },
     },
   };
