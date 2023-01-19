@@ -4,6 +4,8 @@ import {
   AuthorizationRequest,
   DefaultPortfolio,
   NumberedPortfolio,
+  PaginationOptions,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -82,6 +84,15 @@ export class PortfoliosService {
       { portfolio: portfolio.id },
       transactionBaseDto
     );
+  }
+
+  public async getCustodiedPortfolios(
+    did: string,
+    paginationOptions: PaginationOptions
+  ): Promise<ResultSet<DefaultPortfolio | NumberedPortfolio>> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return identity.portfolios.getCustodiedPortfolios(paginationOptions);
   }
 
   public async setCustodian(
