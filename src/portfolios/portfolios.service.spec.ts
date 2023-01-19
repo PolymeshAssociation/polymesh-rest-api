@@ -10,6 +10,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { testValues } from '~/test-utils/consts';
 import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
@@ -239,6 +240,41 @@ describe('PortfoliosService', () => {
           result: undefined,
           transactions: [mockTransaction],
         });
+      });
+    });
+  });
+
+  describe('setCustodian', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddAuthorization,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.setCustodian.mockResolvedValue(mockTransaction);
+
+      const custodianParams: SetCustodianDto = {
+        target: did,
+        signer,
+      };
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.setCustodian(did, mockPortfolio.id, custodianParams);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
       });
     });
   });

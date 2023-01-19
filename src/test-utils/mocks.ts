@@ -273,6 +273,7 @@ export class MockPortfolio {
   public getAssetBalances = jest.fn();
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
+  public setCustodian = jest.fn();
   public moveFunds = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {

@@ -4,6 +4,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -120,6 +121,28 @@ describe('PortfoliosController', () => {
       );
 
       expect(result).toEqual(mockDetails);
+    });
+  });
+
+  describe('setCustodian', () => {
+    it('should return the transaction details', async () => {
+      const response = {
+        ...txResult,
+      };
+      mockPortfoliosService.setCustodian.mockResolvedValue(response);
+      const params: SetCustodianDto = {
+        target: did,
+        signer,
+      };
+
+      const result = await controller.setCustodian(
+        new PortfolioDto({ id: new BigNumber(1), did }),
+        params
+      );
+
+      expect(result).toEqual({
+        ...txResult,
+      });
     });
   });
 });
