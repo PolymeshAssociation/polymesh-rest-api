@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { DefaultPortfolio, NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  DefaultPortfolio,
+  EventIdentifier,
+  NumberedPortfolio,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { AppValidationError } from '~/common/errors';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -77,5 +82,13 @@ export class PortfoliosService {
       { portfolio: portfolio.id },
       transactionBaseDto
     );
+  }
+
+  public async createdAt(did: string, portfolioId: BigNumber): Promise<EventIdentifier | null> {
+    if (portfolioId.isZero()) {
+      throw new AppValidationError('Cannot get event details for Default Portfolio');
+    }
+    const portfolio = await this.findOne(did, portfolioId);
+    return (portfolio as NumberedPortfolio).createdAt();
   }
 }

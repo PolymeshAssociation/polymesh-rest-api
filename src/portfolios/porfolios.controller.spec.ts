@@ -1,6 +1,10 @@
+import { DeepMocked } from '@golevelup/ts-jest';
+import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Response } from 'express';
 
+import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
@@ -8,7 +12,7 @@ import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioModel } from '~/portfolios/portfolios.util';
 import { testValues } from '~/test-utils/consts';
-import { MockPortfolio } from '~/test-utils/mocks';
+import { createMockResponseObject, MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
 const { did, signer, txResult } = testValues;
@@ -120,6 +124,37 @@ describe('PortfoliosController', () => {
       );
 
       expect(result).toEqual(mockDetails);
+    });
+  });
+
+  describe('createdAt', () => {
+    let mockResponse: DeepMocked<Response>;
+
+    beforeEach(() => {
+      mockResponse = createMockResponseObject();
+    });
+
+    it(`should return the ${HttpStatus.NO_CONTENT} if the event details are not yet ready`, async () => {
+      mockPortfoliosService.createdAt.mockResolvedValue(null);
+
+      await controller.createdAt(new PortfolioDto({ id: new BigNumber(1), did }), mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+    });
+
+    it('should return the Portfolio creation event details', async () => {
+      const eventIdentifier = {
+        blockNumber: new BigNumber('2719172'),
+        blockHash: 'someHash',
+        blockDate: new Date('2021-06-26T01:47:45.000Z'),
+        eventIndex: new BigNumber(1),
+      };
+      mockPortfoliosService.createdAt.mockResolvedValue(eventIdentifier);
+
+      await controller.createdAt(new PortfolioDto({ id: new BigNumber(1), did }), mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith(new EventIdentifierModel(eventIdentifier));
     });
   });
 });

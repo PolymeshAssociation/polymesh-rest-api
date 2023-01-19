@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -8,10 +9,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
+import { Response } from 'express';
 
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
@@ -23,6 +26,7 @@ import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.mod
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
+import { SubsidyModel } from '~/subsidy/models/subsidy.model';
 
 @ApiTags('portfolios')
 @Controller()
@@ -159,7 +163,7 @@ export class PortfoliosController {
     description:
       'The ID of the portfolio for which details are to be fetched. Use 0 for default Portfolio',
     type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '1',
   })
   @ApiOkResponse({
     description: 'Portfolio details',
@@ -170,5 +174,47 @@ export class PortfoliosController {
     const portfolio = await this.portfoliosService.findOne(did, id);
 
     return createPortfolioModel(portfolio, did);
+  }
+
+  @ApiOperation({
+    summary: 'Get Portfolio creation event data',
+    description:
+      'The endpoint retrieves the identifier data (block number, date and event index) of the event that was emitted when the given Numbered Portfolio was created. This requires Polymesh GraphQL Middleware Service',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose Portfolio creation event is to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which Portfolio creation event is to be fetched. Throws an error if default Portfolio (0) details are requested',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Details of event where the Numbered Portfolio was created',
+    type: SubsidyModel,
+  })
+  @ApiBadRequestResponse({
+    description: 'Event details for default Portfolio is requested',
+  })
+  @ApiNoContentResponse({
+    description: 'Data is not ready by the time it is requested',
+  })
+  @ApiNotFoundResponse({
+    description: "The Portfolio doesn't exist",
+  })
+  @Get('/identities/:did/portfolios/:id/created-at')
+  async createdAt(@Param() { did, id }: PortfolioDto, @Res() res: Response): Promise<void> {
+    const result = await this.portfoliosService.createdAt(did, id);
+
+    if (result) {
+      res.status(HttpStatus.OK).json(new EventIdentifierModel(result));
+    } else {
+      res.status(HttpStatus.NO_CONTENT).send({});
+    }
   }
 }
