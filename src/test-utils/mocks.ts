@@ -8,6 +8,7 @@ import {
   CalendarUnit,
   MetadataEntry,
   MetadataType,
+  ResultSet,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -251,6 +252,7 @@ export class MockPortfolios {
   public getPortfolio = jest.fn();
   public create = jest.fn();
   public delete = jest.fn();
+  public getCustodiedPortfolios = jest.fn();
 }
 
 export class MockIdentity {
@@ -413,4 +415,13 @@ export function createMockSubsidy(
   }
 ): DeepMocked<Subsidy> {
   return createMock<Subsidy>(partial);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createMockResultSet<T extends any[]>(data: T): ResultSet<T> {
+  return {
+    data,
+    next: '0',
+    count: new BigNumber(data.length),
+  };
 }

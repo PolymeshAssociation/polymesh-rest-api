@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { DefaultPortfolio, NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  DefaultPortfolio,
+  NumberedPortfolio,
+  PaginationOptions,
+  ResultSet,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
@@ -77,5 +82,14 @@ export class PortfoliosService {
       { portfolio: portfolio.id },
       transactionBaseDto
     );
+  }
+
+  public async getCustodiedPortfolios(
+    did: string,
+    paginationOptions: PaginationOptions
+  ): Promise<ResultSet<DefaultPortfolio | NumberedPortfolio>> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return identity.portfolios.getCustodiedPortfolios(paginationOptions);
   }
 }
