@@ -8,7 +8,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class SetCustodianDto extends TransactionBaseDto {
   @ApiProperty({
-    description: 'Th DID of identity to be set as custodian',
+    description: 'The DID of identity to be set as custodian',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @IsDid()
