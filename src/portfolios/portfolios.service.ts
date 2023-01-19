@@ -4,6 +4,8 @@ import {
   DefaultPortfolio,
   EventIdentifier,
   NumberedPortfolio,
+  PaginationOptions,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -84,8 +86,17 @@ export class PortfoliosService {
     );
   }
 
+  public async getCustodiedPortfolios(
+    did: string,
+    paginationOptions: PaginationOptions
+  ): Promise<ResultSet<DefaultPortfolio | NumberedPortfolio>> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return identity.portfolios.getCustodiedPortfolios(paginationOptions);
+  }
+
   public async createdAt(did: string, portfolioId: BigNumber): Promise<EventIdentifier | null> {
-    if (portfolioId.isZero()) {
+    if (portfolioId.lte(0)) {
       throw new AppValidationError('Cannot get event details for Default Portfolio');
     }
     const portfolio = await this.findOne(did, portfolioId);
