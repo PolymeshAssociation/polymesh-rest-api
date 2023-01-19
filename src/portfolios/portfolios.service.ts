@@ -4,7 +4,6 @@ import {
   AuthorizationRequest,
   DefaultPortfolio,
   NumberedPortfolio,
-  SetCustodianParams,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
