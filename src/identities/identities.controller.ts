@@ -12,7 +12,6 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
   AuthorizationType,
-  CddClaim,
   Claim,
   ClaimType,
   TickerReservation,
@@ -32,6 +31,7 @@ import { CreatedAuthorizationRequestModel } from '~/authorizations/models/create
 import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
+import { CddClaimModel } from '~/claims/models/cdd-claim.model';
 import { ClaimModel } from '~/claims/models/claim.model';
 import { InvestorUniquenessClaimModel } from '~/claims/models/investor-uniqueness-claim.model';
 import {
@@ -494,18 +494,24 @@ export class IdentitiesController {
     type: 'boolean',
     required: false,
   })
-  @ApiArrayResponse(ClaimModel, {
-    description: 'List of CDD claims for the target DID',
-    paginated: false,
-  })
+  @ApiArrayResponseReplaceModelProperties(
+    ClaimModel,
+    {
+      description: 'List of CDD claims for the target DID',
+      paginated: false,
+    },
+    { claim: CddClaimModel }
+  )
   @Get(':did/cdd-claims')
   public async getCddClaims(
     @Param() { did }: DidDto,
     @Query() { includeExpired }: IncludeExpiredFilterDto
-  ): Promise<ResultsModel<ClaimModel<CddClaim>>> {
-    const results = await this.claimsService.findCddClaimsByDid(did, includeExpired);
+  ): Promise<ResultsModel<ClaimModel<CddClaimModel>>> {
+    const cddClaims = await this.claimsService.findCddClaimsByDid(did, includeExpired);
 
-    return new ResultsModel({ results });
+    const results = cddClaims.map(claim => new ClaimModel<CddClaimModel>(claim));
+
+    return { results };
   }
 
   @ApiTags('claims')
@@ -546,14 +552,7 @@ export class IdentitiesController {
     );
 
     const results = investorUniquenessClaims.map(
-      ({ issuedAt, expiry, claim, target, issuer }) =>
-        new ClaimModel<InvestorUniquenessClaimModel>({
-          issuedAt,
-          expiry,
-          claim,
-          target,
-          issuer,
-        })
+      claim => new ClaimModel<InvestorUniquenessClaimModel>(claim)
     );
 
     return { results };
