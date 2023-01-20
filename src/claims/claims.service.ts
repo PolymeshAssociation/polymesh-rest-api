@@ -2,15 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimsParams,
+  AddInvestorUniquenessClaimParams,
   ClaimData,
   ClaimScope,
   ClaimType,
+  InvestorUniquenessClaim,
   ModifyClaimsParams,
   ResultSet,
   RevokeClaimsParams,
   Scope,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AddInvestorUniquenessDto } from '~/claims/dto/add-investor-uniqueness.dto';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -83,12 +86,35 @@ export class ClaimsService {
     const { revokeClaims } = this.polymeshService.polymeshApi.claims;
 
     return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, base);
-  
   }
 
   public async findClaimScopesByDid(target: string): Promise<ClaimScope[]> {
     return this.polymeshService.polymeshApi.claims.getClaimScopes({
       target,
+    });
+  }
+
+  public async addInvestorUniqueness(
+    modifyClaimsDto: AddInvestorUniquenessDto
+  ): ServiceReturn<void> {
+    const { base, args } = extractTxBase(modifyClaimsDto);
+
+    const { addInvestorUniquenessClaim } = this.polymeshService.polymeshApi.claims;
+
+    return this.transactionsService.submit(
+      addInvestorUniquenessClaim,
+      args as AddInvestorUniquenessClaimParams,
+      base
+    );
+  }
+
+  public async getInvestorUniquenessClaims(
+    target: string,
+    includeExpired = true
+  ): Promise<ClaimData<InvestorUniquenessClaim>[]> {
+    return await this.polymeshService.polymeshApi.claims.getInvestorUniquenessClaims({
+      target,
+      includeExpired,
     });
   }
 }

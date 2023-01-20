@@ -8,6 +8,7 @@ import {
   CalendarUnit,
   MetadataEntry,
   MetadataType,
+  ResultSet,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -114,6 +115,8 @@ export class MockPolymesh {
     editClaims: jest.fn(),
     revokeClaims: jest.fn(),
     getClaimScopes: jest.fn(),
+    addInvestorUniquenessClaim: jest.fn(),
+    getInvestorUniquenessClaims: jest.fn(),
   };
 
   public _polkadotApi = {
@@ -232,6 +235,7 @@ export class MockInstruction {
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
+  public reschedule = jest.fn();
 }
 
 export class MockVenue {
@@ -252,6 +256,7 @@ export class MockPortfolios {
   public getPortfolio = jest.fn();
   public create = jest.fn();
   public delete = jest.fn();
+  public getCustodiedPortfolios = jest.fn();
 }
 
 export class MockIdentity {
@@ -274,6 +279,7 @@ export class MockPortfolio {
   public getAssetBalances = jest.fn();
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
+  public setCustodian = jest.fn();
   public moveFunds = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
@@ -414,4 +420,13 @@ export function createMockSubsidy(
   }
 ): DeepMocked<Subsidy> {
   return createMock<Subsidy>(partial);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createMockResultSet<T extends any[]>(data: T): ResultSet<T> {
+  return {
+    data,
+    next: '0',
+    count: new BigNumber(data.length),
+  };
 }

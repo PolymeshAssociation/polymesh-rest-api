@@ -422,4 +422,36 @@ describe('SettlementsService', () => {
       expect(result).toEqual(mockTransferBreakdown);
     });
   });
+
+  describe('rescheduleInstruction', () => {
+    it('should run a reschedule procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.RescheduleInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.rescheduleInstruction(new BigNumber(123), {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.reschedule,
+        {},
+        { signer }
+      );
+    });
+  });
 });

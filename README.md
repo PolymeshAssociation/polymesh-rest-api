@@ -8,7 +8,7 @@
 
 A REST API wrapper for the Polymesh blockchain.
 
-This version is compatible with chain versions 5.0.x
+This version is compatible with chain versions 5.1.x
 
 ## Setup
 

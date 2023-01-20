@@ -10,9 +10,16 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { testValues } from '~/test-utils/consts';
-import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockResultSet,
+  MockIdentity,
+  MockPolymesh,
+  MockPortfolio,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockIdentitiesService,
   mockTransactionsProvider,
@@ -239,6 +246,71 @@ describe('PortfoliosService', () => {
           result: undefined,
           transactions: [mockTransaction],
         });
+      });
+    });
+  });
+
+  describe('getCustodiedPortfolios', () => {
+    it('should return a paginated list of custodied Portfolios for a given DID', async () => {
+      const mockIdentity = new MockIdentity();
+      const mockPortfolios = [
+        {
+          name: 'Default',
+          assetBalances: [
+            {
+              ticker: 'TICKER',
+            },
+          ],
+        },
+        {
+          id: new BigNumber(1),
+          name: 'TEST',
+          assetBalances: [],
+        },
+      ];
+      const resultSet = createMockResultSet(mockPortfolios);
+
+      mockIdentity.portfolios.getCustodiedPortfolios.mockResolvedValue(resultSet);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+      const result = await service.getCustodiedPortfolios(did, {
+        size: new BigNumber(10),
+        start: '0',
+      });
+      expect(result).toEqual(resultSet);
+    });
+  });
+
+  describe('setCustodian', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddAuthorization,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.setCustodian.mockResolvedValue(mockTransaction);
+
+      const custodianParams: SetCustodianDto = {
+        target: did,
+        signer,
+      };
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.setCustodian(did, mockPortfolio.id, custodianParams);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
       });
     });
   });
