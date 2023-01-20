@@ -1,6 +1,6 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
+import { ClaimType, ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimsController } from '~/claims/claims.controller';
 import { ClaimsService } from '~/claims/claims.service';
@@ -72,6 +72,24 @@ describe('ClaimsController', () => {
       const result = await controller.revokeClaims(mockPayload);
 
       expect(mockClaimsService.revokeClaimsFromDid).toHaveBeenCalledWith(mockPayload);
+
+      expect(result).toEqual({ ...txResult, results: undefined });
+    });
+  });
+
+  describe('addInvestorUniqueness', () => {
+    it('should call addInvestorUniqueness method and return transaction data', async () => {
+      mockClaimsService.addInvestorUniqueness.mockResolvedValue({ ...txResult, result: undefined });
+      const mockArgs = {
+        scope: { type: ScopeType.Identity, value: did },
+        cddId: '0x1',
+        proof: 'proof',
+        scopeId: 'id',
+        signer,
+      };
+      const result = await controller.addInvestorUniqueness(mockArgs);
+
+      expect(mockClaimsService.addInvestorUniqueness).toHaveBeenCalledWith(mockArgs);
 
       expect(result).toEqual({ ...txResult, results: undefined });
     });
