@@ -13,7 +13,13 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { testValues } from '~/test-utils/consts';
-import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockResultSet,
+  MockIdentity,
+  MockPolymesh,
+  MockPortfolio,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockIdentitiesService,
   mockTransactionsProvider,
@@ -298,6 +304,36 @@ describe('PortfoliosService', () => {
       const result = service.updatePortfolioName(portfolio, body);
 
       await expect(result).rejects.toBeInstanceOf(AppValidationError);
+    });
+  });
+
+  describe('getCustodiedPortfolios', () => {
+    it('should return a paginated list of custodied Portfolios for a given DID', async () => {
+      const mockIdentity = new MockIdentity();
+      const mockPortfolios = [
+        {
+          name: 'Default',
+          assetBalances: [
+            {
+              ticker: 'TICKER',
+            },
+          ],
+        },
+        {
+          id: new BigNumber(1),
+          name: 'TEST',
+          assetBalances: [],
+        },
+      ];
+      const resultSet = createMockResultSet(mockPortfolios);
+
+      mockIdentity.portfolios.getCustodiedPortfolios.mockResolvedValue(resultSet);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+      const result = await service.getCustodiedPortfolios(did, {
+        size: new BigNumber(10),
+        start: '0',
+      });
+      expect(result).toEqual(resultSet);
     });
   });
 });
