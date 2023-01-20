@@ -26,6 +26,7 @@ import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
@@ -250,5 +251,43 @@ export class PortfoliosController {
     const portfolio = await this.portfoliosService.findOne(did, id);
 
     return createPortfolioModel(portfolio, did);
+  }
+
+  @ApiOperation({
+    summary: 'Set Portfolio Custodian',
+    description: 'This endpoint will set Custodian for the provided Portfolio of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity who owns the Portfolio for which Custodian is to be set',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which to set the Custodian. Use 0 for default Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['Insufficient balance to set Custodian for the Portfolio'],
+  })
+  @Post('/identities/:did/portfolios/:id/custodian')
+  async setCustodian(
+    @Param() { did, id }: PortfolioDto,
+    @Body() setCustodianParams: SetCustodianDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.portfoliosService.setCustodian(did, id, setCustodianParams);
+
+    return handleServiceResult(result);
   }
 }
