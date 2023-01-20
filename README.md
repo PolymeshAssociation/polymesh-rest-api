@@ -8,7 +8,7 @@
 
 A REST API wrapper for the Polymesh blockchain.
 
-This version is compatible with chain versions 5.0.x
+This version is compatible with chain versions 5.1.x
 
 ## Setup
 
@@ -67,6 +67,9 @@ LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemo
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##
 
 # Below are optional params that enable some features. The above should be good to get started with
+
+DEVELOPER_SUDO_MNEMONIC=## a mnemonic that has `sudo` privileges for a chain. Defaults to `//Alice` ##
+DEVELOPER_UTILS=## set to `true` to enable developer testing endpoints ##
 
 # Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##

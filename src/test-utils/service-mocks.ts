@@ -8,6 +8,7 @@ import { AuthService } from '~/auth/auth.service';
 import { ClaimsService } from '~/claims/claims.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
@@ -58,6 +59,11 @@ export const mockComplianceRequirementsServiceProvider: ValueProvider<Compliance
     provide: ComplianceRequirementsService,
     useValue: createMock<ComplianceRequirementsService>(),
   };
+
+export const mockDeveloperServiceProvider: ValueProvider<DeveloperTestingService> = {
+  provide: DeveloperTestingService,
+  useValue: createMock<DeveloperTestingService>(),
+};
 
 export class MockSigningService {
   public getAddressByHandle = jest.fn();
@@ -140,6 +146,7 @@ export class MockSettlementsService {
   canTransfer = jest.fn();
   findPendingInstructionsByDid = jest.fn();
   findVenuesByOwner = jest.fn();
+  rescheduleInstruction = jest.fn();
 }
 
 export class MockClaimsService {
@@ -153,6 +160,8 @@ export class MockPortfoliosService {
   findAllByOwner = jest.fn();
   createPortfolio = jest.fn();
   deletePortfolio = jest.fn();
+  getCustodiedPortfolios = jest.fn();
+  findOne = jest.fn();
 }
 
 export class MockOfferingsService {
