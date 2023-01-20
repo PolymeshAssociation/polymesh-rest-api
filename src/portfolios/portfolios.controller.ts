@@ -34,7 +34,6 @@ import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifi
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
-import { SubsidyModel } from '~/subsidy/models/subsidy.model';
 
 @ApiTags('portfolios')
 @Controller()
@@ -279,7 +278,7 @@ export class PortfoliosController {
   })
   @ApiOkResponse({
     description: 'Details of event where the Numbered Portfolio was created',
-    type: SubsidyModel,
+    type: EventIdentifierModel,
   })
   @ApiBadRequestResponse({
     description: 'Event details for default Portfolio is requested',
