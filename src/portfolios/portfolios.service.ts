@@ -3,6 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
   DefaultPortfolio,
+  HistoricSettlement,
   NumberedPortfolio,
   PaginationOptions,
   ResultSet,
@@ -115,5 +116,16 @@ export class PortfoliosService {
       { targetIdentity, expiry },
       base
     );
+  }
+
+  public async getTransactions(
+    did: string,
+    portfolioId: BigNumber,
+    account?: string,
+    ticker?: string
+  ): Promise<ResultSet<HistoricSettlement>> {
+    const portfolio = await this.findOne(did, portfolioId);
+
+    return portfolio.getTransactionHistory({ account, ticker });
   }
 }

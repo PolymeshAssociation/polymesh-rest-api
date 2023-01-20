@@ -15,6 +15,7 @@ import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { testValues } from '~/test-utils/consts';
 import {
   createMockResultSet,
+  MockHistoricSettlement,
   MockIdentity,
   MockPolymesh,
   MockPortfolio,
@@ -312,6 +313,24 @@ describe('PortfoliosService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
+    });
+  });
+
+  describe('getTransactions', () => {
+    it('should return the transaction result set', async () => {
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+      const mockHistoricSettlement = new MockHistoricSettlement();
+
+      const mockResultSet = createMockResultSet([mockHistoricSettlement]);
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.getTransactionHistory.mockResolvedValue(mockResultSet);
+
+      const result = await service.getTransactions(did, mockPortfolio.id);
+
+      expect(result).toEqual(mockResultSet);
     });
   });
 });
