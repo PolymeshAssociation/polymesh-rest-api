@@ -124,6 +124,6 @@ export class PortfoliosService {
       throw new AppValidationError('Cannot get event details for Default Portfolio');
     }
     const portfolio = await this.findOne(did, portfolioId);
-    return (portfolio as NumberedPortfolio).createdAt();
+    return portfolio.createdAt();
   }
 }

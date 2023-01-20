@@ -317,7 +317,7 @@ describe('PortfoliosService', () => {
 
   describe('createdAt', () => {
     it('should throw an error if default Portfolio details are requested', () =>
-      expect(() => service.findOne(did, new BigNumber(0))).rejects.toThrowError());
+      expect(() => service.createdAt(did, new BigNumber(0))).rejects.toThrowError());
 
     describe('otherwise', () => {
       it('should return the EventIdentifier details for a Portfolio', async () => {
