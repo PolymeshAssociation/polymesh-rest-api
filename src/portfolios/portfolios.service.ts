@@ -110,7 +110,7 @@ export class PortfoliosService {
     }
 
     const { base, args } = extractTxBase(params);
-    const portfolio = (await this.findOne(did, id)) as NumberedPortfolio;
+    const portfolio = await this.findOne(did, id);
 
     return this.transactionsService.submit(portfolio.modifyName, args, base);
   }
