@@ -106,6 +106,29 @@ describe('PortfoliosController', () => {
     });
   });
 
+  describe('modifyPortfolioName', () => {
+    it('should return the transaction details', async () => {
+      const mockPortfolio = new MockPortfolio();
+      const response = {
+        ...txResult,
+        result: mockPortfolio,
+      };
+      mockPortfoliosService.updatePortfolioName.mockResolvedValue(response);
+
+      const modifyPortfolioArgs = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = await controller.modifyPortfolioName(
+        new PortfolioDto({ id: new BigNumber(1), did }),
+        modifyPortfolioArgs
+      );
+
+      expect(result).toEqual(txResult);
+    });
+  });
+
   describe('getCustodiedPortfolios', () => {
     it('should return list of all custodied portfolios of an identity', async () => {
       const mockPortfolio = new MockPortfolio();

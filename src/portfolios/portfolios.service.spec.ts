@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AppValidationError } from '~/common/errors';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -247,6 +248,63 @@ describe('PortfoliosService', () => {
           transactions: [mockTransaction],
         });
       });
+    });
+  });
+
+  describe('updatePortfolioName', () => {
+    it('should rename a Portfolio and return the queue results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.RenamePortfolio,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockIdentity = new MockIdentity();
+      const modifyName = jest.fn();
+
+      modifyName.mockReturnValue(mockTransaction);
+      const mockPortfolio = new MockPortfolio();
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
+
+      const portfolio = new PortfolioDto({
+        id: new BigNumber(1),
+        did,
+      });
+
+      const body = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = await service.updatePortfolioName(portfolio, body);
+      expect(result).toEqual({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
+    });
+
+    it('should throw an error on Default portfolio', async () => {
+      const portfolio = new PortfolioDto({
+        id: new BigNumber(0),
+        did,
+      });
+
+      const body = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = service.updatePortfolioName(portfolio, body);
+
+      await expect(result).rejects.toBeInstanceOf(AppValidationError);
     });
   });
 
