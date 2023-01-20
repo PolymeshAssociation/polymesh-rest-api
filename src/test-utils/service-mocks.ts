@@ -149,11 +149,6 @@ export class MockSettlementsService {
   rescheduleInstruction = jest.fn();
 }
 
-export class MockClaimsService {
-  findIssuedByDid = jest.fn();
-  findAssociatedByDid = jest.fn();
-}
-
 export class MockPortfoliosService {
   moveAssets = jest.fn();
   findAllByOwner = jest.fn();
@@ -162,6 +157,7 @@ export class MockPortfoliosService {
   getCustodiedPortfolios = jest.fn();
   findOne = jest.fn();
   createdAt = jest.fn();
+  setCustodian = jest.fn();
 }
 
 export class MockOfferingsService {
