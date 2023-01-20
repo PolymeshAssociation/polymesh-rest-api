@@ -254,4 +254,42 @@ export class PortfoliosController {
 
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Quit Custody of a Portfolio',
+    description:
+      'This endpoint will quit signers Custody over the provided Portfolio of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity who owns the Portfolio for which Custody is to be quit',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the portfolio for which to quit Custody. Use 0 for default Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['Insufficient balance to quit Custody for the Portfolio'],
+  })
+  @Post('/identities/:did/portfolios/:id/quit-custody')
+  async quitCustody(
+    @Param() { did, id }: PortfolioDto,
+    @Body() txBase: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.portfoliosService.quitCustody(did, id, txBase);
+
+    return handleServiceResult(result);
+  }
 }

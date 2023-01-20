@@ -280,6 +280,7 @@ export class MockPortfolio {
   public getCustodian = jest.fn();
   public setCustodian = jest.fn();
   public moveFunds = jest.fn();
+  public quitCustody = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',
