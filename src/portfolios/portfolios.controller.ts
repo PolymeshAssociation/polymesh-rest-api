@@ -10,8 +10,10 @@ import {
 import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
@@ -20,6 +22,7 @@ import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -142,5 +145,70 @@ export class PortfoliosController {
   ): Promise<TransactionResponseModel> {
     const result = await this.portfoliosService.deletePortfolio(portfolio, transactionBaseDto);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get all custodied Portfolios of an Identity',
+    description: 'This endpoint will provide list of all the custodied Portfolios of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose custodied Portfolios are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse(PortfolioIdentifierModel, {
+    description: 'Returns the list of all custodied Portfolios of the given Identity',
+    paginated: true,
+  })
+  @Get('/identities/:did/custodied-portfolios')
+  async getCustodiedPortfolios(
+    @Param() { did }: DidDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<PortfolioIdentifierModel>> {
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.portfoliosService.getCustodiedPortfolios(did, {
+      size,
+      start: start?.toString(),
+    });
+
+    const results = data.map(portfolio => createPortfolioIdentifierModel(portfolio));
+
+    return new PaginatedResultsModel({
+      results,
+      total,
+      next,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get details of a Portfolio for an Identity',
+    description: 'This endpoint will provide details for the provided Portfolio of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose Portfolio details are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which details are to be fetched. Use 0 for default Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Portfolio details',
+    type: PortfolioModel,
+  })
+  @Get('/identities/:did/portfolios/:id')
+  async getPortfolio(@Param() { did, id }: PortfolioDto): Promise<PortfolioModel> {
+    const portfolio = await this.portfoliosService.findOne(did, id);
+
+    return createPortfolioModel(portfolio, did);
   }
 }

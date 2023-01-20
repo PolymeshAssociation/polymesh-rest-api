@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -9,7 +9,11 @@ import {
 } from '@nestjs/swagger';
 import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import {
+  ApiArrayResponse,
+  ApiTransactionFailedResponse,
+  ApiTransactionResponse,
+} from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -49,6 +53,9 @@ export class SettlementsController {
   @ApiOkResponse({
     description: 'Details of the Instruction',
     type: InstructionModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Instruction with the given ID was not found',
   })
   @Get('instructions/:id')
   public async getInstruction(@Param() { id }: IdParamsDto): Promise<InstructionModel> {
@@ -164,6 +171,37 @@ export class SettlementsController {
     @Body() signerDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.withdrawAffirmation(id, signerDto);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Reschedule a failed Instruction',
+    description: 'This endpoint will reschedule a failed Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction to be rescheduled',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'Only transaction with status code `Failed` can be rescheduled',
+    ],
+    [HttpStatus.NOT_FOUND]: ['The Instruction with the given ID was not found'],
+  })
+  @Post('instructions/:id/reschedule')
+  public async rescheduleInstruction(
+    @Param() { id }: IdParamsDto,
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.rescheduleInstruction(id, signerDto);
 
     return handleServiceResult(result);
   }

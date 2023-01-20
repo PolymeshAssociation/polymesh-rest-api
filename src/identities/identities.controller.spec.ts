@@ -1,9 +1,13 @@
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
+  ClaimData,
   ClaimType,
   GenericAuthorizationData,
+  InvestorUniquenessClaim,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -31,7 +35,7 @@ import {
 import {
   MockAssetService,
   MockAuthorizationsService,
-  MockClaimsService,
+  mockClaimsServiceProvider,
   mockDeveloperServiceProvider,
   MockIdentitiesService,
   MockSettlementsService,
@@ -51,7 +55,7 @@ describe('IdentitiesController', () => {
 
   const mockAuthorizationsService = new MockAuthorizationsService();
 
-  const mockClaimsService = new MockClaimsService();
+  let mockClaimsService: DeepMocked<ClaimsService>;
 
   const mockTickerReservationsService = new MockTickerReservationsService();
 
@@ -65,7 +69,7 @@ describe('IdentitiesController', () => {
         SettlementsService,
         IdentitiesService,
         AuthorizationsService,
-        ClaimsService,
+        mockClaimsServiceProvider,
         TickerReservationsService,
         mockPolymeshLoggerProvider,
         mockDeveloperServiceProvider,
@@ -79,12 +83,11 @@ describe('IdentitiesController', () => {
       .useValue(mockIdentitiesService)
       .overrideProvider(AuthorizationsService)
       .useValue(mockAuthorizationsService)
-      .overrideProvider(ClaimsService)
-      .useValue(mockClaimsService)
       .overrideProvider(TickerReservationsService)
       .useValue(mockTickerReservationsService)
       .compile();
 
+    mockClaimsService = mockClaimsServiceProvider.useValue as DeepMocked<ClaimsService>;
     controller = module.get<IdentitiesController>(IdentitiesController);
   });
 
@@ -331,7 +334,8 @@ describe('IdentitiesController', () => {
       count: new BigNumber(1),
     };
     it('should give issued Claims with no start value', async () => {
-      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult as ResultSet<ClaimData>);
+
       const result = await controller.getIssuedClaims(
         { did },
         { size: new BigNumber(10) },
@@ -345,7 +349,7 @@ describe('IdentitiesController', () => {
     });
 
     it('should give issued Claims with start value', async () => {
-      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult);
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult as ResultSet<ClaimData>);
       const result = await controller.getIssuedClaims(
         { did },
         { size: new BigNumber(10), start: new BigNumber(1) },
@@ -385,13 +389,17 @@ describe('IdentitiesController', () => {
     };
 
     it('should give associated Claims with no start value', async () => {
-      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(
+        mockAssociatedClaims as unknown as ResultSet<ClaimData>
+      );
       const result = await controller.getAssociatedClaims({ did }, { size: new BigNumber(10) }, {});
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });
 
     it('should give associated Claims with start value', async () => {
-      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(
+        mockAssociatedClaims as unknown as ResultSet<ClaimData>
+      );
       const result = await controller.getAssociatedClaims(
         { did },
         { size: new BigNumber(10), start: new BigNumber(1) },
@@ -401,7 +409,9 @@ describe('IdentitiesController', () => {
     });
 
     it('should give associated Claims with claim type filter', async () => {
-      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(
+        mockAssociatedClaims as unknown as ResultSet<ClaimData>
+      );
       const result = await controller.getAssociatedClaims(
         { did },
         { size: new BigNumber(10), start: new BigNumber(1) },
@@ -411,7 +421,9 @@ describe('IdentitiesController', () => {
     });
 
     it('should give associated Claims by whether they have expired or not', async () => {
-      mockClaimsService.findAssociatedByDid.mockResolvedValue(mockAssociatedClaims);
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(
+        mockAssociatedClaims as unknown as ResultSet<ClaimData>
+      );
       const result = await controller.getAssociatedClaims(
         { did },
         { size: new BigNumber(10), start: new BigNumber(1) },
@@ -489,6 +501,25 @@ describe('IdentitiesController', () => {
       const result = await controller.createMockCdd(params);
       expect(result).toEqual(fakeIdentityModel);
       expect(mockDeveloperTestingService.createMockCdd).toHaveBeenCalledWith(params);
+    });
+  });
+
+  describe('getInvestorUniquenessClaims', () => {
+    it('should call the service and return the InvestorUniquenessClaims', async () => {
+      const includeExpired = true;
+      const mockClaimList = [{}];
+
+      mockClaimsService.getInvestorUniquenessClaims.mockResolvedValue(
+        mockClaimList as unknown as ClaimData<InvestorUniquenessClaim>[]
+      );
+
+      const result = await controller.getInvestorUniquenessClaims({ did }, { includeExpired });
+
+      expect(result).toEqual({ results: mockClaimList });
+      expect(mockClaimsService.getInvestorUniquenessClaims).toHaveBeenCalledWith(
+        did,
+        includeExpired
+      );
     });
   });
 });
