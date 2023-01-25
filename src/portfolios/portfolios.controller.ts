@@ -279,6 +279,12 @@ export class PortfoliosController {
     description: 'Portfolio transactions',
     type: HistoricSettlementModel,
   })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+  })
   @Get('/identities/:did/portfolios/:id/transactions')
   async getTxHistory(
     @Param() { did, id }: PortfolioDto,
