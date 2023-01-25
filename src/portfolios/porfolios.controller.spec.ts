@@ -6,6 +6,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
+import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement.model';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
@@ -183,7 +184,11 @@ describe('PortfoliosController', () => {
         {}
       );
 
-      expect(result).toEqual({ results: resultSet.data });
+      const settlementModelResult = resultSet.data.map(
+        settlement => new HistoricSettlementModel(settlement as unknown as HistoricSettlementModel)
+      );
+
+      expect(result).toEqual({ results: settlementModelResult });
     });
   });
 });

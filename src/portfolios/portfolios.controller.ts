@@ -7,7 +7,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { HistoricSettlement, NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
+import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
 import {
   ApiArrayResponse,
@@ -28,6 +28,7 @@ import { GetTransactionsDto } from '~/portfolios/dto/get-transactions.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
+import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
@@ -276,19 +277,16 @@ export class PortfoliosController {
   })
   @ApiOkResponse({
     description: 'Portfolio transactions',
-    type: PortfolioModel,
+    type: HistoricSettlementModel,
   })
   @Get('/identities/:did/portfolios/:id/transactions')
   async getTxHistory(
     @Param() { did, id }: PortfolioDto,
     @Query() { account, ticker }: GetTransactionsDto
-  ): Promise<ResultsModel<HistoricSettlement>> {
-    const { data: results } = await this.portfoliosService.getTransactions(
-      did,
-      id,
-      account,
-      ticker
-    );
+  ): Promise<ResultsModel<HistoricSettlementModel>> {
+    const { data } = await this.portfoliosService.getTransactions(did, id, account, ticker);
+
+    const results = data.map(settlement => new HistoricSettlementModel(settlement));
 
     return new ResultsModel({ results });
   }
