@@ -4,6 +4,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
   ClaimData,
+  ClaimScope,
   ClaimType,
   GenericAuthorizationData,
   InvestorUniquenessClaim,
@@ -43,7 +44,7 @@ import {
 } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-const { did, txResult } = testValues;
+const { did, txResult, ticker } = testValues;
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -501,6 +502,29 @@ describe('IdentitiesController', () => {
       const result = await controller.createMockCdd(params);
       expect(result).toEqual(fakeIdentityModel);
       expect(mockDeveloperTestingService.createMockCdd).toHaveBeenCalledWith(params);
+    });
+  });
+
+  describe('getClaimScopes', () => {
+    it('should call the service and return the list of claim scopes', async () => {
+      const params = {
+        did,
+      };
+      const mockClaims = [
+        {
+          ticker,
+          scope: {
+            type: 'Identity',
+            value: '0x9'.padEnd(66, '1'),
+          },
+        },
+      ] as unknown as ClaimScope[];
+
+      mockClaimsService.findClaimScopesByDid.mockResolvedValue(mockClaims);
+
+      const { results } = await controller.getClaimScopes(params);
+      expect(results).toEqual(mockClaims);
+      expect(mockClaimsService.findClaimScopesByDid).toHaveBeenCalledWith(did);
     });
   });
 
