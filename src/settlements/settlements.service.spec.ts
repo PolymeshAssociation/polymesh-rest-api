@@ -424,7 +424,7 @@ describe('SettlementsService', () => {
   });
 
   describe('rescheduleInstruction', () => {
-    it('should run a withdraw affirmation procedure and return the queue data', async () => {
+    it('should run a reschedule procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
       const transaction = {
         blockHash: '0x1',
