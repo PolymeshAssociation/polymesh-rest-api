@@ -22,7 +22,7 @@ describe('ClaimsService', () => {
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
 
-  const { did, signer } = testValues;
+  const { did, signer, ticker } = testValues;
 
   const mockModifyClaimsArgs = {
     claims: [
@@ -230,6 +230,28 @@ describe('ClaimsService', () => {
         target: did,
         includeExpired: false,
       });
+    });
+  });
+
+  describe('findClaimScopesByDid', () => {
+    it('should return claim scopes for the target identity', async () => {
+      const mockClaims = [
+        {
+          ticker,
+          scope: {
+            type: 'Identity',
+            value: '0x9'.padEnd(66, '1'),
+          },
+        },
+      ];
+
+      mockPolymeshApi.claims.getClaimScopes.mockResolvedValue(mockClaims);
+
+      const result = await claimsService.findClaimScopesByDid(did);
+
+      expect(result).toBe(mockClaims);
+
+      expect(mockPolymeshApi.claims.getClaimScopes).toHaveBeenCalledWith({ target: did });
     });
   });
 
