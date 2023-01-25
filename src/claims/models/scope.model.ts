@@ -1,5 +1,4 @@
 /* istanbul ignore file */
-
 import { ApiProperty } from '@nestjs/swagger';
 import { ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -13,9 +12,10 @@ export class ScopeModel {
   readonly type: ScopeType;
 
   @ApiProperty({
+    type: 'string',
+    example: '0x6'.padEnd(66, '1a'),
     description:
       'The value of the Scope. This is a hex prefixed 64 character string for `Identity`, 12 uppercase letters for Ticker',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   readonly value: string;
 

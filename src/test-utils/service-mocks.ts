@@ -154,6 +154,7 @@ export class MockPortfoliosService {
   findAllByOwner = jest.fn();
   createPortfolio = jest.fn();
   deletePortfolio = jest.fn();
+  updatePortfolioName = jest.fn();
   getCustodiedPortfolios = jest.fn();
   getTransactions = jest.fn();
   findOne = jest.fn();

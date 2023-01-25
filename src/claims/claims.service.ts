@@ -4,6 +4,7 @@ import {
   AddClaimsParams,
   AddInvestorUniquenessClaimParams,
   ClaimData,
+  ClaimScope,
   ClaimType,
   InvestorUniquenessClaim,
   ModifyClaimsParams,
@@ -85,6 +86,12 @@ export class ClaimsService {
     const { revokeClaims } = this.polymeshService.polymeshApi.claims;
 
     return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, base);
+  }
+
+  public async findClaimScopesByDid(target: string): Promise<ClaimScope[]> {
+    return this.polymeshService.polymeshApi.claims.getClaimScopes({
+      target,
+    });
   }
 
   public async addInvestorUniqueness(

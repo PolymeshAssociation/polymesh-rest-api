@@ -13,6 +13,7 @@ import {
   Asset,
   AuthorizationType,
   Claim,
+  ClaimScope,
   ClaimType,
   TickerReservation,
   Venue,
@@ -31,6 +32,7 @@ import { CreatedAuthorizationRequestModel } from '~/authorizations/models/create
 import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
+import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
 import { ClaimModel } from '~/claims/models/claim.model';
 import { InvestorUniquenessClaimModel } from '~/claims/models/investor-uniqueness-claim.model';
 import {
@@ -473,6 +475,32 @@ export class IdentitiesController {
   public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
     const identity = await this.developerTestingService.createMockCdd(params);
     return createIdentityModel(identity);
+  }
+
+  @ApiTags('claims')
+  @ApiOperation({
+    summary: 'Fetch all claim scopes for an Identity',
+    description:
+      'This endpoint will fetch all scopes in which claims have been made for the given DID.',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose claim scopes are to be fetched',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse(ClaimScopeModel, {
+    description: 'List of claim scopes',
+    paginated: false,
+  })
+  @Get(':did/claim-scopes')
+  public async getClaimScopes(@Param() { did }: DidDto): Promise<ResultsModel<ClaimScope>> {
+    const claimResultSet = await this.claimsService.findClaimScopesByDid(did);
+
+    const results = claimResultSet.map(claimScope => new ClaimScopeModel(claimScope));
+
+    return new ResultsModel({ results });
   }
 
   @ApiTags('claims')

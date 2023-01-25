@@ -10,11 +10,13 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { AppValidationError } from '~/common/errors';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
@@ -98,6 +100,22 @@ export class PortfoliosService {
     const identity = await this.identitiesService.findOne(did);
 
     return identity.portfolios.getCustodiedPortfolios(paginationOptions);
+  }
+
+  public async updatePortfolioName(
+    portfolioParams: PortfolioDto,
+    params: ModifyPortfolioDto
+  ): ServiceReturn<NumberedPortfolio> {
+    const { did, id } = portfolioParams;
+
+    if (id.lte(0)) {
+      throw new AppValidationError('Default portfolio name cannot be modified');
+    }
+
+    const { base, args } = extractTxBase(params);
+    const portfolio = await this.findOne(did, id);
+
+    return this.transactionsService.submit(portfolio.modifyName, args, base);
   }
 
   public async setCustodian(
