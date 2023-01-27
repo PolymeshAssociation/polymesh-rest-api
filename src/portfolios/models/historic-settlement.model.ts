@@ -7,7 +7,7 @@ import { Type } from 'class-transformer';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
 import { AccountDataModel } from '~/identities/models/account-data.model';
-import { SettlementLegModel } from '~/portfolios/models/settlement-leg.model';
+import { HistoricSettlementLegModel } from '~/portfolios/models/historic-settlement-leg.model';
 
 export class HistoricSettlementModel {
   @ApiProperty({
@@ -31,8 +31,11 @@ export class HistoricSettlementModel {
   readonly status: string;
 
   @ApiProperty({
-    description: 'Transaction hash',
-    example: ['0x01'],
+    description: 'Array of account addresses involved in the settlement',
+    example: [
+      { address: '5grwXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx' },
+      { address: '5graXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx' },
+    ],
     type: AccountDataModel,
     isArray: true,
   })
@@ -41,11 +44,11 @@ export class HistoricSettlementModel {
 
   @ApiProperty({
     description: 'Transaction settlement legs',
-    type: SettlementLegModel,
+    type: HistoricSettlementLegModel,
     isArray: true,
   })
-  @Type(() => SettlementLegModel)
-  readonly legs: SettlementLegModel[];
+  @Type(() => HistoricSettlementLegModel)
+  readonly legs: HistoricSettlementLegModel[];
 
   constructor(model: HistoricSettlementModel) {
     Object.assign(this, model);

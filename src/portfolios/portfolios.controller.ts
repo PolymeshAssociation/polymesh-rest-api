@@ -322,7 +322,7 @@ export class PortfoliosController {
     ],
   })
   @Get('/identities/:did/portfolios/:id/transactions')
-  async getTxHistory(
+  async getTransactionHistory(
     @Param() { did, id }: PortfolioDto,
     @Query() { account, ticker }: GetTransactionsDto
   ): Promise<ResultsModel<HistoricSettlementModel>> {

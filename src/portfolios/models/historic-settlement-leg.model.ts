@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SettlementDirectionEnum } from '@polymeshassociation/polymesh-sdk/types';
 
-export class SettlementLegModel {
+export class HistoricSettlementLegModel {
   @ApiProperty({
     description: 'The direction of the settlement leg',
     example: SettlementDirectionEnum.Incoming,
@@ -11,7 +11,7 @@ export class SettlementLegModel {
   })
   readonly direction: string;
 
-  constructor(model: SettlementLegModel) {
+  constructor(model: HistoricSettlementLegModel) {
     Object.assign(this, model);
   }
 }
