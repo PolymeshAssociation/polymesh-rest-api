@@ -22,7 +22,7 @@ describe('ClaimsService', () => {
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
 
-  const { did, signer } = testValues;
+  const { did, signer, ticker } = testValues;
 
   const mockModifyClaimsArgs = {
     claims: [
@@ -185,6 +185,73 @@ describe('ClaimsService', () => {
         { claims: mockModifyClaimsArgs.claims },
         { signer: mockModifyClaimsArgs.signer }
       );
+    });
+  });
+
+  describe('findCddClaimsByDid', () => {
+    const date = new Date().toISOString();
+    const mockCddClaims = [
+      {
+        target: did,
+        issuer: did,
+        issuedAt: date,
+        expiry: date,
+        claim: {
+          type: 'Accredited',
+          scope: {
+            type: 'Identity',
+            value: did,
+          },
+        },
+      },
+    ];
+
+    it('should return a list of CDD Claims for given DID', async () => {
+      mockPolymeshApi.claims.getCddClaims.mockResolvedValue(mockCddClaims);
+
+      const result = await claimsService.findCddClaimsByDid(did);
+
+      expect(result).toBe(mockCddClaims);
+
+      expect(mockPolymeshApi.claims.getCddClaims).toHaveBeenCalledWith({
+        target: did,
+        includeExpired: true,
+      });
+    });
+
+    it('should return a list of CDD Claims for given DID without including expired claims', async () => {
+      mockPolymeshApi.claims.getCddClaims.mockResolvedValue(mockCddClaims);
+
+      const result = await claimsService.findCddClaimsByDid(did, false);
+
+      expect(result).toBe(mockCddClaims);
+
+      expect(mockPolymeshApi.claims.getCddClaims).toHaveBeenCalledWith({
+        target: did,
+        includeExpired: false,
+      });
+    });
+  });
+
+  describe('findClaimScopesByDid', () => {
+    it('should return claim scopes for the target identity', async () => {
+      const mockClaims = [
+        {
+          ticker,
+          scope: {
+            type: 'Identity',
+            value: '0x9'.padEnd(66, '1'),
+          },
+        },
+      ];
+
+      mockPolymeshApi.claims.getClaimScopes.mockResolvedValue(mockClaims);
+
+      const result = await claimsService.findClaimScopesByDid(did);
+
+      expect(result).toBe(mockClaims);
+
+      expect(mockPolymeshApi.claims.getClaimScopes).toHaveBeenCalledWith({ target: did });
     });
   });
 

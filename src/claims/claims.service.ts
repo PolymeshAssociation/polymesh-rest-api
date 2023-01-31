@@ -3,7 +3,9 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimsParams,
   AddInvestorUniquenessClaimParams,
+  CddClaim,
   ClaimData,
+  ClaimScope,
   ClaimType,
   InvestorUniquenessClaim,
   ModifyClaimsParams,
@@ -87,6 +89,12 @@ export class ClaimsService {
     return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, base);
   }
 
+  public async findClaimScopesByDid(target: string): Promise<ClaimScope[]> {
+    return this.polymeshService.polymeshApi.claims.getClaimScopes({
+      target,
+    });
+  }
+
   public async addInvestorUniqueness(
     modifyClaimsDto: AddInvestorUniquenessDto
   ): ServiceReturn<void> {
@@ -99,6 +107,16 @@ export class ClaimsService {
       args as AddInvestorUniquenessClaimParams,
       base
     );
+  }
+
+  public async findCddClaimsByDid(
+    target: string,
+    includeExpired = true
+  ): Promise<ClaimData<CddClaim>[]> {
+    return await this.polymeshService.polymeshApi.claims.getCddClaims({
+      target,
+      includeExpired,
+    });
   }
 
   public async getInvestorUniquenessClaims(

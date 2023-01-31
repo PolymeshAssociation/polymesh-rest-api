@@ -3,7 +3,9 @@ import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationType,
+  CddClaim,
   ClaimData,
+  ClaimScope,
   ClaimType,
   GenericAuthorizationData,
   InvestorUniquenessClaim,
@@ -43,7 +45,7 @@ import {
 } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-const { did, txResult } = testValues;
+const { did, txResult, ticker } = testValues;
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -504,6 +506,29 @@ describe('IdentitiesController', () => {
     });
   });
 
+  describe('getClaimScopes', () => {
+    it('should call the service and return the list of claim scopes', async () => {
+      const params = {
+        did,
+      };
+      const mockClaims = [
+        {
+          ticker,
+          scope: {
+            type: 'Identity',
+            value: '0x9'.padEnd(66, '1'),
+          },
+        },
+      ] as unknown as ClaimScope[];
+
+      mockClaimsService.findClaimScopesByDid.mockResolvedValue(mockClaims);
+
+      const { results } = await controller.getClaimScopes(params);
+      expect(results).toEqual(mockClaims);
+      expect(mockClaimsService.findClaimScopesByDid).toHaveBeenCalledWith(did);
+    });
+  });
+
   describe('getInvestorUniquenessClaims', () => {
     it('should call the service and return the InvestorUniquenessClaims', async () => {
       const includeExpired = true;
@@ -520,6 +545,39 @@ describe('IdentitiesController', () => {
         did,
         includeExpired
       );
+    });
+  });
+
+  describe('getCddClaims', () => {
+    const date = new Date().toISOString();
+    const mockCddClaims = [
+      {
+        target: did,
+        issuer: did,
+        issuedAt: date,
+        expiry: date,
+        claim: {
+          type: 'Accredited',
+          scope: {
+            type: 'Identity',
+            value: did,
+          },
+        },
+      },
+    ] as unknown as ClaimData<CddClaim>[];
+
+    it('should call the service and return list of CDD Claims', async () => {
+      mockClaimsService.findCddClaimsByDid.mockResolvedValue(mockCddClaims);
+      const result = await controller.getCddClaims({ did }, { includeExpired: false });
+      expect(result).toEqual(new ResultsModel({ results: mockCddClaims }));
+      expect(mockClaimsService.findCddClaimsByDid).toHaveBeenCalledWith(did, false);
+    });
+
+    it('should call the service and return list of CDD Claims including expired claims', async () => {
+      mockClaimsService.findCddClaimsByDid.mockResolvedValue(mockCddClaims);
+      const result = await controller.getCddClaims({ did }, { includeExpired: true });
+      expect(result).toEqual(new ResultsModel({ results: mockCddClaims }));
+      expect(mockClaimsService.findCddClaimsByDid).toHaveBeenCalledWith(did, true);
     });
   });
 });
