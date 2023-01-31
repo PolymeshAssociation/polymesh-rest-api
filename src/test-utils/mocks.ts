@@ -236,6 +236,7 @@ export class MockInstruction {
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
+  public withdraw = jest.fn();
   public reschedule = jest.fn();
 }
 
