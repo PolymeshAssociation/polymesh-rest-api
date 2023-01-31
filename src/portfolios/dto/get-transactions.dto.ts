@@ -8,7 +8,7 @@ import { IsTicker } from '~/common/decorators/validation';
 export class GetTransactionsDto {
   @ApiPropertyOptional({
     description: 'Account address involved in transactions',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '5grwXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXxxXx',
   })
   @IsOptional()
   @IsString()
