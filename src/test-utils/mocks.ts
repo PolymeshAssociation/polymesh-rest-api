@@ -114,6 +114,7 @@ export class MockPolymesh {
     addClaims: jest.fn(),
     editClaims: jest.fn(),
     revokeClaims: jest.fn(),
+    getCddClaims: jest.fn(),
     getClaimScopes: jest.fn(),
     addInvestorUniquenessClaim: jest.fn(),
     getInvestorUniquenessClaims: jest.fn(),
