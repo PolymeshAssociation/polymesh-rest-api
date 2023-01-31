@@ -268,7 +268,8 @@ export class PortfoliosController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the portfolio for which to quit Custody. Use 0 for default Portfolio',
+    description:
+      'The ID of the portfolio for which to quit Custody. Use 0 for the default Portfolio',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
