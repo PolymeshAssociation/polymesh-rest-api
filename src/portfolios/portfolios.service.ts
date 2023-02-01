@@ -134,4 +134,14 @@ export class PortfoliosService {
       base
     );
   }
+
+  public async quitCustody(
+    did: string,
+    id: BigNumber,
+    args: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const portfolio = await this.findOne(did, id);
+
+    return this.transactionsService.submit(portfolio.quitCustody, {}, args);
+  }
 }
