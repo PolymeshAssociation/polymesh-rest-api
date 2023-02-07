@@ -4,11 +4,18 @@ import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  SettlementResult,
+  SettlementResultEnum,
+} from '@polymeshassociation/polymesh-sdk/middleware/types';
+import {
+  Account,
   AuthorizationType,
   CalendarUnit,
+  HistoricSettlement,
   MetadataEntry,
   MetadataType,
   ResultSet,
+  SettlementLeg,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -284,6 +291,7 @@ export class MockPortfolio {
   public getCustodian = jest.fn();
   public setCustodian = jest.fn();
   public moveFunds = jest.fn();
+  public getTransactionHistory = jest.fn();
   public quitCustody = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
@@ -344,6 +352,28 @@ export class MockTransaction {
   }
 
   public run = jest.fn();
+}
+
+export class MockHistoricSettlement {
+  constructor(
+    readonly settlement?: {
+      blockNumber?: BigNumber;
+      blockHash?: string;
+      status?: SettlementResult;
+      accounts?: Account[];
+      legs?: SettlementLeg[];
+    }
+  ) {
+    const defaultValue: HistoricSettlement = {
+      blockNumber: new BigNumber(1),
+      blockHash: '0x1',
+      status: SettlementResultEnum.Executed,
+      accounts: [],
+      legs: [],
+    };
+
+    Object.assign(this, { ...defaultValue, ...settlement });
+  }
 }
 
 class MockPolymeshTransactionBase {
