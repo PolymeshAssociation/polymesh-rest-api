@@ -149,6 +149,34 @@ export class SettlementsController {
 
   @ApiTags('instructions')
   @ApiOperation({
+    summary: 'Withdraw affirmation from an existing Instruction',
+    description: 'This endpoint will withdraw an affirmation from an Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction from which to withdraw the affirmation',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The requested Instruction was not found',
+  })
+  @Post('instructions/:id/withdraw')
+  public async withdrawAffirmation(
+    @Param() { id }: IdParamsDto,
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.withdrawAffirmation(id, signerDto);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
     summary: 'Reschedule a failed Instruction',
     description: 'This endpoint will reschedule a failed Instruction',
   })

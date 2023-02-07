@@ -12,6 +12,7 @@ import { UserModel } from '~/users/model/user.model';
 const signer = 'alice';
 const did = '0x01'.padEnd(66, '0');
 const dryRun = false;
+const ticker = 'TICKER';
 
 const user = new UserModel({
   id: '-1',
@@ -58,4 +59,5 @@ export const testValues = {
   testAccount,
   txResult,
   dryRun,
+  ticker,
 };

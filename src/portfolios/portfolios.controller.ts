@@ -1,7 +1,15 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -9,7 +17,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
-import { Response } from 'express';
 
 import {
   ApiArrayResponse,
@@ -27,6 +34,7 @@ import { handleServiceResult, TransactionResolver, TransactionResponseModel } fr
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
@@ -156,6 +164,41 @@ export class PortfoliosController {
   }
 
   @ApiOperation({
+    summary: 'Modify Portfolio name',
+    description: 'This endpoint modifies Portfolio name for a numbered portfolio',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Portfolio number for which name is to be modified',
+    type: 'string',
+    example: '1',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Portfolio was not found'],
+  })
+  @Post('/identities/:did/portfolios/:id/modify-name')
+  public async modifyPortfolioName(
+    @Param() portfolioParams: PortfolioDto,
+    @Body() modifyPortfolioParams: ModifyPortfolioDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.portfoliosService.updatePortfolioName(
+      portfolioParams,
+      modifyPortfolioParams
+    );
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
     summary: 'Get all custodied Portfolios of an Identity',
     description: 'This endpoint will provide list of all the custodied Portfolios of an Identity',
   })
@@ -259,6 +302,45 @@ export class PortfoliosController {
   }
 
   @ApiOperation({
+    summary: 'Quit Custody of a Portfolio',
+    description:
+      'This endpoint will quit signers Custody over the provided Portfolio of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity who owns the Portfolio for which Custody is to be quit',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which to quit Custody. Use 0 for the default Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['Insufficient balance to quit Custody for the Portfolio'],
+  })
+  @Post('/identities/:did/portfolios/:id/quit-custody')
+  async quitCustody(
+    @Param() { did, id }: PortfolioDto,
+    @Body() txBase: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.portfoliosService.quitCustody(did, id, txBase);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
     summary: 'Get Portfolio creation event data',
     description:
       'The endpoint retrieves the identifier data (block number, date and event index) of the event that was emitted when the given Numbered Portfolio was created. This requires Polymesh GraphQL Middleware Service',
@@ -280,23 +362,21 @@ export class PortfoliosController {
     description: 'Details of event where the Numbered Portfolio was created',
     type: EventIdentifierModel,
   })
-  @ApiBadRequestResponse({
-    description: 'Event details for default Portfolio is requested',
-  })
-  @ApiNoContentResponse({
-    description: 'Data is not ready by the time it is requested',
-  })
-  @ApiNotFoundResponse({
-    description: "The Portfolio doesn't exist",
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      "The Portfolio doesn't exist",
+      "The Portfolio hasn't yet been processed by the Middleware",
+    ],
+    [HttpStatus.BAD_REQUEST]: ['Event details for default Portfolio are requested'],
   })
   @Get('/identities/:did/portfolios/:id/created-at')
-  async createdAt(@Param() { did, id }: PortfolioDto, @Res() res: Response): Promise<void> {
+  async createdAt(@Param() { did, id }: PortfolioDto): Promise<EventIdentifierModel> {
     const result = await this.portfoliosService.createdAt(did, id);
 
-    if (result) {
-      res.status(HttpStatus.OK).json(new EventIdentifierModel(result));
-    } else {
-      res.status(HttpStatus.NO_CONTENT).send({});
+    if (!result) {
+      throw new NotFoundException("Portfolio data hasn't yet been processed by the middleware");
     }
+
+    return new EventIdentifierModel(result);
   }
 }
