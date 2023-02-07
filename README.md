@@ -74,6 +74,11 @@ DEVELOPER_UTILS=## set to `true` to enable developer testing endpoints ##
 # Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_TOKEN=## The access token for authorization with the Vault instance ##
+
+# Fireblocks Signer:
+FIREBLOCKS_URL=## The fireblocks URL ##
+FIREBLOCKS_API_KEY=## The API Key to use ##
+FIREBLOCKS_SECRET_PATH=## Path to secret file to sign requests with ##
 # Webhooks:
 SUBSCRIPTIONS_TTL=## Amount of milliseconds before a subscription is considered expired ##
 SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscription via handshake before it is considered rejected ##

@@ -121,6 +121,7 @@ export class MockPolymesh {
     addClaims: jest.fn(),
     editClaims: jest.fn(),
     revokeClaims: jest.fn(),
+    getCddClaims: jest.fn(),
     getClaimScopes: jest.fn(),
     addInvestorUniquenessClaim: jest.fn(),
     getInvestorUniquenessClaims: jest.fn(),
@@ -242,6 +243,7 @@ export class MockInstruction {
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
+  public withdraw = jest.fn();
   public reschedule = jest.fn();
 }
 
@@ -289,6 +291,7 @@ export class MockPortfolio {
   public setCustodian = jest.fn();
   public moveFunds = jest.fn();
   public getTransactionHistory = jest.fn();
+  public quitCustody = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',

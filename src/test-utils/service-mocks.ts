@@ -146,7 +146,14 @@ export class MockSettlementsService {
   canTransfer = jest.fn();
   findPendingInstructionsByDid = jest.fn();
   findVenuesByOwner = jest.fn();
+  withdrawAffirmation = jest.fn();
   rescheduleInstruction = jest.fn();
+}
+
+export class MockClaimsService {
+  findIssuedByDid = jest.fn();
+  findAssociatedByDid = jest.fn();
+  findCddClaimsByDid = jest.fn();
 }
 
 export class MockPortfoliosService {
@@ -159,6 +166,7 @@ export class MockPortfoliosService {
   getTransactions = jest.fn();
   findOne = jest.fn();
   setCustodian = jest.fn();
+  quitCustody = jest.fn();
 }
 
 export class MockOfferingsService {

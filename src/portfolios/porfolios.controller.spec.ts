@@ -214,4 +214,25 @@ describe('PortfoliosController', () => {
       expect(result).toEqual({ results: settlementModelResult });
     });
   });
+
+  describe('quitCustody', () => {
+    it('should return the transaction details', async () => {
+      const response = {
+        ...txResult,
+      };
+      mockPortfoliosService.quitCustody.mockResolvedValue(response);
+      const params = {
+        signer,
+      };
+
+      const result = await controller.quitCustody(
+        new PortfolioDto({ id: new BigNumber(1), did }),
+        params
+      );
+
+      expect(result).toEqual({
+        ...txResult,
+      });
+    });
+  });
 });

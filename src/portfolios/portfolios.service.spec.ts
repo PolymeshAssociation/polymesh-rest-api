@@ -391,4 +391,34 @@ describe('PortfoliosService', () => {
       expect(result).toEqual(mockResultSet);
     });
   });
+
+  describe('quitCustody', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.RemoveAuthorization,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.quitCustody.mockResolvedValue(mockTransaction);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.quitCustody(did, mockPortfolio.id, { signer });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });
