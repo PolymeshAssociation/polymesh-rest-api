@@ -6,11 +6,12 @@ import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
+import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement.model';
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
 import { testValues } from '~/test-utils/consts';
-import { createMockResultSet, MockPortfolio } from '~/test-utils/mocks';
+import { createMockResultSet, MockHistoricSettlement, MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
 const { did, signer, txResult } = testValues;
@@ -192,6 +193,25 @@ describe('PortfoliosController', () => {
       expect(result).toEqual({
         ...txResult,
       });
+    });
+  });
+
+  describe('getTransactionHistory', () => {
+    it('should return transaction result model', async () => {
+      const mockHistoricSettlement = new MockHistoricSettlement();
+      const resultSet = createMockResultSet([mockHistoricSettlement]);
+      mockPortfoliosService.getTransactions.mockResolvedValue(resultSet);
+
+      const result = await controller.getTransactionHistory(
+        new PortfolioDto({ id: new BigNumber(1), did }),
+        {}
+      );
+
+      const settlementModelResult = resultSet.data.map(
+        settlement => new HistoricSettlementModel(settlement as unknown as HistoricSettlementModel)
+      );
+
+      expect(result).toEqual({ results: settlementModelResult });
     });
   });
 

@@ -24,10 +24,12 @@ import { handleServiceResult, TransactionResolver, TransactionResponseModel } fr
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
+import { GetTransactionsDto } from '~/portfolios/dto/get-transactions.dto';
 import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
+import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
@@ -289,6 +291,46 @@ export class PortfoliosController {
     const result = await this.portfoliosService.setCustodian(did, id, setCustodianParams);
 
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get list of transactions for a Portfolio',
+    description:
+      'This endpoint will provide list of transaction for the provided Portfolio of an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose Portfolio transactions are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which transactions are to be fetched. Use 0 for the default Portfolio',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Portfolio transactions',
+    type: HistoricSettlementModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+  })
+  @Get('/identities/:did/portfolios/:id/transactions')
+  async getTransactionHistory(
+    @Param() { did, id }: PortfolioDto,
+    @Query() { account, ticker }: GetTransactionsDto
+  ): Promise<ResultsModel<HistoricSettlementModel>> {
+    const { data } = await this.portfoliosService.getTransactions(did, id, account, ticker);
+
+    const results = data.map(settlement => new HistoricSettlementModel(settlement));
+
+    return new ResultsModel({ results });
   }
 
   @ApiOperation({
