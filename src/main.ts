@@ -6,6 +6,8 @@ import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from '~/app.module';
+import { parseAuthStrategyConfig } from '~/auth/auth.utils';
+import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
@@ -37,13 +39,30 @@ async function bootstrap(): Promise<void> {
   const options = new DocumentBuilder()
     .setTitle('Polymesh REST API')
     .setDescription('RESTful access to the Polymesh blockchain')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, options);
+    .setVersion('1.0');
+
+  const configService = app.get<ConfigService>(ConfigService);
+
+  const authStrategiesFromEnv = configService.getOrThrow('AUTH_STRATEGY');
+  const authStrategies = parseAuthStrategyConfig(authStrategiesFromEnv);
+
+  const isApiKeyStrategyConfigured = authStrategies.includes(AuthStrategy.ApiKey);
+  if (isApiKeyStrategyConfigured) {
+    options.addApiKey({
+      type: 'apiKey',
+      in: 'header',
+      name: 'x-api-key',
+    });
+  }
+
+  const document = SwaggerModule.createDocument(app, options.build());
+  if (isApiKeyStrategyConfigured) {
+    document.security = [{ api_key: [] }]; // Apply the API key globally to all operations
+  }
+
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen
-  const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get('PORT', 3000);
   await app.listen(port);
 }

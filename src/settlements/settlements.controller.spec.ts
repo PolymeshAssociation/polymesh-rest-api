@@ -128,6 +128,32 @@ describe('SettlementsController', () => {
     });
   });
 
+  describe('withdrawAffirmation', () => {
+    it('should withdraw affirmation from an instruction and return the data returned by the service', async () => {
+      mockSettlementsService.withdrawAffirmation.mockResolvedValue(txResult);
+
+      const result = await controller.withdrawAffirmation(
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('rescheduleInstruction', () => {
+    it('should reschedule a failed instruction and return the data returned by the service', async () => {
+      mockSettlementsService.rescheduleInstruction.mockResolvedValue(txResult);
+
+      const result = await controller.rescheduleInstruction(
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+
+      expect(result).toEqual(txResult);
+    });
+  });
+
   describe('getAffirmations', () => {
     it('should return the list of affirmations generated for a Instruction', async () => {
       const mockAffirmations = {

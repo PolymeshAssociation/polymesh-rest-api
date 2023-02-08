@@ -5,14 +5,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AppValidationError } from '~/common/errors';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { testValues } from '~/test-utils/consts';
-import { MockIdentity, MockPolymesh, MockPortfolio, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockResultSet,
+  MockHistoricSettlement,
+  MockIdentity,
+  MockPolymesh,
+  MockPortfolio,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockIdentitiesService,
   mockTransactionsProvider,
@@ -239,6 +248,200 @@ describe('PortfoliosService', () => {
           result: undefined,
           transactions: [mockTransaction],
         });
+      });
+    });
+  });
+
+  describe('updatePortfolioName', () => {
+    it('should rename a Portfolio and return the queue results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.RenamePortfolio,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockIdentity = new MockIdentity();
+      const modifyName = jest.fn();
+
+      modifyName.mockReturnValue(mockTransaction);
+      const mockPortfolio = new MockPortfolio();
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
+
+      const portfolio = new PortfolioDto({
+        id: new BigNumber(1),
+        did,
+      });
+
+      const body = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = await service.updatePortfolioName(portfolio, body);
+      expect(result).toEqual({
+        result: mockPortfolio,
+        transactions: [mockTransaction],
+      });
+    });
+
+    it('should throw an error on Default portfolio', async () => {
+      const portfolio = new PortfolioDto({
+        id: new BigNumber(0),
+        did,
+      });
+
+      const body = {
+        signer,
+        name: 'FOLIO-1',
+      };
+
+      const result = service.updatePortfolioName(portfolio, body);
+
+      await expect(result).rejects.toBeInstanceOf(AppValidationError);
+    });
+  });
+
+  describe('getCustodiedPortfolios', () => {
+    it('should return a paginated list of custodied Portfolios for a given DID', async () => {
+      const mockIdentity = new MockIdentity();
+      const mockPortfolios = [
+        {
+          name: 'Default',
+          assetBalances: [
+            {
+              ticker: 'TICKER',
+            },
+          ],
+        },
+        {
+          id: new BigNumber(1),
+          name: 'TEST',
+          assetBalances: [],
+        },
+      ];
+      const resultSet = createMockResultSet(mockPortfolios);
+
+      mockIdentity.portfolios.getCustodiedPortfolios.mockResolvedValue(resultSet);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+      const result = await service.getCustodiedPortfolios(did, {
+        size: new BigNumber(10),
+        start: '0',
+      });
+      expect(result).toEqual(resultSet);
+    });
+  });
+
+  describe('setCustodian', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddAuthorization,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.setCustodian.mockResolvedValue(mockTransaction);
+
+      const custodianParams: SetCustodianDto = {
+        target: did,
+        signer,
+      };
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.setCustodian(did, mockPortfolio.id, custodianParams);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('getTransactions', () => {
+    it('should return the transaction result set', async () => {
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+      const mockHistoricSettlement = new MockHistoricSettlement();
+
+      const mockResultSet = createMockResultSet([mockHistoricSettlement]);
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.getTransactionHistory.mockResolvedValue(mockResultSet);
+
+      const result = await service.getTransactions(did, mockPortfolio.id);
+
+      expect(result).toEqual(mockResultSet);
+    });
+  });
+
+  describe('quitCustody', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.RemoveAuthorization,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.quitCustody.mockResolvedValue(mockTransaction);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.quitCustody(did, mockPortfolio.id, { signer });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('createdAt', () => {
+    it('should throw an error if default Portfolio details are requested', () => {
+      return expect(() => service.createdAt(did, new BigNumber(0))).rejects.toThrowError();
+    });
+
+    describe('otherwise', () => {
+      it('should return the EventIdentifier details for a Portfolio', async () => {
+        const mockResult = {
+          blockNumber: new BigNumber('2719172'),
+          blockHash: 'someHash',
+          blockDate: new Date('2021-06-26T01:47:45.000Z'),
+          eventIndex: new BigNumber(1),
+        };
+        const mockPortfolio = new MockPortfolio();
+        mockPortfolio.createdAt.mockResolvedValue(mockResult);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        jest.spyOn(service, 'findOne').mockResolvedValue(mockPortfolio as any);
+        const result = await service.createdAt(did, new BigNumber(1));
+        expect(result).toEqual(mockResult);
       });
     });
   });

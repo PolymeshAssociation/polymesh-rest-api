@@ -1,12 +1,21 @@
 /* istanbul ignore file */
 
 import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
+import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  SettlementResult,
+  SettlementResultEnum,
+} from '@polymeshassociation/polymesh-sdk/middleware/types';
+import {
+  Account,
   AuthorizationType,
   CalendarUnit,
+  HistoricSettlement,
   MetadataEntry,
   MetadataType,
+  ResultSet,
+  SettlementLeg,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -15,6 +24,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
 import { TransactionResult } from '~/transactions/transactions.util';
 
@@ -46,6 +56,13 @@ export const createMockResponseObject = (): DeepMocked<Response> => {
     json: jest.fn().mockReturnThis(),
     status: jest.fn().mockReturnThis(),
   });
+};
+
+export const MockPolymeshService = createMock<PolymeshService>();
+
+export const mockPolymeshServiceProvider: ValueProvider<PolymeshService> = {
+  provide: PolymeshService,
+  useValue: createMock<PolymeshService>(),
 };
 
 /* Polymesh SDK */
@@ -104,14 +121,35 @@ export class MockPolymesh {
     addClaims: jest.fn(),
     editClaims: jest.fn(),
     revokeClaims: jest.fn(),
+    getCddClaims: jest.fn(),
+    getClaimScopes: jest.fn(),
+    addInvestorUniquenessClaim: jest.fn(),
+    getInvestorUniquenessClaims: jest.fn(),
   };
 
   public _polkadotApi = {
     tx: {
+      balances: {
+        transfer: jest.fn(),
+        setBalance: jest.fn(),
+      },
+      cddServiceProviders: {
+        addMember: jest.fn(),
+      },
+      identity: {
+        addClaim: jest.fn(),
+        cddRegisterDid: jest.fn(),
+      },
+      sudo: {
+        sudo: jest.fn(),
+      },
       testUtils: {
         mockCddRegisterDid: jest.fn().mockReturnValue({
           signAndSend: jest.fn(),
         }),
+      },
+      utility: {
+        batchAtomic: jest.fn(),
       },
     },
   };
@@ -205,6 +243,8 @@ export class MockInstruction {
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
+  public withdraw = jest.fn();
+  public reschedule = jest.fn();
 }
 
 export class MockVenue {
@@ -225,6 +265,7 @@ export class MockPortfolios {
   public getPortfolio = jest.fn();
   public create = jest.fn();
   public delete = jest.fn();
+  public getCustodiedPortfolios = jest.fn();
 }
 
 export class MockIdentity {
@@ -244,10 +285,14 @@ export class MockPortfolio {
   id = new BigNumber(1);
   owner = new MockIdentity();
   public getName = jest.fn();
+  public createdAt = jest.fn();
   public getAssetBalances = jest.fn();
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
+  public setCustodian = jest.fn();
   public moveFunds = jest.fn();
+  public getTransactionHistory = jest.fn();
+  public quitCustody = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',
@@ -307,6 +352,28 @@ export class MockTransaction {
   }
 
   public run = jest.fn();
+}
+
+export class MockHistoricSettlement {
+  constructor(
+    readonly settlement?: {
+      blockNumber?: BigNumber;
+      blockHash?: string;
+      status?: SettlementResult;
+      accounts?: Account[];
+      legs?: SettlementLeg[];
+    }
+  ) {
+    const defaultValue: HistoricSettlement = {
+      blockNumber: new BigNumber(1),
+      blockHash: '0x1',
+      status: SettlementResultEnum.Executed,
+      accounts: [],
+      legs: [],
+    };
+
+    Object.assign(this, { ...defaultValue, ...settlement });
+  }
 }
 
 class MockPolymeshTransactionBase {
@@ -387,4 +454,13 @@ export function createMockSubsidy(
   }
 ): DeepMocked<Subsidy> {
   return createMock<Subsidy>(partial);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createMockResultSet<T extends any[]>(data: T): ResultSet<T> {
+  return {
+    data,
+    next: '0',
+    count: new BigNumber(data.length),
+  };
 }

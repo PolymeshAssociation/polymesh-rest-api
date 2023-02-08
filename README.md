@@ -8,7 +8,7 @@
 
 A REST API wrapper for the Polymesh blockchain.
 
-This version is compatible with chain versions 5.0.x
+This version is compatible with chain versions 5.1.x
 
 ## Setup
 
@@ -61,16 +61,25 @@ $ yarn test:cov
 ```bash
 PORT=## port in which the server will listen. Defaults to 3000 ##
 POLYMESH_NODE_URL=## websocket URL for a Polymesh node ##
-POLYMESH_MIDDLEWARE_URL=## URL for an instance of the Polymesh GraphQL Middleware service ##
+POLYMESH_MIDDLEWARE_V2_URL=## URL for an instance of the Polymesh GraphQL Middleware Native SubQuery service ##
+POLYMESH_MIDDLEWARE_URL=## URL for an instance of the Polymesh GraphQL Middleware service @deprecated in favour of POLYMESH_MIDDLEWARE_V2_URL##
 POLYMESH_MIDDLEWARE_API_KEY=## API key for the Middleware GraphQL service ##
 LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemonic ##
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##
 
 # Below are optional params that enable some features. The above should be good to get started with
 
+DEVELOPER_SUDO_MNEMONIC=## a mnemonic that has `sudo` privileges for a chain. Defaults to `//Alice` ##
+DEVELOPER_UTILS=## set to `true` to enable developer testing endpoints ##
+
 # Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##
 VAULT_TOKEN=## The access token for authorization with the Vault instance ##
+
+# Fireblocks Signer:
+FIREBLOCKS_URL=## The fireblocks URL ##
+FIREBLOCKS_API_KEY=## The API Key to use ##
+FIREBLOCKS_SECRET_PATH=## Path to secret file to sign requests with ##
 # Webhooks:
 SUBSCRIPTIONS_TTL=## Amount of milliseconds before a subscription is considered expired ##
 SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscription via handshake before it is considered rejected ##

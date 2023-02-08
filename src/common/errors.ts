@@ -5,6 +5,7 @@ export enum AppErrorCode {
   Conflict = 'Conflict',
   Config = 'Config',
   Validation = 'Validation',
+  Internal = 'Internal',
 }
 
 export abstract class AppError extends Error {
@@ -39,6 +40,13 @@ export class AppValidationError extends AppError {
 
   constructor(message: string) {
     super(`Validation error: ${message}`);
+  }
+}
+export class AppInternalError extends AppError {
+  public readonly code = AppErrorCode.Internal;
+
+  constructor(message: string) {
+    super(`Internal Error: ${message}`);
   }
 }
 
