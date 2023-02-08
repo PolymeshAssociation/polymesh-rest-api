@@ -44,7 +44,11 @@ async function bootstrap(): Promise<void> {
     .setDescription('RESTful access to the Polymesh blockchain')
     .setVersion('1.0');
 
-  const authStrategies = parseAuthStrategyConfig(process.env.AUTH_STRATEGY || '');
+  const configService = app.get<ConfigService>(ConfigService);
+
+  const authStrategiesFromEnv = configService.getOrThrow('AUTH_STRATEGY');
+  const authStrategies = parseAuthStrategyConfig(authStrategiesFromEnv);
+
   const isApiKeyStrategyConfigured = authStrategies.includes(AuthStrategy.ApiKey);
   if (isApiKeyStrategyConfigured) {
     options.addApiKey({
@@ -62,7 +66,6 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen
-  const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get('PORT', 3000);
   await app.listen(port);
 }
