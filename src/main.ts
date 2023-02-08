@@ -4,7 +4,6 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as dotenv from 'dotenv';
 
 import { AppModule } from '~/app.module';
 import { parseAuthStrategyConfig } from '~/auth/auth.utils';
@@ -13,8 +12,6 @@ import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-
-dotenv.config();
 
 async function bootstrap(): Promise<void> {
   // App setup
