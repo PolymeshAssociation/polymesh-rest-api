@@ -15,7 +15,7 @@ export const createAuthGuard = (rawStrategy: string): IAuthGuard => {
  *
  * @throws if given invalid values
  */
-const parseAuthStrategyConfig = (rawStrategyConfig: string): AuthStrategy[] => {
+export const parseAuthStrategyConfig = (rawStrategyConfig: string): AuthStrategy[] => {
   const givenStrategies = rawStrategyConfig.split(',').map(strategy => strategy.trim());
 
   const filteredStrategies = givenStrategies.filter(isStrategyKey);
