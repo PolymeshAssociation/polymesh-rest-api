@@ -1,6 +1,8 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
+import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -232,6 +234,32 @@ describe('PortfoliosController', () => {
 
       expect(result).toEqual({
         ...txResult,
+      });
+    });
+  });
+
+  describe('createdAt', () => {
+    it('should throw NotFoundException if the event details are not yet ready', () => {
+      mockPortfoliosService.createdAt.mockResolvedValue(null);
+
+      return expect(() =>
+        controller.createdAt(new PortfolioDto({ id: new BigNumber(1), did }))
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    describe('otherwise', () => {
+      it('should return the Portfolio creation event details', async () => {
+        const eventIdentifier = {
+          blockNumber: new BigNumber('2719172'),
+          blockHash: 'someHash',
+          blockDate: new Date('2021-06-26T01:47:45.000Z'),
+          eventIndex: new BigNumber(1),
+        };
+        mockPortfoliosService.createdAt.mockResolvedValue(eventIdentifier);
+
+        const result = await controller.createdAt(new PortfolioDto({ id: new BigNumber(1), did }));
+
+        expect(result).toEqual(new EventIdentifierModel(eventIdentifier));
       });
     });
   });

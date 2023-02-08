@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
@@ -17,6 +26,7 @@ import {
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -242,7 +252,7 @@ export class PortfoliosController {
     description:
       'The ID of the portfolio for which details are to be fetched. Use 0 for default Portfolio',
     type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '1',
   })
   @ApiOkResponse({
     description: 'Portfolio details',
@@ -270,7 +280,7 @@ export class PortfoliosController {
     description:
       'The ID of the portfolio for which to set the Custodian. Use 0 for default Portfolio',
     type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '1',
   })
   @ApiTransactionResponse({
     description: 'Information about the transaction',
@@ -370,5 +380,45 @@ export class PortfoliosController {
     const result = await this.portfoliosService.quitCustody(did, id, txBase);
 
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get Portfolio creation event data',
+    description:
+      'The endpoint retrieves the identifier data (block number, date and event index) of the event that was emitted when the given Numbered Portfolio was created. This requires Polymesh GraphQL Middleware Service',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose Portfolio creation event is to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The ID of the portfolio for which Portfolio creation event is to be fetched. Throws an error if default Portfolio (0) details are requested',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Details of event where the Numbered Portfolio was created',
+    type: EventIdentifierModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      "The Portfolio doesn't exist",
+      "The Portfolio hasn't yet been processed by the Middleware",
+    ],
+    [HttpStatus.BAD_REQUEST]: ['Event details for default Portfolio are requested'],
+  })
+  @Get('/identities/:did/portfolios/:id/created-at')
+  async createdAt(@Param() { did, id }: PortfolioDto): Promise<EventIdentifierModel> {
+    const result = await this.portfoliosService.createdAt(did, id);
+
+    if (!result) {
+      throw new NotFoundException("Portfolio data hasn't yet been processed by the middleware");
+    }
+
+    return new EventIdentifierModel(result);
   }
 }

@@ -61,7 +61,8 @@ $ yarn test:cov
 ```bash
 PORT=## port in which the server will listen. Defaults to 3000 ##
 POLYMESH_NODE_URL=## websocket URL for a Polymesh node ##
-POLYMESH_MIDDLEWARE_URL=## URL for an instance of the Polymesh GraphQL Middleware service ##
+POLYMESH_MIDDLEWARE_V2_URL=## URL for an instance of the Polymesh GraphQL Middleware Native SubQuery service ##
+POLYMESH_MIDDLEWARE_URL=## URL for an instance of the Polymesh GraphQL Middleware service @deprecated in favour of POLYMESH_MIDDLEWARE_V2_URL##
 POLYMESH_MIDDLEWARE_API_KEY=## API key for the Middleware GraphQL service ##
 LOCAL_SIGNERS=## list of comma separated IDs to refer to the corresponding mnemonic ##
 LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (each mnemonic corresponds to a signer in LOCAL_SIGNERS) ##

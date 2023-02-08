@@ -421,4 +421,28 @@ describe('PortfoliosService', () => {
       });
     });
   });
+
+  describe('createdAt', () => {
+    it('should throw an error if default Portfolio details are requested', () => {
+      return expect(() => service.createdAt(did, new BigNumber(0))).rejects.toThrowError();
+    });
+
+    describe('otherwise', () => {
+      it('should return the EventIdentifier details for a Portfolio', async () => {
+        const mockResult = {
+          blockNumber: new BigNumber('2719172'),
+          blockHash: 'someHash',
+          blockDate: new Date('2021-06-26T01:47:45.000Z'),
+          eventIndex: new BigNumber(1),
+        };
+        const mockPortfolio = new MockPortfolio();
+        mockPortfolio.createdAt.mockResolvedValue(mockResult);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        jest.spyOn(service, 'findOne').mockResolvedValue(mockPortfolio as any);
+        const result = await service.createdAt(did, new BigNumber(1));
+        expect(result).toEqual(mockResult);
+      });
+    });
+  });
 });

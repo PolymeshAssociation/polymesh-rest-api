@@ -3,6 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
   DefaultPortfolio,
+  EventIdentifier,
   HistoricSettlement,
   NumberedPortfolio,
   PaginationOptions,
@@ -155,5 +156,13 @@ export class PortfoliosService {
     const portfolio = await this.findOne(did, id);
 
     return this.transactionsService.submit(portfolio.quitCustody, {}, args);
+  }
+
+  public async createdAt(did: string, portfolioId: BigNumber): Promise<EventIdentifier | null> {
+    if (portfolioId.lte(0)) {
+      throw new AppValidationError('Cannot get event details for Default Portfolio');
+    }
+    const portfolio = await this.findOne(did, portfolioId);
+    return portfolio.createdAt();
   }
 }

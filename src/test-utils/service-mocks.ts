@@ -165,6 +165,7 @@ export class MockPortfoliosService {
   getCustodiedPortfolios = jest.fn();
   getTransactions = jest.fn();
   findOne = jest.fn();
+  createdAt = jest.fn();
   setCustodian = jest.fn();
   quitCustody = jest.fn();
 }

@@ -285,6 +285,7 @@ export class MockPortfolio {
   id = new BigNumber(1);
   owner = new MockIdentity();
   public getName = jest.fn();
+  public createdAt = jest.fn();
   public getAssetBalances = jest.fn();
   public isCustodiedBy = jest.fn();
   public getCustodian = jest.fn();
