@@ -1,4 +1,3 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ErrorCode,
