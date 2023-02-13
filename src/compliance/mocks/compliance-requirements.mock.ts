@@ -9,7 +9,6 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { testValues } from '~/test-utils/consts';
-
 export class MockComplianceRequirements {
   requirements = [
     {

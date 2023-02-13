@@ -1,10 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
 import { filter, pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
+import { AppNotFoundError } from '~/common/errors';
 import { generateBase64Secret } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { ScheduleService } from '~/schedule/schedule.service';
@@ -73,7 +74,7 @@ export class SubscriptionsService {
     const sub = this.subscriptions[id];
 
     if (!sub) {
-      throw new NotFoundException(`There is no subscription with ID "${id}"`);
+      throw new AppNotFoundError('subscription', id.toString());
     }
 
     return sub;

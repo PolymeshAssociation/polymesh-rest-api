@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionStatus, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AppNotFoundError } from '~/common/errors';
 import { TransactionType } from '~/common/types';
 import { EventEntity } from '~/events/entities/event.entity';
 import { EventsService } from '~/events/events.service';
@@ -106,7 +107,7 @@ describe('EventsService', () => {
     });
 
     it('should throw an error if the event does not exist', () => {
-      return expect(service.findOne(10)).rejects.toThrow('There is no event with ID "10"');
+      return expect(service.findOne(10)).rejects.toThrow(AppNotFoundError);
     });
   });
 });

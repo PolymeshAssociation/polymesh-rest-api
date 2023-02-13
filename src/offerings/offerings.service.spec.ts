@@ -1,9 +1,9 @@
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { OfferingTimingStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { AppNotFoundError } from '~/common/errors';
 import { MockOfferingWithDetails } from '~/offerings/mocks/offering-with-details.mock';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { MockAsset } from '~/test-utils/mocks';
@@ -82,7 +82,7 @@ describe('OfferingsService', () => {
 
   describe('findOne', () => {
     describe('if the offering is not found', () => {
-      it('should throw a NotFoundException', async () => {
+      it('should throw a AppNotFoundError', async () => {
         const findSpy = jest.spyOn(service, 'findAllByTicker');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findSpy.mockResolvedValue([mockOfferingWithDetails] as any);
@@ -93,7 +93,7 @@ describe('OfferingsService', () => {
         } catch (err) {
           error = err;
         }
-        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error).toBeInstanceOf(AppNotFoundError);
       });
     });
     describe('otherwise', () => {

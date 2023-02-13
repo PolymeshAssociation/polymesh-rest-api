@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
@@ -16,6 +16,7 @@ import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
+import { AppNotFoundError } from '~/common/errors';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
@@ -40,7 +41,7 @@ export class AssetsService {
     const isDidValid = await polymeshApi.identities.isIdentityValid({ identity: owner });
 
     if (!isDidValid) {
-      throw new NotFoundException(`There is no identity with DID ${owner}`);
+      throw new AppNotFoundError(owner, 'identity');
     }
 
     return polymeshApi.assets.getAssets({ owner });

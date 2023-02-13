@@ -1,14 +1,9 @@
-import {
-  BadRequestException,
-  HttpException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AddressOrPair, AugmentedSubmittable, SubmittableExtrinsic } from '@polkadot/api/types';
 import { ISubmittableResult } from '@polkadot/types/types';
 import { Polymesh } from '@polymeshassociation/polymesh-sdk';
 
+import { AppError, AppInternalError, AppValidationError } from '~/common/errors';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { ScheduleService } from '~/schedule/schedule.service';
 
@@ -59,21 +54,21 @@ export class PolymeshService {
   private handlePolkadotErrors(
     receipt: ISubmittableResult,
     method: string,
-    reject: (reason: HttpException) => void
+    reject: (reason: AppError) => void
   ): void {
     const hasError = !!receipt.findRecord('system', 'ExtrinsicFailed') || receipt.isError;
     if (hasError) {
-      let exception: HttpException;
+      let exception: AppError;
       if (method === 'mockCddRegisterDid') {
-        exception = new BadRequestException(
+        exception = new AppValidationError(
           'Unable to create mock Identity. Perhaps the address is already linked to an Identity or mock CDD claims are unable to be made on the chain'
         );
       } else if (method === 'sudo') {
-        exception = new InternalServerErrorException(
+        exception = new AppInternalError(
           'Unable to execute a sudo transaction. Perhaps the signer lacks permission'
         );
       } else {
-        exception = new InternalServerErrorException('Unable to process the request');
+        exception = new AppInternalError('Unable to process the request');
       }
       reject(exception);
     }

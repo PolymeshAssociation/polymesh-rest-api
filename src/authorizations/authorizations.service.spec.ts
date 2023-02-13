@@ -1,7 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { AuthorizationType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
@@ -9,6 +8,7 @@ import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
+import { AppNotFoundError } from '~/common/errors';
 import { IdentitiesService } from '~/identities/identities.service';
 import { testValues } from '~/test-utils/consts';
 import {
@@ -231,15 +231,15 @@ describe('AuthorizationsService', () => {
       when(findOneSpy)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .calledWith(mockIdentity as any, id)
-        .mockRejectedValue(new NotFoundException());
+        .mockRejectedValue(new AppNotFoundError('1', 'test'));
 
       when(findOneSpy)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .calledWith(mockAccount as any, id)
-        .mockRejectedValue(new NotFoundException());
+        .mockRejectedValue(new AppNotFoundError('1', 'test'));
 
       await expect(() => service.getAuthRequest(address, id)).rejects.toBeInstanceOf(
-        NotFoundException
+        AppNotFoundError
       );
     });
 
@@ -271,7 +271,7 @@ describe('AuthorizationsService', () => {
       when(findOneSpy)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .calledWith(mockIdentity as any, id)
-        .mockRejectedValue(new NotFoundException());
+        .mockRejectedValue(new AppNotFoundError('1', 'test'));
 
       result = await service.getAuthRequest(address, id);
       expect(result).toBe(mockAuthorizationRequest);

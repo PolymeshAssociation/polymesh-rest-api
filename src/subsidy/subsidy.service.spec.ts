@@ -2,13 +2,13 @@
 const mockIsPolymeshTransaction = jest.fn();
 
 import { DeepMocked } from '@golevelup/ts-jest';
-import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { AllowanceOperation, Subsidy, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { AppValidationError } from '~/common/errors';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -212,7 +212,7 @@ describe('SubsidyService', () => {
       mockTransactionsService.getSigningAccount.mockResolvedValueOnce('address');
 
       return expect(() => service.quit({ signer: 'signer' })).rejects.toBeInstanceOf(
-        BadRequestException
+        AppValidationError
       );
     });
 
@@ -221,7 +221,7 @@ describe('SubsidyService', () => {
 
       return expect(() =>
         service.quit({ signer: 'signer', beneficiary, subsidizer })
-      ).rejects.toBeInstanceOf(BadRequestException);
+      ).rejects.toBeInstanceOf(AppValidationError);
     });
   });
 
