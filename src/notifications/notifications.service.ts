@@ -1,10 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
 import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
+import { AppNotFoundError } from '~/common/errors';
 import { EventsService } from '~/events/events.service';
 import { EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -48,7 +49,7 @@ export class NotificationsService {
     const notification = this.notifications[id];
 
     if (!notification) {
-      throw new NotFoundException(`There is no notification with ID "${id}"`);
+      throw new AppNotFoundError(id.toString(), 'notification');
     }
 
     return notification;

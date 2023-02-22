@@ -1,7 +1,6 @@
 /* eslint-disable import/first */
 const mockIsPolymeshTransaction = jest.fn();
 
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { KnownAssetType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
@@ -10,6 +9,7 @@ import { when } from 'jest-when';
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { AppNotFoundError } from '~/common/errors';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -95,7 +95,7 @@ describe('AssetsService', () => {
 
   describe('findAllByOwner', () => {
     describe('if the identity does not exist', () => {
-      it('should throw a NotFoundException', async () => {
+      it('should throw a AppNotFoundError', async () => {
         mockPolymeshApi.identities.isIdentityValid.mockResolvedValue(false);
 
         let error;
@@ -105,7 +105,7 @@ describe('AssetsService', () => {
           error = err;
         }
 
-        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error).toBeInstanceOf(AppNotFoundError);
       });
     });
     describe('otherwise', () => {

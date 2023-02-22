@@ -5,6 +5,8 @@ export enum AppErrorCode {
   Conflict = 'Conflict',
   Config = 'Config',
   Validation = 'Validation',
+  Unauthorized = 'Unauthorized',
+  Unprocessable = 'Unprocessable',
   Internal = 'Internal',
 }
 
@@ -16,7 +18,9 @@ export class AppNotFoundError extends AppError {
   public readonly code = AppErrorCode.NotFound;
 
   constructor(id: string, resource: string) {
-    super(`${resource} not found with identifier: "${id}"`);
+    const identifierMessage = id !== '' ? `: with identifier: "${id}"` : '';
+
+    super(`Not Found: ${resource} was not found${identifierMessage}`);
   }
 }
 
@@ -24,7 +28,7 @@ export class AppConflictError extends AppError {
   public readonly code = AppErrorCode.Conflict;
 
   constructor(id: string, resource: string) {
-    super(`${resource} already exists with unique identifier: "${id}"`);
+    super(`Conflict: ${resource} already exists with unique identifier: "${id}"`);
   }
 }
 
@@ -32,21 +36,38 @@ export class AppConfigError extends AppError {
   public readonly code = AppErrorCode.Config;
 
   constructor(key: string, message: string) {
-    super(`Config error: ${key}: ${message}`);
+    super(`Config: ${key}: ${message}`);
   }
 }
 export class AppValidationError extends AppError {
   public readonly code = AppErrorCode.Validation;
 
   constructor(message: string) {
-    super(`Validation error: ${message}`);
+    super(`Validation: ${message}`);
   }
 }
+
+export class AppUnauthorizedError extends AppError {
+  public readonly code = AppErrorCode.Unauthorized;
+
+  constructor(message: string) {
+    super(`Unauthorized: ${message}`);
+  }
+}
+
+export class AppUnprocessableError extends AppError {
+  public readonly code = AppErrorCode.Unprocessable;
+
+  constructor(message: string) {
+    super(`Unprocessable: ${message}`);
+  }
+}
+
 export class AppInternalError extends AppError {
   public readonly code = AppErrorCode.Internal;
 
   constructor(message: string) {
-    super(`Internal Error: ${message}`);
+    super(`Internal: ${message}`);
   }
 }
 

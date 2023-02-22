@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AllowanceOperation,
@@ -8,6 +8,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { AppValidationError } from '~/common/errors';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
@@ -55,13 +56,13 @@ export class SubsidyService {
 
     let subsidy: Subsidy;
     if (beneficiary && subsidizer) {
-      throw new BadRequestException('Only beneficiary or subsidizer should be provided');
+      throw new AppValidationError('Only beneficiary or subsidizer should be provided');
     } else if (beneficiary) {
       subsidy = this.findOne(beneficiary, address);
     } else if (subsidizer) {
       subsidy = this.findOne(address, subsidizer);
     } else {
-      throw new BadRequestException('Either beneficiary or subsidizer should be provided');
+      throw new AppValidationError('Either beneficiary or subsidizer should be provided');
     }
 
     return this.transactionsService.submit(subsidy.quit, {}, base);

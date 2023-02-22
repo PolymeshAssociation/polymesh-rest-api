@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Account,
@@ -10,6 +10,7 @@ import {
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { AppNotFoundError } from '~/common/errors';
 import { ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -63,7 +64,7 @@ export class AuthorizationsService {
     let authRequest: AuthorizationRequest | undefined;
     if (identity) {
       authRequest = await this.findOne(identity, id).catch(error => {
-        if (error instanceof NotFoundException) {
+        if (error instanceof AppNotFoundError) {
           return undefined;
         } else {
           throw error;

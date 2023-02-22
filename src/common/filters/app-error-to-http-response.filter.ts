@@ -44,6 +44,10 @@ export class AppErrorToHttpResponseFilter implements ExceptionFilter {
         return HttpStatus.INTERNAL_SERVER_ERROR;
       case AppErrorCode.Validation:
         return HttpStatus.BAD_REQUEST;
+      case AppErrorCode.Unauthorized:
+        return HttpStatus.UNAUTHORIZED;
+      case AppErrorCode.Unprocessable:
+        return HttpStatus.UNPROCESSABLE_ENTITY;
       default:
         throw new UnreachableCaseError(code);
     }

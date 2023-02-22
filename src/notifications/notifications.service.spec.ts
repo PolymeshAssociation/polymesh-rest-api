@@ -5,6 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AppNotFoundError } from '~/common/errors';
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
 import { EventType } from '~/events/types';
@@ -109,7 +110,7 @@ describe('NotificationsService', () => {
     });
 
     it('should throw an error if there is no notification with the passed ID', () => {
-      return expect(service.findOne(10)).rejects.toThrow('There is no notification with ID "10"');
+      return expect(service.findOne(10)).rejects.toThrow(AppNotFoundError);
     });
   });
 

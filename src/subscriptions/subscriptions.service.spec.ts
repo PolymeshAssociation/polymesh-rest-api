@@ -5,6 +5,7 @@ const mockRandomBytes = jest.fn();
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { AppNotFoundError } from '~/common/errors';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { ScheduleService } from '~/schedule/schedule.service';
@@ -142,7 +143,7 @@ describe('SubscriptionsService', () => {
     });
 
     it('should throw an error if there is no subscription with the passed id', () => {
-      return expect(service.findOne(4)).rejects.toThrow('There is no subscription with ID "4"');
+      return expect(service.findOne(4)).rejects.toThrow(AppNotFoundError);
     });
   });
 
