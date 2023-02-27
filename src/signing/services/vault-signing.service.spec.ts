@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
 
+import { AppNotFoundError } from '~/common/errors';
 import { LoggerModule } from '~/logger/logger.module';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -83,9 +84,7 @@ describe('VaultSigningService', () => {
     });
 
     it('should throw if an Account is not found', () => {
-      return expect(service.getAddressByHandle('badId')).rejects.toThrowError(
-        'There is no signer associated to "badId'
-      );
+      return expect(service.getAddressByHandle('badId')).rejects.toBeInstanceOf(AppNotFoundError);
     });
   });
 });

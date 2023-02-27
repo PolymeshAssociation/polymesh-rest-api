@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { SigningManager } from '@polymeshassociation/signing-manager-types';
 
+import { AppNotFoundError } from '~/common/errors';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
@@ -15,6 +16,6 @@ export abstract class SigningService {
   }
 
   protected throwNoSigner(handle: string): never {
-    throw new NotFoundException(`There is no signer associated to "${handle}"`);
+    throw new AppNotFoundError(handle, 'signer');
   }
 }

@@ -1,9 +1,3 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ErrorCode,
@@ -21,6 +15,12 @@ import {
   isPolymeshTransactionBatch,
 } from '@polymeshassociation/polymesh-sdk/utils';
 
+import {
+  AppInternalError,
+  AppNotFoundError,
+  AppUnprocessableError,
+  AppValidationError,
+} from '~/common/errors';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 
@@ -151,21 +151,21 @@ export function handleSdkError(err: unknown): never {
       case ErrorCode.NoDataChange:
       case ErrorCode.ValidationError:
       case ErrorCode.EntityInUse:
-        throw new BadRequestException(message);
+        throw new AppValidationError(message);
       case ErrorCode.InsufficientBalance:
       case ErrorCode.UnmetPrerequisite:
       case ErrorCode.LimitExceeded:
-        throw new UnprocessableEntityException(message);
+        throw new AppUnprocessableError(message);
       case ErrorCode.DataUnavailable:
-        throw new NotFoundException(message);
+        throw new AppNotFoundError(message, '');
       default:
-        throw new InternalServerErrorException(message);
+        throw new AppInternalError(message);
     }
   }
 
   if (err instanceof Error) {
-    throw new InternalServerErrorException(err.message);
+    throw new AppInternalError(err.message);
   }
 
-  throw new InternalServerErrorException('An unexpected error occurred');
+  throw new AppInternalError('An unexpected error occurred');
 }

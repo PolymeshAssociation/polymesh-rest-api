@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   OfferingStatus,
@@ -7,6 +7,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { AppNotFoundError } from '~/common/errors';
 import { InvestmentModel } from '~/offerings/models/investment.model';
 
 @Injectable()
@@ -25,7 +26,7 @@ export class OfferingsService {
     const offerings = await this.findAllByTicker(ticker);
     const offering = offerings.find(({ offering: { id: offeringId } }) => offeringId.eq(id));
     if (!offering) {
-      throw new NotFoundException(`Offering with ID "${id}" for Asset "${ticker}" was not found`);
+      throw new AppNotFoundError(id.toString(), `Asset "${ticker}" Offering`);
     }
     return offering;
   }

@@ -239,7 +239,7 @@ describe('PortfoliosController', () => {
   });
 
   describe('createdAt', () => {
-    it('should throw NotFoundException if the event details are not yet ready', () => {
+    it('should throw AppNotFoundError if the event details are not yet ready', () => {
       mockPortfoliosService.createdAt.mockResolvedValue(null);
 
       return expect(() =>

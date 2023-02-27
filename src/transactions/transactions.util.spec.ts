@@ -1,15 +1,15 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
-import {
-  BadRequestException,
-  HttpException,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
 import { ErrorCode } from '@polymeshassociation/polymesh-sdk/types';
 
+import {
+  AppError,
+  AppInternalError,
+  AppNotFoundError,
+  AppUnprocessableError,
+  AppValidationError,
+} from '~/common/errors';
 import { Class } from '~/common/types';
 import { MockVenue } from '~/test-utils/mocks';
 import { prepareProcedure, processTransaction } from '~/transactions/transactions.util';
@@ -21,13 +21,13 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
 
 describe('processTransaction', () => {
   describe('it should handle Polymesh errors', () => {
-    type Case = [ErrorCode, Class<HttpException>];
+    type Case = [ErrorCode, Class<AppError>];
     const cases: Case[] = [
-      [ErrorCode.ValidationError, BadRequestException],
-      [ErrorCode.UnmetPrerequisite, UnprocessableEntityException],
-      [ErrorCode.InsufficientBalance, UnprocessableEntityException],
-      [ErrorCode.DataUnavailable, NotFoundException],
-      [ErrorCode.FatalError, InternalServerErrorException],
+      [ErrorCode.ValidationError, AppValidationError],
+      [ErrorCode.UnmetPrerequisite, AppUnprocessableError],
+      [ErrorCode.InsufficientBalance, AppUnprocessableError],
+      [ErrorCode.DataUnavailable, AppNotFoundError],
+      [ErrorCode.FatalError, AppInternalError],
     ];
     test.each(cases)('should transform %p into %p', async (code, expected) => {
       const mockVenue = new MockVenue();
@@ -49,7 +49,7 @@ describe('processTransaction', () => {
   });
 
   describe('it should handle non polymesh errors', () => {
-    it('should transform errors into InternalServerException', async () => {
+    it('should transform errors into AppInternalError', async () => {
       const mockVenue = new MockVenue();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = processTransaction(mockVenue.modify as any, {}, {});
@@ -58,14 +58,14 @@ describe('processTransaction', () => {
         throw new Error('Foo');
       });
 
-      await expect(result).rejects.toBeInstanceOf(InternalServerErrorException);
+      await expect(result).rejects.toBeInstanceOf(AppInternalError);
 
       mockVenue.modify.mockImplementationOnce(() => {
         // eslint-disable-next-line no-throw-literal
         throw 'Some unexpected error';
       });
 
-      await expect(result).rejects.toBeInstanceOf(InternalServerErrorException);
+      await expect(result).rejects.toBeInstanceOf(AppInternalError);
     });
   });
 });

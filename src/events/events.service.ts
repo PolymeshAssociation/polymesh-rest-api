@@ -1,5 +1,6 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
+import { AppNotFoundError } from '~/common/errors';
 import { EventEntity } from '~/events/entities/event.entity';
 import { NotificationsService } from '~/notifications/notifications.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
@@ -51,7 +52,7 @@ export class EventsService {
     const event = this.events[id];
 
     if (!event) {
-      throw new NotFoundException(`There is no event with ID "${id}"`);
+      throw new AppNotFoundError(id.toString(), 'event');
     }
 
     return event;

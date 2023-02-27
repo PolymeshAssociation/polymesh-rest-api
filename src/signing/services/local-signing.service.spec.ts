@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 
+import { AppNotFoundError } from '~/common/errors';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -60,9 +61,7 @@ describe('LocalSigningService', () => {
     });
 
     it('should throw if an Account is not loaded', () => {
-      expect(() => service.getAddressByHandle('badId')).toThrowError(
-        'There is no signer associated to "badId"'
-      );
+      expect(() => service.getAddressByHandle('badId')).toThrow(AppNotFoundError);
     });
   });
 });

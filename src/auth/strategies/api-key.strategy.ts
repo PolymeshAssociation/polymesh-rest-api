@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 
 import { AuthService } from '~/auth/auth.service';
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
+import { AppUnauthorizedError } from '~/common/errors';
 
 export const apiKeyHeader = 'x-api-key';
 
@@ -19,7 +20,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, AuthS
     super({ header: apiKeyHeader }, false, (apiKey: string, done: Callback) => {
       const user = this.authService.validateApiKey(apiKey);
       if (!user) {
-        return done(new UnauthorizedException('API key not found'), undefined);
+        return done(new AppUnauthorizedError('API key not found'), undefined);
       }
       return done(null, user);
     });
