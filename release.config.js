@@ -16,7 +16,7 @@ module.exports = {
     [
       '@semantic-release/github',
       {
-        assets: ['CHANGELOG.md'],
+        assets: ['CHANGELOG.md', 'swagger-spec.json'],
       },
     ],
   ],
