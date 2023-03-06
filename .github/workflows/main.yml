@@ -67,6 +67,8 @@ jobs:
           cache: 'yarn'
       - name: install dependencies
         run: yarn --frozen-lockfile
+      - name: Generate Swagger file
+        run: yarn generate:swagger
       - name: release
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}

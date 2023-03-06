@@ -4,7 +4,6 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import fs from 'fs';
 
 import { AppModule } from '~/app.module';
 import { parseAuthStrategyConfig } from '~/auth/auth.utils';
@@ -60,7 +59,6 @@ async function bootstrap(): Promise<void> {
   if (isApiKeyStrategyConfigured) {
     document.security = [{ api_key: [] }]; // Apply the API key globally to all operations
   }
-  fs.writeFileSync('./swagger-spec.json', JSON.stringify(document));
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen
