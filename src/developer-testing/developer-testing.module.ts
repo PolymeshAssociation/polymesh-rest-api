@@ -14,8 +14,7 @@ export class DeveloperTestingModule {
   static register(): DynamicModule {
     const controllers = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const DEVELOPER_UTILS: boolean = JSON.parse(process.env.DEVELOPER_UTILS!);
+    const DEVELOPER_UTILS: boolean = JSON.parse(`${!!process.env.DEVELOPER_UTILS}`);
 
     if (DEVELOPER_UTILS) {
       controllers.push(DeveloperTestingController);
