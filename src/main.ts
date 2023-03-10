@@ -59,7 +59,6 @@ async function bootstrap(): Promise<void> {
   if (isApiKeyStrategyConfigured) {
     document.security = [{ api_key: [] }]; // Apply the API key globally to all operations
   }
-
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen

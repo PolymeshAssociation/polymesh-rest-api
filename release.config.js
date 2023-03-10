@@ -14,9 +14,28 @@ module.exports = {
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
     [
+      '@semantic-release/exec',
+      {
+        // eslint-disable-next-line no-template-curly-in-string
+        prepareCmd: './prepareRelease.sh ${nextRelease.version}',
+      },
+    ],
+    [
+      '@semantic-release/npm',
+      {
+        npmPublish: false,
+      },
+    ],
+    [
+      '@semantic-release/git',
+      {
+        assets: ['package.json', 'src/main.ts'],
+      },
+    ],
+    [
       '@semantic-release/github',
       {
-        assets: ['CHANGELOG.md'],
+        assets: ['CHANGELOG.md', 'polymesh-rest-api-swagger-spec.json'],
       },
     ],
   ],
