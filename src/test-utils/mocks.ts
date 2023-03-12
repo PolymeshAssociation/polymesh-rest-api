@@ -79,6 +79,7 @@ export class MockPolymesh {
     getSs58Format: jest.fn(),
     getNetworkProperties: jest.fn(),
     getTreasuryAccount: jest.fn(),
+    getTransactionByHash: jest.fn(),
   };
 
   public assets = {

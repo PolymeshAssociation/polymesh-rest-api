@@ -1,3 +1,6 @@
+/* eslint-disable import/first */
+const mockHexStripPrefix = jest.fn().mockImplementation(params => params);
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
@@ -6,8 +9,13 @@ import { NetworkService } from '~/network/network.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { testValues } from '~/test-utils/consts';
+import { extrinsicWithFees, testValues } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
+
+jest.mock('@polkadot/util', () => ({
+  ...jest.requireActual('@polkadot/util'),
+  hexStripPrefix: mockHexStripPrefix,
+}));
 
 describe('NetworkService', () => {
   let networkService: NetworkService;
@@ -70,6 +78,16 @@ describe('NetworkService', () => {
       const result = networkService.getTreasuryAccount();
 
       expect(result).toBe(testAccount);
+    });
+  });
+
+  describe('getTransactionByHash', () => {
+    it('should return the extrinsic details', async () => {
+      mockPolymeshApi.network.getTransactionByHash.mockReturnValue(extrinsicWithFees);
+
+      const result = await networkService.getTransactionByHash('someHash');
+
+      expect(result).toEqual(extrinsicWithFees);
     });
   });
 });
