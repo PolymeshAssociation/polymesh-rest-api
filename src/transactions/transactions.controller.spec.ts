@@ -1,11 +1,9 @@
 import { DeepMocked } from '@golevelup/ts-jest';
-import { HttpStatus } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Response } from 'express';
 
 import { NetworkService } from '~/network/network.service';
 import { extrinsicWithFees } from '~/test-utils/consts';
-import { createMockResponseObject } from '~/test-utils/mocks';
 import { mockNetworkServiceProvider } from '~/test-utils/service-mocks';
 import { ExtrinsicDetailsModel } from '~/transactions/models/extrinsic-details.model';
 import { TransactionsController } from '~/transactions/transactions.controller';
@@ -30,26 +28,22 @@ describe('TransactionsController', () => {
   });
 
   describe('getTransactionByHash', () => {
-    let mockResponse: DeepMocked<Response>;
-
-    beforeEach(() => {
-      mockResponse = createMockResponseObject();
-    });
-    it(`should return the ${HttpStatus.NO_CONTENT} if the no transaction is found for given hash`, async () => {
+    it('should throw NotFoundException if the transaction details are not found', () => {
       mockNetworkService.getTransactionByHash.mockResolvedValue(null);
 
-      await controller.getTransactionByHash({ hash: 'someHash' }, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.NO_CONTENT);
+      return expect(() =>
+        controller.getTransactionByHash({ hash: 'someHash' })
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should return the extrinsic details', async () => {
-      mockNetworkService.getTransactionByHash.mockResolvedValue(extrinsicWithFees);
+    describe('otherwise', () => {
+      it('should return the transaction details', async () => {
+        mockNetworkService.getTransactionByHash.mockResolvedValue(extrinsicWithFees);
 
-      await controller.getTransactionByHash({ hash: 'someHash' }, mockResponse);
+        const result = await controller.getTransactionByHash({ hash: 'someHash' });
 
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK);
-      expect(mockResponse.json).toHaveBeenCalledWith(new ExtrinsicDetailsModel(extrinsicWithFees));
+        expect(result).toEqual(new ExtrinsicDetailsModel(extrinsicWithFees));
+      });
     });
   });
 });

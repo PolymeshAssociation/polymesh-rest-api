@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 
-import { IsString } from 'class-validator';
+import { IsHexadecimal } from 'class-validator';
 
 export class TransactionHashParamsDto {
-  @IsString()
+  @IsHexadecimal()
   readonly hash: string;
 }
