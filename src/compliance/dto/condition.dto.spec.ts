@@ -81,7 +81,7 @@ describe('conditionDto', () => {
       [
         'IsPresent without `target`',
         { type: ConditionType.IsPresent, claim: validClaim },
-        ['target must be a valid enum value'],
+        ['target must be one of the following values: Sender, Receiver, Both'],
       ],
       [
         'IsPresent without `claim`',
