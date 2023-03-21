@@ -39,7 +39,7 @@ async function bootstrap(): Promise<void> {
   const options = new DocumentBuilder()
     .setTitle('Polymesh REST API')
     .setDescription('RESTful access to the Polymesh blockchain')
-    .setVersion('2.5.0-alpha.3.17');
+    .setVersion('2.5.0-alpha.3.18');
 
   const configService = app.get<ConfigService>(ConfigService);
 
