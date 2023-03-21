@@ -203,7 +203,7 @@ describe('addSecondaryAccountParamsDto', () => {
           },
           signer,
         },
-        ['permissions.assets.type must be a valid enum value'],
+        ['permissions.assets.type must be one of the following values: Include, Exclude'],
       ],
       [
         'Invite with assets permission with incorrect ticker value',
@@ -270,7 +270,9 @@ describe('addSecondaryAccountParamsDto', () => {
           },
           signer,
         },
-        ['permissions.each value in transactionGroups must be a valid enum value'],
+        [
+          'permissions.each value in transactionGroups must be one of the following values: PortfolioManagement, AssetManagement, AdvancedAssetManagement, Distribution, Issuance, TrustedClaimIssuersManagement, ClaimsManagement, ComplianceRequirementsManagement, CorporateActionsManagement, StoManagement',
+        ],
       ],
       [
         'Invite with transactions permissions with incorrect TxTags',

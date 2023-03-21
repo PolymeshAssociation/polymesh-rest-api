@@ -130,7 +130,9 @@ describe('claimsDto', () => {
           type: ClaimType.Jurisdiction,
           scope,
         },
-        ['code must be a valid enum value'],
+        [
+          'code must be one of the following values: Af, Ax, Al, Dz, As, Ad, Ao, Ai, Aq, Ag, Ar, Am, Aw, Au, At, Az, Bs, Bh, Bd, Bb, By, Be, Bz, Bj, Bm, Bt, Bo, Ba, Bw, Bv, Br, Vg, Io, Bn, Bg, Bf, Bi, Kh, Cm, Ca, Cv, Ky, Cf, Td, Cl, Cn, Hk, Mo, Cx, Cc, Co, Km, Cg, Cd, Ck, Cr, Ci, Hr, Cu, Cy, Cz, Dk, Dj, Dm, Do, Ec, Eg, Sv, Gq, Er, Ee, Et, Fk, Fo, Fj, Fi, Fr, Gf, Pf, Tf, Ga, Gm, Ge, De, Gh, Gi, Gr, Gl, Gd, Gp, Gu, Gt, Gg, Gn, Gw, Gy, Ht, Hm, Va, Hn, Hu, Is, In, Id, Ir, Iq, Ie, Im, Il, It, Jm, Jp, Je, Jo, Kz, Ke, Ki, Kp, Kr, Kw, Kg, La, Lv, Lb, Ls, Lr, Ly, Li, Lt, Lu, Mk, Mg, Mw, My, Mv, Ml, Mt, Mh, Mq, Mr, Mu, Yt, Mx, Fm, Md, Mc, Mn, Me, Ms, Ma, Mz, Mm, Na, Nr, Np, Nl, An, Nc, Nz, Ni, Ne, Ng, Nu, Nf, Mp, No, Om, Pk, Pw, Ps, Pa, Pg, Py, Pe, Ph, Pn, Pl, Pt, Pr, Qa, Re, Ro, Ru, Rw, Bl, Sh, Kn, Lc, Mf, Pm, Vc, Ws, Sm, St, Sa, Sn, Rs, Sc, Sl, Sg, Sk, Si, Sb, So, Za, Gs, Ss, Es, Lk, Sd, Sr, Sj, Sz, Se, Ch, Sy, Tw, Tj, Tz, Th, Tl, Tg, Tk, To, Tt, Tn, Tr, Tm, Tc, Tv, Ug, Ua, Ae, Gb, Us, Um, Uy, Uz, Vu, Ve, Vn, Vi, Wf, Eh, Ye, Zm, Zw, Bq, Cw, Sx',
+        ],
       ],
       [
         'Jurisdiction claim with bad `code`',
@@ -139,7 +141,9 @@ describe('claimsDto', () => {
           scope,
           code: '123',
         },
-        ['code must be a valid enum value'],
+        [
+          'code must be one of the following values: Af, Ax, Al, Dz, As, Ad, Ao, Ai, Aq, Ag, Ar, Am, Aw, Au, At, Az, Bs, Bh, Bd, Bb, By, Be, Bz, Bj, Bm, Bt, Bo, Ba, Bw, Bv, Br, Vg, Io, Bn, Bg, Bf, Bi, Kh, Cm, Ca, Cv, Ky, Cf, Td, Cl, Cn, Hk, Mo, Cx, Cc, Co, Km, Cg, Cd, Ck, Cr, Ci, Hr, Cu, Cy, Cz, Dk, Dj, Dm, Do, Ec, Eg, Sv, Gq, Er, Ee, Et, Fk, Fo, Fj, Fi, Fr, Gf, Pf, Tf, Ga, Gm, Ge, De, Gh, Gi, Gr, Gl, Gd, Gp, Gu, Gt, Gg, Gn, Gw, Gy, Ht, Hm, Va, Hn, Hu, Is, In, Id, Ir, Iq, Ie, Im, Il, It, Jm, Jp, Je, Jo, Kz, Ke, Ki, Kp, Kr, Kw, Kg, La, Lv, Lb, Ls, Lr, Ly, Li, Lt, Lu, Mk, Mg, Mw, My, Mv, Ml, Mt, Mh, Mq, Mr, Mu, Yt, Mx, Fm, Md, Mc, Mn, Me, Ms, Ma, Mz, Mm, Na, Nr, Np, Nl, An, Nc, Nz, Ni, Ne, Ng, Nu, Nf, Mp, No, Om, Pk, Pw, Ps, Pa, Pg, Py, Pe, Ph, Pn, Pl, Pt, Pr, Qa, Re, Ro, Ru, Rw, Bl, Sh, Kn, Lc, Mf, Pm, Vc, Ws, Sm, St, Sa, Sn, Rs, Sc, Sl, Sg, Sk, Si, Sb, So, Za, Gs, Ss, Es, Lk, Sd, Sr, Sj, Sz, Se, Ch, Sy, Tw, Tj, Tz, Th, Tl, Tg, Tk, To, Tt, Tn, Tr, Tm, Tc, Tv, Ug, Ua, Ae, Gb, Us, Um, Uy, Uz, Vu, Ve, Vn, Vi, Wf, Eh, Ye, Zm, Zw, Bq, Cw, Sx',
+        ],
       ],
       [
         'Accredited without `scope`',
@@ -154,7 +158,7 @@ describe('claimsDto', () => {
           type: ClaimType.Affiliate,
           scope: { type: 'Wrong', value: 123 },
         },
-        ['scope.type must be a valid enum value'],
+        ['scope.type must be one of the following values: Identity, Ticker, Custom'],
       ],
       [
         'InvestorUniquenessV2 without `cddId`',
@@ -190,7 +194,9 @@ describe('claimsDto', () => {
             },
           ],
         },
-        ['trustedClaimIssuers.0.each value in trustedFor must be a valid enum value'],
+        [
+          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, InvestorUniqueness, NoType, NoData, InvestorUniquenessV2',
+        ],
       ],
     ];
     test.each(cases)('%s', async (_, input, expected) => {
