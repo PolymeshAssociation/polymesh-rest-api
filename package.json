@@ -1,6 +1,6 @@
 {
   "name": "polymesh-rest-api",
-  "version": "2.5.0-alpha.3.16",
+  "version": "2.5.0-alpha.3.17",
   "description": "Provides a REST like interface for interacting with the Polymesh blockchain",
   "author": "Polymesh Association",
   "private": true,
