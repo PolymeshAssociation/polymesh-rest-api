@@ -40,6 +40,10 @@ function toHumanObject(obj: unknown): unknown {
     return obj.map(toHumanObject);
   }
 
+  if (obj instanceof Date) {
+    return obj.toISOString();
+  }
+
   if (obj instanceof BigNumber && !obj.isNaN()) {
     return obj.toString();
   }
