@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { hexStripPrefix } from '@polkadot/util';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Account } from '@polymeshassociation/polymesh-sdk/types';
+import { Account, ExtrinsicDataWithFees } from '@polymeshassociation/polymesh-sdk/types';
 
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -19,5 +20,11 @@ export class NetworkService {
 
   public getTreasuryAccount(): Account {
     return this.polymeshService.polymeshApi.network.getTreasuryAccount();
+  }
+
+  public getTransactionByHash(hash: string): Promise<ExtrinsicDataWithFees | null> {
+    return this.polymeshService.polymeshApi.network.getTransactionByHash({
+      txHash: hexStripPrefix(hash),
+    });
   }
 }

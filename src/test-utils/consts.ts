@@ -4,6 +4,7 @@ import {
   Account,
   PayingAccountType,
   TransactionStatus,
+  TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
@@ -60,4 +61,31 @@ export const testValues = {
   txResult,
   dryRun,
   ticker,
+};
+
+export const extrinsic = {
+  blockHash: 'blockHash',
+  blockNumber: new BigNumber(1000000),
+  extrinsicIdx: new BigNumber(1),
+  address: 'someAccount',
+  nonce: new BigNumber(123456),
+  txTag: TxTags.asset.RegisterTicker,
+  params: [
+    {
+      name: 'ticker',
+      value: 'TICKER',
+    },
+  ],
+  success: true,
+  specVersionId: new BigNumber(3002),
+  extrinsicHash: 'extrinsicHash',
+};
+
+export const extrinsicWithFees = {
+  ...extrinsic,
+  fee: {
+    gas: new BigNumber('1.234'),
+    protocol: new BigNumber(0),
+    total: new BigNumber('1.234'),
+  },
 };
