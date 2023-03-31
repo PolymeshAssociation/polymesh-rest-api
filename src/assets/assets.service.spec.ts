@@ -249,7 +249,6 @@ describe('AssetsService', () => {
       ticker: 'TICKER',
       isDivisible: false,
       assetType: KnownAssetType.EquityCommon,
-      requireInvestorUniqueness: false,
     };
 
     it('should create the asset', async () => {
