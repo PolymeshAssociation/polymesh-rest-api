@@ -227,7 +227,6 @@ describe('AssetsController', () => {
         ticker: 'TICKER',
         isDivisible: false,
         assetType: KnownAssetType.EquityCommon,
-        requireInvestorUniqueness: false,
       };
       mockAssetsService.createAsset.mockResolvedValue(txResult);
 
