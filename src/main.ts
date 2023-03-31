@@ -39,7 +39,7 @@ async function bootstrap(): Promise<void> {
   const options = new DocumentBuilder()
     .setTitle('Polymesh REST API')
     .setDescription('RESTful access to the Polymesh blockchain')
-    .setVersion('1.0');
+    .setVersion('3.0.0-alpha.1');
 
   const configService = app.get<ConfigService>(ConfigService);
 
@@ -59,7 +59,6 @@ async function bootstrap(): Promise<void> {
   if (isApiKeyStrategyConfigured) {
     document.security = [{ api_key: [] }]; // Apply the API key globally to all operations
   }
-
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen

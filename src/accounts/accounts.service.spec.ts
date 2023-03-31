@@ -13,7 +13,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningModule } from '~/signing/signing.module';
-import { testValues } from '~/test-utils/consts';
+import { extrinsic, testValues } from '~/test-utils/consts';
 import { MockAccount, MockAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
@@ -133,25 +133,7 @@ describe('AccountsService', () => {
 
   describe('getTransactionHistory', () => {
     const mockTransactions = {
-      data: [
-        {
-          blockHash: 'blockHash',
-          blockNumber: new BigNumber(1000000),
-          extrinsicIdx: new BigNumber(1),
-          address: 'someAccount',
-          nonce: new BigNumber(123456),
-          txTag: TxTags.asset.RegisterTicker,
-          params: [
-            {
-              name: 'ticker',
-              value: 'TICKER',
-            },
-          ],
-          success: true,
-          specVersionId: new BigNumber(3002),
-          extrinsicHash: 'extrinsicHash',
-        },
-      ],
+      data: [extrinsic],
       next: null,
       count: new BigNumber(1),
     };

@@ -15,7 +15,7 @@ import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
-import { testValues } from '~/test-utils/consts';
+import { extrinsic, testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
   createMockSubsidy,
@@ -86,23 +86,7 @@ describe('AccountsController', () => {
   });
 
   describe('getTransactionHistory', () => {
-    const mockTransaction = {
-      blockHash: 'blockHash',
-      blockNumber: new BigNumber(1000000),
-      extrinsicIdx: new BigNumber(1),
-      address: 'someAccount',
-      nonce: new BigNumber(123456),
-      txTag: TxTags.asset.RegisterTicker,
-      params: [
-        {
-          name: 'ticker',
-          value: 'TICKER',
-        },
-      ],
-      success: true,
-      specVersionId: new BigNumber(3002),
-      extrinsicHash: 'extrinsicHash',
-    };
+    const mockTransaction = extrinsic;
 
     const mockTransactions = {
       data: [mockTransaction],
