@@ -45,9 +45,13 @@ export class PortfoliosService {
   ): Promise<DefaultPortfolio | NumberedPortfolio> {
     const identity = await this.identitiesService.findOne(did);
     if (portfolioId) {
-      return await identity.portfolios.getPortfolio({ portfolioId }).catch(handleSdkError);
+      return await identity.portfolios.getPortfolio({ portfolioId }).catch(error => {
+        throw handleSdkError(error);
+      });
     }
-    return await identity.portfolios.getPortfolio().catch(handleSdkError);
+    return await identity.portfolios.getPortfolio().catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {

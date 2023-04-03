@@ -30,7 +30,9 @@ export class IdentitiesService {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    return await polymeshApi.identities.getIdentity({ did }).catch(handleSdkError);
+    return await polymeshApi.identities.getIdentity({ did }).catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   /**

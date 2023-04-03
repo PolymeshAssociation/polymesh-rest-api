@@ -16,10 +16,12 @@ import {
 } from '@polymeshassociation/polymesh-sdk/utils';
 
 import {
+  AppError,
   AppInternalError,
   AppNotFoundError,
   AppUnprocessableError,
   AppValidationError,
+  isAppError,
 } from '~/common/errors';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
@@ -48,18 +50,20 @@ export type Method<M, R, T> = WithArgsProcedureMethod<ProcedureMethod<M, R, T>>;
 /**
  * a helper function to handle when procedures have args and those without args
  */
-export function prepareProcedure<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
+export async function prepareProcedure<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
   method: Method<MethodArgs, ReturnType, TransformedReturnType>,
   args: MethodArgs,
   opts: ProcedureOpts
 ): Promise<GenericPolymeshTransaction<ReturnType, TransformedReturnType>> {
-  let procedure;
-  if (!args || Object.keys(args).length === 0) {
-    procedure = method(opts as MethodArgs);
-  } else {
-    procedure = method(args, opts);
+  try {
+    if (!args || Object.keys(args).length === 0) {
+      return await method(opts as MethodArgs);
+    } else {
+      return await method(args, opts);
+    }
+  } catch (error) {
+    throw handleSdkError(error);
   }
-  return procedure;
 }
 
 export async function processTransaction<
@@ -74,6 +78,7 @@ export async function processTransaction<
 ): Promise<TransactionResult<TransformedReturnType>> {
   try {
     const procedure = await prepareProcedure(method, args, opts);
+
     const supportsSubsidy = procedure.supportsSubsidy();
 
     const [totalFees, result] = await Promise.all([
@@ -140,32 +145,37 @@ export async function processTransaction<
       details,
     };
   } catch (err) {
-    handleSdkError(err);
+    throw handleSdkError(err);
   }
 }
 
-export function handleSdkError(err: unknown): never {
+export function handleSdkError(err: unknown): AppError {
+  if (isAppError(err)) {
+    // don't transform App level errors
+    return err;
+  }
+
   if (isPolymeshError(err)) {
     const { message, code } = err;
     switch (code) {
       case ErrorCode.NoDataChange:
       case ErrorCode.ValidationError:
       case ErrorCode.EntityInUse:
-        throw new AppValidationError(message);
+        return new AppValidationError(message);
       case ErrorCode.InsufficientBalance:
       case ErrorCode.UnmetPrerequisite:
       case ErrorCode.LimitExceeded:
-        throw new AppUnprocessableError(message);
+        return new AppUnprocessableError(message);
       case ErrorCode.DataUnavailable:
-        throw new AppNotFoundError(message, '');
+        return new AppNotFoundError(message, '');
       default:
-        throw new AppInternalError(message);
+        return new AppInternalError(message);
     }
   }
 
   if (err instanceof Error) {
-    throw new AppInternalError(err.message);
+    return new AppInternalError(err.message);
   }
 
-  throw new AppInternalError('An unexpected error occurred');
+  return new AppInternalError('An unexpected error occurred');
 }
