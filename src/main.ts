@@ -45,9 +45,9 @@ async function bootstrap(): Promise<void> {
 
   // Swagger
   const options = new DocumentBuilder()
-    .setTitle(swaggerTitle)
-    .setDescription(swaggerDescription)
-    .setVersion('3.0.0-alpha.3');
+    .setTitle('Polymesh REST API')
+    .setDescription('RESTful access to the Polymesh blockchain')
+    .setVersion('3.0.0');
 
   const configService = app.get<ConfigService>(ConfigService);
 
