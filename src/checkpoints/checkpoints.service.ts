@@ -39,7 +39,9 @@ export class CheckpointsService {
 
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
     const asset = await this.assetsService.findOne(ticker);
-    return await asset.checkpoints.getOne({ id }).catch(handleSdkError);
+    return await asset.checkpoints.getOne({ id }).catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
@@ -49,7 +51,9 @@ export class CheckpointsService {
 
   public async findScheduleById(ticker: string, id: BigNumber): Promise<ScheduleWithDetails> {
     const asset = await this.assetsService.findOne(ticker);
-    return await asset.checkpoints.schedules.getOne({ id }).catch(handleSdkError);
+    return await asset.checkpoints.schedules.getOne({ id }).catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async createByTicker(

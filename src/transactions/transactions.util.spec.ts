@@ -1,7 +1,9 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
+import { PolymeshError } from '@polymeshassociation/polymesh-sdk/base/PolymeshError';
 import { ErrorCode } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import {
   AppError,
@@ -12,7 +14,11 @@ import {
 } from '~/common/errors';
 import { Class } from '~/common/types';
 import { MockVenue } from '~/test-utils/mocks';
-import { prepareProcedure, processTransaction } from '~/transactions/transactions.util';
+import {
+  handleSdkError,
+  prepareProcedure,
+  processTransaction,
+} from '~/transactions/transactions.util';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -88,5 +94,56 @@ describe('prepareProcedure', () => {
     prepareProcedure(mockMethod as any, {}, { signingAccount });
 
     expect(mockMethod).toHaveBeenCalledWith({ signingAccount });
+  });
+});
+
+const testCases = [
+  {
+    inputError: new PolymeshError({ code: ErrorCode.NoDataChange, message: '' }),
+    expectedError: AppValidationError,
+    description: 'NoDataChange error',
+    isPolymeshError: true,
+  },
+  {
+    inputError: new PolymeshError({ code: ErrorCode.InsufficientBalance, message: '' }),
+    expectedError: AppUnprocessableError,
+    description: 'InsufficientBalance error',
+    isPolymeshError: true,
+  },
+  {
+    inputError: new PolymeshError({ code: ErrorCode.DataUnavailable, message: '' }),
+    expectedError: AppNotFoundError,
+    description: 'DataUnavailable error',
+    isPolymeshError: true,
+  },
+  {
+    inputError: new PolymeshError({ code: ErrorCode.FatalError, message: '' }),
+    expectedError: AppInternalError,
+    description: 'Unknown PolymeshError code',
+    isPolymeshError: true,
+  },
+  {
+    inputError: new Error(''),
+    expectedError: AppInternalError,
+    description: 'Generic Error',
+    isPolymeshError: false,
+  },
+  {
+    inputError: 'Unknown error',
+    expectedError: AppInternalError,
+    description: 'Unknown error type',
+    isPolymeshError: false,
+  },
+] as const;
+
+describe('handleSdkError', () => {
+  testCases.forEach(({ inputError, expectedError, description, isPolymeshError }) => {
+    test(`should handle ${description}`, () => {
+      when(mockIsPolymeshError).calledWith(inputError).mockReturnValue(isPolymeshError);
+
+      const error = handleSdkError(inputError);
+
+      expect(error).toBeInstanceOf(expectedError);
+    });
   });
 });

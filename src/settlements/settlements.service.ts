@@ -42,7 +42,9 @@ export class SettlementsService {
       .getInstruction({
         id,
       })
-      .catch(handleSdkError);
+      .catch(error => {
+        throw handleSdkError(error);
+      });
   }
 
   public async createInstruction(
@@ -93,7 +95,9 @@ export class SettlementsService {
       .getVenue({
         id,
       })
-      .catch(handleSdkError);
+      .catch(error => {
+        throw handleSdkError(error);
+      });
   }
 
   public async findVenueDetails(id: BigNumber): Promise<VenueDetails> {
