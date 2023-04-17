@@ -11,6 +11,7 @@ import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
+import { swaggerDescription, swaggerTitle } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 // This service was originally designed with node v14, this ensures a backwards compatible run time
@@ -44,8 +45,8 @@ async function bootstrap(): Promise<void> {
 
   // Swagger
   const options = new DocumentBuilder()
-    .setTitle('Polymesh REST API')
-    .setDescription('RESTful access to the Polymesh blockchain')
+    .setTitle(swaggerTitle)
+    .setDescription(swaggerDescription)
     .setVersion('3.0.0-alpha.1');
 
   const configService = app.get<ConfigService>(ConfigService);
