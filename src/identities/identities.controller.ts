@@ -197,6 +197,40 @@ export class IdentitiesController {
     return new ResultsModel({ results });
   }
 
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Fetch all Assets held by an Identity',
+    description:
+      'This endpoint returns a list of all Assets which were held at one point by the given Identity. This requires Polymesh GraphQL Middleware Service',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which held Assets are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of all the held Assets',
+    paginated: true,
+    example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
+  })
+  @Get(':did/held-assets')
+  public async getHeldAssets(
+    @Param() { did }: DidDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<ResultsModel<string>> {
+    const { data, count, next } = await this.identitiesService.findHeldAssets(
+      did,
+      size,
+      new BigNumber(start || 0)
+    );
+    return new PaginatedResultsModel({
+      results: data.map(({ ticker }) => ticker),
+      total: count,
+      next,
+    });
+  }
+
   @ApiTags('settlements', 'instructions')
   @ApiOperation({
     summary: 'Fetch all pending settlement Instructions where an Identity is involved',
