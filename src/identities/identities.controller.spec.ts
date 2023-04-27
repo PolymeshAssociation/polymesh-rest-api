@@ -18,6 +18,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -105,6 +106,32 @@ describe('IdentitiesController', () => {
       const result = await controller.getAssets({ did: '0x1' });
 
       expect(result).toEqual({ results: assets });
+    });
+  });
+
+  describe('getHeldAssets', () => {
+    it('should return a paginated list of held Assets', async () => {
+      const mockResults = ['TICKER', 'TICKER2'];
+      const mockAssets = {
+        data: mockResults.map(asset => ({ ticker: asset })),
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+
+      mockIdentitiesService.findHeldAssets.mockResolvedValue(mockAssets);
+
+      const result = await controller.getHeldAssets(
+        { did: '0x1' },
+        { start: new BigNumber(0), size: new BigNumber(2) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: mockResults,
+          total: new BigNumber(mockAssets.count),
+          next: mockAssets.next,
+        })
+      );
     });
   });
 

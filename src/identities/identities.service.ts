@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { Asset, AuthorizationRequest, Identity } from '@polymeshassociation/polymesh-sdk/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import {
+  Asset,
+  AuthorizationRequest,
+  Identity,
+  ResultSet,
+} from '@polymeshassociation/polymesh-sdk/types';
 
-import { AccountsService } from '~/accounts/accounts.service';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -17,8 +22,7 @@ export class IdentitiesService {
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
-    private readonly transactionsService: TransactionsService,
-    private readonly accountsService: AccountsService
+    private readonly transactionsService: TransactionsService
   ) {
     logger.setContext(IdentitiesService.name);
   }
@@ -41,6 +45,15 @@ export class IdentitiesService {
   public async findTrustingAssets(did: string): Promise<Asset[]> {
     const identity = await this.findOne(did);
     return identity.getTrustingAssets();
+  }
+
+  public async findHeldAssets(
+    did: string,
+    size?: BigNumber,
+    start?: BigNumber
+  ): Promise<ResultSet<Asset>> {
+    const identity = await this.findOne(did);
+    return identity.getHeldAssets({ size, start });
   }
 
   public async addSecondaryAccount(

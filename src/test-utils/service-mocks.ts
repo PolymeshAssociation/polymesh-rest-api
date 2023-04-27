@@ -130,6 +130,7 @@ export class MockScheduleService {
 export class MockIdentitiesService {
   findOne = jest.fn();
   findTrustingAssets = jest.fn();
+  findHeldAssets = jest.fn();
   addSecondaryAccount = jest.fn();
   createMockCdd = jest.fn();
 }
