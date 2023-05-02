@@ -47,7 +47,9 @@ export class AuthorizationsService {
     signatory: Identity | Account,
     id: BigNumber
   ): Promise<AuthorizationRequest> {
-    return await signatory.authorizations.getOne({ id }).catch(handleSdkError);
+    return await signatory.authorizations.getOne({ id }).catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async findOneByDid(did: string, id: BigNumber): Promise<AuthorizationRequest> {

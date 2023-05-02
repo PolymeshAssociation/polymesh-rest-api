@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -11,7 +11,15 @@ import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
+import { swaggerDescription, swaggerTitle } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+
+// This service was originally designed with node v14, this ensures a backwards compatible run time
+// Ideally we wouldn't need this function, but I am unable to find the cause when submitting SDK transactions that fail validation
+const unhandledRejectionLogger = new Logger('UnhandledPromise');
+process.on('unhandledRejection', reason => {
+  unhandledRejectionLogger.warn(`unhandled rejection, reason: ${reason}`);
+});
 
 async function bootstrap(): Promise<void> {
   // App setup

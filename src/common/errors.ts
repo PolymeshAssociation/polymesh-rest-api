@@ -71,6 +71,6 @@ export class AppInternalError extends AppError {
   }
 }
 
-export function isAppError(err: Error): err is AppError {
+export function isAppError(err: unknown): err is AppError {
   return err instanceof AppError;
 }

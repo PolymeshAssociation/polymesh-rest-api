@@ -128,6 +128,32 @@ describe('IdentitiesService', () => {
     });
   });
 
+  describe('findHeldAssets', () => {
+    it('should return the list of Assets held by an Identity', async () => {
+      const mockAssets = {
+        data: [
+          {
+            ticker: 'TICKER',
+          },
+          {
+            ticker: 'TICKER2',
+          },
+        ],
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+      const mockIdentity = new MockIdentity();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockIdentity as any);
+      mockIdentity.getHeldAssets.mockResolvedValue(mockAssets);
+
+      const result = await service.findHeldAssets('0x01', new BigNumber(2), new BigNumber(0));
+      expect(result).toEqual(mockAssets);
+    });
+  });
+
   describe('addSecondaryAccount', () => {
     describe('otherwise', () => {
       it('should return the transaction details', async () => {

@@ -31,7 +31,9 @@ export class AssetsService {
   ) {}
 
   public async findOne(ticker: string): Promise<Asset> {
-    return await this.polymeshService.polymeshApi.assets.getAsset({ ticker }).catch(handleSdkError);
+    return await this.polymeshService.polymeshApi.assets.getAsset({ ticker }).catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async findAllByOwner(owner: string): Promise<Asset[]> {
