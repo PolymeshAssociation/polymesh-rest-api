@@ -44,7 +44,7 @@ export class PortfoliosService {
     portfolioId?: BigNumber
   ): Promise<DefaultPortfolio | NumberedPortfolio> {
     const identity = await this.identitiesService.findOne(did);
-    if (portfolioId) {
+    if (portfolioId?.gt(0)) {
       return await identity.portfolios.getPortfolio({ portfolioId }).catch(error => {
         throw handleSdkError(error);
       });
