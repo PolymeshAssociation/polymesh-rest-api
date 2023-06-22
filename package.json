@@ -43,6 +43,7 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.3.0",
     "@nestjs/schedule": "^2.2.0",
+    "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "^9.0.1",
     "@polymeshassociation/fireblocks-signing-manager": "^1.0.3",

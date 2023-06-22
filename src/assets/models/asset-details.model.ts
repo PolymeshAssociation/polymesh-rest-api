@@ -58,6 +58,7 @@ export class AssetDetailsModel {
         value: 'US0000000000',
       },
     ],
+    type: 'object',
   })
   @FromEntityObject()
   readonly securityIdentifiers: SecurityIdentifier[];

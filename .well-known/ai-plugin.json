@@ -1,0 +1,17 @@
+{
+    "schema_version": "v1",
+    "name_for_human": "Polymesh RESTful API",
+    "name_for_model": "PolymeshRESTfulAPI",
+    "description_for_human": "Query data from the Polymesh blockchain via a RESTful API",
+    "description_for_model": "Help the user with querying data from the Polymesh blockchain. You can query for any data supported via the RESTful API.",
+    "auth": {
+        "type": "none"
+    },
+    "api": {
+        "type": "openapi",
+        "url": "http://localhost:3000/openapi.json"
+    },
+    "logo_url": "https://uploads-ssl.webflow.com/61c0a31b90958801836efe1b/62d0685047000a7f9f741259_polymesh-main-logo.svg",
+    "contact_email": "support@example.com",
+    "legal_info_url": "http://www.example.com/legal"
+}

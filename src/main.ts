@@ -1,9 +1,9 @@
 /* istanbul ignore file */
-
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as fs from 'fs';
 
 import { AppModule } from '~/app.module';
 import { parseAuthStrategyConfig } from '~/auth/auth.utils';
@@ -23,7 +23,7 @@ process.on('unhandledRejection', reason => {
 
 async function bootstrap(): Promise<void> {
   // App setup
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -45,8 +45,8 @@ async function bootstrap(): Promise<void> {
 
   // Swagger
   const options = new DocumentBuilder()
-    .setTitle('Polymesh REST API')
-    .setDescription('RESTful access to the Polymesh blockchain')
+    .setTitle(swaggerTitle)
+    .setDescription(swaggerDescription)
     .setVersion('3.1.0');
 
   const configService = app.get<ConfigService>(ConfigService);
@@ -67,6 +67,18 @@ async function bootstrap(): Promise<void> {
   if (isApiKeyStrategyConfigured) {
     document.security = [{ api_key: [] }]; // Apply the API key globally to all operations
   }
+
+  // Remove non-GET paths from the document
+  for (const [path, pathObject] of Object.entries(document.paths)) {
+    const castedPathObject = pathObject as { [key: string]: any };
+    for (const [method] of Object.entries(castedPathObject)) {
+      if (method.toLowerCase() !== 'get') {
+        delete castedPathObject[method];
+      }
+    }
+  }
+  fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
+
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen

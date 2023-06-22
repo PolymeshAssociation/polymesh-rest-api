@@ -61,6 +61,7 @@ export class ExtrinsicModel {
   @ApiProperty({
     description: 'List of parameters associated with the transaction',
     isArray: true,
+    type: 'object',
     example: [
       {
         name: 'ticker',

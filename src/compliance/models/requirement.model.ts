@@ -18,6 +18,7 @@ export class RequirementModel {
   @ApiProperty({
     description: 'List of Conditions',
     isArray: true,
+    type: 'object',
     example: [
       {
         type: 'IsPresent',

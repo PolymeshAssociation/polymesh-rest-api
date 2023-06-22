@@ -32,6 +32,8 @@ import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservati
 import { TransactionsModule } from '~/transactions/transactions.module';
 import { UsersModule } from '~/users/users.module';
 
+import { OpenAiController } from './open-ai/open-ai.controller';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -67,29 +69,30 @@ import { UsersModule } from '~/users/users.module';
     }),
     AssetsModule,
     TickerReservationsModule,
-    PolymeshModule,
+    // PolymeshModule,
     IdentitiesModule,
-    SettlementsModule,
-    SigningModule,
-    AuthorizationsModule,
-    PortfoliosModule,
+    // SettlementsModule,
+    // SigningModule,
+    // AuthorizationsModule,
+    // PortfoliosModule,
     ClaimsModule,
-    OfferingsModule,
-    CheckpointsModule,
-    CorporateActionsModule,
+    // OfferingsModule,
+    // CheckpointsModule,
+    // CorporateActionsModule,
     ComplianceModule,
     AccountsModule,
-    SubscriptionsModule,
-    TransactionsModule,
-    EventsModule,
-    NotificationsModule,
-    ScheduleModule,
-    NetworkModule,
-    AuthModule,
-    UsersModule,
+    // SubscriptionsModule,
+    // TransactionsModule,
+    // EventsModule,
+    // NotificationsModule,
+    // ScheduleModule,
+    // NetworkModule,
+    // AuthModule,
+    // UsersModule,
     DeveloperTestingModule.register(),
-    MetadataModule,
-    SubsidyModule,
+    // MetadataModule,
+    // SubsidyModule,
   ],
+  controllers: [OpenAiController],
 })
 export class AppModule {}
