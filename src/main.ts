@@ -77,7 +77,7 @@ async function bootstrap(): Promise<void> {
       }
     }
   }
-  fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
+  // fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
 
   SwaggerModule.setup('/', app, document);
 

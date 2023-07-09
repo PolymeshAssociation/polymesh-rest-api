@@ -3,7 +3,7 @@
     "name_for_human": "Polymesh RESTful API",
     "name_for_model": "PolymeshRESTfulAPI",
     "description_for_human": "Query data from the Polymesh blockchain via a RESTful API",
-    "description_for_model": "Help the user with querying data from the Polymesh blockchain. You can query for any data supported via the RESTful API.",
+    "description_for_model": "Help the user with querying data from the Polymesh blockchain. You can query for any data supported via the RESTful API. If the queried data contrains a transaction hash or a block, you can provide a link to an external explorer using the URL https://polymesh.subscan.io/ and a route of /extrinsic or /block as needed. ",
     "auth": {
         "type": "none"
     },
