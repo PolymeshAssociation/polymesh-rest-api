@@ -2604,6 +2604,680 @@
     "/claims/edit": {},
     "/claims/remove": {},
     "/claims/add-investor-uniqueness": {},
+    "/assets/{ticker}/offerings": {
+      "get": {
+        "operationId": "OfferingsController_getOfferings",
+        "summary": "Fetch Asset Offerings for an Asset",
+        "description": "This endpoint will provide the list of all Asset Offerings for an Asset",
+        "parameters": [
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose Offerings are to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timing",
+            "required": false,
+            "in": "query",
+            "description": "Timing status by which to filter Offerings",
+            "schema": {
+              "enum": [
+                "NotStarted",
+                "Started",
+                "Expired"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "balance",
+            "required": false,
+            "in": "query",
+            "description": "Balance status by which to filter Offerings",
+            "schema": {
+              "enum": [
+                "Available",
+                "SoldOut",
+                "Residual"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sale",
+            "required": false,
+            "in": "query",
+            "description": "Sale status by which to filter Offerings",
+            "schema": {
+              "enum": [
+                "Frozen",
+                "Live",
+                "ClosedEarly",
+                "Closed"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Offerings for this Asset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResultsModel"
+                    },
+                    {
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/OfferingDetailsModel"
+                          },
+                          "description": "List of Offerings for this Asset"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "offerings",
+          "assets"
+        ]
+      }
+    },
+    "/assets/{ticker}/offerings/{id}/investments": {
+      "get": {
+        "operationId": "OfferingsController_getInvestments",
+        "summary": "List Investments made in an Offering",
+        "description": "This endpoint will return a list of Investments made in an Offering for a given Asset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the Offering",
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of Investments to be fetched",
+            "example": "10",
+            "schema": {
+              "default": "10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "description": "Starting offset for pagination",
+            "example": "0",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A List of Investments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResultsModel"
+                    },
+                    {
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/InvestmentModel"
+                          },
+                          "description": "A List of Investments"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "offerings"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints": {
+      "get": {
+        "operationId": "CheckpointsController_getCheckpoints",
+        "summary": "Fetch Asset Checkpoints",
+        "description": "This endpoint will provide the list of Checkpoints created on this Asset",
+        "parameters": [
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose attached Checkpoints are to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of Checkpoints to be fetched",
+            "example": "10",
+            "schema": {
+              "default": "10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "description": "Start key from which Checkpoints are to be fetched",
+            "example": "START_KEY",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Checkpoints created on this Asset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResultsModel"
+                    },
+                    {
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CheckpointDetailsModel"
+                          },
+                          "description": "List of Checkpoints created on this Asset"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Schedule start date must be in the future"
+          }
+        },
+        "tags": [
+          "assets",
+          "checkpoints"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints/{id}": {
+      "get": {
+        "operationId": "CheckpointsController_getCheckpoint",
+        "summary": "Fetch details of an Asset Checkpoint",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the Checkpoint to be fetched",
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose Checkpoint is to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Checkpoint details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckpointDetailsModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Either the Asset or the Checkpoint was not found"
+          }
+        },
+        "tags": [
+          "assets",
+          "checkpoints"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints/schedules": {
+      "get": {
+        "operationId": "CheckpointsController_getSchedules",
+        "summary": "Fetch all active Checkpoint Schedules",
+        "description": "This endpoint will provide the list of active Schedules which create Checkpoints for a specific Asset",
+        "parameters": [
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose attached Checkpoint Schedules are to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of active Schedules which create Checkpoints for a specific Asset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResultsModel"
+                    },
+                    {
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CheckpointScheduleModel"
+                          },
+                          "description": "List of active Schedules which create Checkpoints for a specific Asset"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "assets",
+          "checkpoints"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints/schedules/{id}": {
+      "get": {
+        "operationId": "CheckpointsController_getSchedule",
+        "summary": "Fetch details of an Asset Checkpoint Schedule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the Checkpoint Schedule to be fetched",
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose Checkpoint Schedule is to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Checkpoint Schedule details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckpointScheduleModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Either the Asset or the Checkpoint Schedule does not exist"
+          }
+        },
+        "tags": [
+          "assets",
+          "checkpoints"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints/schedules/create": {},
+    "/assets/{ticker}/checkpoints/{id}/balances": {
+      "get": {
+        "operationId": "CheckpointsController_getHolders",
+        "summary": "Get the Asset balance of the holders at a given Checkpoint",
+        "description": "This endpoint returns the Asset balance of holders at a given Checkpoint",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the Checkpoint for which to fetch Asset balances",
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset for which to fetch holder balances",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of Asset holders to be fetched",
+            "example": "10",
+            "schema": {
+              "default": "10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "description": "Start key from which Asset holders are to be fetched",
+            "example": "START_KEY",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of balances of the Asset holders at the Checkpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResultsModel"
+                    },
+                    {
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/IdentityBalanceModel"
+                          },
+                          "description": "List of balances of the Asset holders at the Checkpoint"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Either the Asset or the Checkpoint was not found"
+          }
+        },
+        "tags": [
+          "assets",
+          "checkpoints"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints/{id}/balances/{did}": {
+      "get": {
+        "operationId": "CheckpointsController_getAssetBalance",
+        "summary": "Get the Asset balance for an Identity at a Checkpoint",
+        "description": "This endpoint returns the Asset balance an Identity has at a particular Checkpoint",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The Checkpoint ID to from which to fetch the balance",
+            "example": "2",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset for which the balance is to be fetched",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "did",
+            "required": true,
+            "in": "path",
+            "description": "The Identity for which to fetch the Asset balance",
+            "example": "0x0600000000000000000000000000000000000000000000000000000000000000",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The balance of the Asset the Identity held at a given Checkpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityBalanceModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The Asset or Checkpoint was not found"
+          }
+        },
+        "tags": [
+          "assets",
+          "checkpoints"
+        ]
+      }
+    },
+    "/assets/{ticker}/checkpoints/schedules/{id}/delete": {},
+    "/assets/{ticker}/corporate-actions/default-config": {
+      "get": {
+        "operationId": "CorporateActionsController_getDefaultConfig",
+        "summary": "Fetch Corporate Action Default Config",
+        "description": "This endpoint will provide the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
+        "parameters": [
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose Corporate Action Default Config is to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Corporate Action Default Config for the specified Asset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorporateActionDefaultConfigModel"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "corporate-actions",
+          "assets"
+        ]
+      }
+    },
+    "/assets/{ticker}/corporate-actions/default-config/modify": {},
+    "/assets/{ticker}/corporate-actions/dividend-distributions": {
+      "get": {
+        "operationId": "CorporateActionsController_getDividendDistributions",
+        "summary": "Fetch Dividend Distributions",
+        "description": "This endpoint will provide the list of Dividend Distributions associated with an Asset",
+        "parameters": [
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose Dividend Distributions are to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Dividend Distributions associated with the specified Asset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResultsModel"
+                    },
+                    {
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/DividendDistributionDetailsModel"
+                          },
+                          "description": "List of Dividend Distributions associated with the specified Asset"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "corporate-actions",
+          "assets",
+          "dividend-distributions"
+        ]
+      }
+    },
+    "/assets/{ticker}/corporate-actions/dividend-distributions/{id}": {
+      "get": {
+        "operationId": "CorporateActionsController_getDividendDistribution",
+        "summary": "Fetch a Dividend Distribution",
+        "description": "This endpoint will provide a specific Dividend Distribution associated with an Asset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the Dividend Distribution",
+            "example": "123",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticker",
+            "required": true,
+            "in": "path",
+            "description": "The ticker of the Asset whose Dividend Distribution is to be fetched",
+            "example": "TICKER",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The details of the Dividend Distribution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DividendDistributionModel"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "corporate-actions",
+          "assets",
+          "dividend-distributions"
+        ]
+      }
+    },
+    "/assets/{ticker}/corporate-actions/dividend-distributions/create": {},
+    "/assets/{ticker}/corporate-actions/{id}/delete": {},
+    "/assets/{ticker}/corporate-actions/dividend-distributions/{id}/payments/pay": {},
+    "/assets/{ticker}/corporate-actions/{id}/documents/link": {},
+    "/assets/{ticker}/corporate-actions/{id}/payments/claim": {},
+    "/assets/{ticker}/corporate-actions/{id}/reclaim-funds": {},
+    "/assets/{ticker}/corporate-actions/dividend-distributions/{id}/modify-checkpoint": {},
     "/assets/{ticker}/compliance-requirements": {
       "get": {
         "operationId": "ComplianceRequirementsController_getComplianceRequirements",
@@ -2755,7 +3429,7 @@
     {
       "url": "http://localhost:3000"
     }
-  ],
+  ],  
   "components": {
     "schemas": {
       "MetadataSpecModel": {
@@ -8820,6 +9494,1036 @@
           "cddId",
           "proof",
           "scopeId"
+        ]
+      },
+      "TierModel": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "description": "Total amount available in the Tier",
+            "example": "100"
+          },
+          "price": {
+            "type": "string",
+            "description": "Price per unit",
+            "example": "1"
+          },
+          "remaining": {
+            "type": "string",
+            "description": "Total amount remaining for purchase in the Tier",
+            "example": "100"
+          }
+        },
+        "required": [
+          "amount",
+          "price",
+          "remaining"
+        ]
+      },
+      "OfferingDetailsModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the Offering",
+            "example": "123"
+          },
+          "creator": {
+            "type": "string",
+            "description": "The DID of the creator Identity",
+            "example": "0x0600000000000000000000000000000000000000000000000000000000000000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the Offering",
+            "example": "SERIES A"
+          },
+          "offeringPortfolio": {
+            "description": "Portfolio containing the Asset being offered",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioIdentifierModel"
+              }
+            ]
+          },
+          "raisingPortfolio": {
+            "description": "Portfolio receiving the Asset being raised",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioIdentifierModel"
+              }
+            ]
+          },
+          "raisingCurrency": {
+            "type": "string",
+            "description": "Currency denomination of the investment",
+            "example": "CURR"
+          },
+          "tiers": {
+            "description": "The Tiers of the Offerings",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TierModel"
+            }
+          },
+          "venue": {
+            "type": "string",
+            "description": "The Venue used for the Offering",
+            "example": "1"
+          },
+          "start": {
+            "type": "string",
+            "description": "Start time of the Offering",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "end": {
+            "type": "string",
+            "description": "End time of the Offering. A null value means the Offering doesn't end",
+            "nullable": true,
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "status": {
+            "type": "object",
+            "description": "Status of the Offering",
+            "example": {
+              "timing": "Started",
+              "balance": "Available",
+              "sale": "Live"
+            }
+          },
+          "minInvestment": {
+            "type": "string",
+            "description": "Minimum raising amount per transaction",
+            "example": "1"
+          },
+          "totalAmount": {
+            "type": "string",
+            "description": "Total amount to be raised",
+            "example": "10000"
+          },
+          "totalRemaining": {
+            "type": "string",
+            "description": "Total amount remaining for purchase",
+            "example": "10000"
+          }
+        },
+        "required": [
+          "id",
+          "creator",
+          "name",
+          "offeringPortfolio",
+          "raisingPortfolio",
+          "raisingCurrency",
+          "tiers",
+          "venue",
+          "start",
+          "end",
+          "status",
+          "minInvestment",
+          "totalAmount",
+          "totalRemaining"
+        ]
+      },
+      "InvestmentModel": {
+        "type": "object",
+        "properties": {
+          "investor": {
+            "type": "string",
+            "description": "The DID of the Investor",
+            "example": "0x0600000000000000000000000000000000000000000000000000000000000000"
+          },
+          "soldAmount": {
+            "type": "string",
+            "description": "The amount sold",
+            "example": "100"
+          },
+          "investedAmount": {
+            "type": "string",
+            "description": "The amount invested",
+            "example": "10"
+          }
+        },
+        "required": [
+          "investor",
+          "soldAmount",
+          "investedAmount"
+        ]
+      },
+      "CheckpointDetailsModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the Checkpoint",
+            "example": "1"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Date at which the Checkpoint was created",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "totalSupply": {
+            "type": "string",
+            "description": "Total supply of the Asset at this Checkpoint",
+            "example": "10000"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "totalSupply"
+        ]
+      },
+      "CreatedCheckpointModel": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "description": "List of transactions",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TransactionModel"
+              },
+              {
+                "$ref": "#/components/schemas/BatchTransactionModel"
+              }
+            ],
+            "items": {
+              "type": "array"
+            }
+          },
+          "details": {
+            "description": "Transaction details",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionDetailsModel"
+            }
+          },
+          "checkpoint": {
+            "type": "object",
+            "description": "Identifiers of the newly created Checkpoint",
+            "example": {
+              "id": "1",
+              "ticker": "TICKER"
+            }
+          }
+        },
+        "required": [
+          "transactions",
+          "details",
+          "checkpoint"
+        ]
+      },
+      "CalendarPeriodModel": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "string",
+            "description": "Unit of the period",
+            "enum": [
+              "second",
+              "minute",
+              "hour",
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
+            "example": "month"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Number of units",
+            "example": "3"
+          }
+        },
+        "required": [
+          "unit",
+          "amount"
+        ]
+      },
+      "CheckpointScheduleModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the Schedule",
+            "example": "123"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Ticker of the Asset whose Checkpoints will be created with this Schedule",
+            "example": "TICKER"
+          },
+          "start": {
+            "type": "string",
+            "description": "Date at which first Checkpoint was created",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Date at which the last Checkpoint will be created with this Schedule. A null value means that this Schedule never expires",
+            "nullable": true,
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "period": {
+            "description": "Period in which this Schedule creates a Checkpoint. A null value means this Schedule creates a single Checkpoint and then expires",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CalendarPeriodModel"
+              }
+            ]
+          },
+          "complexity": {
+            "type": "string",
+            "description": "Abstract measure of the complexity of this Schedule. Shorter periods translate into more complexity",
+            "example": "1"
+          },
+          "remainingCheckpoints": {
+            "type": "string",
+            "description": "Number of Checkpoints left to be created by the Schedule",
+            "example": "10"
+          },
+          "nextCheckpointDate": {
+            "type": "string",
+            "description": "Date when the next Checkpoint will be created",
+            "example": "1987-10-13T23:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "ticker",
+          "start",
+          "expiryDate",
+          "period",
+          "complexity",
+          "remainingCheckpoints",
+          "nextCheckpointDate"
+        ]
+      },
+      "CalendarPeriodDto": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "enum": [
+              "second",
+              "minute",
+              "hour",
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
+            "type": "string",
+            "description": "Unit of the period",
+            "example": "month"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Number of units",
+            "example": "3"
+          }
+        },
+        "required": [
+          "unit",
+          "amount"
+        ]
+      },
+      "CreateCheckpointScheduleDto": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "type": "string",
+            "description": "An identifier for the account that should sign the transaction",
+            "example": "alice"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain",
+            "example": false
+          },
+          "start": {
+            "type": "string",
+            "nullable": true,
+            "description": "Date from which the Schedule will start creating Checkpoints. A null value means the first Checkpoint will be created immediately",
+            "example": "2021-05-22T23:00:00.000Z"
+          },
+          "period": {
+            "nullable": true,
+            "description": "Periodic interval between Checkpoints. For example, a period of 2 weeks means that a Checkpoint will be created every 2 weeks. A null value means this Schedule creates a single Checkpoint and then expires",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CalendarPeriodDto"
+              }
+            ]
+          },
+          "repetitions": {
+            "type": "string",
+            "nullable": true,
+            "description": "Number of Checkpoints that should be created by this Schedule. A null or 0 value means infinite Checkpoints (the Schedule never expires)",
+            "example": "12"
+          }
+        },
+        "required": [
+          "signer",
+          "dryRun",
+          "start",
+          "period",
+          "repetitions"
+        ]
+      },
+      "CreatedCheckpointScheduleModel": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "description": "List of transactions",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TransactionModel"
+              },
+              {
+                "$ref": "#/components/schemas/BatchTransactionModel"
+              }
+            ],
+            "items": {
+              "type": "array"
+            }
+          },
+          "details": {
+            "description": "Transaction details",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionDetailsModel"
+            }
+          },
+          "schedule": {
+            "description": "Static data (and identifiers) of the newly created Schedule",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CheckpointScheduleModel"
+              }
+            ]
+          }
+        },
+        "required": [
+          "transactions",
+          "details",
+          "schedule"
+        ]
+      },
+      "CorporateActionTargetsModel": {
+        "type": "object",
+        "properties": {
+          "treatment": {
+            "type": "string",
+            "description": "Indicates how the `identities` are to be treated",
+            "enum": [
+              "Include",
+              "Exclude"
+            ],
+            "example": "Include"
+          },
+          "identities": {
+            "description": "Determines which Identities will be affected by the Corporate Action. If the value of `treatment` is `Include`, then all Identities in this array will be affected. Otherwise, every Asset holder Identity **EXCEPT** for the ones in this array will be affected",
+            "example": [
+              "0x0600000000000000000000000000000000000000000000000000000000000000",
+              "0x0611111111111111111111111111111111111111111111111111111111111111"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "treatment",
+          "identities"
+        ]
+      },
+      "TaxWithholdingModel": {
+        "type": "object",
+        "properties": {
+          "identity": {
+            "type": "string",
+            "description": "DID for which the tax withholding percentage is overridden",
+            "example": "0x0600000000000000000000000000000000000000000000000000000000000000"
+          },
+          "percentage": {
+            "type": "string",
+            "description": "Tax withholding percentage (from 0 to 100)",
+            "example": "67.25"
+          }
+        },
+        "required": [
+          "identity",
+          "percentage"
+        ]
+      },
+      "CorporateActionDefaultConfigModel": {
+        "type": "object",
+        "properties": {
+          "targets": {
+            "description": "Identities that will be affected by the Corporate Actions",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionTargetsModel"
+              }
+            ]
+          },
+          "defaultTaxWithholding": {
+            "type": "string",
+            "description": "Tax withholding percentage(0-100) that applies to Identities that don't have a specific percentage assigned to them",
+            "example": "25"
+          },
+          "taxWithholdings": {
+            "description": "List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxWithholdingModel"
+            }
+          }
+        },
+        "required": [
+          "targets",
+          "defaultTaxWithholding",
+          "taxWithholdings"
+        ]
+      },
+      "CorporateActionTargetsDto": {
+        "type": "object",
+        "properties": {
+          "treatment": {
+            "enum": [
+              "Include",
+              "Exclude"
+            ],
+            "type": "string",
+            "description": "Indicates how the `identities` are to be treated",
+            "example": "Include"
+          },
+          "identities": {
+            "description": "Determines which Identities will be affected by the Corporate Action. If the value of `treatment` is `Include`, then all Identities in this array will be affected. Otherwise, every Asset holder Identity **EXCEPT** for the ones in this array will be affected",
+            "example": [
+              "0x0600000000000000000000000000000000000000000000000000000000000000",
+              "0x0611111111111111111111111111111111111111111111111111111111111111"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "treatment",
+          "identities"
+        ]
+      },
+      "TaxWithholdingDto": {
+        "type": "object",
+        "properties": {
+          "identity": {
+            "type": "string",
+            "description": "DID for which the tax withholding percentage is to be overridden",
+            "example": "0x0600000000000000000000000000000000000000000000000000000000000000"
+          },
+          "percentage": {
+            "type": "string",
+            "description": "Tax withholding percentage (from 0 to 100)",
+            "example": "67.25"
+          }
+        },
+        "required": [
+          "identity",
+          "percentage"
+        ]
+      },
+      "CorporateActionDefaultConfigDto": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "type": "string",
+            "description": "An identifier for the account that should sign the transaction",
+            "example": "alice"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain",
+            "example": false
+          },
+          "targets": {
+            "description": "Identities that will be affected by the Corporate Actions",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionTargetsDto"
+              }
+            ]
+          },
+          "defaultTaxWithholding": {
+            "type": "string",
+            "description": "Tax withholding percentage (0-100) that applies to Identities that don't have a specific percentage assigned to them",
+            "example": "25"
+          },
+          "taxWithholdings": {
+            "description": "List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxWithholdingDto"
+            }
+          }
+        },
+        "required": [
+          "signer",
+          "dryRun"
+        ]
+      },
+      "DividendDistributionDetailsModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the Corporate Action",
+            "example": "1"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Ticker of the Asset",
+            "example": "TICKER"
+          },
+          "declarationDate": {
+            "type": "string",
+            "description": "Date at which the Corporate Action was created",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the Corporate Action",
+            "example": "Corporate Action description"
+          },
+          "targets": {
+            "description": "Identities that will be affected by this Corporate Action",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionTargetsModel"
+              }
+            ]
+          },
+          "defaultTaxWithholding": {
+            "type": "string",
+            "description": "Tax withholding percentage(0-100) that applies to Identities that don't have a specific percentage assigned to them",
+            "example": "25"
+          },
+          "taxWithholdings": {
+            "description": "List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxWithholdingModel"
+            }
+          },
+          "origin": {
+            "description": "Portfolio from which the Dividends are distributed",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioIdentifierModel"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "description": "Ticker of the currency in which Dividends are distributed",
+            "example": "TICKER"
+          },
+          "perShare": {
+            "type": "string",
+            "description": "Amount of `currency` to pay for each Asset holders' share",
+            "example": "100"
+          },
+          "maxAmount": {
+            "type": "string",
+            "description": "Maximum amount of `currency` to be distributed",
+            "example": "1000"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Date after which Dividends can no longer be paid/reclaimed. A null value means the Distribution never expires",
+            "example": "1987-10-13T23:00:00.000Z",
+            "nullable": true
+          },
+          "paymentDate": {
+            "type": "string",
+            "description": "Date starting from which dividends can be paid/reclaimed",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "remainingFunds": {
+            "type": "string",
+            "description": "Amount of remaining funds",
+            "example": "1000"
+          },
+          "fundsReclaimed": {
+            "type": "boolean",
+            "description": "Indicates whether the unclaimed funds have been reclaimed by an Agent",
+            "example": false
+          }
+        },
+        "required": [
+          "id",
+          "ticker",
+          "declarationDate",
+          "description",
+          "targets",
+          "defaultTaxWithholding",
+          "taxWithholdings",
+          "origin",
+          "currency",
+          "perShare",
+          "maxAmount",
+          "expiryDate",
+          "paymentDate",
+          "remainingFunds",
+          "fundsReclaimed"
+        ]
+      },
+      "DividendDistributionModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the Corporate Action",
+            "example": "1"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Ticker of the Asset",
+            "example": "TICKER"
+          },
+          "declarationDate": {
+            "type": "string",
+            "description": "Date at which the Corporate Action was created",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the Corporate Action",
+            "example": "Corporate Action description"
+          },
+          "targets": {
+            "description": "Identities that will be affected by this Corporate Action",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionTargetsModel"
+              }
+            ]
+          },
+          "defaultTaxWithholding": {
+            "type": "string",
+            "description": "Tax withholding percentage(0-100) that applies to Identities that don't have a specific percentage assigned to them",
+            "example": "25"
+          },
+          "taxWithholdings": {
+            "description": "List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxWithholdingModel"
+            }
+          },
+          "origin": {
+            "description": "Portfolio from which the Dividends are distributed",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioIdentifierModel"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "description": "Ticker of the currency in which Dividends are distributed",
+            "example": "TICKER"
+          },
+          "perShare": {
+            "type": "string",
+            "description": "Amount of `currency` to pay for each Asset holders' share",
+            "example": "100"
+          },
+          "maxAmount": {
+            "type": "string",
+            "description": "Maximum amount of `currency` to be distributed",
+            "example": "1000"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Date after which Dividends can no longer be paid/reclaimed. A null value means the Distribution never expires",
+            "example": "1987-10-13T23:00:00.000Z",
+            "nullable": true
+          },
+          "paymentDate": {
+            "type": "string",
+            "description": "Date starting from which dividends can be paid/reclaimed",
+            "example": "1987-10-13T23:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "ticker",
+          "declarationDate",
+          "description",
+          "targets",
+          "defaultTaxWithholding",
+          "taxWithholdings",
+          "origin",
+          "currency",
+          "perShare",
+          "maxAmount",
+          "expiryDate",
+          "paymentDate"
+        ]
+      },
+      "CorporateActionCheckpointDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "Existing",
+              "Schedule"
+            ],
+            "type": "string",
+            "description": "Whether the Checkpoint already exists or will be created by a Schedule",
+            "example": "Existing"
+          },
+          "id": {
+            "type": "string",
+            "description": "ID of the Checkpoint/Schedule (depending on `type`)",
+            "example": "1"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "DividendDistributionDto": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "type": "string",
+            "description": "An identifier for the account that should sign the transaction",
+            "example": "alice"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain",
+            "example": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the Corporate Action",
+            "example": "Corporate Action description"
+          },
+          "declarationDate": {
+            "type": "string",
+            "description": "Date at which the issuer publicly declared the Distribution. Optional, defaults to the current date",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "targets": {
+            "description": "Asset holder Identities that will be affected by the Corporate Actions",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionTargetsDto"
+              }
+            ]
+          },
+          "defaultTaxWithholding": {
+            "type": "string",
+            "description": "Tax withholding percentage(0-100) of the Benefits to be held for tax purposes",
+            "example": "25"
+          },
+          "taxWithholdings": {
+            "description": "List of Identities and the specific tax withholding percentage that should apply to them. This takes precedence over `defaultTaxWithholding`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxWithholdingDto"
+            }
+          },
+          "checkpoint": {
+            "description": "Checkpoint to be used to calculate Dividends. If a Schedule is passed, the next Checkpoint it creates will be used. If a Date is passed, a Checkpoint will be created at that date and used",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionCheckpointDto"
+              },
+              {
+                "type": "string",
+                "example": "1987-10-13T23:00:00.000Z"
+              }
+            ]
+          },
+          "originPortfolio": {
+            "type": "string",
+            "description": "Portfolio number from which the Dividends will be distributed. Use 0 for default Portfolio",
+            "example": "123"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Ticker of the currency in which Dividends will be distributed",
+            "example": "TICKER"
+          },
+          "perShare": {
+            "type": "string",
+            "description": "Amount of `currency` to pay for each Asset holders' share",
+            "example": "100"
+          },
+          "maxAmount": {
+            "type": "string",
+            "description": "Maximum amount of `currency` to be distributed",
+            "example": "1000"
+          },
+          "paymentDate": {
+            "type": "string",
+            "description": "Date starting from which Asset holders can claim their dividends",
+            "example": "1987-10-13T23:00:00.000Z"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Date after which Dividends can no longer be claimed. Optional, defaults to never expiring",
+            "example": "1987-10-13T23:00:00.000Z"
+          }
+        },
+        "required": [
+          "signer",
+          "dryRun",
+          "description",
+          "checkpoint",
+          "currency",
+          "perShare",
+          "maxAmount",
+          "paymentDate"
+        ]
+      },
+      "CreatedDividendDistributionModel": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "description": "List of transactions",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TransactionModel"
+              },
+              {
+                "$ref": "#/components/schemas/BatchTransactionModel"
+              }
+            ],
+            "items": {
+              "type": "array"
+            }
+          },
+          "details": {
+            "description": "Transaction details",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionDetailsModel"
+            }
+          },
+          "dividendDistribution": {
+            "description": "Static data (and identifiers) of the newly created Dividend Distribution",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DividendDistributionModel"
+              }
+            ]
+          }
+        },
+        "required": [
+          "transactions",
+          "details",
+          "dividendDistribution"
+        ]
+      },
+      "PayDividendsDto": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "type": "string",
+            "description": "An identifier for the account that should sign the transaction",
+            "example": "alice"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain",
+            "example": false
+          },
+          "targets": {
+            "description": "DIDs of the target Identities",
+            "example": [
+              "0x0600000000000000000000000000000000000000000000000000000000000000",
+              "0x0611111111111111111111111111111111111111111111111111111111111111"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "signer",
+          "dryRun",
+          "targets"
+        ]
+      },
+      "LinkDocumentsDto": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "type": "string",
+            "description": "An identifier for the account that should sign the transaction",
+            "example": "alice"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain",
+            "example": false
+          },
+          "documents": {
+            "description": "List of documents to be linked to the Corporate Action",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetDocumentDto"
+            }
+          }
+        },
+        "required": [
+          "signer",
+          "dryRun",
+          "documents"
+        ]
+      },
+      "ModifyDistributionCheckpointDto": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "type": "string",
+            "description": "An identifier for the account that should sign the transaction",
+            "example": "alice"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain",
+            "example": false
+          },
+          "checkpoint": {
+            "description": "Checkpoint to be updated. If a Schedule is passed, the next Checkpoint it creates will be used. If a Date is passed, a Checkpoint will be created at that date and used",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CorporateActionCheckpointDto"
+              },
+              {
+                "type": "string",
+                "example": "1987-10-13T23:00:00.000Z"
+              }
+            ]
+          }
+        },
+        "required": [
+          "signer",
+          "dryRun",
+          "checkpoint"
         ]
       },
       "RequirementModel": {
