@@ -1,28 +1,6 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/openapi.json": {
-      "get": {
-        "operationId": "OpenAiController_getOpenAiJson",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/.well-known/ai-plugin.json": {
-      "get": {
-        "operationId": "OpenAiController_getAiPluginJson",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/assets/global-metadata": {
       "get": {
         "operationId": "AssetsController_getGlobalMetadataKeys",
@@ -265,87 +243,6 @@
         },
         "tags": [
           "assets"
-        ]
-      }
-    },
-    "/transactions/{hash}/details": {
-      "get": {
-        "operationId": "TransactionsController_getTransactionByHash",
-        "summary": "Get transaction details using hash",
-        "description": "This endpoint will provide details of the transaction filtered by its hash. This requires Polymesh GraphQL Middleware Service",
-        "parameters": [
-          {
-            "name": "hash",
-            "required": true,
-            "in": "path",
-            "description": "Hash of the transaction whose details are to be fetched",
-            "example": "0xf36f83c943cbc7d915d52be502d52cdb04c7eacd13a2bea6e17ea37bf1e49224",
-            "schema": {
-              "minLength": 66,
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Details of the transaction",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExtrinsicDetailsModel"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Given hash is not hexadecimal"
-          },
-          "404": {
-            "description": "Transaction does not exist"
-          }
-        },
-        "tags": [
-          "transactions"
-        ]
-      }
-    },
-    "/signer/{signer}": {
-      "get": {
-        "operationId": "SigningController_getSignerAddress",
-        "summary": "Fetch signer details",
-        "description": "This endpoint provides information associated with a particular `signer`",
-        "parameters": [
-          {
-            "name": "signer",
-            "required": true,
-            "in": "path",
-            "description": "The value of the `signer` to fetch the address for. Note, the format depends on the signing manager the API is configured with. A Fireblocks signer is up to three numbers like `x-y-z`, Vault will be `{name}-{version}`, while a Local signer can be any string, like `alice`",
-            "example": "alice",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Information about the address associated to the signer",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SignerModel"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The signer did not have the proper format for the given signing manager"
-          },
-          "404": {
-            "description": "The signer was not found"
-          }
-        },
-        "tags": [
-          "signer"
         ]
       }
     },
