@@ -6,6 +6,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -178,6 +179,31 @@ describe('IdentitiesService', () => {
         });
         expect(mockTransactionsService.submit).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('registerDid', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.CddRegisterDid,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const body: RegisterIdentityDto = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      const result = await service.registerDid(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalled();
     });
   });
 });

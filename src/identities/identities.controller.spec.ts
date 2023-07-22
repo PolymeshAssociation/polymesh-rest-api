@@ -12,6 +12,8 @@ import {
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { PermissionedAccountModel } from '~/accounts/models/permissioned-account.model';
+import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { AssetsService } from '~/assets/assets.service';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
@@ -20,6 +22,7 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
 import * as identityUtil from '~/identities/identities.util';
@@ -605,6 +608,52 @@ describe('IdentitiesController', () => {
       const result = await controller.getCddClaims({ did }, { includeExpired: true });
       expect(result).toEqual(new ResultsModel({ results: mockCddClaims }));
       expect(mockClaimsService.findCddClaimsByDid).toHaveBeenCalledWith(did, true);
+    });
+  });
+
+  describe('registerIdentity', () => {
+    it('should return the transaction details on adding registering an Identity', async () => {
+      const identity = new MockIdentity();
+      const address = 'address';
+      identity.getPrimaryAccount.mockResolvedValue({
+        account: { address },
+        permissions: [],
+      });
+      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+
+      const identityData = new IdentityModel({
+        did,
+        primaryAccount: new PermissionedAccountModel({
+          account: new AccountModel({ address }),
+          permissions: new PermissionsModel({
+            assets: null,
+            portfolios: null,
+            transactionGroups: [],
+            transactions: null,
+          }),
+        }),
+        secondaryAccounts: [],
+        secondaryAccountsFrozen: false,
+      });
+
+      const mockData = {
+        ...txResult,
+        result: identity,
+      };
+      mockIdentitiesService.registerDid.mockResolvedValue(mockData);
+
+      const data: RegisterIdentityDto = {
+        signer: 'Ox60',
+        targetAccount: 'address',
+      };
+
+      const result = await controller.registerIdentity(data);
+
+      expect(result).toEqual({
+        ...txResult,
+        identity: identityData,
+      });
     });
   });
 });
