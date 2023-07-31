@@ -8,7 +8,6 @@ import {
   ClaimScope,
   ClaimType,
   GenericAuthorizationData,
-  InvestorUniquenessClaim,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -555,26 +554,6 @@ describe('IdentitiesController', () => {
       expect(mockClaimsService.findClaimScopesByDid).toHaveBeenCalledWith(did);
     });
   });
-
-  describe('getInvestorUniquenessClaims', () => {
-    it('should call the service and return the InvestorUniquenessClaims', async () => {
-      const includeExpired = true;
-      const mockClaimList = [{}];
-
-      mockClaimsService.getInvestorUniquenessClaims.mockResolvedValue(
-        mockClaimList as unknown as ClaimData<InvestorUniquenessClaim>[]
-      );
-
-      const result = await controller.getInvestorUniquenessClaims({ did }, { includeExpired });
-
-      expect(result).toEqual({ results: mockClaimList });
-      expect(mockClaimsService.getInvestorUniquenessClaims).toHaveBeenCalledWith(
-        did,
-        includeExpired
-      );
-    });
-  });
-
   describe('getCddClaims', () => {
     const date = new Date().toISOString();
     const mockCddClaims = [

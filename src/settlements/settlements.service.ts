@@ -152,12 +152,12 @@ export class SettlementsService {
     return this.transactionsService.submit(instruction.withdraw, {}, signerDto);
   }
 
-  public async rescheduleInstruction(
+  public async manuallyExecuteInstruction(
     id: BigNumber,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Instruction> {
     const instruction = await this.findInstruction(id);
 
-    return this.transactionsService.submit(instruction.reschedule, {}, signerDto);
+    return this.transactionsService.submit(instruction.executeManually, { id }, signerDto);
   }
 }

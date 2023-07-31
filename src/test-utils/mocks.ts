@@ -10,7 +10,6 @@ import {
 import {
   Account,
   AuthorizationType,
-  CalendarUnit,
   HistoricSettlement,
   MetadataEntry,
   MetadataType,
@@ -245,7 +244,7 @@ export class MockInstruction {
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
   public withdraw = jest.fn();
-  public reschedule = jest.fn();
+  public executeManually = jest.fn();
 }
 
 export class MockVenue {
@@ -315,10 +314,8 @@ export class MockCheckpoint {
 export class MockCheckpointSchedule {
   id = new BigNumber(1);
   ticker = 'TICKER';
-  period = { unit: CalendarUnit.Month, amount: new BigNumber(3) };
-  start = new Date('10/14/1987');
+  pendingPoints = [new Date('10/14/1987')];
   expiryDate = new Date('10/14/2000');
-  complexity = new BigNumber(4);
 }
 
 export class MockAuthorizationRequest {

@@ -141,11 +141,11 @@ describe('SettlementsController', () => {
     });
   });
 
-  describe('rescheduleInstruction', () => {
+  describe('manuallyExecuteInstruction', () => {
     it('should reschedule a failed instruction and return the data returned by the service', async () => {
-      mockSettlementsService.rescheduleInstruction.mockResolvedValue(txResult);
+      mockSettlementsService.manuallyExecuteInstruction.mockResolvedValue(txResult);
 
-      const result = await controller.rescheduleInstruction(
+      const result = await controller.manuallyExecuteInstruction(
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
