@@ -35,7 +35,6 @@ import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { CddClaimModel } from '~/claims/models/cdd-claim.model';
 import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
 import { ClaimModel } from '~/claims/models/claim.model';
-import { InvestorUniquenessClaimModel } from '~/claims/models/investor-uniqueness-claim.model';
 import {
   ApiArrayResponse,
   ApiArrayResponseReplaceModelProperties,
@@ -574,49 +573,5 @@ export class IdentitiesController {
     const results = claimResultSet.map(claimScope => new ClaimScopeModel(claimScope));
 
     return new ResultsModel({ results });
-  }
-
-  @ApiTags('claims')
-  @ApiOperation({
-    summary: 'Retrieve the list of InvestorUniqueness claims for a target Identity',
-    description:
-      'This endpoint will provide a list of all the InvestorUniquenessClaims made about an Identity',
-  })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Identity for which to fetch InvestorUniquenessClaims',
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiQuery({
-    name: 'includeExpired',
-    description:
-      'Indicates whether to include expired InvestorUniquenessClaims or not. Defaults to true',
-    type: 'boolean',
-    required: false,
-  })
-  @ApiArrayResponseReplaceModelProperties(
-    ClaimModel,
-    {
-      description: 'List of InvestorUniquenessClaims for the given DID',
-      paginated: false,
-    },
-    { claim: InvestorUniquenessClaimModel }
-  )
-  @Get(':did/investor-uniqueness-claims')
-  async getInvestorUniquenessClaims(
-    @Param() { did }: DidDto,
-    @Query() { includeExpired }: IncludeExpiredFilterDto
-  ): Promise<ResultsModel<ClaimModel<InvestorUniquenessClaimModel>>> {
-    const investorUniquenessClaims = await this.claimsService.getInvestorUniquenessClaims(
-      did,
-      includeExpired
-    );
-
-    const results = investorUniquenessClaims.map(
-      claim => new ClaimModel<InvestorUniquenessClaimModel>(claim)
-    );
-
-    return { results };
   }
 }

@@ -433,13 +433,14 @@ describe('SettlementsService', () => {
         tag: TxTags.settlement.RescheduleInstruction,
       };
       const mockTransaction = new MockTransaction(transaction);
+      const id = new BigNumber(123);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findInstructionSpy = jest.spyOn(service, 'findInstruction');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findInstructionSpy.mockResolvedValue(mockInstruction as any);
 
-      const result = await service.rescheduleInstruction(new BigNumber(123), {
+      const result = await service.manuallyExecuteInstruction(id, {
         signer,
       });
 
@@ -448,8 +449,8 @@ describe('SettlementsService', () => {
         transactions: [mockTransaction],
       });
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
-        mockInstruction.reschedule,
-        {},
+        mockInstruction.executeManually,
+        { id },
         { signer }
       );
     });

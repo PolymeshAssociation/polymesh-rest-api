@@ -3,7 +3,7 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { CalendarUnit, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
@@ -133,10 +133,6 @@ describe('CheckpointsService', () => {
         {
           schedule: {
             id: new BigNumber(1),
-            period: {
-              unit: CalendarUnit.Month,
-              amount: new BigNumber(3),
-            },
             start: new Date(),
             complexity: new BigNumber(4),
             expiryDate: null,
@@ -266,9 +262,7 @@ describe('CheckpointsService', () => {
       const mockDate = new Date();
       const params = {
         signer,
-        start: mockDate,
-        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-        repetitions: new BigNumber(2),
+        points: [mockDate],
       };
 
       const result = await service.createScheduleByTicker('TICKER', params);
@@ -279,9 +273,7 @@ describe('CheckpointsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.checkpoints.schedules.create,
         {
-          start: mockDate,
-          period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-          repetitions: new BigNumber(2),
+          points: [mockDate],
         },
         {
           signer,
