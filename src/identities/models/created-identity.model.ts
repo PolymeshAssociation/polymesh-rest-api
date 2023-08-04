@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -6,7 +8,7 @@ import { IdentityModel } from '~/identities/models/identity.model';
 
 export class CreatedIdentityModel extends TransactionQueueModel {
   @ApiProperty({
-    description: 'Static data (and identifiers) of the newly created Dividend Distribution',
+    description: 'Static data (and identifiers) of the newly created Identity',
     type: IdentityModel,
   })
   @Type(() => IdentityModel)

@@ -646,6 +646,7 @@ describe('IdentitiesController', () => {
       const data: RegisterIdentityDto = {
         signer: 'Ox60',
         targetAccount: 'address',
+        createCdd: false,
       };
 
       const result = await controller.registerIdentity(data);

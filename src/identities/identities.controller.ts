@@ -80,7 +80,7 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Register Identity',
     description:
-      'This endpoint allows registering a new Identity. The transaction signer must be a CDD provider. This might create an Authorization Request which has to be accepted by the target Account.',
+      'This endpoint allows registering a new Identity. The transaction signer must be a CDD provider. This will create Authorization Requests which have to be accepted by any secondary accounts if they were specified.',
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',

@@ -196,6 +196,7 @@ describe('IdentitiesService', () => {
       const body: RegisterIdentityDto = {
         signer,
         targetAccount: 'address',
+        createCdd: false,
       };
 
       const result = await service.registerDid(body);

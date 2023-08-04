@@ -23,15 +23,15 @@ export class RegisterIdentityDto extends TransactionBaseDto {
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => PermissionedAccountDto)
-  secondaryAccounts?: PermissionedAccountDto[];
+  readonly secondaryAccounts?: PermissionedAccountDto[];
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description:
       'Issue a CDD claim for the created DID, completing the onboarding process for the Account',
     type: 'boolean',
     example: false,
   })
-  readonly createCdd?: boolean;
+  readonly createCdd: boolean;
 
   @ApiPropertyOptional({
     description: 'Date at which the Identity will expire (to be used together with createCdd)',
