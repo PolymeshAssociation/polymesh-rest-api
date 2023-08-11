@@ -177,8 +177,8 @@ export class SettlementsController {
 
   @ApiTags('instructions')
   @ApiOperation({
-    summary: 'Manually execute an Instruction',
-    description: 'This endpoint will execute an Instruction',
+    summary: 'Reschedule a failed Instruction',
+    description: 'This endpoint will reschedule a failed Instruction',
   })
   @ApiParam({
     name: 'id',
@@ -192,16 +192,16 @@ export class SettlementsController {
   })
   @ApiTransactionFailedResponse({
     [HttpStatus.UNPROCESSABLE_ENTITY]: [
-      'Only Instruction with status code `Failed` or of type "Manual" can be executed manually',
+      'Only transaction with status code `Failed` can be rescheduled',
     ],
     [HttpStatus.NOT_FOUND]: ['The Instruction with the given ID was not found'],
   })
-  @Post('instructions/:id/manuallyExecute')
-  public async manuallyExecuteInstruction(
+  @Post('instructions/:id/reschedule')
+  public async rescheduleInstruction(
     @Param() { id }: IdParamsDto,
     @Body() signerDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.settlementsService.manuallyExecuteInstruction(id, signerDto);
+    const result = await this.settlementsService.rescheduleInstruction(id, signerDto);
 
     return handleServiceResult(result);
   }

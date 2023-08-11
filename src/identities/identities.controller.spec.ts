@@ -554,6 +554,7 @@ describe('IdentitiesController', () => {
       expect(mockClaimsService.findClaimScopesByDid).toHaveBeenCalledWith(did);
     });
   });
+
   describe('getCddClaims', () => {
     const date = new Date().toISOString();
     const mockCddClaims = [

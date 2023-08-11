@@ -148,7 +148,7 @@ export class MockSettlementsService {
   findPendingInstructionsByDid = jest.fn();
   findVenuesByOwner = jest.fn();
   withdrawAffirmation = jest.fn();
-  manuallyExecuteInstruction = jest.fn();
+  rescheduleInstruction = jest.fn();
 }
 
 export class MockClaimsService {
