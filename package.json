@@ -17,7 +17,6 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "NODE_ENV='production' node dist/main",
     "start:repl": "yarn start --entryFile commands/repl",
     "generate:swagger": "yarn start --entryFile commands/write-swagger",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -63,13 +62,13 @@
     "rimraf": "3.0.2",
     "rxjs": "^7.5.7",
     "swagger-ui-express": "4.4.0",
-    "typeorm": "^0.3.10"
+    "typeorm": "^0.3.10",
+    "@golevelup/ts-jest": "^0.3.3"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.15.0",
     "@commitlint/cli": "12.1.4",
     "@commitlint/config-conventional": "12.1.4",
-    "@golevelup/ts-jest": "^0.3.3",
     "@nestjs/cli": "^9.3.0",
     "@nestjs/schematics": "^9.0.3",
     "@nestjs/testing": "^9.3.0",

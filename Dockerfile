@@ -15,6 +15,7 @@ USER node
 COPY --chown=node:node . .
 
 RUN yarn install \
+  --ignore-scripts \
   --frozen-lockfile \
   --no-progress && \
   yarn build && \
@@ -23,11 +24,13 @@ RUN yarn install \
 
 FROM node:lts-alpine3.17
 WORKDIR /home/node
+ENV NODE_ENV production
 
-COPY --from=builder --chown=root:root /app/builder/node_modules ./node_modules
-COPY --from=builder --chown=root:root /app/builder/dist/ ./dist
+COPY --from=builder --chown=node:node /app/builder/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/builder/dist/ ./dist
 
 COPY --chown=node:node . /home/node
 
 USER node
-ENTRYPOINT ["/bin/sh", "./docker-entrypoint.sh"]
+CMD [ "node", "dist/main.js" ]
+
