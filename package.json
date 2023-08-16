@@ -45,7 +45,7 @@
     "@nestjs/schedule": "^2.2.0",
     "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "^9.0.1",
-    "@polymeshassociation/fireblocks-signing-manager": "^2.1.0",
+    "@polymeshassociation/fireblocks-signing-manager": "^2.2.0",
     "@polymeshassociation/hashicorp-vault-signing-manager": "^2.1.0",
     "@polymeshassociation/local-signing-manager": "^2.1.0",
     "@polymeshassociation/polymesh-sdk": "21.0.0-alpha.9",
