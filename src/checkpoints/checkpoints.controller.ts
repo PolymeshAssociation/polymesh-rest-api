@@ -193,11 +193,13 @@ export class CheckpointsController {
     const schedules = await this.checkpointsService.findSchedulesByTicker(ticker);
     return new ResultsModel({
       results: schedules.map(
-        ({ schedule: { id, pendingPoints, expiryDate }, details }) =>
+        ({ schedule: { id, period, start, complexity, expiryDate }, details }) =>
           new CheckpointScheduleModel({
             id,
             ticker,
-            pendingPoints,
+            period,
+            start,
+            complexity,
             expiryDate,
             ...details,
           })
@@ -232,14 +234,16 @@ export class CheckpointsController {
     @Param() { ticker, id }: CheckpointScheduleParamsDto
   ): Promise<CheckpointScheduleModel> {
     const {
-      schedule: { pendingPoints, expiryDate },
+      schedule: { period, start, complexity, expiryDate },
       details,
     } = await this.checkpointsService.findScheduleById(ticker, id);
 
     return new CheckpointScheduleModel({
       id,
+      period,
+      start,
       ticker,
-      pendingPoints,
+      complexity,
       expiryDate,
       ...details,
     });
@@ -247,7 +251,7 @@ export class CheckpointsController {
 
   @ApiOperation({
     summary: 'Create Schedule',
-    description: 'This endpoint will create a Schedule that creates future Checkpoints',
+    description: 'This endpoint will create a Schedule that creates Checkpoints periodically',
   })
   @ApiParam({
     name: 'ticker',
@@ -275,7 +279,7 @@ export class CheckpointsController {
       details,
     }) => {
       const {
-        schedule: { id, expiryDate, pendingPoints },
+        schedule: { id, period, start, complexity, expiryDate },
         details: scheduleDetails,
       } = await this.checkpointsService.findScheduleById(ticker, createdScheduleId);
 
@@ -283,8 +287,10 @@ export class CheckpointsController {
         schedule: new CheckpointScheduleModel({
           id,
           ticker,
+          period,
+          start,
+          complexity,
           expiryDate,
-          pendingPoints,
           ...scheduleDetails,
         }),
         transactions,

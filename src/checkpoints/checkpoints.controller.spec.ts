@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { CalendarUnit } from '@polymeshassociation/polymesh-sdk/types';
 
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
@@ -130,7 +131,12 @@ describe('CheckpointsController', () => {
         {
           schedule: {
             id: new BigNumber(1),
-            pendingPoints: [mockDate],
+            period: {
+              unit: CalendarUnit.Month,
+              amount: new BigNumber(3),
+            },
+            start: mockDate,
+            complexity: new BigNumber(4),
             expiryDate: null,
           },
           details: {
@@ -148,7 +154,12 @@ describe('CheckpointsController', () => {
         {
           id: new BigNumber(1),
           ticker: 'TICKER',
-          pendingPoints: [mockDate],
+          period: {
+            unit: CalendarUnit.Month,
+            amount: new BigNumber(3),
+          },
+          start: mockDate,
+          complexity: new BigNumber(4),
           expiryDate: null,
           remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
@@ -204,7 +215,8 @@ describe('CheckpointsController', () => {
       const body = {
         signer: 'signer',
         start: mockDate,
-        points: [],
+        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
+        repetitions: new BigNumber(2),
       };
 
       const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
