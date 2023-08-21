@@ -1677,14 +1677,14 @@
     "@types/websocket" "^1.0.5"
     websocket "^1.0.34"
 
-"@polymeshassociation/fireblocks-signing-manager@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/fireblocks-signing-manager/-/fireblocks-signing-manager-2.1.0.tgz#eda9af552b862ba14bad20682c6a59e69347192b"
-  integrity sha512-YVRvjEVhzS+WPHx95rNgOnRRgjjYijRjcriG+iGeHcQWprZnxGuVUlsaz+MvmxoySo/XtAHzavOzzMZfQyaL2g==
+"@polymeshassociation/fireblocks-signing-manager@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/fireblocks-signing-manager/-/fireblocks-signing-manager-2.2.0.tgz#15aea1e8131dc604301ee840e7b418006cb61598"
+  integrity sha512-Y9ILReIwRNyWu2nw1Kf9xvkNwcsoBiaaY57URJFB2jSaXr8eHSRmEZwyS6jpy8JKeMJBDmUVF0pRcrN7iO/YFA==
   dependencies:
     "@polkadot/util" "^10.4.2"
     "@polkadot/util-crypto" "^10.4.2"
-    "@polymeshassociation/signing-manager-types" "^2.1.0"
+    "@polymeshassociation/signing-manager-types" "^3.0.0"
     fireblocks-sdk "^2.5.3"
 
 "@polymeshassociation/hashicorp-vault-signing-manager@^2.1.0":
@@ -1731,6 +1731,11 @@
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@polymeshassociation/signing-manager-types/-/signing-manager-types-2.1.0.tgz#c4c6e27e93d3d98de5c28a92862bcab7fb527a6c"
   integrity sha512-UJaaFuHeHtduN42bU5GUhJ7JgExhWvcF5751jHxGg7Gj4xjQyiaNvpQsejYeOlUoALnZ1McmB3nPrbm03TeNKA==
+
+"@polymeshassociation/signing-manager-types@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/signing-manager-types/-/signing-manager-types-3.0.0.tgz#70327690e1779b2ceb7b612c3f447a96d6621557"
+  integrity sha512-8jiR+6Yijy+kGBDTWjr6H+YbaoSlU7tIgXqpX7YVKdmnEbP/SKDh4ktGkF88513J52So+JGDcoLG4URLAhDkhQ==
 
 "@scure/base@1.1.1":
   version "1.1.1"
