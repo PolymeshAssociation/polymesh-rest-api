@@ -5,11 +5,13 @@ import {
   Asset,
   AuthorizationRequest,
   Identity,
+  RegisterIdentityParams,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -71,5 +73,30 @@ export class IdentitiesService {
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
 
     return this.transactionsService.submit(inviteAccount, params, base);
+  }
+
+  public async registerDid(registerIdentityDto: RegisterIdentityDto): ServiceReturn<Identity> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+
+    const {
+      base,
+      args: { targetAccount, secondaryAccounts, createCdd, expiry },
+    } = extractTxBase(registerIdentityDto);
+
+    const params = {
+      targetAccount,
+      secondaryAccounts: secondaryAccounts?.map(({ secondaryAccount, permissions }) => ({
+        secondaryAccount,
+        permissions: permissions?.toPermissionsLike(),
+      })),
+      createCdd,
+      expiry,
+    } as RegisterIdentityParams;
+
+    const { registerIdentity } = polymeshApi.identities;
+
+    return this.transactionsService.submit(registerIdentity, params, base);
   }
 }
