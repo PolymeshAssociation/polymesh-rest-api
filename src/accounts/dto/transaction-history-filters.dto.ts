@@ -2,8 +2,7 @@
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
-import { TxTag, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { ExtrinsicsOrderBy, TxTag, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { IsBoolean, IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
@@ -74,23 +73,11 @@ export class TransactionHistoryFiltersDto {
 
   @ApiPropertyOptional({
     description:
-      'Name of the transaction field based on which transactions will be sorted. Note, this property will be ignored if `order` is not specified',
-    type: 'string',
-    enum: TransactionOrderFields,
-    example: TransactionOrderFields.BlockId,
-  })
-  @ValidateIf(({ order }: TransactionHistoryFiltersDto) => !!order)
-  @IsEnum(TransactionOrderFields)
-  readonly field: TransactionOrderFields = TransactionOrderFields.BlockId;
-
-  @ApiPropertyOptional({
-    description:
       'Order in which the transactions will be sorted based on the value of the `field`.  Note, this property will be ignored if `field` is not specified',
     type: 'string',
-    enum: Order,
-    example: Order.Desc,
+    enum: ExtrinsicsOrderBy,
+    example: ExtrinsicsOrderBy.CreatedAtDesc,
   })
-  @ValidateIf(({ field }: TransactionHistoryFiltersDto) => !!field)
-  @IsEnum(Order)
-  readonly order: Order = Order.Desc;
+  @IsEnum(ExtrinsicsOrderBy)
+  readonly orderBy: ExtrinsicsOrderBy = ExtrinsicsOrderBy.CreatedAtDesc;
 }

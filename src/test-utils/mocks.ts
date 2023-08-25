@@ -4,10 +4,6 @@ import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
-  SettlementResult,
-  SettlementResultEnum,
-} from '@polymeshassociation/polymesh-sdk/middleware/types';
-import {
   Account,
   AuthorizationType,
   CalendarUnit,
@@ -16,6 +12,7 @@ import {
   MetadataType,
   ResultSet,
   SettlementLeg,
+  SettlementResultEnum,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -361,7 +358,6 @@ export class MockHistoricSettlement {
     readonly settlement?: {
       blockNumber?: BigNumber;
       blockHash?: string;
-      status?: SettlementResult;
       accounts?: Account[];
       legs?: SettlementLeg[];
     }

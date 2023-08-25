@@ -202,7 +202,7 @@ describe('PortfoliosController', () => {
     it('should return transaction result model', async () => {
       const mockHistoricSettlement = new MockHistoricSettlement();
       const resultSet = createMockResultSet([mockHistoricSettlement]);
-      mockPortfoliosService.getTransactions.mockResolvedValue(resultSet);
+      mockPortfoliosService.getTransactions.mockResolvedValue([mockHistoricSettlement]);
 
       const result = await controller.getTransactionHistory(
         new PortfolioDto({ id: new BigNumber(1), did }),

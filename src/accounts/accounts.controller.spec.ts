@@ -2,8 +2,12 @@ import { DeepMocked } from '@golevelup/ts-jest';
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
-import { PermissionType, TxGroup, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ExtrinsicsOrderBy,
+  PermissionType,
+  TxGroup,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
 import { AccountsController } from '~/accounts/accounts.controller';
@@ -99,7 +103,7 @@ describe('AccountsController', () => {
 
       const result = await controller.getTransactionHistory(
         { account: 'someAccount' },
-        { field: TransactionOrderFields.BlockId, order: Order.Desc }
+        { orderBy: ExtrinsicsOrderBy.CreatedAtDesc }
       );
 
       expect(result).toEqual(
