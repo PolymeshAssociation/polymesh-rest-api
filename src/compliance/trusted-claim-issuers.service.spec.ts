@@ -35,7 +35,7 @@ describe('TrustedClaimIssuersService', () => {
   const mockClaimIssuers = [
     {
       identity: 'Ox6'.padEnd(66, '0'),
-      trustedFor: [ClaimType.Accredited, ClaimType.InvestorUniqueness],
+      trustedFor: [ClaimType.Accredited, ClaimType.Affiliate],
     },
   ];
 

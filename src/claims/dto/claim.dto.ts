@@ -2,11 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ClaimType, CountryCode } from '@polymeshassociation/polymesh-sdk/types';
-import {
-  isCddClaim,
-  isInvestorUniquenessV2Claim,
-  isNoDataClaim,
-} from '@polymeshassociation/polymesh-sdk/utils';
+import { isCddClaim } from '@polymeshassociation/polymesh-sdk/utils';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmptyObject, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 
@@ -28,9 +24,7 @@ export class ClaimDto {
       'The scope of the Claim. Required for most types except for `CustomerDueDiligence`, `InvestorUniquenessV2` and `NoData`',
     type: ScopeDto,
   })
-  @ValidateIf(
-    claim => !isNoDataClaim(claim) && !isCddClaim(claim) && !isInvestorUniquenessV2Claim(claim)
-  )
+  @ValidateIf(claim => !isCddClaim(claim))
   @ValidateNested()
   @Type(() => ScopeDto)
   @IsNotEmptyObject()
@@ -49,13 +43,7 @@ export class ClaimDto {
     description: 'cddId for `CustomerDueDiligence` and `InvestorUniqueness` type Claims',
     example: '0x60000000000000000000000000000000',
   })
-  @ValidateIf(({ type }) =>
-    [
-      ClaimType.InvestorUniqueness,
-      ClaimType.InvestorUniquenessV2,
-      ClaimType.CustomerDueDiligence,
-    ].includes(type)
-  )
+  @ValidateIf(({ type }) => [ClaimType.CustomerDueDiligence].includes(type))
   @IsCddId()
   cddId?: string;
 

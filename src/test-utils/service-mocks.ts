@@ -133,6 +133,7 @@ export class MockIdentitiesService {
   findHeldAssets = jest.fn();
   addSecondaryAccount = jest.fn();
   createMockCdd = jest.fn();
+  registerDid = jest.fn();
 }
 
 export class MockSettlementsService {

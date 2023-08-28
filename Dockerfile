@@ -1,13 +1,36 @@
-FROM node:18
-WORKDIR /home/node
+FROM node:lts-alpine3.17 AS builder
 
-# cache yarn install step
-COPY --chown=node:node package.json /home/node
-COPY --chown=node:node yarn.lock /home/node
-RUN yarn --frozen-lockfile
+RUN apk add --no-cache \
+  python3 \
+  make \
+  cmake \
+  g++ \
+  jq
+
+WORKDIR /app/builder
+RUN chown -R node: /app
+
+USER node
+
+COPY --chown=node:node . .
+
+RUN yarn install \
+  --ignore-scripts \
+  --frozen-lockfile \
+  --no-progress && \
+  yarn build && \
+  yarn remove $(cat package.json | jq -r '.devDependencies | keys | join(" ")') && \
+  rm -r /home/node/.cache/
+
+FROM node:lts-alpine3.17
+WORKDIR /home/node
+ENV NODE_ENV production
+
+COPY --from=builder --chown=node:node /app/builder/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/builder/dist/ ./dist
 
 COPY --chown=node:node . /home/node
 
 USER node
-RUN yarn build
-ENTRYPOINT ["/bin/bash", "./docker-entrypoint.sh"]
+CMD [ "node", "dist/main.js" ]
+

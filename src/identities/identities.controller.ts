@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -35,10 +35,10 @@ import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { CddClaimModel } from '~/claims/models/cdd-claim.model';
 import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
 import { ClaimModel } from '~/claims/models/claim.model';
-import { InvestorUniquenessClaimModel } from '~/claims/models/investor-uniqueness-claim.model';
 import {
   ApiArrayResponse,
   ApiArrayResponseReplaceModelProperties,
+  ApiTransactionFailedResponse,
   ApiTransactionResponse,
 } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
@@ -49,9 +49,12 @@ import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
+import { CreatedIdentityModel } from '~/identities/models/created-identity.model';
 import { IdentityModel } from '~/identities/models/identity.model';
+import { createIdentityResolver } from '~/identities/models/identity.util';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
@@ -70,6 +73,28 @@ export class IdentitiesController {
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(IdentitiesController.name);
+  }
+
+  @Post('register')
+  @ApiOperation({
+    summary: 'Register Identity',
+    description:
+      'This endpoint allows registering a new Identity. The transaction signer must be a CDD provider. This will create Authorization Requests which have to be accepted by any secondary accounts if they were specified.',
+  })
+  @ApiTransactionResponse({
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedIdentityModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: ['Expiry cannot be set unless a CDD claim is being created'],
+  })
+  async registerIdentity(
+    @Body() registerIdentityDto: RegisterIdentityDto
+  ): Promise<TransactionResponseModel> {
+    this.logger.debug('Registering new identity');
+    const serviceResult = await this.identitiesService.registerDid(registerIdentityDto);
+
+    return handleServiceResult(serviceResult, createIdentityResolver);
   }
 
   @Get(':did')
@@ -574,49 +599,5 @@ export class IdentitiesController {
     const results = claimResultSet.map(claimScope => new ClaimScopeModel(claimScope));
 
     return new ResultsModel({ results });
-  }
-
-  @ApiTags('claims')
-  @ApiOperation({
-    summary: 'Retrieve the list of InvestorUniqueness claims for a target Identity',
-    description:
-      'This endpoint will provide a list of all the InvestorUniquenessClaims made about an Identity',
-  })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Identity for which to fetch InvestorUniquenessClaims',
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiQuery({
-    name: 'includeExpired',
-    description:
-      'Indicates whether to include expired InvestorUniquenessClaims or not. Defaults to true',
-    type: 'boolean',
-    required: false,
-  })
-  @ApiArrayResponseReplaceModelProperties(
-    ClaimModel,
-    {
-      description: 'List of InvestorUniquenessClaims for the given DID',
-      paginated: false,
-    },
-    { claim: InvestorUniquenessClaimModel }
-  )
-  @Get(':did/investor-uniqueness-claims')
-  async getInvestorUniquenessClaims(
-    @Param() { did }: DidDto,
-    @Query() { includeExpired }: IncludeExpiredFilterDto
-  ): Promise<ResultsModel<ClaimModel<InvestorUniquenessClaimModel>>> {
-    const investorUniquenessClaims = await this.claimsService.getInvestorUniquenessClaims(
-      did,
-      includeExpired
-    );
-
-    const results = investorUniquenessClaims.map(
-      claim => new ClaimModel<InvestorUniquenessClaimModel>(claim)
-    );
-
-    return { results };
   }
 }

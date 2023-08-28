@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { registerAs } from '@nestjs/config';
+import { readFileSync } from 'fs';
 
 export default registerAs('signer-accounts', () => {
   const {
@@ -22,10 +23,11 @@ export default registerAs('signer-accounts', () => {
   }
 
   if (FIREBLOCKS_URL && FIREBLOCKS_API_KEY && FIREBLOCKS_SECRET_PATH) {
+    const secret = readFileSync(FIREBLOCKS_SECRET_PATH, 'utf8');
     const fireblocks = {
       url: FIREBLOCKS_URL,
       apiKey: FIREBLOCKS_API_KEY,
-      secretPath: FIREBLOCKS_SECRET_PATH,
+      secret: secret,
     };
 
     return { fireblocks };

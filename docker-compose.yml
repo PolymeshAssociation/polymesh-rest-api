@@ -1,4 +1,20 @@
 services:
+  chain:
+    image: ${CHAIN_IMAGE}
+    init: true # Faster shutdown by container process not be PID 1
+    restart: unless-stopped
+    ports:
+      # expose ports to localhost
+      - '9944:9944' # ws://
+      - '9933:9933' # http://
+      - '30333:30333' # for other nodes
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - './chain-entry.sh:/chain-entry.sh'
+    entrypoint: '/chain-entry.sh'
+    command: [ '--alice --chain dev' ]
+
   postgres:
     image: postgres:15
     ports:
@@ -9,7 +25,7 @@ services:
       POSTGRES_USER: $REST_POSTGRES_USER
       POSTGRES_PASSWORD: $REST_POSTGRES_PASSWORD
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
       interval: 5s
       timeout: 5s
       retries: 5

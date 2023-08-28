@@ -121,6 +121,23 @@ describe('PortfoliosService', () => {
       });
     });
 
+    it('should return the default portfolio when given id of 0', async () => {
+      const mockIdentity = new MockIdentity();
+      const mockPortfolio = {
+        id: new BigNumber(0),
+        assetBalances: [],
+      };
+      const owner = '0x6000';
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+      const result = await service.findOne(owner, new BigNumber(0));
+      expect(result).toEqual({
+        id: new BigNumber(0),
+        assetBalances: [],
+      });
+    });
+
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('foo');

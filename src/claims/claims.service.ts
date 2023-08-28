@@ -2,19 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimsParams,
-  AddInvestorUniquenessClaimParams,
   CddClaim,
   ClaimData,
   ClaimScope,
   ClaimType,
-  InvestorUniquenessClaim,
   ModifyClaimsParams,
   ResultSet,
   RevokeClaimsParams,
   Scope,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { AddInvestorUniquenessDto } from '~/claims/dto/add-investor-uniqueness.dto';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -44,7 +41,7 @@ export class ClaimsService {
   public async findAssociatedByDid(
     target: string,
     scope?: Scope,
-    claimTypes?: Exclude<ClaimType, ClaimType.InvestorUniquenessV2>[],
+    claimTypes?: ClaimType[],
     includeExpired?: boolean,
     size?: BigNumber,
     start?: BigNumber
@@ -95,35 +92,11 @@ export class ClaimsService {
     });
   }
 
-  public async addInvestorUniqueness(
-    modifyClaimsDto: AddInvestorUniquenessDto
-  ): ServiceReturn<void> {
-    const { base, args } = extractTxBase(modifyClaimsDto);
-
-    const { addInvestorUniquenessClaim } = this.polymeshService.polymeshApi.claims;
-
-    return this.transactionsService.submit(
-      addInvestorUniquenessClaim,
-      args as AddInvestorUniquenessClaimParams,
-      base
-    );
-  }
-
   public async findCddClaimsByDid(
     target: string,
     includeExpired = true
   ): Promise<ClaimData<CddClaim>[]> {
     return await this.polymeshService.polymeshApi.claims.getCddClaims({
-      target,
-      includeExpired,
-    });
-  }
-
-  public async getInvestorUniquenessClaims(
-    target: string,
-    includeExpired = true
-  ): Promise<ClaimData<InvestorUniquenessClaim>[]> {
-    return await this.polymeshService.polymeshApi.claims.getInvestorUniquenessClaims({
       target,
       includeExpired,
     });

@@ -82,27 +82,6 @@ describe('claimsDto', () => {
         },
       ],
       [
-        'InvestorUniqueness claim with `scope`',
-        {
-          type: ClaimType.InvestorUniqueness,
-          scope,
-          cddId: '0x60000000000000000000000000000000',
-        },
-      ],
-      [
-        'NoData claim with no additional fields',
-        {
-          type: ClaimType.NoData,
-        },
-      ],
-      [
-        'InvestorUniquenessV2 with `cddId`',
-        {
-          type: ClaimType.InvestorUniquenessV2,
-          cddId: '0x60000000000000000000000000000000',
-        },
-      ],
-      [
         'Accredited with valid `issuers`',
         {
           type: ClaimType.Accredited,
@@ -161,17 +140,6 @@ describe('claimsDto', () => {
         ['scope.type must be one of the following values: Identity, Ticker, Custom'],
       ],
       [
-        'InvestorUniquenessV2 without `cddId`',
-        {
-          type: ClaimType.InvestorUniquenessV2,
-        },
-        [
-          'cddId must be a hexadecimal number',
-          'cddId must start with "0x"',
-          'cddId must be 34 characters long',
-        ],
-      ],
-      [
         'CustomerDueDiligence without `cddId`',
         {
           type: ClaimType.CustomerDueDiligence,
@@ -195,7 +163,7 @@ describe('claimsDto', () => {
           ],
         },
         [
-          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, InvestorUniqueness, NoType, NoData, InvestorUniquenessV2',
+          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked',
         ],
       ],
     ];
