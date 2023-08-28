@@ -54,14 +54,7 @@ export class AccountsService {
   ): Promise<ResultSet<ExtrinsicData>> {
     const account = await this.findOne(address);
 
-    const { field, order, ...rest } = filters;
-
-    let orderBy;
-    if (field && order) {
-      orderBy = { field, order };
-    }
-
-    return account.getTransactionHistory({ ...rest, ...orderBy });
+    return account.getTransactionHistory(filters);
   }
 
   public async getPermissions(address: string): Promise<Permissions> {

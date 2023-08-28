@@ -146,7 +146,7 @@ export class PortfoliosService {
     portfolioId: BigNumber,
     account?: string,
     ticker?: string
-  ): Promise<ResultSet<HistoricSettlement>> {
+  ): Promise<HistoricSettlement[]> {
     const portfolio = await this.findOne(did, portfolioId);
 
     return portfolio.getTransactionHistory({ account, ticker });

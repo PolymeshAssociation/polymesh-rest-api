@@ -319,7 +319,7 @@ export class PortfoliosController {
     description:
       'The ID of the portfolio for which transactions are to be fetched. Use 0 for the default Portfolio',
     type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '0',
   })
   @ApiOkResponse({
     description: 'Portfolio transactions',
@@ -336,7 +336,7 @@ export class PortfoliosController {
     @Param() { did, id }: PortfolioDto,
     @Query() { account, ticker }: GetTransactionsDto
   ): Promise<ResultsModel<HistoricSettlementModel>> {
-    const { data } = await this.portfoliosService.getTransactions(did, id, account, ticker);
+    const data = await this.portfoliosService.getTransactions(did, id, account, ticker);
 
     const results = data.map(settlement => new HistoricSettlementModel(settlement));
 

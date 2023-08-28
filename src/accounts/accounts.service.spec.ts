@@ -3,7 +3,7 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Order, TransactionOrderFields } from '@polymeshassociation/polymesh-sdk/middleware/types';
+import { ExtrinsicsOrderBy } from '@polymeshassociation/polymesh-sdk/middleware/types';
 import { PermissionType, TxGroup, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -147,8 +147,7 @@ describe('AccountsService', () => {
       mockAccount.getTransactionHistory.mockResolvedValue(mockTransactions);
 
       const result = await service.getTransactionHistory('address', {
-        field: TransactionOrderFields.BlockId,
-        order: Order.Desc,
+        orderBy: ExtrinsicsOrderBy.CreatedAtDesc,
       });
       expect(result).toEqual(mockTransactions);
     });
