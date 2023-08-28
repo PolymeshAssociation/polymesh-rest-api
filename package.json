@@ -1,6 +1,6 @@
 {
   "name": "polymesh-rest-api",
-  "version": "3.1.0",
+  "version": "4.0.0-alpha.1",
   "description": "Provides a REST like interface for interacting with the Polymesh blockchain",
   "author": "Polymesh Association",
   "private": true,
@@ -44,7 +44,7 @@
     "@nestjs/schedule": "^2.2.0",
     "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "^9.0.1",
-  "@polymeshassociation/fireblocks-signing-manager": "^2.2.0",
+    "@polymeshassociation/fireblocks-signing-manager": "^2.2.0",
     "@polymeshassociation/hashicorp-vault-signing-manager": "^2.1.0",
     "@polymeshassociation/local-signing-manager": "^2.1.0",
     "@polymeshassociation/polymesh-sdk": "22.0.0-alpha.3",
