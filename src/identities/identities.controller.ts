@@ -56,6 +56,7 @@ import { CreatedIdentityModel } from '~/identities/models/created-identity.model
 import { IdentityModel } from '~/identities/models/identity.model';
 import { createIdentityResolver } from '~/identities/models/identity.util';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+import { GroupedInstructionModel } from '~/settlements/models/grouped-instructions.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
@@ -273,7 +274,7 @@ export class IdentitiesController {
   })
   @Get(':did/pending-instructions')
   public async getPendingInstructions(@Param() { did }: DidDto): Promise<ResultsModel<BigNumber>> {
-    const { pending } = await this.settlementsService.findPendingInstructionsByDid(did);
+    const { pending } = await this.settlementsService.findGroupedInstructionsByDid(did);
 
     return new ResultsModel({ results: pending.map(({ id }) => id) });
   }
@@ -599,5 +600,23 @@ export class IdentitiesController {
     const results = claimResultSet.map(claimScope => new ClaimScopeModel(claimScope));
 
     return new ResultsModel({ results });
+  }
+
+  @Get(':did/grouped-instructions')
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which to get grouped Instructions',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Returns grouped Instructions for the Identity',
+    type: GroupedInstructionModel,
+  })
+  public async getGroupedInstructions(@Param() { did }: DidDto): Promise<GroupedInstructionModel> {
+    const result = await this.settlementsService.findGroupedInstructionsByDid(did);
+
+    return new GroupedInstructionModel(result);
   }
 }
