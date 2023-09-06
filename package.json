@@ -35,7 +35,7 @@
     "postgres:migration:run": "yarn postgres migration:run"
   },
   "dependencies": {
-    "@golevelup/ts-jest": "^0.4.0",
+    "@golevelup/ts-jest": "^0.3.3",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.2.4",
     "@nestjs/config": "^3.0.1",
