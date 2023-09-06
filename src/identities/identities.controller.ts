@@ -33,8 +33,8 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { CddClaimModel } from '~/claims/models/cdd-claim.model';
-import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
 import { ClaimModel } from '~/claims/models/claim.model';
+import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
 import {
   ApiArrayResponse,
   ApiArrayResponseReplaceModelProperties,

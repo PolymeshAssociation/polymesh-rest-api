@@ -11,7 +11,7 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/indent": "off",
     "quotes": ["error", "single", { "avoidEscape": true }],
-    "simple-import-sort/sort": "error",
+    "simple-import-sort/imports": "error",
     "sort-imports": "off",
     "import/order": "off",
     "no-dupe-class-members": "off",

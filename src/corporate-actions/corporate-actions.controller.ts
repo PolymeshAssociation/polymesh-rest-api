@@ -31,8 +31,8 @@ import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultConfigModel } from '~/corporate-actions/models/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/models/corporate-action-targets.model';
 import { CreatedDividendDistributionModel } from '~/corporate-actions/models/created-dividend-distribution.model';
-import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
+import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { TaxWithholdingModel } from '~/corporate-actions/models/tax-withholding.model';
 
 class DividendDistributionParamsDto extends IdParamsDto {

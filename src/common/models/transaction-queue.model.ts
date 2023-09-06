@@ -5,9 +5,9 @@ import { Type } from 'class-transformer';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
+import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionDetailsModel } from '~/common/models/transaction-details.model';
 import { TransactionIdentifierModel } from '~/common/models/transaction-identifier.model';
-import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionType } from '~/common/types';
 
 @ApiExtraModels(TransactionModel, BatchTransactionModel)

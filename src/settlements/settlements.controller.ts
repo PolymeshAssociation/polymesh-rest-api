@@ -27,8 +27,8 @@ import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { CreatedInstructionModel } from '~/settlements/models/created-instruction.model';
 import { CreatedVenueModel } from '~/settlements/models/created-venue.model';
-import { InstructionAffirmationModel } from '~/settlements/models/instruction-affirmation.model';
 import { InstructionModel } from '~/settlements/models/instruction.model';
+import { InstructionAffirmationModel } from '~/settlements/models/instruction-affirmation.model';
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
 import { VenueDetailsModel } from '~/settlements/models/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';

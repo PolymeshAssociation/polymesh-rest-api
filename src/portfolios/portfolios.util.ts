@@ -10,8 +10,8 @@ import {
 import { isNumberedPortfolio } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
-import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 
 export async function createPortfolioModel(
   portfolio: DefaultPortfolio | NumberedPortfolio,
