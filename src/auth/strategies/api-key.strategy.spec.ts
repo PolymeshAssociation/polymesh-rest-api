@@ -35,9 +35,13 @@ describe('ApiKeyStrategy', () => {
     when(authService.validateApiKey).calledWith(mockApiKey).mockReturnValue(mockedUser);
 
     let authorizedUser;
-    passport.authenticate(AuthStrategy.ApiKey, (request, user) => {
-      authorizedUser = user;
-    })(mockRequest, {}, {});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    passport.authenticate(
+      AuthStrategy.ApiKey,
+      (request: any, user: Express.User | false | null) => {
+        authorizedUser = user;
+      }
+    )(mockRequest, {}, {});
 
     expect(authorizedUser).toEqual(mockedUser);
   });
@@ -52,9 +56,13 @@ describe('ApiKeyStrategy', () => {
     when(authService.validateApiKey).calledWith(mockApiKey).mockReturnValue(mockedUser);
 
     let authorizedUser;
-    passport.authenticate(AuthStrategy.ApiKey, (request, user) => {
-      authorizedUser = user;
-    })(mockRequest, {}, {});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    passport.authenticate(
+      AuthStrategy.ApiKey,
+      (request: any, user: Express.User | false | null) => {
+        authorizedUser = user;
+      }
+    )(mockRequest, {}, {});
 
     expect(authorizedUser).toBeFalsy();
   });

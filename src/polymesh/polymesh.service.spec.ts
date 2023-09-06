@@ -34,7 +34,6 @@ describe('PolymeshService', () => {
 
   afterAll(async () => {
     await service.close();
-    await new Promise(resolve => setTimeout(resolve, 5000));
   });
 
   it('should be defined', () => {

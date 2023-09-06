@@ -35,6 +35,7 @@
     "postgres:migration:run": "yarn postgres migration:run"
   },
   "dependencies": {
+    "@golevelup/ts-jest": "^0.4.0",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.3.0",
     "@nestjs/config": "^2.3.1",
@@ -62,8 +63,7 @@
     "rimraf": "3.0.2",
     "rxjs": "^7.5.7",
     "swagger-ui-express": "5.0.0",
-    "typeorm": "^0.3.17",
-    "@golevelup/ts-jest": "^0.4.0"
+    "typeorm": "^0.3.17"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.22.11",

@@ -22,7 +22,8 @@ describe('OpenStrategy', () => {
 
   it('should verify with the open user', async () => {
     let authorizedUser;
-    passport.authenticate(AuthStrategy.Open, (request, user) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    passport.authenticate(AuthStrategy.Open, (request: any, user: Express.User | false | null) => {
       authorizedUser = user;
     })({}, {}, {});
 

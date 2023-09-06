@@ -125,6 +125,7 @@ export class MockHttpService {
 export class MockScheduleService {
   addTimeout = jest.fn();
   addInterval = jest.fn();
+  deleteInterval = jest.fn();
 }
 
 export class MockIdentitiesService {
