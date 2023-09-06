@@ -5,8 +5,8 @@ import { isAccount } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { createPermissionedAccountModel } from '~/accounts/accounts.util';
 import { AccountModel } from '~/identities/models/account.model';
-import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { IdentityModel } from '~/identities/models/identity.model';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { SignerModel } from '~/identities/models/signer.model';
 
 /**

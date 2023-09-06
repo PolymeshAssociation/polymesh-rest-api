@@ -27,7 +27,7 @@ export default registerAs('signer-accounts', () => {
     const fireblocks = {
       url: FIREBLOCKS_URL,
       apiKey: FIREBLOCKS_API_KEY,
-      secret: secret,
+      secret,
     };
 
     return { fireblocks };
