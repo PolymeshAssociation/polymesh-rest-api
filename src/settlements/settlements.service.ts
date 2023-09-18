@@ -31,7 +31,7 @@ export class SettlementsService {
     private readonly assetsService: AssetsService
   ) {}
 
-  public async findPendingInstructionsByDid(did: string): Promise<GroupedInstructions> {
+  public async findGroupedInstructionsByDid(did: string): Promise<GroupedInstructions> {
     const identity = await this.identitiesService.findOne(did);
 
     return identity.getInstructions();

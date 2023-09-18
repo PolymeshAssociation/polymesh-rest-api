@@ -94,7 +94,7 @@ describe('SettlementsService', () => {
 
       mockIdentity.getInstructions.mockResolvedValue(mockInstructions);
 
-      const result = await service.findPendingInstructionsByDid('0x01');
+      const result = await service.findGroupedInstructionsByDid('0x01');
 
       expect(result).toEqual(mockInstructions);
     });

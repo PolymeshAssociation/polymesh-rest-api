@@ -146,7 +146,7 @@ export class MockSettlementsService {
   createVenue = jest.fn();
   modifyVenue = jest.fn();
   canTransfer = jest.fn();
-  findPendingInstructionsByDid = jest.fn();
+  findGroupedInstructionsByDid = jest.fn();
   findVenuesByOwner = jest.fn();
   withdrawAffirmation = jest.fn();
   rescheduleInstruction = jest.fn();
