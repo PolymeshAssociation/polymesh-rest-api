@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { FungibleAsset } from '@polymeshassociation/polymesh-sdk/types';
+import { FungibleAsset, NftCollection } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
@@ -37,7 +37,7 @@ export class LegModel {
     example: 'TICKER',
   })
   @FromEntity()
-  readonly asset: FungibleAsset;
+  readonly asset: FungibleAsset | NftCollection;
 
   constructor(model: LegModel) {
     Object.assign(this, model);
