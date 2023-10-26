@@ -5,6 +5,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
+import { isFungibleLeg } from '~/common/utils';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
@@ -18,21 +19,28 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
   const { status, createdAt, tradeDate, valueDate, venue, type, memo } = details;
 
+  const legs = legsResultSet.data
+    ?.map(leg => {
+      if (isFungibleLeg(leg)) {
+        const { from, to, amount, asset } = leg;
+        return new LegModel({
+          from: createPortfolioIdentifierModel(from),
+          to: createPortfolioIdentifierModel(to),
+          amount,
+          asset,
+        });
+      }
+
+      return null;
+    })
+    .filter(leg => !!leg) as LegModel[]; // TODO: to be changed when both NftLeg and FungibleLeg are implemented
+
   let instructionModelParams: ConstructorParameters<typeof InstructionModel>[0] = {
     status,
     createdAt,
     venue,
     type,
-    legs:
-      legsResultSet.data?.map(
-        ({ from, to, amount, asset }) =>
-          new LegModel({
-            from: createPortfolioIdentifierModel(from),
-            to: createPortfolioIdentifierModel(to),
-            amount,
-            asset,
-          })
-      ) || [],
+    legs: legs || [],
   };
 
   if (valueDate !== null) {

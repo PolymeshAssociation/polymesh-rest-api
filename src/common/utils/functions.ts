@@ -1,4 +1,10 @@
-import { ModuleName, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  FungibleLeg,
+  Leg,
+  ModuleName,
+  NftLeg,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { randomBytes } from 'crypto';
 import { flatten } from 'lodash';
 import { promisify } from 'util';
@@ -94,3 +100,11 @@ export const extractTxBase = <T extends TransactionBaseDto>(
 };
 
 export const isNotNull = <T>(item: T | null): item is T => item !== null;
+
+export function isFungibleLeg(leg: Leg): leg is FungibleLeg {
+  return 'amount' in leg;
+}
+
+export function isNftLeg(leg: Leg): leg is NftLeg {
+  return 'nfts' in leg;
+}
