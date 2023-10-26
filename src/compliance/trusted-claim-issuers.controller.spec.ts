@@ -1,7 +1,7 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Asset, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { TransactionType } from '~/common/types';
@@ -62,7 +62,7 @@ describe('TrustedClaimIssuersController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
-      const testTxResult = createMockTransactionResult<Asset>({
+      const testTxResult = createMockTransactionResult<void>({
         ...txResult,
         transactions: [transaction],
       });
@@ -90,7 +90,7 @@ describe('TrustedClaimIssuersController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.AddDefaultTrustedClaimIssuer,
       };
-      const testTxResult = createMockTransactionResult<Asset>({
+      const testTxResult = createMockTransactionResult<void>({
         ...txResult,
         transactions: [transaction],
       });
@@ -118,7 +118,7 @@ describe('TrustedClaimIssuersController', () => {
         type: TransactionType.Single,
         transactionTag: TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer,
       };
-      const testTxResult = createMockTransactionResult<Asset>({
+      const testTxResult = createMockTransactionResult<void>({
         ...txResult,
         transactions: [transaction],
       });

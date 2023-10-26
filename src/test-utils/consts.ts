@@ -66,6 +66,7 @@ export const testValues = {
 export const extrinsic = {
   blockHash: 'blockHash',
   blockNumber: new BigNumber(1000000),
+  blockDate: new Date(),
   extrinsicIdx: new BigNumber(1),
   address: 'someAccount',
   nonce: new BigNumber(123456),

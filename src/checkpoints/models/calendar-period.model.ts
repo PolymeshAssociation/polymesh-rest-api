@@ -2,9 +2,9 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { CalendarUnit } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
+import { CalendarUnit } from '~/common/types';
 
 export class CalendarPeriodModel {
   @ApiProperty({

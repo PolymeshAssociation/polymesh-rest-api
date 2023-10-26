@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Asset, ClaimType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { ClaimType, FungibleAsset, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
@@ -81,7 +81,7 @@ describe('TrustedClaimIssuersService', () => {
   describe('set', () => {
     it('should set trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
-      const testTxResult = createMockTransactionResult<Asset>({
+      const testTxResult = createMockTransactionResult<FungibleAsset>({
         ...txResult,
         transactions: [getMockTransaction(TxTags.complianceManager.AddDefaultTrustedClaimIssuer)],
       });
@@ -98,7 +98,7 @@ describe('TrustedClaimIssuersService', () => {
   describe('add', () => {
     it('should add trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
-      const testTxResult = createMockTransactionResult<Asset>({
+      const testTxResult = createMockTransactionResult<FungibleAsset>({
         ...txResult,
         transactions: [getMockTransaction(TxTags.complianceManager.AddDefaultTrustedClaimIssuer)],
       });
@@ -120,7 +120,7 @@ describe('TrustedClaimIssuersService', () => {
   describe('remove', () => {
     it('should remove trusted Claim Issuers for an Asset', async () => {
       const mockAsset = new MockAsset();
-      const testTxResult = createMockTransactionResult<Asset>({
+      const testTxResult = createMockTransactionResult<FungibleAsset>({
         ...txResult,
         transactions: [
           getMockTransaction(TxTags.complianceManager.RemoveDefaultTrustedClaimIssuer),

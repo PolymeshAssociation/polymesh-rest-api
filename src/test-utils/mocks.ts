@@ -3,16 +3,15 @@
 import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { SettlementResultEnum } from '@polymeshassociation/polymesh-sdk/middleware/types';
 import {
   Account,
   AuthorizationType,
-  CalendarUnit,
   HistoricSettlement,
   MetadataEntry,
   MetadataType,
   ResultSet,
   SettlementLeg,
-  SettlementResultEnum,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -21,6 +20,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { CalendarUnit } from '~/common/types';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
 import { TransactionResult } from '~/transactions/transactions.util';

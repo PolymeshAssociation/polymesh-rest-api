@@ -10,11 +10,12 @@ import {
 } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
-  Asset,
   AuthorizationType,
   Claim,
   ClaimScope,
   ClaimType,
+  FungibleAsset,
+  NftCollection,
   TickerReservation,
   Venue,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -218,7 +219,9 @@ export class IdentitiesController {
     example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
   })
   @Get(':did/assets')
-  public async getAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
+  public async getAssets(
+    @Param() { did }: DidDto
+  ): Promise<ResultsModel<FungibleAsset | NftCollection>> {
     const results = await this.assetsService.findAllByOwner(did);
     return new ResultsModel({ results });
   }
@@ -458,7 +461,7 @@ export class IdentitiesController {
     example: ['SOME_TICKER', 'RANDOM_TICKER'],
   })
   @Get(':did/trusting-assets')
-  async getTrustingAssets(@Param() { did }: DidDto): Promise<ResultsModel<Asset>> {
+  async getTrustingAssets(@Param() { did }: DidDto): Promise<ResultsModel<FungibleAsset>> {
     const results = await this.identitiesService.findTrustingAssets(did);
     return new ResultsModel({ results });
   }

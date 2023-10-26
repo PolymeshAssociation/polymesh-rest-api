@@ -3,10 +3,11 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { CalendarUnit, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CalendarUnit } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { testValues } from '~/test-utils/consts';
 import {

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddAssetRequirementParams,
-  Asset,
   ComplianceRequirements,
   ModifyComplianceRequirementParams,
   SetAssetRequirementsParams,
@@ -28,7 +27,7 @@ export class ComplianceRequirementsService {
     return asset.compliance.requirements.get();
   }
 
-  public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<Asset> {
+  public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
 
     const asset = await this.assetsService.findOne(ticker);
@@ -43,7 +42,7 @@ export class ComplianceRequirementsService {
   public async pauseRequirements(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
     return this.transactionsService.submit(
       asset.compliance.requirements.pause,
@@ -55,7 +54,7 @@ export class ComplianceRequirementsService {
   public async unpauseRequirements(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
@@ -69,7 +68,7 @@ export class ComplianceRequirementsService {
     ticker: string,
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
@@ -82,7 +81,7 @@ export class ComplianceRequirementsService {
   public async deleteAll(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  ): ServiceReturn<void> {
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
@@ -92,7 +91,7 @@ export class ComplianceRequirementsService {
     );
   }
 
-  public async add(ticker: string, params: RequirementDto): ServiceReturn<Asset> {
+  public async add(ticker: string, params: RequirementDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
 
     const asset = await this.assetsService.findOne(ticker);

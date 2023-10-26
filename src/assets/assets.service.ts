@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
-  Asset,
   AssetDocument,
   AuthorizationRequest,
+  FungibleAsset,
   HistoricAgentOperation,
   IdentityBalance,
+  NftCollection,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -30,13 +31,15 @@ export class AssetsService {
     private readonly transactionsService: TransactionsService
   ) {}
 
-  public async findOne(ticker: string): Promise<Asset> {
-    return await this.polymeshService.polymeshApi.assets.getAsset({ ticker }).catch(error => {
-      throw handleSdkError(error);
-    });
+  public async findOne(ticker: string): Promise<FungibleAsset> {
+    return await this.polymeshService.polymeshApi.assets
+      .getFungibleAsset({ ticker })
+      .catch(error => {
+        throw handleSdkError(error);
+      });
   }
 
-  public async findAllByOwner(owner: string): Promise<Asset[]> {
+  public async findAllByOwner(owner: string): Promise<(FungibleAsset | NftCollection)[]> {
     const {
       polymeshService: { polymeshApi },
     } = this;
@@ -67,7 +70,7 @@ export class AssetsService {
     return asset.documents.get({ size, start });
   }
 
-  public async setDocuments(ticker: string, params: SetAssetDocumentsDto): ServiceReturn<Asset> {
+  public async setDocuments(ticker: string, params: SetAssetDocumentsDto): ServiceReturn<void> {
     const {
       documents: { set },
     } = await this.findOne(ticker);
@@ -76,14 +79,14 @@ export class AssetsService {
     return this.transactionsService.submit(set, args, base);
   }
 
-  public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {
+  public async createAsset(params: CreateAssetDto): ServiceReturn<FungibleAsset> {
     const { base, args } = extractTxBase(params);
 
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
     return this.transactionsService.submit(createAsset, args, base);
   }
 
-  public async issue(ticker: string, params: IssueDto): ServiceReturn<Asset> {
+  public async issue(ticker: string, params: IssueDto): ServiceReturn<FungibleAsset> {
     const { base, args } = extractTxBase(params);
     const asset = await this.findOne(ticker);
 
@@ -112,10 +115,7 @@ export class AssetsService {
     );
   }
 
-  public async freeze(
-    ticker: string,
-    transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  public async freeze(ticker: string, transactionBaseDto: TransactionBaseDto): ServiceReturn<void> {
     const asset = await this.findOne(ticker);
 
     return this.transactionsService.submit(asset.freeze, {}, transactionBaseDto);
@@ -124,7 +124,7 @@ export class AssetsService {
   public async unfreeze(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  ): ServiceReturn<void> {
     const asset = await this.findOne(ticker);
 
     return this.transactionsService.submit(asset.unfreeze, {}, transactionBaseDto);

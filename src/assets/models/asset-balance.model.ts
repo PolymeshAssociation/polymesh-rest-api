@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { FungibleAsset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { BalanceModel } from '~/assets/models/balance.model';
 import { FromEntity } from '~/common/decorators/transformation';
@@ -13,7 +13,7 @@ export class AssetBalanceModel extends BalanceModel {
     example: 'TICKER',
   })
   @FromEntity()
-  readonly asset: Asset;
+  readonly asset: FungibleAsset;
 
   constructor(model: AssetBalanceModel) {
     const { asset, ...balance } = model;
