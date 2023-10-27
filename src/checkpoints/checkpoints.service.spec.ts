@@ -267,9 +267,7 @@ describe('CheckpointsService', () => {
       const mockDate = new Date();
       const params = {
         signer,
-        start: mockDate,
-        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-        repetitions: new BigNumber(2),
+        points: [mockDate],
       };
 
       const result = await service.createScheduleByTicker('TICKER', params);
@@ -280,9 +278,7 @@ describe('CheckpointsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.checkpoints.schedules.create,
         {
-          start: mockDate,
-          period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-          repetitions: new BigNumber(2),
+          points: [mockDate],
         },
         {
           signer,

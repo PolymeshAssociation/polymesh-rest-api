@@ -131,12 +131,8 @@ describe('CheckpointsController', () => {
         {
           schedule: {
             id: new BigNumber(1),
-            period: {
-              unit: CalendarUnit.Month,
-              amount: new BigNumber(3),
-            },
+            pendingPoints: [mockDate],
             start: mockDate,
-            complexity: new BigNumber(4),
             expiryDate: null,
           },
           details: {
@@ -151,19 +147,14 @@ describe('CheckpointsController', () => {
       const result = await controller.getSchedules({ ticker: 'TICKER' });
 
       const mockResult = [
-        {
+        new CheckpointScheduleModel({
           id: new BigNumber(1),
           ticker: 'TICKER',
-          period: {
-            unit: CalendarUnit.Month,
-            amount: new BigNumber(3),
-          },
-          start: mockDate,
-          complexity: new BigNumber(4),
+          pendingPoints: [mockDate],
           expiryDate: null,
           remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
-        },
+        }),
       ];
 
       expect(result).toEqual(new ResultsModel({ results: mockResult }));
@@ -172,7 +163,7 @@ describe('CheckpointsController', () => {
 
   describe('getSchedule', () => {
     it('should call the service and return the Checkpoint Schedule details', async () => {
-      const mockDate = new Date();
+      const mockDate = new Date('10/14/1987');
       const mockScheduleWithDetails = {
         schedule: new MockCheckpointSchedule(),
         details: {
@@ -187,6 +178,7 @@ describe('CheckpointsController', () => {
       const mockResult = new CheckpointScheduleModel({
         ...mockScheduleWithDetails.schedule,
         ...mockScheduleWithDetails.details,
+        pendingPoints: [mockDate],
       });
       expect(result).toEqual(mockResult);
     });
@@ -194,7 +186,7 @@ describe('CheckpointsController', () => {
 
   describe('createSchedule', () => {
     it('should return the details of newly created Checkpoint Schedule', async () => {
-      const mockDate = new Date();
+      const mockDate = new Date('10/14/1987');
 
       const mockCheckpointSchedule = new MockCheckpointSchedule();
       const response = {
@@ -214,9 +206,7 @@ describe('CheckpointsController', () => {
 
       const body = {
         signer: 'signer',
-        start: mockDate,
-        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-        repetitions: new BigNumber(2),
+        points: [mockDate],
       };
 
       const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
@@ -224,6 +214,7 @@ describe('CheckpointsController', () => {
       const mockCreatedSchedule = new CheckpointScheduleModel({
         ...mockScheduleWithDetails.schedule,
         ...mockScheduleWithDetails.details,
+        pendingPoints: [mockDate],
       });
       expect(result).toEqual({
         ...txResult,

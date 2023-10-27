@@ -163,7 +163,7 @@ describe('claimsDto', () => {
           ],
         },
         [
-          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked',
+          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, Custom',
         ],
       ],
     ];
