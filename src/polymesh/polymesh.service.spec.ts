@@ -35,7 +35,7 @@ describe('PolymeshService', () => {
   afterAll(async () => {
     await service.close();
     await new Promise(resolve => setTimeout(resolve, 5000));
-  });
+  }, 10000);
 
   it('should be defined', () => {
     expect(service).toBeDefined();
