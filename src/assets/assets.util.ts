@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { FungibleAsset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 
 /**
  * Fetch and assemble data for an Asset
  */
-export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetailsModel> {
+export async function createAssetDetailsModel(asset: FungibleAsset): Promise<AssetDetailsModel> {
   const [
     { owner, assetType, name, totalSupply, isDivisible },
     securityIdentifiers,

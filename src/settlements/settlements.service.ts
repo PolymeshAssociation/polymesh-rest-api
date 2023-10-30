@@ -151,13 +151,4 @@ export class SettlementsService {
 
     return this.transactionsService.submit(instruction.withdraw, {}, signerDto);
   }
-
-  public async rescheduleInstruction(
-    id: BigNumber,
-    signerDto: TransactionBaseDto
-  ): ServiceReturn<Instruction> {
-    const instruction = await this.findInstruction(id);
-
-    return this.transactionsService.submit(instruction.reschedule, {}, signerDto);
-  }
 }

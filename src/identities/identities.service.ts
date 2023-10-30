@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
-  Asset,
   AuthorizationRequest,
+  FungibleAsset,
   Identity,
   RegisterIdentityParams,
   ResultSet,
@@ -44,7 +44,7 @@ export class IdentitiesService {
   /**
    * Method to get trusting Assets for a specific did
    */
-  public async findTrustingAssets(did: string): Promise<Asset[]> {
+  public async findTrustingAssets(did: string): Promise<FungibleAsset[]> {
     const identity = await this.findOne(did);
     return identity.getTrustingAssets();
   }
@@ -53,7 +53,7 @@ export class IdentitiesService {
     did: string,
     size?: BigNumber,
     start?: BigNumber
-  ): Promise<ResultSet<Asset>> {
+  ): Promise<ResultSet<FungibleAsset>> {
     const identity = await this.findOne(did);
     return identity.getHeldAssets({ size, start });
   }

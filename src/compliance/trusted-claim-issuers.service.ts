@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Asset, TrustedClaimIssuer } from '@polymeshassociation/polymesh-sdk/types';
+import { TrustedClaimIssuer } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
@@ -20,21 +20,21 @@ export class TrustedClaimIssuersService {
     return asset.compliance.trustedClaimIssuers.get();
   }
 
-  public async set(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
+  public async set(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.set, args, base);
   }
 
-  public async add(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<Asset> {
+  public async add(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.add, args, base);
   }
 
-  public async remove(ticker: string, params: RemoveTrustedClaimIssuersDto): ServiceReturn<Asset> {
+  public async remove(ticker: string, params: RemoveTrustedClaimIssuersDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
     const asset = await this.assetsService.findOne(ticker);
 

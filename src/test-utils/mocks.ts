@@ -3,16 +3,16 @@
 import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { SettlementResultEnum } from '@polymeshassociation/polymesh-sdk/middleware/types';
 import {
   Account,
   AuthorizationType,
-  CalendarUnit,
+  ComplianceManagerTx,
   HistoricSettlement,
   MetadataEntry,
   MetadataType,
   ResultSet,
   SettlementLeg,
-  SettlementResultEnum,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -21,8 +21,12 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Response } from 'express';
 
+import { TransactionType } from '~/common/types';
+import { ServiceReturn } from '~/common/utils';
+import { EventType } from '~/events/types';
+import { NotificationPayload } from '~/notifications/types';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { testValues } from '~/test-utils/consts';
+import { testValues, txResult } from '~/test-utils/consts';
 import { TransactionResult } from '~/transactions/transactions.util';
 
 const { did } = testValues;
@@ -80,7 +84,7 @@ export class MockPolymesh {
   };
 
   public assets = {
-    getAsset: jest.fn(),
+    getFungibleAsset: jest.fn(),
     getAssets: jest.fn(),
     reserveTicker: jest.fn(),
     createAsset: jest.fn(),
@@ -312,10 +316,8 @@ export class MockCheckpoint {
 export class MockCheckpointSchedule {
   id = new BigNumber(1);
   ticker = 'TICKER';
-  period = { unit: CalendarUnit.Month, amount: new BigNumber(3) };
-  start = new Date('10/14/1987');
+  pendingPoints = [new Date('10/14/1987')];
   expiryDate = new Date('10/14/2000');
-  complexity = new BigNumber(4);
 }
 
 export class MockAuthorizationRequest {
@@ -461,4 +463,23 @@ export function createMockResultSet<T extends any[]>(data: T): ResultSet<T> {
     next: '0',
     count: new BigNumber(data.length),
   };
+}
+
+export function createMockTxResult(
+  transactionTag: ComplianceManagerTx
+): TransactionResult<void> | ServiceReturn<void> | NotificationPayload<EventType> {
+  const transaction = {
+    blockHash: '0x1',
+    transactionHash: '0x2',
+    blockNumber: new BigNumber(1),
+    type: TransactionType.Single,
+    transactionTag: transactionTag,
+  };
+
+  const testTxResult = createMockTransactionResult<void>({
+    ...txResult,
+    transactions: [transaction],
+  });
+
+  return testTxResult;
 }

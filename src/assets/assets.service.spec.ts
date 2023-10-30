@@ -70,7 +70,7 @@ describe('AssetsService', () => {
     it('should return the Asset for a valid ticker', async () => {
       const mockAsset = new MockAsset();
 
-      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+      mockPolymeshApi.assets.getFungibleAsset.mockResolvedValue(mockAsset);
 
       const result = await service.findOne('TICKER');
 
@@ -80,7 +80,7 @@ describe('AssetsService', () => {
     describe('otherwise', () => {
       it('should call the handleSdkError method and throw an error', async () => {
         const mockError = new Error('Some Error');
-        mockPolymeshApi.assets.getAsset.mockRejectedValue(mockError);
+        mockPolymeshApi.assets.getFungibleAsset.mockRejectedValue(mockError);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
