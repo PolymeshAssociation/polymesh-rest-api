@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType, CountryCode } from '@polymeshassociation/polymesh-sdk/types';
 import { isCddClaim } from '@polymeshassociation/polymesh-sdk/utils';
 import { Type } from 'class-transformer';
@@ -8,6 +9,7 @@ import { IsEnum, IsNotEmptyObject, IsOptional, ValidateIf, ValidateNested } from
 
 import { IsCddId } from '~/claims/decorators/validation';
 import { ScopeDto } from '~/claims/dto/scope.dto';
+import { ToBigNumber } from '~/common/decorators/transformation';
 import { TrustedClaimIssuerDto } from '~/compliance/dto/trusted-claim-issuer.dto';
 
 export class ClaimDto {
@@ -38,6 +40,14 @@ export class ClaimDto {
   @ValidateIf(({ type }) => type === ClaimType.Jurisdiction)
   @IsEnum(CountryCode)
   code?: CountryCode;
+
+  @ApiPropertyOptional({
+    description: 'CustomClaimType Id',
+    example: '1',
+  })
+  @ValidateIf(({ type }) => type === ClaimType.Custom)
+  @ToBigNumber()
+  customClaimTypeId?: BigNumber;
 
   @ApiPropertyOptional({
     description: 'cddId for `CustomerDueDiligence` and `InvestorUniqueness` type Claims',
