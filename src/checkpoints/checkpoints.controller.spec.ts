@@ -8,7 +8,6 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { CalendarUnit } from '~/common/types';
 import { testValues } from '~/test-utils/consts';
 import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 import { MockCheckpointsService } from '~/test-utils/service-mocks';
