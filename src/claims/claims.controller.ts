@@ -107,11 +107,11 @@ export class ClaimsController {
   @ApiOperation({
     summary: 'Get CustomClaimType',
     description:
-      'This endpoint will retrieve the custom claim type by id or name. <br /> `ID` or name needs to be provided. <br/> If both are provided will fetch using `ID`',
+      'This endpoint will retrieve the custom claim type by id or name. <br /> ID or name needs to be provided. <br/> If both are provided will fetch using ID',
   })
   @ApiQuery({
     name: 'id',
-    description: 'The id of the CustomClaimType',
+    description: 'The ID of the CustomClaimType',
     type: 'string',
     required: false,
     example: '1',
