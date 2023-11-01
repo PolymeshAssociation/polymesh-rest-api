@@ -1,4 +1,5 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType, CountryCode, ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
@@ -91,6 +92,14 @@ describe('claimsDto', () => {
               identity: '0x0600000000000000000000000000000000000000000000000000000000000000',
             },
           ],
+        },
+      ],
+      [
+        'Custom claim with `customClaimTypeId`',
+        {
+          type: ClaimType.Custom,
+          scope,
+          customClaimTypeId: new BigNumber('1'),
         },
       ],
     ];
