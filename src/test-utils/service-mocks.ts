@@ -11,6 +11,7 @@ import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.s
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
+import { NftsService } from '~/nfts/nfts.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -240,6 +241,11 @@ export const mockMetadataServiceProvider: ValueProvider<MetadataService> = {
 export const mockSubsidyServiceProvider: ValueProvider<SubsidyService> = {
   provide: SubsidyService,
   useValue: createMock<SubsidyService>(),
+};
+
+export const mockNftsServiceProvider: ValueProvider<NftsService> = {
+  provide: NftsService,
+  useValue: createMock<NftsService>(),
 };
 
 /**

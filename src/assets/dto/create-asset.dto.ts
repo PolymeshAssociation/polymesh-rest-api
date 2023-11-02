@@ -21,7 +21,7 @@ export class CreateAssetDto extends TransactionBaseDto {
   readonly name: string;
 
   @ApiProperty({
-    description: 'The ticker of the Asset. This must already be reserved by the Signer',
+    description: 'The ticker of the Asset. This must either be free or reserved by the Signer',
     example: 'TICKER',
   })
   @IsTicker()

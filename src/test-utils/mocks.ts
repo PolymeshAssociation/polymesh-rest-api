@@ -86,6 +86,7 @@ export class MockPolymesh {
   public assets = {
     getFungibleAsset: jest.fn(),
     getAssets: jest.fn(),
+    getNftCollection: jest.fn(),
     reserveTicker: jest.fn(),
     createAsset: jest.fn(),
     getTickerReservation: jest.fn(),
