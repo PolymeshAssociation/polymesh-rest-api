@@ -77,9 +77,7 @@ export class NftsService {
   public async issueNft(ticker: string, params: IssueNftDto): ServiceReturn<Nft> {
     const { base, args } = extractTxBase(params);
 
-    const collection = await this.findCollection(ticker);
-
-    const issue = collection.issue;
+    const { issue } = await this.findCollection(ticker);
 
     return this.transactionsService.submit(issue, args, base);
   }

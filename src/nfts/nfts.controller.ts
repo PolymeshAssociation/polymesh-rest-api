@@ -36,9 +36,7 @@ export class NftsController {
   public async getCollectionKeys(
     @Param() { ticker }: TickerParamsDto
   ): Promise<CollectionKeyModel[]> {
-    const result = await this.nftService.getCollectionKeys(ticker);
-
-    return result;
+    return this.nftService.getCollectionKeys(ticker);
   }
 
   @ApiOperation({
@@ -63,9 +61,7 @@ export class NftsController {
   })
   @Get(':ticker/:id')
   public async getNftDetails(@Param() { ticker, id }: NftParamsDto): Promise<NftModel> {
-    const result = await this.nftService.nftDetails(ticker, id);
-
-    return result;
+    return this.nftService.nftDetails(ticker, id);
   }
 
   @ApiOperation({
