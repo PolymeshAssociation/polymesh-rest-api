@@ -26,7 +26,7 @@ export class CorporateActionsService {
   ) {}
 
   public async findDefaultConfigByTicker(ticker: string): Promise<CorporateActionDefaultConfig> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return asset.corporateActions.getDefaultConfig();
   }
 
@@ -35,7 +35,7 @@ export class CorporateActionsService {
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): ServiceReturn<void> {
     const { base, args } = extractTxBase(corporateActionDefaultConfigDto);
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
 
     return this.transactionService.submit(
       asset.corporateActions.setDefaultConfig,
@@ -45,12 +45,12 @@ export class CorporateActionsService {
   }
 
   public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return asset.corporateActions.distributions.get();
   }
 
   public async findDistribution(ticker: string, id: BigNumber): Promise<DistributionWithDetails> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
 
     return await asset.corporateActions.distributions.getOne({ id }).catch(error => {
       throw handleSdkError(error);
@@ -66,7 +66,7 @@ export class CorporateActionsService {
       args: { originPortfolio, ...rest },
     } = extractTxBase(dividendDistributionDto);
 
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return this.transactionService.submit(
       asset.corporateActions.distributions.configureDividendDistribution,
       {
@@ -82,7 +82,7 @@ export class CorporateActionsService {
     corporateAction: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return this.transactionService.submit(
       asset.corporateActions.remove,
       { corporateAction },

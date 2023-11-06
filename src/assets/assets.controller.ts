@@ -44,6 +44,7 @@ export class AssetsController {
   ) {}
 
   @ApiTags('metadata')
+  @ApiTags('nfts')
   @ApiOperation({
     summary: 'Fetch an Global Asset Metadata',
     description: 'This endpoint retrieves all the Asset Global Metadata on chain',
@@ -60,6 +61,7 @@ export class AssetsController {
     return result.map(globalKey => new GlobalMetadataModel(globalKey));
   }
 
+  @ApiTags('nfts')
   @ApiOperation({
     summary: 'Fetch Asset details',
     description: 'This endpoint will provide the basic details of an Asset',
@@ -133,6 +135,7 @@ export class AssetsController {
     });
   }
 
+  @ApiTags('nfts')
   @ApiOperation({
     summary: 'Fetch a list of Asset documents',
     description: 'This endpoint will provide the list of documents attached to an Asset',
@@ -188,6 +191,7 @@ export class AssetsController {
     });
   }
 
+  @ApiTags('nfts')
   @ApiOperation({
     summary: 'Set a list of Documents for an Asset',
     description:
@@ -313,6 +317,7 @@ export class AssetsController {
     return handleServiceResult(result);
   }
 
+  @ApiTags('nfts')
   @ApiOperation({
     summary: 'Freeze transfers for an Asset',
     description:
@@ -343,6 +348,7 @@ export class AssetsController {
     return handleServiceResult(result);
   }
 
+  @ApiTags('nfts')
   @ApiOperation({
     summary: 'Unfreeze transfers for an Asset',
     description:

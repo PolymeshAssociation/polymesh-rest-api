@@ -298,7 +298,8 @@ export class SettlementsController {
   })
   @Get('leg-validations')
   public async validateLeg(
-    @Query() { asset, amount, fromDid, fromPortfolio, toDid, toPortfolio }: LegValidationParamsDto
+    @Query()
+    { asset, amount, nfts, fromDid, fromPortfolio, toDid, toPortfolio }: LegValidationParamsDto
   ): Promise<TransferBreakdownModel> {
     const fromPortfolioLike = new PortfolioDto({
       did: fromDid,
@@ -310,7 +311,8 @@ export class SettlementsController {
       fromPortfolioLike,
       toPortfolioLike,
       asset,
-      amount
+      amount,
+      nfts
     );
 
     return new TransferBreakdownModel(transferBreakdown);

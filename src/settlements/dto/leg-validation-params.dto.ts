@@ -1,20 +1,33 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
 
 export class LegValidationParamsDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Amount of the Asset to be transferred',
     type: 'string',
     example: '1000',
   })
+  @ValidateIf(({ nfts }) => !nfts)
   @IsBigNumber()
   @ToBigNumber()
   readonly amount: BigNumber;
+
+  @ApiPropertyOptional({
+    description: 'The NFT IDs to be transferred for the collection',
+    type: 'string',
+    isArray: true,
+    example: ['1000'],
+  })
+  @ValidateIf(({ amount }) => !amount)
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly nfts: BigNumber[];
 
   @ApiProperty({
     description: 'DID of the sender',

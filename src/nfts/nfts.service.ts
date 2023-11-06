@@ -58,7 +58,7 @@ export class NftsService {
   public async getCollectionKeys(ticker: string): Promise<CollectionKeyModel[]> {
     const collection = await this.findCollection(ticker);
 
-    const keys = await collection.collectionMetadata();
+    const keys = await collection.collectionKeys();
 
     return keys.map(key => new CollectionKeyModel(key));
   }

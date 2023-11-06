@@ -19,6 +19,8 @@ import { UsersService } from '~/users/users.service';
 
 export class MockAssetService {
   findOne = jest.fn();
+  findFungible = jest.fn();
+  findNftCollection = jest.fn();
   findHolders = jest.fn();
   findDocuments = jest.fn();
   setDocuments = jest.fn();

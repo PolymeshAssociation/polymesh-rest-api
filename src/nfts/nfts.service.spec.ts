@@ -156,7 +156,7 @@ describe('NftService', () => {
         },
       ];
 
-      collection.collectionMetadata.mockResolvedValue(mockMetadata);
+      collection.collectionKeys.mockResolvedValue(mockMetadata);
 
       const result = await service.getCollectionKeys(ticker);
 

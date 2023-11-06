@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Asset,
   AssetDocument,
   AuthorizationRequest,
   FungibleAsset,
@@ -31,7 +32,13 @@ export class AssetsService {
     private readonly transactionsService: TransactionsService
   ) {}
 
-  public async findOne(ticker: string): Promise<FungibleAsset> {
+  public async findOne(ticker: string): Promise<Asset> {
+    return await this.polymeshService.polymeshApi.assets.getAsset({ ticker }).catch(error => {
+      throw handleSdkError(error);
+    });
+  }
+
+  public async findFungible(ticker: string): Promise<FungibleAsset> {
     return await this.polymeshService.polymeshApi.assets
       .getFungibleAsset({ ticker })
       .catch(error => {
@@ -57,7 +64,7 @@ export class AssetsService {
     size: BigNumber,
     start?: string
   ): Promise<ResultSet<IdentityBalance>> {
-    const asset = await this.findOne(ticker);
+    const asset = await this.findFungible(ticker);
     return asset.assetHolders.get({ size, start });
   }
 
@@ -88,7 +95,7 @@ export class AssetsService {
 
   public async issue(ticker: string, params: IssueDto): ServiceReturn<FungibleAsset> {
     const { base, args } = extractTxBase(params);
-    const asset = await this.findOne(ticker);
+    const asset = await this.findFungible(ticker);
 
     return this.transactionsService.submit(asset.issuance.issue, args, base);
   }
@@ -106,7 +113,7 @@ export class AssetsService {
   public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
 
-    const { redeem } = await this.findOne(ticker);
+    const { redeem } = await this.findFungible(ticker);
 
     return this.transactionsService.submit(
       redeem,
@@ -138,7 +145,7 @@ export class AssetsService {
       base,
       args: { origin, amount },
     } = extractTxBase(params);
-    const { controllerTransfer } = await this.findOne(ticker);
+    const { controllerTransfer } = await this.findFungible(ticker);
 
     return this.transactionsService.submit(
       controllerTransfer,
@@ -148,7 +155,7 @@ export class AssetsService {
   }
 
   public async getOperationHistory(ticker: string): Promise<HistoricAgentOperation[]> {
-    const asset = await this.findOne(ticker);
+    const asset = await this.findFungible(ticker);
     return asset.getOperationHistory();
   }
 }

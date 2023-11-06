@@ -56,7 +56,7 @@ describe('CorporateActionsService', () => {
         mockCorporateActionDefaultConfig
       );
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findDefaultConfigByTicker('TICKER');
 
@@ -70,7 +70,7 @@ describe('CorporateActionsService', () => {
 
     beforeEach(() => {
       mockAsset = new MockAsset();
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
     });
 
     it('should run a setDefaultConfig procedure and return the queue data', async () => {
@@ -100,7 +100,7 @@ describe('CorporateActionsService', () => {
         { defaultTaxWithholding: new BigNumber(25) },
         { signer }
       );
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
     });
   });
 
@@ -111,7 +111,7 @@ describe('CorporateActionsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.corporateActions.distributions.get.mockResolvedValue(mockDistributions);
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findDistributionsByTicker('TICKER');
 
@@ -126,7 +126,7 @@ describe('CorporateActionsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.corporateActions.distributions.getOne.mockResolvedValue(mockDistributions);
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findDistribution('TICKER', new BigNumber(1));
 
@@ -138,7 +138,7 @@ describe('CorporateActionsService', () => {
         const mockAsset = new MockAsset();
         const mockError = new Error('Some Error');
         mockAsset.corporateActions.distributions.getOne.mockRejectedValue(mockError);
-        mockAssetsService.findOne.mockResolvedValue(mockAsset);
+        mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
@@ -168,7 +168,7 @@ describe('CorporateActionsService', () => {
 
     beforeEach(() => {
       mockAsset = new MockAsset();
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
     });
 
     it('should run a configureDividendDistribution procedure and return the created Dividend Distribution', async () => {
@@ -191,7 +191,7 @@ describe('CorporateActionsService', () => {
         result: mockDistribution,
         transactions: [mockTransaction],
       });
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
     });
   });
 
@@ -201,7 +201,7 @@ describe('CorporateActionsService', () => {
 
     beforeEach(() => {
       mockAsset = new MockAsset();
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
     });
 
     it('should run a remove procedure and return the delete the Corporate Action', async () => {
@@ -219,7 +219,7 @@ describe('CorporateActionsService', () => {
       expect(result).toEqual({
         transactions: [mockTransaction],
       });
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
     });
   });
 

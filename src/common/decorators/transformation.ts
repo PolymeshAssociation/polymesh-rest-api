@@ -13,7 +13,15 @@ import { Entity } from '~/common/types';
  * String -> BigNumber
  */
 export function ToBigNumber() {
-  return applyDecorators(Transform(({ value }: { value: string }) => new BigNumber(value)));
+  return applyDecorators(
+    Transform(({ value }: { value: string | Array<string> }) => {
+      if (value instanceof Array) {
+        return value.map(val => new BigNumber(val));
+      } else {
+        return new BigNumber(value);
+      }
+    })
+  );
 }
 
 /**
@@ -59,5 +67,13 @@ function toHumanObject(obj: unknown): unknown {
  * BigNumber -> string
  */
 export function FromBigNumber() {
-  return applyDecorators(Transform(({ value }: { value: BigNumber }) => value?.toString()));
+  return applyDecorators(
+    Transform(({ value }: { value: BigNumber | BigNumber[] }) => {
+      if (value instanceof Array) {
+        return value.map(val => val.toString());
+      } else {
+        return value?.toString();
+      }
+    })
+  );
 }

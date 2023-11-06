@@ -5,7 +5,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
-import { isFungibleLeg } from '~/common/utils';
+import { isFungibleLeg, isNftLeg } from '~/common/utils';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
@@ -21,13 +21,28 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
   const legs = legsResultSet.data
     ?.map(leg => {
+      const { from: legFrom, to: legTo, asset } = leg;
+      const from = createPortfolioIdentifierModel(legFrom);
+      const to = createPortfolioIdentifierModel(legTo);
+
       if (isFungibleLeg(leg)) {
-        const { from, to, amount, asset } = leg;
+        console.log('is fungible');
+        const { amount } = leg;
         return new LegModel({
-          from: createPortfolioIdentifierModel(from),
-          to: createPortfolioIdentifierModel(to),
-          amount,
           asset,
+          from,
+          to,
+          amount,
+        });
+      } else if (isNftLeg(leg)) {
+        console.log('is nft');
+        const { nfts } = leg;
+
+        return new LegModel({
+          asset,
+          from,
+          to,
+          nfts: nfts.map(({ id }) => id),
         });
       }
 
