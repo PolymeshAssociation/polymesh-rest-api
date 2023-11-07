@@ -142,10 +142,12 @@ export class SettlementsService {
     from: PortfolioLike,
     to: PortfolioLike,
     ticker: string,
-    amount: BigNumber,
-    nfts: BigNumber[]
+    transferAmount?: BigNumber,
+    transferNfts?: BigNumber[]
   ): Promise<TransferBreakdown> {
     const assetDetails = await this.assetsService.findOne(ticker);
+    const amount = transferAmount ?? new BigNumber(0);
+    const nfts = transferNfts ?? [];
     return assetDetails.settlements.canTransfer({ from, to, amount, nfts });
   }
 

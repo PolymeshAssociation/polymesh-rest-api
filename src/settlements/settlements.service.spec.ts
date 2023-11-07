@@ -410,7 +410,7 @@ describe('SettlementsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
 
-      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
 
       const result = await service.canTransfer(
         new PortfolioDto({ did: 'fromDid', id: new BigNumber(1) }).toPortfolioLike(),

@@ -16,18 +16,18 @@ export class LegValidationParamsDto {
   @ValidateIf(({ nfts }) => !nfts)
   @IsBigNumber()
   @ToBigNumber()
-  readonly amount: BigNumber;
+  readonly amount?: BigNumber;
 
   @ApiPropertyOptional({
     description: 'The NFT IDs to be transferred for the collection',
     type: 'string',
     isArray: true,
-    example: ['1000'],
+    example: ['1'],
   })
   @ValidateIf(({ amount }) => !amount)
   @IsBigNumber()
   @ToBigNumber()
-  readonly nfts: BigNumber[];
+  readonly nfts?: BigNumber[];
 
   @ApiProperty({
     description: 'DID of the sender',
