@@ -9,6 +9,7 @@ import {
   AppError,
   AppInternalError,
   AppNotFoundError,
+  AppUnauthorizedError,
   AppUnprocessableError,
   AppValidationError,
 } from '~/common/errors';
@@ -29,6 +30,7 @@ describe('processTransaction', () => {
   describe('it should handle Polymesh errors', () => {
     type Case = [ErrorCode, Class<AppError>];
     const cases: Case[] = [
+      [ErrorCode.NotAuthorized, AppUnauthorizedError],
       [ErrorCode.ValidationError, AppValidationError],
       [ErrorCode.UnmetPrerequisite, AppUnprocessableError],
       [ErrorCode.InsufficientBalance, AppUnprocessableError],
@@ -78,8 +80,10 @@ describe('processTransaction', () => {
 
 describe('prepareProcedure', () => {
   const signingAccount = 'someAddress';
-  it('should call the method with args when they are given', () => {
+  it('should call the method with args when they are required', () => {
     const mockMethod = jest.fn();
+    // define length so mock method appears to require args
+    Object.defineProperty(mockMethod, 'length', { value: 1, writable: false });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     prepareProcedure(mockMethod as any, { arg1: 'someValue' }, { signingAccount });
@@ -87,7 +91,7 @@ describe('prepareProcedure', () => {
     expect(mockMethod).toHaveBeenCalledWith({ arg1: 'someValue' }, { signingAccount });
   });
 
-  it('should call the method with only opts when args are not given', () => {
+  it('should call the method with only opts when args are not required', () => {
     const mockMethod = jest.fn();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
