@@ -19,6 +19,7 @@ import {
   AppError,
   AppInternalError,
   AppNotFoundError,
+  AppUnauthorizedError,
   AppUnprocessableError,
   AppValidationError,
   isAppError,
@@ -56,7 +57,7 @@ export async function prepareProcedure<MethodArgs, ReturnType, TransformedReturn
   opts: ProcedureOpts
 ): Promise<GenericPolymeshTransaction<ReturnType, TransformedReturnType>> {
   try {
-    if (!args || Object.keys(args).length === 0) {
+    if (method.length === 0) {
       return await method(opts as MethodArgs);
     } else {
       return await method(args, opts);
@@ -168,6 +169,8 @@ export function handleSdkError(err: unknown): AppError {
         return new AppUnprocessableError(message);
       case ErrorCode.DataUnavailable:
         return new AppNotFoundError(message, '');
+      case ErrorCode.NotAuthorized:
+        return new AppUnauthorizedError(message);
       default:
         return new AppInternalError(message);
     }
