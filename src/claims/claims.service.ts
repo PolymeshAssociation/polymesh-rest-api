@@ -7,6 +7,7 @@ import {
   ClaimScope,
   ClaimType,
   CustomClaimType,
+  CustomClaimTypeWithDid,
   ModifyClaimsParams,
   ResultSet,
   RevokeClaimsParams,
@@ -124,5 +125,13 @@ export class ClaimsService {
       args as RegisterCustomClaimTypeDto,
       base
     );
+  }
+
+  public async getRegisteredCustomClaimTypes(
+    size?: BigNumber,
+    start?: BigNumber,
+    dids?: string[]
+  ): Promise<ResultSet<CustomClaimTypeWithDid>> {
+    return this.polymeshService.polymeshApi.claims.getAllCustomClaimTypes({ size, start, dids });
   }
 }

@@ -322,4 +322,27 @@ describe('ClaimsService', () => {
       );
     });
   });
+
+  describe('getRegisteredCustomClaimTypes', () => {
+    it('should call the sdk and return the result', async () => {
+      const start = new BigNumber(0);
+      const size = new BigNumber(10);
+      const dids = [did];
+      const mockResult = {
+        data: [],
+        count: new BigNumber(1),
+        next: new BigNumber(1),
+      };
+
+      mockPolymeshApi.claims.getAllCustomClaimTypes.mockResolvedValue(mockResult);
+
+      const result = await claimsService.getRegisteredCustomClaimTypes(size, start, dids);
+      expect(result).toEqual(mockResult);
+      expect(mockPolymeshApi.claims.getAllCustomClaimTypes).toHaveBeenCalledWith({
+        start,
+        size,
+        dids,
+      });
+    });
+  });
 });
