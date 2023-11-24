@@ -8,11 +8,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { ClaimsService } from '~/claims/claims.service';
-import { GetCustomClaimTypeDto } from '~/claims/dto/get-custom-claim-type.dto';
+import {
+  GetCustomClaimTypeByIdDto,
+  GetCustomClaimTypeByNameDto,
+} from '~/claims/dto/get-custom-claim-type.dto';
 import { GetCustomClaimTypesDto } from '~/claims/dto/get-custom-claim-types.dto';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { RegisterCustomClaimTypeDto } from '~/claims/dto/register-custom-claim-type.dto';
@@ -119,24 +122,7 @@ export class ClaimsController {
 
   @ApiOperation({
     summary: 'Get CustomClaimTypes',
-    description: 'This endpoint will retrieve the registered CustomClaimTypes',
-  })
-  @ApiQuery({
-    name: 'id',
-    description: 'The ID of the CustomClaimType',
-    type: 'string',
-    required: false,
-    example: '1',
-  })
-  @ApiQuery({
-    name: 'name',
-    description: 'The name of the CustomClaimType',
-    type: 'string',
-    required: false,
-    example: 'Can Buy Asset',
-  })
-  @ApiNotFoundResponse({
-    description: 'The CustomClaimType does not exist',
+    description: 'This endpoint fetches CustomClaimTypes that have been registered."',
   })
   @Get('custom-claim-types')
   async getCustomClaimTypes(
@@ -157,29 +143,21 @@ export class ClaimsController {
 
   @ApiOperation({
     summary: 'Get CustomClaimType by ID',
-    description:
-      'This endpoint will retrieve the custom claim type by id or name. <br /> ID or name needs to be provided. <br/> If both are provided will fetch using ID',
+    description: 'This endpoint fetches the CustomClaimType, identified by its ID',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'id',
     description: 'The ID of the CustomClaimType',
     type: 'string',
     required: false,
     example: '1',
   })
-  @ApiQuery({
-    name: 'name',
-    description: 'The name of the CustomClaimType',
-    type: 'string',
-    required: false,
-    example: 'Can Buy Asset',
-  })
   @ApiNotFoundResponse({
     description: 'The CustomClaimType does not exist',
   })
   @Get('custom-claim-types/id/:id')
   async getCustomClaimTypeById(
-    @Param() { id }: GetCustomClaimTypeDto
+    @Param() { id }: GetCustomClaimTypeByIdDto
   ): Promise<CustomClaimTypeModel> {
     const result = await this.claimsService.getCustomClaimTypeById(id);
 
@@ -192,17 +170,9 @@ export class ClaimsController {
 
   @ApiOperation({
     summary: 'Get CustomClaimType by Name',
-    description:
-      'This endpoint will retrieve the custom claim type by id or name. <br /> ID or name needs to be provided. <br/> If both are provided will fetch using ID',
+    description: 'This endpoint fetches the CustomClaimType, identified by its Name',
   })
-  @ApiQuery({
-    name: 'id',
-    description: 'The ID of the CustomClaimType',
-    type: 'string',
-    required: false,
-    example: '1',
-  })
-  @ApiQuery({
+  @ApiParam({
     name: 'name',
     description: 'The name of the CustomClaimType',
     type: 'string',
@@ -214,7 +184,7 @@ export class ClaimsController {
   })
   @Get('custom-claim-types/name/:name')
   async getCustomClaimTypeByName(
-    @Param() { name }: GetCustomClaimTypeDto
+    @Param() { name }: GetCustomClaimTypeByNameDto
   ): Promise<CustomClaimTypeModel> {
     const result = await this.claimsService.getCustomClaimTypeByName(name);
 
