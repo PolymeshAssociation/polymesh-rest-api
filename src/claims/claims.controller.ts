@@ -10,12 +10,11 @@ import {
 } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { CustomClaimType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimsService } from '~/claims/claims.service';
-import {
-  GetCustomClaimTypeByIdDto,
-  GetCustomClaimTypeByNameDto,
-} from '~/claims/dto/get-custom-claim-type.dto';
+import { GetCustomClaimTypePipe } from '~/claims/decorators/get-custom-claim-type.pipe';
+import { GetCustomClaimTypeDto } from '~/claims/dto/get-custom-claim-type.dto';
 import { GetCustomClaimTypesDto } from '~/claims/dto/get-custom-claim-types.dto';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { RegisterCustomClaimTypeDto } from '~/claims/dto/register-custom-claim-type.dto';
@@ -122,7 +121,7 @@ export class ClaimsController {
 
   @ApiOperation({
     summary: 'Get CustomClaimTypes',
-    description: 'This endpoint fetches CustomClaimTypes that have been registered."',
+    description: 'This endpoint fetches CustomClaimTypes that have been registered"',
   })
   @Get('custom-claim-types')
   async getCustomClaimTypes(
@@ -130,7 +129,7 @@ export class ClaimsController {
   ): Promise<PaginatedResultsModel<CustomClaimTypeWithDid>> {
     const { data, count, next } = await this.claimsService.getRegisteredCustomClaimTypes(
       size,
-      new BigNumber(start || 0),
+      new BigNumber(start ?? 0),
       dids
     );
 
@@ -143,11 +142,11 @@ export class ClaimsController {
 
   @ApiOperation({
     summary: 'Get CustomClaimType by ID',
-    description: 'This endpoint fetches the CustomClaimType, identified by its ID',
+    description: 'This endpoint fetches the CustomClaimType, identified by its ID or Name',
   })
   @ApiParam({
-    name: 'id',
-    description: 'The ID of the CustomClaimType',
+    name: 'identifier',
+    description: 'The ID or Name the CustomClaimType',
     type: 'string',
     required: false,
     example: '1',
@@ -155,38 +154,17 @@ export class ClaimsController {
   @ApiNotFoundResponse({
     description: 'The CustomClaimType does not exist',
   })
-  @Get('custom-claim-types/id/:id')
-  async getCustomClaimTypeById(
-    @Param() { id }: GetCustomClaimTypeByIdDto
+  @Get('custom-claim-types/:identifier')
+  async getCustomClaimType(
+    @Param('identifier', GetCustomClaimTypePipe) { identifier }: GetCustomClaimTypeDto
   ): Promise<CustomClaimTypeModel> {
-    const result = await this.claimsService.getCustomClaimTypeById(id);
+    let result: CustomClaimType | null;
 
-    if (!result) {
-      throw new NotFoundException('Custom claim type not found');
+    if (identifier instanceof BigNumber) {
+      result = await this.claimsService.getCustomClaimTypeById(identifier);
+    } else {
+      result = await this.claimsService.getCustomClaimTypeByName(identifier);
     }
-
-    return new CustomClaimTypeModel(result);
-  }
-
-  @ApiOperation({
-    summary: 'Get CustomClaimType by Name',
-    description: 'This endpoint fetches the CustomClaimType, identified by its Name',
-  })
-  @ApiParam({
-    name: 'name',
-    description: 'The name of the CustomClaimType',
-    type: 'string',
-    required: false,
-    example: 'Can Buy Asset',
-  })
-  @ApiNotFoundResponse({
-    description: 'The CustomClaimType does not exist',
-  })
-  @Get('custom-claim-types/name/:name')
-  async getCustomClaimTypeByName(
-    @Param() { name }: GetCustomClaimTypeByNameDto
-  ): Promise<CustomClaimTypeModel> {
-    const result = await this.claimsService.getCustomClaimTypeByName(name);
 
     if (!result) {
       throw new NotFoundException('Custom claim type not found');

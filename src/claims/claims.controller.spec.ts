@@ -116,8 +116,8 @@ describe('ClaimsController', () => {
     it('should return custom claim type by ID', async () => {
       mockClaimsService.getCustomClaimTypeById.mockResolvedValue(mockResult);
 
-      const result = await controller.getCustomClaimTypeById({
-        id: mockId,
+      const result = await controller.getCustomClaimType({
+        identifier: mockId,
       } as GetCustomClaimTypeDto);
 
       expect(mockClaimsService.getCustomClaimTypeById).toHaveBeenCalledWith(mockId);
@@ -126,27 +126,17 @@ describe('ClaimsController', () => {
 
     it('should throw NotFoundException when custom claim type is not found', async () => {
       mockClaimsService.getCustomClaimTypeById.mockResolvedValue(null);
-      mockClaimsService.getCustomClaimTypeByName.mockResolvedValue(null);
 
       await expect(
-        controller.getCustomClaimTypeById({ id: mockId } as GetCustomClaimTypeDto)
+        controller.getCustomClaimType({ identifier: mockId } as GetCustomClaimTypeDto)
       ).rejects.toThrow(NotFoundException);
     });
-  });
-
-  describe('getCustomClaimTypeByName', () => {
-    const mockId = new BigNumber(1);
-    const mockName = 'CustomClaimType';
-    const mockResult = {
-      id: mockId,
-      name: mockName,
-    };
 
     it('should return custom claim type by name', async () => {
       mockClaimsService.getCustomClaimTypeByName.mockResolvedValue(mockResult);
 
-      const result = await controller.getCustomClaimTypeByName({
-        name: mockName,
+      const result = await controller.getCustomClaimType({
+        identifier: mockName,
       } as GetCustomClaimTypeDto);
 
       expect(mockClaimsService.getCustomClaimTypeByName).toHaveBeenCalledWith(mockName);
@@ -154,11 +144,10 @@ describe('ClaimsController', () => {
     });
 
     it('should throw NotFoundException when custom claim type is not found', async () => {
-      mockClaimsService.getCustomClaimTypeById.mockResolvedValue(null);
       mockClaimsService.getCustomClaimTypeByName.mockResolvedValue(null);
 
       await expect(
-        controller.getCustomClaimTypeByName({ name: mockName } as GetCustomClaimTypeDto)
+        controller.getCustomClaimType({ identifier: mockName } as GetCustomClaimTypeDto)
       ).rejects.toThrow(NotFoundException);
     });
   });
