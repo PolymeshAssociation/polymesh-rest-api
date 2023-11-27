@@ -1,12 +1,27 @@
-import { Body, Controller, Get, HttpStatus, NotFoundException, Post, Query } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { CustomClaimType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimsService } from '~/claims/claims.service';
+import { GetCustomClaimTypePipe } from '~/claims/decorators/get-custom-claim-type.pipe';
 import { GetCustomClaimTypeDto } from '~/claims/dto/get-custom-claim-type.dto';
+import { GetCustomClaimTypesDto } from '~/claims/dto/get-custom-claim-types.dto';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { RegisterCustomClaimTypeDto } from '~/claims/dto/register-custom-claim-type.dto';
+import { CustomClaimTypeWithDid } from '~/claims/models/custom-claim-type-did.model';
 import { CustomClaimTypeModel } from '~/claims/models/custom-claim-type.model';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -105,34 +120,51 @@ export class ClaimsController {
   }
 
   @ApiOperation({
-    summary: 'Get CustomClaimType',
-    description:
-      'This endpoint will retrieve the custom claim type by id or name. <br /> ID or name needs to be provided. <br/> If both are provided will fetch using ID',
+    summary: 'Get CustomClaimTypes',
+    description: 'This endpoint fetches CustomClaimTypes that have been registered"',
   })
-  @ApiQuery({
-    name: 'id',
-    description: 'The ID of the CustomClaimType',
+  @Get('custom-claim-types')
+  async getCustomClaimTypes(
+    @Query() { size, start, dids }: GetCustomClaimTypesDto
+  ): Promise<PaginatedResultsModel<CustomClaimTypeWithDid>> {
+    const { data, count, next } = await this.claimsService.getRegisteredCustomClaimTypes(
+      size,
+      new BigNumber(start ?? 0),
+      dids
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(claimType => new CustomClaimTypeWithDid(claimType)),
+      total: count,
+      next,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get CustomClaimType by ID',
+    description: 'This endpoint fetches the CustomClaimType, identified by its ID or Name',
+  })
+  @ApiParam({
+    name: 'identifier',
+    description: 'The ID or Name the CustomClaimType',
     type: 'string',
     required: false,
     example: '1',
   })
-  @ApiQuery({
-    name: 'name',
-    description: 'The name of the CustomClaimType',
-    type: 'string',
-    required: false,
-    example: 'Can Buy Asset',
-  })
   @ApiNotFoundResponse({
     description: 'The CustomClaimType does not exist',
   })
-  @Get('custom-claim-type')
+  @Get('custom-claim-types/:identifier')
   async getCustomClaimType(
-    @Query() { id, name }: GetCustomClaimTypeDto
+    @Param('identifier', GetCustomClaimTypePipe) { identifier }: GetCustomClaimTypeDto
   ): Promise<CustomClaimTypeModel> {
-    const result = id
-      ? await this.claimsService.getCustomClaimTypeById(id)
-      : await this.claimsService.getCustomClaimTypeByName(name);
+    let result: CustomClaimType | null;
+
+    if (identifier instanceof BigNumber) {
+      result = await this.claimsService.getCustomClaimTypeById(identifier);
+    } else {
+      result = await this.claimsService.getCustomClaimTypeByName(identifier);
+    }
 
     if (!result) {
       throw new NotFoundException('Custom claim type not found');

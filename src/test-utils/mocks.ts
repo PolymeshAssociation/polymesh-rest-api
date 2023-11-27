@@ -132,6 +132,7 @@ export class MockPolymesh {
     getCustomClaimTypeByName: jest.fn(),
     getCustomClaimTypeById: jest.fn(),
     registerCustomClaimType: jest.fn(),
+    getAllCustomClaimTypes: jest.fn(),
   };
 
   public _polkadotApi = {
