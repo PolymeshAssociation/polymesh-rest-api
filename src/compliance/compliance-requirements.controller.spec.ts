@@ -1,7 +1,6 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
@@ -39,7 +38,7 @@ describe('ComplianceRequirementsController', () => {
       ],
     ],
   };
-  const txResponse = createMockTransactionResult<Asset>({ ...txResult, transactions: [] });
+  const txResponse = createMockTransactionResult<void>({ ...txResult, transactions: [] });
   const id = new BigNumber(1);
 
   beforeEach(async () => {
@@ -72,7 +71,7 @@ describe('ComplianceRequirementsController', () => {
 
   describe('setRequirements', () => {
     it('should accept SetRulesDto and set new Asset Compliance Rules', async () => {
-      const response = createMockTransactionResult<Asset>({ ...txResult, transactions: [] });
+      const response = createMockTransactionResult<void>({ ...txResult, transactions: [] });
 
       when(mockService.setRequirements)
         .calledWith(ticker, validBody as SetRequirementsDto)

@@ -7,6 +7,7 @@ import {
   HistoricSettlement,
   NumberedPortfolio,
   PaginationOptions,
+  PortfolioMovement,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -65,12 +66,13 @@ export class PortfoliosService {
 
     const formattedArgs = {
       to: toPortfolioId(to),
-      items: items.map(({ ticker: asset, amount, memo }) => {
+      items: items.map(({ ticker: asset, amount, memo, nfts }) => {
         return {
           asset,
-          amount: new BigNumber(amount),
+          amount,
           memo,
-        };
+          nfts,
+        } as PortfolioMovement;
       }),
     };
 

@@ -1,6 +1,6 @@
 import {
   Account,
-  Asset,
+  FungibleAsset,
   NumberedPortfolio,
   PermissionedAccount,
   Permissions,
@@ -26,7 +26,7 @@ describe('createPermissionsModel', () => {
     let permissions: Permissions = {
       assets: {
         type: PermissionType.Include,
-        values: [new MockAsset() as unknown as Asset],
+        values: [new MockAsset() as unknown as FungibleAsset],
       },
       portfolios: {
         type: PermissionType.Include,

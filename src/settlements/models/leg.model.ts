@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { FungibleAsset, NftCollection } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
@@ -23,13 +23,21 @@ export class LegModel {
   @Type(() => PortfolioIdentifierModel)
   readonly to: PortfolioIdentifierModel;
 
-  @ApiProperty({
-    description: 'Amount to be transferred',
+  @ApiPropertyOptional({
+    description: 'Amount of fungible tokens to be transferred',
     type: 'string',
     example: '123',
   })
   @FromBigNumber()
-  readonly amount: BigNumber;
+  readonly amount?: BigNumber;
+
+  @ApiPropertyOptional({
+    description: 'The NFTs from the collection to be transferred',
+    type: 'string',
+    example: '123',
+  })
+  @FromBigNumber()
+  readonly nfts?: BigNumber[];
 
   @ApiProperty({
     description: 'Asset to be transferred',
@@ -37,7 +45,7 @@ export class LegModel {
     example: 'TICKER',
   })
   @FromEntity()
-  readonly asset: Asset;
+  readonly asset: FungibleAsset | NftCollection;
 
   constructor(model: LegModel) {
     Object.assign(this, model);

@@ -1,23 +1,34 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { ValidateIf, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
 export class LegDto {
-  @ApiProperty({
-    description: 'Amount of the Asset to be transferred',
+  @ApiPropertyOptional({
+    description: 'Amount of the fungible Asset to be transferred',
     type: 'string',
     example: '1000',
   })
+  @ValidateIf(({ nfts }) => !nfts)
   @IsBigNumber()
   @ToBigNumber()
-  readonly amount: BigNumber;
+  readonly amount?: BigNumber;
+
+  @ApiPropertyOptional({
+    description: 'The NFT IDs of a collection to be transferred',
+    type: 'string',
+    example: ['1'],
+  })
+  @ValidateIf(({ amount }) => !amount)
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly nfts?: BigNumber[];
 
   @ApiProperty({
     description: 'Portfolio of the sender',

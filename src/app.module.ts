@@ -19,6 +19,7 @@ import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { MetadataModule } from '~/metadata/metadata.module';
 import { NetworkModule } from '~/network/network.module';
+import { NftsModule } from '~/nfts/nfts.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
@@ -90,6 +91,7 @@ import { UsersModule } from '~/users/users.module';
     DeveloperTestingModule.register(),
     MetadataModule,
     SubsidyModule,
+    NftsModule,
   ],
 })
 export class AppModule {}

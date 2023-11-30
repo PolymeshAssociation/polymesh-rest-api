@@ -50,7 +50,7 @@ describe('OfferingsService', () => {
 
       const mockAsset = new MockAsset();
       mockAsset.offerings.get.mockResolvedValue(mockOfferings);
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findAllByTicker('TICKER', {
         timing: OfferingTimingStatus.Started,

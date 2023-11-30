@@ -4,8 +4,10 @@ import {
   Asset,
   AssetDocument,
   AuthorizationRequest,
+  FungibleAsset,
   HistoricAgentOperation,
   IdentityBalance,
+  NftCollection,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -36,7 +38,15 @@ export class AssetsService {
     });
   }
 
-  public async findAllByOwner(owner: string): Promise<Asset[]> {
+  public async findFungible(ticker: string): Promise<FungibleAsset> {
+    return await this.polymeshService.polymeshApi.assets
+      .getFungibleAsset({ ticker })
+      .catch(error => {
+        throw handleSdkError(error);
+      });
+  }
+
+  public async findAllByOwner(owner: string): Promise<(FungibleAsset | NftCollection)[]> {
     const {
       polymeshService: { polymeshApi },
     } = this;
@@ -54,7 +64,7 @@ export class AssetsService {
     size: BigNumber,
     start?: string
   ): Promise<ResultSet<IdentityBalance>> {
-    const asset = await this.findOne(ticker);
+    const asset = await this.findFungible(ticker);
     return asset.assetHolders.get({ size, start });
   }
 
@@ -67,7 +77,7 @@ export class AssetsService {
     return asset.documents.get({ size, start });
   }
 
-  public async setDocuments(ticker: string, params: SetAssetDocumentsDto): ServiceReturn<Asset> {
+  public async setDocuments(ticker: string, params: SetAssetDocumentsDto): ServiceReturn<void> {
     const {
       documents: { set },
     } = await this.findOne(ticker);
@@ -76,16 +86,16 @@ export class AssetsService {
     return this.transactionsService.submit(set, args, base);
   }
 
-  public async createAsset(params: CreateAssetDto): ServiceReturn<Asset> {
+  public async createAsset(params: CreateAssetDto): ServiceReturn<FungibleAsset> {
     const { base, args } = extractTxBase(params);
 
     const createAsset = this.polymeshService.polymeshApi.assets.createAsset;
     return this.transactionsService.submit(createAsset, args, base);
   }
 
-  public async issue(ticker: string, params: IssueDto): ServiceReturn<Asset> {
+  public async issue(ticker: string, params: IssueDto): ServiceReturn<FungibleAsset> {
     const { base, args } = extractTxBase(params);
-    const asset = await this.findOne(ticker);
+    const asset = await this.findFungible(ticker);
 
     return this.transactionsService.submit(asset.issuance.issue, args, base);
   }
@@ -103,7 +113,7 @@ export class AssetsService {
   public async redeem(ticker: string, params: RedeemTokensDto): ServiceReturn<void> {
     const { base, args } = extractTxBase(params);
 
-    const { redeem } = await this.findOne(ticker);
+    const { redeem } = await this.findFungible(ticker);
 
     return this.transactionsService.submit(
       redeem,
@@ -112,10 +122,7 @@ export class AssetsService {
     );
   }
 
-  public async freeze(
-    ticker: string,
-    transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  public async freeze(ticker: string, transactionBaseDto: TransactionBaseDto): ServiceReturn<void> {
     const asset = await this.findOne(ticker);
 
     return this.transactionsService.submit(asset.freeze, {}, transactionBaseDto);
@@ -124,7 +131,7 @@ export class AssetsService {
   public async unfreeze(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Asset> {
+  ): ServiceReturn<void> {
     const asset = await this.findOne(ticker);
 
     return this.transactionsService.submit(asset.unfreeze, {}, transactionBaseDto);
@@ -138,7 +145,7 @@ export class AssetsService {
       base,
       args: { origin, amount },
     } = extractTxBase(params);
-    const { controllerTransfer } = await this.findOne(ticker);
+    const { controllerTransfer } = await this.findFungible(ticker);
 
     return this.transactionsService.submit(
       controllerTransfer,
@@ -148,7 +155,7 @@ export class AssetsService {
   }
 
   public async getOperationHistory(ticker: string): Promise<HistoricAgentOperation[]> {
-    const asset = await this.findOne(ticker);
+    const asset = await this.findFungible(ticker);
     return asset.getOperationHistory();
   }
 }

@@ -3,10 +3,11 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { CalendarUnit, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
+import { CalendarUnit } from '~/common/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { testValues } from '~/test-utils/consts';
 import {
@@ -80,7 +81,7 @@ describe('CheckpointsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.checkpoints.get.mockResolvedValue(mockCheckpoints);
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findAllByTicker('TICKER', new BigNumber(1));
 
@@ -91,7 +92,7 @@ describe('CheckpointsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.checkpoints.get.mockResolvedValue(mockCheckpoints);
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findAllByTicker('TICKER', new BigNumber(1), 'START_KEY');
 
@@ -104,11 +105,11 @@ describe('CheckpointsService', () => {
       const mockAsset = new MockAsset();
       const mockCheckpoint = new MockCheckpoint();
       mockAsset.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findOne('TICKER', new BigNumber(1));
       expect(result).toEqual(mockCheckpoint);
-      expect(mockAssetsService.findOne).toBeCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toBeCalledWith('TICKER');
     });
 
     describe('otherwise', () => {
@@ -116,7 +117,7 @@ describe('CheckpointsService', () => {
         const mockError = new Error('Some Error');
         const mockAsset = new MockAsset();
         mockAsset.checkpoints.getOne.mockRejectedValue(mockError);
-        mockAssetsService.findOne.mockResolvedValue(mockAsset);
+        mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
@@ -151,7 +152,7 @@ describe('CheckpointsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.findSchedulesByTicker('TICKER');
 
@@ -166,7 +167,7 @@ describe('CheckpointsService', () => {
 
     beforeEach(() => {
       mockAsset = new MockAsset();
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
     });
 
     it('should return the Schedule for a valid ticker and id', async () => {
@@ -198,7 +199,7 @@ describe('CheckpointsService', () => {
     });
 
     afterEach(() => {
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
       expect(mockAsset.checkpoints.schedules.getOne).toHaveBeenCalledWith({
         id,
       });
@@ -222,7 +223,7 @@ describe('CheckpointsService', () => {
         transactions: [mockTransaction],
       });
 
-      mockAssetsService.findOne.mockReturnValue(mockAsset);
+      mockAssetsService.findFungible.mockReturnValue(mockAsset);
 
       const body = {
         signer,
@@ -240,7 +241,7 @@ describe('CheckpointsService', () => {
           signer,
         }
       );
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
     });
   });
 
@@ -261,14 +262,12 @@ describe('CheckpointsService', () => {
         transactions: [mockTransaction],
       });
 
-      mockAssetsService.findOne.mockReturnValue(mockAsset);
+      mockAssetsService.findFungible.mockReturnValue(mockAsset);
 
       const mockDate = new Date();
       const params = {
         signer,
-        start: mockDate,
-        period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-        repetitions: new BigNumber(2),
+        points: [mockDate],
       };
 
       const result = await service.createScheduleByTicker('TICKER', params);
@@ -279,15 +278,13 @@ describe('CheckpointsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.checkpoints.schedules.create,
         {
-          start: mockDate,
-          period: { unit: CalendarUnit.Month, amount: new BigNumber(3) },
-          repetitions: new BigNumber(2),
+          points: [mockDate],
         },
         {
           signer,
         }
       );
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
     });
   });
 
@@ -357,12 +354,12 @@ describe('CheckpointsService', () => {
       const mockAsset = new MockAsset();
       mockAsset.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
 
-      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
       const result = await service.getAssetBalance('TICKER', did, id);
       expect(result).toEqual({ balance, identity: did });
       expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
-      expect(mockAssetsService.findOne).toHaveBeenCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
     });
   });
 
@@ -383,7 +380,7 @@ describe('CheckpointsService', () => {
           transactions: [mockTransaction],
         });
 
-        mockAssetsService.findOne.mockResolvedValue(mockAsset);
+        mockAssetsService.findFungible.mockResolvedValue(mockAsset);
         const ticker = 'TICKER';
         const id = new BigNumber(1);
 
@@ -401,7 +398,7 @@ describe('CheckpointsService', () => {
             signer,
           }
         );
-        expect(mockAssetsService.findOne).toHaveBeenCalledWith(ticker);
+        expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
       });
     });
   });

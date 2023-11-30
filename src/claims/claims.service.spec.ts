@@ -248,4 +248,101 @@ describe('ClaimsService', () => {
       expect(mockPolymeshApi.claims.getClaimScopes).toHaveBeenCalledWith({ target: did });
     });
   });
+
+  describe('getCustomClaimTypeByName', () => {
+    it('should return custom claim type by name', async () => {
+      const mockName = 'CustomClaimType';
+      const mockResult = { id: new BigNumber(1), name: mockName, description: 'Test' };
+
+      mockPolymeshApi.claims.getCustomClaimTypeByName.mockResolvedValue(mockResult);
+
+      const result = await claimsService.getCustomClaimTypeByName(mockName);
+      expect(result).toEqual(mockResult);
+      expect(mockPolymeshApi.claims.getCustomClaimTypeByName).toHaveBeenCalledWith(mockName);
+    });
+
+    it('should return null if custom claim type is not found', async () => {
+      const mockName = 'NonExistentClaimType';
+      mockPolymeshApi.claims.getCustomClaimTypeByName.mockResolvedValue(null);
+
+      const result = await claimsService.getCustomClaimTypeByName(mockName);
+      expect(result).toBeNull();
+      expect(mockPolymeshApi.claims.getCustomClaimTypeByName).toHaveBeenCalledWith(mockName);
+    });
+  });
+
+  describe('getCustomClaimTypeById', () => {
+    it('should return custom claim type by id', async () => {
+      const mockId = new BigNumber(1);
+      const mockResult = { id: mockId, name: 'CustomClaimType', description: 'Test' };
+
+      mockPolymeshApi.claims.getCustomClaimTypeById.mockResolvedValue(mockResult);
+
+      const result = await claimsService.getCustomClaimTypeById(mockId);
+      expect(result).toEqual(mockResult);
+      expect(mockPolymeshApi.claims.getCustomClaimTypeById).toHaveBeenCalledWith(mockId);
+    });
+
+    it('should return null if custom claim type is not found', async () => {
+      const mockId = new BigNumber(999);
+      mockPolymeshApi.claims.getCustomClaimTypeById.mockResolvedValue(null);
+
+      const result = await claimsService.getCustomClaimTypeById(mockId);
+      expect(result).toBeNull();
+      expect(mockPolymeshApi.claims.getCustomClaimTypeById).toHaveBeenCalledWith(mockId);
+    });
+  });
+
+  describe('registerCustomClaimType', () => {
+    it('should submit a transaction to register a custom claim type', async () => {
+      const mockRegisterCustomClaimTypeDto = {
+        name: 'CustomClaimType',
+        description: 'Test',
+        signer: 'Alice',
+      };
+      const mockTransaction = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.RegisterCustomClaimType,
+      });
+
+      mockTransactionsService.submit.mockResolvedValue(mockTransaction);
+
+      const result = await claimsService.registerCustomClaimType(mockRegisterCustomClaimTypeDto);
+
+      expect(result).toEqual(mockTransaction);
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.claims.registerCustomClaimType,
+        {
+          name: mockRegisterCustomClaimTypeDto.name,
+          description: mockRegisterCustomClaimTypeDto.description,
+        },
+        { signer: mockRegisterCustomClaimTypeDto.signer }
+      );
+    });
+  });
+
+  describe('getRegisteredCustomClaimTypes', () => {
+    it('should call the sdk and return the result', async () => {
+      const start = new BigNumber(0);
+      const size = new BigNumber(10);
+      const dids = [did];
+      const mockResult = {
+        data: [],
+        count: new BigNumber(1),
+        next: new BigNumber(1),
+      };
+
+      mockPolymeshApi.claims.getAllCustomClaimTypes.mockResolvedValue(mockResult);
+
+      const result = await claimsService.getRegisteredCustomClaimTypes(size, start, dids);
+      expect(result).toEqual(mockResult);
+      expect(mockPolymeshApi.claims.getAllCustomClaimTypes).toHaveBeenCalledWith({
+        start,
+        size,
+        dids,
+      });
+    });
+  });
 });

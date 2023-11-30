@@ -1,9 +1,11 @@
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
   InstructionStatus,
   InstructionType,
+  Nft,
   TransferError,
   VenueType,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -62,6 +64,14 @@ describe('SettlementsController', () => {
               ticker: 'TICKER',
             },
           },
+          {
+            from: new MockPortfolio(),
+            to: new MockPortfolio(),
+            nfts: [createMock<Nft>({ id: new BigNumber(1) })],
+            asset: {
+              ticker: 'TICKER',
+            },
+          },
         ],
         next: null,
       };
@@ -74,12 +84,13 @@ describe('SettlementsController', () => {
       expect(result).toEqual({
         ...mockInstructionDetails,
         legs:
-          mockLegs.data.map(({ from, to, amount, asset }) => ({
+          mockLegs.data.map(({ from, to, amount, nfts, asset }) => ({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             from: createPortfolioIdentifierModel(from as any),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             to: createPortfolioIdentifierModel(to as any),
             amount,
+            nfts,
             asset,
           })) || [],
       });
@@ -133,19 +144,6 @@ describe('SettlementsController', () => {
       mockSettlementsService.withdrawAffirmation.mockResolvedValue(txResult);
 
       const result = await controller.withdrawAffirmation(
-        { id: new BigNumber(3) },
-        { signer: 'signer' }
-      );
-
-      expect(result).toEqual(txResult);
-    });
-  });
-
-  describe('rescheduleInstruction', () => {
-    it('should reschedule a failed instruction and return the data returned by the service', async () => {
-      mockSettlementsService.rescheduleInstruction.mockResolvedValue(txResult);
-
-      const result = await controller.rescheduleInstruction(
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );

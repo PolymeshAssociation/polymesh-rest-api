@@ -93,6 +93,33 @@ describe('AssetsService', () => {
     });
   });
 
+  describe('findFungible', () => {
+    it('should return the Asset for a valid ticker', async () => {
+      const mockAsset = new MockAsset();
+
+      mockPolymeshApi.assets.getFungibleAsset.mockResolvedValue(mockAsset);
+
+      const result = await service.findFungible('TICKER');
+
+      expect(result).toEqual(mockAsset);
+    });
+
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockPolymeshApi.assets.getFungibleAsset.mockRejectedValue(mockError);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        const address = 'address';
+
+        await expect(() => service.findFungible(address)).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
+      });
+    });
+  });
+
   describe('findAllByOwner', () => {
     describe('if the identity does not exist', () => {
       it('should throw a AppNotFoundError', async () => {
@@ -138,7 +165,7 @@ describe('AssetsService', () => {
     it('should return the list of Asset holders', async () => {
       const mockAsset = new MockAsset();
 
-      const findOneSpy = jest.spyOn(service, 'findOne');
+      const findOneSpy = jest.spyOn(service, 'findFungible');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockAsset as any);
       mockAsset.assetHolders.get.mockResolvedValue(mockHolders);
@@ -150,7 +177,7 @@ describe('AssetsService', () => {
     it('should return the list of Asset holders from a start value', async () => {
       const mockAsset = new MockAsset();
 
-      const findOneSpy = jest.spyOn(service, 'findOne');
+      const findOneSpy = jest.spyOn(service, 'findFungible');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockAsset as any);
       mockAsset.assetHolders.get.mockResolvedValue(mockHolders);
@@ -285,7 +312,7 @@ describe('AssetsService', () => {
         blockNumber: new BigNumber(1),
         tag: TxTags.asset.Issue,
       };
-      const findSpy = jest.spyOn(service, 'findOne');
+      const findSpy = jest.spyOn(service, 'findFungible');
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
@@ -355,7 +382,7 @@ describe('AssetsService', () => {
         blockNumber: new BigNumber(1),
         tag: TxTags.asset.Redeem,
       };
-      const findSpy = jest.spyOn(service, 'findOne');
+      const findSpy = jest.spyOn(service, 'findFungible');
 
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
@@ -455,7 +482,7 @@ describe('AssetsService', () => {
       mockAsset.controllerTransfer.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const findSpy = jest.spyOn(service, 'findOne');
+      const findSpy = jest.spyOn(service, 'findFungible');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockAsset as any);
 
@@ -484,7 +511,7 @@ describe('AssetsService', () => {
     it("should return the Asset's operation history", async () => {
       const mockAsset = new MockAsset();
 
-      const findOneSpy = jest.spyOn(service, 'findOne');
+      const findOneSpy = jest.spyOn(service, 'findFungible');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockAsset as any);
 

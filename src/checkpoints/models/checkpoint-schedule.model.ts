@@ -2,9 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Type } from 'class-transformer';
 
-import { CalendarPeriodModel } from '~/checkpoints/models/calendar-period.model';
 import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class CheckpointScheduleModel {
@@ -24,13 +22,6 @@ export class CheckpointScheduleModel {
   readonly ticker: string;
 
   @ApiProperty({
-    description: 'Date at which first Checkpoint was created',
-    type: 'string',
-    example: new Date('10/14/1987').toISOString(),
-  })
-  readonly start: Date;
-
-  @ApiProperty({
     description:
       'Date at which the last Checkpoint will be created with this Schedule. A null value means that this Schedule never expires',
     type: 'string',
@@ -41,21 +32,13 @@ export class CheckpointScheduleModel {
 
   @ApiProperty({
     description:
-      'Period in which this Schedule creates a Checkpoint. A null value means this Schedule creates a single Checkpoint and then expires',
-    nullable: true,
-    type: CalendarPeriodModel,
+      'An array of dates for pending points. A date in the array represents a scheduled time to create a Checkpoint.',
+    type: 'array',
+    items: { type: 'string', format: 'date-time' },
+    isArray: true,
+    example: [new Date('1987-10-14T00:00:00.000Z').toISOString()],
   })
-  @Type(() => CalendarPeriodModel)
-  readonly period: CalendarPeriodModel | null;
-
-  @ApiProperty({
-    description:
-      'Abstract measure of the complexity of this Schedule. Shorter periods translate into more complexity',
-    type: 'string',
-    example: '1',
-  })
-  @FromBigNumber()
-  readonly complexity: BigNumber;
+  readonly pendingPoints: Date[];
 
   @ApiProperty({
     description: 'Number of Checkpoints left to be created by the Schedule',

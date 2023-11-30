@@ -1,9 +1,27 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { CustomClaimType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimsService } from '~/claims/claims.service';
+import { GetCustomClaimTypePipe } from '~/claims/decorators/get-custom-claim-type.pipe';
+import { GetCustomClaimTypeDto } from '~/claims/dto/get-custom-claim-type.dto';
+import { GetCustomClaimTypesDto } from '~/claims/dto/get-custom-claim-types.dto';
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
+import { RegisterCustomClaimTypeDto } from '~/claims/dto/register-custom-claim-type.dto';
+import { CustomClaimTypeModel } from '~/claims/models/custom-claim-type.model';
+import { CustomClaimTypeWithDid } from '~/claims/models/custom-claim-type-did.model';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -76,5 +94,82 @@ export class ClaimsController {
     const serviceResult = await this.claimsService.revokeClaimsFromDid(args);
 
     return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Register a CustomClaimType',
+    description: 'This endpoint will add the CustomClaimType to the network',
+  })
+  @ApiTransactionResponse({
+    description: 'Transaction response',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'Validation: CustomClaimType name length exceeded',
+      'Validation: The CustomClaimType with provided name already exists',
+    ],
+  })
+  @Post('custom-claim-type')
+  async registerCustomClaimType(
+    @Body() args: RegisterCustomClaimTypeDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.claimsService.registerCustomClaimType(args);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Get CustomClaimTypes',
+    description: 'This endpoint fetches CustomClaimTypes that have been registered"',
+  })
+  @Get('custom-claim-types')
+  async getCustomClaimTypes(
+    @Query() { size, start, dids }: GetCustomClaimTypesDto
+  ): Promise<PaginatedResultsModel<CustomClaimTypeWithDid>> {
+    const { data, count, next } = await this.claimsService.getRegisteredCustomClaimTypes(
+      size,
+      new BigNumber(start ?? 0),
+      dids
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(claimType => new CustomClaimTypeWithDid(claimType)),
+      total: count,
+      next,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get CustomClaimType by ID',
+    description: 'This endpoint fetches the CustomClaimType, identified by its ID or Name',
+  })
+  @ApiParam({
+    name: 'identifier',
+    description: 'The ID or Name the CustomClaimType',
+    type: 'string',
+    required: false,
+    example: '1',
+  })
+  @ApiNotFoundResponse({
+    description: 'The CustomClaimType does not exist',
+  })
+  @Get('custom-claim-types/:identifier')
+  async getCustomClaimType(
+    @Param('identifier', GetCustomClaimTypePipe) { identifier }: GetCustomClaimTypeDto
+  ): Promise<CustomClaimTypeModel> {
+    let result: CustomClaimType | null;
+
+    if (identifier instanceof BigNumber) {
+      result = await this.claimsService.getCustomClaimTypeById(identifier);
+    } else {
+      result = await this.claimsService.getCustomClaimTypeByName(identifier);
+    }
+
+    if (!result) {
+      throw new NotFoundException('Custom claim type not found');
+    }
+
+    return new CustomClaimTypeModel(result);
   }
 }

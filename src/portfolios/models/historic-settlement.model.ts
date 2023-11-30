@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { SettlementResultEnum } from '@polymeshassociation/polymesh-sdk/types';
+import { SettlementResultEnum } from '@polymeshassociation/polymesh-sdk/middleware/types';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber } from '~/common/decorators/transformation';

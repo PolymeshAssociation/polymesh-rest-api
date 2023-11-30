@@ -1,4 +1,5 @@
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType, CountryCode, ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
@@ -93,6 +94,14 @@ describe('claimsDto', () => {
           ],
         },
       ],
+      [
+        'Custom claim with `customClaimTypeId`',
+        {
+          type: ClaimType.Custom,
+          scope,
+          customClaimTypeId: new BigNumber('1'),
+        },
+      ],
     ];
     test.each(cases)('%s', async (_, input) => {
       await target.transform(input, metadata).catch(err => {
@@ -163,7 +172,7 @@ describe('claimsDto', () => {
           ],
         },
         [
-          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked',
+          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, Custom',
         ],
       ],
     ];

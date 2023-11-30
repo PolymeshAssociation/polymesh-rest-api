@@ -4,6 +4,7 @@ import {
   GroupedInstructions,
   Instruction,
   InstructionAffirmation,
+  InstructionLeg,
   PortfolioLike,
   ResultSet,
   TransferBreakdown,
@@ -31,7 +32,7 @@ export class SettlementsService {
     private readonly assetsService: AssetsService
   ) {}
 
-  public async findPendingInstructionsByDid(did: string): Promise<GroupedInstructions> {
+  public async findGroupedInstructionsByDid(did: string): Promise<GroupedInstructions> {
     const identity = await this.identitiesService.findOne(did);
 
     return identity.getInstructions();
@@ -56,12 +57,16 @@ export class SettlementsService {
 
     const params = {
       ...args,
-      legs: args.legs.map(({ amount, asset, from, to }) => ({
-        amount,
-        asset,
-        from: from.toPortfolioLike(),
-        to: to.toPortfolioLike(),
-      })),
+      legs: args.legs.map(
+        ({ amount, nfts, asset, from, to }) =>
+          ({
+            amount,
+            nfts,
+            asset,
+            from: from.toPortfolioLike(),
+            to: to.toPortfolioLike(),
+          } as InstructionLeg)
+      ),
     };
 
     return this.transactionsService.submit(venue.addInstruction, params, base);
@@ -137,10 +142,13 @@ export class SettlementsService {
     from: PortfolioLike,
     to: PortfolioLike,
     ticker: string,
-    amount: BigNumber
+    transferAmount?: BigNumber,
+    transferNfts?: BigNumber[]
   ): Promise<TransferBreakdown> {
     const assetDetails = await this.assetsService.findOne(ticker);
-    return assetDetails.settlements.canTransfer({ from, to, amount });
+    const amount = transferAmount ?? new BigNumber(0);
+    const nfts = transferNfts ?? [];
+    return assetDetails.settlements.canTransfer({ from, to, amount, nfts });
   }
 
   public async withdrawAffirmation(
@@ -150,14 +158,5 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return this.transactionsService.submit(instruction.withdraw, {}, signerDto);
-  }
-
-  public async rescheduleInstruction(
-    id: BigNumber,
-    signerDto: TransactionBaseDto
-  ): ServiceReturn<Instruction> {
-    const instruction = await this.findInstruction(id);
-
-    return this.transactionsService.submit(instruction.reschedule, {}, signerDto);
   }
 }

@@ -57,6 +57,9 @@ export function IsBigNumber(
       options: validationOptions,
       validator: {
         validate(value: unknown) {
+          if (value instanceof Array) {
+            return value.every(val => val instanceof BigNumber);
+          }
           if (!(value instanceof BigNumber)) {
             return false;
           }

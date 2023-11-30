@@ -33,24 +33,24 @@ export class CheckpointsService {
     size: BigNumber,
     start?: string
   ): Promise<ResultSet<CheckpointWithData>> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return asset.checkpoints.get({ start, size });
   }
 
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return await asset.checkpoints.getOne({ id }).catch(error => {
       throw handleSdkError(error);
     });
   }
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return asset.checkpoints.schedules.get();
   }
 
   public async findScheduleById(ticker: string, id: BigNumber): Promise<ScheduleWithDetails> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return await asset.checkpoints.schedules.getOne({ id }).catch(error => {
       throw handleSdkError(error);
     });
@@ -60,7 +60,7 @@ export class CheckpointsService {
     ticker: string,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Checkpoint> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
 
     return this.transactionsService.submit(asset.checkpoints.create, {}, signerDto);
   }
@@ -71,7 +71,7 @@ export class CheckpointsService {
   ): ServiceReturn<CheckpointSchedule> {
     const { base, args } = extractTxBase(createCheckpointScheduleDto);
 
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
 
     return this.transactionsService.submit(asset.checkpoints.schedules.create, args, base);
   }
@@ -101,7 +101,7 @@ export class CheckpointsService {
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },

@@ -193,13 +193,11 @@ export class CheckpointsController {
     const schedules = await this.checkpointsService.findSchedulesByTicker(ticker);
     return new ResultsModel({
       results: schedules.map(
-        ({ schedule: { id, period, start, complexity, expiryDate }, details }) =>
+        ({ schedule: { id, pendingPoints, expiryDate }, details }) =>
           new CheckpointScheduleModel({
             id,
             ticker,
-            period,
-            start,
-            complexity,
+            pendingPoints,
             expiryDate,
             ...details,
           })
@@ -234,16 +232,14 @@ export class CheckpointsController {
     @Param() { ticker, id }: CheckpointScheduleParamsDto
   ): Promise<CheckpointScheduleModel> {
     const {
-      schedule: { period, start, complexity, expiryDate },
+      schedule: { pendingPoints, expiryDate },
       details,
     } = await this.checkpointsService.findScheduleById(ticker, id);
 
     return new CheckpointScheduleModel({
       id,
-      period,
-      start,
       ticker,
-      complexity,
+      pendingPoints,
       expiryDate,
       ...details,
     });
@@ -279,7 +275,7 @@ export class CheckpointsController {
       details,
     }) => {
       const {
-        schedule: { id, period, start, complexity, expiryDate },
+        schedule: { id, pendingPoints, expiryDate },
         details: scheduleDetails,
       } = await this.checkpointsService.findScheduleById(ticker, createdScheduleId);
 
@@ -287,9 +283,7 @@ export class CheckpointsController {
         schedule: new CheckpointScheduleModel({
           id,
           ticker,
-          period,
-          start,
-          complexity,
+          pendingPoints,
           expiryDate,
           ...scheduleDetails,
         }),

@@ -18,7 +18,7 @@ export class OfferingsService {
     ticker: string,
     stoStatus?: Partial<OfferingStatus>
   ): Promise<OfferingWithDetails[]> {
-    const asset = await this.assetsService.findOne(ticker);
+    const asset = await this.assetsService.findFungible(ticker);
     return asset.offerings.get({ status: stoStatus });
   }
 

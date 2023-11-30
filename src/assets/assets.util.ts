@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { isFungibleAsset } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 
@@ -16,7 +17,7 @@ export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetail
   ] = await Promise.all([
     asset.details(),
     asset.getIdentifiers(),
-    asset.currentFundingRound(),
+    isFungibleAsset(asset) ? asset.currentFundingRound() : null,
     asset.isFrozen(),
   ]);
 

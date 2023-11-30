@@ -1,3 +1,6 @@
+/* eslint-disable import/first */
+const mockIsFungibleAsset = jest.fn();
+
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
@@ -16,6 +19,11 @@ import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer, did, txResult } = testValues;
+
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
+  isFungibleAsset: mockIsFungibleAsset,
+}));
 
 describe('AssetsController', () => {
   let controller: AssetsController;
@@ -85,6 +93,7 @@ describe('AssetsController', () => {
       mockAsset.currentFundingRound.mockResolvedValue(mockFundingRound);
 
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
+      mockIsFungibleAsset.mockReturnValue(true);
 
       const result = await controller.getDetails({ ticker: 'TICKER' });
 

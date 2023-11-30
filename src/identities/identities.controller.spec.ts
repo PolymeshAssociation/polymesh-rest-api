@@ -140,7 +140,7 @@ describe('IdentitiesController', () => {
   describe('getPendingInstructions', () => {
     it("should return the Identity's pending Instructions", async () => {
       const expectedInstructionIds = [new BigNumber(1), new BigNumber(2), new BigNumber(3)];
-      mockSettlementsService.findPendingInstructionsByDid.mockResolvedValue({
+      mockSettlementsService.findGroupedInstructionsByDid.mockResolvedValue({
         pending: expectedInstructionIds.map(id => ({ id })),
       });
 
@@ -634,6 +634,26 @@ describe('IdentitiesController', () => {
       expect(result).toEqual({
         ...txResult,
         identity: identityData,
+      });
+    });
+  });
+
+  describe('getGroupedInstructions', () => {
+    it("should return the Identity's Instructions", async () => {
+      const expectedInstructionIds = [new BigNumber(1), new BigNumber(2), new BigNumber(3)];
+
+      mockSettlementsService.findGroupedInstructionsByDid.mockResolvedValue({
+        affirmed: expectedInstructionIds.map(id => id),
+        pending: expectedInstructionIds.map(id => id),
+        failed: expectedInstructionIds.map(id => id),
+      });
+
+      const result = await controller.getGroupedInstructions({ did: '0x1' });
+
+      expect(result).toEqual({
+        affirmed: expectedInstructionIds,
+        pending: expectedInstructionIds,
+        failed: expectedInstructionIds,
       });
     });
   });
