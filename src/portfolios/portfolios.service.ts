@@ -13,7 +13,7 @@ import {
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { AppValidationError } from '~/common/errors';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
@@ -57,9 +57,9 @@ export class PortfoliosService {
 
   public async moveAssets(owner: string, params: AssetMovementDto): ServiceReturn<void> {
     const {
-      base,
+      options,
       args: { to, items, from },
-    } = extractTxBase(params);
+    } = extractTxOptions(params);
 
     const fromId = toPortfolioId(from);
     const fromPortfolio = fromId ? await this.findOne(owner, fromId) : await this.findOne(owner);
@@ -76,16 +76,16 @@ export class PortfoliosService {
       }),
     };
 
-    return this.transactionsService.submit(fromPortfolio.moveFunds, formattedArgs, base);
+    return this.transactionsService.submit(fromPortfolio.moveFunds, formattedArgs, options);
   }
 
   public async createPortfolio(params: CreatePortfolioDto): ServiceReturn<NumberedPortfolio> {
     const {
       polymeshService: { polymeshApi },
     } = this;
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
-    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, args, base);
+    return this.transactionsService.submit(polymeshApi.identities.createPortfolio, args, options);
   }
 
   public async deletePortfolio(
@@ -93,10 +93,11 @@ export class PortfoliosService {
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const identity = await this.identitiesService.findOne(portfolio.did);
+    const { options } = extractTxOptions(transactionBaseDto);
     return this.transactionsService.submit(
       identity.portfolios.delete,
       { portfolio: portfolio.id },
-      transactionBaseDto
+      options
     );
   }
 
@@ -119,10 +120,10 @@ export class PortfoliosService {
       throw new AppValidationError('Default portfolio name cannot be modified');
     }
 
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
     const portfolio = await this.findOne(did, id);
 
-    return this.transactionsService.submit(portfolio.modifyName, args, base);
+    return this.transactionsService.submit(portfolio.modifyName, args, options);
   }
 
   public async setCustodian(
@@ -132,14 +133,14 @@ export class PortfoliosService {
   ): ServiceReturn<AuthorizationRequest> {
     const portfolio = await this.findOne(did, portfolioId);
     const {
-      base,
+      options,
       args: { target: targetIdentity, expiry },
-    } = extractTxBase(params);
+    } = extractTxOptions(params);
 
     return this.transactionsService.submit(
       portfolio.setCustodian,
       { targetIdentity, expiry },
-      base
+      options
     );
   }
 
@@ -157,11 +158,12 @@ export class PortfoliosService {
   public async quitCustody(
     did: string,
     id: BigNumber,
-    args: TransactionBaseDto
+    transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const portfolio = await this.findOne(did, id);
+    const { options } = extractTxOptions(transactionBaseDto);
 
-    return this.transactionsService.submit(portfolio.quitCustody, {}, args);
+    return this.transactionsService.submit(portfolio.quitCustody, {}, options);
   }
 
   public async createdAt(did: string, portfolioId: BigNumber): Promise<EventIdentifier | null> {

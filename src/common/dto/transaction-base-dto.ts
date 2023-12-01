@@ -1,15 +1,28 @@
 /* istanbul ignore file */
 
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsObject, IsOptional, IsString, IsUrl } from 'class-validator';
+
+import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 
 export class TransactionBaseDto {
   @ApiProperty({
-    description: 'An identifier for the account that should sign the transaction',
-    example: 'alice',
+    description:
+      'Options to control the behavior of the transactions, such how or if it will be signed',
   })
+  @IsOptional()
+  @IsObject()
+  options?: TransactionOptionsDto;
+
+  @ApiProperty({
+    description:
+      '(Deprecated, embed in `options` object instead). An identifier for the account that should sign the transaction',
+    example: 'alice',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
-  readonly signer: string;
+  readonly signer?: string;
 
   // Hide the property so the interactive examples work without additional setup
   @ApiHideProperty()
@@ -20,7 +33,7 @@ export class TransactionBaseDto {
 
   @ApiProperty({
     description:
-      'An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain',
+      '(Deprecated, embed in `options` instead). An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain',
     example: false,
   })
   @IsBoolean()

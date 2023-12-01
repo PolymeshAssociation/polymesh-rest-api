@@ -8,7 +8,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { CorporateActionDefaultConfigDto } from '~/corporate-actions/dto/corporate-action-default-config.dto';
 import { DividendDistributionDto } from '~/corporate-actions/dto/dividend-distribution.dto';
 import { LinkDocumentsDto } from '~/corporate-actions/dto/link-documents.dto';
@@ -34,13 +34,13 @@ export class CorporateActionsService {
     ticker: string,
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): ServiceReturn<void> {
-    const { base, args } = extractTxBase(corporateActionDefaultConfigDto);
+    const { options, args } = extractTxOptions(corporateActionDefaultConfigDto);
     const asset = await this.assetsService.findFungible(ticker);
 
     return this.transactionService.submit(
       asset.corporateActions.setDefaultConfig,
       args as Required<typeof args>,
-      base
+      options
     );
   }
 
@@ -62,9 +62,9 @@ export class CorporateActionsService {
     dividendDistributionDto: DividendDistributionDto
   ): ServiceReturn<DividendDistribution> {
     const {
-      base,
+      options,
       args: { originPortfolio, ...rest },
-    } = extractTxBase(dividendDistributionDto);
+    } = extractTxOptions(dividendDistributionDto);
 
     const asset = await this.assetsService.findFungible(ticker);
     return this.transactionService.submit(
@@ -73,7 +73,7 @@ export class CorporateActionsService {
         ...rest,
         originPortfolio: toPortfolioId(originPortfolio),
       },
-      base
+      options
     );
   }
 
@@ -82,11 +82,12 @@ export class CorporateActionsService {
     corporateAction: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findFungible(ticker);
     return this.transactionService.submit(
       asset.corporateActions.remove,
       { corporateAction },
-      transactionBaseDto
+      options
     );
   }
 
@@ -95,10 +96,10 @@ export class CorporateActionsService {
     id: BigNumber,
     payDividendsDto: PayDividendsDto
   ): ServiceReturn<void> {
-    const { base, args } = extractTxBase(payDividendsDto);
+    const { options, args } = extractTxOptions(payDividendsDto);
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(distribution.pay, args, base);
+    return this.transactionService.submit(distribution.pay, args, options);
   }
 
   public async linkDocuments(
@@ -107,16 +108,16 @@ export class CorporateActionsService {
     linkDocumentsDto: LinkDocumentsDto
   ): ServiceReturn<void> {
     const {
-      base,
+      options,
       args: { documents },
-    } = extractTxBase(linkDocumentsDto);
+    } = extractTxOptions(linkDocumentsDto);
 
     const { distribution } = await this.findDistribution(ticker, id);
 
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
     };
-    return this.transactionService.submit(distribution.linkDocuments, params, base);
+    return this.transactionService.submit(distribution.linkDocuments, params, options);
   }
 
   public async claimDividends(
@@ -124,8 +125,9 @@ export class CorporateActionsService {
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const { distribution } = await this.findDistribution(ticker, id);
-    return this.transactionService.submit(distribution.claim, undefined, transactionBaseDto);
+    return this.transactionService.submit(distribution.claim, undefined, options);
   }
 
   public async reclaimRemainingFunds(
@@ -133,9 +135,10 @@ export class CorporateActionsService {
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(distribution.reclaimFunds, undefined, transactionBaseDto);
+    return this.transactionService.submit(distribution.reclaimFunds, undefined, options);
   }
 
   public async modifyCheckpoint(
@@ -143,10 +146,10 @@ export class CorporateActionsService {
     id: BigNumber,
     modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
   ): ServiceReturn<void> {
-    const { base, args } = extractTxBase(modifyDistributionCheckpointDto);
+    const { options, args } = extractTxOptions(modifyDistributionCheckpointDto);
 
     const { distribution } = await this.findDistribution(ticker, id);
 
-    return this.transactionService.submit(distribution.modifyCheckpoint, args, base);
+    return this.transactionService.submit(distribution.modifyCheckpoint, args, options);
   }
 }

@@ -12,7 +12,7 @@ import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -41,11 +41,11 @@ export class AccountsService {
   }
 
   public async transferPolyx(params: TransferPolyxDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
     const { polymeshService, transactionsService } = this;
 
     const { transferPolyx } = polymeshService.polymeshApi.network;
-    return transactionsService.submit(transferPolyx, args, base);
+    return transactionsService.submit(transferPolyx, args, options);
   }
 
   public async getTransactionHistory(
@@ -67,27 +67,31 @@ export class AccountsService {
   public async freezeSecondaryAccounts(
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const { freezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(freezeSecondaryAccounts, undefined, transactionBaseDto);
+    return this.transactionsService.submit(freezeSecondaryAccounts, undefined, options);
   }
 
-  public async unfreezeSecondaryAccounts(opts: TransactionBaseDto): ServiceReturn<void> {
+  public async unfreezeSecondaryAccounts(
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const { unfreezeSecondaryAccounts } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(unfreezeSecondaryAccounts, undefined, opts);
+    return this.transactionsService.submit(unfreezeSecondaryAccounts, undefined, options);
   }
 
   public async revokePermissions(params: RevokePermissionsDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const { revokePermissions } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(revokePermissions, args, base);
+    return this.transactionsService.submit(revokePermissions, args, options);
   }
 
   public async modifyPermissions(params: ModifyPermissionsDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const { modifyPermissions } = this.polymeshService.polymeshApi.accountManagement;
 
@@ -101,7 +105,7 @@ export class AccountsService {
           })
         ),
       },
-      base
+      options
     );
   }
 }

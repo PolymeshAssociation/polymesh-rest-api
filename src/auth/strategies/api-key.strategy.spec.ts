@@ -37,8 +37,7 @@ describe('ApiKeyStrategy', () => {
     let authorizedUser;
     passport.authenticate(
       AuthStrategy.ApiKey,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (request: any, user: Express.User | false | null) => {
+      (request: unknown, user: Express.User | false | null) => {
         authorizedUser = user;
       }
     )(mockRequest, {}, {});
@@ -58,8 +57,7 @@ describe('ApiKeyStrategy', () => {
     let authorizedUser;
     passport.authenticate(
       AuthStrategy.ApiKey,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (request: any, user: Express.User | false | null) => {
+      (request: unknown, user: Express.User | false | null) => {
         authorizedUser = user;
       }
     )(mockRequest, {}, {});
