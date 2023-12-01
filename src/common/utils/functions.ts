@@ -10,6 +10,8 @@ import { flatten } from 'lodash';
 import { promisify } from 'util';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
+import { AppValidationError } from '~/common/errors';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { EventType } from '~/events/types';
@@ -86,17 +88,35 @@ export class UnreachableCaseError extends Error {
   }
 }
 
-export const extractTxBase = <T extends TransactionBaseDto>(
+export const extractTxOptions = <T extends TransactionBaseDto>(
   params: T
 ): {
-  base: TransactionBaseDto;
+  options: TransactionOptionsDto;
   args: Omit<T, keyof TransactionBaseDto>;
 } => {
-  const { signer, webhookUrl, dryRun, ...args } = params;
-  return {
-    base: { signer, webhookUrl, dryRun },
-    args,
-  };
+  const { signer, webhookUrl, dryRun, options, ...args } = params;
+  const deprecatedParams = [signer, webhookUrl, dryRun].some(param => !!param);
+
+  if (deprecatedParams && options) {
+    throw new AppValidationError(
+      '"signer", "webhookUrl", "dryRun" are deprecated and should be nested in "options". These fields are mutually exclusive with "options"'
+    );
+  }
+
+  if (options) {
+    return {
+      options,
+      args,
+    };
+  } else {
+    if (!signer) {
+      throw new AppValidationError('"signer" must be present in transaction requests');
+    }
+    return {
+      options: { signer, webhookUrl, dryRun },
+      args,
+    };
+  }
 };
 
 export const isNotNull = <T>(item: T | null): item is T => item !== null;

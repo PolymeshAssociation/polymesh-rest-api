@@ -14,7 +14,7 @@ import {
   AppValidationError,
 } from '~/common/errors';
 import { Class } from '~/common/types';
-import { MockVenue } from '~/test-utils/mocks';
+import { MockPolymeshTransaction, MockVenue } from '~/test-utils/mocks';
 import {
   handleSdkError,
   prepareProcedure,
@@ -48,9 +48,9 @@ describe('processTransaction', () => {
       mockIsPolymeshError.mockReturnValue(true);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await expect(processTransaction(mockVenue.modify as any, {}, {})).rejects.toBeInstanceOf(
-        expected
-      );
+      await expect(
+        processTransaction(mockVenue.modify as any, {}, {}, { signer: 'Alice' })
+      ).rejects.toBeInstanceOf(expected);
 
       mockIsPolymeshError.mockReset();
     });
@@ -60,7 +60,7 @@ describe('processTransaction', () => {
     it('should transform errors into AppInternalError', async () => {
       const mockVenue = new MockVenue();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = processTransaction(mockVenue.modify as any, {}, {});
+      const result = processTransaction(mockVenue.modify as any, {}, {}, { signer: 'Alice' });
 
       mockVenue.modify.mockImplementationOnce(() => {
         throw new Error('Foo');
@@ -74,6 +74,22 @@ describe('processTransaction', () => {
       });
 
       await expect(result).rejects.toBeInstanceOf(AppInternalError);
+    });
+  });
+
+  describe('with dryRun', () => {
+    it('should handle dry run option', async () => {
+      const mockVenue = new MockVenue();
+
+      const run = jest.fn();
+
+      const mockTransaction = new MockPolymeshTransaction();
+
+      mockVenue.modify.mockResolvedValue(mockTransaction);
+
+      await processTransaction(mockVenue.modify as any, {}, {}, { dryRun: true, signer: 'Alice' });
+
+      expect(run).not.toHaveBeenCalled();
     });
   });
 });

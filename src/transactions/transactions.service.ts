@@ -3,7 +3,7 @@ import { ConfigType } from '@nestjs/config';
 import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
-import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
 import { EventType, TransactionUpdateEvent, TransactionUpdatePayload } from '~/events/types';
@@ -69,13 +69,13 @@ export class TransactionsService {
   public async submit<MethodArgs, ReturnType, TransformedReturnType = ReturnType>(
     method: Method<MethodArgs, ReturnType, TransformedReturnType>,
     args: MethodArgs,
-    transactionBaseDto: TransactionBaseDto
+    transactionOptions: TransactionOptionsDto
   ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
-    const { signer, webhookUrl, dryRun } = transactionBaseDto;
+    const { signer, webhookUrl } = transactionOptions;
     const signingAccount = await this.getSigningAccount(signer);
     try {
       if (!webhookUrl) {
-        return processTransaction(method, args, { signingAccount }, dryRun);
+        return processTransaction(method, args, { signingAccount }, transactionOptions);
       } else {
         // prepare the procedure so the SDK will run its validation and throw if something isn't right
         const transaction = await prepareProcedure(method, args, { signingAccount });

@@ -9,7 +9,7 @@ import {
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -62,9 +62,9 @@ export class IdentitiesService {
     addSecondaryAccountParamsDto: AddSecondaryAccountParamsDto
   ): ServiceReturn<AuthorizationRequest> {
     const {
-      base,
+      options,
       args: { secondaryAccount: targetAccount, permissions, expiry },
-    } = extractTxBase(addSecondaryAccountParamsDto);
+    } = extractTxOptions(addSecondaryAccountParamsDto);
     const params = {
       targetAccount,
       permissions: permissions?.toPermissionsLike(),
@@ -72,7 +72,7 @@ export class IdentitiesService {
     };
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
 
-    return this.transactionsService.submit(inviteAccount, params, base);
+    return this.transactionsService.submit(inviteAccount, params, options);
   }
 
   public async registerDid(registerIdentityDto: RegisterIdentityDto): ServiceReturn<Identity> {
@@ -81,9 +81,9 @@ export class IdentitiesService {
     } = this;
 
     const {
-      base,
+      options,
       args: { targetAccount, secondaryAccounts, createCdd, expiry },
-    } = extractTxBase(registerIdentityDto);
+    } = extractTxOptions(registerIdentityDto);
 
     const params = {
       targetAccount,
@@ -97,6 +97,6 @@ export class IdentitiesService {
 
     const { registerIdentity } = polymeshApi.identities;
 
-    return this.transactionsService.submit(registerIdentity, params, base);
+    return this.transactionsService.submit(registerIdentity, params, options);
   }
 }
