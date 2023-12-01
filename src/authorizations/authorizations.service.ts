@@ -11,7 +11,7 @@ import {
 import { AccountsService } from '~/accounts/accounts.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { AppNotFoundError } from '~/common/errors';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -82,20 +82,21 @@ export class AuthorizationsService {
   }
 
   public async accept(id: BigNumber, transactionBaseDto: TransactionBaseDto): ServiceReturn<void> {
-    const { signer } = transactionBaseDto;
-    const address = await this.transactionsService.getSigningAccount(signer);
+    const { options } = extractTxOptions(transactionBaseDto);
+    const address = await this.transactionsService.getSigningAccount(options.signer);
 
     const { accept } = await this.getAuthRequest(address, id);
 
-    return this.transactionsService.submit(accept, {}, transactionBaseDto);
+    return this.transactionsService.submit(accept, {}, options);
   }
 
   public async remove(id: BigNumber, transactionBaseDto: TransactionBaseDto): ServiceReturn<void> {
-    const { signer } = transactionBaseDto;
-    const address = await this.transactionsService.getSigningAccount(signer);
+    const { options } = extractTxOptions(transactionBaseDto);
+
+    const address = await this.transactionsService.getSigningAccount(options.signer);
 
     const { remove } = await this.getAuthRequest(address, id);
 
-    return this.transactionsService.submit(remove, {}, transactionBaseDto);
+    return this.transactionsService.submit(remove, {}, options);
   }
 }

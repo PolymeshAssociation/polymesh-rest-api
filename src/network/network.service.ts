@@ -5,6 +5,7 @@ import { Account, ExtrinsicDataWithFees } from '@polymeshassociation/polymesh-sd
 
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { TransactionDto } from '~/transactions/dto/transaction.dto';
 
 @Injectable()
 export class NetworkService {
@@ -26,5 +27,9 @@ export class NetworkService {
     return this.polymeshService.polymeshApi.network.getTransactionByHash({
       txHash: hexStripPrefix(hash),
     });
+  }
+
+  public submitTransaction(transaction: TransactionDto): Promise<unknown> {
+    return this.polymeshService.polymeshApi.network.getLatestBlock(); // should be submit
   }
 }

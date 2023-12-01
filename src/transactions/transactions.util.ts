@@ -15,6 +15,7 @@ import {
   isPolymeshTransactionBatch,
 } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 import {
   AppError,
   AppInternalError,
@@ -75,8 +76,9 @@ export async function processTransaction<
   method: Method<MethodArgs, ReturnType, TransformedReturnType>,
   args: MethodArgs,
   opts: ProcedureOpts,
-  dryRun = false
+  transactionOptions: TransactionOptionsDto
 ): Promise<TransactionResult<TransformedReturnType>> {
+  const { dryRun } = transactionOptions;
   try {
     const procedure = await prepareProcedure(method, args, opts);
 

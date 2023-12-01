@@ -9,7 +9,7 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { RequirementDto } from '~/compliance/dto/requirement.dto';
 import { SetRequirementsDto } from '~/compliance/dto/set-requirements.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -28,14 +28,14 @@ export class ComplianceRequirementsService {
   }
 
   public async setRequirements(ticker: string, params: SetRequirementsDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.set,
       args as SetAssetRequirementsParams,
-      base
+      options
     );
   }
 
@@ -43,25 +43,19 @@ export class ComplianceRequirementsService {
     ticker: string,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findOne(ticker);
-    return this.transactionsService.submit(
-      asset.compliance.requirements.pause,
-      {},
-      transactionBaseDto
-    );
+    return this.transactionsService.submit(asset.compliance.requirements.pause, {}, options);
   }
 
   public async unpauseRequirements(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(
-      asset.compliance.requirements.unpause,
-      {},
-      transactionBaseDto
-    );
+    return this.transactionsService.submit(asset.compliance.requirements.unpause, {}, options);
   }
 
   public async deleteOne(
@@ -69,12 +63,13 @@ export class ComplianceRequirementsService {
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.remove,
       { requirement: id },
-      transactionBaseDto
+      options
     );
   }
 
@@ -82,36 +77,33 @@ export class ComplianceRequirementsService {
     ticker: string,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(
-      asset.compliance.requirements.reset,
-      undefined,
-      transactionBaseDto
-    );
+    return this.transactionsService.submit(asset.compliance.requirements.reset, undefined, options);
   }
 
   public async add(ticker: string, params: RequirementDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.add,
       args as AddAssetRequirementParams,
-      base
+      options
     );
   }
 
   public async modify(ticker: string, id: BigNumber, params: RequirementDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const asset = await this.assetsService.findOne(ticker);
 
     return this.transactionsService.submit(
       asset.compliance.requirements.modify,
       { id, ...args } as ModifyComplianceRequirementParams,
-      base
+      options
     );
   }
 

@@ -16,7 +16,7 @@ import {
 
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { RegisterCustomClaimTypeDto } from '~/claims/dto/register-custom-claim-type.dto';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 
@@ -66,27 +66,27 @@ export class ClaimsService {
   }
 
   public async addClaimsOnDid(modifyClaimsDto: ModifyClaimsDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(modifyClaimsDto);
+    const { options, args } = extractTxOptions(modifyClaimsDto);
 
     const { addClaims } = this.polymeshService.polymeshApi.claims;
 
-    return this.transactionsService.submit(addClaims, args as AddClaimsParams, base);
+    return this.transactionsService.submit(addClaims, args as AddClaimsParams, options);
   }
 
   public async editClaimsOnDid(modifyClaimsDto: ModifyClaimsDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(modifyClaimsDto);
+    const { options, args } = extractTxOptions(modifyClaimsDto);
 
     const { editClaims } = this.polymeshService.polymeshApi.claims;
 
-    return this.transactionsService.submit(editClaims, args as ModifyClaimsParams, base);
+    return this.transactionsService.submit(editClaims, args as ModifyClaimsParams, options);
   }
 
   public async revokeClaimsFromDid(modifyClaimsDto: ModifyClaimsDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(modifyClaimsDto);
+    const { options, args } = extractTxOptions(modifyClaimsDto);
 
     const { revokeClaims } = this.polymeshService.polymeshApi.claims;
 
-    return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, base);
+    return this.transactionsService.submit(revokeClaims, args as RevokeClaimsParams, options);
   }
 
   public async findClaimScopesByDid(target: string): Promise<ClaimScope[]> {
@@ -116,14 +116,14 @@ export class ClaimsService {
   public async registerCustomClaimType(
     registerCustomClaimTypeDto: RegisterCustomClaimTypeDto
   ): ServiceReturn<BigNumber> {
-    const { base, args } = extractTxBase(registerCustomClaimTypeDto);
+    const { options, args } = extractTxOptions(registerCustomClaimTypeDto);
 
     const { registerCustomClaimType } = this.polymeshService.polymeshApi.claims;
 
     return this.transactionsService.submit(
       registerCustomClaimType,
       args as RegisterCustomClaimTypeDto,
-      base
+      options
     );
   }
 

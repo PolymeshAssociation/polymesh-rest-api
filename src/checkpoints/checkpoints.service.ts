@@ -13,7 +13,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -60,20 +60,21 @@ export class CheckpointsService {
     ticker: string,
     signerDto: TransactionBaseDto
   ): ServiceReturn<Checkpoint> {
+    const { options } = extractTxOptions(signerDto);
     const asset = await this.assetsService.findFungible(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.create, {}, signerDto);
+    return this.transactionsService.submit(asset.checkpoints.create, {}, options);
   }
 
   public async createScheduleByTicker(
     ticker: string,
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
   ): ServiceReturn<CheckpointSchedule> {
-    const { base, args } = extractTxBase(createCheckpointScheduleDto);
+    const { options, args } = extractTxOptions(createCheckpointScheduleDto);
 
     const asset = await this.assetsService.findFungible(ticker);
 
-    return this.transactionsService.submit(asset.checkpoints.schedules.create, args, base);
+    return this.transactionsService.submit(asset.checkpoints.schedules.create, args, options);
   }
 
   public async getAssetBalance(
@@ -101,11 +102,12 @@ export class CheckpointsService {
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findFungible(ticker);
     return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
-      transactionBaseDto
+      options
     );
   }
 }
