@@ -1840,7 +1840,19 @@
     "@polkadot/wasm-util" "7.3.1"
     tslib "^2.6.2"
 
-"@polkadot/wasm-crypto@^7.2.2", "@polkadot/wasm-crypto@^7.3.1":
+"@polkadot/wasm-crypto@^7.2.2":
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/@polkadot/wasm-crypto/-/wasm-crypto-7.2.2.tgz#3c4b300c0997f4f7e2ddcdf8101d97fa1f5d1a7f"
+  integrity sha512-1ZY1rxUTawYm0m1zylvBMFovNIHYgG2v/XoASNp/EMG5c8FQIxCbhJRaTBA983GVq4lN/IAKREKEp9ZbLLqssA==
+  dependencies:
+    "@polkadot/wasm-bridge" "7.2.2"
+    "@polkadot/wasm-crypto-asmjs" "7.2.2"
+    "@polkadot/wasm-crypto-init" "7.2.2"
+    "@polkadot/wasm-crypto-wasm" "7.2.2"
+    "@polkadot/wasm-util" "7.2.2"
+    tslib "^2.6.1"
+
+"@polkadot/wasm-crypto@^7.3.1":
   version "7.3.1"
   resolved "https://registry.yarnpkg.com/@polkadot/wasm-crypto/-/wasm-crypto-7.3.1.tgz#178e43ab68385c90d40f53590d3fdb59ee1aa5f4"
   integrity sha512-BSK0YyCN4ohjtwbiHG71fgf+7ufgfLrHxjn7pKsvXhyeiEVuDhbDreNcpUf3eGOJ5tNk75aSbKGF4a3EJGIiNA==
@@ -1852,12 +1864,19 @@
     "@polkadot/wasm-util" "7.3.1"
     tslib "^2.6.2"
 
-"@polkadot/wasm-util@7.3.1", "@polkadot/wasm-util@^7.2.2", "@polkadot/wasm-util@^7.3.1":
+"@polkadot/wasm-util@7.3.1", "@polkadot/wasm-util@^7.3.1":
   version "7.3.1"
   resolved "https://registry.yarnpkg.com/@polkadot/wasm-util/-/wasm-util-7.3.1.tgz#047fbce91e9bdd944d46bea8f636d2fdc268fba2"
   integrity sha512-0m6ozYwBrJgnGl6QvS37ZiGRu4FFPPEtMYEVssfo1Tz4skHJlByWaHWhRNoNCVFAKiGEBu+rfx5HAQMAhoPkvg==
   dependencies:
     tslib "^2.6.2"
+
+"@polkadot/wasm-util@^7.2.2":
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/@polkadot/wasm-util/-/wasm-util-7.2.2.tgz#f8aa62eba9a35466aa23f3c5634f3e8dbd398bbf"
+  integrity sha512-N/25960ifCc56sBlJZ2h5UBpEPvxBmMLgwYsl7CUuT+ea2LuJW9Xh8VHDN/guYXwmm92/KvuendYkEUykpm/JQ==
+  dependencies:
+    tslib "^2.6.1"
 
 "@polkadot/x-bigint@12.4.2":
   version "12.4.2"
