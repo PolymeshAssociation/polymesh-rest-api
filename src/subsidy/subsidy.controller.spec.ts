@@ -161,7 +161,7 @@ describe('SubsidyController', () => {
         transactions: [transaction],
       });
       const mockPayload: QuitSubsidyDto = {
-        signer: 'Alice',
+        options: { signer: 'Alice' },
         beneficiary,
       };
 

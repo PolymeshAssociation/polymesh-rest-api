@@ -3,7 +3,7 @@ import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/po
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 
@@ -24,29 +24,31 @@ export class TickerReservationsService {
     ticker: string,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<TickerReservation> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const { transactionsService, polymeshService } = this;
     const { reserveTicker } = polymeshService.polymeshApi.assets;
 
-    return transactionsService.submit(reserveTicker, { ticker }, transactionBaseDto);
+    return transactionsService.submit(reserveTicker, { ticker }, options);
   }
 
   public async transferOwnership(
     ticker: string,
     params: TransferOwnershipDto
   ): ServiceReturn<AuthorizationRequest> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const { transferOwnership } = await this.findOne(ticker);
-    return this.transactionsService.submit(transferOwnership, args, base);
+    return this.transactionsService.submit(transferOwnership, args, options);
   }
 
   public async extend(
     ticker: string,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<TickerReservation> {
+    const { options } = extractTxOptions(transactionBaseDto);
     const { extend } = await this.findOne(ticker);
 
-    return this.transactionsService.submit(extend, {}, transactionBaseDto);
+    return this.transactionsService.submit(extend, {}, options);
   }
 
   public async findAllByOwner(owner: string): Promise<TickerReservation[]> {

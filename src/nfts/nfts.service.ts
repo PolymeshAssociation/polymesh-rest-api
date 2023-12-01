@@ -6,7 +6,7 @@ import {
   NftCollection,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { CreateNftCollectionDto } from '~/nfts/dto/create-nft-collection.dto';
 import { IssueNftDto } from '~/nfts/dto/issue-nft.dto';
 import { RedeemNftDto } from '~/nfts/dto/redeem-nft.dto';
@@ -64,29 +64,29 @@ export class NftsService {
   }
 
   public async createNftCollection(params: CreateNftCollectionDto): ServiceReturn<NftCollection> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const createCollection = this.polymeshService.polymeshApi.assets.createNftCollection;
     return this.transactionsService.submit(
       createCollection,
       args as CreateNftCollectionParams,
-      base
+      options
     );
   }
 
   public async issueNft(ticker: string, params: IssueNftDto): ServiceReturn<Nft> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const { issue } = await this.findCollection(ticker);
 
-    return this.transactionsService.submit(issue, args, base);
+    return this.transactionsService.submit(issue, args, options);
   }
 
   public async redeemNft(ticker: string, id: BigNumber, params: RedeemNftDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
 
     const nft = await this.findNft(ticker, id);
 
-    return this.transactionsService.submit(nft.redeem, { from: toPortfolioId(args.from) }, base);
+    return this.transactionsService.submit(nft.redeem, { from: toPortfolioId(args.from) }, options);
   }
 }

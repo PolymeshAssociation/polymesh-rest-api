@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TrustedClaimIssuer } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-claim-issuers.dto';
 import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -21,23 +21,27 @@ export class TrustedClaimIssuersService {
   }
 
   public async set(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.set, args, base);
+    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.set, args, options);
   }
 
   public async add(ticker: string, params: SetTrustedClaimIssuersDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.add, args, base);
+    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.add, args, options);
   }
 
   public async remove(ticker: string, params: RemoveTrustedClaimIssuersDto): ServiceReturn<void> {
-    const { base, args } = extractTxBase(params);
+    const { options, args } = extractTxOptions(params);
     const asset = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(asset.compliance.trustedClaimIssuers.remove, args, base);
+    return this.transactionsService.submit(
+      asset.compliance.trustedClaimIssuers.remove,
+      args,
+      options
+    );
   }
 }

@@ -6,7 +6,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { ServiceReturn } from '~/common/utils';
+import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { CreateMetadataDto } from '~/metadata/dto/create-metadata.dto';
 import { MetadataParamsDto } from '~/metadata/dto/metadata-params.dto';
 import { SetMetadataDto } from '~/metadata/dto/set-metadata.dto';
@@ -41,29 +41,23 @@ export class MetadataService {
   }
 
   public async create(ticker: string, params: CreateMetadataDto): ServiceReturn<MetadataEntry> {
-    const { signer, webhookUrl, ...rest } = params;
+    const { args, options } = extractTxOptions(params);
 
     const {
       metadata: { register },
     } = await this.assetsService.findOne(ticker);
 
-    return this.transactionsService.submit(register, rest, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(register, args, options);
   }
 
   public async setValue(
     params: MetadataParamsDto,
     body: SetMetadataDto
   ): ServiceReturn<MetadataEntry> {
-    const { signer, webhookUrl, ...rest } = body;
+    const { options, args } = extractTxOptions(body);
 
     const { set } = await this.findOne(params);
 
-    return this.transactionsService.submit(set, rest as SetMetadataParams, {
-      signer,
-      webhookUrl,
-    });
+    return this.transactionsService.submit(set, args as SetMetadataParams, options);
   }
 }
