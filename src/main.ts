@@ -47,7 +47,7 @@ async function bootstrap(): Promise<void> {
   const options = new DocumentBuilder()
     .setTitle(swaggerTitle)
     .setDescription(swaggerDescription)
-    .setVersion('4.1.0');
+    .setVersion('5.0.0-alpha.1');
 
   const configService = app.get<ConfigService>(ConfigService);
 
