@@ -48,7 +48,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
       return null;
     })
-    .filter(leg => !!leg) as LegModel[]; // TODO: to be changed when both NftLeg and FungibleLeg are implemented
+    .filter(leg => !!leg) as LegModel[]; // filters out "off chain" legs, in case they were used
 
   let instructionModelParams: ConstructorParameters<typeof InstructionModel>[0] = {
     status,
