@@ -31,12 +31,11 @@ import { TransactionResult } from '~/transactions/transactions.util';
 
 const { did } = testValues;
 
-export type Mocked<T> = T &
-  {
-    [K in keyof T]: T[K] extends (...args: infer Args) => unknown
-      ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
-      : T[K];
-  };
+export type Mocked<T> = T & {
+  [K in keyof T]: T[K] extends (...args: infer Args) => unknown
+    ? T[K] & jest.Mock<ReturnType<T[K]>, Args>
+    : T[K];
+};
 
 export const mockTrustedClaimIssuer = createMock<TrustedClaimIssuer<true>>();
 
@@ -479,7 +478,7 @@ export function createMockTxResult(
     transactionHash: '0x2',
     blockNumber: new BigNumber(1),
     type: TransactionType.Single,
-    transactionTag: transactionTag,
+    transactionTag,
   };
 
   const testTxResult = createMockTransactionResult<void>({

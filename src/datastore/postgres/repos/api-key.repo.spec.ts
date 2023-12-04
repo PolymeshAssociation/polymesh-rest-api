@@ -15,9 +15,7 @@ describe(`PostgresApiKeyRepo does not meet ${ApiKeyRepo.type} requirements`, () 
   let _id = 1;
 
   when(mockRepository.create).mockImplementation(secret => {
-    when(mockRepository.findOneBy)
-      .calledWith({ secret })
-      .mockResolvedValue({ user, id: _id++ });
+    when(mockRepository.findOneBy).calledWith({ secret }).mockResolvedValue({ user, id: _id++ });
     return { secret, user };
   });
 

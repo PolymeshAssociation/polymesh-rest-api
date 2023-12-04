@@ -13,13 +13,13 @@ import { Checkpoint, CheckpointSchedule } from '@polymeshassociation/polymesh-sd
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
-import { CheckPointBalanceParamsDto } from '~/checkpoints/dto/checkpoint-balance.dto';
 import { CheckpointParamsDto } from '~/checkpoints/dto/checkpoint.dto';
+import { CheckPointBalanceParamsDto } from '~/checkpoints/dto/checkpoint-balance.dto';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
-import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
+import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';

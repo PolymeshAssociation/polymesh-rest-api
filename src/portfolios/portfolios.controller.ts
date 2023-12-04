@@ -40,8 +40,8 @@ import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
 import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement.model';
-import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfolioModel } from '~/portfolios/models/portfolio.model';
+import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
 
