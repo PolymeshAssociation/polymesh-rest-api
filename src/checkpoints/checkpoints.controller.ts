@@ -163,7 +163,7 @@ export class CheckpointsController {
       details,
     }) =>
       new CreatedCheckpointModel({
-        checkpoint,
+        checkpoint: checkpoint as Checkpoint,
         transactions,
         details,
       });

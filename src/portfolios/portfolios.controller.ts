@@ -122,7 +122,7 @@ export class PortfoliosController {
     const serviceResult = await this.portfoliosService.createPortfolio(createPortfolioParams);
     const resolver: TransactionResolver<NumberedPortfolio> = ({ transactions, details, result }) =>
       new CreatedPortfolioModel({
-        portfolio: createPortfolioIdentifierModel(result),
+        portfolio: createPortfolioIdentifierModel(result as NumberedPortfolio),
         details,
         transactions,
       });
