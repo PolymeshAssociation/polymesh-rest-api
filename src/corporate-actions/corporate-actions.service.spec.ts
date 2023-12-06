@@ -98,7 +98,7 @@ describe('CorporateActionsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.corporateActions.setDefaultConfig,
         { defaultTaxWithholding: new BigNumber(25) },
-        { signer }
+        expect.objectContaining({ signer })
       );
       expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
     });
@@ -256,9 +256,9 @@ describe('CorporateActionsService', () => {
         {
           targets: body.targets,
         },
-        {
+        expect.objectContaining({
           signer,
-        }
+        })
       );
     });
   });
@@ -327,9 +327,9 @@ describe('CorporateActionsService', () => {
         expect(mockTransactionsService.submit).toHaveBeenCalledWith(
           distributionWithDetails.distribution.claim,
           undefined,
-          {
+          expect.objectContaining({
             signer,
-          }
+          })
         );
       });
     });
@@ -367,7 +367,7 @@ describe('CorporateActionsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         distributionWithDetails.distribution.reclaimFunds,
         undefined,
-        { signer, webhookUrl, dryRun }
+        expect.objectContaining({ signer, processMode: 'submitAndCallback' })
       );
     });
   });

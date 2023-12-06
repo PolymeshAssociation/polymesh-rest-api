@@ -126,7 +126,7 @@ describe('AccountsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.network.transferPolyx,
         { amount: new BigNumber(10), memo: 'Sample memo', to: 'address' },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -226,7 +226,7 @@ describe('AccountsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.accountManagement.freezeSecondaryAccounts,
         undefined,
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -257,7 +257,7 @@ describe('AccountsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.accountManagement.unfreezeSecondaryAccounts,
         undefined,
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -289,7 +289,7 @@ describe('AccountsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.accountManagement.revokePermissions,
         { secondaryAccounts },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -332,7 +332,7 @@ describe('AccountsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.accountManagement.modifyPermissions,
         { secondaryAccounts: [{ account, permissions }] },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });

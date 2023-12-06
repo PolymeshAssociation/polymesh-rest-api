@@ -264,7 +264,7 @@ describe('AssetsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.documents.set,
         { documents: body.documents },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -390,7 +390,7 @@ describe('AssetsService', () => {
       findSpy.mockResolvedValue(mockAsset as any);
 
       when(mockTransactionsService.submit)
-        .calledWith(mockAsset.redeem, { amount, from }, { signer })
+        .calledWith(mockAsset.redeem, { amount, from }, expect.objectContaining({ signer }))
         .mockResolvedValue({ transactions: [mockTransaction] });
 
       let result = await service.redeem('TICKER', redeemBody);
@@ -400,7 +400,7 @@ describe('AssetsService', () => {
       });
 
       when(mockTransactionsService.submit)
-        .calledWith(mockAsset.redeem, { amount }, { signer })
+        .calledWith(mockAsset.redeem, { amount }, expect.objectContaining({ signer }))
         .mockResolvedValue({ transactions: [mockTransaction] });
 
       result = await service.redeem('TICKER', { ...redeemBody, from: new BigNumber(0) });
@@ -502,7 +502,7 @@ describe('AssetsService', () => {
           },
           amount,
         },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });

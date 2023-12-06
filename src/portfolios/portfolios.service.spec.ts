@@ -200,7 +200,7 @@ describe('PortfoliosService', () => {
             },
           ],
         },
-        { signer: '0x6000' }
+        expect.objectContaining({ signer: '0x6000' })
       );
     });
   });

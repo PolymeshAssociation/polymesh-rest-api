@@ -148,7 +148,7 @@ describe('SubsidyService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.accountManagement.subsidizeAccount,
         { beneficiary, allowance },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -185,7 +185,7 @@ describe('SubsidyService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockSubsidy.quit,
         {},
-        { signer: subsidizer }
+        expect.objectContaining({ signer: subsidizer })
       );
 
       when(findOneSpy).calledWith(subsidizer, beneficiary).mockReturnValue(mockSubsidy);
@@ -204,7 +204,7 @@ describe('SubsidyService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockSubsidy.quit,
         {},
-        { signer: beneficiary }
+        expect.objectContaining({ signer: beneficiary })
       );
     });
 
@@ -264,7 +264,7 @@ describe('SubsidyService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockSubsidy.setAllowance,
         { allowance },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
 
@@ -277,7 +277,7 @@ describe('SubsidyService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockSubsidy.increaseAllowance,
         { allowance },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
 
@@ -290,7 +290,7 @@ describe('SubsidyService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockSubsidy.decreaseAllowance,
         { allowance },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });

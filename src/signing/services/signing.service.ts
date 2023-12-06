@@ -11,6 +11,10 @@ export abstract class SigningService {
 
   public abstract getAddressByHandle(handle: string): Promise<string>;
 
+  public isAddress(address: string): boolean {
+    return this.polymeshService.polymeshApi.accountManagement.isValidAddress({ address });
+  }
+
   public async initialize(): Promise<void> {
     return this.polymeshService.polymeshApi.setSigningManager(this.signingManager);
   }

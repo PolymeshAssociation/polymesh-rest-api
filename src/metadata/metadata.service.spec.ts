@@ -177,7 +177,7 @@ describe('MetadataService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.metadata.register,
         { name: body.name, specs: body.specs },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -221,7 +221,7 @@ describe('MetadataService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockMetadataEntry.set,
         { value: body.value, details: body.details },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });

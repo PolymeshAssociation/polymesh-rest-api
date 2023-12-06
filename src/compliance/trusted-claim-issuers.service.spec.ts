@@ -111,7 +111,7 @@ describe('TrustedClaimIssuersService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.compliance.trustedClaimIssuers.add,
         { claimIssuers: mockClaimIssuers },
-        { signer }
+        expect.objectContaining({ signer })
       );
       expect(result).toEqual(testTxResult);
     });
@@ -138,7 +138,7 @@ describe('TrustedClaimIssuersService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.compliance.trustedClaimIssuers.remove,
         { claimIssuers: [mockClaimIssuers[0].identity] },
-        { signer }
+        expect.objectContaining({ signer })
       );
       expect(result).toEqual(testTxResult);
     });
