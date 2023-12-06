@@ -200,7 +200,7 @@ describe('SettlementsService', () => {
             },
           ],
         },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -237,7 +237,7 @@ describe('SettlementsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.settlements.createVenue,
         { description: body.description, type: body.type },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -274,7 +274,7 @@ describe('SettlementsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockVenue.modify,
         { description: body.description, type: body.type },
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -309,7 +309,7 @@ describe('SettlementsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockInstruction.affirm,
         {},
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -341,7 +341,7 @@ describe('SettlementsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockInstruction.reject,
         {},
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -450,7 +450,7 @@ describe('SettlementsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockInstruction.withdraw,
         {},
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });

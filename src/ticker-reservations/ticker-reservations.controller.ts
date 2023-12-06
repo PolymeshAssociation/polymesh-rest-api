@@ -100,7 +100,7 @@ export class TickerReservationsController {
       new CreatedAuthorizationRequestModel({
         transactions,
         details,
-        authorizationRequest: createAuthorizationRequestModel(result),
+        authorizationRequest: createAuthorizationRequestModel(result as AuthorizationRequest),
       });
 
     return handleServiceResult(serviceResult, resolver);
@@ -143,7 +143,7 @@ export class TickerReservationsController {
       new ExtendedTickerReservationModel({
         transactions,
         details,
-        tickerReservation: await createTickerReservationModel(result),
+        tickerReservation: await createTickerReservationModel(result as TickerReservation),
       });
 
     return handleServiceResult(serviceResult, resolver);

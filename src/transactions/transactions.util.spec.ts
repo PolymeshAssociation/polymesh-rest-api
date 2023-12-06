@@ -47,10 +47,41 @@ describe('processTransaction', () => {
 
       mockIsPolymeshError.mockReturnValue(true);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(
-        processTransaction(mockVenue.modify as any, {}, {}, { signer: 'Alice' })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        processTransaction(
+          mockVenue.modify as any,
+          {},
+          {},
+          { processMode: 'submit', signer: 'Alice' }
+        )
       ).rejects.toBeInstanceOf(expected);
+
+      mockIsPolymeshError.mockReset();
+    });
+
+    it('should catch address not present in signing manager errors', async () => {
+      const mockVenue = new MockVenue();
+
+      const mockError = {
+        code: ErrorCode.General,
+        message: 'The Account is not part of the Signing Manager attached to the SDK',
+      };
+      mockVenue.modify.mockImplementation(() => {
+        throw mockError;
+      });
+
+      mockIsPolymeshError.mockReturnValue(true);
+
+      await expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        processTransaction(
+          mockVenue.modify as any,
+          {},
+          {},
+          { processMode: 'submit', signer: 'Alice' }
+        )
+      ).rejects.toBeInstanceOf(AppValidationError);
 
       mockIsPolymeshError.mockReset();
     });
@@ -60,7 +91,12 @@ describe('processTransaction', () => {
     it('should transform errors into AppInternalError', async () => {
       const mockVenue = new MockVenue();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = processTransaction(mockVenue.modify as any, {}, {}, { signer: 'Alice' });
+      const result = processTransaction(
+        mockVenue.modify as any,
+        {},
+        {},
+        { processMode: 'submit', signer: 'Alice' }
+      );
 
       mockVenue.modify.mockImplementationOnce(() => {
         throw new Error('Foo');
@@ -87,7 +123,13 @@ describe('processTransaction', () => {
 
       mockVenue.modify.mockResolvedValue(mockTransaction);
 
-      await processTransaction(mockVenue.modify as any, {}, {}, { dryRun: true, signer: 'Alice' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await processTransaction(
+        mockVenue.modify as any,
+        {},
+        {},
+        { processMode: 'dryRun', signer: 'Alice' }
+      );
 
       expect(run).not.toHaveBeenCalled();
     });
