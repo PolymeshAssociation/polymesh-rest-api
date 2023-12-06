@@ -28,5 +28,5 @@ export const authorizationRequestResolver: TransactionResolver<AuthorizationRequ
   new CreatedAuthorizationRequestModel({
     transactions,
     details,
-    authorizationRequest: createAuthorizationRequestModel(result),
+    authorizationRequest: createAuthorizationRequestModel(result as AuthorizationRequest),
   });

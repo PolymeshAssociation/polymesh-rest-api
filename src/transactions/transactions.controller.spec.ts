@@ -46,4 +46,22 @@ describe('TransactionsController', () => {
       });
     });
   });
+
+  describe('submit', () => {
+    it('should call the service and return the results', async () => {
+      const body = {
+        method: '0x01',
+        signature: '0x02',
+        payload: {},
+      };
+
+      const txResult = 'fakeResult';
+
+      mockNetworkService.submitTransaction.mockResolvedValue(txResult);
+
+      const result = await controller.submitTransaction(body);
+      expect(result).toEqual(txResult);
+      expect(mockNetworkService.submitTransaction).toHaveBeenCalledWith(body);
+    });
+  });
 });

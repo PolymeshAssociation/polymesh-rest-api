@@ -132,20 +132,18 @@ export class MetadataController {
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.metadataService.create(ticker, params);
 
-    const resolver: TransactionResolver<MetadataEntry> = ({
-      details,
-      transactions,
-      result: {
+    const resolver: TransactionResolver<MetadataEntry> = ({ details, transactions, result }) => {
+      const {
         asset: { ticker: assetTicker },
         id,
         type,
-      },
-    }) =>
-      new CreatedMetadataEntryModel({
+      } = result as MetadataEntry;
+      return new CreatedMetadataEntryModel({
         details,
         transactions,
         metadata: new MetadataEntryModel({ asset: assetTicker, id, type }),
       });
+    };
 
     return handleServiceResult(serviceResult, resolver);
   }
