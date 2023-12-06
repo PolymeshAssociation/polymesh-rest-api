@@ -70,6 +70,7 @@ export const mockDeveloperServiceProvider: ValueProvider<DeveloperTestingService
 
 export class MockSigningService {
   public getAddressByHandle = jest.fn();
+  public isAddress = jest.fn();
 }
 
 export class MockTickerReservationsService {

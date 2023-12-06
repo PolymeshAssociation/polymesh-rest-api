@@ -18,6 +18,7 @@ import {
   Method,
   prepareProcedure,
   processTransaction,
+  TransactionPayloadResult,
   TransactionResult,
 } from '~/transactions/transactions.util';
 import { Transaction } from '~/transactions/types';
@@ -63,6 +64,11 @@ export class TransactionsService {
   }
 
   public async getSigningAccount(signer: string): Promise<string> {
+    const isAddress = this.signingService.isAddress(signer);
+    if (isAddress) {
+      return signer;
+    }
+
     return this.signingService.getAddressByHandle(signer);
   }
 
@@ -70,7 +76,9 @@ export class TransactionsService {
     method: Method<MethodArgs, ReturnType, TransformedReturnType>,
     args: MethodArgs,
     transactionOptions: TransactionOptionsDto
-  ): Promise<NotificationPayload | TransactionResult<TransformedReturnType>> {
+  ): Promise<
+    TransactionPayloadResult | NotificationPayload | TransactionResult<TransformedReturnType>
+  > {
     const { signer, webhookUrl } = transactionOptions;
     const signingAccount = await this.getSigningAccount(signer);
     try {

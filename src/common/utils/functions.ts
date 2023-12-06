@@ -13,10 +13,11 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 import { AppValidationError } from '~/common/errors';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
+import { TransactionPayloadModel } from '~/common/models/transaction-payload.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { EventType } from '~/events/types';
 import { NotificationPayload } from '~/notifications/types';
-import { TransactionResult } from '~/transactions/transactions.util';
+import { TransactionPayloadResult, TransactionResult } from '~/transactions/transactions.util';
 
 /* istanbul ignore next */
 export function getTxTags(): string[] {
@@ -30,13 +31,16 @@ export function getTxTagsWithModuleNames(): string[] {
   return [...moduleNames, ...txTags];
 }
 
-export type TransactionResponseModel = NotificationPayloadModel | TransactionQueueModel;
+export type TransactionResponseModel =
+  | NotificationPayloadModel
+  | TransactionQueueModel
+  | TransactionPayloadModel;
 
 /**
  * A helper type that lets a service return a QueueResult or a Subscription Receipt
  */
 export type ServiceReturn<T> = Promise<
-  NotificationPayload<EventType.TransactionUpdate> | TransactionResult<T>
+  TransactionPayloadResult | NotificationPayload<EventType.TransactionUpdate> | TransactionResult<T>
 >;
 
 /**
@@ -50,9 +54,18 @@ export type TransactionResolver<T> = (
  * A helper function that transforms a service result for a controller. A controller can pass a resolver for a detailed return model, otherwise the transaction details will be used as a default
  */
 export const handleServiceResult = <T>(
-  result: NotificationPayloadModel | TransactionResult<T>,
+  result: TransactionPayloadResult | NotificationPayloadModel | TransactionResult<T>,
   resolver: TransactionResolver<T> = basicModelResolver
-): NotificationPayloadModel | Promise<TransactionQueueModel> | TransactionQueueModel => {
+):
+  | TransactionPayloadModel
+  | NotificationPayloadModel
+  | Promise<TransactionQueueModel>
+  | TransactionQueueModel => {
+  if ('unsignedTransaction' in result) {
+    const { unsignedTransaction, details } = result;
+    return new TransactionPayloadModel({ unsignedTransaction, details });
+  }
+
   if ('transactions' in result) {
     return resolver(result);
   }
@@ -112,8 +125,9 @@ export const extractTxOptions = <T extends TransactionBaseDto>(
     if (!signer) {
       throw new AppValidationError('"signer" must be present in transaction requests');
     }
+    const processMode = webhookUrl ? 'submitAndCallback' : dryRun ? 'dryRun' : 'submit';
     return {
-      options: { signer, webhookUrl, dryRun },
+      options: { signer, webhookUrl, processMode },
       args,
     };
   }

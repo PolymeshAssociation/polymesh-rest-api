@@ -237,9 +237,9 @@ describe('CheckpointsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.checkpoints.create,
         {},
-        {
+        expect.objectContaining({
           signer,
-        }
+        })
       );
       expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
     });
@@ -280,9 +280,9 @@ describe('CheckpointsService', () => {
         {
           points: [mockDate],
         },
-        {
+        expect.objectContaining({
           signer,
-        }
+        })
       );
       expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
     });
@@ -394,9 +394,9 @@ describe('CheckpointsService', () => {
           {
             schedule: id,
           },
-          {
+          expect.objectContaining({
             signer,
-          }
+          })
         );
         expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
       });

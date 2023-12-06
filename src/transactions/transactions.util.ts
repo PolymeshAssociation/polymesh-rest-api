@@ -7,6 +7,7 @@ import {
   PayingAccountType,
   ProcedureMethod,
   ProcedureOpts,
+  TransactionPayload,
   TransactionStatus,
 } from '@polymeshassociation/polymesh-sdk/types';
 import {
@@ -45,6 +46,11 @@ export type TransactionResult<T> = {
   details: TransactionDetails;
 };
 
+export type TransactionPayloadResult = {
+  details: TransactionDetails;
+  unsignedTransaction: TransactionPayload;
+};
+
 type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
 
 export type Method<M, R, T> = WithArgsProcedureMethod<ProcedureMethod<M, R, T>>;
@@ -77,8 +83,8 @@ export async function processTransaction<
   args: MethodArgs,
   opts: ProcedureOpts,
   transactionOptions: TransactionOptionsDto
-): Promise<TransactionResult<TransformedReturnType>> {
-  const { dryRun } = transactionOptions;
+): Promise<TransactionResult<TransformedReturnType> | TransactionPayloadResult> {
+  const { processMode } = transactionOptions;
   try {
     const procedure = await prepareProcedure(method, args, opts);
 
@@ -86,7 +92,7 @@ export async function processTransaction<
 
     const [totalFees, result] = await Promise.all([
       procedure.getTotalFees(),
-      dryRun ? ({} as TransformedReturnType) : procedure.run(),
+      processMode === 'submit' ? procedure.run() : ({} as TransformedReturnType),
     ]);
 
     const {
@@ -105,8 +111,13 @@ export async function processTransaction<
       },
     };
 
-    if (dryRun) {
+    if (processMode === 'dryRun') {
       return { details, result, transactions: [] };
+    }
+
+    if (processMode === 'unsignedPayload') {
+      const unsignedTransaction = await procedure.toSignablePayload();
+      return { details, unsignedTransaction };
     }
 
     const assembleTransactionResponse = <T, R = T>(
@@ -160,6 +171,15 @@ export function handleSdkError(err: unknown): AppError {
 
   if (isPolymeshError(err)) {
     const { message, code } = err;
+
+    // catch address not present error. Ideally there would be sub codes to check rather than inspecting the message
+    if (
+      code === ErrorCode.General &&
+      message.includes('not part of the Signing Manager attached to the SDK')
+    ) {
+      throw new AppValidationError(message);
+    }
+
     switch (code) {
       case ErrorCode.NoDataChange:
       case ErrorCode.ValidationError:

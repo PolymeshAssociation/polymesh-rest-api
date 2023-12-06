@@ -31,11 +31,7 @@ export class TransactionBaseDto {
   @IsUrl()
   readonly webhookUrl?: string;
 
-  @ApiProperty({
-    description:
-      '(Deprecated, embed in `options` instead). An optional property that when set to `true` will will verify the validity of the transaction without submitting it to the chain',
-    example: false,
-  })
+  @ApiHideProperty()
   @IsBoolean()
   @IsOptional()
   readonly dryRun?: boolean;

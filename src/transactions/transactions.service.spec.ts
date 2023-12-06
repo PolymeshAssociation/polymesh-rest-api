@@ -47,7 +47,6 @@ const makeMockMethod = (
 describe('TransactionsService', () => {
   const signer = 'signer';
   const legitimacySecret = 'someSecret';
-  const dryRun = false;
   let service: TransactionsService;
 
   let mockEventsService: MockEventsService;
@@ -94,13 +93,12 @@ describe('TransactionsService', () => {
       mockIsPolymeshTransaction.mockReturnValue(true);
       const mockMethod = makeMockMethod(transaction);
 
-      const { result, transactions, details } = (await service.submit(
+      const { transactions, details } = (await service.submit(
         mockMethod,
         {},
-        { signer }
+        { signer, processMode: 'submit' }
       )) as TransactionResult<undefined>;
 
-      expect(result).toBeUndefined();
       expect(transactions).toEqual([
         {
           blockHash: undefined,
@@ -119,13 +117,11 @@ describe('TransactionsService', () => {
       mockIsPolymeshTransactionBatch.mockReturnValue(true);
       const mockMethod = makeMockMethod(transaction);
 
-      const { result, transactions, details } = (await service.submit(
+      const { transactions, details } = (await service.submit(
         mockMethod,
         {},
-        { signer }
+        { signer, processMode: 'submit' }
       )) as TransactionResult<undefined>;
-
-      expect(result).toBeUndefined();
 
       expect(transactions).toEqual([
         {
@@ -170,7 +166,11 @@ describe('TransactionsService', () => {
 
       mockIsPolymeshTransaction.mockReturnValue(true);
 
-      const result = await service.submit(mockMethod, {}, { signer, webhookUrl, dryRun });
+      const result = await service.submit(
+        mockMethod,
+        {},
+        { signer, webhookUrl, processMode: 'submit' }
+      );
 
       const expectedPayload = {
         type: TransactionType.Single,
@@ -248,7 +248,11 @@ describe('TransactionsService', () => {
 
       const mockMethod = makeMockMethod(transaction);
 
-      const result = await service.submit(mockMethod, {}, { signer, webhookUrl, dryRun });
+      const result = await service.submit(
+        mockMethod,
+        {},
+        { signer, webhookUrl, processMode: 'dryRun' }
+      );
 
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();
 

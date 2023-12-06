@@ -129,7 +129,7 @@ describe('ClaimsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.claims.addClaims,
         { claims: mockModifyClaimsArgs.claims },
-        { signer: mockModifyClaimsArgs.signer }
+        expect.objectContaining({ signer: mockModifyClaimsArgs.signer })
       );
     });
   });
@@ -153,7 +153,7 @@ describe('ClaimsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.claims.editClaims,
         { claims: mockModifyClaimsArgs.claims },
-        { signer: mockModifyClaimsArgs.signer }
+        expect.objectContaining({ signer: mockModifyClaimsArgs.signer })
       );
     });
   });
@@ -177,7 +177,7 @@ describe('ClaimsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPolymeshApi.claims.revokeClaims,
         { claims: mockModifyClaimsArgs.claims },
-        { signer: mockModifyClaimsArgs.signer }
+        expect.objectContaining({ signer: mockModifyClaimsArgs.signer })
       );
     });
   });
@@ -318,7 +318,7 @@ describe('ClaimsService', () => {
           name: mockRegisterCustomClaimTypeDto.name,
           description: mockRegisterCustomClaimTypeDto.description,
         },
-        { signer: mockRegisterCustomClaimTypeDto.signer }
+        expect.objectContaining({ signer: mockRegisterCustomClaimTypeDto.signer })
       );
     });
   });
