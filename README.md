@@ -149,7 +149,7 @@ Offline payloads contain a field `"unsignedTransaction"`, which consists of 4 ke
 
 After being generated the signature with the payload can be passed to `/submit` to be submitted to the chain.
 
-This mode introduces the risk transactions are rejected due to incorrect nonces or elapsed lifetime.
+This mode introduces the risk transactions are rejected due to incorrect nonces or elapsed lifetime. See the [options DTO](src/common/dto/transaction-options.dto.ts) definition for full details
 
 ### Webhooks (alpha)
 

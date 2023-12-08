@@ -1,8 +1,21 @@
 /* istanbul ignore file */
 
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsOptional, IsString, IsUrl, ValidateIf } from 'class-validator';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUrl,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 
+import { ToBigNumber } from '~/common/decorators/transformation';
+import { IsBigNumber } from '~/common/decorators/validation';
+import { MortalityDto } from '~/common/dto/mortality-dto';
 import { ProcessMode } from '~/common/types';
 
 export class TransactionOptionsDto {
@@ -22,6 +35,18 @@ export class TransactionOptionsDto {
   readonly processMode: ProcessMode;
 
   // Hide the property so the interactive examples work without additional setup
+  @ApiHideProperty()
+  @Type(() => MortalityDto)
+  @IsOptional()
+  @ValidateNested()
+  readonly mortality?: MortalityDto;
+
+  @ApiHideProperty()
+  @IsOptional()
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly nonce?: BigNumber;
+
   // Note: If submitWithCallback is used, the user must provide a webhookUrl
   @ApiHideProperty()
   @ValidateIf(({ processMode }) => processMode === ProcessMode.SubmitWithCallback)
