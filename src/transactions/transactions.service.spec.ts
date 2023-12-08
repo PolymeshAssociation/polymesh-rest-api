@@ -165,6 +165,28 @@ describe('TransactionsService', () => {
       expect(details).toBeDefined();
     });
 
+    it('should forward SDK params when present', async () => {
+      const transaction: MockPolymeshTransactionBatch = new MockPolymeshTransactionBatch();
+      mockIsPolymeshTransaction.mockReturnValue(false);
+      mockIsPolymeshTransactionBatch.mockReturnValue(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockMethod: any = jest.fn().mockResolvedValue(transaction);
+
+      const mortality = {
+        immortal: true,
+      };
+
+      const nonce = new BigNumber(7);
+
+      await service.submit(
+        mockMethod,
+        {},
+        { signer, processMode: ProcessMode.Submit, mortality, nonce }
+      );
+
+      expect(mockMethod).toHaveBeenCalledWith(expect.objectContaining({ nonce, mortality }));
+    });
+
     it('should transform SDK errors into app errors', async () => {
       const transaction = new MockPolymeshTransaction();
       mockIsPolymeshTransaction.mockReturnValue(true);
