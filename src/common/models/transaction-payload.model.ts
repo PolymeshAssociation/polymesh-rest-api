@@ -1,23 +1,41 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
+import { IsObject } from 'class-validator';
 
-import { TransactionDetailsModel } from '~/common/models/transaction-details.model';
+import { PayloadModel } from '~/common/models/payload.model';
+import { RawPayloadModel } from '~/common/models/raw-payload.model';
+import { PayloadDto } from '~/transactions/dto/payload.dto';
 
 export class TransactionPayloadModel {
   @ApiProperty({
-    description: 'SDK payload',
+    type: 'string',
+    description: 'The method of the transaction',
+    example: '0x80041a075449434b455200000000000000ca9a3b00000000000000000000000000',
   })
-  unsignedTransaction: TransactionPayload;
+  readonly method: string;
 
   @ApiProperty({
-    description: 'Transaction details',
-    isArray: true,
+    type: PayloadDto,
+    description: 'The transaction payload',
   })
-  @Type(() => TransactionDetailsModel)
-  details: TransactionDetailsModel;
+  @Type(() => PayloadModel)
+  readonly payload: PayloadModel;
+
+  @ApiProperty({
+    type: RawPayloadModel,
+    description: 'The raw transaction payload',
+  })
+  @Type(() => RawPayloadModel)
+  readonly rawPayload: RawPayloadModel;
+
+  @ApiProperty({
+    description: 'Additional information associated with the transaction',
+    example: '{ clientId: "123" }',
+  })
+  @IsObject()
+  readonly metadata: Record<string, string>;
 
   constructor(model: TransactionPayloadModel) {
     Object.assign(this, model);

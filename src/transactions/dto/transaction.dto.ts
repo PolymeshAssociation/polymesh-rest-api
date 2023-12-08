@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsHexadecimal, IsObject, IsOptional, ValidateNested } from 'class-validator';
+import { IsHexadecimal, IsObject, ValidateNested } from 'class-validator';
 
 import { PayloadDto } from '~/transactions/dto/payload.dto';
 import { RawPayloadDto } from '~/transactions/dto/raw-payload.dto';
@@ -39,7 +39,6 @@ export class TransactionDto {
     description: 'The raw transaction payload',
   })
   @Type(() => RawPayloadDto)
-  @IsOptional()
   @ValidateNested()
   readonly rawPayload: RawPayloadDto;
 

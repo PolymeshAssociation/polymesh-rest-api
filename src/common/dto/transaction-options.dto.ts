@@ -14,13 +14,15 @@ export class TransactionOptionsDto {
   readonly signer: string;
 
   @ApiProperty({
-    description: 'How the transaction should be processed',
+    description: 'Mode for processing the transaction',
     enum: ProcessMode,
+    example: ProcessMode.Submit,
   })
   @IsEnum(ProcessMode)
   readonly processMode: ProcessMode;
 
   // Hide the property so the interactive examples work without additional setup
+  // Note: If submitWithCallback is used, the user must provide a webhookUrl
   @ApiHideProperty()
   @ValidateIf(({ processMode }) => processMode === ProcessMode.SubmitWithCallback)
   @IsString()
