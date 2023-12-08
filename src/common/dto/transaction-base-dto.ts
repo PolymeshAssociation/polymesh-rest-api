@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsObject, IsOptional, IsString, IsUrl } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
 
 import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 
@@ -9,9 +10,11 @@ export class TransactionBaseDto {
   @ApiProperty({
     description:
       'Options to control the behavior of the transactions, such how or if it will be signed',
+    type: TransactionOptionsDto,
   })
   @IsOptional()
-  @IsObject()
+  @ValidateNested()
+  @Type(() => TransactionOptionsDto)
   options?: TransactionOptionsDto;
 
   @ApiProperty({

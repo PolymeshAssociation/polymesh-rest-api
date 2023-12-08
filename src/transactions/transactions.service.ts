@@ -95,6 +95,7 @@ export class TransactionsService {
         );
       }
     } catch (error) {
+      /* istanbul ignore next */
       throw handleSdkError(error);
     }
   }

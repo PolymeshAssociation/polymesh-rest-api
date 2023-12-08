@@ -28,6 +28,7 @@ import {
 } from '~/common/errors';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
+import { ProcessMode } from '~/common/types';
 
 export type TransactionDetails = {
   status: TransactionStatus;
@@ -84,7 +85,8 @@ export async function processTransaction<
   opts: ProcedureOpts,
   transactionOptions: TransactionOptionsDto
 ): Promise<TransactionResult<TransformedReturnType> | TransactionPayloadResult> {
-  const { processMode } = transactionOptions;
+  const { processMode, metadata } = transactionOptions;
+
   try {
     const procedure = await prepareProcedure(method, args, opts);
 
@@ -115,8 +117,8 @@ export async function processTransaction<
       return { details, result, transactions: [] };
     }
 
-    if (processMode === 'unsignedPayload') {
-      const unsignedTransaction = await procedure.toSignablePayload();
+    if (processMode === ProcessMode.Offline) {
+      const unsignedTransaction = await procedure.toSignablePayload(metadata);
       return { details, unsignedTransaction };
     }
 
@@ -133,7 +135,7 @@ export async function processTransaction<
           transactionTags: transactions.map(({ tag }) => tag),
         };
       } else {
-        throw new Error(
+        throw new AppInternalError(
           'Unsupported transaction details received. Please report this issue to the Polymesh team'
         );
       }
@@ -172,7 +174,7 @@ export function handleSdkError(err: unknown): AppError {
   if (isPolymeshError(err)) {
     const { message, code } = err;
 
-    // catch address not present error. Ideally there would be sub codes to check rather than inspecting the message
+    // catch address not present error from the signing manager
     if (
       code === ErrorCode.General &&
       message.includes('not part of the Signing Manager attached to the SDK')

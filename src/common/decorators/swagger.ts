@@ -23,6 +23,7 @@ import {
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionPayloadModel } from '~/common/models/transaction-payload.model';
 import { Class } from '~/common/types';
 
 export const ApiArrayResponse = <TModel extends Type | string>(
@@ -180,7 +181,7 @@ export const ApiPropertyOneOf = ({
 };
 
 /**
- * A helper that functions like `ApiCreatedResponse`, that also adds an `ApiAccepted` response in case `webhookUrl` is passed
+ * A helper that functions like `ApiCreatedResponse`, that also adds an `ApiAccepted` response in case "submitAndCallback" is used and `ApiOKResponse` if "offline" mode is used
  *
  * @param options - these will be passed to the `ApiCreatedResponse` decorator
  */
@@ -188,10 +189,15 @@ export function ApiTransactionResponse(
   options: ApiResponseOptions
 ): ReturnType<typeof applyDecorators> {
   return applyDecorators(
+    ApiOkResponse({
+      description:
+        'Returned if `"processMode": "offline"` is passed in `options`. A payload will be returned',
+      type: TransactionPayloadModel,
+    }),
     ApiCreatedResponse(options),
     ApiAcceptedResponse({
       description:
-        'Returned if `webhookUrl` is passed in the body. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
+        'Returned if `"processMode": "submitAndCallback"` is passed in `options`. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
       type: NotificationPayloadModel,
     })
   );

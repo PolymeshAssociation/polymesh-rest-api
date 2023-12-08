@@ -15,6 +15,7 @@ import { AppValidationError } from '~/common/errors';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { TransactionPayloadModel } from '~/common/models/transaction-payload.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
+import { ProcessMode } from '~/common/types';
 import { EventType } from '~/events/types';
 import { NotificationPayload } from '~/notifications/types';
 import { TransactionPayloadResult, TransactionResult } from '~/transactions/transactions.util';
@@ -125,7 +126,13 @@ export const extractTxOptions = <T extends TransactionBaseDto>(
     if (!signer) {
       throw new AppValidationError('"signer" must be present in transaction requests');
     }
-    const processMode = webhookUrl ? 'submitAndCallback' : dryRun ? 'dryRun' : 'submit';
+
+    let processMode = ProcessMode.Submit;
+    if (dryRun) {
+      processMode = ProcessMode.DryRun;
+    } else if (webhookUrl) {
+      processMode = ProcessMode.SubmitWithCallback;
+    }
     return {
       options: { signer, webhookUrl, processMode },
       args,

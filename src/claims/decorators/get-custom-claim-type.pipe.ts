@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 

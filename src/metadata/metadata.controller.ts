@@ -136,7 +136,7 @@ export class MetadataController {
         asset: { ticker: assetTicker },
         id,
         type,
-      } = result as MetadataEntry;
+      } = result;
       return new CreatedMetadataEntryModel({
         details,
         transactions,
