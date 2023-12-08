@@ -228,7 +228,7 @@ export class CorporateActionsController {
       details,
     }) =>
       new CreatedDividendDistributionModel({
-        dividendDistribution: createDividendDistributionModel(result as DividendDistribution),
+        dividendDistribution: createDividendDistributionModel(result),
         transactions,
         details,
       });

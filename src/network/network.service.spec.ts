@@ -11,6 +11,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { extrinsicWithFees, testValues } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
+import { TransactionDto } from '~/transactions/dto/transaction.dto';
 
 jest.mock('@polkadot/util', () => ({
   ...jest.requireActual('@polkadot/util'),
@@ -86,6 +87,24 @@ describe('NetworkService', () => {
       mockPolymeshApi.network.getTransactionByHash.mockReturnValue(extrinsicWithFees);
 
       const result = await networkService.getTransactionByHash('someHash');
+
+      expect(result).toEqual(extrinsicWithFees);
+    });
+  });
+
+  describe('submitTransaction', () => {
+    it('should return the transaction details', async () => {
+      mockPolymeshApi.network.submitTransaction.mockReturnValue(extrinsicWithFees);
+
+      const signature = '0x02';
+
+      const mockBody = {
+        signature,
+        payload: {},
+        rawPayload: {},
+        method: '0x01',
+      } as unknown as TransactionDto;
+      const result = await networkService.submitTransaction(mockBody);
 
       expect(result).toEqual(extrinsicWithFees);
     });

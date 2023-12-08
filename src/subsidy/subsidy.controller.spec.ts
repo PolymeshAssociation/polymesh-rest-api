@@ -6,7 +6,7 @@ import { when } from 'jest-when';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { TransactionType } from '~/common/types';
+import { ProcessMode, TransactionType } from '~/common/types';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
@@ -161,7 +161,7 @@ describe('SubsidyController', () => {
         transactions: [transaction],
       });
       const mockPayload: QuitSubsidyDto = {
-        options: { signer: 'Alice', processMode: 'submit' },
+        options: { signer: 'Alice', processMode: ProcessMode.Submit },
         beneficiary,
       };
 

@@ -64,4 +64,14 @@ describe('LocalSigningService', () => {
       expect(() => service.getAddressByHandle('badId')).toThrow(AppNotFoundError);
     });
   });
+
+  describe('isAddress', () => {
+    it('should return the SDK result', () => {
+      mockPolymeshApi.accountManagement.isValidAddress.mockReturnValue(true);
+
+      const result = service.isAddress('fakeAddress');
+
+      expect(result).toEqual(true);
+    });
+  });
 });
