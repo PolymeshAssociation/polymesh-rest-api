@@ -49,7 +49,7 @@ export type TransactionResult<T> = {
 
 export type TransactionPayloadResult = {
   details: TransactionDetails;
-  unsignedTransaction: TransactionPayload;
+  transactionPayload: TransactionPayload;
 };
 
 type WithArgsProcedureMethod<T> = T extends NoArgsProcedureMethod<unknown, unknown> ? never : T;
@@ -118,8 +118,8 @@ export async function processTransaction<
     }
 
     if (processMode === ProcessMode.Offline) {
-      const unsignedTransaction = await procedure.toSignablePayload(metadata);
-      return { details, unsignedTransaction };
+      const transactionPayload = await procedure.toSignablePayload(metadata);
+      return { details, transactionPayload };
     }
 
     const assembleTransactionResponse = <T, R = T>(

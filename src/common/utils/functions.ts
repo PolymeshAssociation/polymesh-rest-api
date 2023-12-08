@@ -13,7 +13,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 import { AppValidationError } from '~/common/errors';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
-import { TransactionPayloadModel } from '~/common/models/transaction-payload.model';
+import { TransactionPayloadResultModel } from '~/common/models/transaction-payload-result.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ProcessMode } from '~/common/types';
 import { EventType } from '~/events/types';
@@ -35,7 +35,7 @@ export function getTxTagsWithModuleNames(): string[] {
 export type TransactionResponseModel =
   | NotificationPayloadModel
   | TransactionQueueModel
-  | TransactionPayloadModel;
+  | TransactionPayloadResultModel;
 
 /**
  * A helper type that lets a service return a QueueResult or a Subscription Receipt
@@ -58,13 +58,13 @@ export const handleServiceResult = <T>(
   result: TransactionPayloadResult | NotificationPayloadModel | TransactionResult<T>,
   resolver: TransactionResolver<T> = basicModelResolver
 ):
-  | TransactionPayloadModel
+  | TransactionPayloadResultModel
   | NotificationPayloadModel
   | Promise<TransactionQueueModel>
   | TransactionQueueModel => {
-  if ('unsignedTransaction' in result) {
-    const { unsignedTransaction, details } = result;
-    return new TransactionPayloadModel({ unsignedTransaction, details });
+  if ('transactionPayload' in result) {
+    const { transactionPayload, details } = result;
+    return new TransactionPayloadResultModel({ transactionPayload, details });
   }
 
   if ('transactions' in result) {
