@@ -163,7 +163,7 @@ export class CheckpointsController {
       details,
     }) =>
       new CreatedCheckpointModel({
-        checkpoint: checkpoint as Checkpoint,
+        checkpoint,
         transactions,
         details,
       });
@@ -274,7 +274,7 @@ export class CheckpointsController {
       transactions,
       details,
     }) => {
-      const { id: createdScheduleId } = result as CheckpointSchedule;
+      const { id: createdScheduleId } = result;
       const {
         schedule: { id, pendingPoints, expiryDate },
         details: scheduleDetails,

@@ -7,6 +7,7 @@ import { CaCheckpointType, TxTags } from '@polymeshassociation/polymesh-sdk/type
 
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { ProcessMode } from '~/common/types';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
@@ -367,7 +368,7 @@ describe('CorporateActionsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         distributionWithDetails.distribution.reclaimFunds,
         undefined,
-        expect.objectContaining({ signer, processMode: 'submitAndCallback' })
+        expect.objectContaining({ signer, processMode: ProcessMode.SubmitWithCallback })
       );
     });
   });

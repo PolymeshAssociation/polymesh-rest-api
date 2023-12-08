@@ -13,7 +13,7 @@ import {
   AppUnprocessableError,
   AppValidationError,
 } from '~/common/errors';
-import { Class } from '~/common/types';
+import { Class, ProcessMode } from '~/common/types';
 import { MockPolymeshTransaction, MockVenue } from '~/test-utils/mocks';
 import {
   handleSdkError,
@@ -48,12 +48,12 @@ describe('processTransaction', () => {
       mockIsPolymeshError.mockReturnValue(true);
 
       await expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         processTransaction(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           mockVenue.modify as any,
           {},
           {},
-          { processMode: 'submit', signer: 'Alice' }
+          { processMode: ProcessMode.Submit, signer: 'Alice' }
         )
       ).rejects.toBeInstanceOf(expected);
 
@@ -74,12 +74,12 @@ describe('processTransaction', () => {
       mockIsPolymeshError.mockReturnValue(true);
 
       await expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         processTransaction(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           mockVenue.modify as any,
           {},
           {},
-          { processMode: 'submit', signer: 'Alice' }
+          { processMode: ProcessMode.Submit, signer: 'Alice' }
         )
       ).rejects.toBeInstanceOf(AppValidationError);
 
@@ -90,12 +90,12 @@ describe('processTransaction', () => {
   describe('it should handle non polymesh errors', () => {
     it('should transform errors into AppInternalError', async () => {
       const mockVenue = new MockVenue();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = processTransaction(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockVenue.modify as any,
         {},
         {},
-        { processMode: 'submit', signer: 'Alice' }
+        { processMode: ProcessMode.Submit, signer: 'Alice' }
       );
 
       mockVenue.modify.mockImplementationOnce(() => {
@@ -114,21 +114,41 @@ describe('processTransaction', () => {
   });
 
   describe('with dryRun', () => {
-    it('should handle dry run option', async () => {
+    it('should handle dry run process mode', async () => {
       const mockVenue = new MockVenue();
 
-      const run = jest.fn();
-
       const mockTransaction = new MockPolymeshTransaction();
+      const run = mockTransaction.run;
 
       mockVenue.modify.mockResolvedValue(mockTransaction);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await processTransaction(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockVenue.modify as any,
         {},
         {},
-        { processMode: 'dryRun', signer: 'Alice' }
+        { processMode: ProcessMode.DryRun, signer: 'Alice' }
+      );
+
+      expect(run).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with offline', () => {
+    it('should handle offline process mode', async () => {
+      const mockVenue = new MockVenue();
+
+      const mockTransaction = new MockPolymeshTransaction();
+      const run = mockTransaction.run;
+
+      mockVenue.modify.mockResolvedValue(mockTransaction);
+
+      await processTransaction(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mockVenue.modify as any,
+        {},
+        {},
+        { processMode: ProcessMode.Offline, signer: 'Alice' }
       );
 
       expect(run).not.toHaveBeenCalled();

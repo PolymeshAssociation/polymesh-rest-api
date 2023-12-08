@@ -80,6 +80,7 @@ export class MockPolymesh {
     getNetworkProperties: jest.fn(),
     getTreasuryAccount: jest.fn(),
     getTransactionByHash: jest.fn(),
+    submitTransaction: jest.fn(),
   };
 
   public assets = {
@@ -104,6 +105,7 @@ export class MockPolymesh {
     modifyPermissions: jest.fn(),
     subsidizeAccount: jest.fn(),
     getSubsidy: jest.fn(),
+    isValidAddress: jest.fn(),
   };
 
   public identities = {
@@ -394,6 +396,7 @@ class MockPolymeshTransactionBase {
 
   supportsSubsidy = jest.fn().mockReturnValue(false);
   run = jest.fn().mockReturnValue(Promise.resolve());
+  toSignablePayload = jest.fn();
   onStatusChange = jest.fn();
 }
 export class MockPolymeshTransaction extends MockPolymeshTransactionBase {

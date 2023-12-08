@@ -30,6 +30,8 @@ export class NetworkService {
   }
 
   public submitTransaction(transaction: TransactionDto): Promise<unknown> {
-    return this.polymeshService.polymeshApi.network.getLatestBlock(); // should be submit
+    const { signature, ...txPayload } = transaction;
+
+    return this.polymeshService.polymeshApi.network.submitTransaction(txPayload, signature);
   }
 }

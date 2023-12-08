@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NetworkService } from '~/network/network.service';
 import { extrinsicWithFees } from '~/test-utils/consts';
 import { mockNetworkServiceProvider } from '~/test-utils/service-mocks';
+import { TransactionDto } from '~/transactions/dto/transaction.dto';
 import { ExtrinsicDetailsModel } from '~/transactions/models/extrinsic-details.model';
 import { TransactionsController } from '~/transactions/transactions.controller';
 
@@ -53,7 +54,8 @@ describe('TransactionsController', () => {
         method: '0x01',
         signature: '0x02',
         payload: {},
-      };
+        rawPayload: {},
+      } as unknown as TransactionDto;
 
       const txResult = 'fakeResult';
 
