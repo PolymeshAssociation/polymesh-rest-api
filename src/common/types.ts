@@ -23,3 +23,25 @@ export enum CalendarUnit {
   Month = 'Month',
   Year = 'Year',
 }
+
+/**
+ * determines how transactions are processed
+ */
+export enum ProcessMode {
+  /**
+   * Sign and submit the transaction to the chain. Responds when transaction is in a finalized block
+   */
+  Submit = 'submit',
+  /**
+   * Sign and submit the transaction to the chain. Responds immediately, and posts status updates as the transaction is processed
+   */
+  SubmitWithCallback = 'submitWithCallback',
+  /**
+   * Return an unsigned transaction payload
+   */
+  Offline = 'offline',
+  /**
+   * Perform transaction validation, but does not perform the transaction
+   */
+  DryRun = 'dryRun',
+}

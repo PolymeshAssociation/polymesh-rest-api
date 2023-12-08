@@ -12,6 +12,7 @@ export abstract class SigningService {
   public abstract getAddressByHandle(handle: string): Promise<string>;
 
   public isAddress(address: string): boolean {
+    console.log('is address???');
     return this.polymeshService.polymeshApi.accountManagement.isValidAddress({ address });
   }
 

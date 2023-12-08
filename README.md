@@ -98,11 +98,35 @@ REST_POSTGRES_PASSWORD=## Password of the user ##
 REST_POSTGRES_DATABASE=## Database to use ##
 ```
 
-### Signing Transactions
+## Signing Transactions
+
+The REST API has endpoints that submit transactions to the block chain (generally POST routes). Each of these endpoints share a field `"options"` that controls what key will sign it, and how it will be processed.
+
+e.g.
+```
+{
+   options: {
+      signer: "alice",
+      processMode: "submit"
+   },
+   ...transactionParams
+}
+```
+
+Process modes include:
+
+  - `submit` This will create a transaction payload, sign it and submit it to the chain. It will respond with 201 when the transaction has been successfully finalized. (Usually around 15 seconds).
+  - `submitWithCallback` This works like submit, but returns a response as soon as the transaction is submitted. The URL specified by `webhookUrl` will receive updates as the transaction is processed
+  - `dryRun`  This creates and validates a transaction, and returns an estimate of its fees.
+  - `offline` This creates an unsigned transaction and returns a serialized JSON payload. The information can be signed, and then submitted to the chain.
+
+### Signing Managers
+
+A signing manager is required for `submit` and `submitWithCallback` processing modes.
 
 There are currently three [signing managers](https://github.com/PolymeshAssociation/signing-managers#projects) the REST API can be configured with, the local signer, the [Hashicorp Vault](https://www.vaultproject.io/) signer or the [Fireblocks](https://www.fireblocks.com/) signing manager. If args for multiple are given the precedence order is Vault over Fireblocks over Local.
 
-For any method that modifies chain state, the key to sign with can be controlled with the "signer" field.
+For any method that modifies chain state, the key to sign with can be controlled with the "options.signer" field. This can either be the SS58 encoded address, or an ID that is dependent on the particular signing manager.
 
 1. Vault Signing:
    By setting `VAULT_URL` and `VAULT_TOKEN` an external [Vault](https://www.vaultproject.io/) instance will be used to sign transactions. The URL should point to a transit engine in Vault that has Ed25519 keys in it.
@@ -118,6 +142,22 @@ For any method that modifies chain state, the key to sign with can be controlled
 
 1. Local Signing:
    By using `LOCAL_SIGNERS` and `LOCAL_MNEMONICS` private keys will be initialized in memory. When making a transaction that requires a signer use the corresponding `LOCAL_SIGNERS` (by array offset).
+
+### Offline
+
+Offline payloads contain a field `"unsignedTransaction"`, which consists of 4 keys. `payload` and `rawPayload` correspond to `signPayload` and `signRaw`. You will need to pass one of these to the respective signer you are using (or replicate `signRaw` in your environment). `method` is the hex encoded transaction, which can help verify what is being signed. `metadata` is an echo of whatever is passed as `metadata` in the options. It has no effect on operation, but can be useful for attaching extra info to the transactions, e.g. `clientId` or `memo`
+
+After being generated the signature with the payload can be passed to `/submit` to be submitted to the chain.
+
+This mode introduces the risk transactions are rejected due to incorrect nonces or elapsed lifetime.
+
+### Webhooks (alpha)
+
+Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. When processMode `submitAndCallback` is used the `webhookUrl` param must also be provided. The server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
+
+Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with this header copied into the response headers.
+
+If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILS=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`. Note, the IsUrl validator doesn't recognize `localhost` as a valid URL, either use the IP `127.0.0.1` or create an entry in `/etc/hosts` like `127.0.0.1 rest.local` and use that instead.
 
 ### Authentication
 
@@ -151,13 +191,6 @@ To implement a new repo for a service, first define an abstract class describing
 
 To implement a new datastore create a new module in `~/datastores` and create a set of `Repos` that will implement the abstract classes. You will then need to set up the `DatastoreModule` to export the module when it is configured. For testing, each implemented Repo should be able to pass the `test` method defined on the abstract class it is implementing.
 
-### Webhooks (alpha)
-
-Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. Alternatively `webhookUrl` can be given in any state modifying endpoint. When given, the server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
-
-Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with this header copied into the response headers.
-
-If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILS=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`. Note, the IsUrl validator doesn't recognize `localhost` as a valid URL, either use the IP `127.0.0.1` or create an entry in `/etc/hosts` like `127.0.0.1 rest.local` and use that instead.
 
 #### Warning
 
