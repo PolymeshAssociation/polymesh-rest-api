@@ -23,7 +23,7 @@ import {
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { TransactionPayloadModel } from '~/common/models/transaction-payload.model';
+import { TransactionPayloadResultModel } from '~/common/models/transaction-payload-result.model';
 import { Class } from '~/common/types';
 
 export const ApiArrayResponse = <TModel extends Type | string>(
@@ -192,7 +192,7 @@ export function ApiTransactionResponse(
     ApiOkResponse({
       description:
         'Returned if `"processMode": "offline"` is passed in `options`. A payload will be returned',
-      type: TransactionPayloadModel,
+      type: TransactionPayloadResultModel,
     }),
     ApiCreatedResponse(options),
     ApiAcceptedResponse({
