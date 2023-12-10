@@ -203,21 +203,21 @@ export class MetadataController {
   })
   @ApiParam({
     name: 'ticker',
-    description: 'The ticker of the Asset for which the Metadata value is to be removed',
     type: 'string',
+    description: 'The ticker of the Asset for which the Metadata value is to be removed',
     example: 'TICKER',
-  })
-  @ApiParam({
-    name: 'type',
-    description: 'The type of Asset Metadata',
-    enum: MetadataType,
-    example: MetadataType.Local,
   })
   @ApiParam({
     name: 'id',
     description: 'The ID of Asset Metadata',
     type: 'string',
     example: '1',
+  })
+  @ApiParam({
+    name: 'type',
+    enum: MetadataType,
+    description: 'The type of Asset Metadata',
+    example: MetadataType.Local,
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
