@@ -14,6 +14,7 @@ import {
   ApiTransactionFailedResponse,
   ApiTransactionResponse,
 } from '~/common/decorators/swagger';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
@@ -191,6 +192,88 @@ export class MetadataController {
     @Body() body: SetMetadataDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.metadataService.setValue(params, body);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: "Remove an Asset's Metadata value",
+    description:
+      "This endpoint removes the existing value of the Asset's Metadata. Note that value for a metadata can only be remove only if it is not locked.",
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which the Metadata value is to be removed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'type',
+    description: 'The type of Asset Metadata',
+    enum: MetadataType,
+    example: MetadataType.Local,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of Asset Metadata',
+    type: 'string',
+    example: '1',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Asset was not found', 'Asset Metadata does not exists'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['Metadata is locked and cannot be modified'],
+  })
+  @Post(':type/:id/clear')
+  public async clearMetadata(
+    @Param() params: MetadataParamsDto,
+    @Body() transactionBaseDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.metadataService.clearValue(params, transactionBaseDto);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Remove a local Asset Metadata',
+    description:
+      'This endpoint removes a local Asset Metadata key. Note, a local metadata key can only be removed if it is not locked',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which the Metadata is to be removed',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'type',
+    description: 'The type of Asset Metadata',
+    enum: MetadataType.Local,
+    example: MetadataType.Local,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of Asset Metadata',
+    type: 'string',
+    example: '1',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Asset was not found', 'Asset Metadata does not exists'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['Metadata is locked and cannot be modified'],
+  })
+  @Post(':type/:id/remove')
+  public async removeLocalMetadata(
+    @Param() params: MetadataParamsDto,
+    @Body() body: SetMetadataDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.metadataService.removeKey(params, body);
 
     return handleServiceResult(serviceResult);
   }

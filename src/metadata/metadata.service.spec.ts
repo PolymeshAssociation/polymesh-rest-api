@@ -225,4 +225,78 @@ describe('MetadataService', () => {
       );
     });
   });
+
+  describe('clearValue', () => {
+    it('should run a set procedure and return the queue results', async () => {
+      const mockMetadataEntry = createMockMetadataEntry();
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.RemoveMetadataValue,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      when(findOneSpy)
+        .calledWith({ ticker, type, id })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(mockMetadataEntry as any);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+
+      const body = {
+        signer,
+      };
+
+      const result = await service.clearValue({ ticker, type, id }, body);
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockMetadataEntry.clear,
+        undefined,
+        { signer }
+      );
+    });
+  });
+
+  describe('removeKey', () => {
+    it('should run a set procedure and return the queue results', async () => {
+      const mockMetadataEntry = createMockMetadataEntry();
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.RemoveLocalMetadataKey,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      when(findOneSpy)
+        .calledWith({ ticker, type, id })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(mockMetadataEntry as any);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+
+      const body = {
+        signer,
+      };
+
+      const result = await service.removeKey({ ticker, type, id }, body);
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockMetadataEntry.remove,
+        undefined,
+        { signer }
+      );
+    });
+  });
 });

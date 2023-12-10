@@ -164,4 +164,59 @@ describe('MetadataController', () => {
       expect(result).toEqual(testTxResult);
     });
   });
+
+  describe('clearMetadata', () => {
+    it('should remove the value of the Asset Metadata', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        transactionHash: '0x2',
+        blockNumber: new BigNumber(1),
+        type: TransactionType.Single,
+        transactionTag: TxTags.asset.RemoveMetadataValue,
+      };
+      const testTxResult = createMockTransactionResult<void>({
+        ...txResult,
+        transactions: [transaction],
+      });
+      const mockBody = {
+        signer: 'Alice',
+      };
+
+      when(mockService.clearValue)
+        .calledWith({ ticker, type, id }, mockBody)
+        .mockResolvedValue(testTxResult);
+
+      const result = await controller.clearMetadata({ ticker, type, id }, mockBody);
+
+      expect(result).toEqual(testTxResult);
+    });
+  });
+
+  describe('removeKey', () => {
+    it('should remove an Asset Metadata', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        transactionHash: '0x2',
+        blockNumber: new BigNumber(1),
+        type: TransactionType.Single,
+        transactionTag: TxTags.asset.RemoveLocalMetadataKey,
+      };
+      const mockBody = {
+        signer: 'Alice',
+      };
+
+      const testTxResult = createMockTransactionResult<void>({
+        ...txResult,
+        transactions: [transaction],
+      });
+
+      when(mockService.removeKey)
+        .calledWith({ ticker, type, id }, mockBody)
+        .mockResolvedValue(testTxResult);
+
+      const result = await controller.removeLocalMetadata({ ticker, type, id }, mockBody);
+
+      expect(result).toEqual(testTxResult);
+    });
+  });
 });
