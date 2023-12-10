@@ -6,6 +6,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ServiceReturn } from '~/common/utils';
 import { CreateMetadataDto } from '~/metadata/dto/create-metadata.dto';
 import { MetadataParamsDto } from '~/metadata/dto/metadata-params.dto';
@@ -65,5 +66,20 @@ export class MetadataService {
       signer,
       webhookUrl,
     });
+  }
+
+  public async clearValue(
+    params: MetadataParamsDto,
+    opts: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const { clear } = await this.findOne(params);
+
+    return this.transactionsService.submit(clear, undefined, opts);
+  }
+
+  public async removeKey(params: MetadataParamsDto, opts: TransactionBaseDto): ServiceReturn<void> {
+    const { remove } = await this.findOne(params);
+
+    return this.transactionsService.submit(remove, undefined, opts);
   }
 }
