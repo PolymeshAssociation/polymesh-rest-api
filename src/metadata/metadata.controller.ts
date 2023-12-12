@@ -271,9 +271,9 @@ export class MetadataController {
   @Post(':type/:id/remove')
   public async removeLocalMetadata(
     @Param() params: MetadataParamsDto,
-    @Body() body: SetMetadataDto
+    @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.metadataService.removeKey(params, body);
+    const serviceResult = await this.metadataService.removeKey(params, transactionBaseDto);
 
     return handleServiceResult(serviceResult);
   }
