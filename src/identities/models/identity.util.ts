@@ -11,7 +11,7 @@ export const createIdentityResolver: TransactionResolver<Identity> = async ({
   details,
   result,
 }) => {
-  const identity = await createIdentityModel(result as Identity);
+  const identity = await createIdentityModel(result);
 
   return new CreatedIdentityModel({
     transactions,
