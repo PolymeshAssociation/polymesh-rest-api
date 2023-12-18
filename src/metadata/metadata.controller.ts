@@ -269,15 +269,9 @@ export class MetadataController {
   @Post(':type/:id/remove')
   public async removeLocalMetadata(
     @Param() params: MetadataParamsDto,
-<<<<<<< HEAD
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.metadataService.removeKey(params, transactionBaseDto);
-=======
-    @Body() body: SetMetadataDto
-  ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.metadataService.removeKey(params, body);
->>>>>>> 2e9184a (feat: 🎸 Adds new Asset Metadata endpoints)
 
     return handleServiceResult(serviceResult);
   }

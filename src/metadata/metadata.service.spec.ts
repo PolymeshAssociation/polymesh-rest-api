@@ -258,7 +258,7 @@ describe('MetadataService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockMetadataEntry.clear,
         undefined,
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
@@ -295,7 +295,7 @@ describe('MetadataService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockMetadataEntry.remove,
         undefined,
-        { signer }
+        expect.objectContaining({ signer })
       );
     });
   });
