@@ -113,7 +113,7 @@ export async function processTransaction<
       },
     };
 
-    if (processMode === 'dryRun') {
+    if (processMode === ProcessMode.DryRun) {
       return { details, result, transactions: [] };
     }
 
