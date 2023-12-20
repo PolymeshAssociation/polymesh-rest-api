@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
 import { AccountsModule } from '~/accounts/accounts.module';
+import { ArtemisModule } from '~/artemis/artemis.module';
 import { AssetsModule } from '~/assets/assets.module';
 import { AuthModule } from '~/auth/auth.module';
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
@@ -22,6 +23,9 @@ import { NetworkModule } from '~/network/network.module';
 import { NftsModule } from '~/nfts/nfts.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
+import { OfflineSignerModule } from '~/offline-signer/offline-signer.module';
+import { OfflineStarterModule } from '~/offline-starter/offline-starter.module';
+import { OfflineSubmitterModule } from '~/offline-submitter/offline-submitter.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { ScheduleModule } from '~/schedule/schedule.module';
@@ -92,6 +96,10 @@ import { UsersModule } from '~/users/users.module';
     MetadataModule,
     SubsidyModule,
     NftsModule,
+    ArtemisModule,
+    OfflineSignerModule,
+    OfflineSubmitterModule,
+    OfflineStarterModule,
   ],
 })
 export class AppModule {}

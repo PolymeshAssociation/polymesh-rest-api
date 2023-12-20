@@ -6,6 +6,7 @@ import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from '~/app.module';
+import { ArtemisService } from '~/artemis/artemis.service';
 import { parseAuthStrategyConfig } from '~/auth/auth.utils';
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
@@ -70,6 +71,7 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen
+
   const port = configService.get('PORT', 3000);
   await app.listen(port);
 }

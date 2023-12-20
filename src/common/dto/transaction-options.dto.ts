@@ -29,7 +29,7 @@ export class TransactionOptionsDto {
   @ApiProperty({
     description: 'Mode for processing the transaction',
     enum: ProcessMode,
-    example: ProcessMode.Submit,
+    example: ProcessMode.AMQP,
   })
   @IsEnum(ProcessMode)
   readonly processMode: ProcessMode;
