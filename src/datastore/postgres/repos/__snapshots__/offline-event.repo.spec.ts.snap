@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostgresOfflineEventRepo OfflineEvent test suite method: recordEvent should record an event 1`] = `
+OfflineEventModel {
+  "body": undefined,
+  "id": "1",
+  "topicName": undefined,
+}
+`;

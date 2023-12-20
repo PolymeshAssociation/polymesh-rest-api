@@ -44,4 +44,6 @@ export enum ProcessMode {
    * Perform transaction validation, but does not perform the transaction
    */
   DryRun = 'dryRun',
+
+  AMQP = 'AMQP',
 }
