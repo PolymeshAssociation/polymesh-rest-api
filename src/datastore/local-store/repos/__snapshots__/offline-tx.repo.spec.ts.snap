@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalOfflineTxRepo OfflineEvent test suite method: createTx should record the transaction request 1`] = `
+{
+  "id": "1",
+  "payload": {
+    "metadata": {
+      "memo": "test utils payload",
+    },
+    "method": "0x01",
+    "payload": {
+      "address": "address",
+      "blockHash": "0x01",
+      "blockNumber": "-1",
+      "era": "0x01",
+      "genesisHash": "0x01",
+      "method": "testMethod",
+      "nonce": "0x01",
+      "signedExtensions": [],
+      "specVersion": "0x01",
+      "tip": "0x00",
+      "transactionVersion": "0x01",
+      "version": 1,
+    },
+    "rawPayload": {
+      "address": "address",
+      "data": "0x01",
+      "type": "bytes",
+    },
+  },
+  "status": "Requested",
+}
+`;

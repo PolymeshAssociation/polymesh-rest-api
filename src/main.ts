@@ -70,6 +70,7 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup('/', app, document);
 
   // Fetch port from env and listen
+
   const port = configService.get('PORT', 3000);
   await app.listen(port);
 }

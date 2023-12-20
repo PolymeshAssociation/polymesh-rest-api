@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import {
   FungibleLeg,
   Leg,
@@ -18,14 +20,13 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { ProcessMode } from '~/common/types';
 import { EventType } from '~/events/types';
 import { NotificationPayload } from '~/notifications/types';
+import { OfflineReceiptModel } from '~/offline-starter/models/offline-receipt.model';
 import { TransactionPayloadResult, TransactionResult } from '~/transactions/transactions.util';
 
-/* istanbul ignore next */
 export function getTxTags(): string[] {
   return flatten(Object.values(TxTags).map(txTag => Object.values(txTag)));
 }
 
-/* istanbul ignore next */
 export function getTxTagsWithModuleNames(): string[] {
   const txTags = getTxTags();
   const moduleNames = Object.values(ModuleName);
@@ -33,6 +34,7 @@ export function getTxTagsWithModuleNames(): string[] {
 }
 
 export type TransactionResponseModel =
+  | OfflineReceiptModel
   | NotificationPayloadModel
   | TransactionQueueModel
   | TransactionPayloadResultModel;
@@ -41,7 +43,10 @@ export type TransactionResponseModel =
  * A helper type that lets a service return a QueueResult or a Subscription Receipt
  */
 export type ServiceReturn<T> = Promise<
-  TransactionPayloadResult | NotificationPayload<EventType.TransactionUpdate> | TransactionResult<T>
+  | TransactionPayloadResult
+  | NotificationPayload<EventType.TransactionUpdate>
+  | TransactionResult<T>
+  | OfflineReceiptModel
 >;
 
 /**
@@ -55,13 +60,18 @@ export type TransactionResolver<T> = (
  * A helper function that transforms a service result for a controller. A controller can pass a resolver for a detailed return model, otherwise the transaction details will be used as a default
  */
 export const handleServiceResult = <T>(
-  result: TransactionPayloadResult | NotificationPayloadModel | TransactionResult<T>,
+  result:
+    | TransactionPayloadResult
+    | NotificationPayloadModel
+    | TransactionResult<T>
+    | OfflineReceiptModel,
   resolver: TransactionResolver<T> = basicModelResolver
 ):
   | TransactionPayloadResultModel
   | NotificationPayloadModel
   | Promise<TransactionQueueModel>
-  | TransactionQueueModel => {
+  | TransactionQueueModel
+  | OfflineReceiptModel => {
   if ('transactionPayload' in result) {
     const { transactionPayload, details } = result;
     return new TransactionPayloadResultModel({ transactionPayload, details });
@@ -69,6 +79,10 @@ export const handleServiceResult = <T>(
 
   if ('transactions' in result) {
     return resolver(result);
+  }
+
+  if ('topicName' in result) {
+    return result;
   }
 
   return new NotificationPayloadModel(result);
@@ -148,4 +162,11 @@ export function isFungibleLeg(leg: Leg): leg is FungibleLeg {
 
 export function isNftLeg(leg: Leg): leg is NftLeg {
   return 'nfts' in leg;
+}
+
+/**
+ * helper to clear the event loop. `await` this instead of `setTimeout(fn, 0)`
+ */
+export async function clearEventLoop(): Promise<void> {
+  await new Promise(resolve => setImmediate(resolve));
 }

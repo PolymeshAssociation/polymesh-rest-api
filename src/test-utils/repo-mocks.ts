@@ -16,14 +16,10 @@ export const mockUserRepoProvider: ValueProvider<UsersRepo> = {
   useValue: createMock<UsersRepo>(),
 };
 
-export class MockPostgresApiRepository {
-  create = jest.fn();
-  findOneBy = jest.fn();
-  delete = jest.fn();
-  save = jest.fn();
-}
-
-export class MockPostgresUserRepository {
+/**
+ * mocks TypeORM repository
+ */
+export class MockPostgresRepository {
   findOneBy = jest.fn();
   save = jest.fn();
   delete = jest.fn();

@@ -5,12 +5,12 @@ import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { ApiKey } from '~/datastore/postgres/entities/api-key.entity';
 import { PostgresApiKeyRepo } from '~/datastore/postgres/repos/api-keys.repo';
 import { testValues } from '~/test-utils/consts';
-import { MockPostgresApiRepository } from '~/test-utils/repo-mocks';
+import { MockPostgresRepository } from '~/test-utils/repo-mocks';
 
 const { user } = testValues;
 
-describe(`PostgresApiKeyRepo does not meet ${ApiKeyRepo.type} requirements`, () => {
-  const mockRepository = new MockPostgresApiRepository();
+describe(`PostgresApiKeyRepo ${ApiKeyRepo.type} test suite`, () => {
+  const mockRepository = new MockPostgresRepository();
   const repo = new PostgresApiKeyRepo(mockRepository as unknown as Repository<ApiKey>);
   let _id = 1;
 

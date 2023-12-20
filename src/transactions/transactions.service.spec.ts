@@ -3,16 +3,21 @@ const mockIsPolymeshTransaction = jest.fn();
 const mockIsPolymeshTransactionBatch = jest.fn();
 const mockIsPolymeshError = jest.fn();
 
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ProcedureOpts, TransactionStatus, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AppInternalError } from '~/common/errors';
 import { ProcessMode, TransactionType } from '~/common/types';
+import { TopicName } from '~/common/utils/amqp';
 import { EventsService } from '~/events/events.service';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { OfflineReceiptModel } from '~/offline-starter/models/offline-receipt.model';
+import { OfflineStarterService } from '~/offline-starter/offline-starter.service';
 import { SigningService } from '~/signing/services';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
@@ -23,6 +28,7 @@ import {
 } from '~/test-utils/mocks';
 import {
   MockEventsService,
+  mockOfflineStarterProvider,
   MockSigningService,
   MockSubscriptionsService,
 } from '~/test-utils/service-mocks';
@@ -61,6 +67,7 @@ describe('TransactionsService', () => {
   let mockEventsService: MockEventsService;
   let mockSubscriptionsService: MockSubscriptionsService;
   let mockSigningService: MockSigningService;
+  let mockOfflineStarterService: DeepMocked<OfflineStarterService>;
 
   beforeEach(async () => {
     mockEventsService = new MockEventsService();
@@ -73,6 +80,7 @@ describe('TransactionsService', () => {
         EventsService,
         SubscriptionsService,
         mockSigningProvider,
+        mockOfflineStarterProvider,
         {
           provide: transactionsConfig.KEY,
           useValue: { legitimacySecret },
@@ -86,6 +94,7 @@ describe('TransactionsService', () => {
       .compile();
 
     service = module.get<TransactionsService>(TransactionsService);
+    mockOfflineStarterService = module.get<typeof mockOfflineStarterService>(OfflineStarterService);
     mockSigningService = module.get<MockSigningService>(SigningService);
   });
 
@@ -213,6 +222,30 @@ describe('TransactionsService', () => {
     });
   });
 
+  describe('submit (with AMQP)', () => {
+    const fakeReceipt = new OfflineReceiptModel({
+      deliveryId: new BigNumber(1),
+      topicName: TopicName.Requests,
+      payload: {} as SignerPayloadJSON,
+      metadata: {},
+    });
+    it('should call the offline starter when given AMQP process mode', async () => {
+      mockOfflineStarterService.beginTransaction.mockResolvedValue(fakeReceipt);
+
+      const transaction = new MockPolymeshTransactionBatch();
+
+      const mockMethod = makeMockMethod(transaction);
+
+      const result = await service.submit(
+        mockMethod,
+        {},
+        { signer, processMode: ProcessMode.AMQP }
+      );
+
+      expect(result).toEqual(fakeReceipt);
+    });
+  });
+
   describe('submit (with webhookUrl)', () => {
     const subscriptionId = 1;
     const transactionHash = '0xabc';
@@ -245,7 +278,7 @@ describe('TransactionsService', () => {
       const result = await service.submit(
         mockMethod,
         {},
-        { signer, webhookUrl, processMode: ProcessMode.Submit }
+        { signer, webhookUrl, processMode: ProcessMode.SubmitWithCallback }
       );
 
       const expectedPayload = {
@@ -327,7 +360,7 @@ describe('TransactionsService', () => {
       const result = await service.submit(
         mockMethod,
         {},
-        { signer, webhookUrl, processMode: ProcessMode.DryRun }
+        { signer, webhookUrl, processMode: ProcessMode.SubmitWithCallback }
       );
 
       expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();

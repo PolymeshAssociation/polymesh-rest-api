@@ -74,4 +74,12 @@ describe('LocalSigningService', () => {
       expect(result).toEqual(true);
     });
   });
+
+  describe('getSigningManager', () => {
+    it('should return the signing manager', () => {
+      const manager = service.getSigningManager();
+
+      expect(manager).toBeInstanceOf(LocalSigningManager);
+    });
+  });
 });
