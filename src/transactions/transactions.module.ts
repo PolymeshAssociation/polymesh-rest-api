@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from '~/events/events.module';
 import { LoggerModule } from '~/logger/logger.module';
 import { NetworkModule } from '~/network/network.module';
+import { OfflineStarterModule } from '~/offline-starter/offline-starter.module';
+import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { SigningModule } from '~/signing/signing.module';
 import { SubscriptionsModule } from '~/subscriptions/subscriptions.module';
 import transactionsConfig from '~/transactions/config/transactions.config';
@@ -18,6 +20,8 @@ import { TransactionsService } from '~/transactions/transactions.service';
     SubscriptionsModule,
     LoggerModule,
     NetworkModule,
+    OfflineStarterModule,
+    PolymeshModule,
   ],
   providers: [TransactionsService],
   exports: [TransactionsService],

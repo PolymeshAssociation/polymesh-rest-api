@@ -15,6 +15,10 @@ export abstract class SigningService {
     return this.polymeshService.polymeshApi.accountManagement.isValidAddress({ address });
   }
 
+  public getSigningManager(): SigningManager {
+    return this.signingManager;
+  }
+
   public async initialize(): Promise<void> {
     return this.polymeshService.polymeshApi.setSigningManager(this.signingManager);
   }

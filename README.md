@@ -212,6 +212,12 @@ docker run -it --env-file .pme.env -p $HOST_PORT:3000 $image_name
 
 Accessing `http://localhost:<PORT>` will take you to the swagger playground UI where all endpoints are documented and can be tested
 
+### ActiveMQ (Apple Silicone)
+
+You may need to enable "Use Rosetta for x86/amd64 emulation on Apple Silicon" in order for the Artemis AMQP container to start
+
+Currently in "Settings" > "Features in development" in docker desktop
+
 ## License
 
 This project uses [NestJS](https://nestjs.com/), which is [MIT licensed](./LICENSE.MIT).

@@ -86,7 +86,7 @@ export class SettlementsController {
       details,
     }) =>
       new CreatedInstructionModel({
-        instruction: instruction as Instruction,
+        instruction,
         details,
         transactions,
       });
@@ -261,7 +261,7 @@ export class SettlementsController {
 
     const resolver: TransactionResolver<Venue> = ({ result: venue, transactions, details }) =>
       new CreatedVenueModel({
-        venue: venue as Venue,
+        venue,
         details,
         transactions,
       });

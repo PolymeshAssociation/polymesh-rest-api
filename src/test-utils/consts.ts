@@ -8,6 +8,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionType } from '~/common/types';
+import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
 import { UserModel } from '~/users/model/user.model';
 
 const signer = 'alice';
@@ -24,6 +25,30 @@ const resource = {
   type: 'TestResource',
   id: '-1',
 } as const;
+
+const offlineTx = new OfflineTxModel({
+  id: '-1',
+  payload: {
+    payload: {
+      address: 'address',
+      blockHash: '0x01',
+      blockNumber: '-1',
+      genesisHash: '0x01',
+      era: '0x01',
+      method: 'testMethod',
+      nonce: '0x01',
+      specVersion: '0x01',
+      tip: '0x00',
+      transactionVersion: '0x01',
+      signedExtensions: [],
+      version: 1,
+    },
+    method: '0x01',
+    rawPayload: { address: 'address', data: '0x01', type: 'bytes' },
+    metadata: { memo: 'test utils payload' },
+  },
+  status: OfflineTxStatus.Requested,
+});
 
 export const testAccount = createMock<Account>({ address: 'address' });
 export const txResult = {
@@ -56,6 +81,7 @@ export const testValues = {
   signer,
   did,
   user,
+  offlineTx,
   resource,
   testAccount,
   txResult,

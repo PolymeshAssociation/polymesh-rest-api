@@ -5,7 +5,7 @@ import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { LocalApiKeysRepo } from '~/datastore/local-store/repos/api-key.repo';
 import { defaultUser } from '~/users/user.consts';
 
-describe(`LocalApiKeyRepo does not meet ${ApiKeyRepo.type} test suite requirements`, () => {
+describe(`LocalApiKeyRepo ${ApiKeyRepo.type} test suite`, () => {
   const mockConfig = createMock<ConfigService>();
   const repo = new LocalApiKeysRepo(mockConfig);
 
