@@ -3,6 +3,7 @@ import { GenericPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/ty
 import { randomUUID } from 'crypto';
 
 import { ArtemisService } from '~/artemis/artemis.service';
+import { TopicName } from '~/common/utils/amqp';
 
 @Injectable()
 export class OfflineStarterService {
@@ -18,7 +19,10 @@ export class OfflineStarterService {
     const internalMeta = this.generateMeta();
     const payload = await transaction.toSignablePayload({ ...internalMeta, ...metadata });
 
-    await this.artemisService.sendMessage('started', payload as unknown as Record<string, unknown>);
+    await this.artemisService.sendMessage(
+      TopicName.Requests,
+      payload as unknown as Record<string, unknown>
+    );
   }
 
   /**

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { ArtemisService } from '~/artemis/artemis.service';
+import { TopicName } from '~/common/utils/amqp';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 /**
@@ -12,11 +13,10 @@ export class OfflineSubmitterService {
     private readonly artemisService: ArtemisService,
     private readonly polymeshService: PolymeshService
   ) {
-    this.artemisService.registerListener('signed', msg => this.submit(msg));
+    this.artemisService.registerListener(TopicName.Submissions, msg => this.submit(msg));
   }
 
   private async submit(body: unknown): Promise<void> {
-    // log received msg...
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { transaction: payload, signature } = body as any;
 
@@ -25,6 +25,8 @@ export class OfflineSubmitterService {
       signature
     );
 
-    console.log({ result });
+    const msg = JSON.parse(JSON.stringify(result));
+
+    await this.artemisService.sendMessage(TopicName.Finalizations, msg);
   }
 }

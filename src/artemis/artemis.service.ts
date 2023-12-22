@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
   AwaitableSender,
-  Connection,
   ConnectionOptions,
-  Delivery,
+  Container,
   EventContext,
   Receiver,
   ReceiverEvents,
@@ -12,16 +11,22 @@ import {
   SenderOptions,
 } from 'rhea-promise';
 
+import { TopicName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
-type Listener = (context: Record<string, unknown>) => void;
+type EventHandler = (context: Record<string, unknown>) => void;
+
+interface QueueEntry {
+  queueName: TopicName;
+  senders: AwaitableSender[];
+  receivers: Receiver[];
+}
+
+type QueueStore = Record<TopicName, QueueEntry>;
 
 @Injectable()
 export class ArtemisService {
-  private connection: Connection;
-  private sender: AwaitableSender;
-  private receiver: Receiver;
-  private listeners: Listener[] = [];
+  private queueStore: Partial<QueueStore> = {};
 
   constructor(private readonly logger: PolymeshLogger) {
     this.logger.setContext(ArtemisService.name);
@@ -38,9 +43,10 @@ export class ArtemisService {
     };
   }
 
-  private receiverOptions(listenFor: string): ReceiverOptions {
+  private receiverOptions(listenFor: TopicName): ReceiverOptions {
     return {
-      name: randomUUID(),
+      name: `${listenFor}-${randomUUID()}`,
+      credit_window: 10, // how many message to pre-fetch
       source: {
         address: listenFor,
       },
@@ -53,9 +59,9 @@ export class ArtemisService {
     };
   }
 
-  private senderOptions(publishOn: string): SenderOptions {
+  private senderOptions(publishOn: TopicName): SenderOptions {
     return {
-      name: 'exampleSender',
+      name: `${publishOn}-${randomUUID()}`,
       target: {
         address: publishOn,
       },
@@ -74,47 +80,61 @@ export class ArtemisService {
     };
   }
 
-  public async sendMessage(publishOn: string, body: Record<string, unknown>): Promise<void> {
+  public async sendMessage(publishOn: TopicName, body: Record<string, unknown>): Promise<void> {
+    const {
+      senders: [sender],
+    } = await this.setupQueue(publishOn);
+
     const message = { body };
-
-    if (!this.connection) {
-      const connection = new Connection(this.connectOptions());
-      await connection.open();
-    }
-
-    this.sender =
-      this.sender ?? (await this.connection.createAwaitableSender(this.senderOptions(publishOn)));
 
     const sendOptions = { timeoutInSeconds: 10 };
 
-    await this.sender.send(message, sendOptions);
+    await sender.send(message, sendOptions);
   }
 
-  public async registerListener(listenFor: string, listener: Listener): Promise<void> {
-    this.listeners.push(listener);
+  // TODO add error handler
+  public async registerListener(listenFor: TopicName, listener: EventHandler): Promise<void> {
+    const {
+      receivers: [receiver],
+    } = await this.setupQueue(listenFor);
 
-    if (!this.connection) {
-      this.connection = new Connection(this.connectOptions());
-      await this.connection.open();
+    receiver.on(ReceiverEvents.message, (context: EventContext) => {
+      if (context.message) {
+        listener(context.message?.body);
+      } else {
+        this.logger.debug('no message received');
+      }
+    });
+    receiver.on(ReceiverEvents.receiverError, (context: EventContext) => {
+      const receiverError = context.receiver && context.receiver.error;
+      if (receiverError) {
+        this.logger.error('receiver error: ', receiverError);
+      }
+    });
+  }
+
+  private async setupQueue(topicName: TopicName): Promise<QueueEntry> {
+    const entry = this.queueStore[topicName];
+    if (entry) {
+      return entry;
     }
 
-    if (!this.receiver) {
-      this.receiver = await this.connection.createReceiver(this.receiverOptions(listenFor));
+    const container = new Container();
+    const connection = await container.connect(this.connectOptions());
 
-      // TODO each listener should have its own queue. There shouldn't be fan out here
-      this.receiver.on(ReceiverEvents.message, (context: EventContext) => {
-        if (context.message) {
-          this.listeners.forEach(worker => worker(context.message?.body));
-        } else {
-          this.logger.debug('no message received');
-        }
-      });
-      this.receiver.on(ReceiverEvents.receiverError, (context: EventContext) => {
-        const receiverError = context.receiver && context.receiver.error;
-        if (receiverError) {
-          this.logger.error('receiver error: ', receiverError);
-        }
-      });
-    }
+    const terminals = await Promise.all([
+      connection.createAwaitableSender(this.senderOptions(topicName)),
+      connection.createReceiver(this.receiverOptions(topicName)),
+    ]);
+
+    const newEntry = {
+      queueName: topicName,
+      senders: [terminals[0]],
+      receivers: [terminals[1]],
+    };
+
+    this.queueStore[topicName] = newEntry;
+
+    return newEntry;
   }
 }
