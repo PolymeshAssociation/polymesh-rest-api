@@ -72,12 +72,6 @@ export const mockDeveloperServiceProvider: ValueProvider<DeveloperTestingService
   useValue: createMock<DeveloperTestingService>(),
 };
 
-export class MockSigningService {
-  public getAddressByHandle = jest.fn();
-  public isAddress = jest.fn();
-  public getSigningManager = jest.fn();
-}
-
 export class MockTickerReservationsService {
   findOne = jest.fn();
   reserve = jest.fn();

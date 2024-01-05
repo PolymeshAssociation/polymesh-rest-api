@@ -1,10 +1,10 @@
 /* istanbul ignore file */
 
+import { createMock } from '@golevelup/ts-jest';
 import { FireblocksSigningManager } from '@polymeshassociation/fireblocks-signing-manager';
 import { HashicorpVaultSigningManager } from '@polymeshassociation/hashicorp-vault-signing-manager';
 
 import { SigningService } from '~/signing/services';
-import { MockSigningService } from '~/test-utils/service-mocks';
 
 /**
  * provides a mock HashicorpVaultSigningManager for testing
@@ -35,5 +35,5 @@ Object.setPrototypeOf(MockFireblocksSigningManager, FireblocksSigningManager.pro
 
 export const mockSigningProvider = {
   provide: SigningService,
-  useValue: new MockSigningService(),
+  useValue: createMock<SigningService>(),
 };

@@ -8,7 +8,7 @@ import { AnyModel } from '~/offline-recorder/model/any.model';
 export class OfflineEventModel {
   @ApiProperty({
     type: 'string',
-    description: 'Thw topic this event was published on',
+    description: 'The topic this event was published on',
     example: 'Alice',
     enum: TopicName,
   })
