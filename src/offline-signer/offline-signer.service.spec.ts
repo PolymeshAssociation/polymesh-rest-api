@@ -1,7 +1,6 @@
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
-import { PolkadotSigner, SigningManager } from '@polymeshassociation/signing-manager-types';
 
 import { ArtemisService } from '~/artemis/artemis.service';
 import { TopicName } from '~/common/utils/amqp';
@@ -56,11 +55,7 @@ describe('OfflineSignerService', () => {
 
       const mockSignature = '0x01';
 
-      const mockSigningManager = createMock<SigningManager>();
-      const mockExternalSigner = createMock<PolkadotSigner>();
-      mockExternalSigner.signPayload.mockResolvedValue({ id: 1, signature: mockSignature });
-      mockSigningManager.getExternalSigner.mockReturnValue(mockExternalSigner);
-      mockSigningService.getSigningManager.mockReturnValue(mockSigningManager);
+      mockSigningService.signPayload.mockResolvedValue(mockSignature);
 
       await service.autoSign(model);
 

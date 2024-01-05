@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { SigningManager } from '@polymeshassociation/signing-manager-types';
 
 import { AppNotFoundError } from '~/common/errors';
@@ -15,8 +16,10 @@ export abstract class SigningService {
     return this.polymeshService.polymeshApi.accountManagement.isValidAddress({ address });
   }
 
-  public getSigningManager(): SigningManager {
-    return this.signingManager;
+  public async signPayload(payload: TransactionPayload['payload']): Promise<string> {
+    const { signature } = await this.signingManager.getExternalSigner().signPayload(payload);
+
+    return signature;
   }
 
   public async initialize(): Promise<void> {

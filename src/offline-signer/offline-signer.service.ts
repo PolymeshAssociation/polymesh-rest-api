@@ -30,9 +30,8 @@ export class OfflineSignerService {
   public async autoSign(body: OfflineTxModel): Promise<void> {
     const { id: transactionId } = body;
     this.logger.debug(`received request for signature: ${transactionId}`);
-    const signer = this.signingService.getSigningManager().getExternalSigner();
 
-    const { signature } = await signer.signPayload(body.payload.payload);
+    const signature = await this.signingService.signPayload(body.payload.payload);
 
     const model = new OfflineSignatureModel({ signature, id: body.id });
 
