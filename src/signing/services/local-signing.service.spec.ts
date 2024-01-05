@@ -1,5 +1,8 @@
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
+import { PolkadotSigner } from '@polymeshassociation/signing-manager-types';
+import { when } from 'jest-when';
 
 import { AppNotFoundError } from '~/common/errors';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -9,13 +12,20 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { LocalSigningService } from '~/signing/services/local-signing.service';
 import { SigningModule } from '~/signing/signing.module';
+import { testValues } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
 
+const {
+  offlineTx: {
+    payload: { payload },
+  },
+} = testValues;
 describe('LocalSigningService', () => {
   let service: LocalSigningService;
   let logger: PolymeshLogger;
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
+  let mockExternalSigner: DeepMocked<PolkadotSigner>;
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
@@ -31,6 +41,8 @@ describe('LocalSigningService', () => {
     polymeshService = module.get<PolymeshService>(PolymeshService);
     const manager = await LocalSigningManager.create({ accounts: [] });
     manager.setSs58Format(0);
+    mockExternalSigner = createMock<PolkadotSigner>();
+    jest.spyOn(manager, 'getExternalSigner').mockReturnValue(mockExternalSigner);
 
     service = new LocalSigningService(manager, polymeshService, logger);
   });
@@ -75,11 +87,19 @@ describe('LocalSigningService', () => {
     });
   });
 
-  describe('getSigningManager', () => {
-    it('should return the signing manager', () => {
-      const manager = service.getSigningManager();
+  describe('signPayload', () => {
+    it('should sign the payload', async () => {
+      const signature = '0x01';
+      const mockResponse = {
+        id: 1,
+        signature,
+      } as const;
 
-      expect(manager).toBeInstanceOf(LocalSigningManager);
+      when(mockExternalSigner.signPayload).calledWith(payload).mockResolvedValue(mockResponse);
+
+      const result = await service.signPayload(payload);
+
+      expect(result).toEqual(signature);
     });
   });
 });

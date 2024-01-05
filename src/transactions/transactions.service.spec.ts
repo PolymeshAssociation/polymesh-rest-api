@@ -29,7 +29,6 @@ import {
 import {
   MockEventsService,
   mockOfflineStarterProvider,
-  MockSigningService,
   MockSubscriptionsService,
 } from '~/test-utils/service-mocks';
 import transactionsConfig from '~/transactions/config/transactions.config';
@@ -66,7 +65,7 @@ describe('TransactionsService', () => {
 
   let mockEventsService: MockEventsService;
   let mockSubscriptionsService: MockSubscriptionsService;
-  let mockSigningService: MockSigningService;
+  let mockSigningService: DeepMocked<SigningService>;
   let mockOfflineStarterService: DeepMocked<OfflineStarterService>;
 
   beforeEach(async () => {
@@ -95,7 +94,7 @@ describe('TransactionsService', () => {
 
     service = module.get<TransactionsService>(TransactionsService);
     mockOfflineStarterService = module.get<typeof mockOfflineStarterService>(OfflineStarterService);
-    mockSigningService = module.get<MockSigningService>(SigningService);
+    mockSigningService = module.get<typeof mockSigningService>(SigningService);
   });
 
   afterEach(() => {
