@@ -12,7 +12,7 @@ import { when } from 'jest-when';
 
 import { AppInternalError } from '~/common/errors';
 import { ProcessMode, TransactionType } from '~/common/types';
-import { TopicName } from '~/common/utils/amqp';
+import { AddressName } from '~/common/utils/amqp';
 import { EventsService } from '~/events/events.service';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -224,7 +224,7 @@ describe('TransactionsService', () => {
   describe('submit (with AMQP)', () => {
     const fakeReceipt = new OfflineReceiptModel({
       deliveryId: new BigNumber(1),
-      topicName: TopicName.Requests,
+      topicName: AddressName.Requests,
       payload: {} as SignerPayloadJSON,
       metadata: {},
     });

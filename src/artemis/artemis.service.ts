@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationShutdown } from '@nestjs/common';
 import { validate } from 'class-validator';
-import { randomUUID } from 'crypto';
 import {
   AwaitableSender,
   AwaitableSendOptions,
+  Connection,
   ConnectionOptions,
   Container,
   Delivery,
@@ -14,25 +14,68 @@ import {
   SenderOptions,
 } from 'rhea-promise';
 
-import { TopicName } from '~/common/utils/amqp';
+import { AddressName, QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 type EventHandler<T> = (params: T) => Promise<void>;
 
-interface QueueEntry {
-  queueName: TopicName;
-  senders: AwaitableSender[];
-  receivers: Receiver[];
+interface AddressEntry {
+  addressName: AddressName;
+  sender: AwaitableSender;
 }
 
-type QueueStore = Record<TopicName, QueueEntry>;
+type AddressStore = Record<AddressName, AddressEntry>;
 
 @Injectable()
-export class ArtemisService {
-  private queueStore: Partial<QueueStore> = {};
+export class ArtemisService implements OnApplicationShutdown {
+  private receivers: Receiver[] = [];
+  private addressStore: Partial<AddressStore> = {};
+  private connectionPromise?: Promise<Connection>;
 
   constructor(private readonly logger: PolymeshLogger) {
     this.logger.setContext(ArtemisService.name);
+  }
+
+  public async onApplicationShutdown(signal?: string | undefined): Promise<void> {
+    this.logger.debug(
+      `artemis service received application shutdown request, sig: ${signal} - now closing connections`
+    );
+
+    const closePromises = [
+      ...this.receivers.map(receiver => receiver.close()),
+      ...this.addressEntries().map(entry => entry.sender.close()),
+    ];
+
+    this.logger.debug(`awaiting ${closePromises.length} connections to close`);
+
+    const closeResults = await Promise.allSettled(closePromises);
+
+    let successfulCloses = 0;
+    for (const result of closeResults) {
+      if (result.status === 'rejected') {
+        this.logger.error(`error closing artemis connection: ${result.reason}`);
+      } else {
+        successfulCloses += 1;
+      }
+    }
+    this.logger.debug(`successfully closed ${successfulCloses} connections`);
+
+    const connection = await this.getConnection();
+
+    await connection.close();
+  }
+
+  private addressEntries(): AddressEntry[] {
+    const entries: AddressEntry[] = [];
+
+    for (const key in this.addressStore) {
+      const entry = this.addressStore[key as AddressName];
+      if (entry) {
+        entries.push(entry);
+      }
+    }
+
+    return entries;
   }
 
   private connectOptions(): ConnectionOptions {
@@ -54,34 +97,35 @@ export class ArtemisService {
     };
   }
 
-  private receiverOptions(listenFor: TopicName): ReceiverOptions {
+  private receiverOptions(listenOn: QueueName): ReceiverOptions {
     return {
-      name: `${listenFor}-${randomUUID()}`,
-      credit_window: 10, // how many message to pre-fetch
+      name: `${listenOn}`,
+      credit_window: 10, // how many message to pre-fetch,
       source: {
-        address: listenFor,
+        address: listenOn,
+        distribution_mode: 'move',
+        durable: 2,
+        expiry_policy: 'never',
       },
     };
   }
 
-  private senderOptions(publishOn: TopicName): SenderOptions {
+  private senderOptions(publishOn: AddressName): SenderOptions {
     return {
-      name: `${publishOn}-${randomUUID()}`,
+      name: `${publishOn}`,
       target: {
         address: publishOn,
       },
     };
   }
 
-  public async sendMessage(publishOn: TopicName, body: unknown): Promise<Delivery> {
-    const {
-      senders: [sender],
-    } = await this.setupQueue(publishOn);
+  public async sendMessage(publishOn: AddressName, body: unknown): Promise<Delivery> {
+    const { sender } = await this.getAddress(publishOn);
 
     const message = { body };
 
     const sendOptions = this.sendOptions();
-
+    this.logger.debug(`sending message on: ${publishOn}`);
     return sender.send(message, sendOptions);
   }
 
@@ -91,15 +135,14 @@ export class ArtemisService {
    * @note `receiver` should have an error handler registered
    */
   public async registerListener<T extends object>(
-    listenFor: TopicName,
+    listenOn: QueueName,
     listener: EventHandler<T>,
     Model: new (params: T) => T
   ): Promise<void> {
-    const {
-      receivers: [receiver],
-    } = await this.setupQueue(listenFor);
+    const receiver = await this.getReceiver(listenOn);
 
     receiver.on(ReceiverEvents.message, async (context: EventContext) => {
+      this.logger.debug(`received message ${listenOn}`);
       if (context.message) {
         const model = new Model(context.message.body);
         const validationErrors = await validate(model);
@@ -112,28 +155,50 @@ export class ArtemisService {
     });
   }
 
-  private async setupQueue(topicName: TopicName): Promise<QueueEntry> {
-    const entry = this.queueStore[topicName];
+  private async getConnection(): Promise<Connection> {
+    if (!this.connectionPromise) {
+      const container = new Container();
+      this.connectionPromise = container.connect(this.connectOptions());
+    }
+
+    return this.connectionPromise;
+  }
+
+  private async getAddress(addressName: AddressName): Promise<AddressEntry> {
+    const entry = this.addressStore[addressName];
     if (entry) {
       return entry;
     }
 
-    const container = new Container();
-    const connection = await container.connect(this.connectOptions());
+    const connection = await this.getConnection();
 
-    const terminals = await Promise.all([
-      connection.createAwaitableSender(this.senderOptions(topicName)),
-      connection.createReceiver(this.receiverOptions(topicName)),
-    ]);
+    this.logger.debug(`making publish connection: ${addressName}`);
+
+    const sender = await connection.createAwaitableSender(this.senderOptions(addressName));
+
+    this.logger.debug(`made publish connection: ${addressName}`);
 
     const newEntry = {
-      queueName: topicName,
-      senders: [terminals[0]],
-      receivers: [terminals[1]],
+      addressName,
+      sender,
     };
 
-    this.queueStore[topicName] = newEntry;
+    this.addressStore[addressName] = newEntry;
 
     return newEntry;
+  }
+
+  private async getReceiver(queueName: QueueName): Promise<Receiver> {
+    const connection = await this.getConnection();
+
+    this.logger.debug(`making receiver: ${queueName}`);
+
+    const receiver = await connection.createReceiver(this.receiverOptions(queueName));
+
+    this.logger.debug(`made receiver: ${queueName}`);
+
+    this.receivers.push(receiver);
+
+    return receiver;
   }
 }

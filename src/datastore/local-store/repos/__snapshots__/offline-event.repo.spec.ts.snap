@@ -7,6 +7,5 @@ exports[`LocalOfflineEventRepo OfflineEvent test suite method: recordEvent shoul
     "memo": "offline suite test",
   },
   "id": "1",
-  "topicName": "Signatures",
 }
 `;

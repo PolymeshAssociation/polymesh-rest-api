@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ArtemisService } from '~/artemis/artemis.service';
-import { TopicName } from '~/common/utils/amqp';
+import { AddressName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { OfflineSignerService } from '~/offline-signer/offline-signer.service';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
@@ -38,7 +38,7 @@ describe('OfflineSignerService', () => {
   describe('constructor', () => {
     it('should have subscribed to the required topics', () => {
       expect(mockArtemisService.registerListener).toHaveBeenCalledWith(
-        TopicName.Requests,
+        AddressName.Requests,
         expect.any(Function),
         expect.any(Function)
       );
@@ -59,9 +59,10 @@ describe('OfflineSignerService', () => {
 
       await service.autoSign(model);
 
-      expect(mockArtemisService.sendMessage).toHaveBeenCalledWith(TopicName.Signatures, {
+      expect(mockArtemisService.sendMessage).toHaveBeenCalledWith(AddressName.Signatures, {
         id: 'someId',
         signature: mockSignature,
+        payload: expect.any(Object),
       });
     });
   });
