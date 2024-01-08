@@ -1,0 +1,145 @@
+<?xml version='1.0'?>
+
+<configuration xmlns="urn:activemq"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xi="http://www.w3.org/2001/XInclude"
+               xsi:schemaLocation="urn:activemq /schema/artemis-configuration.xsd">
+
+   <core xmlns="urn:activemq:core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="urn:activemq:core ">
+
+      <name>0.0.0.0</name>
+
+
+      <persistence-enabled>true</persistence-enabled>
+
+      <!-- It is recommended to keep this value as 1, maximizing the number of records stored about redeliveries.
+           However if you must preserve state of individual redeliveries, you may increase this value or set it to -1 (infinite). -->
+      <max-redelivery-records>1</max-redelivery-records>
+
+      <acceptors>
+
+         <!-- useEpoll means: it will use Netty epoll if you are on a system (Linux) that supports it -->
+         <!-- amqpCredits: The number of credits sent to AMQP producers -->
+         <!-- amqpLowCredits: The server will send the # credits specified at amqpCredits at this low mark -->
+         <!-- amqpDuplicateDetection: If you are not using duplicate detection, set this to false
+                                      as duplicate detection requires applicationProperties to be parsed on the server. -->
+         <!-- amqpMinLargeMessageSize: Determines how many bytes are considered large, so we start using files to hold their data.
+                                       default: 102400, -1 would mean to disable large message control -->
+
+         <!-- Note: If an acceptor needs to be compatible with HornetQ and/or Artemis 1.x clients add
+                    "anycastPrefix=jms.queue.;multicastPrefix=jms.topic." to the acceptor url.
+                    See https://issues.apache.org/jira/browse/ARTEMIS-1644 for more information. -->
+
+
+         <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
+         <acceptor name="amqp">tcp://0.0.0.0:5672?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=AMQP;useEpoll=true;amqpCredits=1000;amqpLowCredits=300;amqpMinLargeMessageSize=102400;amqpDuplicateDetection=true</acceptor>
+
+
+
+      </acceptors>
+
+
+      <security-settings>
+         <security-setting match="#">
+            <permission type="createNonDurableQueue" roles="amq"/>
+            <permission type="deleteNonDurableQueue" roles="amq"/>
+            <permission type="createDurableQueue" roles="amq"/>
+            <permission type="deleteDurableQueue" roles="amq"/>
+            <permission type="createAddress" roles="amq"/>
+            <permission type="deleteAddress" roles="amq"/>
+            <permission type="consume" roles="amq"/>
+            <permission type="browse" roles="amq"/>
+            <permission type="send" roles="amq"/>
+            <!-- we need this otherwise ./artemis data imp wouldn't work -->
+            <permission type="manage" roles="amq"/>
+         </security-setting>
+      </security-settings>
+
+      <address-settings>
+         <address-setting match="activemq.management#">
+            <dead-letter-address>DLQ</dead-letter-address>
+            <expiry-address>ExpiryQueue</expiry-address>
+            <redelivery-delay>0</redelivery-delay>
+            <!-- with -1 only the global-max-size is in use for limiting -->
+            <max-size-bytes>-1</max-size-bytes>
+            <message-counter-history-day-limit>10</message-counter-history-day-limit>
+            <address-full-policy>PAGE</address-full-policy>
+            <auto-create-queues>false</auto-create-queues>
+            <auto-create-addresses>false</auto-create-addresses>
+         </address-setting>
+         <!--default for catch all-->
+         <address-setting match="#">
+            <dead-letter-address>DLQ</dead-letter-address>
+            <expiry-address>ExpiryQueue</expiry-address>
+            <redelivery-delay>0</redelivery-delay>
+            <max-delivery-attempts>3</max-delivery-attempts>
+
+            <message-counter-history-day-limit>10</message-counter-history-day-limit>
+            <address-full-policy>PAGE</address-full-policy>
+            <auto-create-queues>false</auto-create-queues>
+            <auto-create-addresses>false</auto-create-addresses>
+            <auto-delete-queues>false</auto-delete-queues>
+            <auto-delete-addresses>false</auto-delete-addresses>
+          </address-setting>
+      </address-settings>
+
+      <addresses>
+         <address name="DLQ">
+            <anycast>
+               <queue name="DLQ" />
+            </anycast>
+         </address>
+
+         <address name="ExpiryQueue">
+            <anycast>
+               <queue name="ExpiryQueue" />
+            </anycast>
+         </address>
+
+         <address name="Requests">
+            <anycast>
+               <queue name="Requests"></queue>
+            </anycast>
+        </address>
+
+        <address name="Signatures">
+          <anycast>
+            <queue name="Signatures"></queue>
+          </anycast>
+        </address>
+
+        <address name="Finalizations">
+          <multicast>
+          </multicast>
+        </address>
+
+        <address name="EventsLog">
+          <anycast>
+             <queue name="EventsLog"></queue>
+          </anycast>
+        </address>
+      </addresses>
+
+      <diverts>
+         <divert name="RequestsRecorder">
+             <address>Requests</address>
+             <forwarding-address>EventsLog</forwarding-address>
+             <exclusive>false</exclusive>
+         </divert>
+
+         <divert name="SignaturesRecorder">
+             <address>Signatures</address>
+             <forwarding-address>EventsLog</forwarding-address>
+             <exclusive>false</exclusive>
+         </divert>
+
+         <divert name="FinalizationsRecorder">
+             <address>Finalizations</address>
+             <forwarding-address>EventsLog</forwarding-address>
+             <exclusive>false</exclusive>
+         </divert>
+     </diverts>
+
+   </core>
+</configuration>

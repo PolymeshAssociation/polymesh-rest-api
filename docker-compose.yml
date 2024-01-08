@@ -11,20 +11,20 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - './chain-entry.sh:/chain-entry.sh'
+      - './compose/chain-entry.sh:/chain-entry.sh'
     entrypoint: '/chain-entry.sh'
     command: [ '--alice --chain dev' ]
+    healthcheck:
+      test: "timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/9933' && exit 0 || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   subquery:
     image: '${SUBQUERY_IMAGE}'
     init: true
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:3000/meta || exit 1
-      interval: 20s
-      retries: 10
-      start_period: 20s
-      timeout: 10s
     depends_on:
       - 'postgres'
     environment:
@@ -40,9 +40,16 @@ services:
       - --batch-size=500
       - -f=/app
       - --local
+    healthcheck:
+      test: curl --fail http://localhost:3000/meta || exit 1
+      interval: 20s
+      retries: 10
+      start_period: 20s
+      timeout: 10s
 
   graphql:
     image: onfinality/subql-query:v1.0.0
+    restart: unless-stopped
     ports:
       - ${SQ_PORT:-3001}:3000
     depends_on:
@@ -67,10 +74,12 @@ services:
       - 8161:8161 # Web Server
       - 61616:61616 # Core,MQTT,AMQP,HORNETQ,STOMP,OpenWire
       - 5672:5672 # AMQP
+    volumes:
+      - './compose/broker.xml:/var/lib/artemis-instance/etc-override/broker.xml'
     environment:
       ARTEMIS_USERNAME: artemis
       ARTEMIS_PASSWORD: artemis
-      AMQ_EXTRA_ARGS: "--nio"
+      AMQ_EXTRA_ARGS: "--nio" # "aio" offers better performance, but less platforms support it
 
   postgres:
     image: postgres:15
@@ -78,6 +87,7 @@ services:
       - $REST_POSTGRES_PORT:5432
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./compose/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     environment:
       POSTGRES_USER: $REST_POSTGRES_USER
       POSTGRES_PASSWORD: $REST_POSTGRES_PASSWORD

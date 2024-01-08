@@ -5,7 +5,7 @@ import { testOfflineEventRepo } from '~/offline-recorder/repo/offline-event.repo
 export abstract class OfflineEventRepo {
   public static type = 'OfflineEvent';
 
-  public abstract recordEvent(name: string, body: AnyModel): Promise<OfflineEventModel>;
+  public abstract recordEvent(body: AnyModel): Promise<OfflineEventModel>;
 
   /**
    * a set of tests implementers should pass

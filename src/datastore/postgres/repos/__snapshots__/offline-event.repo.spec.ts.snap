@@ -4,6 +4,5 @@ exports[`PostgresOfflineEventRepo OfflineEvent test suite method: recordEvent sh
 OfflineEventModel {
   "body": undefined,
   "id": "1",
-  "topicName": undefined,
 }
 `;
