@@ -72,6 +72,9 @@ async function bootstrap(): Promise<void> {
   // Fetch port from env and listen
 
   const port = configService.get('PORT', 3000);
+
+  app.enableShutdownHooks();
+
   await app.listen(port);
 }
 bootstrap();

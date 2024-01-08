@@ -6,11 +6,13 @@ import { EventContext } from 'rhea-promise';
 
 import { ArtemisService } from '~/artemis/artemis.service';
 import { clearEventLoop } from '~/common/utils';
-import { TopicName } from '~/common/utils/amqp';
+import { AddressName, QueueName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 const mockSend = jest.fn();
+const mockConnectionClose = jest.fn();
+const mockSendClose = jest.fn();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const generateMockReceiver = (body: any): unknown => {
@@ -24,6 +26,7 @@ const generateMockReceiver = (body: any): unknown => {
       });
       listener(mockContext);
     },
+    close: jest.fn(),
   };
 };
 
@@ -41,8 +44,9 @@ class StubModel {
 }
 
 const mockConnect = jest.fn().mockResolvedValue({
-  createAwaitableSender: jest.fn().mockResolvedValue({ send: mockSend }),
+  createAwaitableSender: jest.fn().mockResolvedValue({ send: mockSend, close: mockSendClose }),
   createReceiver: mockCreateReceiver,
+  close: mockConnectionClose,
 });
 
 jest.mock('rhea-promise', () => {
@@ -78,7 +82,7 @@ describe('ArtemisService', () => {
       const mockReceipt = 'mockReceipt';
       const otherMockReceipt = 'otherMockReceipt';
 
-      const topicName = TopicName.Requests;
+      const topicName = AddressName.Requests;
       const body = { payload: 'some payload' };
       const otherBody = { other: 'payload' };
 
@@ -99,7 +103,7 @@ describe('ArtemisService', () => {
     it('should register and call a listener', async () => {
       const listener = jest.fn();
 
-      service.registerListener(TopicName.Requests, listener, StubModel);
+      service.registerListener(QueueName.Requests, listener, StubModel);
 
       await clearEventLoop();
 
@@ -112,9 +116,32 @@ describe('ArtemisService', () => {
 
       mockCreateReceiver.mockImplementationOnce(() => generateMockReceiver(badBody));
 
-      service.registerListener(TopicName.Requests, listener, StubModel);
+      service.registerListener(QueueName.Requests, listener, StubModel);
 
       await clearEventLoop();
+
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('onApplicationShutdown', () => {
+    it('should close down all senders, receivers and the connection', async () => {
+      const listener = jest.fn();
+
+      await service.sendMessage(AddressName.Requests, { id: 1 });
+      await service.registerListener(QueueName.Requests, listener, StubModel);
+
+      await service.onApplicationShutdown();
+
+      expect(mockConnectionClose).toHaveBeenCalled();
+    });
+
+    it('should log an error if a connection fails to close', async () => {
+      await service.sendMessage(AddressName.Requests, { id: 1 });
+
+      const closeError = new Error('mock close error');
+      mockSendClose.mockRejectedValueOnce(closeError);
+      await service.onApplicationShutdown();
 
       expect(logger.error).toHaveBeenCalled();
     });

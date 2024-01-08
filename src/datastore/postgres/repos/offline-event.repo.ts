@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { TopicName } from '~/common/utils/amqp';
 import { OfflineEvent } from '~/datastore/postgres/entities/offline-event.entity';
 import { convertTypeOrmErrorToAppError } from '~/datastore/postgres/repos/utils';
 import { OfflineEventModel } from '~/offline-recorder/model/offline-event.model';
@@ -14,26 +13,22 @@ export class PostgresOfflineEventRepo implements OfflineEventRepo {
     @InjectRepository(OfflineEvent) private readonly offlineEventRepo: Repository<OfflineEvent>
   ) {}
 
-  public async recordEvent(
-    topicName: string,
-    body: Record<string, unknown>
-  ): Promise<OfflineEventModel> {
-    const model = { topicName, body };
+  public async recordEvent(body: Record<string, unknown>): Promise<OfflineEventModel> {
+    const model = { body };
     const entity = this.offlineEventRepo.create(model);
 
     await this.offlineEventRepo
       .save(entity)
-      .catch(convertTypeOrmErrorToAppError(topicName, OfflineEventRepo.type));
+      .catch(convertTypeOrmErrorToAppError('offlineEvent', OfflineEventRepo.type));
 
     return this.toModel(entity);
   }
 
   private toModel(event: OfflineEvent): OfflineEventModel {
-    const { id, topicName, body } = event;
+    const { id, body } = event;
 
     return new OfflineEventModel({
       id: id.toString(),
-      topicName: topicName as TopicName,
       body,
     });
   }

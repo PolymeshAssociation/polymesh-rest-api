@@ -19,9 +19,6 @@ export class OfflineEvent {
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createDateTime: Date;
 
-  @Column({ type: 'text' })
-  topicName: string;
-
   @Column({ type: 'json' })
   body: Record<string, unknown>;
 }

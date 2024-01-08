@@ -4,16 +4,18 @@ import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { ArtemisService } from '~/artemis/artemis.service';
-import { AppNotFoundError } from '~/common/errors';
-import { TopicName } from '~/common/utils/amqp';
+import { AddressName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { OfflineSignatureModel } from '~/offline-signer/models/offline-signature.model';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
 import { OfflineSubmitterService } from '~/offline-submitter/offline-submitter.service';
 import { OfflineTxRepo } from '~/offline-submitter/repos/offline-tx.repo';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { testValues } from '~/test-utils/consts';
 import { mockPolymeshServiceProvider } from '~/test-utils/mocks';
 import { mockArtemisServiceProvider, mockOfflineTxRepoProvider } from '~/test-utils/service-mocks';
+
+const { offlineTx } = testValues;
 
 describe('OfflineSubmitterService', () => {
   let service: OfflineSubmitterService;
@@ -52,13 +54,7 @@ describe('OfflineSubmitterService', () => {
   describe('constructor', () => {
     it('should have subscribed to the required topics', () => {
       expect(mockArtemisService.registerListener).toHaveBeenCalledWith(
-        TopicName.Requests,
-        expect.any(Function),
-        expect.any(Function)
-      );
-
-      expect(mockArtemisService.registerListener).toHaveBeenCalledWith(
-        TopicName.Signatures,
+        AddressName.Signatures,
         expect.any(Function),
         expect.any(Function)
       );
@@ -73,9 +69,13 @@ describe('OfflineSubmitterService', () => {
   });
 
   describe('method: submit', () => {
-    const signatureModel = new OfflineSignatureModel({ id: 'someId', signature: '0x01' });
+    const signatureModel = new OfflineSignatureModel({
+      id: 'someId',
+      signature: '0x01',
+      payload: offlineTx.payload,
+    });
     it('should submit the transaction, update the DB, and publish events', async () => {
-      when(mockRepo.findById).calledWith('someId').mockResolvedValue(offlineModel);
+      when(mockRepo.createTx).mockResolvedValue(offlineModel);
 
       const networkMock = createMock<typeof mockPolymeshService.polymeshApi.network>();
       networkMock.submitTransaction.mockResolvedValue({
@@ -94,27 +94,19 @@ describe('OfflineSubmitterService', () => {
           blockHash: '0x02',
           id: 'someId',
           payload: {},
-          signature: '0x01',
           status: 'Finalized',
           txHash: '0x03',
           txIndex: 1,
         })
       );
       expect(mockArtemisService.sendMessage).toHaveBeenCalledWith(
-        TopicName.Finalizations,
+        AddressName.Finalizations,
         expect.objectContaining({
           blockHash: '0x02',
           txHash: '0x03',
           txIndex: 1,
         })
       );
-    });
-
-    it('should throw an error if the transaction is not found', async () => {
-      mockRepo.findById.mockResolvedValue(undefined);
-      const expectedError = new AppNotFoundError('someId', 'offlineTx');
-
-      await expect(service.submit(signatureModel)).rejects.toThrow(expectedError);
     });
   });
 });

@@ -2,18 +2,9 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
-import { TopicName } from '~/common/utils/amqp';
 import { AnyModel } from '~/offline-recorder/model/any.model';
 
 export class OfflineEventModel {
-  @ApiProperty({
-    type: 'string',
-    description: 'The topic this event was published on',
-    example: 'Alice',
-    enum: TopicName,
-  })
-  readonly topicName: TopicName;
-
   @ApiProperty({
     type: 'string',
     description: 'The event body',

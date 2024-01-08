@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { ArtemisService } from '~/artemis/artemis.service';
-import { TopicName } from '~/common/utils/amqp';
+import { AddressName, QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { OfflineSignatureModel } from '~/offline-signer/models/offline-signature.model';
 import { OfflineTxModel } from '~/offline-submitter/models/offline-tx.model';
@@ -20,7 +20,7 @@ export class OfflineSignerService {
     this.logger.setContext(OfflineSignerService.name);
 
     this.artemisService.registerListener(
-      TopicName.Requests,
+      QueueName.Requests,
       /* istanbul ignore next */
       msg => this.autoSign(msg),
       OfflineTxModel
@@ -31,11 +31,13 @@ export class OfflineSignerService {
     const { id: transactionId } = body;
     this.logger.debug(`received request for signature: ${transactionId}`);
 
-    const signature = await this.signingService.signPayload(body.payload.payload);
+    const payload = body.payload;
 
-    const model = new OfflineSignatureModel({ signature, id: body.id });
+    const signature = await this.signingService.signPayload(payload.payload);
+
+    const model = new OfflineSignatureModel({ signature, id: body.id, payload });
 
     this.logger.log(`signed transaction: ${transactionId}`);
-    await this.artemisService.sendMessage(TopicName.Signatures, model);
+    await this.artemisService.sendMessage(AddressName.Signatures, model);
   }
 }
