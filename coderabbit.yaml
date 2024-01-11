@@ -1,0 +1,28 @@
+language: "en"
+reviews:
+    request_changes_workflow: false
+    high_level_summary: true
+    poem: true
+    review_status: true
+    collapse_walkthrough: false
+    path_instructions:
+        - path: "**/*.ts"
+          instructions: "Review the JavaScript code for conformity with the Semi-Standard style guide, highlighting any deviations."
+        - path: "**/*.ts"
+          instructions: "Analyze the logic of the code and the efficiency of the algorithms used. Suggest improvements if any inefficient algorithms are found."
+        - path: "/**/*.spec.ts"
+          instructions: |
+              "Assess the unit test code employing the jest testing framework. Confirm that:
+              - The tests adhere to jest's established best practices.
+              - Test descriptions are sufficiently detailed to clarify the purpose of each test."
+    auto_review:
+        enabled: true
+        ignore_title_keywords:
+            - "WIP"
+            - "DO NOT MERGE"
+        drafts: true
+        base_branches:
+            - "master"
+            - "alpha"
+chat:
+    auto_reply: true
