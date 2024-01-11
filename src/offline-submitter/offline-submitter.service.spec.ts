@@ -60,14 +60,6 @@ describe('OfflineSubmitterService', () => {
       );
     });
   });
-  describe('method: recordRequest', () => {
-    it('should save the request', async () => {
-      await service.recordRequest(offlineModel);
-
-      expect(mockRepo.createTx).toHaveBeenCalledWith(offlineModel);
-    });
-  });
-
   describe('method: submit', () => {
     const signatureModel = new OfflineSignatureModel({
       id: 'someId',

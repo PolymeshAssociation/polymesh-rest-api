@@ -28,15 +28,6 @@ export class OfflineSubmitterService {
     );
   }
 
-  public async recordRequest(record: OfflineTxModel): Promise<void> {
-    const { id } = record;
-    this.logger.debug(`received transaction request: ${id}`);
-
-    await this.offlineTxRepo.createTx(record);
-
-    this.logger.log(`created transaction record: ${id}`);
-  }
-
   /**
    * @note this assumes the tx request has already been recorded
    */
