@@ -13,9 +13,11 @@ import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 const mockSend = jest.fn();
 const mockConnectionClose = jest.fn();
 const mockSendClose = jest.fn();
+const mockAccept = jest.fn();
+const mockReject = jest.fn();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const generateMockReceiver = (body: any): unknown => {
+const generateMockReceiver = (body: any, withDelivery = true): unknown => {
   return {
     // eslint-disable-next-line @typescript-eslint/ban-types
     on: (event: string, listener: Function): void => {
@@ -23,6 +25,12 @@ const generateMockReceiver = (body: any): unknown => {
         message: {
           body,
         },
+        delivery: withDelivery
+          ? {
+              accept: mockAccept,
+              reject: mockReject,
+            }
+          : undefined,
       });
       listener(mockContext);
     },
@@ -100,7 +108,7 @@ describe('ArtemisService', () => {
   });
 
   describe('registerListener', () => {
-    it('should register and call a listener', async () => {
+    it('should register and call a listener, which accepts the message', async () => {
       const listener = jest.fn();
 
       service.registerListener(QueueName.Requests, listener, StubModel);
@@ -108,6 +116,7 @@ describe('ArtemisService', () => {
       await clearEventLoop();
 
       expect(listener).toHaveBeenCalled();
+      expect(mockAccept).toHaveBeenCalled();
     });
 
     it('should error if the receiver is called with an unexpected payload', async () => {
@@ -121,6 +130,18 @@ describe('ArtemisService', () => {
       await clearEventLoop();
 
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should reject the message if the listener throws an error', async () => {
+      const mockError = new Error('some error');
+      const listener = jest.fn().mockRejectedValue(mockError);
+
+      service.registerListener(QueueName.Requests, listener, StubModel);
+
+      await clearEventLoop();
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(mockReject).toHaveBeenCalled();
     });
   });
 
