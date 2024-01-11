@@ -14,6 +14,7 @@ import {
   SenderOptions,
 } from 'rhea-promise';
 
+import { AppInternalError } from '~/common/errors';
 import { AddressName, QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
@@ -98,15 +99,26 @@ export class ArtemisService implements OnApplicationShutdown {
   }
 
   private receiverOptions(listenOn: QueueName): ReceiverOptions {
+    /* istanbul ignore next: not worth mocking the lib callbacks */
+    const onSessionError = (context: EventContext): void => {
+      const sessionError = context?.session?.error;
+      this.logger.error(
+        `A session error occurred for receiver "${listenOn}": ${sessionError ?? 'unknown error'}`
+      );
+    };
+
     return {
       name: `${listenOn}`,
-      credit_window: 10, // how many message to pre-fetch,
+      credit_window: 1,
+      autoaccept: true,
+      autosettle: false,
       source: {
         address: listenOn,
         distribution_mode: 'move',
         durable: 2,
         expiry_policy: 'never',
       },
+      onSessionError,
     };
   }
 
@@ -143,6 +155,11 @@ export class ArtemisService implements OnApplicationShutdown {
 
     receiver.on(ReceiverEvents.message, async (context: EventContext) => {
       this.logger.debug(`received message ${listenOn}`);
+      /* istanbul ignore next: message will be unacknowledgeable without this */
+      if (!context.delivery) {
+        throw new AppInternalError('message received without delivery methods');
+      }
+
       if (context.message) {
         const model = new Model(context.message.body);
         const validationErrors = await validate(model);
@@ -150,8 +167,30 @@ export class ArtemisService implements OnApplicationShutdown {
           this.logger.error(`Validation errors: ${JSON.stringify(validationErrors)}`);
         }
 
-        listener(model);
+        try {
+          await listener(model);
+
+          context.delivery.accept();
+        } catch (error) {
+          let message = 'unknown error';
+          if (error instanceof Error) {
+            message = error.message;
+          }
+          this.logger.error(
+            `rejecting message for queue "${listenOn}", listener threw error: ${message}`
+          );
+
+          context.delivery.reject({
+            condition: 'processing error',
+            description: `Error processing message: ${message}`,
+          });
+        }
       }
+    });
+
+    receiver.on(ReceiverEvents.receiverError, (context: EventContext) => {
+      const receiverError = context?.receiver?.error;
+      this.logger.error(`An error occurred for receiver "${listenOn}": ${receiverError}`);
     });
   }
 
@@ -172,8 +211,6 @@ export class ArtemisService implements OnApplicationShutdown {
 
     const connection = await this.getConnection();
 
-    this.logger.debug(`making publish connection: ${addressName}`);
-
     const sender = await connection.createAwaitableSender(this.senderOptions(addressName));
 
     this.logger.debug(`made publish connection: ${addressName}`);
@@ -190,8 +227,6 @@ export class ArtemisService implements OnApplicationShutdown {
 
   private async getReceiver(queueName: QueueName): Promise<Receiver> {
     const connection = await this.getConnection();
-
-    this.logger.debug(`making receiver: ${queueName}`);
 
     const receiver = await connection.createReceiver(this.receiverOptions(queueName));
 
