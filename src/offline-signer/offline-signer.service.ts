@@ -4,7 +4,7 @@ import { ArtemisService } from '~/artemis/artemis.service';
 import { AddressName, QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { OfflineSignatureModel } from '~/offline-signer/models/offline-signature.model';
-import { OfflineTxModel } from '~/offline-submitter/models/offline-tx.model';
+import { OfflineRequestModel } from '~/offline-starter/models/offline-request.model';
 import { SigningService } from '~/signing/services';
 
 /**
@@ -23,11 +23,11 @@ export class OfflineSignerService {
       QueueName.Requests,
       /* istanbul ignore next */
       msg => this.autoSign(msg),
-      OfflineTxModel
+      OfflineRequestModel
     );
   }
 
-  public async autoSign(body: OfflineTxModel): Promise<void> {
+  public async autoSign(body: OfflineRequestModel): Promise<void> {
     const { id: transactionId } = body;
     this.logger.debug(`received request for signature: ${transactionId}`);
 

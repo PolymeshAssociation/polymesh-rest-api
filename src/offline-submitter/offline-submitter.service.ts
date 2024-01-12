@@ -33,6 +33,8 @@ export class OfflineSubmitterService {
    */
   public async submit(body: OfflineSignatureModel): Promise<void> {
     const { id, signature, payload } = body;
+    const { address, nonce: rawNonce } = payload.payload;
+    const nonce = parseInt(rawNonce, 16);
     this.logger.debug(`received signature for: ${id}`);
 
     const transaction = await this.offlineTxRepo.createTx({
@@ -40,6 +42,8 @@ export class OfflineSubmitterService {
       payload,
       status: OfflineTxStatus.Signed,
       signature,
+      address,
+      nonce,
     });
 
     this.logger.log(`submitting transaction: ${id}`);
@@ -50,6 +54,7 @@ export class OfflineSubmitterService {
     this.logger.log(`transaction finalized: ${id}`);
 
     const msg = JSON.parse(JSON.stringify(result)); // make sure its serializes properly
+
     await this.artemisService.sendMessage(AddressName.Finalizations, msg);
 
     transaction.blockHash = result.blockHash as string;

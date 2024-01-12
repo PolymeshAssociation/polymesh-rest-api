@@ -47,7 +47,10 @@ const offlineTx = new OfflineTxModel({
     rawPayload: { address: 'address', data: '0x01', type: 'bytes' },
     metadata: { memo: 'test utils payload' },
   },
-  status: OfflineTxStatus.Requested,
+  status: OfflineTxStatus.Signed,
+  signature: '0x01',
+  address: 'someAddress',
+  nonce: 1,
 });
 
 export const testAccount = createMock<Account>({ address: 'address' });

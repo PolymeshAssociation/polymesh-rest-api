@@ -13,6 +13,12 @@ export class OfflineTx extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   signature: string;
 
+  @Column({ type: 'text' })
+  address: string;
+
+  @Column({ type: 'integer' })
+  nonce: number;
+
   @Column({ type: 'json' })
   payload: TransactionPayload;
 

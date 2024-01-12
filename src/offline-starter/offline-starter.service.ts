@@ -7,6 +7,7 @@ import { ArtemisService } from '~/artemis/artemis.service';
 import { AddressName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { OfflineReceiptModel } from '~/offline-starter/models/offline-receipt.model';
+import { OfflineRequestModel } from '~/offline-starter/models/offline-request.model';
 
 @Injectable()
 export class OfflineStarterService {
@@ -25,13 +26,15 @@ export class OfflineStarterService {
     const internalTxId = this.generateTxId();
 
     const payload = await transaction.toSignablePayload({ ...metadata, internalTxId });
-    const topicName = AddressName.Requests;
 
-    this.logger.debug(`sending topic: ${topicName}`, topicName);
-    const delivery = await this.artemisService.sendMessage(topicName, {
+    const request = new OfflineRequestModel({
       id: internalTxId,
       payload,
     });
+    const topicName = AddressName.Requests;
+
+    this.logger.debug(`sending topic: ${topicName}`, topicName);
+    const delivery = await this.artemisService.sendMessage(topicName, request);
 
     const model = new OfflineReceiptModel({
       deliveryId: new BigNumber(delivery.id),
