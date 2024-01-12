@@ -18,6 +18,7 @@ sed -i.bak -e "s/.setVersion('.*')/.setVersion('$nextVersion')/g" src/main.ts
 rm src/main.ts.bak
 
 export CHAIN_IMAGE="$CHAIN_REPO:$CHAIN_TAG"
+export SUBQUERY_IMAGE="polymeshassociation/polymesh-subquery:v12.1.0"
 
 docker compose up -d chain
 
