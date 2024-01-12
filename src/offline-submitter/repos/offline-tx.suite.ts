@@ -11,9 +11,8 @@ export const testOfflineTxRepo = async (offlineTxRepo: OfflineTxRepo): Promise<v
   describe('method: createTx', () => {
     it('should record the transaction request', async () => {
       const txParams = new OfflineTxModel({
+        ...offlineTx,
         id: 'someTestSuiteId',
-        payload: offlineTx.payload,
-        status: OfflineTxStatus.Requested,
       });
       model = await offlineTxRepo.createTx({ ...txParams });
       expect(model).toMatchSnapshot();

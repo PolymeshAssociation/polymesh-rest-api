@@ -43,7 +43,10 @@ describe('OfflineSubmitterService', () => {
     offlineModel = new OfflineTxModel({
       id: 'someId',
       payload: {} as TransactionPayload,
-      status: OfflineTxStatus.Requested,
+      status: OfflineTxStatus.Signed,
+      signature: '0x01',
+      nonce: 1,
+      address: 'someAddress',
     });
   });
 
