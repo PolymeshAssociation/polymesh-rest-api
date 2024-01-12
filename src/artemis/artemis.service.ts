@@ -164,7 +164,9 @@ export class ArtemisService implements OnApplicationShutdown {
         const model = new Model(context.message.body);
         const validationErrors = await validate(model);
         if (validationErrors.length) {
-          this.logger.error(`Validation errors: ${JSON.stringify(validationErrors)}`);
+          this.logger.error(
+            `Validation errors for "${listenOn}": ${JSON.stringify(validationErrors)}`
+          );
         }
 
         try {

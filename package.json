@@ -32,6 +32,7 @@
     "postgres:dev:reset": "yarn postgres:dev down postgres --volumes && yarn postgres:dev:start",
     "postgres:dev:migration:generate": "source ./postgres.dev.config && yarn postgres migration:generate",
     "postgres:dev:migration:run": "source ./postgres.dev.config && yarn postgres migration:run",
+    "postgres:dev:migration:revert": "source ./postgres.dev.config && yarn postgres migration:revert",
     "postgres:migration:run": "yarn postgres migration:run"
   },
   "dependencies": {

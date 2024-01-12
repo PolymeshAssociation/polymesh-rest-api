@@ -2,7 +2,9 @@
 
 exports[`PostgresOfflineTxRepo OfflineTxRepo test suite method: createTx should record the transaction request 1`] = `
 OfflineTxModel {
+  "address": "someAddress",
   "id": "someTestSuiteId",
+  "nonce": 1,
   "payload": {
     "metadata": {
       "memo": "test utils payload",
@@ -28,6 +30,7 @@ OfflineTxModel {
       "type": "bytes",
     },
   },
-  "status": "Requested",
+  "signature": "0x01",
+  "status": "Signed",
 }
 `;

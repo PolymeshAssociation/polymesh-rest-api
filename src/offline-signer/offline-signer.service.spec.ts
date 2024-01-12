@@ -6,7 +6,7 @@ import { ArtemisService } from '~/artemis/artemis.service';
 import { AddressName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { OfflineSignerService } from '~/offline-signer/offline-signer.service';
-import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
+import { OfflineRequestModel } from '~/offline-starter/models/offline-request.model';
 import { SigningService } from '~/signing/services';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { mockArtemisServiceProvider } from '~/test-utils/service-mocks';
@@ -47,10 +47,9 @@ describe('OfflineSignerService', () => {
 
   describe('method: autoSign', () => {
     it('should sign and publish the signature', async () => {
-      const model = new OfflineTxModel({
+      const model = new OfflineRequestModel({
         id: 'someId',
         payload: {} as TransactionPayload,
-        status: OfflineTxStatus.Requested,
       });
 
       const mockSignature = '0x01';

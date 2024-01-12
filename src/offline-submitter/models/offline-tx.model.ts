@@ -2,10 +2,9 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export enum OfflineTxStatus {
-  Requested = 'Requested',
   Signed = 'Signed',
   Finalized = 'Finalized',
 }
@@ -27,14 +26,26 @@ export class OfflineTxModel {
   })
   @IsOptional()
   @IsString()
-  signature?: string;
+  signature: string;
 
   @ApiProperty({
     description: 'The status of the transaction',
     enum: OfflineTxStatus,
   })
   @IsEnum(OfflineTxStatus)
-  status: OfflineTxStatus = OfflineTxStatus.Requested;
+  status: OfflineTxStatus = OfflineTxStatus.Signed;
+
+  @ApiProperty({
+    description: 'The account signing the transaction',
+  })
+  @IsString()
+  readonly address: string;
+
+  @ApiProperty({
+    description: 'The nonce of the transaction',
+  })
+  @IsNumber()
+  readonly nonce: number;
 
   @ApiProperty({
     description: 'The block hash the transaction was included in',

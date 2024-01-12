@@ -2,7 +2,9 @@
 
 exports[`LocalOfflineTxRepo OfflineEvent test suite method: createTx should record the transaction request 1`] = `
 {
+  "address": "someAddress",
   "id": "1",
+  "nonce": 1,
   "payload": {
     "metadata": {
       "memo": "test utils payload",
@@ -28,6 +30,7 @@ exports[`LocalOfflineTxRepo OfflineEvent test suite method: createTx should reco
       "type": "bytes",
     },
   },
-  "status": "Requested",
+  "signature": "0x01",
+  "status": "Signed",
 }
 `;
