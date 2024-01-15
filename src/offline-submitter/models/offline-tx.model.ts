@@ -24,7 +24,6 @@ export class OfflineTxModel {
   @ApiProperty({
     description: 'The signature for the transaction',
   })
-  @IsOptional()
   @IsString()
   signature: string;
 

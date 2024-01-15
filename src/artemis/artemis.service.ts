@@ -99,18 +99,18 @@ export class ArtemisService implements OnApplicationShutdown {
   }
 
   private receiverOptions(listenOn: QueueName): ReceiverOptions {
-    /* istanbul ignore next: not worth mocking the lib callbacks */
+    /* istanbul ignore next: not worth mocking the lib callbacks for a log */
     const onSessionError = (context: EventContext): void => {
       const sessionError = context?.session?.error;
       this.logger.error(
-        `A session error occurred for receiver "${listenOn}": ${sessionError ?? 'unknown error'}`
+        `session error occurred for receiver "${listenOn}": ${sessionError ?? 'unknown error'}`
       );
     };
 
     return {
       name: `${listenOn}`,
       credit_window: 1,
-      autoaccept: true,
+      autoaccept: false,
       autosettle: false,
       source: {
         address: listenOn,
@@ -155,7 +155,7 @@ export class ArtemisService implements OnApplicationShutdown {
 
     receiver.on(ReceiverEvents.message, async (context: EventContext) => {
       this.logger.debug(`received message ${listenOn}`);
-      /* istanbul ignore next: message will be unacknowledgeable without this */
+      /* istanbul ignore next: message cannot be acknowledge without `delivery` methods */
       if (!context.delivery) {
         throw new AppInternalError('message received without delivery methods');
       }
@@ -165,8 +165,15 @@ export class ArtemisService implements OnApplicationShutdown {
         const validationErrors = await validate(model);
         if (validationErrors.length) {
           this.logger.error(
-            `Validation errors for "${listenOn}": ${JSON.stringify(validationErrors)}`
+            `validation errors for "${listenOn}": ${JSON.stringify(validationErrors)}`
           );
+
+          context.delivery.reject({
+            condition: 'validation error',
+            description: `message was deemed invalid for model: ${Model.name}`,
+          });
+
+          return;
         }
 
         try {
@@ -184,7 +191,7 @@ export class ArtemisService implements OnApplicationShutdown {
 
           context.delivery.reject({
             condition: 'processing error',
-            description: `Error processing message: ${message}`,
+            description: `error processing message: ${message}`,
           });
         }
       }
@@ -192,7 +199,7 @@ export class ArtemisService implements OnApplicationShutdown {
 
     receiver.on(ReceiverEvents.receiverError, (context: EventContext) => {
       const receiverError = context?.receiver?.error;
-      this.logger.error(`An error occurred for receiver "${listenOn}": ${receiverError}`);
+      this.logger.error(`an error occurred for receiver "${listenOn}": ${receiverError}`);
     });
   }
 
