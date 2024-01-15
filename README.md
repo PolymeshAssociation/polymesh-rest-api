@@ -119,6 +119,7 @@ Process modes include:
   - `submitWithCallback` This works like submit, but returns a response as soon as the transaction is submitted. The URL specified by `webhookUrl` will receive updates as the transaction is processed
   - `dryRun`  This creates and validates a transaction, and returns an estimate of its fees.
   - `offline` This creates an unsigned transaction and returns a serialized JSON payload. The information can be signed, and then submitted to the chain.
+  - `AMQP` This creates an transaction to be processed by worker processes using an AMQP broker to ensure reliable processing
 
 ### Signing Managers
 
@@ -151,6 +152,22 @@ After being generated the signature with the payload can be passed to `/submit` 
 
 This mode introduces the risk transactions are rejected due to incorrect nonces or elapsed lifetime. See the [options DTO](src/common/dto/transaction-options.dto.ts) definition for full details
 
+### AMQP
+
+AMQP is a form on offline processing where the payload will be published on an AMQP topic, instead of being returned. Currently there are a set of "offline" modules, that setup listeners to the different queues.
+
+1. A transaction with "AMQP" mode is received. This gets serialized to an offline payload and published on `Requests`
+1. A signer process subscribes to `Requests`. For each message it generates a signature, and publishes a message on `Signatures`
+1. A submitter process subscribes to `Signatures` and submits to the chain. It publishes to `Finalizations`, for consumer applications to subscribe to
+
+To use AMQP mode a message broker must be configured. The implementation assumes [ArtemisMQ](https://activemq.apache.org/components/artemis/) is used, with an AMQP acceptor. In theory any AMQP 1.0 compliant broker should work though.
+
+If using AMQP, it is strongly recommended to use a persistent data store (i.e postgres). There are two tables related to AMQP processing: `offline_tx` and `offline_event`:
+  - `offline_tx` is a table for the submitter process. This provides a convenient way to query submitted transactions, and to detect ones rejected by the chain for some reason
+  - `offline_event` is a table for the recorder process. This uses Artemis diverts to record every message exchanged in the process, serving as an audit log
+
+If using the project's compose file, an Artemis console will be exposed on `:8181` with `artemis` being both username and password.
+
 ### Webhooks (alpha)
 
 Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. When processMode `submitAndCallback` is used the `webhookUrl` param must also be provided. The server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
@@ -158,6 +175,14 @@ Normally the endpoints that create transactions wait for block finalization befo
 Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with this header copied into the response headers.
 
 If you are a developer you can toggle an endpoint to aid with testing by setting the env `DEVELOPER_UTILS=true` which will enabled a endpoint at `/developer-testing/webhook` which can then be supplied as the `webhookUrl`. Note, the IsUrl validator doesn't recognize `localhost` as a valid URL, either use the IP `127.0.0.1` or create an entry in `/etc/hosts` like `127.0.0.1 rest.local` and use that instead.
+
+#### Warning
+
+Webhooks are still being developed and should not be used against mainnet. However the API should be stable to develop against for testing and demo purposes
+
+Webhooks have yet to implement a Repo to maintain subscription state, or AMQP to ensure it won't miss events. As such it can not guarantee delivery of messages
+
+The plan is to use a datastore and a message broker to make this module production ready
 
 ### Authentication
 
@@ -192,13 +217,7 @@ To implement a new repo for a service, first define an abstract class describing
 To implement a new datastore create a new module in `~/datastores` and create a set of `Repos` that will implement the abstract classes. You will then need to set up the `DatastoreModule` to export the module when it is configured. For testing, each implemented Repo should be able to pass the `test` method defined on the abstract class it is implementing.
 
 
-#### Warning
 
-Webhooks are still being developed and should not be used against mainnet. However the API should be stable to develop against for testing and demo purposes
-
-Webhooks have yet to implement a Repo. As such the subscription status is not persisted and the service can not guarantee delivery in the face of ordinary compting faults.
-
-In its current state the transactions would have to be reconciled with chain events as there is a chance for notifications to not be delivered.
 
 ### With docker
 
