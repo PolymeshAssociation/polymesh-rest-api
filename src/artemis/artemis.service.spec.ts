@@ -71,6 +71,7 @@ jest.mock('rhea-promise', () => {
 describe('ArtemisService', () => {
   let service: ArtemisService;
   let logger: DeepMocked<PolymeshLogger>;
+  let configSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -78,6 +79,8 @@ describe('ArtemisService', () => {
     }).compile();
 
     service = module.get<ArtemisService>(ArtemisService);
+    configSpy = jest.spyOn(service, 'isConfigured');
+    configSpy.mockReturnValue(true);
     logger = module.get<typeof logger>(PolymeshLogger);
   });
 
@@ -165,6 +168,15 @@ describe('ArtemisService', () => {
       await service.onApplicationShutdown();
 
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should do no work if service is not configured', async () => {
+      configSpy.mockReturnValue(false);
+
+      const initialCallCount = mockConnectionClose.mock.calls.length;
+      await service.onApplicationShutdown();
+
+      expect(mockConnectionClose.mock.calls.length).toEqual(initialCallCount);
     });
   });
 });

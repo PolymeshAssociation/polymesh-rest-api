@@ -53,9 +53,16 @@ export class OfflineSubmitterService {
     );
     this.logger.log(`transaction finalized: ${id}`);
 
-    const msg = JSON.parse(JSON.stringify(result)); // make sure its serializes properly
+    const resultData = JSON.parse(JSON.stringify(result)); // make sure its serializes properly
 
-    await this.artemisService.sendMessage(AddressName.Finalizations, msg);
+    const finalizationMsg = {
+      ...resultData,
+      id,
+      address,
+      nonce,
+    };
+
+    await this.artemisService.sendMessage(AddressName.Finalizations, finalizationMsg);
 
     transaction.blockHash = result.blockHash as string;
     transaction.txIndex = result.txIndex as string;

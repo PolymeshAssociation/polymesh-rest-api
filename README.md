@@ -91,11 +91,16 @@ NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
 AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
 API_KEYS=## list of comma separated api keys to initialize the `apiKey` strategy with ##
 # Datastore:
-REST_POSTGRES_HOST=## Domain or IP indicating of the DB ##
+REST_POSTGRES_HOST=## Domain or IP of DB instance ##
 REST_POSTGRES_PORT=## Port the DB is listening (usually 5432) ##
 REST_POSTGRES_USER=## DB user to use##
 REST_POSTGRES_PASSWORD=## Password of the user ##
 REST_POSTGRES_DATABASE=## Database to use ##
+# Artemis:
+ARTEMIS_HOST=localhost## Domain or IP of artemis instance ##
+ARTEMIS_USERNAME=artemis ## Artemis user ##
+ARTEMIS_PASSWORD=artemis ## Artemis password ##
+ARTEMIS_PORT=5672 ## Port of AMQP acceptor ##
 ```
 
 ## Signing Transactions
