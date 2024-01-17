@@ -8,6 +8,11 @@ import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class OfflineReceiptModel {
   @ApiProperty({
+    description: 'The internal ID of the transaction',
+  })
+  readonly id: string;
+
+  @ApiProperty({
     description: 'The AMQP delivery ID',
     type: BigNumber,
   })

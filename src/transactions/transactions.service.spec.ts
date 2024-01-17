@@ -223,6 +223,7 @@ describe('TransactionsService', () => {
 
   describe('submit (with AMQP)', () => {
     const fakeReceipt = new OfflineReceiptModel({
+      id: 'someId',
       deliveryId: new BigNumber(1),
       topicName: AddressName.Requests,
       payload: {} as SignerPayloadJSON,

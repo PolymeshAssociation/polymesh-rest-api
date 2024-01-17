@@ -37,10 +37,18 @@ export class ArtemisService implements OnApplicationShutdown {
     this.logger.setContext(ArtemisService.name);
   }
 
+  public isConfigured(): boolean {
+    return !!process.env.ARTEMIS_HOST;
+  }
+
   public async onApplicationShutdown(signal?: string | undefined): Promise<void> {
     this.logger.debug(
       `artemis service received application shutdown request, sig: ${signal} - now closing connections`
     );
+
+    if (!this.isConfigured()) {
+      return;
+    }
 
     const closePromises = [
       ...this.receivers.map(receiver => receiver.close()),
