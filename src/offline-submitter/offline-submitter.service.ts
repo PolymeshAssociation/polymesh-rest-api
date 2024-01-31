@@ -64,9 +64,9 @@ export class OfflineSubmitterService {
 
     await this.artemisService.sendMessage(AddressName.Finalizations, finalizationMsg);
 
-    transaction.blockHash = result.blockHash as string;
-    transaction.txIndex = result.txIndex as string;
-    transaction.txHash = result.txHash as string;
+    transaction.blockHash = result.blockHash;
+    transaction.txIndex = result.transactionIndex.toString();
+    transaction.txHash = result.transactionHash;
     transaction.status = OfflineTxStatus.Finalized;
     await this.updateTransaction(transaction);
   }
