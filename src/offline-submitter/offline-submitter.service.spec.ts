@@ -1,5 +1,6 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
@@ -75,8 +76,8 @@ describe('OfflineSubmitterService', () => {
       const networkMock = createMock<typeof mockPolymeshService.polymeshApi.network>();
       networkMock.submitTransaction.mockResolvedValue({
         blockHash: '0x02',
-        txHash: '0x03',
-        txIndex: 1,
+        transactionHash: '0x03',
+        transactionIndex: new BigNumber(1),
       });
 
       mockPolymeshService.polymeshApi.network = networkMock;
@@ -91,15 +92,15 @@ describe('OfflineSubmitterService', () => {
           payload: {},
           status: 'Finalized',
           txHash: '0x03',
-          txIndex: 1,
+          txIndex: '1',
         })
       );
       expect(mockArtemisService.sendMessage).toHaveBeenCalledWith(
         AddressName.Finalizations,
         expect.objectContaining({
           blockHash: '0x02',
-          txHash: '0x03',
-          txIndex: 1,
+          transactionHash: '0x03',
+          transactionIndex: '1',
         })
       );
     });
