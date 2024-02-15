@@ -8,6 +8,7 @@ import { Type } from 'class-transformer';
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { LegModel } from '~/settlements/models/leg.model';
+import { MediatorAffirmationModel } from '~/settlements/models/mediator-affirmation.model';
 
 export class InstructionModel {
   @ApiProperty({
@@ -85,6 +86,13 @@ export class InstructionModel {
   })
   @Type(() => LegModel)
   readonly legs: LegModel[];
+
+  @ApiProperty({
+    description: 'List of mediators involved in the Instruction',
+    type: MediatorAffirmationModel,
+    isArray: true,
+  })
+  readonly mediators: MediatorAffirmationModel[];
 
   constructor(model: InstructionModel) {
     Object.assign(this, model);

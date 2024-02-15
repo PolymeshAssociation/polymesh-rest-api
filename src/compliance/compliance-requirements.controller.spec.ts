@@ -99,7 +99,7 @@ describe('ComplianceRequirementsController', () => {
         .calledWith(ticker, validBody)
         .mockResolvedValue(txResponse);
 
-      const result = await controller.pauseRequirements({ ticker }, validBody);
+      const result = await controller.unpauseRequirements({ ticker }, validBody);
       expect(result).toEqual(txResponse);
     });
   });

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { AppConflictError, AppNotFoundError } from '~/common/errors';
 import { UserModel } from '~/users/model/user.model';
 import { UsersRepo } from '~/users/repo/user.repo';

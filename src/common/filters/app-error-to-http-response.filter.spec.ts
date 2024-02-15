@@ -10,6 +10,7 @@ import {
   AppNotFoundError,
   AppUnauthorizedError,
   AppUnprocessableError,
+  AppValidationError,
 } from '~/common/errors';
 import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http-response.filter';
 import { testValues } from '~/test-utils/consts';
@@ -31,6 +32,7 @@ describe('AppErrorToHttpResponseFilter', () => {
   const configError = new AppConfigError('TEST_CONFIG', 'is a test error');
   const unauthorizedError = new AppUnauthorizedError('test');
   const unprocessesableError = new AppUnprocessableError('test');
+  const validationError = new AppValidationError('test validation');
   const internalError = new AppInternalError('internal test');
 
   const cases: Case[] = [
@@ -47,6 +49,10 @@ describe('AppErrorToHttpResponseFilter', () => {
     [
       unprocessesableError,
       [{ message: unprocessesableError.message, statusCode: 422 }, HttpStatus.UNPROCESSABLE_ENTITY],
+    ],
+    [
+      validationError,
+      [{ message: validationError.message, statusCode: 400 }, HttpStatus.BAD_REQUEST],
     ],
     [
       internalError,

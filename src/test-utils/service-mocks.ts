@@ -38,6 +38,9 @@ export class MockAssetService {
   unfreeze = jest.fn();
   controllerTransfer = jest.fn();
   getOperationHistory = jest.fn();
+  getRequiredMediators = jest.fn();
+  addRequiredMediators = jest.fn();
+  removeRequiredMediators = jest.fn();
 }
 
 export class MockTransactionsService {
@@ -154,6 +157,9 @@ export class MockSettlementsService {
   findVenuesByOwner = jest.fn();
   withdrawAffirmation = jest.fn();
   rescheduleInstruction = jest.fn();
+  affirmInstructionAsMediator = jest.fn();
+  rejectInstructionAsMediator = jest.fn();
+  withdrawAffirmationAsMediator = jest.fn();
 }
 
 export class MockClaimsService {

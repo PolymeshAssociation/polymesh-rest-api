@@ -6,6 +6,7 @@ import {
   AuthorizationRequest,
   FungibleAsset,
   HistoricAgentOperation,
+  Identity,
   IdentityBalance,
   NftCollection,
   ResultSet,
@@ -15,6 +16,7 @@ import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
+import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
@@ -159,5 +161,38 @@ export class AssetsService {
   public async getOperationHistory(ticker: string): Promise<HistoricAgentOperation[]> {
     const asset = await this.findFungible(ticker);
     return asset.getOperationHistory();
+  }
+
+  public async getRequiredMediators(ticker: string): Promise<Identity[]> {
+    const asset = await this.findOne(ticker);
+    return asset.getRequiredMediators().catch(error => {
+      throw handleSdkError(error);
+    });
+  }
+
+  public async addRequiredMediators(
+    ticker: string,
+    params: RequiredMediatorsDto
+  ): ServiceReturn<void> {
+    const {
+      options,
+      args: { mediators },
+    } = extractTxOptions(params);
+    const { addRequiredMediators } = await this.findOne(ticker);
+
+    return this.transactionsService.submit(addRequiredMediators, { mediators }, options);
+  }
+
+  public async removeRequiredMediators(
+    ticker: string,
+    params: RequiredMediatorsDto
+  ): ServiceReturn<void> {
+    const {
+      options,
+      args: { mediators },
+    } = extractTxOptions(params);
+    const { removeRequiredMediators } = await this.findOne(ticker);
+
+    return this.transactionsService.submit(removeRequiredMediators, { mediators }, options);
   }
 }
