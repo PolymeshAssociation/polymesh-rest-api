@@ -144,6 +144,17 @@ describe('SettlementsService', () => {
     });
   });
 
+  describe('findVenuesByOwner', () => {
+    it('should return the identities venues', async () => {
+      const mockVenue = new MockVenue();
+      const mockIdentity = new MockIdentity();
+      mockIdentity.getVenues.mockResolvedValue([mockVenue]);
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      const result = await service.findVenuesByOwner('someDid');
+      expect(result).toEqual([mockVenue]);
+    });
+  });
+
   describe('createInstruction', () => {
     it('should run an addInstruction procedure and return the queue data', async () => {
       const mockVenue = new MockVenue();
@@ -396,18 +407,24 @@ describe('SettlementsService', () => {
   });
 
   describe('canTransfer', () => {
-    it('should return if Asset transfer is possible ', async () => {
-      const mockTransferBreakdown = {
-        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
-        compliance: {
-          requirements: [],
-          complies: false,
-        },
-        restrictions: [],
-        result: false,
-      };
+    const mockTransferBreakdown = {
+      general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+      compliance: {
+        requirements: [],
+        complies: false,
+      },
+      restrictions: [],
+      result: false,
+    };
 
-      const mockAsset = new MockAsset();
+    let mockAsset: MockAsset;
+    beforeEach(() => {
+      mockAsset = new MockAsset();
+      mockAsset.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
+      mockAssetsService.findOne.mockResolvedValue(mockAsset);
+    });
+
+    it('should return if Asset transfer is possible ', async () => {
       mockAsset.settlements.canTransfer.mockResolvedValue(mockTransferBreakdown);
 
       mockAssetsService.findOne.mockResolvedValue(mockAsset);
@@ -417,6 +434,18 @@ describe('SettlementsService', () => {
         new PortfolioDto({ did: 'toDid', id: new BigNumber(2) }).toPortfolioLike(),
         'TICKER',
         new BigNumber(123)
+      );
+
+      expect(result).toEqual(mockTransferBreakdown);
+    });
+
+    it('should return if NFT transfer is possible ', async () => {
+      const result = await service.canTransfer(
+        new PortfolioDto({ did: 'fromDid', id: new BigNumber(1) }).toPortfolioLike(),
+        new PortfolioDto({ did: 'toDid', id: new BigNumber(2) }).toPortfolioLike(),
+        'NFT',
+        undefined,
+        [new BigNumber(1)]
       );
 
       expect(result).toEqual(mockTransferBreakdown);
@@ -449,6 +478,106 @@ describe('SettlementsService', () => {
       });
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockInstruction.withdraw,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('affirmInstructionAsMediator', () => {
+    it('should run an affirm procedure and return the queue data', async () => {
+      const expiry = new Date();
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.AffirmInstructionAsMediator,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const body = {
+        signer,
+        expiry,
+      };
+
+      const result = await service.affirmInstructionAsMediator(new BigNumber(123), body);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.affirmAsMediator,
+        { expiry },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('rejectInstructionAsMediator', () => {
+    it('should run a reject procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.RejectInstructionAsMediator,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.rejectInstructionAsMediator(new BigNumber(123), {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.rejectAsMediator,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('withdrawAffirmationAsMediator', () => {
+    it('should run a withdraw affirmation procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.WithdrawAffirmationAsMediator,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.withdrawAffirmationAsMediator(new BigNumber(123), {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.withdrawAsMediator,
         {},
         expect.objectContaining({ signer })
       );

@@ -22,12 +22,14 @@ services:
       start_period: 10s
 
   subquery:
+    platform: 'linux/amd64'
     image: '${SUBQUERY_IMAGE}'
     init: true
     restart: unless-stopped
     depends_on:
       - 'postgres'
     environment:
+      START_BLOCK: 1
       NETWORK_ENDPOINT: ws://chain:9944
       NETWORK_HTTP_ENDPOINT: http://chain:9933
       DB_USER: '${PG_USER:-postgres}'

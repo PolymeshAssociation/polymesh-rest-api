@@ -1,4 +1,4 @@
-/** istanbul ignore file */
+/* istanbul ignore file */
 
 import { Identity, Signer } from '@polymeshassociation/polymesh-sdk/types';
 import { isAccount } from '@polymeshassociation/polymesh-sdk/utils';

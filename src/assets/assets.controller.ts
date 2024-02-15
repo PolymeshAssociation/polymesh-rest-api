@@ -17,12 +17,14 @@ import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
+import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
+import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
@@ -432,5 +434,83 @@ export class AssetsController {
     const agentOperations = await this.assetsService.getOperationHistory(ticker);
 
     return agentOperations.map(agentOperation => new AgentOperationModel(agentOperation));
+  }
+
+  @ApiOperation({
+    summary: "Fetch an Asset's required mediators",
+    description:
+      'This endpoint provides a list required mediators for the asset. These identities must affirm any instruction involving the asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose required mediators is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiOkResponse({
+    description: 'The required mediators for the asset',
+    type: RequiredMediatorsModel,
+  })
+  @Get(':ticker/required-mediators')
+  public async getRequiredMediators(
+    @Param() { ticker }: TickerParamsDto
+  ): Promise<RequiredMediatorsModel> {
+    const mediatorIdentities = await this.assetsService.getRequiredMediators(ticker);
+    const mediators = mediatorIdentities.map(({ did }) => did);
+
+    return new RequiredMediatorsModel({ mediators });
+  }
+
+  @ApiOperation({
+    summary: 'Add required mediators',
+    description:
+      'This endpoint adds required mediators for an asset. These identities will need to affirm instructions involving this asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to set required mediators for',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Post(':ticker/add-required-mediators')
+  public async addRequiredMediators(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: RequiredMediatorsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.addRequiredMediators(ticker, params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Remove required mediators',
+    description: 'This endpoint removes required mediators for an asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to set required mediators for',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Post(':ticker/remove-required-mediators')
+  public async removeRequiredMediators(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: RequiredMediatorsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.removeRequiredMediators(ticker, params);
+    return handleServiceResult(result);
   }
 }

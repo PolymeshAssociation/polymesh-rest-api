@@ -3,7 +3,7 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { KnownAssetType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { AffirmationStatus, KnownAssetType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
@@ -18,6 +18,7 @@ import { testValues } from '~/test-utils/consts';
 import {
   MockAsset,
   MockAuthorizationRequest,
+  MockIdentity,
   MockPolymesh,
   MockTransaction,
 } from '~/test-utils/mocks';
@@ -534,6 +535,105 @@ describe('AssetsService', () => {
 
       const result = await service.getOperationHistory('TICKER');
       expect(result).toEqual(mockOperations);
+    });
+  });
+
+  describe('getRequiredMediators', () => {
+    it("should return the Asset's required mediators", async () => {
+      const mockAsset = new MockAsset();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAsset as any);
+
+      const identity = new MockIdentity();
+
+      const mockMediators = [
+        {
+          identity,
+          status: AffirmationStatus.Pending,
+        },
+      ];
+      mockAsset.getRequiredMediators.mockResolvedValue(mockMediators);
+
+      const result = await service.getRequiredMediators('TICKER');
+      expect(result).toEqual(mockMediators);
+    });
+  });
+
+  describe('addRequiredMediators', () => {
+    it('should run a addRequiredMediators procedure and return the transaction results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.AddMandatoryMediators,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockAsset = new MockAsset();
+      mockAsset.addRequiredMediators.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const result = await service.addRequiredMediators('TICKER', {
+        signer,
+        mediators: ['someDid'],
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.addRequiredMediators,
+        {
+          mediators: ['someDid'],
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('removeRequiredMediators', () => {
+    it('should run a removeRequiredMediators procedure and return the transaction results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.RemoveMandatoryMediators,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockAsset = new MockAsset();
+      mockAsset.removeRequiredMediators.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const result = await service.removeRequiredMediators('TICKER', {
+        signer,
+        mediators: ['someDid'],
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.removeRequiredMediators,
+        {
+          mediators: ['someDid'],
+        },
+        expect.objectContaining({ signer })
+      );
     });
   });
 });

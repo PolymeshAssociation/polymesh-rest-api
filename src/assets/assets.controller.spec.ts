@@ -365,4 +365,54 @@ describe('AssetsController', () => {
       ]);
     });
   });
+
+  describe('getRequiredMediators', () => {
+    it('should call the service and return the results', async () => {
+      const mockMediator = {
+        did: 'Ox6'.padEnd(66, '0'),
+      };
+
+      mockAssetsService.getRequiredMediators.mockResolvedValue([mockMediator]);
+
+      const result = await controller.getRequiredMediators({ ticker: 'TICKER' });
+
+      expect(result).toEqual({
+        mediators: [mockMediator.did],
+      });
+    });
+  });
+
+  describe('addRequiredMediators', () => {
+    it('should call the service and return the results', async () => {
+      const ticker = 'TICKER';
+      const mediators = ['someDid'];
+
+      mockAssetsService.addRequiredMediators.mockResolvedValue(txResult);
+
+      const result = await controller.addRequiredMediators({ ticker }, { signer, mediators });
+
+      expect(result).toEqual(txResult);
+      expect(mockAssetsService.addRequiredMediators).toHaveBeenCalledWith(ticker, {
+        signer,
+        mediators,
+      });
+    });
+  });
+
+  describe('removeRequiredMediators', () => {
+    it('should call the service and return the results', async () => {
+      const ticker = 'TICKER';
+      const mediators = ['someDid'];
+
+      mockAssetsService.removeRequiredMediators.mockResolvedValue(txResult);
+
+      const result = await controller.removeRequiredMediators({ ticker }, { signer, mediators });
+
+      expect(result).toEqual(txResult);
+      expect(mockAssetsService.removeRequiredMediators).toHaveBeenCalledWith(ticker, {
+        signer,
+        mediators,
+      });
+    });
+  });
 });

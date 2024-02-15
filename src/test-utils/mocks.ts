@@ -176,6 +176,9 @@ export class MockAsset {
   public unfreeze = jest.fn();
   public controllerTransfer = jest.fn();
   public getOperationHistory = jest.fn();
+  public getRequiredMediators = jest.fn();
+  public addRequiredMediators = jest.fn();
+  public removeRequiredMediators = jest.fn();
 
   public assetHolders = {
     get: jest.fn(),
@@ -254,6 +257,10 @@ export class MockInstruction {
   public getAffirmations = jest.fn();
   public withdraw = jest.fn();
   public reschedule = jest.fn();
+  public getMediators = jest.fn();
+  public affirmAsMediator = jest.fn();
+  public rejectAsMediator = jest.fn();
+  public withdrawAsMediator = jest.fn();
 }
 
 export class MockVenue {

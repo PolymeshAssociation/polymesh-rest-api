@@ -79,5 +79,22 @@ describe('OfferingsController', () => {
         })
       );
     });
+
+    it('should return a Investments made in an Offering when no start param is provided', async () => {
+      mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
+
+      const result = await controller.getInvestments(
+        { ticker: 'TICKER', id: new BigNumber(1) },
+        { size: new BigNumber(10) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: mockInvestments.data,
+          total: new BigNumber(mockInvestments.count),
+          next: mockInvestments.next,
+        })
+      );
+    });
   });
 });
