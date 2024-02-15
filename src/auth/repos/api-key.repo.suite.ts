@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ApiKeyRepo } from '~/auth/repos/api-key.repo';
 import { AppNotFoundError } from '~/common/errors';
 import { testValues } from '~/test-utils/consts';

@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import { IsByteLength, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsBigNumber, IsDid } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { LegDto } from '~/settlements/dto/leg.dto';
 
@@ -49,4 +49,14 @@ export class CreateInstructionDto extends TransactionBaseDto {
   @IsString()
   @IsByteLength(0, 32)
   readonly memo?: string;
+
+  @ApiPropertyOptional({
+    description: 'Additional identities that will need to affirm that instruction',
+    isArray: true,
+    type: 'string',
+    example: ['0x0600000000000000000000000000000000000000000000000000000000000000'],
+  })
+  @IsOptional()
+  @IsDid({ each: true })
+  readonly mediators: string[];
 }

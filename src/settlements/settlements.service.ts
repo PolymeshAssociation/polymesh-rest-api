@@ -17,6 +17,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { AffirmAsMediatorDto } from '~/settlements/dto/affirm-as-mediator.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
@@ -70,26 +71,6 @@ export class SettlementsService {
     };
 
     return this.transactionsService.submit(venue.addInstruction, params, options);
-  }
-
-  public async affirmInstruction(
-    id: BigNumber,
-    transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Instruction> {
-    const { options } = extractTxOptions(transactionBaseDto);
-    const instruction = await this.findInstruction(id);
-
-    return this.transactionsService.submit(instruction.affirm, {}, options);
-  }
-
-  public async rejectInstruction(
-    id: BigNumber,
-    transactionBaseDto: TransactionBaseDto
-  ): ServiceReturn<Instruction> {
-    const { options } = extractTxOptions(transactionBaseDto);
-    const instruction = await this.findInstruction(id);
-
-    return this.transactionsService.submit(instruction.reject, {}, options);
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {
@@ -153,6 +134,26 @@ export class SettlementsService {
     return assetDetails.settlements.canTransfer({ from, to, amount, nfts });
   }
 
+  public async affirmInstruction(
+    id: BigNumber,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { options } = extractTxOptions(transactionBaseDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.affirm, {}, options);
+  }
+
+  public async rejectInstruction(
+    id: BigNumber,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { options } = extractTxOptions(transactionBaseDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.reject, {}, options);
+  }
+
   public async withdrawAffirmation(
     id: BigNumber,
     signerDto: TransactionBaseDto
@@ -161,5 +162,35 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return this.transactionsService.submit(instruction.withdraw, {}, options);
+  }
+
+  public async affirmInstructionAsMediator(
+    id: BigNumber,
+    transactionBaseDto: AffirmAsMediatorDto
+  ): ServiceReturn<Instruction> {
+    const { options, args } = extractTxOptions(transactionBaseDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.affirmAsMediator, args, options);
+  }
+
+  public async rejectInstructionAsMediator(
+    id: BigNumber,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { options } = extractTxOptions(transactionBaseDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.rejectAsMediator, {}, options);
+  }
+
+  public async withdrawAffirmationAsMediator(
+    id: BigNumber,
+    signerDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { options } = extractTxOptions(signerDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.withdrawAsMediator, {}, options);
   }
 }

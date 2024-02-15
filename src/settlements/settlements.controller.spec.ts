@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
+  Identity,
   InstructionStatus,
   InstructionType,
   Nft,
@@ -43,6 +44,7 @@ describe('SettlementsController', () => {
   describe('getInstruction', () => {
     it('should return the Instruction details', async () => {
       const date = new Date();
+      const mediatorDid = 'mediatorDid';
 
       const mockInstruction = new MockInstruction();
       const mockInstructionDetails = {
@@ -78,11 +80,15 @@ describe('SettlementsController', () => {
       mockInstruction.details.mockResolvedValue(mockInstructionDetails);
       mockInstruction.getStatus.mockResolvedValue({ status: InstructionStatus.Pending });
       mockInstruction.getLegs.mockResolvedValue(mockLegs);
+      mockInstruction.getMediators.mockResolvedValue([
+        { identity: createMock<Identity>({ did: mediatorDid }), status: AffirmationStatus.Pending },
+      ]);
       mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
       const result = await controller.getInstruction({ id: new BigNumber(3) });
 
       expect(result).toEqual({
         ...mockInstructionDetails,
+        mediators: [{ identity: mediatorDid, status: AffirmationStatus.Pending }],
         legs:
           mockLegs.data.map(({ from, to, amount, nfts, asset }) => ({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,7 +136,7 @@ describe('SettlementsController', () => {
     it('should reject an instruction and return the data returned by the service', async () => {
       mockSettlementsService.rejectInstruction.mockResolvedValue(txResult);
 
-      const result = await controller.affirmInstruction(
+      const result = await controller.rejectInstruction(
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
@@ -144,6 +150,46 @@ describe('SettlementsController', () => {
       mockSettlementsService.withdrawAffirmation.mockResolvedValue(txResult);
 
       const result = await controller.withdrawAffirmation(
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('affirmInstructionAsMediator', () => {
+    it('should affirm an instruction and return the data returned by the service', async () => {
+      mockSettlementsService.affirmInstructionAsMediator.mockResolvedValue(txResult);
+
+      const result = await controller.affirmInstructionAsMediator(
+        { id: new BigNumber(3) },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        {} as any
+      );
+
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('rejectInstructionAsMediator', () => {
+    it('should reject an instruction and return the data returned by the service', async () => {
+      mockSettlementsService.rejectInstructionAsMediator.mockResolvedValue(txResult);
+
+      const result = await controller.rejectInstructionAsMediator(
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('withdrawAffirmationAsMediator', () => {
+    it('should withdraw affirmation from an instruction and return the data returned by the service', async () => {
+      mockSettlementsService.withdrawAffirmationAsMediator.mockResolvedValue(txResult);
+
+      const result = await controller.withdrawAffirmationAsMediator(
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
@@ -175,6 +221,26 @@ describe('SettlementsController', () => {
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: mockAffirmations.data,
+          next: null,
+        })
+      );
+    });
+
+    it('should handle when start is present and no more data is returned', async () => {
+      const mockAffirmations = {
+        data: undefined,
+        next: null,
+      };
+      mockSettlementsService.findAffirmations.mockResolvedValue(mockAffirmations);
+
+      const result = await controller.getAffirmations(
+        { id: new BigNumber(3) },
+        { size: new BigNumber(10), start: new BigNumber(10) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: [],
           next: null,
         })
       );

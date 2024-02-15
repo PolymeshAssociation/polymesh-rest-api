@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { AppNotFoundError } from '~/common/errors';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
 import { OfflineTxRepo } from '~/offline-submitter/repos/offline-tx.repo';

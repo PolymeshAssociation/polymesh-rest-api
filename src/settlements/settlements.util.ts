@@ -11,10 +11,11 @@ import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
 
 export async function createInstructionModel(instruction: Instruction): Promise<InstructionModel> {
-  const [details, legsResultSet, instructionStatus] = await Promise.all([
+  const [details, legsResultSet, instructionStatus, mediators] = await Promise.all([
     instruction.details(),
     instruction.getLegs(),
     instruction.getStatus(),
+    instruction.getMediators(),
   ]);
 
   const { status, createdAt, tradeDate, valueDate, venue, type, memo } = details;
@@ -44,6 +45,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
         });
       }
 
+      /* istanbul ignore next */
       return null;
     })
     .filter(leg => !!leg) as LegModel[]; // filters out "off chain" legs, in case they were used
@@ -54,6 +56,11 @@ export async function createInstructionModel(instruction: Instruction): Promise<
     venue,
     type,
     legs: legs || [],
+    mediators: mediators.map(mediator => ({
+      status: mediator.status,
+      identity: mediator.identity.did,
+      expiry: mediator.expiry,
+    })),
   };
 
   if (valueDate !== null) {
