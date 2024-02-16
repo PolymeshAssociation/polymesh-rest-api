@@ -26,7 +26,7 @@ import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
 import * as identityUtil from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
-import { IdentityModel } from '~/identities/models/identity.model';
+import { IdentityDetailsModel } from '~/identities/models/identity-details.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -168,7 +168,7 @@ describe('IdentitiesController', () => {
 
   describe('getIdentityDetails', () => {
     it("should return the Identity's details", async () => {
-      const mockIdentityDetails = new IdentityModel({
+      const mockIdentityDetails = new IdentityDetailsModel({
         did,
         primaryAccount: {
           account: new AccountModel({
@@ -602,7 +602,7 @@ describe('IdentitiesController', () => {
       identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
       identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
 
-      const identityData = new IdentityModel({
+      const identityData = new IdentityDetailsModel({
         did,
         primaryAccount: new PermissionedAccountModel({
           account: new AccountModel({ address }),

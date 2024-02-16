@@ -2,15 +2,15 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
-export class IdentityModel {
+export class ConfidentialAccountModel {
   @ApiProperty({
+    description: 'The public key of the Confidential Account',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-    description: 'Unique Identity identifier (DID: Decentralized IDentity)',
   })
-  readonly did: string;
+  readonly publicKey: string;
 
-  constructor(model: IdentityModel) {
+  constructor(model: ConfidentialAccountModel) {
     Object.assign(this, model);
   }
 }

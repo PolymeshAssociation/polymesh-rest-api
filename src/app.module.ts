@@ -13,6 +13,7 @@ import { CheckpointsModule } from '~/checkpoints/checkpoints.module';
 import { ClaimsModule } from '~/claims/claims.module';
 import { AppConfigError } from '~/common/errors';
 import { ComplianceModule } from '~/compliance/compliance.module';
+import { ConfidentialAssetsModule } from '~/confidential-assets/confidential-assets.module';
 import { CorporateActionsModule } from '~/corporate-actions/corporate-actions.module';
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { EventsModule } from '~/events/events.module';
@@ -32,6 +33,9 @@ import { SubsidyModule } from '~/subsidy/subsidy.module';
 import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
 import { UsersModule } from '~/users/users.module';
+
+import { ConfidentialAccountsModule } from './confidential-accounts/confidential-accounts.module';
+import { ConfidentialTransactionsModule } from './confidential-transactions/confidential-transactions.module';
 
 @Module({
   imports: [
@@ -92,6 +96,9 @@ import { UsersModule } from '~/users/users.module';
     MetadataModule,
     SubsidyModule,
     NftsModule,
+    ConfidentialAssetsModule,
+    ConfidentialAccountsModule,
+    ConfidentialTransactionsModule,
   ],
 })
 export class AppModule {}

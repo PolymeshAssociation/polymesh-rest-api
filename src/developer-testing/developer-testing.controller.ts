@@ -8,7 +8,7 @@ import { DeveloperTestingService } from '~/developer-testing/developer-testing.s
 import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
 import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
 import { createIdentityModel } from '~/identities/identities.util';
-import { IdentityModel } from '~/identities/models/identity.model';
+import { IdentityDetailsModel } from '~/identities/models/identity-details.model';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
 
 @ApiTags('developer-testing')
@@ -43,14 +43,14 @@ export class DeveloperTestingController {
     description:
       'This endpoint initializes a set of addresses to be chain admin accounts. The signer must be a CDD provider and have sufficient POLYX to cover the initial amounts (DEV ONLY)',
   })
-  @ApiArrayResponse(IdentityModel, {
+  @ApiArrayResponse(IdentityDetailsModel, {
     description: 'List of Identities that were made CDD providers and given POLYX',
     paginated: true,
   })
   @Post('/create-test-admins')
   async createTestAdmins(
     @Body() params: CreateTestAdminsDto
-  ): Promise<ResultsModel<IdentityModel>> {
+  ): Promise<ResultsModel<IdentityDetailsModel>> {
     const identities = await this.developerTestingService.createTestAdmins(params);
     const results = await Promise.all(identities.map(id => createIdentityModel(id)));
 
@@ -64,14 +64,14 @@ export class DeveloperTestingController {
     description:
       'This endpoint creates Identities for multiple accounts. The signer must be a CDD provider and have sufficient POLYX to cover the initialPolyx amounts. (DEV ONLY)',
   })
-  @ApiArrayResponse(IdentityModel, {
+  @ApiArrayResponse(IdentityDetailsModel, {
     description: 'List of Identities were created with a CDD claim by the signer',
     paginated: true,
   })
   @Post('/create-test-accounts')
   async createTestAccounts(
     @Body() params: CreateTestAccountsDto
-  ): Promise<ResultsModel<IdentityModel>> {
+  ): Promise<ResultsModel<IdentityDetailsModel>> {
     const ids = await this.developerTestingService.createTestAccounts(params);
     const results = await Promise.all(ids.map(id => createIdentityModel(id)));
 
