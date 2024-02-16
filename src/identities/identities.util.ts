@@ -5,20 +5,20 @@ import { isAccount } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { createPermissionedAccountModel } from '~/accounts/accounts.util';
 import { AccountModel } from '~/identities/models/account.model';
-import { IdentityModel } from '~/identities/models/identity.model';
+import { IdentityDetailsModel } from '~/identities/models/identity-details.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { SignerModel } from '~/identities/models/signer.model';
 
 /**
  * Fetch and assemble data for an Identity
  */
-export async function createIdentityModel(identity: Identity): Promise<IdentityModel> {
+export async function createIdentityModel(identity: Identity): Promise<IdentityDetailsModel> {
   const [primaryAccount, secondaryAccountsFrozen, { data: secondaryAccounts }] = await Promise.all([
     identity.getPrimaryAccount(),
     identity.areSecondaryAccountsFrozen(),
     identity.getSecondaryAccounts(),
   ]);
-  return new IdentityModel({
+  return new IdentityDetailsModel({
     did: identity.did,
     primaryAccount: createPermissionedAccountModel(primaryAccount),
     secondaryAccountsFrozen,

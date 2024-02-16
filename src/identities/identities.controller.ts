@@ -54,8 +54,8 @@ import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { CreatedIdentityModel } from '~/identities/models/created-identity.model';
-import { IdentityModel } from '~/identities/models/identity.model';
 import { createIdentityResolver } from '~/identities/models/identity.util';
+import { IdentityDetailsModel } from '~/identities/models/identity-details.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { GroupedInstructionModel } from '~/settlements/models/grouped-instructions.model';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -112,9 +112,9 @@ export class IdentitiesController {
   })
   @ApiOkResponse({
     description: 'Returns basic details of the Identity',
-    type: IdentityModel,
+    type: IdentityDetailsModel,
   })
-  async getIdentityDetails(@Param() { did }: DidDto): Promise<IdentityModel> {
+  async getIdentityDetails(@Param() { did }: DidDto): Promise<IdentityDetailsModel> {
     this.logger.debug(`Get identity details for did ${did}`);
     const identity = await this.identitiesService.findOne(did);
     return createIdentityModel(identity);
@@ -536,7 +536,7 @@ export class IdentitiesController {
     description: 'Failed to execute an extrinsic, or something unexpected',
   })
   @Post('/mock-cdd')
-  public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
+  public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityDetailsModel> {
     const identity = await this.developerTestingService.createMockCdd(params);
     return createIdentityModel(identity);
   }

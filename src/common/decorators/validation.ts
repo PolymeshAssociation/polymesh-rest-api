@@ -16,6 +16,7 @@ import {
 
 import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';
+import { ASSET_ID_LENGTH } from '~/confidential-assets/confidential-assets.consts';
 import { DID_LENGTH } from '~/identities/identities.consts';
 
 export function IsDid(validationOptions?: ValidationOptions) {
@@ -138,4 +139,17 @@ export function IsTxTagOrModuleName(validationOptions?: ValidationOptions) {
       },
     });
   };
+}
+
+export function IsConfidentialAssetId(validationOptions?: ValidationOptions) {
+  return applyDecorators(
+    Length(ASSET_ID_LENGTH, undefined, {
+      ...validationOptions,
+      message: `ID must be ${ASSET_ID_LENGTH} characters long`,
+    }),
+    Matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i, {
+      ...validationOptions,
+      message: 'ID is not a valid confidential Asset ID',
+    })
+  );
 }
