@@ -147,7 +147,7 @@ export function IsConfidentialAssetId(validationOptions?: ValidationOptions) {
       ...validationOptions,
       message: `ID must be ${ASSET_ID_LENGTH} characters long`,
     }),
-    Matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i, {
+    Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
       ...validationOptions,
       message: 'ID is not a valid confidential Asset ID',
     })
