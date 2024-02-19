@@ -21,7 +21,7 @@ export class ConfidentialAssetDetailsModel {
   @ApiProperty({
     description: 'Custom data associated with the Confidential Asset',
     type: 'string',
-    example: 'MyAsset',
+    example: 'Random Data',
   })
   readonly data: string;
 

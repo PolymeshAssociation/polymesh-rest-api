@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { ConfidentialTransaction } from '@polymeshassociation/polymesh-sdk/types';
 
 import { createConfidentialAccountModel } from '~/confidential-accounts/confidential-accounts.util';

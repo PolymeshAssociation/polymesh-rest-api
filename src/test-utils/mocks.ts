@@ -8,7 +8,12 @@ import {
   Account,
   AuthorizationType,
   ComplianceManagerTx,
+  ConfidentialAccount,
+  ConfidentialAsset,
+  ConfidentialTransaction,
+  ConfidentialVenue,
   HistoricSettlement,
+  Identity,
   MetadataEntry,
   MetadataType,
   ResultSet,
@@ -132,6 +137,23 @@ export class MockPolymesh {
     getCustomClaimTypeById: jest.fn(),
     registerCustomClaimType: jest.fn(),
     getAllCustomClaimTypes: jest.fn(),
+  };
+
+  public confidentialAccounts = {
+    getConfidentialAccount: jest.fn(),
+    createConfidentialAccount: jest.fn(),
+  };
+
+  public confidentialAssets = {
+    getConfidentialAsset: jest.fn(),
+    getConfidentialAssetFromTicker: jest.fn(),
+    createConfidentialAsset: jest.fn(),
+  };
+
+  public confidentialSettlements = {
+    getTransaction: jest.fn(),
+    getVenue: jest.fn(),
+    createVenue: jest.fn(),
   };
 
   public _polkadotApi = {
@@ -487,4 +509,50 @@ export function createMockTxResult(
   });
 
   return testTxResult;
+}
+
+export function createMockIdentity(
+  partial: PartialFuncReturn<Identity> = {
+    did: 'SOME_DID',
+  }
+): DeepMocked<Identity> {
+  return createMock<Identity>(partial);
+}
+
+export function createMockConfidentialAsset(
+  partial: PartialFuncReturn<ConfidentialAsset> = {
+    id: 'SOME-CONFIDENTIAL-ASSET-ID',
+  }
+): DeepMocked<ConfidentialAsset> {
+  return createMock<ConfidentialAsset>(partial);
+}
+
+export function createMockConfidentialAccount(
+  partial: PartialFuncReturn<ConfidentialAccount> = {
+    publicKey: 'SOME_KEY',
+    getIdentity(): PartialFuncReturn<Promise<Identity | null>> {
+      return { did: 'SOME_OWNER' } as PartialFuncReturn<Promise<Identity | null>>;
+    },
+  }
+): DeepMocked<ConfidentialAccount> {
+  return createMock<ConfidentialAccount>(partial);
+}
+
+export function createMockConfidentialTransaction(
+  partial: PartialFuncReturn<ConfidentialTransaction> = {
+    id: new BigNumber(1),
+  }
+): DeepMocked<ConfidentialTransaction> {
+  return createMock<ConfidentialTransaction>(partial);
+}
+
+export function createMockConfidentialVenue(
+  partial: PartialFuncReturn<ConfidentialVenue> = {
+    id: new BigNumber(1),
+    creator(): PartialFuncReturn<Promise<Identity>> {
+      return { did: 'SOME_OWNER' } as PartialFuncReturn<Promise<Identity>>;
+    },
+  }
+): DeepMocked<ConfidentialVenue> {
+  return createMock<ConfidentialVenue>(partial);
 }

@@ -35,7 +35,7 @@ export class ConfidentialTransactionsService {
       });
   }
 
-  public async getCreator(id: BigNumber): Promise<Identity> {
+  public async getVenueCreator(id: BigNumber): Promise<Identity> {
     const venue = await this.findVenue(id);
     return venue.creator();
   }

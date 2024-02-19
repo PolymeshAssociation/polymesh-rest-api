@@ -85,7 +85,7 @@ export class ConfidentialAssetsController {
     description: 'One or more auditors do not exists',
   })
   @Post('create')
-  public async createAsset(
+  public async createConfidentialAsset(
     @Body() params: CreateConfidentialAssetDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.createConfidentialAsset(params);
@@ -112,7 +112,7 @@ export class ConfidentialAssetsController {
     [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
   })
   @Post(':id/issue')
-  public async issue(
+  public async issueConfidentialAsset(
     @Param() { id }: ConfidentialAssetIdParamsDto,
     @Body() params: IssueConfidentialAssetDto
   ): Promise<TransactionResponseModel> {

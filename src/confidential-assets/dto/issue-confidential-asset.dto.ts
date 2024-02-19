@@ -20,7 +20,7 @@ export class IssueConfidentialAssetDto extends TransactionBaseDto {
 
   @ApiProperty({
     description: "The asset issuer's Confidential Account to receive the minted Assets",
-    example: '0x',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
     type: 'string',
   })
   @IsString()
