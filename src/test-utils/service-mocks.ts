@@ -8,6 +8,9 @@ import { AuthService } from '~/auth/auth.service';
 import { ClaimsService } from '~/claims/claims.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
+import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
+import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
@@ -279,3 +282,19 @@ export const mockClaimsServiceProvider: ValueProvider<ClaimsService> = {
   provide: ClaimsService,
   useValue: createMock<ClaimsService>(),
 };
+
+export const mockConfidentialAssetsServiceProvider: ValueProvider<ConfidentialAssetsService> = {
+  provide: ConfidentialAssetsService,
+  useValue: createMock<ConfidentialAssetsService>(),
+};
+
+export const mockConfidentialAccountsServiceProvider: ValueProvider<ConfidentialAccountsService> = {
+  provide: ConfidentialAccountsService,
+  useValue: createMock<ConfidentialAccountsService>(),
+};
+
+export const mockConfidentialTransactionsServiceProvider: ValueProvider<ConfidentialTransactionsService> =
+  {
+    provide: ConfidentialTransactionsService,
+    useValue: createMock<ConfidentialTransactionsService>(),
+  };

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 
-import { ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
@@ -15,22 +15,20 @@ export class ConfidentialAccountsController {
 
   @ApiOperation({
     summary: 'Get owner',
-    description: 'This endpoint retire',
+    description: 'This endpoint retrieves the owner of the Confidential Account',
   })
   @ApiParam({
     name: 'publicKey',
     description: 'The public key of the Confidential Account',
     type: 'string',
-    example: '0x',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
     description: 'DID of the owner of the Confidential Account',
     type: IdentityModel,
   })
-  @Get(':publicKey')
-  public async getDetails(
-    @Param() { publicKey }: ConfidentialAccountModel
-  ): Promise<IdentityModel> {
+  @Get(':publicKey/owner')
+  public async getOwner(@Param() { publicKey }: ConfidentialAccountModel): Promise<IdentityModel> {
     const { did } = await this.confidentialAccountsService.fetchOwner(publicKey);
 
     return new IdentityModel({ did });
@@ -44,11 +42,17 @@ export class ConfidentialAccountsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'The given Confidential Account is already mapped to an Identity',
+    ],
+  })
   @Post('create')
   public async createAccount(
     @Body() params: CreateConfidentialAccountDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAccountsService.createConfidentialAccount(params);
+
     return handleServiceResult(result);
   }
 }

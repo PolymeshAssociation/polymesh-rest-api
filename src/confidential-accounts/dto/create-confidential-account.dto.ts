@@ -9,7 +9,7 @@ export class CreateConfidentialAccountDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'Public key of the Confidential Account',
     type: 'string',
-    example: '0x',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
   @IsString()
   readonly publicKey: string;

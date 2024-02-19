@@ -3,10 +3,5 @@
   "trailingComma": "es5",
   "tabWidth": 2,
   "printWidth": 100,
-  "arrowParens": "avoid",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.fixAll.tslint": true,
-    "source.fixAll.stylelint": true
-  }
+  "arrowParens": "avoid"
 }

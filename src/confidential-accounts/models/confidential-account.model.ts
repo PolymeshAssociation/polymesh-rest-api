@@ -6,7 +6,7 @@ export class ConfidentialAccountModel {
   @ApiProperty({
     description: 'The public key of the Confidential Account',
     type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
   readonly publicKey: string;
 
