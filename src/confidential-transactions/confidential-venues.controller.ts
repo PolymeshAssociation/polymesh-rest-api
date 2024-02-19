@@ -14,7 +14,6 @@ import { IdentityModel } from '~/identities/models/identity.model';
 export class ConfidentialVenuesController {
   constructor(private readonly confidentialTransactionsService: ConfidentialTransactionsService) {}
 
-  @ApiTags('confidential-venue')
   @ApiOperation({
     summary: 'Get creator',
     description: 'This endpoint retrieves the creator of a Confidential Venue',
