@@ -439,7 +439,7 @@ export class AssetsController {
   @ApiOperation({
     summary: "Fetch an Asset's required mediators",
     description:
-      'This endpoint provides a list required mediators for the asset. These identities must affirm any instruction involving the asset',
+      'This endpoint provides a list of required mediators for the asset. These identities must affirm any instruction involving the asset',
   })
   @ApiParam({
     name: 'ticker',
