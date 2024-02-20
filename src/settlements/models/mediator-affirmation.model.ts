@@ -13,7 +13,8 @@ export class MediatorAffirmationModel {
 
   @ApiPropertyOptional({
     description:
-      'The expiry of the affirmation. The time should be checked to ensure the affirmation is still valid',
+      'The expiry of the affirmation. If present, the time should be checked to ensure the affirmation is still valid',
+    example: new Date('05/23/2055').toISOString(),
   })
   readonly expiry?: Date;
 
