@@ -6,6 +6,10 @@ module.exports = {
       name: 'alpha',
       prerelease: true,
     },
+    {
+      name: 'confidential-assets',
+      prerelease: true,
+    },
   ],
 
   // Note, the expectation is for Github plugin to create a tag that begins with `v`, which triggers a workflow that publishes a docker image
