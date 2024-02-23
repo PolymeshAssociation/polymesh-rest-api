@@ -53,7 +53,7 @@ describe('ConfidentialAccountsController', () => {
         txResult as unknown as ServiceReturn<ConfidentialAccount>
       );
 
-      const result = await controller.createAccount(input);
+      const result = await controller.mapAccount(input);
       expect(result).toEqual(txResult);
     });
   });

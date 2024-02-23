@@ -26,14 +26,6 @@ export class ConfidentialAssetsService {
       });
   }
 
-  public async findOneByTicker(ticker: string): Promise<ConfidentialAsset> {
-    return await this.polymeshService.polymeshApi.confidentialAssets
-      .getConfidentialAssetFromTicker({ ticker })
-      .catch(error => {
-        throw handleSdkError(error);
-      });
-  }
-
   public async createConfidentialAsset(
     params: CreateConfidentialAssetDto
   ): ServiceReturn<ConfidentialAsset> {

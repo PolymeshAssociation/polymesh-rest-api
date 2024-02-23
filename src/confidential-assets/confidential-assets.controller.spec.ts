@@ -18,7 +18,7 @@ import {
 } from '~/test-utils/mocks';
 import { mockConfidentialAssetsServiceProvider } from '~/test-utils/service-mocks';
 
-const { signer, ticker, txResult } = testValues;
+const { signer, txResult } = testValues;
 
 describe('ConfidentialAssetsController', () => {
   let controller: ConfidentialAssetsController;
@@ -43,7 +43,6 @@ describe('ConfidentialAssetsController', () => {
   describe('getDetails', () => {
     it('should return the details', async () => {
       const mockAssetDetails = {
-        ticker: 'SOME_TICKER',
         data: 'SOME_DATA',
         owner: {
           did: 'SOME_DID',
@@ -71,28 +70,11 @@ describe('ConfidentialAssetsController', () => {
     });
   });
 
-  describe('getAssetByTicker', () => {
-    it('should search confidential Asset by ticker', async () => {
-      mockConfidentialAssetsService.findOneByTicker.mockResolvedValue(
-        createMockConfidentialAsset({ id })
-      );
-
-      const result = await controller.getAssetByTicker({ ticker: 'SOME_TICKER' });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          id,
-        })
-      );
-    });
-  });
-
   describe('createConfidentialAsset', () => {
     it('should call the service and return the results', async () => {
       const input = {
         signer,
         data: 'SOME_DATA',
-        ticker,
         auditors: ['SOME_PUBLIC_KEY'],
         mediators: [],
       };
@@ -110,7 +92,7 @@ describe('ConfidentialAssetsController', () => {
       const input = {
         signer,
         amount: new BigNumber(1000),
-        account: 'SOME_PUBLIC_KEY',
+        confidentialAccount: 'SOME_PUBLIC_KEY',
       };
       mockConfidentialAssetsService.issue.mockResolvedValue(
         txResult as unknown as ServiceReturn<ConfidentialAsset>

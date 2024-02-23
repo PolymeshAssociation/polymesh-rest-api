@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
@@ -14,13 +14,13 @@ export class ConfidentialAssetAuditorModel {
   @Type(() => ConfidentialAssetModel)
   readonly asset: ConfidentialAssetModel;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'List of auditors for the `asset`',
     type: ConfidentialAccountModel,
     isArray: true,
   })
   @Type(() => ConfidentialAccountModel)
-  readonly auditors?: ConfidentialAccountModel[];
+  readonly auditors: ConfidentialAccountModel[];
 
   constructor(model: ConfidentialAssetAuditorModel) {
     Object.assign(this, model);
