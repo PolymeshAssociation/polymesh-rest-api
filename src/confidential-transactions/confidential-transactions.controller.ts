@@ -16,15 +16,11 @@ import { createConfidentialTransactionModel } from '~/confidential-transactions/
 import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
 import { ConfidentialTransactionModel } from '~/confidential-transactions/models/confidential-transaction.model';
-import { ProofServerService } from '~/proof-server/proof-server.service';
 
 @ApiTags('confidential-transactions')
 @Controller('confidential-transactions')
 export class ConfidentialTransactionsController {
-  constructor(
-    private readonly confidentialTransactionsService: ConfidentialTransactionsService,
-    private readonly proofServerService: ProofServerService
-  ) {}
+  constructor(private readonly confidentialTransactionsService: ConfidentialTransactionsService) {}
 
   @ApiOperation({
     summary: 'Fetch Confidential transaction details',

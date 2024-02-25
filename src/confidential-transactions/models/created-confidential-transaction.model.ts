@@ -13,7 +13,7 @@ export class CreatedConfidentialTransactionModel extends TransactionQueueModel {
     example: '123',
   })
   @FromEntity()
-  readonly transaction: ConfidentialTransaction;
+  readonly confidentialTransaction: ConfidentialTransaction;
 
   constructor(model: CreatedConfidentialTransactionModel) {
     const { transactions, details, ...rest } = model;

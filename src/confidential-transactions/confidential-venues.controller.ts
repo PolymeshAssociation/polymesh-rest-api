@@ -84,7 +84,7 @@ export class ConfidentialVenuesController {
     type: CreatedInstructionModel,
   })
   @Post(':id/transactions/create')
-  public async createInstruction(
+  public async createConfidentialTransaction(
     @Param() { id }: IdParamsDto,
     @Body() createConfidentialTransactionDto: CreateConfidentialTransactionDto
   ): Promise<TransactionResponseModel> {
@@ -94,12 +94,12 @@ export class ConfidentialVenuesController {
     );
 
     const resolver: TransactionResolver<ConfidentialTransaction> = ({
-      result: transaction,
+      result: confidentialTransaction,
       transactions,
       details,
     }) =>
       new CreatedConfidentialTransactionModel({
-        transaction,
+        confidentialTransaction,
         details,
         transactions,
       });

@@ -7,6 +7,8 @@ import {
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
+import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionType } from '~/common/types';
 import { UserModel } from '~/users/model/user.model';
 
@@ -90,3 +92,14 @@ export const extrinsicWithFees = {
     total: new BigNumber('1.234'),
   },
 };
+
+export const getMockTransaction = (
+  tag: string,
+  type = TransactionType.Single
+): TransactionModel | BatchTransactionModel => ({
+  blockHash: '0x1',
+  transactionHash: '0x2',
+  blockNumber: new BigNumber(1),
+  type,
+  transactionTag: tag,
+});

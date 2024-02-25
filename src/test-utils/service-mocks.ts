@@ -15,6 +15,7 @@ import { DeveloperTestingService } from '~/developer-testing/developer-testing.s
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
 import { NftsService } from '~/nfts/nfts.service';
+import { ProofServerService } from '~/proof-server/proof-server.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { ServiceProvider } from '~/test-utils/types';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -298,3 +299,8 @@ export const mockConfidentialTransactionsServiceProvider: ValueProvider<Confiden
     provide: ConfidentialTransactionsService,
     useValue: createMock<ConfidentialTransactionsService>(),
   };
+
+export const mockProofServerServiceProvider: ValueProvider<ProofServerService> = {
+  provide: ProofServerService,
+  useValue: createMock<ProofServerService>(),
+};

@@ -1,19 +1,42 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ConfidentialAccount,
+  ConfidentialAffirmParty,
+  ConfidentialTransaction,
+  ConfidentialTransactionStatus,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
+import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
+import { ConfidentialAssetModel } from '~/confidential-assets/models/confidential-asset.model';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
+import * as confidentialTransactionsUtilModule from '~/confidential-transactions/confidential-transactions.util';
+import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
+import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
+import { ConfidentialAssetAuditorModel } from '~/confidential-transactions/models/confidential-asset-auditor.model';
+import { ConfidentialTransactionModel } from '~/confidential-transactions/models/confidential-transaction.model';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { ProofServerService } from '~/proof-server/proof-server.service';
 import { testValues } from '~/test-utils/consts';
 import {
+  createMockConfidentialAccount,
   createMockConfidentialTransaction,
   createMockConfidentialVenue,
   MockPolymesh,
   MockTransaction,
 } from '~/test-utils/mocks';
-import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
+import {
+  mockConfidentialAccountsServiceProvider,
+  mockProofServerServiceProvider,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 import { TransactionsService } from '~/transactions/transactions.service';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
@@ -24,17 +47,31 @@ describe('ConfidentialTransactionsService', () => {
   let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
+  let mockProofServerService: ProofServerService;
+  let mockConfidentialAccountsService: ConfidentialAccountsService;
   const id = new BigNumber(1);
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
 
+    mockConfidentialAccountsService = mockConfidentialAccountsServiceProvider.useValue;
+    mockProofServerService = mockProofServerServiceProvider.useValue;
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [ConfidentialTransactionsService, mockTransactionsProvider],
+      providers: [
+        ConfidentialTransactionsService,
+        mockTransactionsProvider,
+        mockProofServerServiceProvider,
+        mockConfidentialAccountsServiceProvider,
+      ],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
+      .overrideProvider(ConfidentialAccountsService)
+      .useValue(mockConfidentialAccountsService)
+      .overrideProvider(ProofServerService)
+      .useValue(mockProofServerService)
       .compile();
 
     mockPolymeshApi = module.get<MockPolymesh>(POLYMESH_API);
@@ -131,6 +168,271 @@ describe('ConfidentialTransactionsService', () => {
 
       expect(result).toEqual({
         result: mockVenue,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('createConfidentialTransaction', () => {
+    it('should call the addTransaction procedure in the venue where the transaction is to be created', async () => {
+      const args = {
+        legs: [
+          {
+            assets: ['SOME_CONFIDENTIAL_ASSET'],
+            sender: 'SENDER_CONFIDENTIAL_ACCOUNT',
+            receiver: 'RECEIVER_CONFIDENTIAL_ACCOUNT',
+            auditors: [],
+            mediators: [],
+          },
+        ],
+        memo: 'SOME_MEMO',
+      };
+
+      const mockVenue = createMockConfidentialVenue();
+      jest.spyOn(service, 'findVenue').mockResolvedValue(mockVenue);
+
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.AddTransaction,
+      };
+
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockConfidentialTransaction = createMockConfidentialTransaction();
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockVenue.addTransaction, args, { signer })
+        .mockResolvedValue({
+          result: mockConfidentialTransaction,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.createConfidentialTransaction(new BigNumber(1), {
+        signer,
+        ...args,
+      });
+
+      expect(result).toEqual({
+        result: mockConfidentialTransaction,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('observerAffirmLeg', () => {
+    it('should call the affirmLeg procedure for the transaction being approved by Receiver/Mediator', async () => {
+      const args = {
+        legId: new BigNumber(0),
+        party: ConfidentialAffirmParty.Receiver,
+      } as ObserverAffirmConfidentialTransactionDto;
+
+      const mockConfidentialTransaction = createMockConfidentialTransaction();
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockConfidentialTransaction);
+
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.AffirmTransactions,
+      };
+
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockConfidentialTransaction.affirmLeg, args, { signer })
+        .mockResolvedValue({
+          result: mockConfidentialTransaction,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.observerAffirmLeg(new BigNumber(1), { ...args, signer });
+
+      expect(result).toEqual({
+        result: mockConfidentialTransaction,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('senderAffirmLeg', () => {
+    let mockConfidentialTransaction: ConfidentialTransaction;
+    let mockConfidentialTransactionModel: ConfidentialTransactionModel;
+    let body: Omit<SenderAffirmConfidentialTransactionDto, keyof TransactionBaseDto>;
+    let sender: ConfidentialAccount;
+
+    beforeEach(() => {
+      mockConfidentialTransaction = createMockConfidentialTransaction();
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockConfidentialTransaction);
+
+      mockConfidentialTransactionModel = new ConfidentialTransactionModel({
+        id: new BigNumber(1),
+        venueId: new BigNumber(1),
+        createdAt: new Date('2024/01/01'),
+        status: ConfidentialTransactionStatus.Pending,
+        memo: 'Some transfer memo',
+        legs: [
+          {
+            id: new BigNumber(0),
+            sender: new ConfidentialAccountModel({ publicKey: 'SENDER_CONFIDENTIAL_ACCOUNT' }),
+            receiver: new ConfidentialAccountModel({ publicKey: 'RECEIVER_CONFIDENTIAL_ACCOUNT' }),
+            mediators: [],
+            assetAuditors: [
+              new ConfidentialAssetAuditorModel({
+                asset: new ConfidentialAssetModel({ id: 'SOME_ASSET_ID' }),
+                auditors: [
+                  new ConfidentialAccountModel({ publicKey: 'AUDITOR_CONFIDENTIAL_ACCOUNT' }),
+                ],
+              }),
+            ],
+          },
+        ],
+      });
+
+      jest
+        .spyOn(confidentialTransactionsUtilModule, 'createConfidentialTransactionModel')
+        .mockResolvedValue(mockConfidentialTransactionModel);
+
+      body = {
+        legId: new BigNumber(0),
+        legAmounts: [
+          {
+            confidentialAsset: 'SOME_ASSET_ID',
+            amount: new BigNumber(100),
+          },
+        ],
+      };
+
+      sender = createMockConfidentialAccount();
+      when(mockConfidentialAccountsService.findOne)
+        .calledWith('SENDER_CONFIDENTIAL_ACCOUNT')
+        .mockResolvedValue(sender);
+
+      when(mockProofServerService.generateSenderProof)
+        .calledWith('SENDER_CONFIDENTIAL_ACCOUNT', {
+          amount: 100,
+          auditors: ['AUDITOR_CONFIDENTIAL_ACCOUNT'],
+          receiver: 'RECEIVER_CONFIDENTIAL_ACCOUNT',
+          encrypted_balance: '0x0ceabalance',
+        })
+        .mockResolvedValue('some_proof');
+    });
+
+    it('should throw an error for an invalid legId', () => {
+      return expect(
+        service.senderAffirmLeg(new BigNumber(1), { signer, ...body, legId: new BigNumber(10) })
+      ).rejects.toThrow('Invalid leg ID received');
+    });
+
+    it('should throw an error if leg amounts has an invalid Asset ID', () => {
+      return expect(
+        service.senderAffirmLeg(new BigNumber(1), {
+          signer,
+          ...body,
+          legAmounts: [
+            {
+              confidentialAsset: 'RANDOM_ASSET_ID',
+              amount: new BigNumber(100),
+            },
+          ],
+        })
+      ).rejects.toThrow('Asset not found in the leg');
+    });
+
+    it('should call the affirmLeg procedure for the transaction being approved by Sender', async () => {
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.AffirmTransactions,
+      };
+
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      when(mockTransactionsService.submit)
+        .calledWith(
+          mockConfidentialTransaction.affirmLeg,
+          {
+            legId: new BigNumber(0),
+            party: ConfidentialAffirmParty.Sender,
+            proofs: [
+              {
+                asset: 'SOME_ASSET_ID',
+                proof: 'some_proof',
+              },
+            ],
+          },
+          { signer }
+        )
+        .mockResolvedValue({
+          result: mockConfidentialTransaction,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.senderAffirmLeg(new BigNumber(1), { ...body, signer });
+
+      expect(result).toEqual({
+        result: mockConfidentialTransaction,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('rejectTransaction', () => {
+    it('should call the reject procedure for the transaction being rejected', async () => {
+      const mockConfidentialTransaction = createMockConfidentialTransaction();
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockConfidentialTransaction);
+
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.RejectTransaction,
+      };
+
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockConfidentialTransaction.reject, {}, { signer })
+        .mockResolvedValue({
+          result: mockConfidentialTransaction,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.rejectTransaction(new BigNumber(1), { signer });
+
+      expect(result).toEqual({
+        result: mockConfidentialTransaction,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('rejectTransaction', () => {
+    it('should call the reject procedure for the transaction being rejected', async () => {
+      const mockConfidentialTransaction = createMockConfidentialTransaction();
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockConfidentialTransaction);
+
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.ExecuteTransaction,
+      };
+
+      const mockTransaction = new MockTransaction(mockTransactions);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockConfidentialTransaction.execute, {}, { signer })
+        .mockResolvedValue({
+          result: mockConfidentialTransaction,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.executeTransaction(new BigNumber(1), { signer });
+
+      expect(result).toEqual({
+        result: mockConfidentialTransaction,
         transactions: [mockTransaction],
       });
     });

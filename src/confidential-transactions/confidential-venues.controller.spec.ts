@@ -1,13 +1,25 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ConfidentialVenue } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ConfidentialTransaction,
+  ConfidentialVenue,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
-import { ServiceReturn } from '~/common/utils';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { ConfidentialVenuesController } from '~/confidential-transactions/confidential-venues.controller';
-import { testValues } from '~/test-utils/consts';
-import { createMockIdentity } from '~/test-utils/mocks';
+import { ConfidentialTransactionLegDto } from '~/confidential-transactions/dto/confidential-transaction-leg.dto';
+import { CreatedConfidentialTransactionModel } from '~/confidential-transactions/models/created-confidential-transaction.model';
+import { CreatedConfidentialVenueModel } from '~/confidential-transactions/models/created-confidential-venue.model';
+import { getMockTransaction, testValues } from '~/test-utils/consts';
+import {
+  createMockConfidentialTransaction,
+  createMockConfidentialVenue,
+  createMockIdentity,
+  createMockTransactionResult,
+} from '~/test-utils/mocks';
 import { mockConfidentialTransactionsServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer, txResult } = testValues;
@@ -50,12 +62,60 @@ describe('ConfidentialVenuesController', () => {
       const input = {
         signer,
       };
-      mockConfidentialTransactionsService.createConfidentialVenue.mockResolvedValue(
-        txResult as unknown as ServiceReturn<ConfidentialVenue>
-      );
+
+      const mockVenue = createMockConfidentialVenue();
+      const transaction = getMockTransaction(TxTags.confidentialAsset.CreateVenue);
+      const testTxResult = createMockTransactionResult<ConfidentialVenue>({
+        ...txResult,
+        transactions: [transaction],
+        result: mockVenue,
+      });
+
+      when(mockConfidentialTransactionsService.createConfidentialVenue)
+        .calledWith(input)
+        .mockResolvedValue(testTxResult);
 
       const result = await controller.createVenue(input);
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(
+        new CreatedConfidentialVenueModel({
+          ...txResult,
+          transactions: [transaction],
+          confidentialVenue: mockVenue,
+        })
+      );
+    });
+  });
+
+  describe('createConfidentialTransaction', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+        legs: 'some_legs' as unknown as ConfidentialTransactionLegDto[],
+        memo: 'some_memo',
+      };
+
+      const venueId = new BigNumber(1);
+
+      const mockResult = createMockConfidentialTransaction();
+      const transaction = getMockTransaction(TxTags.confidentialAsset.CreateVenue);
+      const testTxResult = createMockTransactionResult<ConfidentialTransaction>({
+        ...txResult,
+        transactions: [transaction],
+        result: mockResult,
+      });
+
+      when(mockConfidentialTransactionsService.createConfidentialTransaction)
+        .calledWith(venueId, input)
+        .mockResolvedValue(testTxResult);
+
+      const result = await controller.createConfidentialTransaction({ id: venueId }, input);
+      expect(result).toEqual(
+        new CreatedConfidentialTransactionModel({
+          ...txResult,
+          transactions: [transaction],
+          confidentialTransaction: mockResult,
+        })
+      );
     });
   });
 });
