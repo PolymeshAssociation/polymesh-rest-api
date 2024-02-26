@@ -16,6 +16,7 @@ import { createConfidentialTransactionModel } from '~/confidential-transactions/
 import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
 import { ConfidentialTransactionModel } from '~/confidential-transactions/models/confidential-transaction.model';
+import { IdentityModel } from '~/identities/models/identity.model';
 
 @ApiTags('confidential-transactions')
 @Controller('confidential-transactions')
@@ -138,5 +139,31 @@ export class ConfidentialTransactionsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialTransactionsService.executeTransaction(id, signerDto);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get list of all involved parties',
+    description:
+      'This endpoint will return a list of all identities involved in a given Confidential Transaction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Transaction',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'List of DIDs of the involved parties',
+    type: IdentityModel,
+    isArray: true,
+  })
+  @ApiNotFoundResponse({
+    description: 'No involved parties were found for the given Confidential Transaction',
+  })
+  @Get(':id/involved-parties')
+  public async getInvolvedParties(@Param() { id }: IdParamsDto): Promise<IdentityModel[]> {
+    const result = await this.confidentialTransactionsService.getInvolvedParties(id);
+
+    return result.map(({ did }) => new IdentityModel({ did }));
   }
 }
