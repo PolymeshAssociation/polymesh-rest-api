@@ -1,3 +1,4 @@
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
@@ -19,6 +20,7 @@ import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transac
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
 import { ConfidentialAssetAuditorModel } from '~/confidential-transactions/models/confidential-asset-auditor.model';
 import { ConfidentialTransactionModel } from '~/confidential-transactions/models/confidential-transaction.model';
+import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -28,11 +30,14 @@ import {
   createMockConfidentialAccount,
   createMockConfidentialTransaction,
   createMockConfidentialVenue,
+  createMockIdentity,
+  MockIdentity,
   MockPolymesh,
   MockTransaction,
 } from '~/test-utils/mocks';
 import {
   mockConfidentialAccountsServiceProvider,
+  MockIdentitiesService,
   mockProofServerServiceProvider,
   mockTransactionsProvider,
   MockTransactionsService,
@@ -47,15 +52,15 @@ describe('ConfidentialTransactionsService', () => {
   let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
-  let mockProofServerService: ProofServerService;
+  let mockProofServerService: DeepMocked<ProofServerService>;
   let mockConfidentialAccountsService: ConfidentialAccountsService;
+  let mockIdentitiesService: MockIdentitiesService;
   const id = new BigNumber(1);
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
 
-    mockConfidentialAccountsService = mockConfidentialAccountsServiceProvider.useValue;
-    mockProofServerService = mockProofServerServiceProvider.useValue;
+    mockIdentitiesService = new MockIdentitiesService();
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
@@ -64,18 +69,21 @@ describe('ConfidentialTransactionsService', () => {
         mockTransactionsProvider,
         mockProofServerServiceProvider,
         mockConfidentialAccountsServiceProvider,
+        IdentitiesService,
       ],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
-      .overrideProvider(ConfidentialAccountsService)
-      .useValue(mockConfidentialAccountsService)
-      .overrideProvider(ProofServerService)
-      .useValue(mockProofServerService)
+      .overrideProvider(IdentitiesService)
+      .useValue(mockIdentitiesService)
       .compile();
 
     mockPolymeshApi = module.get<MockPolymesh>(POLYMESH_API);
     polymeshService = module.get<PolymeshService>(PolymeshService);
+    mockConfidentialAccountsService = module.get<typeof mockConfidentialAccountsService>(
+      ConfidentialAccountsService
+    );
+    mockProofServerService = module.get<typeof mockProofServerService>(ProofServerService);
     mockTransactionsService = module.get<MockTransactionsService>(TransactionsService);
 
     service = module.get<ConfidentialTransactionsService>(ConfidentialTransactionsService);
@@ -435,6 +443,33 @@ describe('ConfidentialTransactionsService', () => {
         result: mockConfidentialTransaction,
         transactions: [mockTransaction],
       });
+    });
+  });
+
+  describe('getInvolvedParties', () => {
+    it('should return the involved parties in a transaction', async () => {
+      const expectedResult = [createMockIdentity()];
+      const mockConfidentialTransaction = createMockConfidentialTransaction();
+      mockConfidentialTransaction.getInvolvedParties.mockResolvedValue(expectedResult);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockConfidentialTransaction);
+
+      const result = await service.getInvolvedParties(new BigNumber(1));
+
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('findVenuesByOwner', () => {
+    it('should return the confidential venues for an identity', async () => {
+      const mockIdentity = new MockIdentity();
+      const mockConfidentialVenues = [createMockConfidentialVenue()];
+      mockIdentity.getConfidentialVenues.mockResolvedValue(mockConfidentialVenues);
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+
+      const result = await service.findVenuesByOwner('SOME_DID');
+
+      expect(result).toEqual(mockConfidentialVenues);
     });
   });
 });

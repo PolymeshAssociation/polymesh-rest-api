@@ -15,6 +15,7 @@ import { createConfidentialTransactionModel } from '~/confidential-transactions/
 import { CreateConfidentialTransactionDto } from '~/confidential-transactions/dto/create-confidential-transaction.dto';
 import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
+import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { ProofServerService } from '~/proof-server/proof-server.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -26,7 +27,8 @@ export class ConfidentialTransactionsService {
     private readonly polymeshService: PolymeshService,
     private readonly transactionsService: TransactionsService,
     private readonly confidentialAccountsService: ConfidentialAccountsService,
-    private readonly proofServerService: ProofServerService
+    private readonly proofServerService: ProofServerService,
+    private readonly identitiesService: IdentitiesService
   ) {}
 
   public async findOne(id: BigNumber): Promise<ConfidentialTransaction> {
@@ -152,5 +154,17 @@ export class ConfidentialTransactionsService {
     const transaction = await this.findOne(transactionId);
 
     return this.transactionsService.submit(transaction.execute, {}, base);
+  }
+
+  public async getInvolvedParties(transactionId: BigNumber): Promise<Identity[]> {
+    const transaction = await this.findOne(transactionId);
+
+    return transaction.getInvolvedParties();
+  }
+
+  public async findVenuesByOwner(did: string): Promise<ConfidentialVenue[]> {
+    const identity = await this.identitiesService.findOne(did);
+
+    return identity.getConfidentialVenues();
   }
 }

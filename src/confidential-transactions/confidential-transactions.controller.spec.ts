@@ -176,4 +176,21 @@ describe('ConfidentialTransactionsController', () => {
       expect(result).toEqual(txResult);
     });
   });
+
+  describe('getInvolvedParties', () => {
+    it('should call the service and return the result', async () => {
+      const transactionId = new BigNumber(1);
+      when(mockConfidentialTransactionsService.getInvolvedParties)
+        .calledWith(transactionId)
+        .mockResolvedValue([createMockIdentity({ did: 'INVOLVED_PARTY_DID' })]);
+
+      const result = await controller.getInvolvedParties({ id: transactionId });
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          did: 'INVOLVED_PARTY_DID',
+        }),
+      ]);
+    });
+  });
 });
