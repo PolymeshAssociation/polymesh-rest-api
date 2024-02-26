@@ -33,22 +33,15 @@ export class ConfidentialAssetDetailsModel {
   @FromBigNumber()
   readonly totalSupply: BigNumber;
 
-  @ApiPropertyOptional({
-    description: 'The ticker value if provided while creating the Confidential Asset',
-    type: 'string',
-    example: 'TICKER',
-  })
-  readonly ticker?: string;
-
   @ApiProperty({
-    description: 'Auditors configured for the Confidential Asset',
+    description: 'Auditor Confidential Accounts configured for the Confidential Asset',
     type: ConfidentialAccountModel,
   })
   @Type(() => ConfidentialAccountModel)
   readonly auditors: ConfidentialAccountModel[];
 
   @ApiPropertyOptional({
-    description: 'Mediators configured for the Confidential Asset',
+    description: 'Mediator Identities configured for the Confidential Asset',
     type: IdentityModel,
   })
   @Type(() => IdentityModel)

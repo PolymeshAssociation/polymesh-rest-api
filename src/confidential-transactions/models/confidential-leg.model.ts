@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
 
@@ -32,21 +32,22 @@ export class ConfidentialLegModel {
   @Type(() => ConfidentialAccountModel)
   readonly receiver: ConfidentialAccountModel;
 
-  @ApiPropertyOptional({
-    description: 'List of mediators configured for this leg',
+  @ApiProperty({
+    description: 'List of mediator identities configured for this leg',
     type: IdentityModel,
     isArray: true,
   })
   @Type(() => IdentityModel)
-  readonly mediators?: IdentityModel[];
+  readonly mediators: IdentityModel[];
 
-  @ApiPropertyOptional({
-    description: 'Auditors for the leg, grouped by asset they are auditors for',
+  @ApiProperty({
+    description:
+      'Auditor confidential Accounts for the leg, grouped by asset they are auditors for',
     type: ConfidentialAssetAuditorModel,
     isArray: true,
   })
   @Type(() => ConfidentialAssetAuditorModel)
-  readonly assetAuditors?: ConfidentialAssetAuditorModel[];
+  readonly assetAuditors: ConfidentialAssetAuditorModel[];
 
   constructor(model: ConfidentialLegModel) {
     Object.assign(this, model);

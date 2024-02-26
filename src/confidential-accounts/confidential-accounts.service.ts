@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfidentialAccount, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
-import { extractTxBase, ServiceReturn } from '~/common/utils';
-import { CreateConfidentialAccountDto } from '~/confidential-accounts/dto/create-confidential-account.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -34,13 +34,13 @@ export class ConfidentialAccountsService {
     return identity;
   }
 
-  public async createConfidentialAccount(
-    params: CreateConfidentialAccountDto
+  public async mapConfidentialAccount(
+    publicKey: string,
+    base: TransactionBaseDto
   ): ServiceReturn<ConfidentialAccount> {
-    const { base, args } = extractTxBase(params);
-
     const createConfidentialAccount =
       this.polymeshService.polymeshApi.confidentialAccounts.createConfidentialAccount;
-    return this.transactionsService.submit(createConfidentialAccount, args, base);
+
+    return this.transactionsService.submit(createConfidentialAccount, { publicKey }, base);
   }
 }

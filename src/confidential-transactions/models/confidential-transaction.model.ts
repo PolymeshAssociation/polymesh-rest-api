@@ -41,13 +41,13 @@ export class ConfidentialTransactionModel {
   readonly status: ConfidentialTransactionStatus;
 
   @ApiPropertyOptional({
-    description: 'Identifier string provided while creating the Instruction',
+    description: 'Identifier string provided while creating the Confidential Transaction',
     example: 'Transfer of GROWTH Asset',
   })
   readonly memo?: string;
 
   @ApiProperty({
-    description: 'List of Legs in the Confidential Transaction',
+    description: 'List of legs in the Confidential Transaction',
     type: ConfidentialLegModel,
     isArray: true,
   })

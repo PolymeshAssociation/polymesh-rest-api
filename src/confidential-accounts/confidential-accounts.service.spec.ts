@@ -19,7 +19,7 @@ describe('ConfidentialAccountsService', () => {
   let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
-  const publicKey = 'SOME_PUBLIC_KEY';
+  const confidentialAccount = 'SOME_PUBLIC_KEY';
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
@@ -52,7 +52,7 @@ describe('ConfidentialAccountsService', () => {
       const account = createMockConfidentialAccount();
       mockPolymeshApi.confidentialAccounts.getConfidentialAccount.mockResolvedValue(account);
 
-      const result = await service.findOne(publicKey);
+      const result = await service.findOne(confidentialAccount);
 
       expect(result).toEqual(account);
     });
@@ -63,7 +63,7 @@ describe('ConfidentialAccountsService', () => {
 
       const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-      await expect(() => service.findOne(publicKey)).rejects.toThrowError();
+      await expect(() => service.findOne(confidentialAccount)).rejects.toThrowError();
 
       expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
     });
@@ -71,30 +71,29 @@ describe('ConfidentialAccountsService', () => {
 
   describe('fetchOwner', () => {
     it('should return the owner of Confidential Account', async () => {
-      const account = createMockConfidentialAccount();
+      const mockConfidentialAccount = createMockConfidentialAccount();
 
-      jest.spyOn(service, 'findOne').mockResolvedValueOnce(account);
+      jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockConfidentialAccount);
 
-      const result = await service.fetchOwner(publicKey);
+      const result = await service.fetchOwner(confidentialAccount);
 
       expect(result).toEqual(expect.objectContaining({ did: 'SOME_OWNER' }));
     });
 
     it('should throw an error if no owner exists', async () => {
-      const account = createMockConfidentialAccount();
-      account.getIdentity.mockResolvedValue(null);
+      const mockConfidentialAccount = createMockConfidentialAccount();
+      mockConfidentialAccount.getIdentity.mockResolvedValue(null);
 
-      jest.spyOn(service, 'findOne').mockResolvedValueOnce(account);
+      jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockConfidentialAccount);
 
-      await expect(service.fetchOwner(publicKey)).rejects.toThrow('No owner found');
+      await expect(service.fetchOwner(confidentialAccount)).rejects.toThrow('No owner found');
     });
   });
 
-  describe('createConfidentialAccount', () => {
-    it('should create the Confidential Account', async () => {
+  describe('mapConfidentialAccount', () => {
+    it('should map a given public key to the signer', async () => {
       const input = {
         signer,
-        publicKey,
       };
       const mockTransactions = {
         blockHash: '0x1',
@@ -110,7 +109,7 @@ describe('ConfidentialAccountsService', () => {
         transactions: [mockTransaction],
       });
 
-      const result = await service.createConfidentialAccount(input);
+      const result = await service.mapConfidentialAccount(confidentialAccount, input);
 
       expect(result).toEqual({
         result: mockAccount,

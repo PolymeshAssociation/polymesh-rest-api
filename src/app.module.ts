@@ -27,6 +27,7 @@ import { NotificationsModule } from '~/notifications/notifications.module';
 import { OfferingsModule } from '~/offerings/offerings.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
+import { ProofServerModule } from '~/proof-server/proof-server.module';
 import { ScheduleModule } from '~/schedule/schedule.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
 import { SigningModule } from '~/signing/signing.module';
@@ -64,6 +65,7 @@ import { UsersModule } from '~/users/users.module';
           console.warn('Defaulting to "open" for "AUTH_STRATEGY"');
           return AuthStrategy.Open;
         }),
+        PROOF_SERVER_API: Joi.string().default(''),
       })
         .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')
         .and('LOCAL_SIGNERS', 'LOCAL_MNEMONICS')
@@ -98,6 +100,7 @@ import { UsersModule } from '~/users/users.module';
     ConfidentialAssetsModule,
     ConfidentialAccountsModule,
     ConfidentialTransactionsModule,
+    ProofServerModule,
   ],
 })
 export class AppModule {}

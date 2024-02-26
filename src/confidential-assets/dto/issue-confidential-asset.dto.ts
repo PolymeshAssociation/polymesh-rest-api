@@ -24,5 +24,5 @@ export class IssueConfidentialAssetDto extends TransactionBaseDto {
     type: 'string',
   })
   @IsString()
-  readonly account: string;
+  readonly confidentialAccount: string;
 }

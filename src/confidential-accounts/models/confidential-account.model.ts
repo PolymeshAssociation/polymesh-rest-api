@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ConfidentialAccountModel {
   @ApiProperty({
-    description: 'The public key of the Confidential Account',
+    description: 'The public key of the ElGamal key pair',
     type: 'string',
     example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })

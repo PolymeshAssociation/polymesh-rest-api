@@ -1,25 +1,23 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { ConfidentialAsset } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
-import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { createConfidentialAssetDetailsModel } from '~/confidential-assets/confidential-assets.util';
 import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
-import { ConfidentialAssetModel } from '~/confidential-assets/models/confidential-asset.model';
 import { ConfidentialAssetDetailsModel } from '~/confidential-assets/models/confidential-asset-details.model';
 import { ConfidentialVenueFilteringDetailsModel } from '~/confidential-assets/models/confidential-venue-filtering-details.model';
+import { CreatedConfidentialAssetModel } from '~/confidential-assets/models/created-confidential-asset.model';
 
 @ApiTags('confidential-assets')
 @Controller('confidential-assets')
@@ -51,35 +49,12 @@ export class ConfidentialAssetsController {
   }
 
   @ApiOperation({
-    summary: 'Search by ticker',
-    description: 'This endpoint will return the Confidential Asset mapped to a given ticker',
-  })
-  @ApiQuery({
-    name: 'ticker',
-    description: 'The ticker to be searched',
-    type: 'string',
-    example: 'TICKER',
-  })
-  @ApiOkResponse({
-    description: 'Confidential Asset corresponding to the given ticker',
-    type: ConfidentialAssetModel,
-  })
-  @Get('search')
-  public async getAssetByTicker(
-    @Query() { ticker }: TickerParamsDto
-  ): Promise<ConfidentialAssetModel> {
-    const { id } = await this.confidentialAssetsService.findOneByTicker(ticker);
-
-    return new ConfidentialAssetModel({ id });
-  }
-
-  @ApiOperation({
     summary: 'Create a Confidential Asset',
     description: 'This endpoint allows for the creation of a new Confidential Asset',
   })
   @ApiTransactionResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
+    description: 'Details about the newly created Confidential Asset',
+    type: CreatedConfidentialAssetModel,
   })
   @ApiUnprocessableEntityResponse({
     description: 'One or more auditors do not exists',
@@ -89,7 +64,19 @@ export class ConfidentialAssetsController {
     @Body() params: CreateConfidentialAssetDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.createConfidentialAsset(params);
-    return handleServiceResult(result);
+
+    const resolver: TransactionResolver<ConfidentialAsset> = ({
+      result: confidentialAsset,
+      transactions,
+      details,
+    }) =>
+      new CreatedConfidentialAssetModel({
+        confidentialAsset,
+        details,
+        transactions,
+      });
+
+    return handleServiceResult(result, resolver);
   }
 
   @ApiOperation({
