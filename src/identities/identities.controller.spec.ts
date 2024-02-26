@@ -21,6 +21,7 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -32,6 +33,7 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { testValues } from '~/test-utils/consts';
 import {
+  createMockConfidentialVenue,
   MockAuthorizationRequest,
   MockIdentity,
   MockTickerReservation,
@@ -41,6 +43,7 @@ import {
   MockAssetService,
   MockAuthorizationsService,
   mockClaimsServiceProvider,
+  mockConfidentialTransactionsServiceProvider,
   mockDeveloperServiceProvider,
   MockIdentitiesService,
   MockSettlementsService,
@@ -66,6 +69,8 @@ describe('IdentitiesController', () => {
 
   const mockDeveloperTestingService = mockDeveloperServiceProvider.useValue;
 
+  let mockConfidentialTransactionService: DeepMocked<ConfidentialTransactionsService>;
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       controllers: [IdentitiesController],
@@ -78,6 +83,7 @@ describe('IdentitiesController', () => {
         TickerReservationsService,
         mockPolymeshLoggerProvider,
         mockDeveloperServiceProvider,
+        mockConfidentialTransactionsServiceProvider,
       ],
     })
       .overrideProvider(AssetsService)
@@ -93,6 +99,9 @@ describe('IdentitiesController', () => {
       .compile();
 
     mockClaimsService = mockClaimsServiceProvider.useValue as DeepMocked<ClaimsService>;
+    mockConfidentialTransactionService = module.get<typeof mockConfidentialTransactionService>(
+      ConfidentialTransactionsService
+    );
     controller = module.get<IdentitiesController>(IdentitiesController);
   });
 
@@ -654,6 +663,18 @@ describe('IdentitiesController', () => {
         affirmed: expectedInstructionIds,
         pending: expectedInstructionIds,
         failed: expectedInstructionIds,
+      });
+    });
+  });
+
+  describe('getConfidentialVenues', () => {
+    it("should return the Identity's Confidential Venues", async () => {
+      const mockResults = [createMockConfidentialVenue()];
+      mockConfidentialTransactionService.findVenuesByOwner.mockResolvedValue(mockResults);
+
+      const result = await controller.getConfidentialVenues({ did });
+      expect(result).toEqual({
+        results: mockResults,
       });
     });
   });
