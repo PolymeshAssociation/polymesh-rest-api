@@ -533,6 +533,9 @@ export function createMockConfidentialAccount(
     getIdentity(): PartialFuncReturn<Promise<Identity | null>> {
       return { did: 'SOME_OWNER' } as PartialFuncReturn<Promise<Identity | null>>;
     },
+    getBalance(): PartialFuncReturn<Promise<string>> {
+      return '0x0ceabalance' as PartialFuncReturn<Promise<string>>;
+    },
   }
 ): DeepMocked<ConfidentialAccount> {
   return createMock<ConfidentialAccount>(partial);

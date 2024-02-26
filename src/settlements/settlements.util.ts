@@ -26,7 +26,6 @@ export async function createInstructionModel(instruction: Instruction): Promise<
       const to = createPortfolioIdentifierModel(legTo);
 
       if (isFungibleLeg(leg)) {
-        console.log('is fungible');
         const { amount } = leg;
         return new LegModel({
           asset,
@@ -35,7 +34,6 @@ export async function createInstructionModel(instruction: Instruction): Promise<
           amount,
         });
       } else if (isNftLeg(leg)) {
-        console.log('is nft');
         const { nfts } = leg;
 
         return new LegModel({

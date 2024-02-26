@@ -96,6 +96,9 @@ REST_POSTGRES_PORT=## Port the DB is listening (usually 5432) ##
 REST_POSTGRES_USER=## DB user to use##
 REST_POSTGRES_PASSWORD=## Password of the user ##
 REST_POSTGRES_DATABASE=## Database to use ##
+
+# Proof Server:
+PROOF_SERVER_API=## API path where the proof server is hosted
 ```
 
 ### Signing Transactions

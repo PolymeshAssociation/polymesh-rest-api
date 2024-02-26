@@ -69,37 +69,11 @@ describe('ConfidentialAssetsService', () => {
     });
   });
 
-  describe('findOneByTicker', () => {
-    it('should return Confidential Asset for a given ticker', async () => {
-      const asset = createMockConfidentialAsset();
-
-      mockPolymeshApi.confidentialAssets.getConfidentialAssetFromTicker.mockResolvedValue(asset);
-
-      const result = await service.findOneByTicker('TICKER');
-
-      expect(result).toEqual(asset);
-    });
-
-    it('should call handleSdkError and throw an error', async () => {
-      const mockError = new Error('Some Error');
-      mockPolymeshApi.confidentialAssets.getConfidentialAssetFromTicker.mockRejectedValue(
-        mockError
-      );
-
-      const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
-
-      await expect(() => service.findOneByTicker(id)).rejects.toThrowError();
-
-      expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
-    });
-  });
-
   describe('createConfidentialAsset', () => {
     it('should create the Confidential Asset', async () => {
       const input = {
         signer,
         data: 'SOME_DATA',
-        ticker: 'TICKER',
         auditors: ['AUDITOR_KEY'],
         mediators: ['MEDIATOR_DID'],
       };
@@ -131,7 +105,7 @@ describe('ConfidentialAssetsService', () => {
       const input = {
         signer,
         amount: new BigNumber(100),
-        account: 'SOME_ACCOUNT',
+        confidentialAccount: 'SOME_ACCOUNT',
       };
       const mockTransactions = {
         blockHash: '0x1',
