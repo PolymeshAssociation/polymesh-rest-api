@@ -14,6 +14,7 @@ import {
   Claim,
   ClaimScope,
   ClaimType,
+  ConfidentialVenue,
   FungibleAsset,
   NftCollection,
   TickerReservation,
@@ -47,6 +48,7 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
@@ -72,6 +74,7 @@ export class IdentitiesController {
     private readonly claimsService: ClaimsService,
     private readonly tickerReservationsService: TickerReservationsService,
     private readonly developerTestingService: DeveloperTestingService,
+    private readonly confidentialTransactionService: ConfidentialTransactionsService,
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(IdentitiesController.name);
@@ -621,5 +624,27 @@ export class IdentitiesController {
     const result = await this.settlementsService.findGroupedInstructionsByDid(did);
 
     return new GroupedInstructionModel(result);
+  }
+
+  @ApiTags('confidential-venues')
+  @ApiOperation({
+    summary: 'Get all Confidential Venues owned by an Identity',
+    description: 'This endpoint will provide list of confidential venues for an identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity whose Confidential Venues are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of IDs of all owned Confidential Venues',
+    paginated: false,
+    example: ['1', '2', '3'],
+  })
+  @Get(':did/confidential-venues')
+  async getConfidentialVenues(@Param() { did }: DidDto): Promise<ResultsModel<ConfidentialVenue>> {
+    const results = await this.confidentialTransactionService.findVenuesByOwner(did);
+    return new ResultsModel({ results });
   }
 }
