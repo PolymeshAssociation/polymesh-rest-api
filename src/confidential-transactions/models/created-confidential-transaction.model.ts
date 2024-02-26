@@ -9,7 +9,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 export class CreatedConfidentialTransactionModel extends TransactionQueueModel {
   @ApiProperty({
     type: 'string',
-    description: 'ID of the newly created confidential transaction',
+    description: 'ID of the newly created Confidential Transaction',
     example: '123',
   })
   @FromEntity()

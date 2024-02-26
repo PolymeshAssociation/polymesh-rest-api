@@ -4,17 +4,21 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ConfidentialAsset,
   ConfidentialAssetDetails,
+  TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { ServiceReturn } from '~/common/utils';
 import { ConfidentialAssetsController } from '~/confidential-assets/confidential-assets.controller';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
-import { testValues } from '~/test-utils/consts';
+import { CreatedConfidentialAssetModel } from '~/confidential-assets/models/created-confidential-asset.model';
+import { getMockTransaction, testValues } from '~/test-utils/consts';
 import {
   createMockConfidentialAccount,
   createMockConfidentialAsset,
   createMockConfidentialVenue,
   createMockIdentity,
+  createMockTransactionResult,
 } from '~/test-utils/mocks';
 import { mockConfidentialAssetsServiceProvider } from '~/test-utils/service-mocks';
 
@@ -78,12 +82,28 @@ describe('ConfidentialAssetsController', () => {
         auditors: ['SOME_PUBLIC_KEY'],
         mediators: [],
       };
-      mockConfidentialAssetsService.createConfidentialAsset.mockResolvedValue(
-        txResult as unknown as ServiceReturn<ConfidentialAsset>
-      );
+
+      const mockConfidentialAsset = createMockConfidentialAsset();
+      const transaction = getMockTransaction(TxTags.confidentialAsset.CreateAsset);
+
+      const testTxResult = createMockTransactionResult<ConfidentialAsset>({
+        ...txResult,
+        transactions: [transaction],
+        result: mockConfidentialAsset,
+      });
+
+      when(mockConfidentialAssetsService.createConfidentialAsset)
+        .calledWith(input)
+        .mockResolvedValue(testTxResult);
 
       const result = await controller.createConfidentialAsset(input);
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(
+        new CreatedConfidentialAssetModel({
+          ...txResult,
+          transactions: [transaction],
+          confidentialAsset: mockConfidentialAsset,
+        })
+      );
     });
   });
 

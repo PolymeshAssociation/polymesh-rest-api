@@ -58,19 +58,7 @@ describe('ConfidentialAccountsController', () => {
     });
   });
 
-  describe('getOwner', () => {
-    it('should get the owner of a Confidential Account', async () => {
-      mockConfidentialAccountsService.fetchOwner.mockResolvedValue(
-        createMockIdentity({ did: 'OWNER_DID' })
-      );
-
-      const result = await controller.getOwner({ confidentialAccount });
-
-      expect(result).toEqual(expect.objectContaining({ did: 'OWNER_DID' }));
-    });
-  });
-
-  describe('create', () => {
+  describe('createAccount', () => {
     it('should call the service and return the results', async () => {
       const mockAccount = {
         confidential_account: 'SOME_PUBLIC_KEY',
@@ -91,12 +79,24 @@ describe('ConfidentialAccountsController', () => {
       const input = {
         signer,
       };
-      mockConfidentialAccountsService.createConfidentialAccount.mockResolvedValue(
+      mockConfidentialAccountsService.mapConfidentialAccount.mockResolvedValue(
         txResult as unknown as ServiceReturn<ConfidentialAccount>
       );
 
       const result = await controller.mapAccount({ confidentialAccount }, input);
       expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('getOwner', () => {
+    it('should get the owner of a Confidential Account', async () => {
+      mockConfidentialAccountsService.fetchOwner.mockResolvedValue(
+        createMockIdentity({ did: 'OWNER_DID' })
+      );
+
+      const result = await controller.getOwner({ confidentialAccount });
+
+      expect(result).toEqual(expect.objectContaining({ did: 'OWNER_DID' }));
     });
   });
 });

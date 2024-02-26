@@ -15,7 +15,7 @@ export class ConfidentialAssetAuditorModel {
   readonly asset: ConfidentialAssetModel;
 
   @ApiProperty({
-    description: 'List of auditors for the `asset`',
+    description: 'List of auditor confidential Accounts for the `asset`',
     type: ConfidentialAccountModel,
     isArray: true,
   })

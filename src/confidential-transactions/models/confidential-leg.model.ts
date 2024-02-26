@@ -33,7 +33,7 @@ export class ConfidentialLegModel {
   readonly receiver: ConfidentialAccountModel;
 
   @ApiProperty({
-    description: 'List of mediators configured for this leg',
+    description: 'List of mediator identities configured for this leg',
     type: IdentityModel,
     isArray: true,
   })
@@ -41,7 +41,8 @@ export class ConfidentialLegModel {
   readonly mediators: IdentityModel[];
 
   @ApiProperty({
-    description: 'Auditors for the leg, grouped by asset they are auditors for',
+    description:
+      'Auditor confidential Accounts for the leg, grouped by asset they are auditors for',
     type: ConfidentialAssetAuditorModel,
     isArray: true,
   })

@@ -8,7 +8,7 @@ import { IsConfidentialAssetId, IsDid } from '~/common/decorators/validation';
 export class ConfidentialTransactionLegDto {
   @ApiProperty({
     description:
-      'The confidential Assets (or their IDs) for this leg of the transaction. Amounts are specified in the later proof generation steps',
+      'The confidential Asset IDs for this leg of the transaction. Amounts are specified in the later proof generation steps',
     type: 'string',
     isArray: true,
     example: ['76702175-d8cb-e3a5-5a19-734433351e25'],

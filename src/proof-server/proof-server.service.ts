@@ -11,7 +11,7 @@ import { ConfidentialAccountEntity } from '~/proof-server/entities/confidential-
 
 @Injectable()
 export class ProofServerService {
-  private apiPath?: string;
+  private apiPath: string;
 
   constructor(
     @Inject(proofServerConfig.KEY) config: ConfigType<typeof proofServerConfig>,
@@ -27,7 +27,7 @@ export class ProofServerService {
    * Asserts if proof server API was initialized
    */
   private assertProofServerInitialized(): void {
-    if (this.apiPath?.length === 0) {
+    if (this.apiPath.length === 0) {
       throw new AppConfigError('PROOF_SERVER_API', 'Proof server not initialized');
     }
   }
@@ -99,6 +99,10 @@ export class ProofServerService {
       encrypted_balance: string;
     }
   ): Promise<string> {
+    this.logger.debug(
+      `generateSenderProof - Generating sender proof for account ${confidentialAccount}`
+    );
+
     return this.requestProofServer(`accounts/${confidentialAccount}/send`, 'POST', senderInfo);
   }
 }

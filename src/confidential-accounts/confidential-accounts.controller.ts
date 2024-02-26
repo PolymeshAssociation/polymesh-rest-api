@@ -26,9 +26,9 @@ export class ConfidentialAccountsController {
   ) {}
 
   @ApiOperation({
-    summary: 'Get confidential accounts',
+    summary: 'Get all Confidential Accounts',
     description:
-      'This endpoint retrieves the list of all confidential Accounts existing on the Proof Server. Note, this needs the PROOF_SERVER_API to be set in the environment',
+      'This endpoint retrieves the list of all confidential Accounts created on the Proof Server. Note, this needs the `PROOF_SERVER_API` to be set in the environment',
   })
   @ApiOkResponse({
     description: 'List of Confidential Accounts',
@@ -48,35 +48,16 @@ export class ConfidentialAccountsController {
   }
 
   @ApiOperation({
-    summary: 'Get owner',
-    description: 'This endpoint retrieves the owner of the Confidential Account',
-  })
-  @ApiParam({
-    name: 'confidentialAccount',
-    description: 'The public key of the Confidential Account',
-    type: 'string',
-    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+    summary: 'Create a Confidential Account',
+    description:
+      'This endpoint creates a new Confidential Account (ElGamal key pair) on the proof server. Note, this needs the `PROOF_SERVER_API` to be set in the environment',
   })
   @ApiOkResponse({
-    description: 'DID of the owner of the Confidential Account',
-    type: IdentityModel,
-  })
-  @Get(':confidentialAccount/owner')
-  public async getOwner(
-    @Param() { confidentialAccount }: ConfidentialAccountParamsDto
-  ): Promise<IdentityModel> {
-    const { did } = await this.confidentialAccountsService.fetchOwner(confidentialAccount);
-
-    return new IdentityModel({ did });
-  }
-
-  @ApiOperation({
-    summary: 'Create a Confidential Account',
-    description: 'This endpoint allows for the creation of a new Confidential Account',
-  })
-  @ApiTransactionResponse({
-    description: 'The newly created Confidential Account ',
+    description: 'Public key of the newly created Confidential Account (ElGamal key pair)',
     type: ConfidentialAccountModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server API is not set',
   })
   @Post('create')
   public async createAccount(): Promise<ConfidentialAccountModel> {
@@ -88,8 +69,8 @@ export class ConfidentialAccountsController {
 
   @Post(':confidentialAccount/map')
   @ApiOperation({
-    summary: 'Create a Confidential Account',
-    description: 'This endpoint allows for the creation of a new Confidential Account',
+    summary: 'Map a Confidential Account to an Identity',
+    description: 'This endpoint maps a given confidential Account to the signer on chain',
   })
   @ApiParam({
     name: 'confidentialAccount',
@@ -110,11 +91,35 @@ export class ConfidentialAccountsController {
     @Param() { confidentialAccount }: ConfidentialAccountParamsDto,
     @Body() params: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.confidentialAccountsService.createConfidentialAccount(
+    const result = await this.confidentialAccountsService.mapConfidentialAccount(
       confidentialAccount,
       params
     );
 
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get owner of a Confidential Account',
+    description:
+      'This endpoint retrieves the DID to which a Confidential Account is mapped on chain',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Confidential Account',
+    type: 'string',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'DID of the owner of the Confidential Account',
+    type: IdentityModel,
+  })
+  @Get(':confidentialAccount/owner')
+  public async getOwner(
+    @Param() { confidentialAccount }: ConfidentialAccountParamsDto
+  ): Promise<IdentityModel> {
+    const { did } = await this.confidentialAccountsService.fetchOwner(confidentialAccount);
+
+    return new IdentityModel({ did });
   }
 }

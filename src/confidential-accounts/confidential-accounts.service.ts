@@ -34,12 +34,13 @@ export class ConfidentialAccountsService {
     return identity;
   }
 
-  public async createConfidentialAccount(
+  public async mapConfidentialAccount(
     publicKey: string,
     base: TransactionBaseDto
   ): ServiceReturn<ConfidentialAccount> {
     const createConfidentialAccount =
       this.polymeshService.polymeshApi.confidentialAccounts.createConfidentialAccount;
+
     return this.transactionsService.submit(createConfidentialAccount, { publicKey }, base);
   }
 }

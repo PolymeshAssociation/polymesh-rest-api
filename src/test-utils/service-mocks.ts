@@ -127,6 +127,7 @@ export class MockNotificationsService {
 
 export class MockHttpService {
   post = jest.fn();
+  request = jest.fn();
 }
 
 export class MockScheduleService {

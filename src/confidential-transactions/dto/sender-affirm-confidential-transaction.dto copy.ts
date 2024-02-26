@@ -21,7 +21,7 @@ export class SenderAffirmConfidentialTransactionDto extends TransactionBaseDto {
   readonly legId: BigNumber;
 
   @ApiProperty({
-    description: 'Affirming party',
+    description: 'List of confidential Asset IDs along with their transfer amount',
     type: ConfidentialLegAmountDto,
     isArray: true,
   })

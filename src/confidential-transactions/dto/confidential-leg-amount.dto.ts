@@ -10,13 +10,13 @@ export class ConfidentialLegAmountDto {
   @ApiProperty({
     description: 'Then Confidential Asset ID whose amount is being specified',
     type: 'string',
-    example: '1',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
   })
   @IsConfidentialAssetId()
   readonly confidentialAsset: string;
 
   @ApiProperty({
-    description: 'Affirming party',
+    description: 'Amount to be transferred',
     type: 'string',
     example: '1000',
   })

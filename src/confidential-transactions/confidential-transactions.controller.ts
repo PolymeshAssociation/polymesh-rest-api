@@ -48,7 +48,7 @@ export class ConfidentialTransactionsController {
   @ApiOperation({
     summary: 'Affirm a leg of an existing Confidential Transaction as a Sender',
     description:
-      'This endpoint will affirm a specific leg of a pending Confidential Transaction for the Sender',
+      'This endpoint will affirm a specific leg of a pending Confidential Transaction for the Sender. Note, this needs the `PROOF_SERVER_API` to be set in the environment in order to generate the sender proof',
   })
   @ApiParam({
     name: 'id',

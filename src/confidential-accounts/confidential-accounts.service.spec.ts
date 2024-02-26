@@ -90,8 +90,8 @@ describe('ConfidentialAccountsService', () => {
     });
   });
 
-  describe('createConfidentialAccount', () => {
-    it('should create the Confidential Account', async () => {
+  describe('mapConfidentialAccount', () => {
+    it('should map a given public key to the signer', async () => {
       const input = {
         signer,
       };
@@ -109,7 +109,7 @@ describe('ConfidentialAccountsService', () => {
         transactions: [mockTransaction],
       });
 
-      const result = await service.createConfidentialAccount(confidentialAccount, input);
+      const result = await service.mapConfidentialAccount(confidentialAccount, input);
 
       expect(result).toEqual({
         result: mockAccount,

@@ -16,7 +16,7 @@ export class CreateConfidentialAssetDto extends TransactionBaseDto {
   readonly data: string;
 
   @ApiProperty({
-    description: 'List of auditors for the Confidential Asset',
+    description: 'List of auditor Confidential Accounts for the Confidential Asset',
     isArray: true,
     type: 'string',
     example: ['0xdeadbeef00000000000000000000000000000000000000000000000000000000'],
@@ -26,7 +26,7 @@ export class CreateConfidentialAssetDto extends TransactionBaseDto {
   readonly auditors: string[];
 
   @ApiPropertyOptional({
-    description: 'List of mediators for the Confidential Asset',
+    description: 'List of mediator DIDs for the Confidential Asset',
     isArray: true,
     type: 'string',
     example: ['0x0600000000000000000000000000000000000000000000000000000000000000'],
