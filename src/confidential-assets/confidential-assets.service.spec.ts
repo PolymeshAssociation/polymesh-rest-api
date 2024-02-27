@@ -147,4 +147,36 @@ describe('ConfidentialAssetsService', () => {
       expect(result).toEqual(expectedResult);
     });
   });
+
+  describe('setVenueFiltering', () => {
+    it('should call the setVenueFiltering procedure and return the results', async () => {
+      const input = {
+        signer,
+        enabled: true,
+        allowedVenues: [new BigNumber(1)],
+      };
+
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.SetVenueFiltering,
+      };
+
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockAsset = createMockConfidentialAsset();
+
+      jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockAsset);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.setVenueFilteringDetails(id, input);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });

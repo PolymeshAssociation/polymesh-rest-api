@@ -7,6 +7,7 @@ import {
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
+import { SetConfidentialVenueFilteringParamsDto } from '~/confidential-assets/dto/set-confidential-venue-filtering-params.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -52,5 +53,16 @@ export class ConfidentialAssetsService {
     const asset = await this.findOne(assetId);
 
     return asset.getVenueFilteringDetails();
+  }
+
+  public async setVenueFilteringDetails(
+    assetId: string,
+    params: SetConfidentialVenueFilteringParamsDto
+  ): ServiceReturn<void> {
+    const asset = await this.findOne(assetId);
+
+    const { base, args } = extractTxBase(params);
+
+    return this.transactionsService.submit(asset.setVenueFiltering, args, base);
   }
 }

@@ -15,6 +15,7 @@ import { createConfidentialAssetDetailsModel } from '~/confidential-assets/confi
 import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
+import { SetConfidentialVenueFilteringParamsDto } from '~/confidential-assets/dto/set-confidential-venue-filtering-params.dto';
 import { ConfidentialAssetDetailsModel } from '~/confidential-assets/models/confidential-asset-details.model';
 import { ConfidentialVenueFilteringDetailsModel } from '~/confidential-assets/models/confidential-venue-filtering-details.model';
 import { CreatedConfidentialAssetModel } from '~/confidential-assets/models/created-confidential-asset.model';
@@ -133,5 +134,29 @@ export class ConfidentialAssetsController {
     };
 
     return new ConfidentialVenueFilteringDetailsModel({ enabled, allowedConfidentialVenues });
+  }
+
+  @ApiOperation({
+    summary: 'Set confidential Venue filtering',
+    description:
+      'This endpoint enables/disables confidential venue filtering for a given Confidential Asset and/or set allowed/disallowed Confidential Venues',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Asset',
+    type: 'string',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
+  })
+  @Post(':id/venue-filtering')
+  public async setConfidentialVenueFiltering(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() params: SetConfidentialVenueFilteringParamsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, params);
+
+    return handleServiceResult(result);
   }
 }
