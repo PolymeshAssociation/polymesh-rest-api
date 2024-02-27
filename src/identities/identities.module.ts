@@ -6,6 +6,7 @@ import { AccountsModule } from '~/accounts/accounts.module';
 import { AssetsModule } from '~/assets/assets.module';
 import { AuthorizationsModule } from '~/authorizations/authorizations.module';
 import { ClaimsModule } from '~/claims/claims.module';
+import { ConfidentialTransactionsModule } from '~/confidential-transactions/confidential-transactions.module';
 import { DeveloperTestingModule } from '~/developer-testing/developer-testing.module';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -29,6 +30,7 @@ import { TransactionsModule } from '~/transactions/transactions.module';
     AccountsModule,
     ClaimsModule,
     TickerReservationsModule,
+    forwardRef(() => ConfidentialTransactionsModule),
   ],
   controllers: [IdentitiesController],
   providers: [IdentitiesService],

@@ -148,4 +148,20 @@ describe('ConfidentialAssetsController', () => {
       );
     });
   });
+
+  describe('issueConfidentialAsset', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+        enabled: true,
+        allowedVenues: [new BigNumber(1)],
+      };
+      mockConfidentialAssetsService.setVenueFilteringDetails.mockResolvedValue(
+        txResult as unknown as ServiceReturn<void>
+      );
+
+      const result = await controller.setConfidentialVenueFiltering({ id }, input);
+      expect(result).toEqual(txResult);
+    });
+  });
 });
