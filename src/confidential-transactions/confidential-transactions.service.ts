@@ -121,7 +121,7 @@ export class ConfidentialTransactionsService {
         amount: amount.toNumber(),
         auditors: assetAuditor.auditors.map(({ publicKey }) => publicKey),
         receiver: receiver.publicKey,
-        encrypted_balance: encryptedBalance,
+        encryptedBalance,
       });
 
       proofs.push({ asset: confidentialAsset, proof });
