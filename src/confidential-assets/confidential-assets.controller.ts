@@ -141,7 +141,7 @@ export class ConfidentialAssetsController {
   @ApiOperation({
     summary: 'Enable/disable confidential Venue filtering',
     description:
-      'This endpoint enables/disables confidential venue filtering for a given Confidential Asset and/or set allowed/disallowed Confidential Venues',
+      'This endpoint enables/disables confidential venue filtering for a given Confidential Asset',
   })
   @ApiParam({
     name: 'id',
