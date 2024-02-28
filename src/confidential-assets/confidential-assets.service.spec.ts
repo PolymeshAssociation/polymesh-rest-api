@@ -150,12 +150,6 @@ describe('ConfidentialAssetsService', () => {
 
   describe('setVenueFiltering', () => {
     it('should call the setVenueFiltering procedure and return the results', async () => {
-      const input = {
-        signer,
-        enabled: true,
-        allowedVenues: [new BigNumber(1)],
-      };
-
       const mockTransactions = {
         blockHash: '0x1',
         txHash: '0x2',
@@ -166,13 +160,31 @@ describe('ConfidentialAssetsService', () => {
       const mockTransaction = new MockTransaction(mockTransactions);
       const mockAsset = createMockConfidentialAsset();
 
-      jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockAsset);
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset);
 
       mockTransactionsService.submit.mockResolvedValue({
         transactions: [mockTransaction],
       });
 
-      const result = await service.setVenueFilteringDetails(id, input);
+      let result = await service.setVenueFilteringDetails(id, { signer, enabled: true });
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+
+      result = await service.setVenueFilteringDetails(id, {
+        signer,
+        allowedVenues: [new BigNumber(1)],
+      });
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+
+      result = await service.setVenueFilteringDetails(id, {
+        signer,
+        disallowedVenues: [new BigNumber(2)],
+      });
 
       expect(result).toEqual({
         transactions: [mockTransaction],

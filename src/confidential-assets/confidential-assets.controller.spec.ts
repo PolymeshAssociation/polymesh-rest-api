@@ -149,18 +149,35 @@ describe('ConfidentialAssetsController', () => {
     });
   });
 
-  describe('issueConfidentialAsset', () => {
+  describe('toggleConfidentialVenueFiltering', () => {
     it('should call the service and return the results', async () => {
       const input = {
         signer,
         enabled: true,
-        allowedVenues: [new BigNumber(1)],
       };
       mockConfidentialAssetsService.setVenueFilteringDetails.mockResolvedValue(
         txResult as unknown as ServiceReturn<void>
       );
 
-      const result = await controller.setConfidentialVenueFiltering({ id }, input);
+      const result = await controller.toggleConfidentialVenueFiltering({ id }, input);
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('addAllowedVenues and removeAllowedVenues', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+        confidentialVenues: [new BigNumber(1)],
+      };
+      mockConfidentialAssetsService.setVenueFilteringDetails.mockResolvedValue(
+        txResult as unknown as ServiceReturn<void>
+      );
+
+      let result = await controller.addAllowedVenues({ id }, input);
+      expect(result).toEqual(txResult);
+
+      result = await controller.removeAllowedVenues({ id }, input);
       expect(result).toEqual(txResult);
     });
   });
