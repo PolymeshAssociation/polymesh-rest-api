@@ -12,9 +12,11 @@ import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/d
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { createConfidentialAssetDetailsModel } from '~/confidential-assets/confidential-assets.util';
+import { AddAllowedConfidentialVenuesDto } from '~/confidential-assets/dto/add-allowed-confidential-venues.dto';
 import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
+import { RemoveAllowedConfidentialVenuesDto } from '~/confidential-assets/dto/remove-allowed-confidential-venues.dto';
 import { SetConfidentialVenueFilteringParamsDto } from '~/confidential-assets/dto/set-confidential-venue-filtering-params.dto';
 import { ConfidentialAssetDetailsModel } from '~/confidential-assets/models/confidential-asset-details.model';
 import { ConfidentialVenueFilteringDetailsModel } from '~/confidential-assets/models/confidential-venue-filtering-details.model';
@@ -137,7 +139,7 @@ export class ConfidentialAssetsController {
   }
 
   @ApiOperation({
-    summary: 'Set confidential Venue filtering',
+    summary: 'Enable/disable confidential Venue filtering',
     description:
       'This endpoint enables/disables confidential venue filtering for a given Confidential Asset and/or set allowed/disallowed Confidential Venues',
   })
@@ -151,11 +153,68 @@ export class ConfidentialAssetsController {
     [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
   })
   @Post(':id/venue-filtering')
-  public async setConfidentialVenueFiltering(
+  public async toggleConfidentialVenueFiltering(
     @Param() { id }: ConfidentialAssetIdParamsDto,
     @Body() params: SetConfidentialVenueFilteringParamsDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Add a list of Confidential Venues for Confidential Asset transactions',
+    description:
+      'This endpoint adds additional Confidential Venues to existing list of Confidential Venues allowed to handle transfer of the given Confidential Asset',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Asset',
+    type: 'string',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
+  })
+  @Post(':id/venue-filtering/add-allowed-venues')
+  public async addAllowedVenues(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() params: AddAllowedConfidentialVenuesDto
+  ): Promise<TransactionResponseModel> {
+    const { confidentialVenues: allowedVenues, ...rest } = params;
+    const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, {
+      ...rest,
+      allowedVenues,
+    });
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Remove a list of Confidential Venues for Confidential Asset transactions',
+    description:
+      'This endpoint removes the given list of Confidential Venues (if present), from the existing list of allowed Confidential Venues for Confidential Asset Transaction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Asset',
+    type: 'string',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
+  })
+  @Post(':id/venue-filtering/remove-allowed-venues')
+  public async removeAllowedVenues(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() params: RemoveAllowedConfidentialVenuesDto
+  ): Promise<TransactionResponseModel> {
+    const { confidentialVenues: disallowedVenues, ...rest } = params;
+
+    const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, {
+      ...rest,
+      disallowedVenues,
+    });
 
     return handleServiceResult(result);
   }

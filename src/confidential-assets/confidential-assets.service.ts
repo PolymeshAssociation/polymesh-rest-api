@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ConfidentialAsset,
   ConfidentialVenueFilteringDetails,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
-import { SetConfidentialVenueFilteringParamsDto } from '~/confidential-assets/dto/set-confidential-venue-filtering-params.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -57,7 +58,14 @@ export class ConfidentialAssetsService {
 
   public async setVenueFilteringDetails(
     assetId: string,
-    params: SetConfidentialVenueFilteringParamsDto
+    params: TransactionBaseDto &
+      (
+        | { enabled: boolean }
+        | {
+            allowedVenues: BigNumber[];
+          }
+        | { disallowedVenues: BigNumber[] }
+      )
   ): ServiceReturn<void> {
     const asset = await this.findOne(assetId);
 
