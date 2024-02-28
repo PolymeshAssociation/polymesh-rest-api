@@ -10,8 +10,12 @@ import {
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { ConfidentialAccountParamsDto } from '~/confidential-accounts/dto/confidential-account-params.dto';
 import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
 import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
+import { AuditorVerifySenderProofDto } from '~/confidential-proofs/dto/auditor-verify-sender-proof.dto';
+import { ReceiverVerifySenderProofDto } from '~/confidential-proofs/dto/receiver-verify-sender-proof.dto';
+import { SenderProofVerificationResponseModel } from '~/confidential-proofs/models/sender-proof-verification-response.model';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
 
@@ -56,7 +60,7 @@ export class ConfidentialProofsController {
     type: ConfidentialAccountModel,
   })
   @ApiInternalServerErrorResponse({
-    description: 'Proof server API is not set',
+    description: 'Proof server returned a non-OK status',
   })
   @Post('confidential-accounts/create')
   public async createAccount(): Promise<ConfidentialAccountModel> {
@@ -64,6 +68,56 @@ export class ConfidentialProofsController {
       await this.confidentialProofsService.createConfidentialAccount();
 
     return new ConfidentialAccountModel({ publicKey });
+  }
+
+  @ApiTags('confidential-accounts')
+  @ApiOperation({
+    summary: 'Verify a sender proof as an auditor',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Auditor Confidential Account',
+    type: 'string',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Public key of the newly created Confidential Account (ElGamal key pair)',
+    type: ConfidentialAccountModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server returned a non-OK status',
+  })
+  @Post('confidential-accounts/:confidentialAccount/auditor-verify')
+  public async verifySenderProofAsAuditor(
+    @Param() { confidentialAccount }: ConfidentialAccountParamsDto,
+    @Body() params: AuditorVerifySenderProofDto
+  ): Promise<SenderProofVerificationResponseModel> {
+    return this.confidentialProofsService.verifySenderProofAsAuditor(confidentialAccount, params);
+  }
+
+  @ApiTags('confidential-accounts')
+  @ApiOperation({
+    summary: 'Verify a sender proof as an auditor',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Auditor Confidential Account',
+    type: 'string',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Public key of the newly created Confidential Account (ElGamal key pair)',
+    type: ConfidentialAccountModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server returned a non-OK status',
+  })
+  @Post('confidential-accounts/:confidentialAccount/receiver-verify')
+  public async verifySenderProofAsReceiver(
+    @Param() { confidentialAccount }: ConfidentialAccountParamsDto,
+    @Body() params: ReceiverVerifySenderProofDto
+  ): Promise<SenderProofVerificationResponseModel> {
+    return this.confidentialProofsService.verifySenderProofAsReceiver(confidentialAccount, params);
   }
 
   @ApiTags('confidential-transactions')
@@ -81,6 +135,9 @@ export class ConfidentialProofsController {
   @ApiOkResponse({
     description: 'Details of the transaction',
     type: TransactionQueueModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server returned a non-OK status',
   })
   @Post('confidential-transactions/:id/affirm-leg/sender')
   public async senderAffirmLeg(

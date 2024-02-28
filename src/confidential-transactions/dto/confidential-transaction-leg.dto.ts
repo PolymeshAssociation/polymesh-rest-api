@@ -48,7 +48,7 @@ export class ConfidentialTransactionLegDto {
     description: 'The DID of mediators of the transaction leg',
     type: 'string',
     isArray: true,
-    example: ['1'],
+    example: ['0x0600000000000000000000000000000000000000000000000000000000000000'],
   })
   @IsArray()
   @IsDid({ each: true })

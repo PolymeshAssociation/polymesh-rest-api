@@ -2,12 +2,18 @@ import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Method } from 'axios';
-import applyCaseMiddleware from 'axios-case-converter';
 import { lastValueFrom } from 'rxjs';
 
 import { AppInternalError } from '~/common/errors';
+import {
+  deserializeObject,
+  serializeObject,
+} from '~/confidential-proofs/confidential-proofs.utils';
 import confidentialProofsConfig from '~/confidential-proofs/config/confidential-proofs.config';
+import { AuditorVerifySenderProofDto } from '~/confidential-proofs/dto/auditor-verify-sender-proof.dto';
+import { ReceiverVerifySenderProofDto } from '~/confidential-proofs/dto/receiver-verify-sender-proof.dto';
 import { ConfidentialAccountEntity } from '~/confidential-proofs/entities/confidential-account.entity';
+import { SenderProofVerificationResponseModel } from '~/confidential-proofs/models/sender-proof-verification-response.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
 @Injectable()
@@ -21,7 +27,6 @@ export class ConfidentialProofsService {
   ) {
     this.apiPath = config.proofServerUrl;
 
-    applyCaseMiddleware(this.httpService.axiosRef);
     logger.setContext(ConfidentialProofsService.name);
   }
 
@@ -37,7 +42,7 @@ export class ConfidentialProofsService {
       this.httpService.request({
         url: `${this.apiPath}/${apiEndpoint}`,
         method,
-        data,
+        data: serializeObject(data),
         timeout: 10000,
       })
     );
@@ -52,7 +57,7 @@ export class ConfidentialProofsService {
 
     this.logger.log(`requestProofServer - Received OK status for endpoint : "${apiEndpoint}"`);
 
-    return responseBody;
+    return deserializeObject(responseBody) as T;
   }
 
   /**
@@ -87,7 +92,7 @@ export class ConfidentialProofsService {
       amount: number;
       auditors: string[];
       receiver: string;
-      encrypted_balance: string;
+      encryptedBalance: string;
     }
   ): Promise<string> {
     this.logger.debug(
@@ -95,5 +100,41 @@ export class ConfidentialProofsService {
     );
 
     return this.requestProofServer(`accounts/${confidentialAccount}/send`, 'POST', senderInfo);
+  }
+
+  /**
+   * Verifies sender proof as an auditor
+   */
+  public async verifySenderProofAsAuditor(
+    confidentialAccount: string,
+    params: AuditorVerifySenderProofDto
+  ): Promise<SenderProofVerificationResponseModel> {
+    this.logger.debug(
+      `verifySenderProofAsAuditor - Verifying sender proof ${params.senderProof} for account ${confidentialAccount}`
+    );
+
+    return this.requestProofServer(
+      `accounts/${confidentialAccount}/auditor_verify`,
+      'POST',
+      params
+    );
+  }
+
+  /**
+   * Verifies sender proof as a receiver
+   */
+  public async verifySenderProofAsReceiver(
+    confidentialAccount: string,
+    params: ReceiverVerifySenderProofDto
+  ): Promise<SenderProofVerificationResponseModel> {
+    this.logger.debug(
+      `verifySenderProofAsReceiver - Generating sender proof ${params.senderProof} for account ${confidentialAccount}`
+    );
+
+    return this.requestProofServer(
+      `accounts/${confidentialAccount}/receiver_verify`,
+      'POST',
+      params
+    );
   }
 }
