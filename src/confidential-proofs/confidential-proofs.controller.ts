@@ -70,6 +70,34 @@ export class ConfidentialProofsController {
     return new ConfidentialAccountModel({ publicKey });
   }
 
+  @ApiTags('confidential-transactions')
+  @ApiOperation({
+    summary: 'Affirm a leg of an existing Confidential Transaction as a Sender',
+    description:
+      'This endpoint will affirm a specific leg of a pending Confidential Transaction for the Sender. Note, this needs the `PROOF_SERVER_URL` to be set in the environment in order to generate the sender proof',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Transaction to be affirmed',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server returned a non-OK status',
+  })
+  @Post('confidential-transactions/:id/affirm-leg/sender')
+  public async senderAffirmLeg(
+    @Param() { id }: IdParamsDto,
+    @Body() body: SenderAffirmConfidentialTransactionDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialTransactionsService.senderAffirmLeg(id, body);
+    return handleServiceResult(result);
+  }
+
   @ApiTags('confidential-accounts')
   @ApiOperation({
     summary: 'Verify a sender proof as an auditor',
@@ -118,33 +146,5 @@ export class ConfidentialProofsController {
     @Body() params: ReceiverVerifySenderProofDto
   ): Promise<SenderProofVerificationResponseModel> {
     return this.confidentialProofsService.verifySenderProofAsReceiver(confidentialAccount, params);
-  }
-
-  @ApiTags('confidential-transactions')
-  @ApiOperation({
-    summary: 'Affirm a leg of an existing Confidential Transaction as a Sender',
-    description:
-      'This endpoint will affirm a specific leg of a pending Confidential Transaction for the Sender. Note, this needs the `PROOF_SERVER_URL` to be set in the environment in order to generate the sender proof',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Confidential Transaction to be affirmed',
-    type: 'string',
-    example: '123',
-  })
-  @ApiOkResponse({
-    description: 'Details of the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Proof server returned a non-OK status',
-  })
-  @Post('confidential-transactions/:id/affirm-leg/sender')
-  public async senderAffirmLeg(
-    @Param() { id }: IdParamsDto,
-    @Body() body: SenderAffirmConfidentialTransactionDto
-  ): Promise<TransactionResponseModel> {
-    const result = await this.confidentialTransactionsService.senderAffirmLeg(id, body);
-    return handleServiceResult(result);
   }
 }

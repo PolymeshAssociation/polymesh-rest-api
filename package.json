@@ -50,7 +50,6 @@
     "@polymeshassociation/local-signing-manager": "^3.1.0",
     "@polymeshassociation/polymesh-sdk": "^24.0.0-confidential-assets.7",
     "@polymeshassociation/signing-manager-types": "^3.1.0",
-    "axios-case-converter": "^1.1.1",
     "class-transformer": "0.5.1",
     "class-validator": "^0.14.0",
     "joi": "17.4.0",
