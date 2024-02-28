@@ -4,11 +4,11 @@ export class ConfidentialAccountEntity {
   /**
    * Public key of ElGamal Key Pair
    */
-  public confidential_account: string;
+  public confidentialAccount: string;
 
-  public created_at: Date;
+  public createdAt: Date;
 
-  public updated_at: Date;
+  public updatedAt: Date;
 
   constructor(entity: ConfidentialAccountEntity) {
     Object.assign(this, entity);

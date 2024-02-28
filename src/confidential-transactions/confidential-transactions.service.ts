@@ -11,13 +11,13 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { AppValidationError } from '~/common/errors';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
+import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { createConfidentialTransactionModel } from '~/confidential-transactions/confidential-transactions.util';
 import { CreateConfidentialTransactionDto } from '~/confidential-transactions/dto/create-confidential-transaction.dto';
 import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { ProofServerService } from '~/proof-server/proof-server.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
 
@@ -27,7 +27,7 @@ export class ConfidentialTransactionsService {
     private readonly polymeshService: PolymeshService,
     private readonly transactionsService: TransactionsService,
     private readonly confidentialAccountsService: ConfidentialAccountsService,
-    private readonly proofServerService: ProofServerService,
+    private readonly confidentialProofsService: ConfidentialProofsService,
     private readonly identitiesService: IdentitiesService
   ) {}
 
@@ -117,7 +117,7 @@ export class ConfidentialTransactionsService {
         asset: confidentialAsset,
       });
 
-      const proof = await this.proofServerService.generateSenderProof(sender.publicKey, {
+      const proof = await this.confidentialProofsService.generateSenderProof(sender.publicKey, {
         amount: amount.toNumber(),
         auditors: assetAuditor.auditors.map(({ publicKey }) => publicKey),
         receiver: receiver.publicKey,

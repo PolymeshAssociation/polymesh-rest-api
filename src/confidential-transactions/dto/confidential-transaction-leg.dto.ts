@@ -19,7 +19,7 @@ export class ConfidentialTransactionLegDto {
 
   @ApiProperty({
     description:
-      'The Confidential Account from which the confidential Assets will be withdrawn from',
+      'The Confidential Account from which the Confidential Assets will be withdrawn from',
     type: 'string',
     example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
@@ -27,7 +27,7 @@ export class ConfidentialTransactionLegDto {
   readonly sender: string;
 
   @ApiProperty({
-    description: 'The Confidential Account from which the confidential Assets will be deposited',
+    description: 'The Confidential Account from which the Confidential Assets will be deposited',
     type: 'string',
     example: '0xdeadbeef11111111111111111111111111111111111111111111111111111111',
   })
@@ -35,7 +35,7 @@ export class ConfidentialTransactionLegDto {
   readonly receiver: string;
 
   @ApiProperty({
-    description: 'The confidential Accounts of the auditors of the transaction leg',
+    description: 'The Confidential Accounts of the auditors of the transaction leg',
     type: 'string',
     isArray: true,
     example: ['0x7e9cf42766e08324c015f183274a9e977706a59a28d64f707e410a03563be77d'],

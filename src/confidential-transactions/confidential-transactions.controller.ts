@@ -14,7 +14,6 @@ import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { createConfidentialTransactionModel } from '~/confidential-transactions/confidential-transactions.util';
 import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
-import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
 import { ConfidentialTransactionModel } from '~/confidential-transactions/models/confidential-transaction.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 
@@ -47,9 +46,9 @@ export class ConfidentialTransactionsController {
   }
 
   @ApiOperation({
-    summary: 'Affirm a leg of an existing Confidential Transaction as a Sender',
+    summary: 'Affirm a leg of an existing Confidential Transaction as a Receiver/Mediator',
     description:
-      'This endpoint will affirm a specific leg of a pending Confidential Transaction for the Sender. Note, this needs the `PROOF_SERVER_API` to be set in the environment in order to generate the sender proof',
+      'This endpoint will affirm a specific leg of a pending Confidential Transaction as a Receiver/Mediator. Note, a mediator/receiver can only affirm a confidential transaction when the sender has already affirmed it. All owners of involved portfolios must affirm for the Confidential Transaction to be executed',
   })
   @ApiParam({
     name: 'id',
@@ -61,31 +60,7 @@ export class ConfidentialTransactionsController {
     description: 'Details of the transaction',
     type: TransactionQueueModel,
   })
-  @Post(':id/sender-affirm-leg')
-  public async senderAffirmLeg(
-    @Param() { id }: IdParamsDto,
-    @Body() body: SenderAffirmConfidentialTransactionDto
-  ): Promise<TransactionResponseModel> {
-    const result = await this.confidentialTransactionsService.senderAffirmLeg(id, body);
-    return handleServiceResult(result);
-  }
-
-  @ApiOperation({
-    summary: 'Affirm a leg of an existing Confidential Transaction',
-    description:
-      'This endpoint will affirm a specific leg of a pending Confidential Transaction. All owners of involved portfolios must affirm for the Confidential Transaction to be executed',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Confidential Transaction to be affirmed',
-    type: 'string',
-    example: '123',
-  })
-  @ApiOkResponse({
-    description: 'Details of the transaction',
-    type: TransactionQueueModel,
-  })
-  @Post(':id/observer-affirm-leg')
+  @Post(':id/affirm-leg/observer')
   public async observerAffirmLeg(
     @Param() { id }: IdParamsDto,
     @Body() body: ObserverAffirmConfidentialTransactionDto

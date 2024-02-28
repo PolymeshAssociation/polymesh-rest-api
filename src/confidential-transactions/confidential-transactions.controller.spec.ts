@@ -100,30 +100,6 @@ describe('ConfidentialTransactionsController', () => {
     });
   });
 
-  describe('senderAffirmLeg', () => {
-    it('should call the service and return the results', async () => {
-      const input = {
-        signer,
-        legId: new BigNumber(0),
-        legAmounts: [
-          {
-            confidentialAsset: 'SOME_ASSET_ID',
-            amount: new BigNumber(100),
-          },
-        ],
-      };
-
-      const transactionId = new BigNumber(1);
-
-      when(mockConfidentialTransactionsService.senderAffirmLeg)
-        .calledWith(transactionId, input)
-        .mockResolvedValue(txResult as unknown as ServiceReturn<ConfidentialTransaction>);
-
-      const result = await controller.senderAffirmLeg({ id: transactionId }, input);
-      expect(result).toEqual(txResult);
-    });
-  });
-
   describe('observerAffirmLeg', () => {
     it('should call the service and return the results', async () => {
       const input = {

@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
