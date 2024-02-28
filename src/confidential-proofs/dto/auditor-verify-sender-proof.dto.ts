@@ -17,7 +17,7 @@ export class AuditorVerifySenderProofDto {
   @IsOptional()
   @ToBigNumber()
   @IsBigNumber()
-  readonly amount: number | null;
+  readonly amount: BigNumber | null;
 
   @ApiProperty({
     description: 'The id of the auditor',

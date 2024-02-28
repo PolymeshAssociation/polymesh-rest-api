@@ -322,7 +322,7 @@ describe('ConfidentialTransactionsService', () => {
           amount: 100,
           auditors: ['AUDITOR_CONFIDENTIAL_ACCOUNT'],
           receiver: 'RECEIVER_CONFIDENTIAL_ACCOUNT',
-          encrypted_balance: '0x0ceabalance',
+          encryptedBalance: '0x0ceabalance',
         })
         .mockResolvedValue('some_proof');
     });

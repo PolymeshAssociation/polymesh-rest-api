@@ -99,4 +99,49 @@ describe('ConfidentialProofsController', () => {
       expect(result).toEqual(txResult);
     });
   });
+
+  describe('verifySenderProofAsAuditor', () => {
+    it('should call the service and return the results', async () => {
+      const mockResponse = {
+        isValid: true,
+        amount: new BigNumber(10),
+        errMsg: null,
+      };
+
+      mockConfidentialProofsService.verifySenderProofAsAuditor.mockResolvedValue(mockResponse);
+
+      const result = await controller.verifySenderProofAsAuditor(
+        { confidentialAccount: 'SOME_PUBLIC_KEY' },
+        {
+          amount: new BigNumber(10),
+          auditorId: new BigNumber(1),
+          senderProof: '0xproof',
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('verifySenderProofAsReceiver', () => {
+    it('should call the service and return the results', async () => {
+      const mockResponse = {
+        isValid: true,
+        amount: new BigNumber(10),
+        errMsg: null,
+      };
+
+      mockConfidentialProofsService.verifySenderProofAsReceiver.mockResolvedValue(mockResponse);
+
+      const result = await controller.verifySenderProofAsReceiver(
+        { confidentialAccount: 'SOME_PUBLIC_KEY' },
+        {
+          amount: new BigNumber(10),
+          senderProof: '0xproof',
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
 });

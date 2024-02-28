@@ -3,6 +3,7 @@ const mockLastValueFrom = jest.fn();
 
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import confidentialProofsConfig from '~/confidential-proofs/config/confidential-proofs.config';
@@ -13,8 +14,6 @@ jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   lastValueFrom: mockLastValueFrom,
 }));
-
-jest.mock('axios-case-converter');
 
 describe('ConfidentialProofsService', () => {
   let service: ConfidentialProofsService;
@@ -123,7 +122,7 @@ describe('ConfidentialProofsService', () => {
         amount: 100,
         auditors: ['auditor'],
         receiver: 'receiver',
-        encrypted_balance: '0xencrypted_balance',
+        encryptedBalance: '0xencryptedBalance',
       };
 
       const result = await service.generateSenderProof('confidential_account', mockSenderInfo);
@@ -136,6 +135,76 @@ describe('ConfidentialProofsService', () => {
       });
 
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('verifySenderProofAsAuditor', () => {
+    it('should return verify sender proof as an auditor', async () => {
+      mockLastValueFrom.mockReturnValue({
+        status: 200,
+        data: {
+          is_valid: 'true',
+          amount: 10,
+          errMsg: null,
+        },
+      });
+
+      const result = await service.verifySenderProofAsAuditor('confidential_account', {
+        amount: new BigNumber(10),
+        auditorId: new BigNumber(1),
+        senderProof: '0xsomeproof',
+      });
+
+      expect(mockHttpService.request).toHaveBeenCalledWith({
+        url: `${proofServerUrl}/accounts/confidential_account/auditor_verify`,
+        method: 'POST',
+        data: {
+          amount: 10,
+          auditorId: 1,
+          sender_proof: '0xsomeproof',
+        },
+        timeout: 10000,
+      });
+
+      expect(result).toEqual({
+        isValid: true,
+        amount: new BigNumber(10),
+        errMsg: null,
+      });
+    });
+  });
+
+  describe('verifySenderProofAsReceiver', () => {
+    it('should return verify sender proof as an auditor', async () => {
+      mockLastValueFrom.mockReturnValue({
+        status: 200,
+        data: {
+          is_valid: 'true',
+          amount: 100,
+          errMsg: null,
+        },
+      });
+
+      const result = await service.verifySenderProofAsReceiver('confidential_account', {
+        amount: new BigNumber(10),
+        senderProof: '0xsomeproof',
+      });
+
+      expect(mockHttpService.request).toHaveBeenCalledWith({
+        url: `${proofServerUrl}/accounts/confidential_account/receiver_verify`,
+        method: 'POST',
+        data: {
+          amount: 10,
+          sender_proof: '0xsomeproof',
+        },
+        timeout: 10000,
+      });
+
+      expect(result).toEqual({
+        isValid: true,
+        amount: new BigNumber(100),
+        errMsg: null,
+      });
     });
   });
 });
