@@ -26,7 +26,7 @@ import { CreatedMetadataEntryModel } from '~/metadata/models/created-metadata-en
 import { MetadataDetailsModel } from '~/metadata/models/metadata-details.model';
 import { MetadataEntryModel } from '~/metadata/models/metadata-entry.model';
 
-@ApiTags('asset', 'metadata')
+@ApiTags('assets', 'metadata')
 @Controller('assets/:ticker/metadata')
 export class MetadataController {
   constructor(private readonly metadataService: MetadataService) {}

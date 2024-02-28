@@ -98,7 +98,7 @@ REST_POSTGRES_PASSWORD=## Password of the user ##
 REST_POSTGRES_DATABASE=## Database to use ##
 
 # Proof Server:
-PROOF_SERVER_API=## API path where the proof server is hosted
+PROOF_SERVER_URL=## API path where the proof server is hosted
 ```
 
 ### Signing Transactions

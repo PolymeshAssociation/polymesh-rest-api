@@ -28,13 +28,13 @@ export class ConfidentialAccountsService {
     const identity = await account.getIdentity();
 
     if (!identity) {
-      throw new NotFoundException('No owner found');
+      throw new NotFoundException('No owner exists for the Confidential Account');
     }
 
     return identity;
   }
 
-  public async mapConfidentialAccount(
+  public async linkConfidentialAccount(
     publicKey: string,
     base: TransactionBaseDto
   ): ServiceReturn<ConfidentialAccount> {

@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 import { ApiProperty } from '@nestjs/swagger';
 import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';

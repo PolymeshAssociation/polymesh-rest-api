@@ -21,6 +21,6 @@ export class ConfidentialLegAmountDto {
     example: '1000',
   })
   @ToBigNumber()
-  @IsBigNumber()
+  @IsBigNumber({ min: 1 })
   readonly amount: BigNumber;
 }

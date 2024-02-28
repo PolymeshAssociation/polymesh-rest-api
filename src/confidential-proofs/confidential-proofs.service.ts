@@ -2,34 +2,27 @@ import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Method } from 'axios';
+import applyCaseMiddleware from 'axios-case-converter';
 import { lastValueFrom } from 'rxjs';
 
-import { AppConfigError } from '~/common/errors';
+import { AppInternalError } from '~/common/errors';
+import confidentialProofsConfig from '~/confidential-proofs/config/confidential-proofs.config';
+import { ConfidentialAccountEntity } from '~/confidential-proofs/entities/confidential-account.entity';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-import proofServerConfig from '~/proof-server/config/proof-server.config';
-import { ConfidentialAccountEntity } from '~/proof-server/entities/confidential-account.entity';
 
 @Injectable()
-export class ProofServerService {
+export class ConfidentialProofsService {
   private apiPath: string;
 
   constructor(
-    @Inject(proofServerConfig.KEY) config: ConfigType<typeof proofServerConfig>,
+    @Inject(confidentialProofsConfig.KEY) config: ConfigType<typeof confidentialProofsConfig>,
     private readonly httpService: HttpService,
     private readonly logger: PolymeshLogger
   ) {
-    this.apiPath = config.proofServerApi;
+    this.apiPath = config.proofServerUrl;
 
-    logger.setContext(ProofServerService.name);
-  }
-
-  /**
-   * Asserts if proof server API was initialized
-   */
-  private assertProofServerInitialized(): void {
-    if (this.apiPath.length === 0) {
-      throw new AppConfigError('PROOF_SERVER_API', 'Proof server not initialized');
-    }
+    applyCaseMiddleware(this.httpService.axiosRef);
+    logger.setContext(ConfidentialProofsService.name);
   }
 
   /**
@@ -40,8 +33,6 @@ export class ProofServerService {
     method: Method,
     data?: unknown
   ): Promise<T> {
-    this.assertProofServerInitialized();
-
     const { status, data: responseBody } = await lastValueFrom(
       this.httpService.request({
         url: `${this.apiPath}/${apiEndpoint}`,
@@ -51,24 +42,24 @@ export class ProofServerService {
       })
     );
 
-    if (status === HttpStatus.OK) {
-      this.logger.log(`requestProofServer - Received OK status for endpoint : "${apiEndpoint}"`);
+    if (status !== HttpStatus.OK) {
+      this.logger.error(
+        `requestProofServer - Proof server responded with non-OK status : ${status} with message for the endpoint: ${apiEndpoint}`
+      );
 
-      return responseBody;
+      throw new AppInternalError(`Proof server responded with non-OK status: ${status}`);
     }
 
-    this.logger.error(
-      `requestProofServer - Proof server responded with non-OK status : ${status} with message for the endpoint: ${apiEndpoint}`
-    );
+    this.logger.log(`requestProofServer - Received OK status for endpoint : "${apiEndpoint}"`);
 
-    throw new Error(`Proof server responded with non-OK status: ${status}`);
+    return responseBody;
   }
 
   /**
    * Gets all confidential accounts present in the Proof Server
    */
   public async getConfidentialAccounts(): Promise<ConfidentialAccountEntity[]> {
-    this.logger.debug('getConfidentialAccounts - Fetching Confidential accounts from proof server');
+    this.logger.debug('getConfidentialAccounts - Fetching Confidential Accounts from proof server');
 
     return this.requestProofServer<ConfidentialAccountEntity[]>('accounts', 'GET');
   }

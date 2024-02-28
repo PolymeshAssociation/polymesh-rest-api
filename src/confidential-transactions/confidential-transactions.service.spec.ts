@@ -14,6 +14,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
 import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
 import { ConfidentialAssetModel } from '~/confidential-assets/models/confidential-asset.model';
+import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import * as confidentialTransactionsUtilModule from '~/confidential-transactions/confidential-transactions.util';
 import { ObserverAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/observer-affirm-confidential-transaction.dto';
@@ -24,7 +25,6 @@ import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
-import { ProofServerService } from '~/proof-server/proof-server.service';
 import { testValues } from '~/test-utils/consts';
 import {
   createMockConfidentialAccount,
@@ -37,8 +37,8 @@ import {
 } from '~/test-utils/mocks';
 import {
   mockConfidentialAccountsServiceProvider,
+  mockConfidentialProofsServiceProvider,
   MockIdentitiesService,
-  mockProofServerServiceProvider,
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
@@ -52,7 +52,7 @@ describe('ConfidentialTransactionsService', () => {
   let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
-  let mockProofServerService: DeepMocked<ProofServerService>;
+  let mockConfidentialProofsService: DeepMocked<ConfidentialProofsService>;
   let mockConfidentialAccountsService: ConfidentialAccountsService;
   let mockIdentitiesService: MockIdentitiesService;
   const id = new BigNumber(1);
@@ -67,7 +67,7 @@ describe('ConfidentialTransactionsService', () => {
       providers: [
         ConfidentialTransactionsService,
         mockTransactionsProvider,
-        mockProofServerServiceProvider,
+        mockConfidentialProofsServiceProvider,
         mockConfidentialAccountsServiceProvider,
         IdentitiesService,
       ],
@@ -83,7 +83,8 @@ describe('ConfidentialTransactionsService', () => {
     mockConfidentialAccountsService = module.get<typeof mockConfidentialAccountsService>(
       ConfidentialAccountsService
     );
-    mockProofServerService = module.get<typeof mockProofServerService>(ProofServerService);
+    mockConfidentialProofsService =
+      module.get<typeof mockConfidentialProofsService>(ConfidentialProofsService);
     mockTransactionsService = module.get<MockTransactionsService>(TransactionsService);
 
     service = module.get<ConfidentialTransactionsService>(ConfidentialTransactionsService);
@@ -316,7 +317,7 @@ describe('ConfidentialTransactionsService', () => {
         .calledWith('SENDER_CONFIDENTIAL_ACCOUNT')
         .mockResolvedValue(sender);
 
-      when(mockProofServerService.generateSenderProof)
+      when(mockConfidentialProofsService.generateSenderProof)
         .calledWith('SENDER_CONFIDENTIAL_ACCOUNT', {
           amount: 100,
           auditors: ['AUDITOR_CONFIDENTIAL_ACCOUNT'],

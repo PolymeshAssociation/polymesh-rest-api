@@ -86,12 +86,14 @@ describe('ConfidentialAccountsService', () => {
 
       jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockConfidentialAccount);
 
-      await expect(service.fetchOwner(confidentialAccount)).rejects.toThrow('No owner found');
+      await expect(service.fetchOwner(confidentialAccount)).rejects.toThrow(
+        'No owner exists for the Confidential Account'
+      );
     });
   });
 
-  describe('mapConfidentialAccount', () => {
-    it('should map a given public key to the signer', async () => {
+  describe('linkConfidentialAccount', () => {
+    it('should link a given public key to the signer', async () => {
       const input = {
         signer,
       };
@@ -109,7 +111,7 @@ describe('ConfidentialAccountsService', () => {
         transactions: [mockTransaction],
       });
 
-      const result = await service.mapConfidentialAccount(confidentialAccount, input);
+      const result = await service.linkConfidentialAccount(confidentialAccount, input);
 
       expect(result).toEqual({
         result: mockAccount,

@@ -42,7 +42,7 @@ export class ConfidentialLegModel {
 
   @ApiProperty({
     description:
-      'Auditor confidential Accounts for the leg, grouped by asset they are auditors for',
+      'Auditor Confidential Accounts for the leg, grouped by asset they are auditors for',
     type: ConfidentialAssetAuditorModel,
     isArray: true,
   })
