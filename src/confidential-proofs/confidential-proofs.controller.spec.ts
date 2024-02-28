@@ -144,4 +144,23 @@ describe('ConfidentialProofsController', () => {
       expect(result).toEqual(mockResponse);
     });
   });
+
+  describe('decryptBalance', () => {
+    it('should call the service and return the results', async () => {
+      const mockResponse = {
+        value: new BigNumber(10),
+      };
+
+      mockConfidentialProofsService.decryptBalance.mockResolvedValue(mockResponse);
+
+      const result = await controller.decryptBalance(
+        { confidentialAccount: 'SOME_PUBLIC_KEY' },
+        {
+          encryptedValue: '0xsomebalance',
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
 });

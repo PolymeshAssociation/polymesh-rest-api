@@ -65,7 +65,7 @@ describe('ConfidentialProofsService', () => {
     it('should return all the Confidential Accounts from proof server', async () => {
       const mockResult = [
         {
-          confidential_account: 'SOME_PUBLIC_KEY',
+          confidentialAccount: 'SOME_PUBLIC_KEY',
         },
       ];
       mockLastValueFrom.mockReturnValue({
@@ -88,7 +88,7 @@ describe('ConfidentialProofsService', () => {
   describe('createConfidentialAccount', () => {
     it('should return create a new confidential account in proof server', async () => {
       const mockResult = {
-        confidential_account: 'SOME_PUBLIC_KEY',
+        confidentialAccount: 'SOME_PUBLIC_KEY',
       };
 
       mockLastValueFrom.mockReturnValue({
@@ -118,19 +118,22 @@ describe('ConfidentialProofsService', () => {
         data: mockResult,
       });
 
-      const mockSenderInfo = {
+      const result = await service.generateSenderProof('confidentialAccount', {
         amount: 100,
         auditors: ['auditor'],
         receiver: 'receiver',
         encryptedBalance: '0xencryptedBalance',
-      };
-
-      const result = await service.generateSenderProof('confidential_account', mockSenderInfo);
+      });
 
       expect(mockHttpService.request).toHaveBeenCalledWith({
-        url: `${proofServerUrl}/accounts/confidential_account/send`,
+        url: `${proofServerUrl}/accounts/confidentialAccount/send`,
         method: 'POST',
-        data: mockSenderInfo,
+        data: {
+          amount: 100,
+          auditors: ['auditor'],
+          receiver: 'receiver',
+          encrypted_balance: '0xencryptedBalance',
+        },
         timeout: 10000,
       });
 
@@ -143,24 +146,24 @@ describe('ConfidentialProofsService', () => {
       mockLastValueFrom.mockReturnValue({
         status: 200,
         data: {
-          is_valid: 'true',
+          is_valid: true,
           amount: 10,
           errMsg: null,
         },
       });
 
-      const result = await service.verifySenderProofAsAuditor('confidential_account', {
+      const result = await service.verifySenderProofAsAuditor('confidentialAccount', {
         amount: new BigNumber(10),
         auditorId: new BigNumber(1),
         senderProof: '0xsomeproof',
       });
 
       expect(mockHttpService.request).toHaveBeenCalledWith({
-        url: `${proofServerUrl}/accounts/confidential_account/auditor_verify`,
+        url: `${proofServerUrl}/accounts/confidentialAccount/auditor_verify`,
         method: 'POST',
         data: {
           amount: 10,
-          auditorId: 1,
+          auditor_id: 1,
           sender_proof: '0xsomeproof',
         },
         timeout: 10000,
@@ -179,19 +182,19 @@ describe('ConfidentialProofsService', () => {
       mockLastValueFrom.mockReturnValue({
         status: 200,
         data: {
-          is_valid: 'true',
+          is_valid: true,
           amount: 100,
           errMsg: null,
         },
       });
 
-      const result = await service.verifySenderProofAsReceiver('confidential_account', {
+      const result = await service.verifySenderProofAsReceiver('confidentialAccount', {
         amount: new BigNumber(10),
         senderProof: '0xsomeproof',
       });
 
       expect(mockHttpService.request).toHaveBeenCalledWith({
-        url: `${proofServerUrl}/accounts/confidential_account/receiver_verify`,
+        url: `${proofServerUrl}/accounts/confidentialAccount/receiver_verify`,
         method: 'POST',
         data: {
           amount: 10,
@@ -204,6 +207,34 @@ describe('ConfidentialProofsService', () => {
         isValid: true,
         amount: new BigNumber(100),
         errMsg: null,
+      });
+    });
+  });
+
+  describe('decrypt', () => {
+    it('should return decrypted balance', async () => {
+      mockLastValueFrom.mockReturnValue({
+        status: 200,
+        data: {
+          value: 10,
+        },
+      });
+
+      const result = await service.decryptBalance('confidentialAccount', {
+        encryptedValue: '0xsomebalance',
+      });
+
+      expect(mockHttpService.request).toHaveBeenCalledWith({
+        url: `${proofServerUrl}/accounts/confidentialAccount/decrypt`,
+        method: 'POST',
+        data: {
+          encrypted_value: '0xsomebalance',
+        },
+        timeout: 10000,
+      });
+
+      expect(result).toEqual({
+        value: new BigNumber(10),
       });
     });
   });

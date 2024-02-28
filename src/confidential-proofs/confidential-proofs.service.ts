@@ -11,8 +11,10 @@ import {
 } from '~/confidential-proofs/confidential-proofs.utils';
 import confidentialProofsConfig from '~/confidential-proofs/config/confidential-proofs.config';
 import { AuditorVerifySenderProofDto } from '~/confidential-proofs/dto/auditor-verify-sender-proof.dto';
+import { DecryptBalanceDto } from '~/confidential-proofs/dto/decrypt-balance.dto';
 import { ReceiverVerifySenderProofDto } from '~/confidential-proofs/dto/receiver-verify-sender-proof.dto';
 import { ConfidentialAccountEntity } from '~/confidential-proofs/entities/confidential-account.entity';
+import { DecryptedBalanceModel } from '~/confidential-proofs/models/decrypted-balance.model';
 import { SenderProofVerificationResponseModel } from '~/confidential-proofs/models/sender-proof-verification-response.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
@@ -128,11 +130,29 @@ export class ConfidentialProofsService {
     params: ReceiverVerifySenderProofDto
   ): Promise<SenderProofVerificationResponseModel> {
     this.logger.debug(
-      `verifySenderProofAsReceiver - Generating sender proof ${params.senderProof} for account ${confidentialAccount}`
+      `verifySenderProofAsReceiver - Verifying sender proof ${params.senderProof} for account ${confidentialAccount}`
     );
 
     return this.requestProofServer(
       `accounts/${confidentialAccount}/receiver_verify`,
+      'POST',
+      params
+    );
+  }
+
+  /**
+   * Decrypts balance for a confidential account
+   */
+  public async decryptBalance(
+    confidentialAccount: string,
+    params: DecryptBalanceDto
+  ): Promise<DecryptedBalanceModel> {
+    this.logger.debug(
+      `decryptBalance - Decrypting balance ${params.encryptedValue} for account ${confidentialAccount}`
+    );
+
+    return this.requestProofServer<DecryptedBalanceModel>(
+      `accounts/${confidentialAccount}/decrypt`,
       'POST',
       params
     );

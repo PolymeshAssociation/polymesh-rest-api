@@ -14,7 +14,9 @@ import { ConfidentialAccountParamsDto } from '~/confidential-accounts/dto/confid
 import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
 import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { AuditorVerifySenderProofDto } from '~/confidential-proofs/dto/auditor-verify-sender-proof.dto';
+import { DecryptBalanceDto } from '~/confidential-proofs/dto/decrypt-balance.dto';
 import { ReceiverVerifySenderProofDto } from '~/confidential-proofs/dto/receiver-verify-sender-proof.dto';
+import { DecryptedBalanceModel } from '~/confidential-proofs/models/decrypted-balance.model';
 import { SenderProofVerificationResponseModel } from '~/confidential-proofs/models/sender-proof-verification-response.model';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transactions/dto/sender-affirm-confidential-transaction.dto copy';
@@ -109,8 +111,8 @@ export class ConfidentialProofsController {
     example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
-    description: 'Public key of the newly created Confidential Account (ElGamal key pair)',
-    type: ConfidentialAccountModel,
+    description: 'Details about the verification',
+    type: SenderProofVerificationResponseModel,
   })
   @ApiInternalServerErrorResponse({
     description: 'Proof server returned a non-OK status',
@@ -129,13 +131,13 @@ export class ConfidentialProofsController {
   })
   @ApiParam({
     name: 'confidentialAccount',
-    description: 'The public key of the Auditor Confidential Account',
+    description: 'The public key of the receiver Confidential Account',
     type: 'string',
     example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
   @ApiOkResponse({
-    description: 'Public key of the newly created Confidential Account (ElGamal key pair)',
-    type: ConfidentialAccountModel,
+    description: 'Details about the verification',
+    type: SenderProofVerificationResponseModel,
   })
   @ApiInternalServerErrorResponse({
     description: 'Proof server returned a non-OK status',
@@ -146,5 +148,30 @@ export class ConfidentialProofsController {
     @Body() params: ReceiverVerifySenderProofDto
   ): Promise<SenderProofVerificationResponseModel> {
     return this.confidentialProofsService.verifySenderProofAsReceiver(confidentialAccount, params);
+  }
+
+  @ApiTags('confidential-accounts')
+  @ApiOperation({
+    summary: 'Decrypts an encrypted balance for a Confidential Account',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Confidential Account',
+    type: 'string',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Decrypted balance value',
+    type: DecryptedBalanceModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server returned a non-OK status',
+  })
+  @Post('confidential-accounts/:confidentialAccount/decrypt-balance')
+  public async decryptBalance(
+    @Param() { confidentialAccount }: ConfidentialAccountParamsDto,
+    @Body() params: DecryptBalanceDto
+  ): Promise<DecryptedBalanceModel> {
+    return this.confidentialProofsService.decryptBalance(confidentialAccount, params);
   }
 }
