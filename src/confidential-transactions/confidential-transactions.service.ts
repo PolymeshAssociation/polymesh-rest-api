@@ -118,7 +118,7 @@ export class ConfidentialTransactionsService {
       });
 
       const proof = await this.confidentialProofsService.generateSenderProof(sender.publicKey, {
-        amount: amount.toNumber(),
+        amount,
         auditors: assetAuditor.auditors.map(({ publicKey }) => publicKey),
         receiver: receiver.publicKey,
         encryptedBalance,

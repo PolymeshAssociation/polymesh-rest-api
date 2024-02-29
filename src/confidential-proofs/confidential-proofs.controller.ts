@@ -12,6 +12,9 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialAccountParamsDto } from '~/confidential-accounts/dto/confidential-account-params.dto';
 import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
+import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
+import { BurnConfidentialAssetsDto } from '~/confidential-assets/dto/burn-confidential-assets.dto';
+import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
 import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { AuditorVerifySenderProofDto } from '~/confidential-proofs/dto/auditor-verify-sender-proof.dto';
 import { DecryptBalanceDto } from '~/confidential-proofs/dto/decrypt-balance.dto';
@@ -25,7 +28,8 @@ import { SenderAffirmConfidentialTransactionDto } from '~/confidential-transacti
 export class ConfidentialProofsController {
   constructor(
     private readonly confidentialProofsService: ConfidentialProofsService,
-    private readonly confidentialTransactionsService: ConfidentialTransactionsService
+    private readonly confidentialTransactionsService: ConfidentialTransactionsService,
+    private readonly confidentialAssetsService: ConfidentialAssetsService
   ) {}
 
   @ApiTags('confidential-accounts')
@@ -173,5 +177,36 @@ export class ConfidentialProofsController {
     @Body() params: DecryptBalanceDto
   ): Promise<DecryptedBalanceModel> {
     return this.confidentialProofsService.decryptBalance(confidentialAccount, params);
+  }
+
+  @ApiTags('confidential-accounts')
+  @ApiOperation({
+    summary: 'Burn Confidential Assets',
+    description:
+      'This endpoints allows to burn a specific amount of Confidential Assets from a given Confidential Account',
+  })
+  @ApiParam({
+    name: 'confidentialAssetId',
+    description: 'The ID of the Confidential Asset to be burned',
+    type: 'string',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
+  })
+  @ApiOkResponse({
+    description: 'Decrypted balance value',
+    type: DecryptedBalanceModel,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Proof server returned a non-OK status',
+  })
+  @Post('confidential-assets/:confidentialAssetId/burn')
+  public async burnConfidentialAsset(
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
+    @Body() params: BurnConfidentialAssetsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAssetsService.burnConfidentialAsset(
+      confidentialAssetId,
+      params
+    );
+    return handleServiceResult(result);
   }
 }

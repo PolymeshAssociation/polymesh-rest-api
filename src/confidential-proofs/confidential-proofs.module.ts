@@ -4,6 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { DynamicModule, forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { ConfidentialAssetsModule } from '~/confidential-assets/confidential-assets.module';
 import { ConfidentialProofsController } from '~/confidential-proofs/confidential-proofs.controller';
 import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import confidentialProofsConfig from '~/confidential-proofs/config/confidential-proofs.config';
@@ -28,6 +29,7 @@ export class ConfidentialProofsModule {
         HttpModule,
         LoggerModule,
         forwardRef(() => ConfidentialTransactionsModule),
+        forwardRef(() => ConfidentialAssetsModule),
       ],
       controllers,
       providers: [ConfidentialProofsService],

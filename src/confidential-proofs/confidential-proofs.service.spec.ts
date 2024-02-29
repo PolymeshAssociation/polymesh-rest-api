@@ -119,7 +119,7 @@ describe('ConfidentialProofsService', () => {
       });
 
       const result = await service.generateSenderProof('confidentialAccount', {
-        amount: 100,
+        amount: new BigNumber(100),
         auditors: ['auditor'],
         receiver: 'receiver',
         encryptedBalance: '0xencryptedBalance',
@@ -236,6 +236,34 @@ describe('ConfidentialProofsService', () => {
       expect(result).toEqual({
         value: new BigNumber(10),
       });
+    });
+  });
+
+  describe('generateBurnProof', () => {
+    it('should return generated burn proof', async () => {
+      const mockResult = 'some_proof';
+
+      mockLastValueFrom.mockReturnValue({
+        status: 200,
+        data: mockResult,
+      });
+
+      const result = await service.generateBurnProof('confidentialAccount', {
+        amount: new BigNumber(100),
+        encryptedBalance: '0xencryptedBalance',
+      });
+
+      expect(mockHttpService.request).toHaveBeenCalledWith({
+        url: `${proofServerUrl}/accounts/confidentialAccount/burn`,
+        method: 'POST',
+        data: {
+          amount: 100,
+          encrypted_balance: '0xencryptedBalance',
+        },
+        timeout: 10000,
+      });
+
+      expect(result).toEqual(mockResult);
     });
   });
 });
