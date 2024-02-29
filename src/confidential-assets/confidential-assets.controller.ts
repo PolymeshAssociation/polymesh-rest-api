@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import {
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -11,6 +12,7 @@ import { ConfidentialAsset } from '@polymeshassociation/polymesh-sdk/types';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { ConfidentialAccountParamsDto } from '~/confidential-accounts/dto/confidential-account-params.dto';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { createConfidentialAssetDetailsModel } from '~/confidential-assets/confidential-assets.util';
 import { AddAllowedConfidentialVenuesDto } from '~/confidential-assets/dto/add-allowed-confidential-venues.dto';
@@ -332,5 +334,36 @@ export class ConfidentialAssetsController {
     );
 
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary:
+      'Check whether trading for a Confidential Asset is frozen for a specific Confidential Account',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Asset',
+    type: 'string',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Confidential Account',
+    type: 'string',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiOkResponse({
+    description: 'Indicator to know if the Confidential Account is frozen or not',
+    type: 'boolean',
+  })
+  @ApiNotFoundResponse({
+    description: 'The Confidential Asset does not exists',
+  })
+  @Get(':id/freeze-account/:confidentialAccount')
+  async isConfidentialAccountFrozen(
+    @Param()
+    { id, confidentialAccount }: ConfidentialAssetIdParamsDto & ConfidentialAccountParamsDto
+  ): Promise<boolean> {
+    return this.confidentialAssetsService.isConfidentialAccountFrozen(id, confidentialAccount);
   }
 }

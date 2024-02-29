@@ -280,4 +280,17 @@ describe('ConfidentialAssetsService', () => {
       });
     });
   });
+
+  describe('isConfidentialAccountFrozen', () => {
+    it('should return whether a given Confidential Account is frozen', async () => {
+      const asset = createMockConfidentialAsset();
+      asset.isAccountFrozen.mockResolvedValue(false);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(asset);
+
+      const result = await service.isConfidentialAccountFrozen(id, 'SOME_PUBLIC_KEY');
+
+      expect(result).toEqual(false);
+    });
+  });
 });
