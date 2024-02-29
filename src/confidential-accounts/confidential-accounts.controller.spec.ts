@@ -110,4 +110,18 @@ describe('ConfidentialAccountsController', () => {
       expect(result).toEqual(balance);
     });
   });
+
+  describe('applyAllIncomingAssetBalances', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+      };
+      mockConfidentialAccountsService.applyAllIncomingAssetBalances.mockResolvedValue(
+        txResult as unknown as ServiceReturn<ConfidentialAccount>
+      );
+
+      const result = await controller.applyAllIncomingAssetBalances({ confidentialAccount }, input);
+      expect(result).toEqual(txResult);
+    });
+  });
 });

@@ -80,4 +80,14 @@ export class ConfidentialAccountsService {
       throw handleSdkError(error);
     });
   }
+
+  public async applyAllIncomingAssetBalances(
+    confidentialAccount: string,
+    base: TransactionBaseDto
+  ): ServiceReturn<ConfidentialAccount> {
+    const applyIncomingBalances =
+      this.polymeshService.polymeshApi.confidentialAccounts.applyIncomingBalances;
+
+    return this.transactionsService.submit(applyIncomingBalances, { confidentialAccount }, base);
+  }
 }

@@ -214,4 +214,37 @@ export class ConfidentialAccountsController {
       confidentialAssetId
     );
   }
+
+  @Post(':confidentialAccount/incoming-balances/apply')
+  @ApiOperation({
+    summary: 'Deposit all incoming balances for a Confidential Account',
+    description: 'This endpoint deposit all the incoming balances for a Confidential Account',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Confidential Account',
+    type: 'string',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'The Signing Identity cannot apply incoming balances in the specified Confidential Account',
+    ],
+    [HttpStatus.NOT_FOUND]: ['No incoming balance for the given the Confidential Account'],
+  })
+  public async applyAllIncomingAssetBalances(
+    @Param() { confidentialAccount }: ConfidentialAccountParamsDto,
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAccountsService.applyAllIncomingAssetBalances(
+      confidentialAccount,
+      params
+    );
+
+    return handleServiceResult(result);
+  }
 }
