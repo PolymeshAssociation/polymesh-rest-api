@@ -4,5 +4,5 @@ import { IsConfidentialAssetId } from '~/common/decorators/validation';
 
 export class ConfidentialAssetIdParamsDto {
   @IsConfidentialAssetId()
-  readonly id: string;
+  readonly confidentialAssetId: string;
 }
