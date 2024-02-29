@@ -9,6 +9,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
+import { ToggleFreezeConfidentialAccountAssetDto } from '~/confidential-assets/dto/toggle-freeze-confidential-account-asset.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -72,5 +73,31 @@ export class ConfidentialAssetsService {
     const { base, args } = extractTxBase(params);
 
     return this.transactionsService.submit(asset.setVenueFiltering, args, base);
+  }
+
+  public async toggleFreezeConfidentialAsset(
+    assetId: string,
+    base: TransactionBaseDto,
+    freeze: boolean
+  ): ServiceReturn<void> {
+    const asset = await this.findOne(assetId);
+
+    const method = freeze ? asset.freeze : asset.unfreeze;
+
+    return this.transactionsService.submit(method, {}, base);
+  }
+
+  public async toggleFreezeConfidentialAccountAsset(
+    assetId: string,
+    params: ToggleFreezeConfidentialAccountAssetDto,
+    freeze: boolean
+  ): ServiceReturn<void> {
+    const asset = await this.findOne(assetId);
+
+    const { base, args } = extractTxBase(params);
+
+    const method = freeze ? asset.freezeAccount : asset.unfreezeAccount;
+
+    return this.transactionsService.submit(method, args, base);
   }
 }

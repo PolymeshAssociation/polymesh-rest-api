@@ -61,6 +61,7 @@ describe('ConfidentialAssetsController', () => {
 
       mockConfidentialAsset.details.mockResolvedValue(mockAssetDetails);
       mockConfidentialAsset.getAuditors.mockResolvedValue(mockAuditorInfo);
+      mockConfidentialAsset.isFrozen.mockResolvedValue(false);
 
       mockConfidentialAssetsService.findOne.mockResolvedValue(mockConfidentialAsset);
 
@@ -68,6 +69,7 @@ describe('ConfidentialAssetsController', () => {
 
       expect(result).toEqual({
         ...mockAssetDetails,
+        isFrozen: false,
         auditors: expect.arrayContaining([expect.objectContaining({ publicKey: 'SOME_AUDITOR' })]),
         mediators: expect.arrayContaining([expect.objectContaining({ did: 'MEDIATOR_DID' })]),
       });
@@ -178,6 +180,41 @@ describe('ConfidentialAssetsController', () => {
       expect(result).toEqual(txResult);
 
       result = await controller.removeAllowedVenues({ id }, input);
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('freezeConfidentialAsset and unfreezeConfidentialAsset', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+      };
+      mockConfidentialAssetsService.toggleFreezeConfidentialAsset.mockResolvedValue(
+        txResult as unknown as ServiceReturn<void>
+      );
+
+      let result = await controller.freezeConfidentialAsset({ id }, input);
+      expect(result).toEqual(txResult);
+
+      result = await controller.unfreezeConfidentialAsset({ id }, input);
+      expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('freezeConfidentialAccount and unfreezeConfidentialAccount', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+        confidentialAccount: 'SOME_PUBLIC_KEY',
+      };
+      mockConfidentialAssetsService.toggleFreezeConfidentialAccountAsset.mockResolvedValue(
+        txResult as unknown as ServiceReturn<void>
+      );
+
+      let result = await controller.freezeConfidentialAccount({ id }, input);
+      expect(result).toEqual(txResult);
+
+      result = await controller.unfreezeConfidentialAccount({ id }, input);
       expect(result).toEqual(txResult);
     });
   });
