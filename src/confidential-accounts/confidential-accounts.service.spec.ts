@@ -235,4 +235,32 @@ describe('ConfidentialAccountsService', () => {
       });
     });
   });
+
+  describe('applyAllIncomingAssetBalances', () => {
+    it('should deposit all incoming balances for a Confidential Account', async () => {
+      const input = {
+        signer,
+      };
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.ApplyIncomingBalances,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockAccount = createMockConfidentialAccount();
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockAccount,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.applyAllIncomingAssetBalances(confidentialAccount, input);
+
+      expect(result).toEqual({
+        result: mockAccount,
+        transactions: [mockTransaction],
+      });
+    });
+  });
 });
