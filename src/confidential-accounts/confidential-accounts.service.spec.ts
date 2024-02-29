@@ -73,7 +73,7 @@ describe('ConfidentialAccountsService', () => {
 
       const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-      await expect(() => service.findOne(confidentialAccount)).rejects.toThrowError();
+      await expect(service.findOne(confidentialAccount)).rejects.toThrowError();
 
       expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
     });
@@ -200,7 +200,7 @@ describe('ConfidentialAccountsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() =>
+        await expect(
           service.getAssetBalance(confidentialAccount, confidentialAssetId)
         ).rejects.toThrowError();
 
@@ -227,7 +227,7 @@ describe('ConfidentialAccountsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() =>
+        await expect(
           service.getIncomingAssetBalance(confidentialAccount, confidentialAssetId)
         ).rejects.toThrowError();
 
