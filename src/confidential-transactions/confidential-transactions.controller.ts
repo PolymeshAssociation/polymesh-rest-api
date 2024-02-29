@@ -141,4 +141,29 @@ export class ConfidentialTransactionsController {
 
     return result.map(({ did }) => new IdentityModel({ did }));
   }
+
+  @ApiOperation({
+    summary: 'Get pending affirmation count',
+    description:
+      'This endpoint retrieves the number of pending affirmations for a Confidential Transaction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Confidential Transaction',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Number of pending affirmation',
+    type: 'number',
+  })
+  @ApiNotFoundResponse({
+    description: 'Affirm count not available',
+  })
+  @Get(':id/pending-affirmation-count')
+  public async getPendingAffirmsCount(@Param() { id }: IdParamsDto): Promise<number> {
+    const result = await this.confidentialTransactionsService.getPendingAffirmsCount(id);
+
+    return result.toNumber();
+  }
 }

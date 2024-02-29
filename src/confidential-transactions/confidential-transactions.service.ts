@@ -167,4 +167,10 @@ export class ConfidentialTransactionsService {
 
     return identity.getConfidentialVenues();
   }
+
+  public async getPendingAffirmsCount(transactionId: BigNumber): Promise<BigNumber> {
+    const transaction = await this.findOne(transactionId);
+
+    return transaction.getPendingAffirmsCount();
+  }
 }
