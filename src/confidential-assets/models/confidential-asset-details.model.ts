@@ -34,6 +34,13 @@ export class ConfidentialAssetDetailsModel {
   readonly totalSupply: BigNumber;
 
   @ApiProperty({
+    description: 'Whether trading is frozen for the Confidential Asset',
+    type: 'boolean',
+    example: true,
+  })
+  readonly isFrozen: boolean;
+
+  @ApiProperty({
     description: 'Auditor Confidential Accounts configured for the Confidential Asset',
     type: ConfidentialAccountModel,
   })

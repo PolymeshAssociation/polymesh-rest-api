@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ConfidentialVenueFilteringDetails, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -185,6 +186,94 @@ describe('ConfidentialAssetsService', () => {
         signer,
         disallowedVenues: [new BigNumber(2)],
       });
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('toggleFreezeConfidentialAsset', () => {
+    it('should freeze/unfreeze a Confidential Asset', async () => {
+      const input = {
+        signer,
+      };
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.SetAssetFrozen,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockAsset = createMockConfidentialAsset();
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.freeze, {}, input)
+        .mockResolvedValue({
+          transactions: [mockTransaction],
+        });
+
+      let result = await service.toggleFreezeConfidentialAsset(id, input, true);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.unfreeze, {}, input)
+        .mockResolvedValue({
+          transactions: [mockTransaction],
+        });
+
+      result = await service.toggleFreezeConfidentialAsset(id, input, false);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('toggleFreezeConfidentialAccountAsset', () => {
+    it('should freeze/unfreeze a Confidential Account from trading a Confidential Asset', async () => {
+      const params = {
+        confidentialAccount: 'SOME_PUBLIC_KEY',
+      };
+      const input = {
+        signer,
+        ...params,
+      };
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.SetAccountAssetFrozen,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockAsset = createMockConfidentialAsset();
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.freezeAccount, params, { signer })
+        .mockResolvedValue({
+          transactions: [mockTransaction],
+        });
+
+      let result = await service.toggleFreezeConfidentialAccountAsset(id, input, true);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.freezeAccount, params, { signer })
+        .mockResolvedValue({
+          transactions: [mockTransaction],
+        });
+
+      result = await service.toggleFreezeConfidentialAccountAsset(id, input, true);
 
       expect(result).toEqual({
         transactions: [mockTransaction],

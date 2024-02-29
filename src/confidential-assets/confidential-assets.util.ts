@@ -13,13 +13,15 @@ import { IdentityModel } from '~/identities/models/identity.model';
 export async function createConfidentialAssetDetailsModel(
   asset: ConfidentialAsset
 ): Promise<ConfidentialAssetDetailsModel> {
-  const [details, { auditors, mediators }] = await Promise.all([
+  const [details, { auditors, mediators }, isFrozen] = await Promise.all([
     asset.details(),
     asset.getAuditors(),
+    asset.isFrozen(),
   ]);
 
   return new ConfidentialAssetDetailsModel({
     ...details,
+    isFrozen,
     auditors: auditors.map(({ publicKey }) => new ConfidentialAccountModel({ publicKey })),
     mediators: mediators.map(({ did }) => new IdentityModel({ did })),
   });

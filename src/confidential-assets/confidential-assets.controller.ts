@@ -9,6 +9,7 @@ import {
 import { ConfidentialAsset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { createConfidentialAssetDetailsModel } from '~/confidential-assets/confidential-assets.util';
@@ -18,6 +19,7 @@ import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-con
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
 import { RemoveAllowedConfidentialVenuesDto } from '~/confidential-assets/dto/remove-allowed-confidential-venues.dto';
 import { SetConfidentialVenueFilteringParamsDto } from '~/confidential-assets/dto/set-confidential-venue-filtering-params.dto';
+import { ToggleFreezeConfidentialAccountAssetDto } from '~/confidential-assets/dto/toggle-freeze-confidential-account-asset.dto';
 import { ConfidentialAssetDetailsModel } from '~/confidential-assets/models/confidential-asset-details.model';
 import { ConfidentialVenueFilteringDetailsModel } from '~/confidential-assets/models/confidential-venue-filtering-details.model';
 import { CreatedConfidentialAssetModel } from '~/confidential-assets/models/created-confidential-asset.model';
@@ -215,6 +217,119 @@ export class ConfidentialAssetsController {
       ...rest,
       disallowedVenues,
     });
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Freeze all trading for a Confidential Asset',
+    description:
+      'This endpoint freezes all trading for a Confidential Asset. Note, only the owner of the Confidential asset can perform this operation',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'Asset is already frozen',
+      'The signing identity is not the owner of the Confidential Asset',
+    ],
+  })
+  @Post(':id/freeze')
+  async freezeConfidentialAsset(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() body: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAssetsService.toggleFreezeConfidentialAsset(
+      id,
+      body,
+      true
+    );
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Resume (unfreeze) all trading for a Confidential Asset',
+    description:
+      'This endpoint resumes all trading for a freezed Confidential Asset. Note, only the owner of the Confidential asset can perform this operation',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'Asset is already unfrozen',
+      'The signing identity is not the owner of the Confidential Asset',
+    ],
+  })
+  @Post(':id/unfreeze')
+  async unfreezeConfidentialAsset(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() body: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAssetsService.toggleFreezeConfidentialAsset(
+      id,
+      body,
+      false
+    );
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Freeze trading for a specific Confidential Account for a Confidential Asset',
+    description:
+      'This endpoint freezes trading for a specific Confidential Account for a freezed Confidential Asset. Note, only the owner of the Confidential asset can perform this operation',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'Account is already frozen',
+      'The signing identity is not the owner of the Confidential Asset',
+    ],
+  })
+  @Post(':id/freeze-account')
+  async freezeConfidentialAccount(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() body: ToggleFreezeConfidentialAccountAssetDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAssetsService.toggleFreezeConfidentialAccountAsset(
+      id,
+      body,
+      true
+    );
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary:
+      'Resume (unfreeze) trading for a specific Confidential Account for a Confidential Asset',
+    description:
+      'This endpoint resumes trading for a specific Confidential Account for a freezed Confidential Asset. Note, only the owner of the Confidential asset can perform this operation',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'Confidential Account is already unfrozen',
+      'The signing identity is not the owner of the Confidential Asset',
+    ],
+  })
+  @Post(':id/unfreeze-account')
+  async unfreezeConfidentialAccount(
+    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Body() body: ToggleFreezeConfidentialAccountAssetDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.confidentialAssetsService.toggleFreezeConfidentialAccountAsset(
+      id,
+      body,
+      false
+    );
 
     return handleServiceResult(result);
   }
