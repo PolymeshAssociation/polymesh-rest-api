@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Method } from 'axios';
 import { lastValueFrom } from 'rxjs';
 
@@ -91,7 +92,7 @@ export class ConfidentialProofsService {
   public async generateSenderProof(
     confidentialAccount: string,
     senderInfo: {
-      amount: number;
+      amount: BigNumber;
       auditors: string[];
       receiver: string;
       encryptedBalance: string;
@@ -156,5 +157,25 @@ export class ConfidentialProofsService {
       'POST',
       params
     );
+  }
+
+  /**
+   * Generates sender proof for a transaction leg. This will be used by the sender to affirm the transaction
+   * @param confidentialAccount
+   * @param burnInfo consisting of the amount and current encrypted balance
+   * @returns sender proof
+   */
+  public async generateBurnProof(
+    confidentialAccount: string,
+    burnInfo: {
+      amount: BigNumber;
+      encryptedBalance: string;
+    }
+  ): Promise<string> {
+    this.logger.debug(
+      `generateBurnProof - Generating burn proof for account ${confidentialAccount}`
+    );
+
+    return this.requestProofServer(`accounts/${confidentialAccount}/burn`, 'POST', burnInfo);
   }
 }

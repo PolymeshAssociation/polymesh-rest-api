@@ -7,9 +7,12 @@ import {
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxBase, ServiceReturn } from '~/common/utils';
+import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
+import { BurnConfidentialAssetsDto } from '~/confidential-assets/dto/burn-confidential-assets.dto';
 import { CreateConfidentialAssetDto } from '~/confidential-assets/dto/create-confidential-asset.dto';
 import { IssueConfidentialAssetDto } from '~/confidential-assets/dto/issue-confidential-asset.dto';
 import { ToggleFreezeConfidentialAccountAssetDto } from '~/confidential-assets/dto/toggle-freeze-confidential-account-asset.dto';
+import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -18,7 +21,9 @@ import { handleSdkError } from '~/transactions/transactions.util';
 export class ConfidentialAssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly transactionsService: TransactionsService
+    private readonly transactionsService: TransactionsService,
+    private readonly confidentialProofsService: ConfidentialProofsService,
+    private readonly confidentialAccountsService: ConfidentialAccountsService
   ) {}
 
   public async findOne(id: string): Promise<ConfidentialAsset> {
@@ -108,5 +113,33 @@ export class ConfidentialAssetsService {
     const asset = await this.findOne(assetId);
 
     return asset.isAccountFrozen(confidentialAccount);
+  }
+
+  public async burnConfidentialAsset(
+    assetId: string,
+    params: BurnConfidentialAssetsDto
+  ): ServiceReturn<ConfidentialAsset> {
+    const asset = await this.findOne(assetId);
+
+    const { base, args } = extractTxBase(params);
+
+    const encryptedBalance = await this.confidentialAccountsService.getAssetBalance(
+      args.confidentialAccount,
+      assetId
+    );
+
+    const proof = await this.confidentialProofsService.generateBurnProof(args.confidentialAccount, {
+      amount: args.amount,
+      encryptedBalance,
+    });
+
+    return this.transactionsService.submit(
+      asset.burn,
+      {
+        ...args,
+        proof,
+      },
+      base
+    );
   }
 }

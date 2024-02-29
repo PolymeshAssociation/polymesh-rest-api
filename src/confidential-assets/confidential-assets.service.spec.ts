@@ -1,15 +1,23 @@
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ConfidentialVenueFilteringDetails, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
+import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
+import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
 import { createMockConfidentialAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
-import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
+import {
+  mockConfidentialAccountsServiceProvider,
+  mockConfidentialProofsServiceProvider,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 import { TransactionsService } from '~/transactions/transactions.service';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
@@ -20,6 +28,8 @@ describe('ConfidentialAssetsService', () => {
   let mockPolymeshApi: MockPolymesh;
   let polymeshService: PolymeshService;
   let mockTransactionsService: MockTransactionsService;
+  let mockConfidentialAccountsService: DeepMocked<ConfidentialAccountsService>;
+  let mockConfidentialProofsService: DeepMocked<ConfidentialProofsService>;
   const id = 'SOME-CONFIDENTIAL-ASSET-ID';
 
   beforeEach(async () => {
@@ -27,7 +37,12 @@ describe('ConfidentialAssetsService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [ConfidentialAssetsService, mockTransactionsProvider],
+      providers: [
+        ConfidentialAssetsService,
+        mockTransactionsProvider,
+        mockConfidentialAccountsServiceProvider,
+        mockConfidentialProofsServiceProvider,
+      ],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
@@ -36,6 +51,11 @@ describe('ConfidentialAssetsService', () => {
     mockPolymeshApi = module.get<MockPolymesh>(POLYMESH_API);
     polymeshService = module.get<PolymeshService>(PolymeshService);
     mockTransactionsService = module.get<MockTransactionsService>(TransactionsService);
+    mockConfidentialProofsService =
+      module.get<typeof mockConfidentialProofsService>(ConfidentialProofsService);
+    mockConfidentialAccountsService = module.get<typeof mockConfidentialAccountsService>(
+      ConfidentialAccountsService
+    );
 
     service = module.get<ConfidentialAssetsService>(ConfidentialAssetsService);
   });
@@ -291,6 +311,56 @@ describe('ConfidentialAssetsService', () => {
       const result = await service.isConfidentialAccountFrozen(id, 'SOME_PUBLIC_KEY');
 
       expect(result).toEqual(false);
+    });
+  });
+
+  describe('burnConfidentialAccount', () => {
+    it('should burn the specified amount of Confidential Assets from given Confidential Account`', async () => {
+      const params = {
+        confidentialAccount: 'SOME_PUBLIC_KEY',
+        amount: new BigNumber(100),
+      };
+      const input = {
+        signer,
+        ...params,
+      };
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.confidentialAsset.Burn,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockAsset = createMockConfidentialAsset();
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset);
+
+      const encryptedBalance = '0xencryptedbalance';
+      when(mockConfidentialAccountsService.getAssetBalance)
+        .calledWith(params.confidentialAccount, id)
+        .mockResolvedValue(encryptedBalance);
+
+      const mockProof = 'some_proof';
+      when(mockConfidentialProofsService.generateBurnProof)
+        .calledWith(params.confidentialAccount, {
+          amount: params.amount,
+          encryptedBalance,
+        })
+        .mockResolvedValue(mockProof);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.burn, { ...params, proof: mockProof }, { signer })
+        .mockResolvedValue({
+          result: mockAsset,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.burnConfidentialAsset(id, input);
+
+      expect(result).toEqual({
+        result: mockAsset,
+        transactions: [mockTransaction],
+      });
     });
   });
 });

@@ -1,17 +1,22 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ConfidentialTransaction } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ConfidentialAsset,
+  ConfidentialTransaction,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { ServiceReturn } from '~/common/utils';
 import { ConfidentialAccountModel } from '~/confidential-accounts/models/confidential-account.model';
+import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { ConfidentialProofsController } from '~/confidential-proofs/confidential-proofs.controller';
 import { ConfidentialProofsService } from '~/confidential-proofs/confidential-proofs.service';
 import { ConfidentialAccountEntity } from '~/confidential-proofs/entities/confidential-account.entity';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
 import { testValues, txResult } from '~/test-utils/consts';
 import {
+  mockConfidentialAssetsServiceProvider,
   mockConfidentialProofsServiceProvider,
   mockConfidentialTransactionsServiceProvider,
 } from '~/test-utils/service-mocks';
@@ -22,6 +27,7 @@ describe('ConfidentialProofsController', () => {
   let controller: ConfidentialProofsController;
   let mockConfidentialProofsService: DeepMocked<ConfidentialProofsService>;
   let mockConfidentialTransactionsService: DeepMocked<ConfidentialTransactionsService>;
+  let mockConfidentialAssetsService: DeepMocked<ConfidentialAssetsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,6 +35,7 @@ describe('ConfidentialProofsController', () => {
       providers: [
         mockConfidentialProofsServiceProvider,
         mockConfidentialTransactionsServiceProvider,
+        mockConfidentialAssetsServiceProvider,
       ],
     }).compile();
 
@@ -37,6 +44,8 @@ describe('ConfidentialProofsController', () => {
     mockConfidentialTransactionsService = module.get<typeof mockConfidentialTransactionsService>(
       ConfidentialTransactionsService
     );
+    mockConfidentialAssetsService =
+      module.get<typeof mockConfidentialAssetsService>(ConfidentialAssetsService);
     controller = module.get<ConfidentialProofsController>(ConfidentialProofsController);
   });
 
@@ -161,6 +170,25 @@ describe('ConfidentialProofsController', () => {
       );
 
       expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('burnConfidentialAsset', () => {
+    it('should call the service and return the results', async () => {
+      const input = {
+        signer,
+        amount: new BigNumber(1),
+        confidentialAccount: 'SOME_PUBLIC_KEY',
+      };
+
+      const confidentialAssetId = 'SOME_ASSET_ID';
+
+      when(mockConfidentialAssetsService.burnConfidentialAsset)
+        .calledWith(confidentialAssetId, input)
+        .mockResolvedValue(txResult as unknown as ServiceReturn<ConfidentialAsset>);
+
+      const result = await controller.burnConfidentialAsset({ confidentialAssetId }, input);
+      expect(result).toEqual(txResult);
     });
   });
 });

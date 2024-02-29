@@ -319,7 +319,7 @@ describe('ConfidentialTransactionsService', () => {
 
       when(mockConfidentialProofsService.generateSenderProof)
         .calledWith('SENDER_CONFIDENTIAL_ACCOUNT', {
-          amount: 100,
+          amount: new BigNumber(100),
           auditors: ['AUDITOR_CONFIDENTIAL_ACCOUNT'],
           receiver: 'RECEIVER_CONFIDENTIAL_ACCOUNT',
           encryptedBalance: '0x0ceabalance',
