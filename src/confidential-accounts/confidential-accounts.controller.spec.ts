@@ -6,7 +6,7 @@ import { ServiceReturn } from '~/common/utils';
 import { ConfidentialAccountsController } from '~/confidential-accounts/confidential-accounts.controller';
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
 import { testValues } from '~/test-utils/consts';
-import { createMockIdentity } from '~/test-utils/mocks';
+import { createMockConfidentialAsset, createMockIdentity } from '~/test-utils/mocks';
 import { mockConfidentialAccountsServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer, txResult } = testValues;
@@ -56,6 +56,58 @@ describe('ConfidentialAccountsController', () => {
       const result = await controller.getOwner({ confidentialAccount });
 
       expect(result).toEqual(expect.objectContaining({ did: 'OWNER_DID' }));
+    });
+  });
+
+  describe('getAllBalances and getAllIncomingBalances', () => {
+    it('should get all confidential asset balances', async () => {
+      const confidentialAsset = createMockConfidentialAsset();
+      const balance = '0xsomebalance';
+      const mockResult = [
+        {
+          confidentialAsset,
+          balance,
+        },
+      ];
+      mockConfidentialAccountsService.getAllBalances.mockResolvedValue(mockResult);
+
+      let result = await controller.getAllBalances({ confidentialAccount });
+
+      expect(result).toEqual(
+        expect.arrayContaining([{ confidentialAsset: confidentialAsset.id, balance }])
+      );
+
+      mockConfidentialAccountsService.getAllIncomingBalances.mockResolvedValue(mockResult);
+
+      result = await controller.getAllIncomingBalances({ confidentialAccount });
+
+      expect(result).toEqual(
+        expect.arrayContaining([{ confidentialAsset: confidentialAsset.id, balance }])
+      );
+    });
+  });
+
+  describe('getConfidentialAssetBalance and getIncomingConfidentialAssetBalance', () => {
+    it('should get all confidential asset balances', async () => {
+      const confidentialAssetId = 'SOME_ASSET_ID';
+      const balance = '0xsomebalance';
+      mockConfidentialAccountsService.getAssetBalance.mockResolvedValue(balance);
+
+      let result = await controller.getConfidentialAssetBalance({
+        confidentialAccount,
+        confidentialAssetId,
+      });
+
+      expect(result).toEqual(balance);
+
+      mockConfidentialAccountsService.getIncomingAssetBalance.mockResolvedValue(balance);
+
+      result = await controller.getIncomingConfidentialAssetBalance({
+        confidentialAccount,
+        confidentialAssetId,
+      });
+
+      expect(result).toEqual(balance);
     });
   });
 });

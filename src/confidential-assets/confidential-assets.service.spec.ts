@@ -268,12 +268,12 @@ describe('ConfidentialAssetsService', () => {
       });
 
       when(mockTransactionsService.submit)
-        .calledWith(mockAsset.freezeAccount, params, { signer })
+        .calledWith(mockAsset.unfreezeAccount, params, { signer })
         .mockResolvedValue({
           transactions: [mockTransaction],
         });
 
-      result = await service.toggleFreezeConfidentialAccountAsset(id, input, true);
+      result = await service.toggleFreezeConfidentialAccountAsset(id, input, false);
 
       expect(result).toEqual({
         transactions: [mockTransaction],

@@ -65,7 +65,7 @@ describe('ConfidentialAssetsController', () => {
 
       mockConfidentialAssetsService.findOne.mockResolvedValue(mockConfidentialAsset);
 
-      const result = await controller.getDetails({ id });
+      const result = await controller.getDetails({ confidentialAssetId: id });
 
       expect(result).toEqual({
         ...mockAssetDetails,
@@ -120,7 +120,7 @@ describe('ConfidentialAssetsController', () => {
         txResult as unknown as ServiceReturn<ConfidentialAsset>
       );
 
-      const result = await controller.issueConfidentialAsset({ id }, input);
+      const result = await controller.issueConfidentialAsset({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
     });
   });
@@ -131,7 +131,7 @@ describe('ConfidentialAssetsController', () => {
         enabled: false,
       });
 
-      let result = await controller.getVenueFilteringDetails({ id });
+      let result = await controller.getVenueFilteringDetails({ confidentialAssetId: id });
 
       expect(result).toEqual(expect.objectContaining({ enabled: false }));
 
@@ -140,7 +140,7 @@ describe('ConfidentialAssetsController', () => {
         allowedConfidentialVenues: [createMockConfidentialVenue({ id: new BigNumber(1) })],
       });
 
-      result = await controller.getVenueFilteringDetails({ id });
+      result = await controller.getVenueFilteringDetails({ confidentialAssetId: id });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -161,7 +161,10 @@ describe('ConfidentialAssetsController', () => {
         txResult as unknown as ServiceReturn<void>
       );
 
-      const result = await controller.toggleConfidentialVenueFiltering({ id }, input);
+      const result = await controller.toggleConfidentialVenueFiltering(
+        { confidentialAssetId: id },
+        input
+      );
       expect(result).toEqual(txResult);
     });
   });
@@ -176,10 +179,10 @@ describe('ConfidentialAssetsController', () => {
         txResult as unknown as ServiceReturn<void>
       );
 
-      let result = await controller.addAllowedVenues({ id }, input);
+      let result = await controller.addAllowedVenues({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
 
-      result = await controller.removeAllowedVenues({ id }, input);
+      result = await controller.removeAllowedVenues({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
     });
   });
@@ -193,10 +196,10 @@ describe('ConfidentialAssetsController', () => {
         txResult as unknown as ServiceReturn<void>
       );
 
-      let result = await controller.freezeConfidentialAsset({ id }, input);
+      let result = await controller.freezeConfidentialAsset({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
 
-      result = await controller.unfreezeConfidentialAsset({ id }, input);
+      result = await controller.unfreezeConfidentialAsset({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
     });
   });
@@ -211,10 +214,10 @@ describe('ConfidentialAssetsController', () => {
         txResult as unknown as ServiceReturn<void>
       );
 
-      let result = await controller.freezeConfidentialAccount({ id }, input);
+      let result = await controller.freezeConfidentialAccount({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
 
-      result = await controller.unfreezeConfidentialAccount({ id }, input);
+      result = await controller.unfreezeConfidentialAccount({ confidentialAssetId: id }, input);
       expect(result).toEqual(txResult);
     });
   });
@@ -224,7 +227,7 @@ describe('ConfidentialAssetsController', () => {
       mockConfidentialAssetsService.isConfidentialAccountFrozen.mockResolvedValue(true);
 
       const result = await controller.isConfidentialAccountFrozen({
-        id: 'SOME_ASSET_ID',
+        confidentialAssetId: 'SOME_ASSET_ID',
         confidentialAccount: 'SOME_PUBLIC_KEY',
       });
       expect(result).toEqual(true);

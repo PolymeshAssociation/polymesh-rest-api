@@ -37,7 +37,7 @@ export class ConfidentialAssetsController {
       'This endpoint will provide the basic details of an Confidential Asset along with the auditors information',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset whose details are to be fetched',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -46,11 +46,11 @@ export class ConfidentialAssetsController {
     description: 'Basic details of the Asset',
     type: ConfidentialAssetDetailsModel,
   })
-  @Get(':id')
+  @Get(':confidentialAssetId')
   public async getDetails(
-    @Param() { id }: ConfidentialAssetIdParamsDto
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto
   ): Promise<ConfidentialAssetDetailsModel> {
-    const asset = await this.confidentialAssetsService.findOne(id);
+    const asset = await this.confidentialAssetsService.findOne(confidentialAssetId);
 
     return createConfidentialAssetDetailsModel(asset);
   }
@@ -92,7 +92,7 @@ export class ConfidentialAssetsController {
       'This endpoint issues more of a given Confidential Asset into a specified Confidential Account',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset to be issued',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -105,12 +105,12 @@ export class ConfidentialAssetsController {
     ],
     [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
   })
-  @Post(':id/issue')
+  @Post(':confidentialAssetId/issue')
   public async issueConfidentialAsset(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() params: IssueConfidentialAssetDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.confidentialAssetsService.issue(id, params);
+    const result = await this.confidentialAssetsService.issue(confidentialAssetId, params);
     return handleServiceResult(result);
   }
 
@@ -119,7 +119,7 @@ export class ConfidentialAssetsController {
     description: 'This endpoint will return the venue filtering details for a Confidential Asset',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -128,11 +128,13 @@ export class ConfidentialAssetsController {
     description: 'Venue filtering details',
     type: ConfidentialVenueFilteringDetailsModel,
   })
-  @Get(':id/venue-filtering')
+  @Get(':confidentialAssetId/venue-filtering')
   public async getVenueFilteringDetails(
-    @Param() { id }: ConfidentialAssetIdParamsDto
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto
   ): Promise<ConfidentialVenueFilteringDetailsModel> {
-    const details = await this.confidentialAssetsService.getVenueFilteringDetails(id);
+    const details = await this.confidentialAssetsService.getVenueFilteringDetails(
+      confidentialAssetId
+    );
 
     const { enabled, allowedConfidentialVenues } = {
       allowedConfidentialVenues: undefined,
@@ -148,7 +150,7 @@ export class ConfidentialAssetsController {
       'This endpoint enables/disables confidential venue filtering for a given Confidential Asset',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -156,12 +158,15 @@ export class ConfidentialAssetsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
   })
-  @Post(':id/venue-filtering')
+  @Post(':confidentialAssetId/venue-filtering')
   public async toggleConfidentialVenueFiltering(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() params: SetConfidentialVenueFilteringParamsDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, params);
+    const result = await this.confidentialAssetsService.setVenueFilteringDetails(
+      confidentialAssetId,
+      params
+    );
 
     return handleServiceResult(result);
   }
@@ -172,7 +177,7 @@ export class ConfidentialAssetsController {
       'This endpoint adds additional Confidential Venues to existing list of Confidential Venues allowed to handle transfer of the given Confidential Asset',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -180,16 +185,19 @@ export class ConfidentialAssetsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
   })
-  @Post(':id/venue-filtering/add-allowed-venues')
+  @Post(':confidentialAssetId/venue-filtering/add-allowed-venues')
   public async addAllowedVenues(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() params: AddAllowedConfidentialVenuesDto
   ): Promise<TransactionResponseModel> {
     const { confidentialVenues: allowedVenues, ...rest } = params;
-    const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, {
-      ...rest,
-      allowedVenues,
-    });
+    const result = await this.confidentialAssetsService.setVenueFilteringDetails(
+      confidentialAssetId,
+      {
+        ...rest,
+        allowedVenues,
+      }
+    );
 
     return handleServiceResult(result);
   }
@@ -200,7 +208,7 @@ export class ConfidentialAssetsController {
       'This endpoint removes the given list of Confidential Venues (if present), from the existing list of allowed Confidential Venues for Confidential Asset Transaction',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -208,17 +216,20 @@ export class ConfidentialAssetsController {
   @ApiTransactionFailedResponse({
     [HttpStatus.NOT_FOUND]: ['The Confidential Asset does not exists'],
   })
-  @Post(':id/venue-filtering/remove-allowed-venues')
+  @Post(':confidentialAssetId/venue-filtering/remove-allowed-venues')
   public async removeAllowedVenues(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() params: RemoveAllowedConfidentialVenuesDto
   ): Promise<TransactionResponseModel> {
     const { confidentialVenues: disallowedVenues, ...rest } = params;
 
-    const result = await this.confidentialAssetsService.setVenueFilteringDetails(id, {
-      ...rest,
-      disallowedVenues,
-    });
+    const result = await this.confidentialAssetsService.setVenueFilteringDetails(
+      confidentialAssetId,
+      {
+        ...rest,
+        disallowedVenues,
+      }
+    );
 
     return handleServiceResult(result);
   }
@@ -237,13 +248,13 @@ export class ConfidentialAssetsController {
       'The signing identity is not the owner of the Confidential Asset',
     ],
   })
-  @Post(':id/freeze')
+  @Post(':confidentialAssetId/freeze')
   async freezeConfidentialAsset(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() body: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.toggleFreezeConfidentialAsset(
-      id,
+      confidentialAssetId,
       body,
       true
     );
@@ -265,13 +276,13 @@ export class ConfidentialAssetsController {
       'The signing identity is not the owner of the Confidential Asset',
     ],
   })
-  @Post(':id/unfreeze')
+  @Post(':confidentialAssetId/unfreeze')
   async unfreezeConfidentialAsset(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() body: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.toggleFreezeConfidentialAsset(
-      id,
+      confidentialAssetId,
       body,
       false
     );
@@ -293,13 +304,13 @@ export class ConfidentialAssetsController {
       'The signing identity is not the owner of the Confidential Asset',
     ],
   })
-  @Post(':id/freeze-account')
+  @Post(':confidentialAssetId/freeze-account')
   async freezeConfidentialAccount(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() body: ToggleFreezeConfidentialAccountAssetDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.toggleFreezeConfidentialAccountAsset(
-      id,
+      confidentialAssetId,
       body,
       true
     );
@@ -322,13 +333,13 @@ export class ConfidentialAssetsController {
       'The signing identity is not the owner of the Confidential Asset',
     ],
   })
-  @Post(':id/unfreeze-account')
+  @Post(':confidentialAssetId/unfreeze-account')
   async unfreezeConfidentialAccount(
-    @Param() { id }: ConfidentialAssetIdParamsDto,
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
     @Body() body: ToggleFreezeConfidentialAccountAssetDto
   ): Promise<TransactionResponseModel> {
     const result = await this.confidentialAssetsService.toggleFreezeConfidentialAccountAsset(
-      id,
+      confidentialAssetId,
       body,
       false
     );
@@ -341,7 +352,7 @@ export class ConfidentialAssetsController {
       'Check whether trading for a Confidential Asset is frozen for a specific Confidential Account',
   })
   @ApiParam({
-    name: 'id',
+    name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset',
     type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
@@ -359,11 +370,17 @@ export class ConfidentialAssetsController {
   @ApiNotFoundResponse({
     description: 'The Confidential Asset does not exists',
   })
-  @Get(':id/freeze-account/:confidentialAccount')
+  @Get(':confidentialAssetId/freeze-account/:confidentialAccount')
   async isConfidentialAccountFrozen(
     @Param()
-    { id, confidentialAccount }: ConfidentialAssetIdParamsDto & ConfidentialAccountParamsDto
+    {
+      confidentialAssetId,
+      confidentialAccount,
+    }: ConfidentialAssetIdParamsDto & ConfidentialAccountParamsDto
   ): Promise<boolean> {
-    return this.confidentialAssetsService.isConfidentialAccountFrozen(id, confidentialAccount);
+    return this.confidentialAssetsService.isConfidentialAccountFrozen(
+      confidentialAssetId,
+      confidentialAccount
+    );
   }
 }

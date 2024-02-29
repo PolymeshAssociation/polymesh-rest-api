@@ -1,13 +1,23 @@
+import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ConfidentialAccount,
+  ConfidentialAssetBalance,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
-import { createMockConfidentialAccount, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockConfidentialAccount,
+  createMockConfidentialAsset,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 import { TransactionsService } from '~/transactions/transactions.service';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
@@ -116,6 +126,112 @@ describe('ConfidentialAccountsService', () => {
       expect(result).toEqual({
         result: mockAccount,
         transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('getAllBalances and getAllIncomingBalances', () => {
+    let account: DeepMocked<ConfidentialAccount>;
+    let balances: ConfidentialAssetBalance[];
+
+    beforeEach(() => {
+      balances = [
+        {
+          confidentialAsset: createMockConfidentialAsset(),
+          balance: '0xsomebalance',
+        },
+      ];
+
+      account = createMockConfidentialAccount();
+    });
+
+    describe('getAllBalances', () => {
+      it('should return all balances for a Confidential Account', async () => {
+        account.getBalances.mockResolvedValue(balances);
+
+        jest.spyOn(service, 'findOne').mockResolvedValue(account);
+
+        const result = await service.getAllBalances(confidentialAccount);
+
+        expect(result).toEqual(balances);
+      });
+    });
+
+    describe('getAllIncomingBalances', () => {
+      it('should return all incoming balances for a Confidential Account', async () => {
+        account.getIncomingBalances.mockResolvedValue(balances);
+
+        jest.spyOn(service, 'findOne').mockResolvedValue(account);
+
+        const result = await service.getAllIncomingBalances(confidentialAccount);
+
+        expect(result).toEqual(balances);
+      });
+    });
+  });
+
+  describe('getAssetBalance and getIncomingAssetBalance', () => {
+    let account: DeepMocked<ConfidentialAccount>;
+    let balance: string;
+    let confidentialAssetId: string;
+
+    beforeEach(() => {
+      balance = '0xsomebalance';
+      confidentialAssetId = 'SOME_ASSET_ID';
+
+      account = createMockConfidentialAccount();
+      account.getBalance.mockResolvedValue(balance);
+      account.getIncomingBalance.mockResolvedValue(balance);
+    });
+
+    describe('getAssetBalance', () => {
+      it('should return balance for a specific Confidential Asset', async () => {
+        jest.spyOn(service, 'findOne').mockResolvedValue(account);
+
+        const result = await service.getAssetBalance(confidentialAccount, confidentialAssetId);
+
+        expect(result).toEqual(balance);
+      });
+
+      it('should call handleSdkError and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        account.getBalance.mockRejectedValue(mockError);
+        jest.spyOn(service, 'findOne').mockResolvedValue(account);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() =>
+          service.getAssetBalance(confidentialAccount, confidentialAssetId)
+        ).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
+      });
+    });
+
+    describe('getIncomingAssetBalance', () => {
+      it('should return the incoming balance for a specific Confidential Asset', async () => {
+        jest.spyOn(service, 'findOne').mockResolvedValue(account);
+
+        const result = await service.getIncomingAssetBalance(
+          confidentialAccount,
+          confidentialAssetId
+        );
+
+        expect(result).toEqual(balance);
+      });
+
+      it('should call handleSdkError and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        account.getIncomingBalance.mockRejectedValue(mockError);
+        jest.spyOn(service, 'findOne').mockResolvedValue(account);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() =>
+          service.getIncomingAssetBalance(confidentialAccount, confidentialAssetId)
+        ).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
