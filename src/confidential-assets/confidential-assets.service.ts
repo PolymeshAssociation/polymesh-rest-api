@@ -100,4 +100,13 @@ export class ConfidentialAssetsService {
 
     return this.transactionsService.submit(method, args, base);
   }
+
+  public async isConfidentialAccountFrozen(
+    assetId: string,
+    confidentialAccount: string
+  ): Promise<boolean> {
+    const asset = await this.findOne(assetId);
+
+    return asset.isAccountFrozen(confidentialAccount);
+  }
 }

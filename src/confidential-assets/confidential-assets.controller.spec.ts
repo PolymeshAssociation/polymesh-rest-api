@@ -218,4 +218,16 @@ describe('ConfidentialAssetsController', () => {
       expect(result).toEqual(txResult);
     });
   });
+
+  describe('isConfidentialAccountFrozen', () => {
+    it('should call the service and return the results', async () => {
+      mockConfidentialAssetsService.isConfidentialAccountFrozen.mockResolvedValue(true);
+
+      const result = await controller.isConfidentialAccountFrozen({
+        id: 'SOME_ASSET_ID',
+        confidentialAccount: 'SOME_PUBLIC_KEY',
+      });
+      expect(result).toEqual(true);
+    });
+  });
 });
