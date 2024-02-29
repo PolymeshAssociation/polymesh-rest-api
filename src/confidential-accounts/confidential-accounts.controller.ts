@@ -183,16 +183,16 @@ export class ConfidentialAccountsController {
       'This endpoint retrieves the incoming balance of a specific Confidential Asset in the given Confidential Account',
   })
   @ApiParam({
-    name: 'confidentialAccount',
-    description: 'The public key of the Confidential Account',
-    type: 'string',
-    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiParam({
     name: 'confidentialAssetId',
     description: 'The ID of the Confidential Asset for which the incoming balance is to be fetched',
-    type: 'string',
     example: '76702175-d8cb-e3a5-5a19-734433351e25',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Confidential Account',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
+    type: 'string',
   })
   @ApiOkResponse({
     description: 'Encrypted incoming balance of the Confidential Asset',
