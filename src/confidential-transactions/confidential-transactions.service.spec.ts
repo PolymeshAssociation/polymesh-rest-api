@@ -473,4 +473,19 @@ describe('ConfidentialTransactionsService', () => {
       expect(result).toEqual(mockConfidentialVenues);
     });
   });
+
+  describe('getPendingAffirmsCount', () => {
+    it('should return the pending affirms count for a transaction', async () => {
+      const expectedResult = new BigNumber(3);
+
+      const mockConfidentialTransaction = createMockConfidentialTransaction();
+      mockConfidentialTransaction.getPendingAffirmsCount.mockResolvedValue(expectedResult);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockConfidentialTransaction);
+
+      const result = await service.getPendingAffirmsCount(new BigNumber(1));
+
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });

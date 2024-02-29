@@ -169,4 +169,17 @@ describe('ConfidentialTransactionsController', () => {
       ]);
     });
   });
+
+  describe('getPendingAffirmsCount', () => {
+    it('should call the service and return the result', async () => {
+      const transactionId = new BigNumber(1);
+      when(mockConfidentialTransactionsService.getPendingAffirmsCount)
+        .calledWith(transactionId)
+        .mockResolvedValue(new BigNumber(3));
+
+      const result = await controller.getPendingAffirmsCount({ id: transactionId });
+
+      expect(result).toEqual(3);
+    });
+  });
 });
