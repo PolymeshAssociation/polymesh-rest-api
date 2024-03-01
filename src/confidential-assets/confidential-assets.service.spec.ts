@@ -363,4 +363,24 @@ describe('ConfidentialAssetsService', () => {
       });
     });
   });
+
+  describe('createdAt', () => {
+    it('should return creation event details for a Confidential Account', async () => {
+      const mockResult = {
+        blockNumber: new BigNumber('2719172'),
+        blockHash: 'someHash',
+        blockDate: new Date('2023-06-26T01:47:45.000Z'),
+        eventIndex: new BigNumber(1),
+      };
+      const asset = createMockConfidentialAsset();
+
+      asset.createdAt.mockResolvedValue(mockResult);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(asset);
+
+      const result = await service.createdAt('SOME_ASSET_ID');
+
+      expect(result).toEqual(mockResult);
+    });
+  });
 });

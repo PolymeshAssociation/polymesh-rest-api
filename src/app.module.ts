@@ -22,6 +22,7 @@ import { DeveloperTestingModule } from '~/developer-testing/developer-testing.mo
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { MetadataModule } from '~/metadata/metadata.module';
+import { MiddlewareModule } from '~/middleware/middleware.module';
 import { NetworkModule } from '~/network/network.module';
 import { NftsModule } from '~/nfts/nfts.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
@@ -101,6 +102,7 @@ import { UsersModule } from '~/users/users.module';
     ConfidentialAccountsModule,
     ConfidentialTransactionsModule,
     ConfidentialProofsModule.register(),
+    MiddlewareModule.register(),
   ],
 })
 export class AppModule {}
