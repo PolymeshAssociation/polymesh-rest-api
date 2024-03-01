@@ -3,6 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ConfidentialAsset,
   ConfidentialVenueFilteringDetails,
+  EventIdentifier,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -141,5 +142,11 @@ export class ConfidentialAssetsService {
       },
       base
     );
+  }
+
+  public async createdAt(assetId: string): Promise<EventIdentifier | null> {
+    const asset = await this.findOne(assetId);
+
+    return asset.createdAt();
   }
 }
