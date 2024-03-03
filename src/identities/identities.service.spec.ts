@@ -3,7 +3,7 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { ConfidentialLegParty, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
@@ -14,7 +14,12 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { testValues } from '~/test-utils/consts';
-import { MockIdentity, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockConfidentialTransaction,
+  MockIdentity,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
@@ -205,6 +210,43 @@ describe('IdentitiesService', () => {
         transactions: [mockTransaction],
       });
       expect(mockTransactionsService.submit).toHaveBeenCalled();
+    });
+  });
+
+  describe('getInvolvedConfidentialTransactions', () => {
+    const mockAffirmations = {
+      data: [
+        {
+          transaction: createMockConfidentialTransaction(),
+          legId: new BigNumber(1),
+          role: ConfidentialLegParty.Auditor,
+          affirmed: true,
+        },
+      ],
+      next: '0xddddd',
+      count: new BigNumber(1),
+    };
+
+    beforeEach(() => {
+      const mockIdentity = new MockIdentity();
+      mockIdentity.getInvolvedConfidentialTransactions.mockResolvedValue(mockAffirmations);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockIdentity as any);
+    });
+
+    it('should return the list of involved confidential affirmations', async () => {
+      const result = await service.getInvolvedConfidentialTransactions('0x01', new BigNumber(10));
+      expect(result).toEqual(mockAffirmations);
+    });
+
+    it('should return the list of involved confidential affirmations from a start value', async () => {
+      const result = await service.getInvolvedConfidentialTransactions(
+        '0x01',
+        new BigNumber(10),
+        'NEXT_KEY'
+      );
+      expect(result).toEqual(mockAffirmations);
     });
   });
 });
