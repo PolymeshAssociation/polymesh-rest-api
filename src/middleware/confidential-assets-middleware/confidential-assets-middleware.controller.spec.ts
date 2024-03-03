@@ -4,22 +4,33 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { ConfidentialAssetsMiddlewareController } from '~/middleware/confidential-assets-middleware/confidential-assets-middleware.controller';
-import { mockConfidentialAssetsServiceProvider } from '~/test-utils/service-mocks';
+import { createMockConfidentialAsset } from '~/test-utils/mocks';
+import {
+  mockConfidentialAccountsServiceProvider,
+  mockConfidentialAssetsServiceProvider,
+} from '~/test-utils/service-mocks';
 
 describe('ConfidentialAssetsMiddlewareController', () => {
   let controller: ConfidentialAssetsMiddlewareController;
   let mockConfidentialAssetsService: DeepMocked<ConfidentialAssetsService>;
+  let mockConfidentialAccountsService: DeepMocked<ConfidentialAccountsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ConfidentialAssetsMiddlewareController],
-      providers: [mockConfidentialAssetsServiceProvider],
+      providers: [mockConfidentialAssetsServiceProvider, mockConfidentialAccountsServiceProvider],
     }).compile();
 
     mockConfidentialAssetsService =
       module.get<typeof mockConfidentialAssetsService>(ConfidentialAssetsService);
+
+    mockConfidentialAccountsService = module.get<typeof mockConfidentialAccountsService>(
+      ConfidentialAccountsService
+    );
     controller = module.get<ConfidentialAssetsMiddlewareController>(
       ConfidentialAssetsMiddlewareController
     );
@@ -52,6 +63,34 @@ describe('ConfidentialAssetsMiddlewareController', () => {
 
         expect(result).toEqual(new EventIdentifierModel(eventIdentifier));
       });
+    });
+  });
+
+  describe('getHeldAssets', () => {
+    it('should return a paginated list of held Confidential Assets', async () => {
+      const mockAssets = {
+        data: [
+          createMockConfidentialAsset({ id: 'SOME_ASSET_ID_1' }),
+          createMockConfidentialAsset({ id: 'SOME_ASSET_ID_2' }),
+        ],
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+
+      mockConfidentialAccountsService.findHeldAssets.mockResolvedValue(mockAssets);
+
+      const result = await controller.getHeldAssets(
+        { did: '0x1' },
+        { start: new BigNumber(0), size: new BigNumber(2) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: expect.arrayContaining([{ id: 'SOME_ASSET_ID_2' }, { id: 'SOME_ASSET_ID_2' }]),
+          total: new BigNumber(mockAssets.count),
+          next: mockAssets.next,
+        })
+      );
     });
   });
 });

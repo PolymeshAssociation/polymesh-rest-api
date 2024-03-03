@@ -1,14 +1,31 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
+import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
+import { DidDto } from '~/common/dto/params.dto';
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
+import { ConfidentialAssetModel } from '~/confidential-assets/models/confidential-asset.model';
 
 @Controller()
 export class ConfidentialAssetsMiddlewareController {
-  constructor(private readonly confidentialAssetsService: ConfidentialAssetsService) {}
+  constructor(
+    private readonly confidentialAssetsService: ConfidentialAssetsService,
+    private readonly confidentialAccountsService: ConfidentialAccountsService
+  ) {}
 
+  @ApiTags('confidential-assets')
   @ApiOperation({
     summary: 'Get creation event data for a Confidential Asset',
     description:
@@ -40,5 +57,39 @@ export class ConfidentialAssetsMiddlewareController {
     }
 
     return new EventIdentifierModel(result);
+  }
+
+  @ApiTags('confidential-accounts', 'confidential-assets')
+  @ApiOperation({
+    summary: 'Fetch all Confidential Assets held by a Confidential Account',
+    description:
+      'This endpoint returns a list of all Confidential Assets which were held at one point by the given Confidential Account',
+  })
+  @ApiParam({
+    name: 'confidentialAccount',
+    description: 'The public key of the Confidential Account',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse(ConfidentialAssetModel, {
+    description: 'List of all the held Confidential Assets',
+    paginated: true,
+  })
+  @Get('confidential-accounts/:confidentialAccount/held-confidential-assets')
+  public async getHeldAssets(
+    @Param() { did }: DidDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<ConfidentialAssetModel>> {
+    const { data, count, next } = await this.confidentialAccountsService.findHeldAssets(
+      did,
+      size,
+      new BigNumber(start || 0)
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(({ id }) => new ConfidentialAssetModel({ id })),
+      total: count,
+      next,
+    });
   }
 }

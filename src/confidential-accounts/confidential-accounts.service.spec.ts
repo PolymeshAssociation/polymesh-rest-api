@@ -263,4 +263,29 @@ describe('ConfidentialAccountsService', () => {
       });
     });
   });
+
+  describe('findHeldAssets', () => {
+    it('should return the list of Confidential Assets held by an Confidential Account', async () => {
+      const mockAssets = {
+        data: [
+          createMockConfidentialAsset({ id: 'SOME_ASSET_ID_1' }),
+          createMockConfidentialAsset({ id: 'SOME_ASSET_ID_2' }),
+        ],
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+      const mockAccount = createMockConfidentialAccount();
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAccount);
+
+      mockAccount.getHeldAssets.mockResolvedValue(mockAssets);
+
+      const result = await service.findHeldAssets(
+        'SOME_PUBLIC_KEY',
+        new BigNumber(2),
+        new BigNumber(0)
+      );
+      expect(result).toEqual(mockAssets);
+    });
+  });
 });
