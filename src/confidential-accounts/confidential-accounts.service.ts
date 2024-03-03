@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ConfidentialAccount,
+  ConfidentialAsset,
   ConfidentialAssetBalance,
   Identity,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -89,5 +92,15 @@ export class ConfidentialAccountsService {
       this.polymeshService.polymeshApi.confidentialAccounts.applyIncomingBalances;
 
     return this.transactionsService.submit(applyIncomingBalances, { confidentialAccount }, base);
+  }
+
+  public async findHeldAssets(
+    confidentialAccount: string,
+    size?: BigNumber,
+    start?: BigNumber
+  ): Promise<ResultSet<ConfidentialAsset>> {
+    const account = await this.findOne(confidentialAccount);
+
+    return account.getHeldAssets({ size, start });
   }
 }
