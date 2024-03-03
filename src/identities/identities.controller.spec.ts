@@ -7,6 +7,7 @@ import {
   ClaimData,
   ClaimScope,
   ClaimType,
+  ConfidentialLegParty,
   GenericAuthorizationData,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -33,6 +34,7 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { testValues } from '~/test-utils/consts';
 import {
+  createMockConfidentialTransaction,
   createMockConfidentialVenue,
   MockAuthorizationRequest,
   MockIdentity,
@@ -676,6 +678,55 @@ describe('IdentitiesController', () => {
       expect(result).toEqual({
         results: mockResults,
       });
+    });
+  });
+
+  describe('getInvolvedConfidentialTransactions', () => {
+    const mockAffirmations = {
+      data: [
+        {
+          transaction: createMockConfidentialTransaction(),
+          legId: new BigNumber(0),
+          role: ConfidentialLegParty.Mediator,
+          affirmed: true,
+        },
+      ],
+      next: '0xddddd',
+      count: new BigNumber(1),
+    };
+
+    it('should return the list of involved confidential affirmations', async () => {
+      mockIdentitiesService.getInvolvedConfidentialTransactions.mockResolvedValue(mockAffirmations);
+
+      const result = await controller.getInvolvedConfidentialTransactions(
+        { did },
+        { size: new BigNumber(1) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: expect.arrayContaining(mockAffirmations.data),
+          total: new BigNumber(mockAffirmations.count),
+          next: mockAffirmations.next,
+        })
+      );
+    });
+
+    it('should return the list of involved confidential affirmations from a start value', async () => {
+      mockAssetsService.findDocuments.mockResolvedValue(mockAffirmations);
+
+      const result = await controller.getInvolvedConfidentialTransactions(
+        { did },
+        { size: new BigNumber(1), start: 'SOME_START_KEY' }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: expect.arrayContaining(mockAffirmations.data),
+          total: new BigNumber(mockAffirmations.count),
+          next: mockAffirmations.next,
+        })
+      );
     });
   });
 });

@@ -143,6 +143,7 @@ export class MockIdentitiesService {
   addSecondaryAccount = jest.fn();
   createMockCdd = jest.fn();
   registerDid = jest.fn();
+  getInvolvedConfidentialTransactions = jest.fn();
 }
 
 export class MockSettlementsService {

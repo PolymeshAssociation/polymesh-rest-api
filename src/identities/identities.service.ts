@@ -3,6 +3,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
+  ConfidentialAffirmation,
   FungibleAsset,
   Identity,
   RegisterIdentityParams,
@@ -98,5 +99,14 @@ export class IdentitiesService {
     const { registerIdentity } = polymeshApi.identities;
 
     return this.transactionsService.submit(registerIdentity, params, base);
+  }
+
+  public async getInvolvedConfidentialTransactions(
+    did: string,
+    size: BigNumber,
+    start?: string
+  ): Promise<ResultSet<ConfidentialAffirmation>> {
+    const identity = await this.findOne(did);
+    return identity.getInvolvedConfidentialTransactions({ size, start });
   }
 }

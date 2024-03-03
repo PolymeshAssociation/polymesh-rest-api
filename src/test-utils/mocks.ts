@@ -310,6 +310,7 @@ export class MockIdentity {
   public getTrustingAssets = jest.fn();
   public getHeldAssets = jest.fn();
   public getConfidentialVenues = jest.fn();
+  public getInvolvedConfidentialTransactions = jest.fn();
 }
 
 export class MockPortfolio {

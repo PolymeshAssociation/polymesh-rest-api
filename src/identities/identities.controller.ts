@@ -49,6 +49,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { ConfidentialTransactionsService } from '~/confidential-transactions/confidential-transactions.service';
+import { ConfidentialAffirmationModel } from '~/confidential-transactions/models/confidential-affirmation.model';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
@@ -250,7 +251,7 @@ export class IdentitiesController {
   public async getHeldAssets(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto
-  ): Promise<ResultsModel<string>> {
+  ): Promise<PaginatedResultsModel<string>> {
     const { data, count, next } = await this.identitiesService.findHeldAssets(
       did,
       size,
@@ -646,5 +647,42 @@ export class IdentitiesController {
   async getConfidentialVenues(@Param() { did }: DidDto): Promise<ResultsModel<ConfidentialVenue>> {
     const results = await this.confidentialTransactionService.findVenuesByOwner(did);
     return new ResultsModel({ results });
+  }
+
+  @ApiTags('confidential-transactions')
+  @ApiOperation({
+    summary: 'Get all Confidential Transaction affirmations involving an Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of IDs of all owned Confidential Venues',
+    paginated: false,
+    example: ['1', '2', '3'],
+  })
+  @Get(':did/involved-confidential-transactions')
+  async getInvolvedConfidentialTransactions(
+    @Param() { did }: DidDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<ConfidentialAffirmationModel>> {
+    const {
+      data,
+      count: total,
+      next,
+    } = await this.identitiesService.getInvolvedConfidentialTransactions(
+      did,
+      size,
+      start?.toString()
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(affirmation => new ConfidentialAffirmationModel(affirmation)),
+      total,
+      next,
+    });
   }
 }
