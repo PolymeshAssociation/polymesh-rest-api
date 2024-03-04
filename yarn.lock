@@ -1925,6 +1925,28 @@
     tslib "^2.6.2"
     ws "^8.14.1"
 
+"@polymeshassociation/confidential-polymesh-sdk@^1.0.0-alpha.3":
+  version "1.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/confidential-polymesh-sdk/-/confidential-polymesh-sdk-1.0.0-alpha.3.tgz#75c4ebe0cb820a1269ed7e9470acb0f65e08862b"
+  integrity sha512-ZWvnYj/ADjE4tb1j5n3+TekVxQbT4w+dpSRWY7skX4raD9RZ5CXPBzJr6SD1Hm8omqgvBIjCpExL4pRZcvYAPQ==
+  dependencies:
+    "@apollo/client" "^3.8.1"
+    "@polkadot/api" "10.9.1"
+    "@polkadot/util" "12.4.2"
+    "@polkadot/util-crypto" "12.4.2"
+    bignumber.js "9.0.1"
+    bluebird "^3.7.2"
+    cross-fetch "^4.0.0"
+    dayjs "1.11.9"
+    graphql "^16.8.0"
+    graphql-tag "2.12.6"
+    iso-7064 "^1.1.0"
+    json-stable-stringify "^1.0.2"
+    lodash "^4.17.21"
+    patch-package "^8.0.0"
+    semver "^7.5.4"
+    websocket "^1.0.34"
+
 "@polymeshassociation/fireblocks-signing-manager@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@polymeshassociation/fireblocks-signing-manager/-/fireblocks-signing-manager-2.3.0.tgz#fbcabb0803e0f50aa95211047664423be093b3b8"
@@ -1952,28 +1974,6 @@
   integrity sha512-T6RPqnw7D0KJpsI7J1Ix+S6VMyFBEAIJKpYZUJ16a2nmYL4DzlCWY/aHhyubaZn4jY5d1j5vmJTLYsavKENbLw==
   dependencies:
     "@polymeshassociation/signing-manager-types" "^3.1.0"
-
-"@polymeshassociation/polymesh-sdk@^24.0.0-confidential-assets.11":
-  version "24.0.0-confidential-assets.11"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-24.0.0-confidential-assets.11.tgz#8739b653d2d985065b739a3e50c169fa5f73615f"
-  integrity sha512-NJdNT3JXhXhbozKIQnlC4ZEbSnL9pp1DMewD8WJ41jNKn9vOobhSVgbrHd/aFC2MElIl5TuuvT0A7Qvh4oTYCw==
-  dependencies:
-    "@apollo/client" "^3.8.1"
-    "@polkadot/api" "10.9.1"
-    "@polkadot/util" "12.4.2"
-    "@polkadot/util-crypto" "12.4.2"
-    bignumber.js "9.0.1"
-    bluebird "^3.7.2"
-    cross-fetch "^4.0.0"
-    dayjs "1.11.9"
-    graphql "^16.8.0"
-    graphql-tag "2.12.6"
-    iso-7064 "^1.1.0"
-    json-stable-stringify "^1.0.2"
-    lodash "^4.17.21"
-    patch-package "^8.0.0"
-    semver "^7.5.4"
-    websocket "^1.0.34"
 
 "@polymeshassociation/signing-manager-types@^3.1.0":
   version "3.1.0"
