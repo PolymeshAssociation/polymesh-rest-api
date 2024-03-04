@@ -6,9 +6,9 @@
 
 ## Description
 
-A REST API wrapper for the Polymesh blockchain.
+A REST API wrapper for the Polymesh Private blockchain.
 
-This version is compatible with chain versions 5.4.x - 6.0.x
+This version is compatible with chain versions 1.0.x
 
 ## Setup
 
