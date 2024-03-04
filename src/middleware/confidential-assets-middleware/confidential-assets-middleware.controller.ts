@@ -10,10 +10,10 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
-import { DidDto } from '~/common/dto/params.dto';
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
+import { ConfidentialAccountParamsDto } from '~/confidential-accounts/dto/confidential-account-params.dto';
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
 import { ConfidentialAssetModel } from '~/confidential-assets/models/confidential-asset.model';
@@ -69,7 +69,7 @@ export class ConfidentialAssetsMiddlewareController {
     name: 'confidentialAccount',
     description: 'The public key of the Confidential Account',
     type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+    example: '0xdeadbeef00000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse(ConfidentialAssetModel, {
     description: 'List of all the held Confidential Assets',
@@ -77,11 +77,11 @@ export class ConfidentialAssetsMiddlewareController {
   })
   @Get('confidential-accounts/:confidentialAccount/held-confidential-assets')
   public async getHeldAssets(
-    @Param() { did }: DidDto,
+    @Param() { confidentialAccount }: ConfidentialAccountParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<ConfidentialAssetModel>> {
     const { data, count, next } = await this.confidentialAccountsService.findHeldAssets(
-      did,
+      confidentialAccount,
       size,
       new BigNumber(start || 0)
     );
