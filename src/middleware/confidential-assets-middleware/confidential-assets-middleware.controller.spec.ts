@@ -80,7 +80,7 @@ describe('ConfidentialAssetsMiddlewareController', () => {
       mockConfidentialAccountsService.findHeldAssets.mockResolvedValue(mockAssets);
 
       const result = await controller.getHeldAssets(
-        { did: '0x1' },
+        { confidentialAccount: 'SOME_PUBLIC_KEY' },
         { start: new BigNumber(0), size: new BigNumber(2) }
       );
 

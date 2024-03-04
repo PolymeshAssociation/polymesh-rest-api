@@ -44,8 +44,6 @@ import { UsersModule } from '~/users/users.module';
       validationSchema: Joi.object({
         PORT: Joi.number().default(3000),
         POLYMESH_NODE_URL: Joi.string().required(),
-        POLYMESH_MIDDLEWARE_URL: Joi.string(),
-        POLYMESH_MIDDLEWARE_API_KEY: Joi.string(),
         SUBSCRIPTIONS_TTL: Joi.number().default(60000),
         SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES: Joi.number().default(5),
         SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL: Joi.number().default(5000),
@@ -68,7 +66,6 @@ import { UsersModule } from '~/users/users.module';
         }),
         PROOF_SERVER_URL: Joi.string().default(''),
       })
-        .and('POLYMESH_MIDDLEWARE_URL', 'POLYMESH_MIDDLEWARE_API_KEY')
         .and('LOCAL_SIGNERS', 'LOCAL_MNEMONICS')
         .and('VAULT_TOKEN', 'VAULT_URL'),
     }),
