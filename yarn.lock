@@ -1925,10 +1925,10 @@
     tslib "^2.6.2"
     ws "^8.14.1"
 
-"@polymeshassociation/confidential-polymesh-sdk@^1.0.0-alpha.3":
-  version "1.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/confidential-polymesh-sdk/-/confidential-polymesh-sdk-1.0.0-alpha.3.tgz#75c4ebe0cb820a1269ed7e9470acb0f65e08862b"
-  integrity sha512-ZWvnYj/ADjE4tb1j5n3+TekVxQbT4w+dpSRWY7skX4raD9RZ5CXPBzJr6SD1Hm8omqgvBIjCpExL4pRZcvYAPQ==
+"@polymeshassociation/confidential-polymesh-sdk@^1.0.0-alpha.5":
+  version "1.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/confidential-polymesh-sdk/-/confidential-polymesh-sdk-1.0.0-alpha.5.tgz#4b9df0b8c44e422e26fff003d432943ca4d82442"
+  integrity sha512-SZXfidBHW5Kw6yhqVsbkAk1pwIJG7eXPxI4b1X0TwzP/akHGAq0I9YxLD8S9CFjpmRHBHqOTBz21y0oXWh58PA==
   dependencies:
     "@apollo/client" "^3.8.1"
     "@polkadot/api" "10.9.1"
