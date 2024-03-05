@@ -2,6 +2,7 @@ import { DeepMocked } from '@golevelup/ts-jest';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { EventIdEnum } from '@polymeshassociation/polymesh-sdk/types';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -89,6 +90,44 @@ describe('ConfidentialAssetsMiddlewareController', () => {
           results: expect.arrayContaining([{ id: 'SOME_ASSET_ID_2' }, { id: 'SOME_ASSET_ID_2' }]),
           total: new BigNumber(mockAssets.count),
           next: mockAssets.next,
+        })
+      );
+    });
+  });
+
+  describe('getTransactionHistory', () => {
+    it('should return the transaction history', async () => {
+      const mockResult = {
+        data: [
+          {
+            id: 'someId',
+            assetId: '0x0a732f0ea43bb082ff1cff9a9ff59291',
+            fromId: 'mockFrom',
+            toId: '0x786a5b0ffef119dd43565768a3557e7880be8958c7eda070e4162b27f308b23e',
+            amount:
+              '0x000000000000000000000000000000000000000000000000000000000000000064aff78e09b0fa5dccd82b594cd49d431d0fbf8ddd6830e65a0cdcd428d67428',
+            datetime: new Date('2024-02-20T13:15:54'),
+            createdBlockId: new BigNumber(277),
+            eventId: EventIdEnum.AccountDeposit,
+            memo: 'someMemo',
+          },
+        ],
+        next: 'abc',
+        count: new BigNumber(1),
+      };
+
+      mockConfidentialAssetsService.transactionHistory.mockResolvedValue(mockResult);
+
+      const result = await controller.getTransactionHistory(
+        { confidentialAssetId: 'SOME_ASSET_ID' },
+        { size: new BigNumber(10) }
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          results: mockResult.data,
+          next: mockResult.next,
+          total: mockResult.count,
         })
       );
     });

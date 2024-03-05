@@ -1,7 +1,11 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ConfidentialVenueFilteringDetails, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ConfidentialVenueFilteringDetails,
+  EventIdEnum,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { ConfidentialAccountsService } from '~/confidential-accounts/confidential-accounts.service';
@@ -379,6 +383,37 @@ describe('ConfidentialAssetsService', () => {
       jest.spyOn(service, 'findOne').mockResolvedValue(asset);
 
       const result = await service.createdAt('SOME_ASSET_ID');
+
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('transactionHistory', () => {
+    it('should return creation event details for a Confidential Account', async () => {
+      const mockResult = {
+        data: [
+          {
+            id: '',
+            assetId: 'someId',
+            amount: '10',
+            eventId: EventIdEnum.TransactionExecuted,
+            datetime: new Date(),
+            createdBlockId: new BigNumber(3),
+            blockNumber: new BigNumber('2719172'),
+            blockHash: 'someHash',
+            blockDate: new Date('2023-06-26T01:47:45.000Z'),
+            eventIndex: new BigNumber(1),
+          },
+        ],
+        next: '',
+      };
+      const asset = createMockConfidentialAsset();
+
+      asset.getTransactionHistory.mockResolvedValue(mockResult);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(asset);
+
+      const result = await service.transactionHistory('SOME_ASSET_ID', new BigNumber(10));
 
       expect(result).toEqual(mockResult);
     });

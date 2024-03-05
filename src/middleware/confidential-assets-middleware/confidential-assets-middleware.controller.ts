@@ -4,6 +4,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
@@ -17,6 +18,7 @@ import { ConfidentialAccountParamsDto } from '~/confidential-accounts/dto/confid
 import { ConfidentialAssetsService } from '~/confidential-assets/confidential-assets.service';
 import { ConfidentialAssetIdParamsDto } from '~/confidential-assets/dto/confidential-asset-id-params.dto';
 import { ConfidentialAssetModel } from '~/confidential-assets/models/confidential-asset.model';
+import { ConfidentialAssetTransactionModel } from '~/confidential-assets/models/confidential-asset-transaction.model';
 
 @Controller()
 export class ConfidentialAssetsMiddlewareController {
@@ -88,6 +90,51 @@ export class ConfidentialAssetsMiddlewareController {
 
     return new PaginatedResultsModel({
       results: data.map(({ id }) => new ConfidentialAssetModel({ id })),
+      total: count,
+      next,
+    });
+  }
+
+  @ApiTags('confidential-assets')
+  @ApiOperation({
+    summary: 'Get transaction history of a Confidential Asset',
+    description: 'This endpoint provides a list of transactions involving a Confidential Asset',
+  })
+  @ApiParam({
+    name: 'confidentialAssetId',
+    description: 'The ID of the Confidential Asset',
+    type: 'string',
+    example: '76702175-d8cb-e3a5-5a19-734433351e25',
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of transactions to be fetched',
+    type: 'string',
+    required: false,
+    example: '10',
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start key from which transactions are to be fetched',
+    type: 'string',
+    required: false,
+  })
+  @ApiNotFoundResponse({
+    description: 'The confidential asset was not found',
+  })
+  @Get('confidential-assets/:confidentialAssetId/transactions')
+  async getTransactionHistory(
+    @Param() { confidentialAssetId }: ConfidentialAssetIdParamsDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<ConfidentialAssetTransactionModel>> {
+    const { data, count, next } = await this.confidentialAssetsService.transactionHistory(
+      confidentialAssetId,
+      size,
+      new BigNumber(start || 0)
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(txHistory => new ConfidentialAssetTransactionModel(txHistory)),
       total: count,
       next,
     });

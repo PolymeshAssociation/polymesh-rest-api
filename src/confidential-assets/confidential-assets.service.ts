@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ConfidentialAsset,
+  ConfidentialAssetTransactionHistory,
   ConfidentialVenueFilteringDetails,
   EventIdentifier,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -148,5 +150,15 @@ export class ConfidentialAssetsService {
     const asset = await this.findOne(assetId);
 
     return asset.createdAt();
+  }
+
+  public async transactionHistory(
+    assetId: string,
+    size: BigNumber,
+    start?: BigNumber
+  ): Promise<ResultSet<ConfidentialAssetTransactionHistory>> {
+    const asset = await this.findOne(assetId);
+
+    return asset.getTransactionHistory({ size, start });
   }
 }
