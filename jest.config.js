@@ -6,6 +6,8 @@ module.exports = {
   testPathIgnorePatterns: ['<rootDir>/dist/*'],
   moduleNameMapper: {
     '~/(.*)': '<rootDir>/src/$1',
+    '@polymeshassociation/polymesh-sdk(.*)':
+      '<rootDir>/node_modules/@polymeshassociation/confidential-polymesh-sdk$1',
   },
   testRegex: '.*\\.spec\\.ts$',
   coverageDirectory: './coverage',
