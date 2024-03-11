@@ -141,6 +141,7 @@ export class MockIdentitiesService {
   addSecondaryAccount = jest.fn();
   createMockCdd = jest.fn();
   registerDid = jest.fn();
+  rotatePrimaryKey = jest.fn();
 }
 
 export class MockSettlementsService {

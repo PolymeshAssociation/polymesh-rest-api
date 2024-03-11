@@ -207,4 +207,29 @@ describe('IdentitiesService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalled();
     });
   });
+
+  describe('rotatePrimaryKey', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.AddAuthorization,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const body = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      const result = await service.rotatePrimaryKey(body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalled();
+    });
+  });
 });

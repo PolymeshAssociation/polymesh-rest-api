@@ -51,6 +51,7 @@ import { DeveloperTestingService } from '~/developer-testing/developer-testing.s
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
+import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { CreatedIdentityModel } from '~/identities/models/created-identity.model';
@@ -621,5 +622,27 @@ export class IdentitiesController {
     const result = await this.settlementsService.findGroupedInstructionsByDid(did);
 
     return new GroupedInstructionModel(result);
+  }
+
+  @ApiOperation({
+    summary: 'Rotate Primary Key',
+    description:
+      'Creates an Authorization to rotate primary key of the signing Identity by the `targetAccount`.',
+  })
+  @ApiTransactionResponse({
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The target Account already has a pending invitation to become the primary key of the given Identity',
+  })
+  @Post('rotate-primary-key')
+  async rotatePrimaryKey(
+    @Body() rotatePrimaryKeyDto: RotatePrimaryKeyParamsDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.identitiesService.rotatePrimaryKey(rotatePrimaryKeyDto);
+
+    return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
 }

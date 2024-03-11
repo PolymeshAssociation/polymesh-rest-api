@@ -657,4 +657,26 @@ describe('IdentitiesController', () => {
       });
     });
   });
+
+  describe('rotatePrimaryKey', () => {
+    it('should return the transaction details on rotating primary key for signing Identity', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      const mockData = {
+        ...txResult,
+        result: mockAuthorization,
+      };
+      mockIdentitiesService.rotatePrimaryKey.mockResolvedValue(mockData);
+
+      const result = await controller.rotatePrimaryKey({
+        signer: 'Ox60',
+        targetAccount: '5xdd',
+      });
+
+      expect(result).toEqual({
+        ...txResult,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+      });
+    });
+  });
 });
