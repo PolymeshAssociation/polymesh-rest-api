@@ -114,4 +114,28 @@ export class IdentitiesService {
 
     return this.transactionsService.submit(rotatePrimaryKey, args, options);
   }
+
+  public async attestPrimaryKeyRotation(
+    did: string,
+    rotatePrimaryKeyDto: RotatePrimaryKeyParamsDto
+  ): ServiceReturn<AuthorizationRequest> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+
+    const identity = await this.findOne(did);
+
+    const {
+      options,
+      args: { targetAccount, expiry },
+    } = extractTxOptions(rotatePrimaryKeyDto);
+
+    const { attestPrimaryKeyRotation } = polymeshApi.identities;
+
+    return this.transactionsService.submit(
+      attestPrimaryKeyRotation,
+      { identity, targetAccount, expiry },
+      options
+    );
+  }
 }

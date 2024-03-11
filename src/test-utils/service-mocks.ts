@@ -142,6 +142,7 @@ export class MockIdentitiesService {
   createMockCdd = jest.fn();
   registerDid = jest.fn();
   rotatePrimaryKey = jest.fn();
+  attestPrimaryKeyRotation = jest.fn();
 }
 
 export class MockSettlementsService {

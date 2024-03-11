@@ -14,7 +14,12 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { testValues } from '~/test-utils/consts';
-import { MockIdentity, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockTxResult,
+  MockIdentity,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
@@ -210,14 +215,9 @@ describe('IdentitiesService', () => {
 
   describe('rotatePrimaryKey', () => {
     it('should return the transaction details', async () => {
-      const transaction = {
-        blockHash: '0x1',
-        txHash: '0x2',
-        blockNumber: new BigNumber(1),
-        tag: TxTags.identity.AddAuthorization,
-      };
-      const mockTransaction = new MockTransaction(transaction);
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      const txResult = createMockTxResult(TxTags.identity.AddAuthorization);
+
+      mockTransactionsService.submit.mockResolvedValue(txResult);
 
       const body = {
         signer,
@@ -225,10 +225,30 @@ describe('IdentitiesService', () => {
       };
 
       const result = await service.rotatePrimaryKey(body);
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [mockTransaction],
-      });
+      expect(result).toEqual(txResult);
+      expect(mockTransactionsService.submit).toHaveBeenCalled();
+    });
+  });
+
+  describe('attestPrimaryKeyRotation', () => {
+    it('should return the transaction details', async () => {
+      const txResult = createMockTxResult(TxTags.identity.AddAuthorization);
+
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const mockIdentity = new MockIdentity();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockIdentity as any);
+
+      const body = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      const result = await service.attestPrimaryKeyRotation(mockIdentity.did, body);
+      expect(result).toEqual(txResult);
       expect(mockTransactionsService.submit).toHaveBeenCalled();
     });
   });

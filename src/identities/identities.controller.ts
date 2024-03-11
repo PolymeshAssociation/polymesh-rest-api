@@ -627,7 +627,8 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Rotate Primary Key',
     description:
-      'Creates an Authorization to rotate primary key of the signing Identity by the `targetAccount`.',
+      'Creates an Authorization to rotate primary key of the signing Identity by the `targetAccount`. <br />' +
+      'The existing key for the signing Identity will be unlinked once the new primary key is attested.',
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
@@ -642,6 +643,40 @@ export class IdentitiesController {
     @Body() rotatePrimaryKeyDto: RotatePrimaryKeyParamsDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.identitiesService.rotatePrimaryKey(rotatePrimaryKeyDto);
+
+    return handleServiceResult(serviceResult, authorizationRequestResolver);
+  }
+
+  @ApiOperation({
+    summary: 'Attest Primary Key Rotation',
+    description:
+      'The transaction signer must be a CDD provider. <br />' +
+      'This will create Authorization Request to accept the `targetAccount` to become as the primary key of the given Identity.',
+  })
+  @ApiTransactionResponse({
+    description: 'Newly created Authorization Request along with transaction details',
+    type: CreatedAuthorizationRequestModel,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The target Account already has a pending attestation to become the primary key of the target Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which to attest primary key rotation',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @Post(':did/rotate-primary-key')
+  async attestPrimaryKeyRotation(
+    @Param() { did }: DidDto,
+    @Body() rotatePrimaryKeyDto: RotatePrimaryKeyParamsDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.identitiesService.attestPrimaryKeyRotation(
+      did,
+      rotatePrimaryKeyDto
+    );
 
     return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
