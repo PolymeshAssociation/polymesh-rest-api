@@ -657,4 +657,55 @@ describe('IdentitiesController', () => {
       });
     });
   });
+
+  describe('rotatePrimaryKey', () => {
+    it('should return the transaction details on rotating primary key for signing Identity', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      const mockData = {
+        ...txResult,
+        result: mockAuthorization,
+      };
+      mockIdentitiesService.rotatePrimaryKey.mockResolvedValue(mockData);
+
+      const result = await controller.rotatePrimaryKey({
+        signer: 'Ox60',
+        targetAccount: '5xdd',
+      });
+
+      expect(result).toEqual({
+        ...txResult,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+      });
+    });
+  });
+
+  describe('attestPrimaryKeyRotation', () => {
+    it('should return the transaction details on attesting primary key rotation for DID', async () => {
+      const mockAuthorization = new MockAuthorizationRequest();
+      const mockData = {
+        ...txResult,
+        result: mockAuthorization,
+      };
+      mockIdentitiesService.attestPrimaryKeyRotation.mockResolvedValue(mockData);
+
+      const mockIdentity = new MockIdentity();
+      mockIdentity.did = did;
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+
+      const result = await controller.attestPrimaryKeyRotation(
+        { did },
+        {
+          signer: 'Ox60',
+          targetAccount: '5xdd',
+        }
+      );
+
+      expect(result).toEqual({
+        ...txResult,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+      });
+    });
+  });
 });
