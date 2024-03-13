@@ -7,7 +7,6 @@ import { SettlementResultEnum } from '@polymeshassociation/polymesh-sdk/middlewa
 import {
   Account,
   AuthorizationType,
-  ComplianceManagerTx,
   HistoricSettlement,
   MetadataEntry,
   MetadataType,
@@ -481,7 +480,7 @@ export function createMockResultSet<T extends any[]>(data: T): ResultSet<T> {
 }
 
 export function createMockTxResult(
-  transactionTag: ComplianceManagerTx
+  transactionTag: TxTag
 ): TransactionResult<void> | ServiceReturn<void> | NotificationPayload<EventType> {
   const transaction = {
     blockHash: '0x1',

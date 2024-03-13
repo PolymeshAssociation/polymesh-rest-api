@@ -170,3 +170,13 @@ export function isNftLeg(leg: Leg): leg is NftLeg {
 export async function clearEventLoop(): Promise<void> {
   await new Promise(resolve => setImmediate(resolve));
 }
+
+/**
+ * helper to get current date plus one year in ISO format
+ */
+export function getNextYearISO(): string {
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+
+  return nextYear.toISOString();
+}
