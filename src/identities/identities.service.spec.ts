@@ -14,7 +14,12 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { testValues } from '~/test-utils/consts';
-import { MockIdentity, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import {
+  createMockTxResult,
+  MockIdentity,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
@@ -204,6 +209,46 @@ describe('IdentitiesService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
+      expect(mockTransactionsService.submit).toHaveBeenCalled();
+    });
+  });
+
+  describe('rotatePrimaryKey', () => {
+    it('should return the transaction details', async () => {
+      const txResult = createMockTxResult(TxTags.identity.AddAuthorization);
+
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const body = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      const result = await service.rotatePrimaryKey(body);
+      expect(result).toEqual(txResult);
+      expect(mockTransactionsService.submit).toHaveBeenCalled();
+    });
+  });
+
+  describe('attestPrimaryKeyRotation', () => {
+    it('should return the transaction details', async () => {
+      const txResult = createMockTxResult(TxTags.identity.AddAuthorization);
+
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const mockIdentity = new MockIdentity();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockIdentity as any);
+
+      const body = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      const result = await service.attestPrimaryKeyRotation(mockIdentity.did, body);
+      expect(result).toEqual(txResult);
       expect(mockTransactionsService.submit).toHaveBeenCalled();
     });
   });

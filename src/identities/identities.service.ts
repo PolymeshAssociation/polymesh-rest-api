@@ -12,6 +12,7 @@ import {
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
+import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -98,5 +99,43 @@ export class IdentitiesService {
     const { registerIdentity } = polymeshApi.identities;
 
     return this.transactionsService.submit(registerIdentity, params, options);
+  }
+
+  public async rotatePrimaryKey(
+    rotatePrimaryKeyDto: RotatePrimaryKeyParamsDto
+  ): ServiceReturn<AuthorizationRequest> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+
+    const { options, args } = extractTxOptions(rotatePrimaryKeyDto);
+
+    const { rotatePrimaryKey } = polymeshApi.identities;
+
+    return this.transactionsService.submit(rotatePrimaryKey, args, options);
+  }
+
+  public async attestPrimaryKeyRotation(
+    did: string,
+    rotatePrimaryKeyDto: RotatePrimaryKeyParamsDto
+  ): ServiceReturn<AuthorizationRequest> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+
+    const identity = await this.findOne(did);
+
+    const {
+      options,
+      args: { targetAccount, expiry },
+    } = extractTxOptions(rotatePrimaryKeyDto);
+
+    const { attestPrimaryKeyRotation } = polymeshApi.identities;
+
+    return this.transactionsService.submit(
+      attestPrimaryKeyRotation,
+      { identity, targetAccount, expiry },
+      options
+    );
   }
 }
