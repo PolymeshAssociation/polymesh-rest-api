@@ -45,6 +45,9 @@ Documentation for REPL mode can be found [here](https://docs.nestjs.com/recipes/
 
 ## Test
 
+Before running the tests, make sure to open a new terminal tab or window without sourcing .env file.
+This is because the test runners pick up local environment variables if they are set for the node.
+
 ```bash
 # unit tests
 $ yarn test
