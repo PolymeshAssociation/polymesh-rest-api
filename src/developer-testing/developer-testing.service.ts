@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SubmittableExtrinsic } from '@polkadot/api-base/types';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { ISubmittableResult } from '@polkadot/types/types';
 import { Account, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -32,7 +30,7 @@ export class DeveloperTestingService {
    * @note relies on having a sudo account configured
    */
   public async createTestAdmins({ accounts }: CreateTestAdminsDto): Promise<Identity[]> {
-    const identities = await this.batchSudoInitIdentities(accounts);
+    const identities = await this.createTestAccounts({ accounts });
 
     await this.createCddProvidersBatch(identities);
 
@@ -106,44 +104,6 @@ export class DeveloperTestingService {
     const batchTx = utility.batchAtomic(cddCalls);
 
     await this.polymeshService.execTransaction(sudoPair, sudo.sudo, batchTx);
-  }
-
-  /**
-   * @note relies on having a sudo account configured
-   */
-  private async batchSudoInitIdentities(accounts: CreateMockIdentityDto[]): Promise<Identity[]> {
-    const {
-      polymeshService: {
-        polymeshApi: {
-          _polkadotApi: {
-            tx: { testUtils, utility, balances, sudo },
-          },
-        },
-      },
-      sudoPair,
-    } = this;
-
-    const cddCalls: SubmittableExtrinsic<'promise', ISubmittableResult>[] = [];
-    const balanceCalls: SubmittableExtrinsic<'promise', ISubmittableResult>[] = [];
-
-    accounts.forEach(({ address, initialPolyx }) => {
-      cddCalls.push(testUtils.mockCddRegisterDid(address));
-      if (initialPolyx.gt(0)) {
-        const polyx = initialPolyx.toNumber() * unitsPerPolyx;
-        balanceCalls.push(balances.setBalance(address, polyx, 0));
-      }
-    });
-
-    const balanceTx = sudo.sudo(utility.batchAtomic(balanceCalls));
-
-    await this.polymeshService.execTransaction(sudoPair, utility.batchAtomic, [
-      ...cddCalls,
-      balanceTx,
-    ]);
-
-    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
-
-    return this.fetchAccountsIdentities(madeAccounts);
   }
 
   private get sudoPair(): KeyringPair {
