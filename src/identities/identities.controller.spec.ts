@@ -32,6 +32,7 @@ import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { testValues } from '~/test-utils/consts';
 import {
+  MockAsset,
   MockAuthorizationRequest,
   MockIdentity,
   MockTickerReservation,
@@ -705,6 +706,51 @@ describe('IdentitiesController', () => {
         ...txResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
+      });
+    });
+  });
+
+  describe('getIsPreApprove', () => {
+    it('should return the asset pre-approval status', async () => {
+      mockIdentitiesService.isTickerPreApproved.mockResolvedValue(true);
+
+      const result = await controller.getIsTickerPreApproved({ did }, { ticker });
+
+      expect(result).toEqual({ ticker, did, isPreApproved: true });
+    });
+  });
+
+  describe('getPreApprovedAssets', () => {
+    const paginatedResult = {
+      data: [new MockAsset()],
+      next: null,
+      count: new BigNumber(1),
+    };
+    it('should return pre-approved assets without start value', async () => {
+      mockIdentitiesService.getPreApprovedAssets.mockResolvedValue(
+        paginatedResult as ResultSet<MockAsset>
+      );
+
+      const result = await controller.getPreApprovedAssets({ did }, { size: new BigNumber(10) });
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: [expect.objectContaining({ ticker, did, isPreApproved: true })],
+      });
+    });
+
+    it('should give pre-approved assets with start value', async () => {
+      mockIdentitiesService.getPreApprovedAssets.mockResolvedValue(
+        paginatedResult as ResultSet<MockAsset>
+      );
+      const result = await controller.getPreApprovedAssets(
+        { did },
+        { size: new BigNumber(10), start: new BigNumber(1) }
+      );
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: [expect.objectContaining({ ticker, did, isPreApproved: true })],
       });
     });
   });

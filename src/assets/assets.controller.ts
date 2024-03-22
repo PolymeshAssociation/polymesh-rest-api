@@ -513,4 +513,64 @@ export class AssetsController {
     const result = await this.assetsService.removeRequiredMediators(ticker, params);
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Pre-approve receiving an asset',
+    description: 'This endpoint enables automatic affirmation when receiving the asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to pre-approve',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiBadRequestResponse({
+    description: 'The signing identity has already pre-approved the asset',
+  })
+  @Post(':ticker/pre-approve')
+  public async preApprove(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.preApprove(ticker, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Remove pre-approve receiving an asset',
+    description: 'This endpoint disables automatic affirmation when receiving the asset',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset to remove pre-approval for',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiBadRequestResponse({
+    description: 'The asset is not pre-approved for the signing identity',
+  })
+  @Post(':ticker/remove-pre-approval')
+  public async removePreApproval(
+    @Param() { ticker }: TickerParamsDto,
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.removePreApproval(ticker, params);
+
+    return handleServiceResult(result);
+  }
 }

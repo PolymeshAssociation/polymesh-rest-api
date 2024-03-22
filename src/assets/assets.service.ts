@@ -195,4 +195,24 @@ export class AssetsService {
 
     return this.transactionsService.submit(removeRequiredMediators, { mediators }, options);
   }
+
+  public async preApprove(ticker: string, params: TransactionBaseDto): ServiceReturn<void> {
+    const { options } = extractTxOptions(params);
+
+    const {
+      settlements: { preApprove },
+    } = await this.findOne(ticker);
+
+    return this.transactionsService.submit(preApprove, {}, options);
+  }
+
+  public async removePreApproval(ticker: string, params: TransactionBaseDto): ServiceReturn<void> {
+    const { options } = extractTxOptions(params);
+
+    const {
+      settlements: { removePreApproval },
+    } = await this.findOne(ticker);
+
+    return this.transactionsService.submit(removePreApproval, {}, options);
+  }
 }

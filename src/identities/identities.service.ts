@@ -5,6 +5,7 @@ import {
   AuthorizationRequest,
   FungibleAsset,
   Identity,
+  NftCollection,
   RegisterIdentityParams,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -137,5 +138,21 @@ export class IdentitiesService {
       { identity, targetAccount, expiry },
       options
     );
+  }
+
+  public async getPreApprovedAssets(
+    did: string,
+    size: BigNumber,
+    start?: string
+  ): Promise<ResultSet<FungibleAsset | NftCollection>> {
+    const identity = await this.findOne(did);
+
+    return identity.preApprovedAssets({ size, start });
+  }
+
+  public async isTickerPreApproved(did: string, ticker: string): Promise<boolean> {
+    const identity = await this.findOne(did);
+
+    return identity.isAssetPreApproved(ticker);
   }
 }

@@ -636,4 +636,72 @@ describe('AssetsService', () => {
       );
     });
   });
+
+  describe('preApprove', () => {
+    it('should run a preApproveTicker procedure and return the transaction results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.PreApproveTicker,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockAsset = new MockAsset();
+      mockAsset.settlements.preApprove.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset as any);
+
+      const result = await service.preApprove('TICKER', {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.settlements.preApprove,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('removePreApproval', () => {
+    it('should run a removePreApproval procedure and return the transaction results', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.RemoveTickerPreApproval,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      const mockAsset = new MockAsset();
+      mockAsset.settlements.removePreApproval.mockResolvedValue(mockTransaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset as any);
+
+      const result = await service.removePreApproval('TICKER', {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.settlements.removePreApproval,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
 });
