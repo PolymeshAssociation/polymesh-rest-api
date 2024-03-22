@@ -190,6 +190,8 @@ export class MockAsset {
 
   public settlements = {
     canTransfer: jest.fn(),
+    preApprove: jest.fn(),
+    removePreApproval: jest.fn(),
   };
 
   public compliance = {
@@ -295,6 +297,8 @@ export class MockIdentity {
   public getSecondaryAccounts = jest.fn();
   public getTrustingAssets = jest.fn();
   public getHeldAssets = jest.fn();
+  public preApprovedAssets = jest.fn();
+  public isAssetPreApproved = jest.fn();
 }
 
 export class MockPortfolio {
