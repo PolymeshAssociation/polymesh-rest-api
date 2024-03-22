@@ -21,6 +21,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import {
   authorizationRequestResolver,
@@ -57,6 +58,7 @@ import { createIdentityModel } from '~/identities/identities.util';
 import { CreatedIdentityModel } from '~/identities/models/created-identity.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { createIdentityResolver } from '~/identities/models/identity.util';
+import { PreApprovedModel } from '~/identities/models/pre-approved.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { GroupedInstructionModel } from '~/settlements/models/grouped-instructions.model';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -664,6 +666,11 @@ export class IdentitiesController {
   @ApiParam({
     name: 'did',
     description: 'The DID of the Identity for which to attest primary key rotation',
+  })
+  @Get(':did/is-pre-approved')
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which fetch pre-approved assets for',
     type: 'string',
     required: true,
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
@@ -679,5 +686,60 @@ export class IdentitiesController {
     );
 
     return handleServiceResult(serviceResult, authorizationRequestResolver);
+  }
+
+  @ApiOkResponse({
+    description: 'Returns pre-approval status for the asset',
+    type: PreApprovedModel,
+  })
+  public async getIsTickerPreApproved(
+    @Param() { did }: DidDto,
+    @Query() { ticker }: TickerParamsDto
+  ): Promise<PreApprovedModel> {
+    const isPreApproved = await this.identitiesService.isTickerPreApproved(did, ticker);
+
+    return new PreApprovedModel({ ticker, did, isPreApproved });
+  }
+
+  @Get(':did/pre-approved-assets')
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which fetch pre-approved assets for',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiQuery({
+    name: 'size',
+    description: 'The number of pre-approved tickers to be fetched',
+    type: 'string',
+    required: false,
+    example: '10',
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start key from which pre-approved tickers are to be fetched',
+    type: 'string',
+    required: false,
+  })
+  @ApiOkResponse({
+    description: 'Returns grouped Instructions for the Identity',
+    type: PaginatedResultsModel<PreApprovedModel>,
+  })
+  public async getPreApprovedAssets(
+    @Param() { did }: DidDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<PreApprovedModel>> {
+    const { data, count, next } = await this.identitiesService.getPreApprovedAssets(
+      did,
+      size,
+      start?.toString()
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(({ ticker }) => new PreApprovedModel({ ticker, did, isPreApproved: true })),
+      total: count,
+      next,
+    });
   }
 }

@@ -415,4 +415,34 @@ describe('AssetsController', () => {
       });
     });
   });
+
+  describe('preApprove', () => {
+    it('should call the service and return the results', async () => {
+      const ticker = 'TICKER';
+
+      mockAssetsService.preApprove.mockResolvedValue(txResult);
+
+      const result = await controller.preApprove({ ticker }, { signer });
+
+      expect(result).toEqual(txResult);
+      expect(mockAssetsService.preApprove).toHaveBeenCalledWith(ticker, {
+        signer,
+      });
+    });
+  });
+
+  describe('removePreApproval', () => {
+    it('should call the service and return the results', async () => {
+      const ticker = 'TICKER';
+
+      mockAssetsService.removePreApproval.mockResolvedValue(txResult);
+
+      const result = await controller.removePreApproval({ ticker }, { signer });
+
+      expect(result).toEqual(txResult);
+      expect(mockAssetsService.removePreApproval).toHaveBeenCalledWith(ticker, {
+        signer,
+      });
+    });
+  });
 });

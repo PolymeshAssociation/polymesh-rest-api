@@ -41,6 +41,8 @@ export class MockAssetService {
   getRequiredMediators = jest.fn();
   addRequiredMediators = jest.fn();
   removeRequiredMediators = jest.fn();
+  preApprove = jest.fn();
+  removePreApproval = jest.fn();
 }
 
 export class MockTransactionsService {
@@ -143,6 +145,8 @@ export class MockIdentitiesService {
   registerDid = jest.fn();
   rotatePrimaryKey = jest.fn();
   attestPrimaryKeyRotation = jest.fn();
+  isTickerPreApproved = jest.fn();
+  getPreApprovedAssets = jest.fn();
 }
 
 export class MockSettlementsService {

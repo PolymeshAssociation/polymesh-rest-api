@@ -252,4 +252,42 @@ describe('IdentitiesService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalled();
     });
   });
+
+  describe('isTickerPreApproved', () => {
+    it('should return if the asset is pre-approved', async () => {
+      const mockIdentity = new MockIdentity();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockIdentity as any);
+      mockIdentity.isAssetPreApproved.mockResolvedValue(true);
+
+      const result = await service.isTickerPreApproved('0x01', 'TICKER');
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe('getPreApprovedAssets', () => {
+    it('should return the pre-approved assets', async () => {
+      const mockAssets = {
+        data: [
+          {
+            ticker: 'TICKER',
+          },
+          {
+            ticker: 'TICKER2',
+          },
+        ],
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+      const mockIdentity = new MockIdentity();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockIdentity as any);
+      mockIdentity.preApprovedAssets.mockResolvedValue(mockAssets);
+
+      const result = await service.getPreApprovedAssets('0x01', new BigNumber(2));
+      expect(result).toEqual(mockAssets);
+    });
+  });
 });
