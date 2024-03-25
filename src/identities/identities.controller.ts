@@ -667,14 +667,6 @@ export class IdentitiesController {
     name: 'did',
     description: 'The DID of the Identity for which to attest primary key rotation',
   })
-  @Get(':did/is-pre-approved')
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Identity for which fetch pre-approved assets for',
-    type: 'string',
-    required: true,
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
   @Post(':did/rotate-primary-key')
   async attestPrimaryKeyRotation(
     @Param() { did }: DidDto,
@@ -688,10 +680,18 @@ export class IdentitiesController {
     return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
 
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which fetch pre-approved assets for',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
   @ApiOkResponse({
     description: 'Returns pre-approval status for the asset',
     type: PreApprovedModel,
   })
+  @Get(':did/is-pre-approved')
   public async getIsTickerPreApproved(
     @Param() { did }: DidDto,
     @Query() { ticker }: TickerParamsDto
