@@ -7,6 +7,7 @@ import { extrinsicWithFees } from '~/test-utils/consts';
 import { mockNetworkServiceProvider } from '~/test-utils/service-mocks';
 import { TransactionDto } from '~/transactions/dto/transaction.dto';
 import { ExtrinsicDetailsModel } from '~/transactions/models/extrinsic-details.model';
+import { SubmitResultModel } from '~/transactions/models/submit-result.model';
 import { TransactionsController } from '~/transactions/transactions.controller';
 
 describe('TransactionsController', () => {
@@ -57,7 +58,7 @@ describe('TransactionsController', () => {
         rawPayload: {},
       } as unknown as TransactionDto;
 
-      const txResult = 'fakeResult';
+      const txResult = 'fakeResult' as unknown as SubmitResultModel;
 
       mockNetworkService.submitTransaction.mockResolvedValue(txResult);
 

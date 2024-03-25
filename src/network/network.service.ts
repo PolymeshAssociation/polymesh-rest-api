@@ -6,6 +6,7 @@ import { Account, ExtrinsicDataWithFees } from '@polymeshassociation/polymesh-sd
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionDto } from '~/transactions/dto/transaction.dto';
+import { SubmitResultModel } from '~/transactions/models/submit-result.model';
 
 @Injectable()
 export class NetworkService {
@@ -29,9 +30,14 @@ export class NetworkService {
     });
   }
 
-  public submitTransaction(transaction: TransactionDto): Promise<unknown> {
+  public async submitTransaction(transaction: TransactionDto): Promise<SubmitResultModel> {
     const { signature, ...txPayload } = transaction;
 
-    return this.polymeshService.polymeshApi.network.submitTransaction(txPayload, signature);
+    const result = await this.polymeshService.polymeshApi.network.submitTransaction(
+      txPayload,
+      signature
+    );
+
+    return new SubmitResultModel(result);
   }
 }

@@ -6,6 +6,7 @@ import { NetworkService } from '~/network/network.service';
 import { TransactionDto } from '~/transactions/dto/transaction.dto';
 import { TransactionHashParamsDto } from '~/transactions/dto/transaction-hash-params.dto';
 import { ExtrinsicDetailsModel } from '~/transactions/models/extrinsic-details.model';
+import { SubmitResultModel } from '~/transactions/models/submit-result.model';
 
 @ApiTags('transactions')
 @Controller('transactions')
@@ -44,11 +45,17 @@ export class TransactionsController {
     return new ExtrinsicDetailsModel(result);
   }
 
-  @Post('/submit')
+  @ApiOperation({
+    summary: 'Submit an offline transaction with its signature',
+    description:
+      'This endpoint allows for a transaction that has been signed offline to be submitted with its signature. For example when the transaction was made from using the option `processMode: "offline"`, this endpoint will attach the signature and forward it to the chain',
+  })
   @ApiOkResponse({
     description: 'Information about the block the transaction was included in',
+    type: SubmitResultModel,
   })
-  public async submitTransaction(@Body() transaction: TransactionDto): Promise<unknown> {
-    return await this.networkService.submitTransaction(transaction);
+  @Post('/submit')
+  public async submitTransaction(@Body() transaction: TransactionDto): Promise<SubmitResultModel> {
+    return this.networkService.submitTransaction(transaction);
   }
 }

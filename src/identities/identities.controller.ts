@@ -680,6 +680,10 @@ export class IdentitiesController {
     return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
 
+  @ApiOperation({
+    summary: 'Check if a ticker is pre-approved for an identity',
+    description: 'This endpoint returns wether or not an asset is pre-approved for an identity',
+  })
   @ApiParam({
     name: 'did',
     description: 'The DID of the Identity for which fetch pre-approved assets for',
@@ -701,7 +705,10 @@ export class IdentitiesController {
     return new PreApprovedModel({ ticker, did, isPreApproved });
   }
 
-  @Get(':did/pre-approved-assets')
+  @ApiOperation({
+    summary: 'Returns pre-approved assets for the identity',
+    description: 'This endpoint returns the tickers the identity has pre-approved',
+  })
   @ApiParam({
     name: 'did',
     description: 'The DID of the Identity for which fetch pre-approved assets for',
@@ -723,9 +730,10 @@ export class IdentitiesController {
     required: false,
   })
   @ApiOkResponse({
-    description: 'Returns grouped Instructions for the Identity',
+    description: 'Returns pre-approved assets for the identity',
     type: PaginatedResultsModel<PreApprovedModel>,
   })
+  @Get(':did/pre-approved-assets')
   public async getPreApprovedAssets(
     @Param() { did }: DidDto,
     @Query() { size, start }: PaginatedParamsDto
