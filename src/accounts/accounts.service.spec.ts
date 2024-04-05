@@ -1,6 +1,5 @@
 /* eslint-disable import/first */
 const mockIsPolymeshTransaction = jest.fn();
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ExtrinsicsOrderBy } from '@polymeshassociation/polymesh-sdk/middleware/types';
@@ -14,7 +13,13 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningModule } from '~/signing/signing.module';
 import { extrinsic, testValues } from '~/test-utils/consts';
-import { MockAccount, MockAsset, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
+import {
+  MockAccount,
+  MockAsset,
+  MockIdentity,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
@@ -84,6 +89,22 @@ describe('AccountsService', () => {
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
+    });
+  });
+
+  describe('getIdentity', () => {
+    it('should return the Identity associated with a given address', async () => {
+      const mockAccount = new MockAccount();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAccount as any);
+
+      const mockResult = new MockIdentity();
+      mockAccount.getIdentity.mockResolvedValue(mockResult);
+
+      const result = await service.getIdentity('address');
+      expect(result).toEqual(mockResult);
     });
   });
 

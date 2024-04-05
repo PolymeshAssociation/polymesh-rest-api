@@ -104,6 +104,7 @@ export class MockAccountsService {
   modifyPermissions = jest.fn();
   revokePermissions = jest.fn();
   getTreasuryAccount = jest.fn();
+  getIdentity = jest.fn();
 }
 
 export class MockEventsService {

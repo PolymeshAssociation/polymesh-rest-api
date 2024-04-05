@@ -1,5 +1,5 @@
 import { DeepMocked } from '@golevelup/ts-jest';
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
@@ -17,6 +17,7 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import { AccountModel } from '~/identities/models/account.model';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { extrinsic, testValues } from '~/test-utils/consts';
@@ -24,6 +25,7 @@ import {
   createMockResponseObject,
   createMockSubsidy,
   MockAsset,
+  MockIdentity,
   MockPortfolio,
 } from '~/test-utils/mocks';
 import {
@@ -55,6 +57,27 @@ describe('AccountsController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getIdentity', () => {
+    it('should throw NotFoundException if no Identity is associated with the Account', () => {
+      mockAccountsService.getIdentity.mockResolvedValue(null);
+
+      return expect(() => controller.getIdentity({ account: '5xdd' })).rejects.toBeInstanceOf(
+        NotFoundException
+      );
+    });
+
+    describe('otherwise', () => {
+      it('should return the associated DID for the given account', async () => {
+        const identity = new MockIdentity();
+        mockAccountsService.getIdentity.mockResolvedValue(identity);
+
+        const result = await controller.getIdentity({ account: '5xdd' });
+
+        expect(result).toEqual(new IdentitySignerModel({ did }));
+      });
+    });
   });
 
   describe('getAccountBalance', () => {

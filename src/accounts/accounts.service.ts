@@ -3,6 +3,7 @@ import {
   Account,
   AccountBalance,
   ExtrinsicData,
+  Identity,
   Permissions,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -31,6 +32,11 @@ export class AccountsService {
     return await polymeshApi.accountManagement.getAccount({ address }).catch(error => {
       throw handleSdkError(error);
     });
+  }
+
+  public async getIdentity(address: string): Promise<Identity | null> {
+    const account = await this.findOne(address);
+    return account.getIdentity();
   }
 
   public async getAccountBalance(account: string): Promise<AccountBalance> {

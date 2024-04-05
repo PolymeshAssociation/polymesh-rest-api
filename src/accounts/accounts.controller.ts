@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiNoContentResponse,
@@ -27,6 +37,7 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { AccountModel } from '~/identities/models/account.model';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyModel } from '~/subsidy/models/subsidy.model';
 import { SubsidyService } from '~/subsidy/subsidy.service';
@@ -40,6 +51,33 @@ export class AccountsController {
     private readonly networkService: NetworkService,
     private readonly subsidyService: SubsidyService
   ) {}
+
+  @ApiOperation({
+    summary: 'Get the DID associated with an Account',
+    description: 'This endpoint provides account to identity lookup',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address whose DID is to be fetched',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiOkResponse({
+    description: 'DID of the Identity associated with the given Account',
+    type: IdentitySignerModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'No DID is associated with the given account',
+  })
+  @Get(':account/identity')
+  async getIdentity(@Param() { account }: AccountParamsDto): Promise<IdentitySignerModel> {
+    const identity = await this.accountsService.getIdentity(account);
+
+    if (!identity) {
+      throw new NotFoundException('No DID is associated with the given account');
+    }
+    return new IdentitySignerModel({ did: identity.did });
+  }
 
   @ApiOperation({
     summary: 'Get POLYX balance of an Account',
