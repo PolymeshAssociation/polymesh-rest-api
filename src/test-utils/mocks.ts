@@ -262,12 +262,6 @@ export class MockInstruction {
   public affirmAsMediator = jest.fn();
   public rejectAsMediator = jest.fn();
   public withdrawAsMediator = jest.fn();
-  public toHuman = jest.fn().mockImplementation(() => {
-    return {
-      id: '1',
-      did,
-    };
-  });
 }
 
 export class MockVenue {

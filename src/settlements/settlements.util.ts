@@ -2,7 +2,6 @@ import {
   Instruction,
   InstructionStatus,
   InstructionType,
-  Leg,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
@@ -11,13 +10,18 @@ import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
 
-export function legsToLegModel(legs: Leg[]): LegModel[] {
-  if (!legs.length) {
-    return [];
-  }
+export async function createInstructionModel(instruction: Instruction): Promise<InstructionModel> {
+  const [details, legsResultSet, instructionStatus, mediators] = await Promise.all([
+    instruction.details(),
+    instruction.getLegs(),
+    instruction.getStatus(),
+    instruction.getMediators(),
+  ]);
 
-  return legs
-    .map(leg => {
+  const { status, createdAt, tradeDate, valueDate, venue, type, memo } = details;
+
+  const legs = legsResultSet.data
+    ?.map(leg => {
       const { from: legFrom, to: legTo, asset } = leg;
       const from = createPortfolioIdentifierModel(legFrom);
       const to = createPortfolioIdentifierModel(legTo);
@@ -41,22 +45,10 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
         });
       }
 
+      /* istanbul ignore next */
       return null;
     })
-    .filter(leg => !!leg) as LegModel[];
-}
-
-export async function createInstructionModel(instruction: Instruction): Promise<InstructionModel> {
-  const [details, legsResultSet, instructionStatus, mediators] = await Promise.all([
-    instruction.details(),
-    instruction.getLegs(),
-    instruction.getStatus(),
-    instruction.getMediators(),
-  ]);
-
-  const { status, createdAt, tradeDate, valueDate, venue, type, memo } = details;
-
-  const legs = legsToLegModel(legsResultSet.data);
+    .filter(leg => !!leg) as LegModel[]; // filters out "off chain" legs, in case they were used
 
   let instructionModelParams: ConstructorParameters<typeof InstructionModel>[0] = {
     status,
