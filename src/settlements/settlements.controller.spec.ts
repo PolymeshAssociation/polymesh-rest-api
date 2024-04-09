@@ -10,6 +10,7 @@ import {
   TransferError,
   VenueType,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
@@ -105,9 +106,13 @@ describe('SettlementsController', () => {
 
   describe('createInstruction', () => {
     it('should create an instruction and return the data returned by the service', async () => {
+      const mockInstruction = new MockInstruction();
+
+      when(mockInstruction.getLegs).calledWith().mockResolvedValue({ data: [] });
+
       const mockData = {
         ...txResult,
-        result: 'fakeInstruction',
+        result: mockInstruction,
       };
       mockSettlementsService.createInstruction.mockResolvedValue(mockData);
 
@@ -116,7 +121,8 @@ describe('SettlementsController', () => {
 
       expect(result).toEqual({
         ...txResult,
-        instruction: 'fakeInstruction',
+        instruction: mockInstruction, // in jest the @FromEntity decorator is not applied
+        legs: [],
       });
     });
   });

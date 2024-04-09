@@ -29,7 +29,7 @@ import { InstructionAffirmationModel } from '~/settlements/models/instruction-af
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
 import { VenueDetailsModel } from '~/settlements/models/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { createInstructionModel } from '~/settlements/settlements.util';
+import { createInstructionModel, legsToLegModel } from '~/settlements/settlements.util';
 
 @ApiTags('settlements')
 @Controller()
@@ -81,16 +81,20 @@ export class SettlementsController {
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.settlementsService.createInstruction(id, createInstructionDto);
 
-    const resolver: TransactionResolver<Instruction> = ({
+    const resolver: TransactionResolver<Instruction> = async ({
       result: instruction,
       transactions,
       details,
-    }) =>
-      new CreatedInstructionModel({
+    }) => {
+      const { data: legs } = await instruction.getLegs();
+
+      return new CreatedInstructionModel({
         instruction,
         details,
         transactions,
+        legs: legsToLegModel(legs),
       });
+    };
 
     return handleServiceResult(serviceResult, resolver);
   }
