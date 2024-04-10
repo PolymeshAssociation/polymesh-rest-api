@@ -157,7 +157,7 @@ export class MockPolymesh {
         }),
       },
       utility: {
-        batchAtomic: jest.fn(),
+        batchAll: jest.fn(),
       },
     },
   };

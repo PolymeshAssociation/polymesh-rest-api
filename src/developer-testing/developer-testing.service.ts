@@ -74,7 +74,7 @@ export class DeveloperTestingService {
         balances.transfer(address, initialPolyx.toNumber() * unitsPerPolyx)
       );
 
-    await this.polymeshService.execTransaction(signerAddress, utility.batchAtomic, [
+    await this.polymeshService.execTransaction(signerAddress, utility.batchAll, [
       ...createCddCalls,
       ...initialPolyxCalls,
     ]);
@@ -101,7 +101,7 @@ export class DeveloperTestingService {
       return cddServiceProviders.addMember(did);
     });
 
-    const batchTx = utility.batchAtomic(cddCalls);
+    const batchTx = utility.batchAll(cddCalls);
 
     await this.polymeshService.execTransaction(sudoPair, sudo.sudo, batchTx);
   }
