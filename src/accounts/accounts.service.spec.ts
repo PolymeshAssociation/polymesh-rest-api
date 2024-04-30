@@ -3,7 +3,7 @@ const mockIsPolymeshTransaction = jest.fn();
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ExtrinsicsOrderBy } from '@polymeshassociation/polymesh-sdk/middleware/types';
-import { PermissionType, TxGroup, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { Account, PermissionType, TxGroup, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
@@ -17,6 +17,7 @@ import {
   MockAccount,
   MockAsset,
   MockIdentity,
+  MockMultiSig,
   MockPolymesh,
   MockTransaction,
 } from '~/test-utils/mocks';
@@ -355,6 +356,30 @@ describe('AccountsService', () => {
         { secondaryAccounts: [{ account, permissions }] },
         expect.objectContaining({ signer })
       );
+    });
+  });
+
+  describe('getDetails', () => {
+    it('should return the Account details', async () => {
+      const mockAccount = new MockAccount();
+      const mockIdentity = new MockIdentity();
+      const mockMultiSig = new MockMultiSig();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      findOneSpy.mockResolvedValue(mockAccount as unknown as Account);
+
+      mockMultiSig.details.mockResolvedValue({ signers: [], requiredSignatures: new BigNumber(2) });
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+      mockAccount.getMultiSig.mockResolvedValue(mockMultiSig);
+
+      const result = await service.getDetails('address');
+
+      const fakeResult = {
+        identity: mockIdentity,
+        multiSigDetails: { signers: [], requiredSignatures: new BigNumber(2) },
+      };
+
+      expect(result).toStrictEqual(fakeResult);
     });
   });
 });

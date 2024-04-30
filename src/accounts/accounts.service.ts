@@ -4,6 +4,8 @@ import {
   AccountBalance,
   ExtrinsicData,
   Identity,
+  MultiSig,
+  MultiSigDetails,
   Permissions,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -17,6 +19,11 @@ import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
+
+export type AccountDetails = {
+  identity: Identity | null;
+  multiSigDetails: MultiSigDetails | null;
+};
 
 @Injectable()
 export class AccountsService {
@@ -113,5 +120,26 @@ export class AccountsService {
       },
       options
     );
+  }
+
+  private async getMultiSigDetails(multiSig: MultiSig | null): Promise<MultiSigDetails | null> {
+    if (!multiSig) {
+      return null;
+    }
+
+    return await multiSig.details();
+  }
+
+  public async getDetails(address: string): Promise<AccountDetails> {
+    const account = await this.findOne(address);
+
+    const [identity, multiSig] = await Promise.all([account.getIdentity(), account.getMultiSig()]);
+
+    const multiSigDetails = await this.getMultiSigDetails(multiSig);
+
+    return {
+      identity,
+      multiSigDetails,
+    };
   }
 }

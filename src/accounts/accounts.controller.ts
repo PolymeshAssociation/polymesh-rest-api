@@ -28,6 +28,8 @@ import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
 import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import { AccountDetailsModel } from '~/accounts/models/account-details.model';
+import { MultiSigDetailsModel } from '~/accounts/models/multi-sig-details.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
@@ -36,6 +38,7 @@ import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { createIdentityModel, createSignerModel } from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { NetworkService } from '~/network/network.service';
@@ -300,5 +303,44 @@ export class AccountsController {
     const { address } = this.networkService.getTreasuryAccount();
 
     return new AccountModel({ address });
+  }
+
+  @ApiOperation({
+    summary: 'Get Account details',
+    description:
+      'This endpoint retrieves the Account details for the given Account address. This includes the  associated Identity DID, primary account for that Identity and Secondary Accounts with the Permissions and the Subsidy details',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address whose details is to be fetched',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiOkResponse({
+    description: 'Account details',
+    type: AccountDetailsModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'No Account found for the given address',
+  })
+  @Get(':account')
+  async getAccountDetails(@Param() { account }: AccountParamsDto): Promise<AccountDetailsModel> {
+    const { identity, multiSigDetails } = await this.accountsService.getDetails(account);
+
+    let identityModel;
+    let multiSigDetailsModel;
+
+    if (identity) {
+      identityModel = await createIdentityModel(identity);
+    }
+
+    if (multiSigDetails) {
+      multiSigDetailsModel = new MultiSigDetailsModel({
+        signers: multiSigDetails.signers.map(createSignerModel),
+        requiredSignatures: multiSigDetails.requiredSignatures,
+      });
+    }
+
+    return new AccountDetailsModel({ identity: identityModel, multiSig: multiSigDetailsModel });
   }
 }
