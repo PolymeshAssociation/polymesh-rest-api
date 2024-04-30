@@ -455,10 +455,15 @@ export class MockAccount {
   getPermissions = jest.fn();
   getIdentity = jest.fn();
   getSubsidy = jest.fn();
+  getMultiSig = jest.fn();
 
   constructor(address = 'address') {
     this.address = address;
   }
+}
+
+export class MockMultiSig {
+  details = jest.fn();
 }
 
 export function createMockMetadataEntry(
