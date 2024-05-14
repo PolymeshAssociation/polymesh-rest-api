@@ -27,12 +27,6 @@ module.exports = {
       },
     ],
     [
-      '@semantic-release/git',
-      {
-        assets: ['package.json', 'src/main.ts'],
-      },
-    ],
-    [
       '@semantic-release/github',
       {
         assets: ['CHANGELOG.md', 'polymesh-rest-api-swagger-spec.json'],
