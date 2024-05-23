@@ -10,7 +10,7 @@ export class PayloadDto {
     example: '0x005b8d84',
   })
   @IsHexadecimal()
-  readonly specVersion: string;
+  readonly specVersion: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
@@ -18,7 +18,7 @@ export class PayloadDto {
     example: '0x00000004',
   })
   @IsHexadecimal()
-  readonly transactionVersion: string;
+  readonly transactionVersion: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
@@ -36,7 +36,7 @@ export class PayloadDto {
   })
   @IsHexadecimal()
   @Length(66)
-  readonly blockHash: string;
+  readonly blockHash: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
@@ -45,7 +45,7 @@ export class PayloadDto {
     example: '0x00000000',
   })
   @IsHexadecimal()
-  readonly blockNumber: string;
+  readonly blockNumber: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
@@ -53,7 +53,7 @@ export class PayloadDto {
     example: '0xc501',
   })
   @IsHexadecimal()
-  readonly era: string;
+  readonly era: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
@@ -62,7 +62,7 @@ export class PayloadDto {
   })
   @IsHexadecimal()
   @Length(66)
-  readonly genesisHash: string;
+  readonly genesisHash: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
@@ -78,7 +78,7 @@ export class PayloadDto {
     example: '0x00000007',
   })
   @IsHexadecimal()
-  readonly nonce: string;
+  readonly nonce: `0x${string}`;
 
   @ApiProperty({
     type: 'string',
