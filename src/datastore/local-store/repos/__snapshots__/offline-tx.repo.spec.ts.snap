@@ -13,7 +13,7 @@ exports[`LocalOfflineTxRepo OfflineEvent test suite method: createTx should reco
     "payload": {
       "address": "address",
       "blockHash": "0x01",
-      "blockNumber": "-1",
+      "blockNumber": "0x01",
       "era": "0x01",
       "genesisHash": "0x01",
       "method": "testMethod",

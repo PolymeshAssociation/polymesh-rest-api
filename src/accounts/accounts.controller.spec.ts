@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   ExtrinsicsOrderBy,
+  Identity,
   PermissionType,
   TxGroup,
   TxTags,
@@ -11,12 +12,14 @@ import {
 import { Response } from 'express';
 
 import { AccountsController } from '~/accounts/accounts.controller';
-import { AccountsService } from '~/accounts/accounts.service';
+import { AccountDetails, AccountsService } from '~/accounts/accounts.service';
 import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
+import * as identityUtil from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
+import { IdentityModel } from '~/identities/models/identity.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
@@ -289,6 +292,24 @@ describe('AccountsController', () => {
       const result = controller.getTreasuryAccount();
 
       expect(result).toEqual(new AccountModel({ address: testAccount.address }));
+    });
+  });
+
+  describe('getDetails', () => {
+    it('should call the service and return AccountDetailsModel', async () => {
+      const fakeIdentityModel = 'fakeIdentityModel' as unknown as IdentityModel;
+      jest.spyOn(identityUtil, 'createIdentityModel').mockResolvedValue(fakeIdentityModel);
+
+      const mockResponse: AccountDetails = {
+        identity: new MockIdentity() as unknown as Identity,
+        multiSigDetails: null,
+      };
+
+      mockAccountsService.getDetails.mockReturnValue(mockResponse);
+
+      const result = await controller.getAccountDetails({ account: '5xdd' });
+
+      expect(result).toEqual({ identity: fakeIdentityModel });
     });
   });
 });
