@@ -32,7 +32,7 @@ const offlineTx = new OfflineTxModel({
     payload: {
       address: 'address',
       blockHash: '0x01',
-      blockNumber: '-1',
+      blockNumber: '0x01',
       genesisHash: '0x01',
       era: '0x01',
       method: 'testMethod',
