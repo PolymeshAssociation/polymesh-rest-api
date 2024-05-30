@@ -52,7 +52,7 @@ export class DeveloperTestingService {
 
     const signerAddress = signer
       ? await this.signingService.getAddressByHandle(signer)
-      : this.sudoPair.address;
+      : this.sudoPair;
 
     // Create a DID to attach claim too
     const createDidCalls = accounts.map(({ address }) => identity.cddRegisterDid(address, []));

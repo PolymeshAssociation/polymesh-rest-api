@@ -137,7 +137,7 @@ describe('DeveloperTestingService', () => {
       await service.createTestAccounts(params);
 
       expect(polymeshService.execTransaction).toHaveBeenCalledWith(
-        defaultAdminAddress,
+        expect.objectContaining({ address: defaultAdminAddress }),
         expect.anything(),
         expect.anything()
       );
