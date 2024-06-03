@@ -219,6 +219,7 @@ export class MockCheckpointsService {
   getHolders = jest.fn();
   deleteScheduleByTicker = jest.fn();
   findOne = jest.fn();
+  findCheckpointsByScheduleId = jest.fn();
 }
 
 export class MockAuthService {

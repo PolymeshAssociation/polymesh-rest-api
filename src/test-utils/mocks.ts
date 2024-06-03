@@ -341,6 +341,7 @@ export class MockCheckpointSchedule {
   ticker = 'TICKER';
   pendingPoints = [new Date('10/14/1987')];
   expiryDate = new Date('10/14/2000');
+  getCheckpoints = jest.fn();
 }
 
 export class MockAuthorizationRequest {

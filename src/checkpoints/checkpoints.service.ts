@@ -110,4 +110,28 @@ export class CheckpointsService {
       options
     );
   }
+
+  public async findCheckpointsByScheduleId(
+    ticker: string,
+    id: BigNumber
+  ): Promise<CheckpointWithData[]> {
+    const schedule = await this.findScheduleById(ticker, id);
+
+    const checkpoints = await schedule.schedule.getCheckpoints();
+
+    const checkpointDetailsPromises = checkpoints.map(async (checkpoint: Checkpoint) => {
+      const [createdAt, totalSupply] = await Promise.all([
+        checkpoint.createdAt(),
+        checkpoint.totalSupply(),
+      ]);
+
+      return {
+        checkpoint,
+        createdAt,
+        totalSupply,
+      };
+    });
+
+    return Promise.all(checkpointDetailsPromises);
+  }
 }

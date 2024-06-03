@@ -423,4 +423,42 @@ export class CheckpointsController {
     );
     return handleServiceResult(result);
   }
+
+  @ApiOperation({
+    summary: 'Get all Checkpoints originated from a given Schedule',
+    description: 'This endpoint returns all Checkpoints that were created from a specific Schedule',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Checkpoints are to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'scheduleId',
+    description: 'The ID of the Schedule whose Checkpoints are to be fetched',
+    type: 'string',
+    example: '1',
+  })
+  @ApiArrayResponse(CheckpointDetailsModel, {
+    description: 'List of Checkpoints originated from the given Schedule',
+    paginated: false,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset or Schedule was not found',
+  })
+  @Get('schedules/:id/checkpoints')
+  public async getCheckpointsBySchedule(
+    @Param() { ticker, id: checkpointId }: CheckpointParamsDto
+  ): Promise<CheckpointDetailsModel[]> {
+    const checkpointsWithDetails = await this.checkpointsService.findCheckpointsByScheduleId(
+      ticker,
+      checkpointId
+    );
+
+    return checkpointsWithDetails.map(
+      ({ checkpoint: { id }, createdAt, totalSupply }) =>
+        new CheckpointDetailsModel({ id, createdAt, totalSupply })
+    );
+  }
 }

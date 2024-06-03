@@ -175,7 +175,9 @@ describe('CheckpointsController', () => {
       const result = await controller.getSchedule({ ticker: 'TICKER', id: new BigNumber(1) });
 
       const mockResult = new CheckpointScheduleModel({
-        ...mockScheduleWithDetails.schedule,
+        id: mockScheduleWithDetails.schedule.id,
+        expiryDate: mockScheduleWithDetails.schedule.expiryDate,
+        ticker: mockScheduleWithDetails.schedule.ticker,
         ...mockScheduleWithDetails.details,
         pendingPoints: [mockDate],
       });
@@ -211,7 +213,9 @@ describe('CheckpointsController', () => {
       const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
 
       const mockCreatedSchedule = new CheckpointScheduleModel({
-        ...mockScheduleWithDetails.schedule,
+        id: mockScheduleWithDetails.schedule.id,
+        expiryDate: mockScheduleWithDetails.schedule.expiryDate,
+        ticker: mockScheduleWithDetails.schedule.ticker,
         ...mockScheduleWithDetails.details,
         pendingPoints: [mockDate],
       });
@@ -298,6 +302,23 @@ describe('CheckpointsController', () => {
       );
 
       expect(result).toEqual(txResult);
+    });
+  });
+
+  describe('getCheckpointsBySchedule', () => {
+    it('should return the Checkpoint data', async () => {
+      const createdAt = new Date();
+      const totalSupply = new BigNumber(1000);
+      const id = new BigNumber(1);
+      const ticker = 'TICKER';
+
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpointsService.findCheckpointsByScheduleId.mockResolvedValue([
+        { checkpoint: mockCheckpoint, createdAt, totalSupply },
+      ]);
+
+      const result = await controller.getCheckpointsBySchedule({ ticker, id });
+      expect(result).toEqual([new CheckpointDetailsModel({ id, totalSupply, createdAt })]);
     });
   });
 });

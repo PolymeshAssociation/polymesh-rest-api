@@ -402,4 +402,60 @@ describe('CheckpointsService', () => {
       });
     });
   });
+
+  describe('findCheckpointsByScheduleId', () => {
+    let mockAsset: MockAsset;
+    let mockCheckpoint: MockCheckpoint;
+    const ticker = 'TICKER';
+    const id = new BigNumber(1);
+    const createdAt = new Date();
+    const totalSupply = new BigNumber(1000);
+
+    beforeEach(() => {
+      mockAsset = new MockAsset();
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
+      mockCheckpoint = new MockCheckpoint();
+
+      mockCheckpoint.createdAt.mockResolvedValue(createdAt);
+      mockCheckpoint.totalSupply.mockResolvedValue(totalSupply);
+    });
+
+    it('should return Checkpoints for a valid ticker and id', async () => {
+      const mockSchedule = new MockCheckpointSchedule();
+      mockSchedule.getCheckpoints.mockResolvedValue([mockCheckpoint]);
+
+      const mockScheduleWithDetails = {
+        schedule: mockSchedule,
+        details: {
+          remainingCheckpoints: 1,
+          nextCheckpointDate: new Date(),
+        },
+      };
+      mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
+
+      const result = await service.findCheckpointsByScheduleId(ticker, id);
+
+      expect(result).toEqual([{ checkpoint: mockCheckpoint, createdAt, totalSupply }]);
+    });
+
+    describe('otherwise', () => {
+      it('should call the handleSdkError method and throw an error', async () => {
+        const mockError = new Error('Some Error');
+        mockAsset.checkpoints.schedules.getOne.mockRejectedValue(mockError);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() => service.findCheckpointsByScheduleId(ticker, id)).rejects.toThrowError();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
+      });
+    });
+
+    afterEach(() => {
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+      expect(mockAsset.checkpoints.schedules.getOne).toHaveBeenCalledWith({
+        id,
+      });
+    });
+  });
 });
