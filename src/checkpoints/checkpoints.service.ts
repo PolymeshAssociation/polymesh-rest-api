@@ -34,11 +34,13 @@ export class CheckpointsService {
     start?: string
   ): Promise<ResultSet<CheckpointWithData>> {
     const asset = await this.assetsService.findFungible(ticker);
+
     return asset.checkpoints.get({ start, size });
   }
 
   public async findOne(ticker: string, id: BigNumber): Promise<Checkpoint> {
     const asset = await this.assetsService.findFungible(ticker);
+
     return await asset.checkpoints.getOne({ id }).catch(error => {
       throw handleSdkError(error);
     });
@@ -46,11 +48,13 @@ export class CheckpointsService {
 
   public async findSchedulesByTicker(ticker: string): Promise<ScheduleWithDetails[]> {
     const asset = await this.assetsService.findFungible(ticker);
+
     return asset.checkpoints.schedules.get();
   }
 
   public async findScheduleById(ticker: string, id: BigNumber): Promise<ScheduleWithDetails> {
     const asset = await this.assetsService.findFungible(ticker);
+
     return await asset.checkpoints.schedules.getOne({ id }).catch(error => {
       throw handleSdkError(error);
     });
@@ -71,7 +75,6 @@ export class CheckpointsService {
     createCheckpointScheduleDto: CreateCheckpointScheduleDto
   ): ServiceReturn<CheckpointSchedule> {
     const { options, args } = extractTxOptions(createCheckpointScheduleDto);
-
     const asset = await this.assetsService.findFungible(ticker);
 
     return this.transactionsService.submit(asset.checkpoints.schedules.create, args, options);
@@ -84,6 +87,7 @@ export class CheckpointsService {
   ): Promise<IdentityBalanceModel> {
     const checkpoint = await this.findOne(ticker, checkpointId);
     const balance = await checkpoint.balance({ identity: did });
+
     return new IdentityBalanceModel({ identity: did, balance });
   }
 
@@ -94,6 +98,7 @@ export class CheckpointsService {
     start?: string
   ): Promise<ResultSet<IdentityBalance>> {
     const checkpoint = await this.findOne(ticker, checkpointId);
+
     return checkpoint.allBalances({ start, size });
   }
 
@@ -104,6 +109,7 @@ export class CheckpointsService {
   ): ServiceReturn<void> {
     const { options } = extractTxOptions(transactionBaseDto);
     const asset = await this.assetsService.findFungible(ticker);
+
     return this.transactionsService.submit(
       asset.checkpoints.schedules.remove,
       { schedule: id },
@@ -133,5 +139,17 @@ export class CheckpointsService {
     });
 
     return Promise.all(checkpointDetailsPromises);
+  }
+
+  public async getComplexityForAsset(
+    ticker: string
+  ): Promise<{ schedules: ScheduleWithDetails[]; maxComplexity: BigNumber }> {
+    const asset = await this.assetsService.findFungible(ticker);
+    const [schedules, maxComplexity] = await Promise.all([
+      asset.checkpoints.schedules.get(),
+      asset.checkpoints.schedules.maxComplexity(),
+    ]);
+
+    return { schedules, maxComplexity };
   }
 }

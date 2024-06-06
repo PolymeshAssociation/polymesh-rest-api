@@ -222,6 +222,7 @@ export class MockAsset {
       getOne: jest.fn(),
       create: jest.fn(),
       remove: jest.fn(),
+      maxComplexity: jest.fn(),
     },
   };
 

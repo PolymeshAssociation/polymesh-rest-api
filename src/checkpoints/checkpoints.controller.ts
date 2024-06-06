@@ -8,6 +8,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Checkpoint, CheckpointSchedule } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
@@ -20,6 +21,7 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
+import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
@@ -460,5 +462,39 @@ export class CheckpointsController {
       ({ checkpoint: { id }, createdAt, totalSupply }) =>
         new CheckpointDetailsModel({ id, createdAt, totalSupply })
     );
+  }
+  
+  @ApiOperation({
+    summary: 'Fetch Asset Schedules complexity',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset for which Schedule complexity is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset was not found',
+  })
+  @ApiOkResponse({
+    description: 'Complexity details for the Schedules of the Asset',
+    type: ScheduleComplexityModel,
+    isArray: true,
+  })
+  @Get('/complexity')
+  public async getComplexity(
+    @Param() { ticker }: TickerParamsDto
+  ): Promise<ScheduleComplexityModel[]> {
+    const { schedules, maxComplexity } = await this.checkpointsService.getComplexityForAsset(
+      ticker
+    );
+
+    return schedules.map(({ schedule }) => {
+      return new ScheduleComplexityModel({
+        id: schedule.id,
+        maxComplexity,
+        currentComplexity: new BigNumber(schedule.pendingPoints.length),
+      });
+    });
   }
 }

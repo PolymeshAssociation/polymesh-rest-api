@@ -29,6 +29,24 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
 }));
 
 const { signer } = testValues;
+const mockSchedules = [
+  {
+    schedule: {
+      id: new BigNumber(1),
+      period: {
+        unit: CalendarUnit.Month,
+        amount: new BigNumber(3),
+      },
+      start: new Date(),
+      complexity: new BigNumber(4),
+      expiryDate: null,
+    },
+    details: {
+      remainingCheckpoints: new BigNumber(1),
+      nextCheckpointDate: new Date(),
+    },
+  },
+];
 
 describe('CheckpointsService', () => {
   let service: CheckpointsService;
@@ -130,25 +148,6 @@ describe('CheckpointsService', () => {
 
   describe('findSchedulesByTicker', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
-      const mockSchedules = [
-        {
-          schedule: {
-            id: new BigNumber(1),
-            period: {
-              unit: CalendarUnit.Month,
-              amount: new BigNumber(3),
-            },
-            start: new Date(),
-            complexity: new BigNumber(4),
-            expiryDate: null,
-          },
-          details: {
-            remainingCheckpoints: new BigNumber(1),
-            nextCheckpointDate: new Date(),
-          },
-        },
-      ];
-
       const mockAsset = new MockAsset();
       mockAsset.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
 
@@ -456,6 +455,26 @@ describe('CheckpointsService', () => {
       expect(mockAsset.checkpoints.schedules.getOne).toHaveBeenCalledWith({
         id,
       });
+    });
+  });
+
+  describe('getComplexityForAsset', () => {
+    it('should return a maxComplexity and schedules for a valid ticker', async () => {
+      const maxComplexity = new BigNumber(1);
+      const mockResult = {
+        schedules: mockSchedules,
+        maxComplexity,
+      };
+
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
+      mockAsset.checkpoints.schedules.maxComplexity.mockResolvedValue(maxComplexity);
+
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
+
+      const result = await service.getComplexityForAsset('TICKER');
+      expect(result).toEqual(mockResult);
+      expect(mockAssetsService.findFungible).toBeCalledWith('TICKER');
     });
   });
 });

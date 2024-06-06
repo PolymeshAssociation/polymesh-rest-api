@@ -6,6 +6,7 @@ import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
+import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { testValues } from '~/test-utils/consts';
@@ -319,6 +320,38 @@ describe('CheckpointsController', () => {
 
       const result = await controller.getCheckpointsBySchedule({ ticker, id });
       expect(result).toEqual([new CheckpointDetailsModel({ id, totalSupply, createdAt })]);
+    });
+  });
+  
+  describe('getComplexity', () => {
+    it('should return the transaction details', async () => {
+      const maxComplexity = new BigNumber(10);
+      const id = new BigNumber(1);
+      const pendingPoints = [new Date()];
+
+      const mockSchedules = [
+        {
+          schedule: {
+            id: new BigNumber(1),
+            pendingPoints,
+          },
+        },
+      ];
+
+      mockCheckpointsService.getComplexityForAsset.mockResolvedValue({
+        schedules: mockSchedules,
+        maxComplexity,
+      });
+
+      const result = await controller.getComplexity({ ticker: 'TICKER' });
+
+      expect(result).toEqual([
+        new ScheduleComplexityModel({
+          id,
+          maxComplexity,
+          currentComplexity: new BigNumber(pendingPoints.length),
+        }),
+      ]);
     });
   });
 });
