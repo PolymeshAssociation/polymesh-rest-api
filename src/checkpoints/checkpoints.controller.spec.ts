@@ -6,6 +6,7 @@ import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
+import { PeriodComplexityModel } from '~/checkpoints/models/period-complexity.model';
 import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
@@ -13,7 +14,7 @@ import { testValues } from '~/test-utils/consts';
 import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 import { MockCheckpointsService } from '~/test-utils/service-mocks';
 
-const { did, signer, txResult } = testValues;
+const { did, signer, txResult, ticker } = testValues;
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -41,7 +42,6 @@ describe('CheckpointsController', () => {
       const createdAt = new Date();
       const totalSupply = new BigNumber(1000);
       const id = new BigNumber(1);
-      const ticker = 'TICKER';
 
       const mockCheckpoint = new MockCheckpoint();
       mockCheckpoint.createdAt.mockResolvedValue(createdAt);
@@ -83,10 +83,7 @@ describe('CheckpointsController', () => {
     it('should return the list of Checkpoints created on an Asset', async () => {
       mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
 
-      const result = await controller.getCheckpoints(
-        { ticker: 'TICKER' },
-        { size: new BigNumber(1) }
-      );
+      const result = await controller.getCheckpoints({ ticker }, { size: new BigNumber(1) });
 
       expect(result).toEqual(mockResult);
     });
@@ -95,7 +92,7 @@ describe('CheckpointsController', () => {
       mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
 
       const result = await controller.getCheckpoints(
-        { ticker: 'TICKER' },
+        { ticker },
         { size: new BigNumber(1), start: 'START_KEY' }
       );
 
@@ -115,7 +112,7 @@ describe('CheckpointsController', () => {
         signer: 'signer',
       };
 
-      const result = await controller.createCheckpoint({ ticker: 'TICKER' }, body);
+      const result = await controller.createCheckpoint({ ticker }, body);
 
       expect(result).toEqual({
         ...txResult,
@@ -144,12 +141,12 @@ describe('CheckpointsController', () => {
 
       mockCheckpointsService.findSchedulesByTicker.mockResolvedValue(mockSchedules);
 
-      const result = await controller.getSchedules({ ticker: 'TICKER' });
+      const result = await controller.getSchedules({ ticker });
 
       const mockResult = [
         new CheckpointScheduleModel({
           id: new BigNumber(1),
-          ticker: 'TICKER',
+          ticker,
           pendingPoints: [mockDate],
           expiryDate: null,
           remainingCheckpoints: new BigNumber(1),
@@ -164,8 +161,10 @@ describe('CheckpointsController', () => {
   describe('getSchedule', () => {
     it('should call the service and return the Checkpoint Schedule details', async () => {
       const mockDate = new Date('10/14/1987');
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { getCheckpoints, ...schedule } = new MockCheckpointSchedule();
       const mockScheduleWithDetails = {
-        schedule: new MockCheckpointSchedule(),
+        schedule,
         details: {
           remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
@@ -173,7 +172,7 @@ describe('CheckpointsController', () => {
       };
       mockCheckpointsService.findScheduleById.mockResolvedValue(mockScheduleWithDetails);
 
-      const result = await controller.getSchedule({ ticker: 'TICKER', id: new BigNumber(1) });
+      const result = await controller.getSchedule({ ticker, id: new BigNumber(1) });
 
       const mockResult = new CheckpointScheduleModel({
         id: mockScheduleWithDetails.schedule.id,
@@ -197,8 +196,10 @@ describe('CheckpointsController', () => {
       };
       mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { getCheckpoints, ...schedule } = new MockCheckpointSchedule();
       const mockScheduleWithDetails = {
-        schedule: new MockCheckpointSchedule(),
+        schedule,
         details: {
           remainingCheckpoints: new BigNumber(1),
           nextCheckpointDate: mockDate,
@@ -211,7 +212,7 @@ describe('CheckpointsController', () => {
         points: [mockDate],
       };
 
-      const result = await controller.createSchedule({ ticker: 'TICKER' }, body);
+      const result = await controller.createSchedule({ ticker }, body);
 
       const mockCreatedSchedule = new CheckpointScheduleModel({
         id: mockScheduleWithDetails.schedule.id,
@@ -262,7 +263,7 @@ describe('CheckpointsController', () => {
 
       const result = await controller.getHolders(
         {
-          ticker: 'TICKER',
+          ticker,
           id: new BigNumber(1),
         },
         { size: new BigNumber(10) }
@@ -275,7 +276,6 @@ describe('CheckpointsController', () => {
   describe('getAssetBalance', () => {
     it('should return the balance of an Asset for an Identity at a given Checkpoint', async () => {
       const balance = new BigNumber(10);
-      const ticker = 'TICKER';
       const id = new BigNumber(1);
 
       const balanceModel = new IdentityBalanceModel({ balance, identity: did });
@@ -297,10 +297,7 @@ describe('CheckpointsController', () => {
     it('should return the transaction details', async () => {
       mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(txResult);
 
-      const result = await controller.deleteSchedule(
-        { id: new BigNumber(1), ticker: 'TICKER' },
-        { signer }
-      );
+      const result = await controller.deleteSchedule({ id: new BigNumber(1), ticker }, { signer });
 
       expect(result).toEqual(txResult);
     });
@@ -311,7 +308,6 @@ describe('CheckpointsController', () => {
       const createdAt = new Date();
       const totalSupply = new BigNumber(1000);
       const id = new BigNumber(1);
-      const ticker = 'TICKER';
 
       const mockCheckpoint = new MockCheckpoint();
       mockCheckpointsService.findCheckpointsByScheduleId.mockResolvedValue([
@@ -352,6 +348,30 @@ describe('CheckpointsController', () => {
           currentComplexity: new BigNumber(pendingPoints.length),
         }),
       ]);
+    });
+  });
+
+  describe('getPeriodComplexity', () => {
+    it('should call the service and return the Checkpoint Schedule complexity for given period', async () => {
+      const complexity = new BigNumber(10000);
+      mockCheckpointsService.getComplexityForPeriod.mockResolvedValue(complexity);
+      const start = new Date();
+      const end = new Date();
+      const result = await controller.getPeriodComplexity(
+        { ticker, id: new BigNumber(1) },
+        { start, end }
+      );
+
+      const mockResult = new PeriodComplexityModel({
+        complexity,
+      });
+      expect(result).toEqual(mockResult);
+      expect(mockCheckpointsService.getComplexityForPeriod).toBeCalledWith(
+        ticker,
+        new BigNumber(1),
+        start,
+        end
+      );
     });
   });
 });

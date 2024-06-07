@@ -477,4 +477,66 @@ describe('CheckpointsService', () => {
       expect(mockAssetsService.findFungible).toBeCalledWith('TICKER');
     });
   });
+
+  describe('getComplexityForPeriod', () => {
+    let mockAsset: MockAsset;
+    const ticker = 'TICKER';
+    const id = new BigNumber(1);
+
+    const CHECKPOINT_DATE = new Date('2021-01-01');
+    const START_DATE = new Date('2021-01-15');
+    const END_DATE = new Date('2021-01-31');
+    const PENDING_POINT_DATE_1 = new Date('2021-01-21');
+    const PENDING_POINT_DATE_2 = new Date('2021-01-15');
+
+    beforeEach(() => {
+      mockAsset = new MockAsset();
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
+    });
+
+    const setupMocks = (createdAtDate: Date, pendingPoints: Date[] = []): void => {
+      const schedule = new MockCheckpointSchedule();
+      schedule.pendingPoints = pendingPoints;
+      const mockCheckpoint = new MockCheckpoint();
+      mockCheckpoint.createdAt.mockResolvedValue(createdAtDate);
+      schedule.getCheckpoints.mockResolvedValue([mockCheckpoint]);
+
+      const mockScheduleWithDetails = {
+        schedule,
+      };
+      mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
+    };
+
+    it('should equal the length of all checkpoints for schedule if no period given', async () => {
+      setupMocks(new Date());
+
+      const result = await service.getComplexityForPeriod(ticker, id);
+
+      expect(result).toEqual(new BigNumber(1));
+    });
+
+    it('should filter out checkpoints that are outside given period', async () => {
+      setupMocks(CHECKPOINT_DATE, [PENDING_POINT_DATE_2]);
+
+      const result = await service.getComplexityForPeriod(ticker, id, START_DATE, END_DATE);
+
+      expect(result).toEqual(new BigNumber(1));
+    });
+
+    it('should filter if just start is given', async () => {
+      setupMocks(CHECKPOINT_DATE, [PENDING_POINT_DATE_1]);
+
+      const result = await service.getComplexityForPeriod(ticker, id, START_DATE);
+
+      expect(result).toEqual(new BigNumber(1));
+    });
+
+    it('should filter if just end is given', async () => {
+      setupMocks(CHECKPOINT_DATE, [PENDING_POINT_DATE_1]);
+
+      const result = await service.getComplexityForPeriod(ticker, id, undefined, START_DATE);
+
+      expect(result).toEqual(new BigNumber(1));
+    });
+  });
 });

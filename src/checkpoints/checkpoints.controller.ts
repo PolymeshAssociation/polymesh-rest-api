@@ -17,10 +17,12 @@ import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckpointParamsDto } from '~/checkpoints/dto/checkpoint.dto';
 import { CheckPointBalanceParamsDto } from '~/checkpoints/dto/checkpoint-balance.dto';
 import { CreateCheckpointScheduleDto } from '~/checkpoints/dto/create-checkpoint-schedule.dto';
+import { PeriodQueryDto } from '~/checkpoints/dto/period-query.dto';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
+import { PeriodComplexityModel } from '~/checkpoints/models/period-complexity.model';
 import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
 import { IsTicker } from '~/common/decorators/validation';
@@ -463,7 +465,7 @@ export class CheckpointsController {
         new CheckpointDetailsModel({ id, createdAt, totalSupply })
     );
   }
-  
+
   @ApiOperation({
     summary: 'Fetch Asset Schedules complexity',
   })
@@ -495,6 +497,54 @@ export class CheckpointsController {
         maxComplexity,
         currentComplexity: new BigNumber(schedule.pendingPoints.length),
       });
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Fetch details of an Asset Checkpoint Schedule',
+  })
+  @ApiParam({
+    name: 'ticker',
+    description: 'The ticker of the Asset whose Checkpoint Schedule is to be fetched',
+    type: 'string',
+    example: 'TICKER',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint Schedule to be fetched',
+    type: 'string',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'start',
+    description: 'Start date for the period for which to fetch complexity',
+    type: 'string',
+    required: false,
+    example: '2021-01-01',
+  })
+  @ApiQuery({
+    name: 'end',
+    description: 'End date for the period for which to fetch complexity',
+    type: 'string',
+    required: false,
+    example: '2021-01-31',
+  })
+  @ApiOkResponse({
+    description: 'The complexity of the Schedule for the given period',
+    type: ScheduleComplexityModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint Schedule does not exist',
+  })
+  @Get('schedules/:id/complexity')
+  public async getPeriodComplexity(
+    @Param() { ticker, id }: CheckpointScheduleParamsDto,
+    @Query() { start, end }: PeriodQueryDto
+  ): Promise<PeriodComplexityModel> {
+    const complexity = await this.checkpointsService.getComplexityForPeriod(ticker, id, start, end);
+
+    return new PeriodComplexityModel({
+      complexity,
     });
   }
 }

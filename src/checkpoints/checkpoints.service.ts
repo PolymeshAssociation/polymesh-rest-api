@@ -152,4 +152,27 @@ export class CheckpointsService {
 
     return { schedules, maxComplexity };
   }
+
+  public async getComplexityForPeriod(
+    ticker: string,
+    id: BigNumber,
+    start?: Date,
+    end?: Date
+  ): Promise<BigNumber> {
+    const { schedule } = await this.findScheduleById(ticker, id);
+
+    const checkpoints = await schedule.getCheckpoints();
+    const pendingPoints = schedule.pendingPoints;
+    const checkpointDatePromises = checkpoints.map(checkpoint => checkpoint.createdAt());
+
+    const pastCheckpoints = await Promise.all(checkpointDatePromises);
+
+    const allCheckpoints = [...pendingPoints, ...pastCheckpoints];
+
+    const checkpointsInPeriod = allCheckpoints.filter(
+      date => (!start || date >= start) && (!end || date <= end)
+    );
+
+    return new BigNumber(checkpointsInPeriod.length);
+  }
 }

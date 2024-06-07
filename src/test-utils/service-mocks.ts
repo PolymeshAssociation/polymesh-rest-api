@@ -221,6 +221,7 @@ export class MockCheckpointsService {
   findOne = jest.fn();
   findCheckpointsByScheduleId = jest.fn();
   getComplexityForAsset = jest.fn();
+  getComplexityForPeriod = jest.fn();
 }
 
 export class MockAuthService {
