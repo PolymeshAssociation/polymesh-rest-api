@@ -178,7 +178,7 @@ If using the project's compose file, an Artemis console will be exposed on `:818
 
 ### Webhooks (alpha)
 
-Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. When processMode `submitAndCallback` is used the `webhookUrl` param must also be provided. The server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
+Normally the endpoints that create transactions wait for block finalization before returning a response, which normally takes around 15 seconds. When processMode `submitWithCallback` is used the `webhookUrl` param must also be provided. The server will respond after submitting the transaction to the mempool with 202 (Accepted) status code instead of the usual 201 (Created).
 
 Before sending any information to the endpoint the service will first make a request with the header `x-hook-secret` set to a value. The endpoint should return a `200` response with this header copied into the response headers.
 
@@ -223,9 +223,6 @@ Currently there are two datastore available:
 To implement a new repo for a service, first define an abstract class describing the desired interface. Also write a test suite to specify the expected behavior from an implementation. Then in the concrete implementations define a new Repo that satisfies the test suite.
 
 To implement a new datastore create a new module in `~/datastores` and create a set of `Repos` that will implement the abstract classes. You will then need to set up the `DatastoreModule` to export the module when it is configured. For testing, each implemented Repo should be able to pass the `test` method defined on the abstract class it is implementing.
-
-
-
 
 ### With docker
 

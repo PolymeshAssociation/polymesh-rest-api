@@ -2,7 +2,7 @@
 
 import { NotificationStatus } from '~/notifications/types';
 
-export class NotificationEntity {
+export class NotificationModel {
   public id: number;
 
   public subscriptionId: number;
@@ -17,7 +17,7 @@ export class NotificationEntity {
 
   public nonce: number;
 
-  constructor(entity: NotificationEntity) {
+  constructor(entity: NotificationModel) {
     Object.assign(this, entity);
   }
 }

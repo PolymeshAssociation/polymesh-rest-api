@@ -2,7 +2,6 @@ import { HttpService } from '@nestjs/axios';
 import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
-import { pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
 import { AppNotFoundError } from '~/common/errors';
@@ -10,18 +9,16 @@ import { EventsService } from '~/events/events.service';
 import { EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import notificationsConfig from '~/notifications/config/notifications.config';
-import { NotificationEntity } from '~/notifications/entities/notification.entity';
+import { NotificationModel } from '~/notifications/model/notification.model';
 import { SIGNATURE_HEADER_KEY } from '~/notifications/notifications.consts';
 import { signPayload } from '~/notifications/notifications.util';
-import { NotificationPayload, NotificationStatus } from '~/notifications/types';
+import { NotificationRepo } from '~/notifications/repo/notifications.repo';
+import { NotificationParams, NotificationPayload, NotificationStatus } from '~/notifications/types';
 import { ScheduleService } from '~/schedule/schedule.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 
 @Injectable()
 export class NotificationsService {
-  private notifications: Record<number, NotificationEntity>;
-  private currentId: number;
-
   private maxTries: number;
   private retryInterval: number;
 
@@ -31,22 +28,19 @@ export class NotificationsService {
     private readonly subscriptionsService: SubscriptionsService,
     @Inject(forwardRef(() => EventsService)) private readonly eventsService: EventsService,
     private readonly httpService: HttpService,
-    // TODO @polymath-eric: handle errors with specialized service
-    private readonly logger: PolymeshLogger
+    private readonly logger: PolymeshLogger,
+    private readonly notificationsRepo: NotificationRepo
   ) {
     const { maxTries, retryInterval } = config;
 
     this.maxTries = maxTries;
     this.retryInterval = retryInterval;
 
-    this.notifications = {};
-    this.currentId = 0;
-
     logger.setContext(NotificationsService.name);
   }
 
-  public async findOne(id: number): Promise<NotificationEntity> {
-    const notification = this.notifications[id];
+  public async findOne(id: number): Promise<NotificationModel> {
+    const notification = await this.notificationsRepo.findById(id);
 
     if (!notification) {
       throw new AppNotFoundError(id.toString(), 'notification');
@@ -56,54 +50,36 @@ export class NotificationsService {
   }
 
   public async createNotifications(
-    newNotifications: Pick<NotificationEntity, 'eventId' | 'subscriptionId' | 'nonce'>[]
+    newNotifications: Pick<NotificationModel, 'eventId' | 'subscriptionId' | 'nonce'>[]
   ): Promise<number[]> {
-    const { notifications, maxTries: triesLeft } = this;
+    const { maxTries: triesLeft } = this;
+
     const newIds: number[] = [];
+    await Promise.all(
+      newNotifications.map(async notification => {
+        const { id } = await this.notificationsRepo.create({
+          ...notification,
+          triesLeft,
+          status: NotificationStatus.Active,
+        });
 
-    newNotifications.forEach(notification => {
-      this.currentId += 1; // auto-increment
-      const id = this.currentId;
+        newIds.push(id);
 
-      newIds.push(id);
-      notifications[id] = new NotificationEntity({
-        id,
-        ...notification,
-        triesLeft,
-        status: NotificationStatus.Active,
-        createdAt: new Date(),
-      });
-
-      /**
-       * we add the notification to the scheduler cycle
-       */
-      this.scheduleSendNotification(id, 0);
-    });
+        /**
+         * we add the notification to the scheduler cycle
+         */
+        this.scheduleSendNotification(id, 0);
+      })
+    );
 
     return newIds;
   }
 
-  /**
-   * @note ignores any properties other than `status` and `triesLeft`
-   */
   public async updateNotification(
     id: number,
-    data: Partial<NotificationEntity>
-  ): Promise<NotificationEntity> {
-    const { notifications } = this;
-
-    const updater = pick(data, 'status', 'triesLeft');
-
-    const current = await this.findOne(id);
-
-    const updated = new NotificationEntity({
-      ...current,
-      ...updater,
-    });
-
-    notifications[id] = updated;
-
-    return updated;
+    data: Partial<NotificationParams>
+  ): Promise<NotificationModel> {
+    return this.notificationsRepo.update(id, data);
   }
 
   /**

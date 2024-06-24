@@ -181,7 +181,7 @@ export const ApiPropertyOneOf = ({
 };
 
 /**
- * A helper that functions like `ApiCreatedResponse`, that also adds an `ApiAccepted` response in case "submitAndCallback" is used and `ApiOKResponse` if "offline" mode is used
+ * A helper that functions like `ApiCreatedResponse`, that also adds an `ApiAccepted` response in case "submitWithCallback" is used and `ApiOKResponse` if "offline" mode is used
  *
  * @param options - these will be passed to the `ApiCreatedResponse` decorator
  */
@@ -197,7 +197,7 @@ export function ApiTransactionResponse(
     ApiCreatedResponse(options),
     ApiAcceptedResponse({
       description:
-        'Returned if `"processMode": "submitAndCallback"` is passed in `options`. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
+        'Returned if `"processMode": "submitWithCallback"` is passed in `options`. A response will be returned after the transaction has been validated. The result will be posted to the `webhookUrl` given when the transaction is completed',
       type: NotificationPayloadModel,
     })
   );

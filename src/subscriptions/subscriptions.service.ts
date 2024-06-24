@@ -2,7 +2,6 @@ import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
-import { filter, pick } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 
 import { AppNotFoundError } from '~/common/errors';
@@ -10,15 +9,13 @@ import { generateBase64Secret } from '~/common/utils';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { ScheduleService } from '~/schedule/schedule.service';
 import subscriptionsConfig from '~/subscriptions/config/subscriptions.config';
-import { SubscriptionEntity } from '~/subscriptions/entities/subscription.entity';
+import { SubscriptionModel } from '~/subscriptions/models/subscription.model';
+import { SubscriptionRepo } from '~/subscriptions/repo/subscription.repo';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
 import { SubscriptionStatus } from '~/subscriptions/types';
 
 @Injectable()
 export class SubscriptionsService {
-  private subscriptions: Record<number, SubscriptionEntity>;
-  private currentId: number;
-
   private ttl: number;
   private maxTries: number;
   private retryInterval: number;
@@ -28,16 +25,14 @@ export class SubscriptionsService {
     private readonly scheduleService: ScheduleService,
     private readonly httpService: HttpService,
     // TODO @polymath-eric: handle errors with specialized service
-    private readonly logger: PolymeshLogger
+    private readonly logger: PolymeshLogger,
+    private readonly subscriptionRepo: SubscriptionRepo
   ) {
     const { ttl, maxTries: triesLeft, retryInterval } = config;
 
     this.ttl = ttl;
     this.maxTries = triesLeft;
     this.retryInterval = retryInterval;
-
-    this.subscriptions = {};
-    this.currentId = 0;
 
     logger.setContext(SubscriptionsService.name);
   }
@@ -47,10 +42,10 @@ export class SubscriptionsService {
    *   expired subscriptions from the result (default behavior is to include them)
    */
   public async findAll(
-    filters: Partial<Pick<SubscriptionEntity, 'eventType' | 'eventScope' | 'status'>> & {
+    filters: Partial<Pick<SubscriptionModel, 'eventType' | 'eventScope' | 'status'>> & {
       excludeExpired?: boolean;
     } = {}
-  ): Promise<SubscriptionEntity[]> {
+  ): Promise<SubscriptionModel[]> {
     const {
       status: statusFilter,
       eventScope: scopeFilter,
@@ -58,7 +53,9 @@ export class SubscriptionsService {
       excludeExpired = false,
     } = filters;
 
-    return filter(this.subscriptions, subscription => {
+    const subscriptions = await this.subscriptionRepo.findAll();
+
+    return subscriptions.filter(subscription => {
       const { status, eventScope, eventType } = subscription;
 
       return (
@@ -70,8 +67,8 @@ export class SubscriptionsService {
     });
   }
 
-  public async findOne(id: number): Promise<SubscriptionEntity> {
-    const sub = this.subscriptions[id];
+  public async findOne(id: number): Promise<SubscriptionModel> {
+    const sub = await this.subscriptionRepo.findById(id);
 
     if (!sub) {
       throw new AppNotFoundError('subscription', id.toString());
@@ -81,21 +78,17 @@ export class SubscriptionsService {
   }
 
   public async createSubscription(
-    sub: Pick<SubscriptionEntity, 'eventType' | 'eventScope' | 'webhookUrl' | 'legitimacySecret'>
+    sub: Pick<SubscriptionModel, 'eventType' | 'eventScope' | 'webhookUrl' | 'legitimacySecret'>
   ): Promise<number> {
-    const { subscriptions, ttl, maxTries: triesLeft } = this;
+    const { subscriptionRepo, ttl, maxTries: triesLeft } = this;
 
-    this.currentId += 1;
-    const id = this.currentId;
-
-    subscriptions[id] = new SubscriptionEntity({
-      id,
+    const { id } = await subscriptionRepo.create({
       ...sub,
-      createdAt: new Date(),
+      triesLeft,
       status: SubscriptionStatus.Inactive,
       ttl,
-      triesLeft,
       nextNonce: 0,
+      createdAt: new Date(),
     });
 
     /**
@@ -111,44 +104,27 @@ export class SubscriptionsService {
    */
   public async updateSubscription(
     id: number,
-    data: Partial<SubscriptionEntity>
-  ): Promise<SubscriptionEntity> {
-    const { subscriptions } = this;
-
-    const updater = pick(data, 'status', 'triesLeft', 'nextNonce');
-
-    const current = await this.findOne(id);
-
-    const updated = new SubscriptionEntity({
-      ...current,
-      ...updater,
-    });
-
-    subscriptions[id] = updated;
-
-    return updated;
+    data: Partial<SubscriptionModel>
+  ): Promise<SubscriptionModel> {
+    return await this.subscriptionRepo.update(id, data);
   }
 
   /**
    * Change the status of many subscriptions at once to "done"
    */
   public async batchMarkAsDone(ids: number[]): Promise<void> {
-    const { subscriptions } = this;
-
-    ids.forEach(id => {
-      subscriptions[id].status = SubscriptionStatus.Done;
-    });
+    await Promise.all(
+      ids.map(async id => {
+        return this.updateSubscription(id, { status: SubscriptionStatus.Done });
+      })
+    );
   }
 
   /**
    * Increase the latest nonce of many subscriptions at once by one
    */
   public async batchBumpNonce(ids: number[]): Promise<void> {
-    const { subscriptions } = this;
-
-    ids.forEach(id => {
-      subscriptions[id].nextNonce += 1;
-    });
+    await this.subscriptionRepo.incrementNonces(ids);
   }
 
   /**

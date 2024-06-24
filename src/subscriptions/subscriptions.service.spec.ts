@@ -2,15 +2,18 @@
 const mockLastValueFrom = jest.fn();
 const mockRandomBytes = jest.fn();
 
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
+import { when } from 'jest-when';
 
 import { AppNotFoundError } from '~/common/errors';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { ScheduleService } from '~/schedule/schedule.service';
 import subscriptionsConfig from '~/subscriptions/config/subscriptions.config';
-import { SubscriptionEntity } from '~/subscriptions/entities/subscription.entity';
+import { SubscriptionModel } from '~/subscriptions/models/subscription.model';
+import { SubscriptionRepo } from '~/subscriptions/repo/subscription.repo';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '~/subscriptions/types';
@@ -32,6 +35,7 @@ describe('SubscriptionsService', () => {
 
   let mockScheduleService: MockScheduleService;
   let mockHttpService: MockHttpService;
+  let mockSubscriptionRepo: DeepMocked<SubscriptionRepo>;
 
   const ttl = 120000;
   const maxTries = 5;
@@ -39,7 +43,7 @@ describe('SubscriptionsService', () => {
   const legitimacySecret = 'someSecret';
 
   const subs = [
-    new SubscriptionEntity({
+    new SubscriptionModel({
       id: 1,
       eventType: EventType.TransactionUpdate,
       eventScope: '0x01',
@@ -51,7 +55,7 @@ describe('SubscriptionsService', () => {
       nextNonce: 0,
       legitimacySecret,
     }),
-    new SubscriptionEntity({
+    new SubscriptionModel({
       id: 2,
       eventType: EventType.TransactionUpdate,
       eventScope: '0x02',
@@ -68,6 +72,7 @@ describe('SubscriptionsService', () => {
   beforeEach(async () => {
     mockScheduleService = new MockScheduleService();
     mockHttpService = new MockHttpService();
+    mockSubscriptionRepo = createMock<SubscriptionRepo>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,6 +80,10 @@ describe('SubscriptionsService', () => {
         ScheduleService,
         HttpService,
         mockPolymeshLoggerProvider,
+        {
+          provide: SubscriptionRepo,
+          useValue: mockSubscriptionRepo,
+        },
         {
           provide: subscriptionsConfig.KEY,
           useValue: { ttl, maxTries, retryInterval },
@@ -102,6 +111,10 @@ describe('SubscriptionsService', () => {
   });
 
   describe('findAll', () => {
+    beforeEach(() => {
+      mockSubscriptionRepo.findAll.mockResolvedValue(subs);
+    });
+
     it('should return all subscriptions', async () => {
       const result = await service.findAll();
 
@@ -137,12 +150,16 @@ describe('SubscriptionsService', () => {
 
   describe('findOne', () => {
     it('should return a single subscription by ID', async () => {
+      when(mockSubscriptionRepo.findById).calledWith(1).mockResolvedValue(subs[0]);
+
       const result = await service.findOne(1);
 
       expect(result).toEqual(subs[0]);
     });
 
     it('should throw an error if there is no subscription with the passed id', () => {
+      when(mockSubscriptionRepo.findById).calledWith(4).mockResolvedValue(undefined);
+
       return expect(service.findOne(4)).rejects.toThrow(AppNotFoundError);
     });
   });
@@ -153,6 +170,16 @@ describe('SubscriptionsService', () => {
       const eventScope = '0x03';
       const webhookUrl = 'https://www.example.com';
 
+      const mockSubscription = createMock<SubscriptionModel>({
+        id: 3,
+        triesLeft: 2,
+        isExpired: () => false,
+      });
+      mockSubscriptionRepo.create.mockResolvedValue(mockSubscription);
+      when(mockSubscriptionRepo.findById)
+        .calledWith(mockSubscription.id)
+        .mockResolvedValue(mockSubscription);
+
       const result = await service.createSubscription({
         eventScope,
         eventType,
@@ -162,20 +189,9 @@ describe('SubscriptionsService', () => {
 
       expect(result).toEqual(3);
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { createdAt: _, ...sub } = await service.findOne(3);
-
-      expect(sub).toEqual({
-        id: 3,
-        ttl,
-        triesLeft: maxTries,
-        status: SubscriptionStatus.Inactive,
-        eventType,
-        eventScope,
-        webhookUrl,
-        nextNonce: 0,
-        legitimacySecret,
-      });
+      expect(mockSubscriptionRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ status: SubscriptionStatus.Inactive })
+      );
 
       // ignore expired subs
       await unsafeService.sendHandshake(1);
@@ -195,31 +211,41 @@ describe('SubscriptionsService', () => {
 
       await unsafeService.sendHandshake(3);
 
-      let subscription = await service.findOne(3);
-      expect(subscription.status).toBe(SubscriptionStatus.Active);
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
+        3,
+        expect.objectContaining({ status: SubscriptionStatus.Active })
+      );
 
       mockLastValueFrom.mockResolvedValue({
         status: 500,
       });
 
-      await service.updateSubscription(3, {
-        status: SubscriptionStatus.Inactive,
-      });
-
       await unsafeService.sendHandshake(3);
 
-      subscription = await service.findOne(3);
-      expect(subscription.status).toBe(SubscriptionStatus.Inactive);
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
+        3,
+        expect.objectContaining({ triesLeft: 1 })
+      );
 
-      await service.updateSubscription(3, {
-        status: SubscriptionStatus.Inactive,
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
+        3,
+        expect.objectContaining({ status: SubscriptionStatus.Active })
+      );
+
+      const oneMoreTry = createMock<SubscriptionModel>({
+        id: 4,
         triesLeft: 1,
+        isExpired: () => false,
       });
 
-      await unsafeService.sendHandshake(3);
+      when(mockSubscriptionRepo.findById).calledWith(4).mockResolvedValue(oneMoreTry);
 
-      subscription = await service.findOne(3);
-      expect(subscription.status).toBe(SubscriptionStatus.Rejected);
+      await unsafeService.sendHandshake(4);
+
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
+        4,
+        expect.objectContaining({ triesLeft: 0, status: SubscriptionStatus.Rejected })
+      );
     });
   });
 
@@ -227,11 +253,24 @@ describe('SubscriptionsService', () => {
     it('should update a subscription and return it, ignoring fields other than status or triesLeft', async () => {
       const status = SubscriptionStatus.Active;
       const triesLeft = 1;
-      const result = await service.updateSubscription(1, {
+
+      const params = {
         status,
         triesLeft,
         id: 4,
-      });
+      };
+
+      when(mockSubscriptionRepo.update)
+        .calledWith(1, params)
+        .mockResolvedValue(
+          createMock<SubscriptionModel>({
+            id: 1,
+            status,
+            triesLeft,
+          })
+        );
+
+      const result = await service.updateSubscription(1, params);
 
       expect(result.status).toBe(status);
       expect(result.triesLeft).toBe(triesLeft);
@@ -243,9 +282,12 @@ describe('SubscriptionsService', () => {
     it('should mark a group of subscriptions as done', async () => {
       await service.batchMarkAsDone([1, 2]);
 
-      const result = await service.findAll({ status: SubscriptionStatus.Done });
-
-      expect(result.length).toBe(2);
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(1, {
+        status: SubscriptionStatus.Done,
+      });
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(2, {
+        status: SubscriptionStatus.Done,
+      });
     });
   });
 

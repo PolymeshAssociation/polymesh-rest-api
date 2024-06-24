@@ -1,4 +1,5 @@
 import { EventType, GetPayload } from '~/events/types';
+import { NotificationModel } from '~/notifications/model/notification.model';
 
 export enum NotificationStatus {
   /**
@@ -26,3 +27,8 @@ export type NotificationPayload<T extends EventType = EventType> = {
   nonce: number;
   payload: GetPayload<T>;
 };
+
+export type NotificationParams = Pick<
+  NotificationModel,
+  'eventId' | 'subscriptionId' | 'nonce' | 'status' | 'triesLeft'
+>;

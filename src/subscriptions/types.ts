@@ -1,3 +1,5 @@
+import { SubscriptionModel } from '~/subscriptions/models/subscription.model';
+
 export enum SubscriptionStatus {
   /**
    * Not yet confirmed by receiver
@@ -16,3 +18,5 @@ export enum SubscriptionStatus {
    */
   Done = 'done',
 }
+
+export type SubscriptionParams = Omit<SubscriptionModel, 'id' | 'isExpired'>;
