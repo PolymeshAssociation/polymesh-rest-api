@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { DatastoreModule } from '~/datastore/datastore.module';
 import { EventsModule } from '~/events/events.module';
 import { LoggerModule } from '~/logger/logger.module';
 import notificationsConfig from '~/notifications/config/notifications.config';
@@ -11,6 +12,7 @@ import { SubscriptionsModule } from '~/subscriptions/subscriptions.module';
 
 @Module({
   imports: [
+    DatastoreModule.registerAsync(),
     ConfigModule.forFeature(notificationsConfig),
     forwardRef(() => EventsModule),
     SubscriptionsModule,

@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostgresNotificationRepo Notification test suite method: create should create a notification 1`] = `
+{
+  "eventId": 0,
+  "id": 1,
+  "nonce": 1,
+  "status": "active",
+  "subscriptionId": 1,
+  "triesLeft": 3,
+}
+`;
+
+exports[`PostgresNotificationRepo Notification test suite method: findById should find the created notification 1`] = `
+{
+  "id": 1,
+}
+`;

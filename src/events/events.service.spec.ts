@@ -97,6 +97,26 @@ describe('EventsService', () => {
         },
       ]);
     });
+
+    it('should handle no subscriptions for the event', async () => {
+      const type = EventType.TransactionUpdate;
+      const scope = '0x02';
+      const payload = {
+        type: TransactionType.Single,
+        transactionTag: TxTags.asset.CreateAsset,
+        status: TransactionStatus.Unapproved,
+      } as const;
+
+      mockSubscriptionsService.findAll.mockReturnValue([]);
+
+      await service.createEvent({
+        type,
+        scope,
+        payload,
+      });
+
+      expect(mockNotificationsService.createNotifications).not.toHaveBeenCalled();
+    });
   });
 
   describe('findOne', () => {

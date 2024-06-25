@@ -1,9 +1,11 @@
 /* eslint-disable import/first */
 const mockLastValueFrom = jest.fn();
 
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { AppNotFoundError } from '~/common/errors';
 import { TransactionType } from '~/common/types';
@@ -11,8 +13,9 @@ import { EventsService } from '~/events/events.service';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import notificationsConfig from '~/notifications/config/notifications.config';
-import { NotificationEntity } from '~/notifications/entities/notification.entity';
+import { NotificationModel } from '~/notifications/model/notification.model';
 import { NotificationsService } from '~/notifications/notifications.service';
+import { NotificationRepo } from '~/notifications/repo/notifications.repo';
 import { NotificationStatus } from '~/notifications/types';
 import { ScheduleService } from '~/schedule/schedule.service';
 import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
@@ -37,6 +40,7 @@ describe('NotificationsService', () => {
   let mockSubscriptionsService: MockSubscriptionsService;
   let mockEventsService: MockEventsService;
   let mockHttpService: MockHttpService;
+  let notificationRepo: DeepMocked<NotificationRepo>;
 
   const maxTries = 5;
   const retryInterval = 5000;
@@ -46,6 +50,7 @@ describe('NotificationsService', () => {
     mockSubscriptionsService = new MockSubscriptionsService();
     mockEventsService = new MockEventsService();
     mockHttpService = new MockHttpService();
+    notificationRepo = createMock<NotificationRepo>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -55,6 +60,10 @@ describe('NotificationsService', () => {
         EventsService,
         HttpService,
         mockPolymeshLoggerProvider,
+        {
+          provide: NotificationRepo,
+          useValue: notificationRepo,
+        },
         {
           provide: notificationsConfig.KEY,
           useValue: { maxTries, retryInterval },
@@ -75,7 +84,7 @@ describe('NotificationsService', () => {
     unsafeService = service;
 
     unsafeService.notifications = {
-      1: new NotificationEntity({
+      1: new NotificationModel({
         id: 1,
         subscriptionId: 1,
         eventId: 1,
@@ -94,22 +103,28 @@ describe('NotificationsService', () => {
 
   describe('findOne', () => {
     it('should return a notification by ID', async () => {
+      const params = {
+        id: 1,
+        subscriptionId: 1,
+        eventId: 1,
+        triesLeft: maxTries,
+        status: NotificationStatus.Acknowledged,
+        createdAt: new Date('10/14/1987'),
+        nonce: 0,
+      };
+
+      const model = new NotificationModel(params);
+
+      when(notificationRepo.findById).calledWith(model.id).mockResolvedValue(model);
+
       const result = await service.findOne(1);
 
-      expect(result).toEqual(
-        new NotificationEntity({
-          id: 1,
-          subscriptionId: 1,
-          eventId: 1,
-          triesLeft: maxTries,
-          status: NotificationStatus.Acknowledged,
-          createdAt: new Date('10/14/1987'),
-          nonce: 0,
-        })
-      );
+      expect(result).toEqual(model);
     });
 
     it('should throw an error if there is no notification with the passed ID', () => {
+      notificationRepo.findById.mockResolvedValue(undefined);
+
       return expect(service.findOne(10)).rejects.toThrow(AppNotFoundError);
     });
   });
@@ -117,13 +132,22 @@ describe('NotificationsService', () => {
   describe('createNotifications', () => {
     it('should create a group of notifications, return their IDs, and schedule them to be sent, retrying if something goes wrong', async () => {
       const subscriptionId = 1;
-      const result = await service.createNotifications([
-        {
-          eventId: 2,
-          subscriptionId,
-          nonce: 0,
-        },
-      ]);
+      const params = {
+        eventId: 2,
+        subscriptionId,
+        nonce: 0,
+      };
+
+      when(notificationRepo.create)
+        .calledWith({ ...params, triesLeft: maxTries, status: NotificationStatus.Active })
+        .mockResolvedValue(
+          createMock<NotificationModel>({
+            id: 2,
+            ...params,
+          })
+        );
+
+      const result = await service.createNotifications([params]);
 
       expect(result).toEqual([2]);
 
@@ -152,22 +176,31 @@ describe('NotificationsService', () => {
         status: 200,
       });
 
+      when(notificationRepo.findById)
+        .calledWith(1)
+        .mockResolvedValue(
+          createMock<NotificationModel>({
+            status: NotificationStatus.Active,
+            triesLeft: maxTries,
+          })
+        );
+
       // notifications for expired subscriptions should be marked as orphaned
       mockIsExpired.mockReturnValue(true);
       await unsafeService.sendNotification(1);
 
-      let notification = await service.findOne(1);
-
-      expect(notification.status).toBe(NotificationStatus.Orphaned);
+      expect(notificationRepo.update).toHaveBeenCalledWith(1, {
+        status: NotificationStatus.Orphaned,
+      });
       expect(mockHttpService.post).not.toHaveBeenCalled();
 
       mockIsExpired.mockReturnValue(false);
 
       await unsafeService.sendNotification(2);
 
-      notification = await service.findOne(2);
-
-      expect(notification.status).toBe(NotificationStatus.Acknowledged);
+      expect(notificationRepo.update).toHaveBeenCalledWith(2, {
+        status: NotificationStatus.Acknowledged,
+      });
 
       await service.updateNotification(2, {
         status: NotificationStatus.Active,
@@ -177,22 +210,40 @@ describe('NotificationsService', () => {
         status: 500,
       });
 
+      when(notificationRepo.findById)
+        .calledWith(2)
+        .mockResolvedValueOnce(
+          createMock<NotificationModel>({
+            triesLeft: 2,
+            status: NotificationStatus.Active,
+          })
+        );
+
       await unsafeService.sendNotification(2);
 
-      notification = await service.findOne(2);
+      expect(notificationRepo.update).toHaveBeenCalledWith(2, {
+        status: NotificationStatus.Active,
+      });
 
-      expect(notification.triesLeft).toBe(maxTries - 1);
-      expect(notification.status).toBe(NotificationStatus.Active);
-
-      await service.updateNotification(2, {
+      expect(notificationRepo.update).toHaveBeenCalledWith(2, {
         triesLeft: 1,
       });
 
+      when(notificationRepo.findById)
+        .calledWith(2)
+        .mockResolvedValueOnce(
+          createMock<NotificationModel>({
+            triesLeft: 1,
+            status: NotificationStatus.Active,
+          })
+        );
+
       await unsafeService.sendNotification(2);
 
-      notification = await service.findOne(2);
-
-      expect(notification.status).toBe(NotificationStatus.Failed);
+      expect(notificationRepo.update).toHaveBeenCalledWith(2, {
+        status: NotificationStatus.Failed,
+        triesLeft: 0,
+      });
     });
   });
 
@@ -200,11 +251,18 @@ describe('NotificationsService', () => {
     it('should update a notification and return it, ignoring fields other than status or triesLeft', async () => {
       const status = NotificationStatus.Active;
       const triesLeft = 1;
-      const result = await service.updateNotification(1, {
+      const id = 1;
+
+      const params = {
         status,
         triesLeft,
-        id: 4,
-      });
+      };
+
+      const notification = createMock<NotificationModel>({ id, ...params });
+
+      when(notificationRepo.update).calledWith(id, params).mockResolvedValue(notification);
+
+      const result = await service.updateNotification(id, params);
 
       expect(result.status).toBe(status);
       expect(result.triesLeft).toBe(triesLeft);

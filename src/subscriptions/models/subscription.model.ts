@@ -3,7 +3,7 @@
 import { EventType } from '~/events/types';
 import { SubscriptionStatus } from '~/subscriptions/types';
 
-export class SubscriptionEntity {
+export class SubscriptionModel {
   public id: number;
 
   public eventType: EventType;
@@ -36,7 +36,7 @@ export class SubscriptionEntity {
     return new Date(createdAt.getTime() + ttl) <= new Date();
   }
 
-  constructor(entity: Omit<SubscriptionEntity, 'isExpired'>) {
+  constructor(entity: Omit<SubscriptionModel, 'isExpired'>) {
     Object.assign(this, entity);
   }
 }

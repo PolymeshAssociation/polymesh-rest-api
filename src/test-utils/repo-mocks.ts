@@ -16,6 +16,13 @@ export const mockUserRepoProvider: ValueProvider<UsersRepo> = {
   useValue: createMock<UsersRepo>(),
 };
 
+export class MockQueryBuilder {
+  update = jest.fn().mockReturnThis();
+  set = jest.fn().mockReturnThis();
+  where = jest.fn().mockReturnThis();
+  execute = jest.fn().mockResolvedValue({ affected: 1 });
+}
+
 /**
  * mocks TypeORM repository
  */
@@ -24,4 +31,7 @@ export class MockPostgresRepository {
   save = jest.fn();
   delete = jest.fn();
   create = jest.fn();
+  update = jest.fn();
+  find = jest.fn();
+  createQueryBuilder = jest.fn().mockReturnValue(new MockQueryBuilder());
 }

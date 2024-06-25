@@ -69,15 +69,19 @@ export class EventsService {
       excludeExpired: true,
     });
 
-    const notifications = affectedSubscriptions.map(({ id: subscriptionId, nextNonce: nonce }) => ({
-      subscriptionId,
-      eventId,
-      nonce,
-    }));
+    if (affectedSubscriptions.length) {
+      const notifications = affectedSubscriptions.map(
+        ({ id: subscriptionId, nextNonce: nonce }) => ({
+          subscriptionId,
+          eventId,
+          nonce,
+        })
+      );
 
-    await subscriptionsService.batchBumpNonce(affectedSubscriptions.map(({ id }) => id));
+      await subscriptionsService.batchBumpNonce(affectedSubscriptions.map(({ id }) => id));
 
-    await notificationsService.createNotifications(notifications);
+      await notificationsService.createNotifications(notifications);
+    }
   }
 
   private async markEventAsProcessed(id: number): Promise<void> {

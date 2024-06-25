@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostgresSubscriptionRepo Subscription test suite method: create should create a subscription 1`] = `
+SubscriptionModel {
+  "createdAt": 1987-10-14T00:00:00.000Z,
+  "eventScope": "",
+  "eventType": "transaction.update",
+  "id": 1,
+  "legitimacySecret": "someSecret",
+  "nextNonce": 3,
+  "status": "inactive",
+  "triesLeft": 10,
+  "ttl": 10,
+  "webhookUrl": "http://example.com",
+}
+`;
+
+exports[`PostgresSubscriptionRepo Subscription test suite method: findById should find the created notification 1`] = `
+{
+  "eventScope": "",
+  "eventType": "transaction.update",
+  "id": 1,
+  "legitimacySecret": "someSecret",
+  "nextNonce": 3,
+  "status": "inactive",
+  "triesLeft": 10,
+  "ttl": 10,
+  "webhookUrl": "http://example.com",
+}
+`;
