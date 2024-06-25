@@ -16,9 +16,9 @@ services:
     command: [ '--alice --chain dev' ]
     healthcheck:
       test: "timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/9933' && exit 0 || exit 1"
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
 
   subquery:
@@ -27,7 +27,10 @@ services:
     init: true
     restart: unless-stopped
     depends_on:
-      - 'postgres'
+     postgres:
+        condition: service_started
+     chain:
+        condition: service_healthy
     environment:
       START_BLOCK: 1
       NETWORK_ENDPOINT: ws://chain:9944
@@ -44,13 +47,13 @@ services:
       - --local
     healthcheck:
       test: curl --fail http://localhost:3000/meta || exit 1
-      interval: 20s
-      retries: 10
+      interval: 10s
+      retries: 20
       start_period: 20s
       timeout: 10s
 
   graphql:
-    image: onfinality/subql-query:v1.0.0
+    image: onfinality/subql-query:v2.13.0
     restart: unless-stopped
     ports:
       - ${SQ_PORT:-3001}:3000
@@ -95,9 +98,9 @@ services:
       POSTGRES_PASSWORD: $REST_POSTGRES_PASSWORD
     healthcheck:
       test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      interval: 3s
+      timeout: 3s
+      retries: 10
 
 volumes:
   db-data:
