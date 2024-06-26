@@ -7,6 +7,7 @@ import { IdentitiesModule } from '~/identities/identities.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
+import { VenuesController } from '~/settlements/venues.controller';
 import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({
@@ -18,6 +19,6 @@ import { TransactionsModule } from '~/transactions/transactions.module';
   ],
   providers: [SettlementsService],
   exports: [SettlementsService],
-  controllers: [SettlementsController],
+  controllers: [SettlementsController, VenuesController],
 })
 export class SettlementsModule {}

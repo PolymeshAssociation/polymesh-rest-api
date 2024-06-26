@@ -27,6 +27,7 @@ export class PortfolioMovementDto {
 
   @ApiPropertyOptional({
     description: 'NFT IDs to move from a collection',
+    type: 'string',
     example: ['1'],
     isArray: true,
   })
