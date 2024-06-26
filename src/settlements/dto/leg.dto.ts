@@ -2,14 +2,18 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { InstructionFungibleLeg, InstructionNftLeg } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
-import { ValidateIf, ValidateNested } from 'class-validator';
+import { IsEnum, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsBigNumber } from '~/common/decorators/validation';
+import { AppValidationError } from '~/common/errors';
+import { LegType } from '~/common/types';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { AssetLegDto } from '~/settlements/dto/asset-leg.dto';
 
-export class LegDto {
+export class LegDto extends AssetLegDto {
   @ApiPropertyOptional({
     description: 'Amount of the fungible Asset to be transferred',
     type: 'string',
@@ -54,10 +58,29 @@ export class LegDto {
   @Type(() => PortfolioDto)
   readonly to: PortfolioDto;
 
-  @ApiProperty({
-    description: 'Asset ticker',
-    example: 'TICKER',
-  })
-  @IsTicker()
-  readonly asset: string;
+  @ApiProperty({ enum: LegType, default: LegType.onChain })
+  @IsEnum(LegType)
+  readonly type = LegType.onChain;
+
+  public toLeg(): InstructionFungibleLeg | InstructionNftLeg {
+    const { amount, nfts, asset, from, to } = this;
+    if (amount) {
+      return {
+        from: from.toPortfolioLike(),
+        to: to.toPortfolioLike(),
+        asset,
+        amount,
+      };
+    }
+
+    if (nfts) {
+      return {
+        nfts,
+        asset,
+        from: from.toPortfolioLike(),
+        to: to.toPortfolioLike(),
+      };
+    }
+    throw new AppValidationError('Either nfts/amount should be specific for a on-chain leg');
+  }
 }

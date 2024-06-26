@@ -4,12 +4,15 @@ import {
   InstructionType,
   Leg,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { isOffChainLeg } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
-import { isFungibleLeg, isNftLeg } from '~/common/utils';
+import { LegType } from '~/common/types';
+import { isFungibleLeg } from '~/common/utils';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
+import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
 
 export function legsToLegModel(legs: Leg[]): LegModel[] {
   if (!legs.length) {
@@ -18,30 +21,38 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
 
   return legs
     .map(leg => {
-      const { from: legFrom, to: legTo, asset } = leg;
+      if (isOffChainLeg(leg)) {
+        return new OffChainLegModel({ ...leg, type: LegType.offChain });
+      }
+      const {
+        from: legFrom,
+        to: legTo,
+        asset: { ticker },
+      } = leg;
       const from = createPortfolioIdentifierModel(legFrom);
       const to = createPortfolioIdentifierModel(legTo);
 
       if (isFungibleLeg(leg)) {
         const { amount } = leg;
         return new LegModel({
-          asset,
+          type: LegType.onChain,
+          asset: ticker,
           from,
           to,
           amount,
         });
-      } else if (isNftLeg(leg)) {
+      } else {
+        // presume nft
         const { nfts } = leg;
 
         return new LegModel({
-          asset,
+          type: LegType.onChain,
+          asset: ticker,
           from,
           to,
           nfts: nfts.map(({ id }) => id),
         });
       }
-
-      return null;
     })
     .filter(leg => !!leg) as LegModel[];
 }
@@ -85,6 +96,10 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
   if (details.type === InstructionType.SettleOnBlock) {
     instructionModelParams = { ...instructionModelParams, endBlock: details.endBlock };
+  }
+
+  if (details.type === InstructionType.SettleManual) {
+    instructionModelParams = { ...instructionModelParams, endBlock: details.endAfterBlock };
   }
 
   if (instructionStatus.status !== InstructionStatus.Pending) {

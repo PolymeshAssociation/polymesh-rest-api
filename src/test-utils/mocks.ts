@@ -257,12 +257,15 @@ export class MockInstruction {
   public details = jest.fn();
   public getLegs = jest.fn();
   public getAffirmations = jest.fn();
+  public getOffChainAffirmations = jest.fn();
+  public getOffChainAffirmationForLeg = jest.fn();
   public withdraw = jest.fn();
   public reschedule = jest.fn();
   public getMediators = jest.fn();
   public affirmAsMediator = jest.fn();
   public rejectAsMediator = jest.fn();
   public withdrawAsMediator = jest.fn();
+  public generateOffChainAffirmationReceipt = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',
@@ -276,6 +279,9 @@ export class MockVenue {
   public addInstruction = jest.fn();
   public details = jest.fn();
   public modify = jest.fn();
+  public getAllowedSigners = jest.fn();
+  public addSigners = jest.fn();
+  public removeSigners = jest.fn();
 }
 
 export class MockIdentityAuthorization {
@@ -458,6 +464,7 @@ export class MockAccount {
   getIdentity = jest.fn();
   getSubsidy = jest.fn();
   getMultiSig = jest.fn();
+  getOffChainReceipts = jest.fn();
 
   constructor(address = 'address') {
     this.address = address;

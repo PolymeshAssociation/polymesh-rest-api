@@ -312,4 +312,15 @@ describe('AccountsController', () => {
       expect(result).toEqual({ identity: fakeIdentityModel });
     });
   });
+
+  describe('getOffChainReceipts', () => {
+    it('should call the service and return AccountDetailsModel', async () => {
+      const mockResponse = [new BigNumber(1), new BigNumber(2)];
+      mockAccountsService.fetchOffChainReceipts.mockReturnValue(mockResponse);
+
+      const result = await controller.getOffChainReceipts({ account: '5xdd' });
+
+      expect(result).toEqual({ results: ['1', '2'] });
+    });
+  });
 });

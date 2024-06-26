@@ -106,6 +106,7 @@ export class MockAccountsService {
   getTreasuryAccount = jest.fn();
   getIdentity = jest.fn();
   getDetails = jest.fn();
+  fetchOffChainReceipts = jest.fn();
 }
 
 export class MockEventsService {
@@ -158,6 +159,8 @@ export class MockSettlementsService {
   rejectInstruction = jest.fn();
   findVenueDetails = jest.fn();
   findAffirmations = jest.fn();
+  fetchOffChainAffirmations = jest.fn();
+  fetchOffChainAffirmationForALeg = jest.fn();
   createVenue = jest.fn();
   modifyVenue = jest.fn();
   canTransfer = jest.fn();
@@ -168,6 +171,7 @@ export class MockSettlementsService {
   affirmInstructionAsMediator = jest.fn();
   rejectInstructionAsMediator = jest.fn();
   withdrawAffirmationAsMediator = jest.fn();
+  executeInstruction = jest.fn();
 }
 
 export class MockClaimsService {

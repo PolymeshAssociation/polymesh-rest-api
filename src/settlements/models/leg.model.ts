@@ -2,13 +2,14 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { FungibleAsset, NftCollection } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { FromBigNumber } from '~/common/decorators/transformation';
+import { LegType } from '~/common/types';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
+import { AssetLegModel } from '~/settlements/models/asset-leg.model';
 
-export class LegModel {
+export class LegModel extends AssetLegModel {
   @ApiProperty({
     description: 'Portfolio from which the transfer is to be made',
     type: PortfolioIdentifierModel,
@@ -40,14 +41,16 @@ export class LegModel {
   readonly nfts?: BigNumber[];
 
   @ApiProperty({
-    description: 'Asset to be transferred',
+    description: 'Indicates that the leg is on chain',
+    enum: LegType,
     type: 'string',
-    example: 'TICKER',
+    example: LegType.onChain,
   })
-  @FromEntity()
-  readonly asset: FungibleAsset | NftCollection;
+  readonly type = LegType.onChain;
 
   constructor(model: LegModel) {
-    Object.assign(this, model);
+    const { asset, type, ...rest } = model;
+    super({ asset, type });
+    Object.assign(this, rest);
   }
 }

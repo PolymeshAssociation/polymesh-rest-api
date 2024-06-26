@@ -8,19 +8,18 @@ import {
   InstructionType,
   Nft,
   TransferError,
-  VenueType,
 } from '@polymeshassociation/polymesh-sdk/types';
-import { when } from 'jest-when';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { LegType } from '~/common/types';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { testValues } from '~/test-utils/consts';
-import { MockInstruction, MockPortfolio, MockVenue } from '~/test-utils/mocks';
+import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
 
-const { did, signer, txResult } = testValues;
+const { did, txResult } = testValues;
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -75,6 +74,12 @@ describe('SettlementsController', () => {
               ticker: 'TICKER',
             },
           },
+          {
+            from: createMock<Identity>({ did: '0x01' }),
+            to: createMock<Identity>({ did: '0x02' }),
+            offChainAmount: new BigNumber(100),
+            asset: 'OFF_CHAIN_TICKER',
+          },
         ],
         next: null,
       };
@@ -90,39 +95,26 @@ describe('SettlementsController', () => {
       expect(result).toEqual({
         ...mockInstructionDetails,
         mediators: [{ identity: mediatorDid, status: AffirmationStatus.Pending }],
-        legs:
-          mockLegs.data.map(({ from, to, amount, nfts, asset }) => ({
+        legs: [
+          ...[mockLegs.data[0], mockLegs.data[1]].map(({ from, to, amount, nfts, asset }) => ({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             from: createPortfolioIdentifierModel(from as any),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             to: createPortfolioIdentifierModel(to as any),
             amount,
             nfts,
-            asset,
-          })) || [],
-      });
-    });
-  });
-
-  describe('createInstruction', () => {
-    it('should create an instruction and return the data returned by the service', async () => {
-      const mockInstruction = new MockInstruction();
-
-      when(mockInstruction.getLegs).calledWith().mockResolvedValue({ data: [] });
-
-      const mockData = {
-        ...txResult,
-        result: mockInstruction,
-      };
-      mockSettlementsService.createInstruction.mockResolvedValue(mockData);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.createInstruction({ id: new BigNumber(3) }, {} as any);
-
-      expect(result).toEqual({
-        ...txResult,
-        instruction: mockInstruction, // in jest the @FromEntity decorator is not applied
-        legs: [],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            asset: (asset as any).ticker,
+            type: LegType.onChain,
+          })),
+          {
+            from: '0x01',
+            to: '0x02',
+            offChainAmount: new BigNumber(100),
+            asset: 'OFF_CHAIN_TICKER',
+            type: LegType.offChain,
+          },
+        ],
       });
     });
   });
@@ -253,59 +245,40 @@ describe('SettlementsController', () => {
     });
   });
 
-  describe('getVenueDetails', () => {
-    it('should return the details of the Venue', async () => {
-      const mockVenueDetails = {
-        owner: {
-          did,
+  describe('getOffChainAffirmations', () => {
+    it('should return the list of off chain affirmations for a Instruction', async () => {
+      const mockAffirmations = [
+        {
+          legId: new BigNumber(0),
+          status: AffirmationStatus.Pending,
         },
-        description: 'Venue desc',
-        type: VenueType.Distribution,
-      };
-      mockSettlementsService.findVenueDetails.mockResolvedValue(mockVenueDetails);
+      ];
+      mockSettlementsService.fetchOffChainAffirmations.mockResolvedValue(mockAffirmations);
 
-      const result = await controller.getVenueDetails({ id: new BigNumber(3) });
-
-      expect(result).toEqual(mockVenueDetails);
-    });
-  });
-
-  describe('createVenue', () => {
-    it('should create a Venue and return the data returned by the service', async () => {
-      const body = {
-        signer,
-        description: 'Generic Exchange',
-        type: VenueType.Exchange,
-      };
-      const mockVenue = new MockVenue();
-      const mockData = {
-        ...txResult,
-        result: mockVenue,
-      };
-      mockSettlementsService.createVenue.mockResolvedValue(mockData);
-
-      const result = await controller.createVenue(body);
+      const result = await controller.getOffChainAffirmations({ id: new BigNumber(3) });
 
       expect(result).toEqual({
-        ...txResult,
-        venue: mockVenue,
+        results: mockAffirmations,
       });
     });
   });
 
-  describe('modifyVenue', () => {
-    it('should modify a venue and return the data returned by the service', async () => {
-      mockSettlementsService.modifyVenue.mockResolvedValue(txResult);
+  describe('getOffChainAffirmationForLeg', () => {
+    it('should return the off chain affirmation status for a specific leg in an Instruction', async () => {
+      const mockAffirmationStatus = AffirmationStatus.Pending;
+      mockSettlementsService.fetchOffChainAffirmationForALeg.mockResolvedValue(
+        mockAffirmationStatus
+      );
 
-      const body = {
-        signer,
-        description: 'A generic exchange',
-        type: VenueType.Exchange,
-      };
+      const result = await controller.getOffChainAffirmationForLeg({
+        id: new BigNumber(3),
+        legId: new BigNumber(0),
+      });
 
-      const result = await controller.modifyVenue({ id: new BigNumber(3) }, body);
-
-      expect(result).toEqual(txResult);
+      expect(result).toEqual({
+        legId: new BigNumber(0),
+        status: mockAffirmationStatus,
+      });
     });
   });
 
@@ -333,6 +306,19 @@ describe('SettlementsController', () => {
       });
 
       expect(result).toEqual(mockTransferBreakdown);
+    });
+  });
+
+  describe('executeInstruction', () => {
+    it('should execute an instruction and return the data returned by the service', async () => {
+      mockSettlementsService.executeInstruction.mockResolvedValue(txResult);
+
+      const result = await controller.executeInstruction(
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+
+      expect(result).toEqual(txResult);
     });
   });
 });

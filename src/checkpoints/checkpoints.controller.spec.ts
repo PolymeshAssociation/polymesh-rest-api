@@ -318,7 +318,7 @@ describe('CheckpointsController', () => {
       expect(result).toEqual([new CheckpointDetailsModel({ id, totalSupply, createdAt })]);
     });
   });
-  
+
   describe('getComplexity', () => {
     it('should return the transaction details', async () => {
       const maxComplexity = new BigNumber(10);

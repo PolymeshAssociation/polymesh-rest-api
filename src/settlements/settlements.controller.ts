@@ -7,29 +7,27 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { AffirmAsMediatorDto } from '~/settlements/dto/affirm-as-mediator.dto';
-import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
+import { AffirmInstructionDto } from '~/settlements/dto/affirm-instruction.dto';
+import { ExecuteInstructionDto } from '~/settlements/dto/execute-instruction.dto';
+import { LegIdParamsDto } from '~/settlements/dto/leg-id-params.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
-import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
-import { CreatedInstructionModel } from '~/settlements/models/created-instruction.model';
-import { CreatedVenueModel } from '~/settlements/models/created-venue.model';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { InstructionAffirmationModel } from '~/settlements/models/instruction-affirmation.model';
+import { OffChainAffirmationModel } from '~/settlements/models/off-chain-affirmation.model';
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
-import { VenueDetailsModel } from '~/settlements/models/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { createInstructionModel, legsToLegModel } from '~/settlements/settlements.util';
+import { createInstructionModel } from '~/settlements/settlements.util';
 
 @ApiTags('settlements')
 @Controller()
@@ -60,45 +58,6 @@ export class SettlementsController {
     return createInstructionModel(instruction);
   }
 
-  @ApiTags('venues', 'instructions')
-  @ApiOperation({
-    summary: 'Create a new Instruction',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Venue through which Settlement will be handled',
-    type: 'string',
-    example: '123',
-  })
-  @ApiOkResponse({
-    description: 'The ID of the newly created Instruction',
-    type: CreatedInstructionModel,
-  })
-  @Post('venues/:id/instructions/create')
-  public async createInstruction(
-    @Param() { id }: IdParamsDto,
-    @Body() createInstructionDto: CreateInstructionDto
-  ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.settlementsService.createInstruction(id, createInstructionDto);
-
-    const resolver: TransactionResolver<Instruction> = async ({
-      result: instruction,
-      transactions,
-      details,
-    }) => {
-      const { data: legs } = await instruction.getLegs();
-
-      return new CreatedInstructionModel({
-        instruction,
-        details,
-        transactions,
-        legs: legsToLegModel(legs),
-      });
-    };
-
-    return handleServiceResult(serviceResult, resolver);
-  }
-
   @ApiTags('instructions')
   @ApiOperation({
     summary: 'Affirm an existing Instruction',
@@ -118,9 +77,9 @@ export class SettlementsController {
   @Post('instructions/:id/affirm')
   public async affirmInstruction(
     @Param() { id }: IdParamsDto,
-    @Body() signerDto: TransactionBaseDto
+    @Body() affirmInstructionDto: AffirmInstructionDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.settlementsService.affirmInstruction(id, signerDto);
+    const result = await this.settlementsService.affirmInstruction(id, affirmInstructionDto);
     return handleServiceResult(result);
   }
 
@@ -305,67 +264,69 @@ export class SettlementsController {
     });
   }
 
-  @ApiTags('venues')
+  @ApiTags('instructions')
   @ApiOperation({
-    summary: 'Fetch details of a Venue',
-    description: 'This endpoint will provide the basic details of a Venue',
+    summary: 'List of affirmations for off chain legs',
+    description:
+      'This endpoint will provide the affirmation statuses for off chain legs in a Instruction',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the Venue whose details are to be fetched',
+    description: 'The ID of the Instruction whose off chain affirmations are to be fetched',
+    type: 'string',
+    example: '123',
+  })
+  @ApiArrayResponse(OffChainAffirmationModel, {
+    description: 'List of all off chain affirmations received',
+    paginated: false,
+  })
+  @Get('instructions/:id/off-chain-affirmations')
+  public async getOffChainAffirmations(
+    @Param() { id }: IdParamsDto
+  ): Promise<ResultsModel<OffChainAffirmationModel>> {
+    const result = await this.settlementsService.fetchOffChainAffirmations(id);
+    return new ResultsModel({
+      results: result.map(
+        ({ legId, status }) =>
+          new OffChainAffirmationModel({
+            legId,
+            status,
+          })
+      ),
+    });
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Get off-chain affirmation status for a specific leg',
+    description:
+      'This endpoint will provide the affirmation status of a specific off chain leg in an Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction',
+    type: 'string',
+    example: '123',
+  })
+  @ApiParam({
+    name: 'legId',
+    description: 'The leg index for which the affirmation status is to be fetched',
     type: 'string',
     example: '123',
   })
   @ApiOkResponse({
-    description: 'Details of the Venue',
-    type: VenueDetailsModel,
+    description: 'Affirmation status of the specified leg in the Instruction provided',
+    type: OffChainAffirmationModel,
   })
-  @Get('venues/:id')
-  public async getVenueDetails(@Param() { id }: IdParamsDto): Promise<VenueDetailsModel> {
-    const venueDetails = await this.settlementsService.findVenueDetails(id);
-    return new VenueDetailsModel(venueDetails);
-  }
-
-  @ApiTags('venues')
-  @ApiOperation({
-    summary: 'Create a Venue',
-    description: 'This endpoint creates a new Venue',
-  })
-  @ApiTransactionResponse({
-    description: 'Details about the newly created Venue',
-    type: CreatedVenueModel,
-  })
-  @Post('/venues/create')
-  public async createVenue(
-    @Body() createVenueDto: CreateVenueDto
-  ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.settlementsService.createVenue(createVenueDto);
-
-    const resolver: TransactionResolver<Venue> = ({ result: venue, transactions, details }) =>
-      new CreatedVenueModel({
-        venue,
-        details,
-        transactions,
-      });
-
-    return handleServiceResult(serviceResult, resolver);
-  }
-
-  @ApiTags('venues')
-  @ApiParam({
-    type: 'string',
-    name: 'id',
-  })
-  @ApiOperation({
-    summary: "Modify a venue's details",
-  })
-  @Post('venues/:id/modify')
-  public async modifyVenue(
-    @Param() { id }: IdParamsDto,
-    @Body() modifyVenueDto: ModifyVenueDto
-  ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.settlementsService.modifyVenue(id, modifyVenueDto);
-    return handleServiceResult(serviceResult);
+  @Get('instructions/:id/off-chain-affirmations/:legId')
+  public async getOffChainAffirmationForLeg(
+    @Param() { id, legId }: LegIdParamsDto
+  ): Promise<OffChainAffirmationModel> {
+    const status = await this.settlementsService.fetchOffChainAffirmationForALeg(id, legId);
+    return new OffChainAffirmationModel({
+      legId,
+      status,
+    });
   }
 
   @ApiTags('assets')
@@ -398,5 +359,29 @@ export class SettlementsController {
     );
 
     return new TransferBreakdownModel(transferBreakdown);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Execute an existing Instruction',
+    description: 'This endpoint will execute a pending Instruction of type `SettleManual`',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction to be executed',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('instructions/:id/execute-manually')
+  public async executeInstruction(
+    @Param() { id }: IdParamsDto,
+    @Body() body: ExecuteInstructionDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.executeInstruction(id, body);
+    return handleServiceResult(result);
   }
 }

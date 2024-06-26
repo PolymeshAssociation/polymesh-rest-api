@@ -36,6 +36,7 @@ import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/sw
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { createIdentityModel, createSignerModel } from '~/identities/identities.util';
@@ -342,5 +343,30 @@ export class AccountsController {
     }
 
     return new AccountDetailsModel({ identity: identityModel, multiSig: multiSigDetailsModel });
+  }
+
+  @ApiOperation({
+    summary: 'Get all redeemed off chain receipt UIDs',
+    description: 'This endpoint will provide list of all off chain receipt UIDs used by an Account',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address for which the receipts are to be fetched',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of receipt UIDs used by the Account',
+    paginated: false,
+    example: ['10001', '10002'],
+  })
+  @Get('/:id/receipts')
+  public async getOffChainReceipts(
+    @Param() { account }: AccountParamsDto
+  ): Promise<ResultsModel<string>> {
+    const results = await this.accountsService.fetchOffChainReceipts(account);
+    return new ResultsModel({
+      results: results.map(result => result.toString()),
+    });
   }
 }

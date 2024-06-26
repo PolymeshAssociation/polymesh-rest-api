@@ -47,3 +47,8 @@ export enum ProcessMode {
 
   AMQP = 'AMQP',
 }
+
+export enum LegType {
+  offChain = 'offChain',
+  onChain = 'onChain',
+}

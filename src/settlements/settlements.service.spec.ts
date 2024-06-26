@@ -5,20 +5,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
+  SignerKeyRingType,
   TransferError,
   TxTags,
   VenueType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
+import { LegType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { LegDto } from '~/settlements/dto/leg.dto';
+import { OffChainAffirmationReceiptDto } from '~/settlements/dto/offchain-affirmation-receipt.dto';
+import { OffChainLegDto } from '~/settlements/dto/offchain-leg.dto';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { testValues } from '~/test-utils/consts';
 import {
+  MockAccount,
   MockAsset,
   MockIdentity,
   MockInstruction,
@@ -178,12 +184,20 @@ describe('SettlementsService', () => {
 
       const params = {
         legs: [
-          {
-            from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
-            to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
-            amount: new BigNumber(100),
-            asset: 'FAKE_TICKER',
-          },
+          // new LegDto({
+          //   type: LegType.onChain,
+          //   from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
+          //   to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
+          //   amount: new BigNumber(100),
+          //   asset: 'FAKE_TICKER',
+          // }),
+          // new OffChainLegDto({
+          //   type: LegType.offChain,
+          //   from: '0x01',
+          //   to: '0x02',
+          //   offChainAmount: new BigNumber(100),
+          //   asset: 'OFF_CHAIN_TICKER',
+          // }),
         ],
       };
 
@@ -208,6 +222,12 @@ describe('SettlementsService', () => {
               to: { identity: 'toDid', id: new BigNumber(1) },
               amount: new BigNumber(100),
               asset: 'FAKE_TICKER',
+            },
+            {
+              from: '0x01',
+              to: '0x02',
+              offChainAmount: new BigNumber(100),
+              asset: 'OFF_CHAIN_TICKER',
             },
           ],
         },
@@ -290,6 +310,54 @@ describe('SettlementsService', () => {
     });
   });
 
+  describe('updateVenueSigners', () => {
+    it('should run a addSigners or modifySigners procedure and return the queue data', async () => {
+      const mockVenue = new MockVenue();
+
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.UpdateVenueSigners,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const body = {
+        signer,
+        signers: ['randomSigner'],
+      };
+
+      let result = await service.updateVenueSigners(new BigNumber(123), body, true);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockVenue.addSigners,
+        { signers: body.signers },
+        expect.objectContaining({ signer })
+      );
+
+      result = await service.updateVenueSigners(new BigNumber(12), body, false);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockVenue.removeSigners,
+        { signers: body.signers },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
   describe('affirmInstruction', () => {
     it('should run an affirm procedure and return the queue data', async () => {
       const mockInstruction = new MockInstruction();
@@ -297,7 +365,7 @@ describe('SettlementsService', () => {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
-        tag: TxTags.settlement.AffirmInstruction,
+        tag: TxTags.settlement.AffirmInstructionWithCount,
       };
       const mockTransaction = new MockTransaction(transaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
@@ -310,8 +378,7 @@ describe('SettlementsService', () => {
         signer,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.affirmInstruction(new BigNumber(123), body as any);
+      let result = await service.affirmInstruction(new BigNumber(123), body);
 
       expect(result).toEqual({
         result: undefined,
@@ -320,6 +387,71 @@ describe('SettlementsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockInstruction.affirm,
         {},
+        expect.objectContaining({ signer })
+      );
+
+      mockTransactionsService.submit.mockClear();
+
+      result = await service.affirmInstruction(new BigNumber(123), {
+        ...body,
+        portfolios: [new PortfolioDto({ did: '0x01', id: new BigNumber(0) })],
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.affirm,
+        { portfolios: ['0x01'] },
+        expect.objectContaining({ signer })
+      );
+
+      mockTransactionsService.submit.mockClear();
+
+      const receipt = new OffChainAffirmationReceiptDto({
+        legId: new BigNumber(0),
+        uid: new BigNumber(1),
+        signer: 'some_signer',
+        signature: {
+          type: SignerKeyRingType.Sr25519,
+          value: '0xsomesignature',
+        },
+      });
+
+      const receipt2 = new OffChainAffirmationReceiptDto({
+        legId: new BigNumber(1),
+        uid: new BigNumber(2),
+        signer: 'some_signer2',
+        signature: {
+          type: SignerKeyRingType.Sr25519,
+          value: '0xsomesignature2',
+        },
+        metadata: 'random metadata',
+      });
+
+      mockInstruction.generateOffChainAffirmationReceipt.mockResolvedValue(receipt2);
+
+      result = await service.affirmInstruction(new BigNumber(123), {
+        ...body,
+        receipts: [
+          receipt,
+          {
+            ...receipt2,
+            signature: {
+              type: SignerKeyRingType.Sr25519,
+            },
+          },
+        ],
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.affirm,
+        { receipts: [receipt, receipt2] },
         expect.objectContaining({ signer })
       );
     });
@@ -379,6 +511,22 @@ describe('SettlementsService', () => {
     });
   });
 
+  describe('fetchAllowedSigners', () => {
+    it('should return the allowed signers for a Venue', async () => {
+      const mockAccounts = [new MockAccount()];
+      const mockVenue = new MockVenue();
+      mockVenue.getAllowedSigners.mockResolvedValue(mockAccounts);
+
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
+
+      const result = await service.fetchAllowedSigners(new BigNumber(12));
+
+      expect(result).toEqual(mockAccounts);
+    });
+  });
+
   describe('findAffirmations', () => {
     it('should return a list of affirmations for an Instruction', async () => {
       const mockAffirmations = {
@@ -403,6 +551,48 @@ describe('SettlementsService', () => {
       const result = await service.findAffirmations(new BigNumber(123), new BigNumber(10));
 
       expect(result).toEqual(mockAffirmations);
+    });
+  });
+
+  describe('getOffChainAffirmations', () => {
+    it('should return a list of off chain affirmations for an Instruction', async () => {
+      const mockAffirmations = [
+        {
+          legId: new BigNumber(0),
+          status: AffirmationStatus.Pending,
+        },
+      ];
+
+      const mockInstruction = new MockInstruction();
+      mockInstruction.getOffChainAffirmations.mockResolvedValue(mockAffirmations);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.fetchOffChainAffirmations(new BigNumber(12));
+
+      expect(result).toEqual(mockAffirmations);
+    });
+  });
+
+  describe('fetchOffChainAffirmationForALeg', () => {
+    it('should return a list of off chain affirmations for an Instruction', async () => {
+      const mockAffirmationStatus = AffirmationStatus.Affirmed;
+
+      const mockInstruction = new MockInstruction();
+      mockInstruction.getOffChainAffirmationForLeg.mockResolvedValue(mockAffirmationStatus);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.fetchOffChainAffirmationForALeg(
+        new BigNumber(12),
+        new BigNumber(0)
+      );
+
+      expect(result).toEqual(mockAffirmationStatus);
     });
   });
 

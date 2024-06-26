@@ -21,4 +21,14 @@ export class CreateVenueDto extends TransactionBaseDto {
   })
   @IsEnum(VenueType)
   readonly type: VenueType;
+
+  @ApiProperty({
+    description:
+      'Optional list of signers to be allowed to sign off chain receipts for instructions in this Venue',
+    type: 'string',
+    isArray: true,
+    example: ['5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV'],
+  })
+  @IsString({ each: true })
+  readonly signers?: string[];
 }

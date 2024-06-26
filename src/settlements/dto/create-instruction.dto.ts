@@ -1,21 +1,47 @@
 /* istanbul ignore file */
-import { ApiPropertyOptional } from '@nestjs/swagger';
+
+import { ApiExtraModels, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsByteLength, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
+import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsDid } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { LegType } from '~/common/types';
+import { AssetLegDto } from '~/settlements/dto/asset-leg.dto';
 import { LegDto } from '~/settlements/dto/leg.dto';
+import { OffChainLegDto } from '~/settlements/dto/offchain-leg.dto';
 
+@ApiExtraModels(LegDto, OffChainLegDto, AssetLegDto)
 export class CreateInstructionDto extends TransactionBaseDto {
+  @ApiPropertyOneOf({
+    description: 'Array of legs which can be either LegDto or OffChainLegDto',
+    union: [LegDto, OffChainLegDto],
+    isArray: true,
+  })
   @ValidateNested({ each: true })
-  @Type(() => LegDto)
-  readonly legs: LegDto[];
+  @Type(() => AssetLegDto, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'type',
+      subTypes: [
+        {
+          value: OffChainLegDto,
+          name: LegType.offChain,
+        },
+        {
+          value: LegDto,
+          name: LegType.onChain,
+        },
+      ],
+    },
+  })
+  readonly legs: (LegDto | OffChainLegDto)[];
 
   @ApiPropertyOptional({
-    description: 'Date at which the trade was agreed upon (optional, for offchain trades)',
+    description: 'Date at which the trade was agreed upon (optional, for off chain trades)',
     example: new Date('10/14/1987').toISOString(),
   })
   @IsOptional()
@@ -23,7 +49,7 @@ export class CreateInstructionDto extends TransactionBaseDto {
   readonly tradeDate?: Date;
 
   @ApiPropertyOptional({
-    description: 'Date at which the trade was executed (optional, for offchain trades)',
+    description: 'Date at which the trade was executed (optional, for off chain trades)',
     example: new Date('10/14/1987').toISOString(),
   })
   @IsOptional()
@@ -40,6 +66,17 @@ export class CreateInstructionDto extends TransactionBaseDto {
   @IsBigNumber()
   @ToBigNumber()
   readonly endBlock?: BigNumber;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    description:
+      'Block after which the Instruction can be manually executed. If not passed, the Instruction will be executed when all parties affirm or as soon as one party rejects',
+    example: '123',
+  })
+  @IsOptional()
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly endAfterBlock?: BigNumber;
 
   @ApiPropertyOptional({
     description: 'Identifier string to help differentiate instructions. Maximum 32 bytes',
