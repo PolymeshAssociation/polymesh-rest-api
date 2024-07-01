@@ -5,10 +5,12 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { InstructionStatus, InstructionType, Venue } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
+import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { LegModel } from '~/settlements/models/leg.model';
 import { MediatorAffirmationModel } from '~/settlements/models/mediator-affirmation.model';
+import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
 
 export class InstructionModel {
   @ApiProperty({
@@ -67,6 +69,15 @@ export class InstructionModel {
 
   @ApiPropertyOptional({
     description:
+      'Block after which the Instruction can be manually executed. This value will only be present for "SettleManual" type Instruction',
+    type: 'string',
+    example: '1000000',
+  })
+  @FromBigNumber()
+  readonly endAfterBlock?: BigNumber;
+
+  @ApiPropertyOptional({
+    description:
       'Identifies the event where the Instruction execution was attempted. This value will not be present for a "Pending" Instruction',
     type: EventIdentifierModel,
   })
@@ -79,13 +90,13 @@ export class InstructionModel {
   })
   readonly memo?: string;
 
-  @ApiProperty({
+  @ApiPropertyOneOf({
     description: 'List of Legs in the Instruction',
-    type: LegModel,
     isArray: true,
+    union: [LegModel, OffChainLegModel],
   })
-  @Type(() => LegModel)
-  readonly legs: LegModel[];
+  // @Type(() => InstructionLegModel)
+  readonly legs: (LegModel | OffChainLegModel)[];
 
   @ApiProperty({
     description: 'List of mediators involved in the Instruction',

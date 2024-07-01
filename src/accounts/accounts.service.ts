@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Account,
   AccountBalance,
@@ -141,5 +142,10 @@ export class AccountsService {
       identity,
       multiSigDetails,
     };
+  }
+
+  public async fetchOffChainReceipts(address: string): Promise<BigNumber[]> {
+    const account = await this.findOne(address);
+    return account.getOffChainReceipts();
   }
 }

@@ -4,12 +4,14 @@ import {
   InstructionType,
   Leg,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { isOffChainLeg } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
-import { isFungibleLeg, isNftLeg } from '~/common/utils';
+import { isFungibleLeg } from '~/common/utils';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
+import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
 
 export function legsToLegModel(legs: Leg[]): LegModel[] {
   if (!legs.length) {
@@ -18,6 +20,9 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
 
   return legs
     .map(leg => {
+      if (isOffChainLeg(leg)) {
+        return new OffChainLegModel(leg);
+      }
       const { from: legFrom, to: legTo, asset } = leg;
       const from = createPortfolioIdentifierModel(legFrom);
       const to = createPortfolioIdentifierModel(legTo);
@@ -30,7 +35,8 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
           to,
           amount,
         });
-      } else if (isNftLeg(leg)) {
+      } else {
+        // presume nft
         const { nfts } = leg;
 
         return new LegModel({
@@ -40,8 +46,6 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
           nfts: nfts.map(({ id }) => id),
         });
       }
-
-      return null;
     })
     .filter(leg => !!leg) as LegModel[];
 }
@@ -85,6 +89,10 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
   if (details.type === InstructionType.SettleOnBlock) {
     instructionModelParams = { ...instructionModelParams, endBlock: details.endBlock };
+  }
+
+  if (details.type === InstructionType.SettleManual) {
+    instructionModelParams = { ...instructionModelParams, endBlock: details.endAfterBlock };
   }
 
   if (instructionStatus.status !== InstructionStatus.Pending) {

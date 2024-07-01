@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Account,
+  AffirmationStatus,
+  AffirmInstructionParams,
   GroupedInstructions,
   Instruction,
   InstructionAffirmation,
-  InstructionLeg,
+  OffChainAffirmation,
+  OffChainAffirmationReceipt,
   PortfolioLike,
   ResultSet,
   TransferBreakdown,
@@ -18,9 +22,12 @@ import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { AffirmAsMediatorDto } from '~/settlements/dto/affirm-as-mediator.dto';
+import { AffirmInstructionDto } from '~/settlements/dto/affirm-instruction.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { CreateVenueDto } from '~/settlements/dto/create-venue.dto';
+import { ExecuteInstructionDto } from '~/settlements/dto/execute-instruction.dto';
 import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
+import { UpdateVenueSignersDto } from '~/settlements/dto/update-venue-signers.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
 
@@ -58,16 +65,7 @@ export class SettlementsService {
 
     const params = {
       ...args,
-      legs: args.legs.map(
-        ({ amount, nfts, asset, from, to }) =>
-          ({
-            amount,
-            nfts,
-            asset,
-            from: from.toPortfolioLike(),
-            to: to.toPortfolioLike(),
-          } as InstructionLeg)
-      ),
+      legs: args.legs.map(leg => leg.toLeg()),
     };
 
     return this.transactionsService.submit(venue.addInstruction, params, options);
@@ -94,6 +92,12 @@ export class SettlementsService {
     return venue.details();
   }
 
+  public async fetchAllowedSigners(id: BigNumber): Promise<Account[]> {
+    const venue = await this.findVenue(id);
+
+    return venue.getAllowedSigners();
+  }
+
   public async findAffirmations(
     id: BigNumber,
     size: BigNumber,
@@ -102,6 +106,21 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return instruction.getAffirmations({ size, start });
+  }
+
+  public async fetchOffChainAffirmations(id: BigNumber): Promise<OffChainAffirmation[]> {
+    const instruction = await this.findInstruction(id);
+
+    return instruction.getOffChainAffirmations();
+  }
+
+  public async fetchOffChainAffirmationForALeg(
+    id: BigNumber,
+    legId: BigNumber
+  ): Promise<AffirmationStatus> {
+    const instruction = await this.findInstruction(id);
+
+    return instruction.getOffChainAffirmationForLeg({ legId });
   }
 
   public async createVenue(createVenueDto: CreateVenueDto): ServiceReturn<Venue> {
@@ -121,6 +140,18 @@ export class SettlementsService {
     return this.transactionsService.submit(venue.modify, args as Required<typeof args>, options);
   }
 
+  public async updateVenueSigners(
+    venueId: BigNumber,
+    updateVenueSignersDto: UpdateVenueSignersDto,
+    addSigners: boolean
+  ): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(updateVenueSignersDto);
+    const venue = await this.findVenue(venueId);
+    const method = addSigners ? venue.addSigners : venue.removeSigners;
+
+    return this.transactionsService.submit(method, args, options);
+  }
+
   public async canTransfer(
     from: PortfolioLike,
     to: PortfolioLike,
@@ -136,12 +167,45 @@ export class SettlementsService {
 
   public async affirmInstruction(
     id: BigNumber,
-    transactionBaseDto: TransactionBaseDto
+    affirmInstructionDto: AffirmInstructionDto
   ): ServiceReturn<Instruction> {
-    const { options } = extractTxOptions(transactionBaseDto);
+    const { options, args } = extractTxOptions(affirmInstructionDto);
+
+    const { portfolios, receipts } = args;
+
     const instruction = await this.findInstruction(id);
 
-    return this.transactionsService.submit(instruction.affirm, {}, options);
+    const params = {} as AffirmInstructionParams;
+
+    if (portfolios) {
+      params.portfolios = portfolios.map(portfolio => portfolio.toPortfolioLike());
+    }
+
+    if (receipts) {
+      params.receipts = await Promise.all(
+        receipts.map(receipt => {
+          const {
+            legId,
+            uid,
+            signer,
+            signature: { type: signerKeyRingType, value: signatureValue },
+            metadata,
+          } = receipt;
+          if (signatureValue) {
+            return Promise.resolve(receipt as OffChainAffirmationReceipt);
+          }
+          return instruction.generateOffChainAffirmationReceipt({
+            legId,
+            uid,
+            signer,
+            signerKeyRingType,
+            metadata,
+          });
+        })
+      );
+    }
+
+    return this.transactionsService.submit(instruction.affirm, params, options);
   }
 
   public async rejectInstruction(
@@ -152,6 +216,16 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return this.transactionsService.submit(instruction.reject, {}, options);
+  }
+
+  public async executeInstruction(
+    id: BigNumber,
+    executeInstructionDto: ExecuteInstructionDto
+  ): ServiceReturn<Instruction> {
+    const { options, args } = extractTxOptions(executeInstructionDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.executeManually, args, options);
   }
 
   public async withdrawAffirmation(

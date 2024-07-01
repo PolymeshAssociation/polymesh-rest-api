@@ -382,4 +382,19 @@ describe('AccountsService', () => {
       expect(result).toStrictEqual(fakeResult);
     });
   });
+
+  describe('fetchOffChainReceipts', () => {
+    it('should return the off chain Receipts redeemed by an Account', async () => {
+      const mockAccount = new MockAccount();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAccount as any);
+      const mockResult = [new BigNumber(1)];
+      mockAccount.getOffChainReceipts.mockResolvedValue(mockResult);
+
+      const result = await service.fetchOffChainReceipts('address');
+      expect(result).toEqual(mockResult);
+    });
+  });
 });
