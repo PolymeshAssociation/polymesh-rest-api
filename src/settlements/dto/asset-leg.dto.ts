@@ -21,8 +21,4 @@ export class AssetLegDto {
   })
   @IsEnum(LegType)
   readonly type: LegType;
-
-  constructor(dto: AssetLegDto) {
-    Object.assign(this, dto);
-  }
 }

@@ -10,6 +10,7 @@ import {
   TxTags,
   VenueType,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { plainToInstance } from 'class-transformer';
 
 import { AssetsService } from '~/assets/assets.service';
 import { LegType } from '~/common/types';
@@ -182,23 +183,24 @@ describe('SettlementsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findVenueSpy.mockResolvedValue(mockVenue as any);
 
+      const onChainLeg = {
+        type: LegType.onChain,
+        from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
+        to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
+        amount: new BigNumber(100),
+        asset: 'FAKE_TICKER',
+      };
+
+      const offChainLeg = {
+        type: LegType.offChain,
+        from: '0x01',
+        to: '0x02',
+        offChainAmount: new BigNumber(100),
+        asset: 'OFF_CHAIN_TICKER',
+      };
+
       const params = {
-        legs: [
-          // new LegDto({
-          //   type: LegType.onChain,
-          //   from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
-          //   to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
-          //   amount: new BigNumber(100),
-          //   asset: 'FAKE_TICKER',
-          // }),
-          // new OffChainLegDto({
-          //   type: LegType.offChain,
-          //   from: '0x01',
-          //   to: '0x02',
-          //   offChainAmount: new BigNumber(100),
-          //   asset: 'OFF_CHAIN_TICKER',
-          // }),
-        ],
+        legs: [plainToInstance(LegDto, onChainLeg), plainToInstance(OffChainLegDto, offChainLeg)],
       };
 
       const body = {
