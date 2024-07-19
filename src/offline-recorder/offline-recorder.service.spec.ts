@@ -1,30 +1,30 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { ArtemisService } from '~/artemis/artemis.service';
 import { QueueName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { MessageService } from '~/message/common/message.service';
 import { OfflineRecorderService } from '~/offline-recorder/offline-recorder.service';
 import { OfflineEventRepo } from '~/offline-recorder/repo/offline-event.repo';
-import { mockArtemisServiceProvider, mockOfflineRepoProvider } from '~/test-utils/service-mocks';
+import { mockMessageServiceProvider, mockOfflineRepoProvider } from '~/test-utils/service-mocks';
 
 describe('OfflineRecorderService', () => {
   let service: OfflineRecorderService;
   let mockOfflineRepo: DeepMocked<OfflineEventRepo>;
-  let mockArtemisService: DeepMocked<ArtemisService>;
+  let mockMessageService: DeepMocked<MessageService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OfflineRecorderService,
-        mockArtemisServiceProvider,
+        mockMessageServiceProvider,
         mockOfflineRepoProvider,
         mockPolymeshLoggerProvider,
       ],
     }).compile();
 
     mockOfflineRepo = module.get<typeof mockOfflineRepo>(OfflineEventRepo);
-    mockArtemisService = module.get<typeof mockArtemisService>(ArtemisService);
+    mockMessageService = module.get<typeof mockMessageService>(MessageService);
     service = module.get<OfflineRecorderService>(OfflineRecorderService);
   });
 
@@ -34,7 +34,7 @@ describe('OfflineRecorderService', () => {
 
   describe('constructor', () => {
     it('should have subscribed to the required topics', () => {
-      expect(mockArtemisService.registerListener).toHaveBeenCalledWith(
+      expect(mockMessageService.registerListener).toHaveBeenCalledWith(
         QueueName.EventsLog,
         expect.any(Function),
         expect.any(Function)

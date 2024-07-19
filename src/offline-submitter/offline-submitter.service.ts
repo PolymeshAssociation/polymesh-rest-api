@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { ArtemisService } from '~/artemis/artemis.service';
 import { AddressName, QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+import { MessageService } from '~/message/common/message.service';
 import { OfflineSignatureModel } from '~/offline-signer/models/offline-signature.model';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
 import { OfflineTxRepo } from '~/offline-submitter/repos/offline-tx.repo';
@@ -14,13 +14,13 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 @Injectable()
 export class OfflineSubmitterService {
   constructor(
-    private readonly artemisService: ArtemisService,
+    private readonly messageService: MessageService,
     private readonly polymeshService: PolymeshService,
     private readonly offlineTxRepo: OfflineTxRepo,
     private readonly logger: PolymeshLogger
   ) {
     this.logger.setContext(OfflineSubmitterService.name);
-    this.artemisService.registerListener(
+    this.messageService.registerListener(
       QueueName.Signatures,
       /* istanbul ignore next */
       msg => this.submit(msg),
@@ -62,7 +62,7 @@ export class OfflineSubmitterService {
       nonce,
     };
 
-    await this.artemisService.sendMessage(AddressName.Finalizations, finalizationMsg);
+    await this.messageService.sendMessage(AddressName.Finalizations, finalizationMsg);
 
     transaction.blockHash = result.blockHash;
     transaction.txIndex = result.transactionIndex.toString();

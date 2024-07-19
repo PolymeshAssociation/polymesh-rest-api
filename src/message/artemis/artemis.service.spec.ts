@@ -1,14 +1,18 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { IsString } from 'class-validator';
 import { when } from 'jest-when';
 import { EventContext } from 'rhea-promise';
 
-import { ArtemisService } from '~/artemis/artemis.service';
+import { AppInternalError } from '~/common/errors';
 import { clearEventLoop } from '~/common/utils';
 import { AddressName, QueueName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+import { ArtemisService } from '~/message/artemis/artemis.service';
+import { ArtemisConfig } from '~/message/artemis/utils';
+import { MessageService } from '~/message/common/message.service';
 
 const mockSend = jest.fn();
 const mockConnectionClose = jest.fn();
@@ -68,31 +72,60 @@ jest.mock('rhea-promise', () => {
   };
 });
 
+const mockConfig: ArtemisConfig = {
+  type: 'artemis',
+  port: 1,
+  username: 'someUser',
+  password: 'somePassword',
+  host: 'http://example.com',
+  operationTimeoutInSeconds: 10,
+  transport: 'tcp',
+  configured: true,
+};
+
+const mockReceipt = { id: 1 };
+const otherMockReceipt = { id: 2 };
+
+describe('ArtemisService generic test suite', () => {
+  const logger = createMock<PolymeshLogger>();
+
+  const service = new ArtemisService(logger, mockConfig);
+
+  mockSend.mockResolvedValue(mockReceipt);
+
+  MessageService.test(service);
+});
+
 describe('ArtemisService', () => {
   let service: ArtemisService;
   let logger: DeepMocked<PolymeshLogger>;
-  let configSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ArtemisService, mockPolymeshLoggerProvider],
+      providers: [
+        ArtemisService,
+        mockPolymeshLoggerProvider,
+        { provide: 'ARTEMIS_CONFIG', useValue: mockConfig },
+      ],
     }).compile();
 
     service = module.get<ArtemisService>(ArtemisService);
-    configSpy = jest.spyOn(service, 'isConfigured');
-    configSpy.mockReturnValue(true);
     logger = module.get<typeof logger>(PolymeshLogger);
+    mockSend.mockResolvedValue(mockReceipt);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
+  it('should throw an error if constructed with unconfigured config', () => {
+    expect(() => new ArtemisService(logger, { configured: false, type: 'artemis' })).toThrow(
+      AppInternalError
+    );
+  });
+
   describe('sendMessage', () => {
     it('should send a message', async () => {
-      const mockReceipt = 'mockReceipt';
-      const otherMockReceipt = 'otherMockReceipt';
-
       const topicName = AddressName.Requests;
       const body = { payload: 'some payload' };
       const otherBody = { other: 'payload' };
@@ -103,10 +136,12 @@ describe('ArtemisService', () => {
         .mockResolvedValue(otherMockReceipt);
 
       const receipt = await service.sendMessage(topicName, body);
-      expect(receipt).toEqual(mockReceipt);
+      expect(receipt).toEqual(expect.objectContaining({ id: new BigNumber(mockReceipt.id) }));
 
       const otherReceipt = await service.sendMessage(topicName, otherBody);
-      expect(otherReceipt).toEqual(otherMockReceipt);
+      expect(otherReceipt).toEqual(
+        expect.objectContaining({ id: new BigNumber(otherMockReceipt.id) })
+      );
     });
   });
 
@@ -168,15 +203,6 @@ describe('ArtemisService', () => {
       await service.onApplicationShutdown();
 
       expect(logger.error).toHaveBeenCalled();
-    });
-
-    it('should do no work if service is not configured', async () => {
-      configSpy.mockReturnValue(false);
-
-      const initialCallCount = mockConnectionClose.mock.calls.length;
-      await service.onApplicationShutdown();
-
-      expect(mockConnectionClose.mock.calls.length).toEqual(initialCallCount);
     });
   });
 });

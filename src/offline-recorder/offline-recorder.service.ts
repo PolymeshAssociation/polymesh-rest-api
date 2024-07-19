@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { ArtemisService } from '~/artemis/artemis.service';
 import { QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+import { MessageService } from '~/message/common/message.service';
 import { AnyModel } from '~/offline-recorder/model/any.model';
 import { OfflineEventRepo } from '~/offline-recorder/repo/offline-event.repo';
 
@@ -12,13 +12,13 @@ import { OfflineEventRepo } from '~/offline-recorder/repo/offline-event.repo';
 @Injectable()
 export class OfflineRecorderService {
   constructor(
-    private readonly artemisService: ArtemisService,
+    private readonly messageService: MessageService,
     private readonly offlineRepo: OfflineEventRepo,
     private readonly logger: PolymeshLogger
   ) {
     this.logger.setContext(OfflineRecorderService.name);
 
-    this.artemisService.registerListener(
+    this.messageService.registerListener(
       QueueName.EventsLog,
       /* istanbul ignore next */
       msg => this.recordEvent(msg),

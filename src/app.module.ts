@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
 import { AccountsModule } from '~/accounts/accounts.module';
-import { ArtemisModule } from '~/artemis/artemis.module';
 import { AssetsModule } from '~/assets/assets.module';
 import { AuthModule } from '~/auth/auth.module';
 import { AuthStrategy } from '~/auth/strategies/strategies.consts';
@@ -102,15 +101,10 @@ import { UsersModule } from '~/users/users.module';
     MetadataModule,
     SubsidyModule,
     NftsModule,
-    ...(process.env.ARTEMIS_HOST
-      ? [
-          ArtemisModule,
-          OfflineSignerModule,
-          OfflineSubmitterModule,
-          OfflineStarterModule,
-          OfflineRecorderModule,
-        ]
-      : []),
+    OfflineSignerModule,
+    OfflineSubmitterModule,
+    OfflineStarterModule,
+    OfflineRecorderModule,
   ],
 })
 export class AppModule {}

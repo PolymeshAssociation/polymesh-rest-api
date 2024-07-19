@@ -9,7 +9,7 @@ import { SignerModel } from '~/identities/models/signer.model';
 
 export class MultiSigDetailsModel {
   @ApiProperty({
-    description: 'Secondary accounts with permissions',
+    description: 'Signing accounts for the multiSig',
     isArray: true,
     type: SignerModel,
   })

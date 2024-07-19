@@ -1,4 +1,5 @@
-import { Injectable, OnApplicationShutdown } from '@nestjs/common';
+import { Inject, Injectable, OnApplicationShutdown } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { validate } from 'class-validator';
 import {
   AwaitableSender,
@@ -6,7 +7,6 @@ import {
   Connection,
   ConnectionOptions,
   Container,
-  Delivery,
   EventContext,
   Receiver,
   ReceiverEvents,
@@ -17,8 +17,9 @@ import {
 import { AppInternalError } from '~/common/errors';
 import { AddressName, QueueName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
-
-type EventHandler<T> = (params: T) => Promise<void>;
+import { ArtemisConfig } from '~/message/artemis/types';
+import { MessageReceipt } from '~/message/common';
+import { EventHandler, MessageService } from '~/message/common/message.service';
 
 interface AddressEntry {
   addressName: AddressName;
@@ -28,27 +29,30 @@ interface AddressEntry {
 type AddressStore = Record<AddressName, AddressEntry>;
 
 @Injectable()
-export class ArtemisService implements OnApplicationShutdown {
+export class ArtemisService extends MessageService implements OnApplicationShutdown {
   private receivers: Receiver[] = [];
   private addressStore: Partial<AddressStore> = {};
   private connectionPromise?: Promise<Connection>;
 
-  constructor(private readonly logger: PolymeshLogger) {
+  constructor(
+    private readonly logger: PolymeshLogger,
+    @Inject('ARTEMIS_CONFIG') private readonly config: ArtemisConfig
+  ) {
+    super();
     this.logger.setContext(ArtemisService.name);
-  }
+    this.logger.debug('Artemis service initialized');
 
-  public isConfigured(): boolean {
-    return !!process.env.ARTEMIS_HOST;
+    if (!this.config.configured) {
+      throw new AppInternalError(
+        'Artemis service was constructed, but Artemis config values were not set'
+      );
+    }
   }
 
   public async onApplicationShutdown(signal?: string | undefined): Promise<void> {
     this.logger.debug(
       `artemis service received application shutdown request, sig: ${signal} - now closing connections`
     );
-
-    if (!this.isConfigured()) {
-      return;
-    }
 
     const closePromises = [
       ...this.receivers.map(receiver => receiver.close()),
@@ -88,16 +92,7 @@ export class ArtemisService implements OnApplicationShutdown {
   }
 
   private connectOptions(): ConnectionOptions {
-    const { ARTEMIS_HOST, ARTEMIS_USERNAME, ARTEMIS_PASSWORD, ARTEMIS_PORT } = process.env;
-
-    return {
-      port: Number(ARTEMIS_PORT),
-      host: ARTEMIS_HOST,
-      username: ARTEMIS_USERNAME,
-      password: ARTEMIS_PASSWORD,
-      operationTimeoutInSeconds: 10,
-      transport: 'tcp',
-    };
+    return this.config as ConnectionOptions;
   }
 
   private sendOptions(): AwaitableSendOptions {
@@ -139,14 +134,19 @@ export class ArtemisService implements OnApplicationShutdown {
     };
   }
 
-  public async sendMessage(publishOn: AddressName, body: unknown): Promise<Delivery> {
+  public async sendMessage(publishOn: AddressName, body: unknown): Promise<MessageReceipt> {
     const { sender } = await this.getAddress(publishOn);
 
     const message = { body };
 
     const sendOptions = this.sendOptions();
     this.logger.debug(`sending message on: ${publishOn}`);
-    return sender.send(message, sendOptions);
+    const receipt = await sender.send(message, sendOptions);
+
+    return {
+      id: new BigNumber(receipt.id),
+      topic: publishOn,
+    };
   }
 
   /**
@@ -206,6 +206,7 @@ export class ArtemisService implements OnApplicationShutdown {
     });
 
     receiver.on(ReceiverEvents.receiverError, (context: EventContext) => {
+      /* istanbul ignore next */
       const receiverError = context?.receiver?.error;
       this.logger.error(`an error occurred for receiver "${listenOn}": ${receiverError}`);
     });

@@ -15,7 +15,8 @@ export class AccountDetailsModel {
   readonly identity?: IdentityModel;
 
   @ApiPropertyOptional({
-    description: 'MultiSig Account details',
+    description:
+      'The MultiSig for which the account is a signer for. Will not be set if the account is not a MultiSig signer',
     type: MultiSigDetailsModel,
   })
   @Type(() => MultiSigDetailsModel)

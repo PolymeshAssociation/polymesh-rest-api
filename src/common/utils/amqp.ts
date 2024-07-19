@@ -14,8 +14,8 @@ export enum QueueName {
   EventsLog = 'EventsLog',
 
   Requests = 'Requests',
-  SignerRequests = 'SignerRequests',
-  SubmitterRequests = 'SubmitterRequests',
 
   Signatures = 'Signatures',
+
+  Finalizations = 'Finalizations',
 }

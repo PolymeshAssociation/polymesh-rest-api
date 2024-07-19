@@ -168,13 +168,15 @@ AMQP is a form on offline processing where the payload will be published on an A
 1. A signer process subscribes to `Requests`. For each message it generates a signature, and publishes a message on `Signatures`
 1. A submitter process subscribes to `Signatures` and submits to the chain. It publishes to `Finalizations`, for consumer applications to subscribe to
 
-To use AMQP mode a message broker must be configured. The implementation assumes [ArtemisMQ](https://activemq.apache.org/components/artemis/) is used, with an AMQP acceptor. In theory any AMQP 1.0 compliant broker should work though.
+When using AMQP mode a message broker should be configured. The current implementation assumes [ArtemisMQ](https://activemq.apache.org/components/artemis/) is used, with an AMQP acceptor. Other message queues can be implemented as needed.
 
 If using AMQP, it is strongly recommended to use a persistent data store (i.e postgres). There are two tables related to AMQP processing: `offline_tx` and `offline_event`:
   - `offline_tx` is a table for the submitter process. This provides a convenient way to query submitted transactions, and to detect ones rejected by the chain for some reason
   - `offline_event` is a table for the recorder process. This uses Artemis diverts to record every message exchanged in the process, serving as an audit log
 
 If using the project's compose file, an Artemis console will be exposed on `:8181` with `artemis` being both username and password.
+
+If artemis config values are not set, then an in memory implementation will be defaulted to. This mode is not recommended for use in production environments since the messages are ephemeral.
 
 ### Webhooks (alpha)
 

@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 
-import { ArtemisModule } from '~/artemis/artemis.module';
 import { LoggerModule } from '~/logger/logger.module';
+import { MessageModule } from '~/message/message.module';
 import { OfflineSignerService } from '~/offline-signer/offline-signer.service';
 import { SigningModule } from '~/signing/signing.module';
 
 @Module({
-  imports: [ArtemisModule, SigningModule, LoggerModule],
+  imports: [MessageModule.registerAsync(), SigningModule, LoggerModule],
   providers: [OfflineSignerService],
 })
 export class OfflineSignerModule {}

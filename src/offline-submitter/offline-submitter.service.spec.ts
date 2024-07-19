@@ -4,9 +4,9 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
-import { ArtemisService } from '~/artemis/artemis.service';
 import { AddressName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { MessageService } from '~/message/common/message.service';
 import { OfflineSignatureModel } from '~/offline-signer/models/offline-signature.model';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
 import { OfflineSubmitterService } from '~/offline-submitter/offline-submitter.service';
@@ -14,14 +14,14 @@ import { OfflineTxRepo } from '~/offline-submitter/repos/offline-tx.repo';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { testValues } from '~/test-utils/consts';
 import { mockPolymeshServiceProvider } from '~/test-utils/mocks';
-import { mockArtemisServiceProvider, mockOfflineTxRepoProvider } from '~/test-utils/service-mocks';
+import { mockMessageServiceProvider, mockOfflineTxRepoProvider } from '~/test-utils/service-mocks';
 
 const { offlineTx } = testValues;
 
 describe('OfflineSubmitterService', () => {
   let service: OfflineSubmitterService;
   let mockRepo: DeepMocked<OfflineTxRepo>;
-  let mockArtemisService: DeepMocked<ArtemisService>;
+  let mockMessageService: DeepMocked<MessageService>;
   let mockPolymeshService: DeepMocked<PolymeshService>;
   let offlineModel: OfflineTxModel;
 
@@ -29,7 +29,7 @@ describe('OfflineSubmitterService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OfflineSubmitterService,
-        mockArtemisServiceProvider,
+        mockMessageServiceProvider,
         mockOfflineTxRepoProvider,
         mockPolymeshServiceProvider,
         mockPolymeshLoggerProvider,
@@ -37,7 +37,7 @@ describe('OfflineSubmitterService', () => {
     }).compile();
 
     mockRepo = module.get<typeof mockRepo>(OfflineTxRepo);
-    mockArtemisService = module.get<typeof mockArtemisService>(ArtemisService);
+    mockMessageService = module.get<typeof mockMessageService>(MessageService);
     mockPolymeshService = module.get<typeof mockPolymeshService>(PolymeshService);
     service = module.get<OfflineSubmitterService>(OfflineSubmitterService);
 
@@ -57,7 +57,7 @@ describe('OfflineSubmitterService', () => {
 
   describe('constructor', () => {
     it('should have subscribed to the required topics', () => {
-      expect(mockArtemisService.registerListener).toHaveBeenCalledWith(
+      expect(mockMessageService.registerListener).toHaveBeenCalledWith(
         AddressName.Signatures,
         expect.any(Function),
         expect.any(Function)
@@ -95,7 +95,7 @@ describe('OfflineSubmitterService', () => {
           txIndex: '1',
         })
       );
-      expect(mockArtemisService.sendMessage).toHaveBeenCalledWith(
+      expect(mockMessageService.sendMessage).toHaveBeenCalledWith(
         AddressName.Finalizations,
         expect.objectContaining({
           blockHash: '0x02',

@@ -4,12 +4,12 @@ import { createMock } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { ArtemisService } from '~/artemis/artemis.service';
 import { AuthService } from '~/auth/auth.service';
 import { ClaimsService } from '~/claims/claims.service';
 import { ComplianceRequirementsService } from '~/compliance/compliance-requirements.service';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
+import { MessageService } from '~/message/common/message.service';
 import { MetadataService } from '~/metadata/metadata.service';
 import { NetworkService } from '~/network/network.service';
 import { NftsService } from '~/nfts/nfts.service';
@@ -301,9 +301,9 @@ export const mockClaimsServiceProvider: ValueProvider<ClaimsService> = {
   useValue: createMock<ClaimsService>(),
 };
 
-export const mockArtemisServiceProvider: ValueProvider<ArtemisService> = {
-  provide: ArtemisService,
-  useValue: createMock<ArtemisService>(),
+export const mockMessageServiceProvider: ValueProvider<MessageService> = {
+  provide: MessageService,
+  useValue: createMock<MessageService>(),
 };
 
 export const mockOfflineRepoProvider: ValueProvider<OfflineEventRepo> = {

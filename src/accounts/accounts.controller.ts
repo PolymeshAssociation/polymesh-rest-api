@@ -309,7 +309,7 @@ export class AccountsController {
   @ApiOperation({
     summary: 'Get Account details',
     description:
-      'This endpoint retrieves the Account details for the given Account address. This includes the  associated Identity DID, primary account for that Identity and Secondary Accounts with the Permissions and the Subsidy details',
+      'This endpoint retrieves the Account details for the given Account address. This includes the associated Identity DID, primary account for that Identity and Secondary Accounts with the Permissions and the Subsidy details',
   })
   @ApiParam({
     name: 'account',
