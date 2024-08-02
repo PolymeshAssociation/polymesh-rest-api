@@ -1,8 +1,9 @@
 /* eslint-disable import/first */
 const mockIsPolymeshError = jest.fn();
 
+import { createMock } from '@golevelup/ts-jest';
 import { PolymeshError } from '@polymeshassociation/polymesh-sdk/base/PolymeshError';
-import { ErrorCode } from '@polymeshassociation/polymesh-sdk/types';
+import { ErrorCode, MultiSig } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import {
@@ -17,6 +18,7 @@ import { Class, ProcessMode } from '~/common/types';
 import { MockPolymeshTransaction, MockVenue } from '~/test-utils/mocks';
 import {
   handleSdkError,
+  MultiSigProposalResult,
   prepareProcedure,
   processTransaction,
 } from '~/transactions/transactions.util';
@@ -131,6 +133,32 @@ describe('processTransaction', () => {
       );
 
       expect(run).not.toHaveBeenCalled();
+    });
+
+    it('should handle dry run process mode with MultiSig signers', async () => {
+      const mockVenue = new MockVenue();
+
+      const mockTransaction = new MockPolymeshTransaction();
+      mockTransaction.multiSig = createMock<MultiSig>({ address: 'someAddress' });
+
+      const runAsProposal = mockTransaction.runAsProposal;
+
+      mockVenue.modify.mockResolvedValue(mockTransaction);
+
+      const processedTx = await processTransaction(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mockVenue.modify as any,
+        {},
+        {},
+        { processMode: ProcessMode.DryRun, signer: 'Alice' }
+      );
+
+      expect(runAsProposal).not.toHaveBeenCalled();
+
+      expect((processedTx as MultiSigProposalResult).result.toHuman()).toEqual({
+        multiSigAddress: 'someAddress',
+        id: '-1',
+      });
     });
   });
 

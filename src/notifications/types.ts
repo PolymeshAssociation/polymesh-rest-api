@@ -26,6 +26,7 @@ export type NotificationPayload<T extends EventType = EventType> = {
   scope: string;
   nonce: number;
   payload: GetPayload<T>;
+  multiSig?: string;
 };
 
 export type NotificationParams = Pick<

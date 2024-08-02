@@ -34,7 +34,7 @@ export class NetworkService {
     const { signature, ...txPayload } = transaction;
 
     const result = await this.polymeshService.polymeshApi.network.submitTransaction(
-      txPayload,
+      { ...txPayload, multiSig: null },
       signature
     );
 

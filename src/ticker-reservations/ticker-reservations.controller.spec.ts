@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TickerReservationStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';
 import { MockTickerReservationsService } from '~/test-utils/service-mocks';
 import { TickerReservationsController } from '~/ticker-reservations/ticker-reservations.controller';
@@ -36,7 +36,7 @@ describe('TickerReservationsController', () => {
       const ticker = 'SOME_TICKER';
       const result = await controller.reserve({ ticker, signer });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockTickerReservationsService.reserve).toHaveBeenCalledWith(ticker, { signer });
     });
   });
@@ -75,7 +75,7 @@ describe('TickerReservationsController', () => {
       const result = await controller.transferOwnership({ ticker }, body);
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
@@ -107,7 +107,7 @@ describe('TickerReservationsController', () => {
       const result = await controller.extendReservation({ ticker }, { signer, webhookUrl, dryRun });
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         tickerReservation: mockResult,
       });
       expect(mockTickerReservationsService.extend).toHaveBeenCalledWith(ticker, {

@@ -23,7 +23,7 @@ import { IdentityModel } from '~/identities/models/identity.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
-import { extrinsic, testValues } from '~/test-utils/consts';
+import { extrinsic, processedTxResult, testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
   createMockSubsidy,
@@ -111,7 +111,7 @@ describe('AccountsController', () => {
 
       const result = await controller.transferPolyx(body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -229,7 +229,7 @@ describe('AccountsController', () => {
 
       const result = await controller.freezeSecondaryAccounts(body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -242,7 +242,7 @@ describe('AccountsController', () => {
 
       const result = await controller.unfreezeSecondaryAccounts(body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -257,7 +257,7 @@ describe('AccountsController', () => {
 
       const result = await controller.revokePermissions(body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -281,7 +281,7 @@ describe('AccountsController', () => {
 
       const result = await controller.modifyPermissions(body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
+import { MultiSigProposal, TransactionStatus } from '@polymeshassociation/polymesh-sdk/types';
 import { isPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
@@ -134,19 +134,26 @@ export class TransactionsService {
       nextNonce: 1,
     });
 
+    let txProposal: MultiSigProposal | undefined;
     // TODO @polymath-eric: use dedicated error service
     // we don't propagate transaction errors because they're sent as status updates
-    transaction
-      .run()
-      .catch(({ message, stack }: Error) =>
-        logger.error(`Error while running transaction "${id}": ${message}`, stack)
-      );
+    if (transaction.multiSig) {
+      txProposal = await transaction.runAsProposal().catch(({ message, stack }: Error) => {
+        logger.error(`Error while running transaction "${id}": ${message}`, stack);
+
+        return undefined;
+      });
+    } else {
+      transaction.run().catch(({ message, stack }: Error) => {
+        logger.error(`Error while running transaction "${id}": ${message}`, stack);
+      });
+    }
 
     return {
       subscriptionId,
       type: eventType,
       scope: eventScope,
-      payload: this.assemblePayload(transaction),
+      payload: this.assemblePayload(transaction, txProposal),
       nonce: 0,
     };
   }
@@ -243,11 +250,15 @@ export class TransactionsService {
    *
    * @note this is very type unsafe, but there's no real way around it without making it horribly unreadable
    */
-  private assemblePayload(transaction: Transaction): TransactionUpdatePayload {
+  private assemblePayload(
+    transaction: Transaction,
+    proposal?: MultiSigProposal
+  ): TransactionUpdatePayload {
     const { status, txHash, blockHash, blockNumber } = transaction;
 
     let payload: Record<string, unknown> = {
       status,
+      proposal: proposal?.toHuman(),
     };
 
     if (isPolymeshTransaction(transaction)) {

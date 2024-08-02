@@ -12,7 +12,7 @@ import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement
 import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { createMockResultSet, MockHistoricSettlement, MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
@@ -67,7 +67,7 @@ describe('PortfoliosController', () => {
 
       const result = await controller.moveAssets({ did: '0x6000' }, params);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -87,7 +87,7 @@ describe('PortfoliosController', () => {
       const result = await controller.createPortfolio(params);
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         portfolio: {
           id: '1',
           did,
@@ -105,7 +105,7 @@ describe('PortfoliosController', () => {
         { signer }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -128,7 +128,7 @@ describe('PortfoliosController', () => {
         modifyPortfolioArgs
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -192,9 +192,7 @@ describe('PortfoliosController', () => {
         params
       );
 
-      expect(result).toEqual({
-        ...txResult,
-      });
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -232,9 +230,7 @@ describe('PortfoliosController', () => {
         params
       );
 
-      expect(result).toEqual({
-        ...txResult,
-      });
+      expect(result).toEqual(processedTxResult);
     });
   });
 

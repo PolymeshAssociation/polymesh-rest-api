@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 
 export class CreatedPortfolioModel extends TransactionQueueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Details of the newly created Portfolio',
     type: PortfolioIdentifierModel,
   })

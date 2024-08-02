@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MultiSigProposal } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
-import { ApiPropertyOneOf } from '~/common/decorators/swagger';
+import { ApiPropertyOneOf, FromEntity } from '~/common/decorators';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 import { TransactionDetailsModel } from '~/common/models/transaction-details.model';
@@ -41,6 +42,17 @@ export class TransactionQueueModel {
   })
   @Type(() => TransactionDetailsModel)
   details: TransactionDetailsModel;
+
+  @ApiPropertyOptional({
+    description:
+      'Proposal information. Set if the signer was a MultiSig signer and the transaction was wrapped as a proposal',
+    example: {
+      multiSigAddress: '5DSv9np6VuG7XeNnudfvvs3VS9P6Q36DMiU4wxGHMkeFGbgZ',
+      id: '7',
+    },
+  })
+  @FromEntity()
+  readonly proposal?: MultiSigProposal;
 
   constructor(model: TransactionQueueModel) {
     Object.assign(this, model);

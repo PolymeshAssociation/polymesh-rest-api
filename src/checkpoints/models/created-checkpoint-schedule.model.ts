@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
 export class CreatedCheckpointScheduleModel extends TransactionQueueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Static data (and identifiers) of the newly created Schedule',
     type: CheckpointScheduleModel,
   })

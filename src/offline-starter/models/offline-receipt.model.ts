@@ -34,6 +34,12 @@ export class OfflineReceiptModel {
   })
   readonly metadata: TransactionPayload['metadata'];
 
+  @ApiProperty({
+    description:
+      'The acting MultiSig. Set when the signing account is a MultiSig signer and the transaction was wrapped as a MultiSigProposal',
+  })
+  readonly multiSig: string | null;
+
   constructor(model: OfflineReceiptModel) {
     Object.assign(this, model);
   }

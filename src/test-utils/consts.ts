@@ -9,6 +9,8 @@ import {
 
 import { TransactionType } from '~/common/types';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
+import { DirectTransactionResult } from '~/transactions/transactions.util';
+import { ResultType } from '~/transactions/types';
 import { UserModel } from '~/users/model/user.model';
 
 const signer = 'alice';
@@ -46,6 +48,7 @@ const offlineTx = new OfflineTxModel({
     method: '0x01',
     rawPayload: { address: 'address', data: '0x01', type: 'bytes' },
     metadata: { memo: 'test utils payload' },
+    multiSig: null,
   },
   status: OfflineTxStatus.Signed,
   signature: '0x01',
@@ -54,7 +57,8 @@ const offlineTx = new OfflineTxModel({
 });
 
 export const testAccount = createMock<Account>({ address: 'address' });
-export const txResult = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const txResult: DirectTransactionResult<any> = {
   transactions: [
     {
       transactionTag: 'tag',
@@ -78,7 +82,18 @@ export const txResult = {
       type: PayingAccountType.Caller,
     },
   },
+  resultType: ResultType.Direct,
+  result: undefined,
 };
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { result: unusedResult, resultType: unusedType, ...processedResult } = txResult;
+/**
+ * @hidden
+ *
+ * like `txResult`, but without properties not meant for public response API
+ */
+export const processedTxResult = processedResult;
 
 export const testValues = {
   signer,

@@ -12,7 +12,7 @@ import { CustomClaimTypeModel } from '~/claims/models/custom-claim-type.model';
 import { CustomClaimTypeWithDid } from '~/claims/models/custom-claim-type-did.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { mockClaimsServiceProvider } from '~/test-utils/service-mocks';
 
 const { did, txResult, signer } = testValues;
@@ -55,7 +55,7 @@ describe('ClaimsController', () => {
 
       expect(mockClaimsService.addClaimsOnDid).toHaveBeenCalledWith(mockPayload);
 
-      expect(result).toEqual({ ...txResult, results: undefined });
+      expect(result).toEqual({ ...processedTxResult, results: undefined });
     });
   });
 
@@ -67,7 +67,7 @@ describe('ClaimsController', () => {
 
       expect(mockClaimsService.editClaimsOnDid).toHaveBeenCalledWith(mockPayload);
 
-      expect(result).toEqual({ ...txResult, results: undefined });
+      expect(result).toEqual({ ...processedTxResult, results: undefined });
     });
   });
 
@@ -79,7 +79,7 @@ describe('ClaimsController', () => {
 
       expect(mockClaimsService.revokeClaimsFromDid).toHaveBeenCalledWith(mockPayload);
 
-      expect(result).toEqual({ ...txResult, results: undefined });
+      expect(result).toEqual({ ...processedTxResult, results: undefined });
     });
   });
 
@@ -101,7 +101,7 @@ describe('ClaimsController', () => {
       expect(mockClaimsService.registerCustomClaimType).toHaveBeenCalledWith(
         mockRegisterCustomClaimTypeDto
       );
-      expect(result).toEqual({ ...txResult, results: undefined });
+      expect(result).toEqual({ ...processedTxResult, results: undefined });
     });
   });
 

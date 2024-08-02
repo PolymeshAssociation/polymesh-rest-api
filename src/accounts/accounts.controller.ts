@@ -32,7 +32,7 @@ import { AccountDetailsModel } from '~/accounts/models/account-details.model';
 import { MultiSigDetailsModel } from '~/accounts/models/multi-sig-details.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { BalanceModel } from '~/assets/models/balance.model';
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';

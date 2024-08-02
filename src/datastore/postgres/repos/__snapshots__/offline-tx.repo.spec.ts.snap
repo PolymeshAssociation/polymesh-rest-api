@@ -10,6 +10,7 @@ OfflineTxModel {
       "memo": "test utils payload",
     },
     "method": "0x01",
+    "multiSig": null,
     "payload": {
       "address": "address",
       "blockHash": "0x01",

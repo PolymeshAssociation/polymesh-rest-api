@@ -11,7 +11,7 @@ import {
 import { DividendDistribution } from '@polymeshassociation/polymesh-sdk/types';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';

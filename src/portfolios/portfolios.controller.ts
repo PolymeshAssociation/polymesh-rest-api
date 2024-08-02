@@ -22,7 +22,7 @@ import {
   ApiArrayResponse,
   ApiTransactionFailedResponse,
   ApiTransactionResponse,
-} from '~/common/decorators/swagger';
+} from '~/common/decorators/';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';

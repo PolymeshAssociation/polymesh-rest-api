@@ -30,7 +30,7 @@ import { IdentityModel } from '~/identities/models/identity.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import {
   MockAsset,
   MockAuthorizationRequest,
@@ -498,7 +498,7 @@ describe('IdentitiesController', () => {
       });
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
@@ -633,7 +633,7 @@ describe('IdentitiesController', () => {
       const result = await controller.registerIdentity(data);
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         identity: identityData,
       });
     });
@@ -674,7 +674,7 @@ describe('IdentitiesController', () => {
       });
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
@@ -703,7 +703,7 @@ describe('IdentitiesController', () => {
       );
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });

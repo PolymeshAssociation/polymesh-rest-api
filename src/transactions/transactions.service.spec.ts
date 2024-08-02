@@ -3,11 +3,16 @@ const mockIsPolymeshTransaction = jest.fn();
 const mockIsPolymeshTransactionBatch = jest.fn();
 const mockIsPolymeshError = jest.fn();
 
-import { DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ProcedureOpts, TransactionStatus, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  MultiSig,
+  ProcedureOpts,
+  TransactionStatus,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { AppInternalError } from '~/common/errors';
@@ -34,7 +39,7 @@ import {
 import transactionsConfig from '~/transactions/config/transactions.config';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { TransactionResult } from '~/transactions/transactions.util';
-import { Transaction } from '~/transactions/types';
+import { ResultType, Transaction } from '~/transactions/types';
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -130,12 +135,13 @@ describe('TransactionsService', () => {
       mockIsPolymeshTransaction.mockReturnValue(true);
       const mockMethod = makeMockMethod(transaction);
 
-      const { transactions, details } = (await service.submit(
+      const { transactions, details, resultType } = (await service.submit(
         mockMethod,
         {},
         { signer, processMode: ProcessMode.Submit }
       )) as TransactionResult<undefined>;
 
+      expect(resultType).toEqual(ResultType.Direct);
       expect(transactions).toEqual([
         {
           blockHash: undefined,
@@ -171,6 +177,22 @@ describe('TransactionsService', () => {
       ]);
 
       expect(details).toBeDefined();
+    });
+
+    it('should run as proposal when transaction multiSig is set', async () => {
+      const transaction = new MockPolymeshTransaction();
+      transaction.multiSig = createMock<MultiSig>();
+      mockIsPolymeshTransaction.mockReturnValue(true);
+      mockIsPolymeshTransactionBatch.mockReturnValue(false);
+      const mockMethod = makeMockMethod(transaction);
+
+      const { resultType } = (await service.submit(
+        mockMethod,
+        {},
+        { signer, processMode: ProcessMode.Submit }
+      )) as TransactionResult<undefined>;
+
+      expect(resultType).toEqual(ResultType.MultiSigProposal);
     });
 
     it('should forward SDK params when present', async () => {
@@ -228,6 +250,7 @@ describe('TransactionsService', () => {
       topicName: AddressName.Requests,
       payload: {} as SignerPayloadJSON,
       metadata: {},
+      multiSig: null,
     });
     it('should call the offline starter when given AMQP process mode', async () => {
       mockOfflineStarterService.beginTransaction.mockResolvedValue(fakeReceipt);
@@ -423,6 +446,54 @@ describe('TransactionsService', () => {
         'Error while handling status change for transaction "1"',
         message
       );
+    });
+
+    it('process a multiSig transaction', async () => {
+      const transaction = new MockPolymeshTransactionBatch();
+      transaction.multiSig = createMock<MultiSig>();
+
+      mockIsPolymeshTransaction.mockReturnValue(false);
+      mockIsPolymeshTransactionBatch.mockRejectedValue(true);
+
+      const mockMethod = makeMockMethod(transaction);
+
+      const result = await service.submit(
+        mockMethod,
+        {},
+        { signer, webhookUrl, processMode: ProcessMode.SubmitWithCallback }
+      );
+
+      expect(result).toEqual({
+        subscriptionId,
+        type: eventType,
+        scope: eventScope,
+        nonce: 0,
+        payload: {
+          type: TransactionType.Batch,
+          transactionTags: [TxTags.asset.RegisterTicker, TxTags.asset.CreateAsset],
+          status: TransactionStatus.Unapproved,
+        },
+      });
+    });
+
+    it('should log an error from MultiSigProposals', async () => {
+      const transaction = new MockPolymeshTransactionBatch();
+      transaction.multiSig = createMock<MultiSig>();
+
+      transaction.runAsProposal.mockRejectedValue(new Error('baz'));
+
+      mockIsPolymeshTransaction.mockReturnValue(false);
+      mockIsPolymeshTransactionBatch.mockRejectedValue(true);
+
+      const mockMethod = makeMockMethod(transaction);
+
+      await service.submit(
+        mockMethod,
+        {},
+        { signer, webhookUrl, processMode: ProcessMode.SubmitWithCallback }
+      );
+
+      expect(mockPolymeshLoggerProvider.useValue.error).toHaveBeenCalled();
     });
   });
 });

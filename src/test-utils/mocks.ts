@@ -3,15 +3,17 @@
 import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { SettlementResultEnum } from '@polymeshassociation/polymesh-sdk/middleware/types';
 import {
   Account,
   AuthorizationType,
   HistoricSettlement,
   MetadataEntry,
   MetadataType,
+  MultiSig,
+  MultiSigProposal,
   ResultSet,
   SettlementLeg,
+  SettlementResultEnum,
   Subsidy,
   TransactionStatus,
   TrustedClaimIssuer,
@@ -411,6 +413,7 @@ class MockPolymeshTransactionBase {
   blockHash?: string;
   txHash?: string;
   blockNumber?: BigNumber;
+  multiSig?: MultiSig;
   status: TransactionStatus = TransactionStatus.Unapproved;
   error: Error;
   getTotalFees = jest.fn().mockResolvedValue({
@@ -420,6 +423,7 @@ class MockPolymeshTransactionBase {
 
   supportsSubsidy = jest.fn().mockReturnValue(false);
   run = jest.fn().mockReturnValue(Promise.resolve());
+  runAsProposal = jest.fn().mockReturnValue(Promise.resolve(createMock<MultiSigProposal>()));
   toSignablePayload = jest.fn();
   onStatusChange = jest.fn();
 }

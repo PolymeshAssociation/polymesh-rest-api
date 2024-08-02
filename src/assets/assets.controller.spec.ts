@@ -14,7 +14,7 @@ import { createAuthorizationRequestModel } from '~/authorizations/authorizations
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { MetadataService } from '~/metadata/metadata.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { MockAssetService, mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
@@ -223,7 +223,7 @@ describe('AssetsController', () => {
       mockAssetsService.setDocuments.mockResolvedValue(txResult);
 
       const result = await controller.setDocuments({ ticker }, body);
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.setDocuments).toHaveBeenCalledWith(ticker, body);
     });
   });
@@ -240,7 +240,7 @@ describe('AssetsController', () => {
       mockAssetsService.createAsset.mockResolvedValue(txResult);
 
       const result = await controller.createAsset(input);
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.createAsset).toHaveBeenCalledWith(input);
     });
   });
@@ -252,7 +252,7 @@ describe('AssetsController', () => {
       mockAssetsService.issue.mockResolvedValue(txResult);
 
       const result = await controller.issue({ ticker }, { signer, amount });
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.issue).toHaveBeenCalledWith(ticker, { signer, amount });
     });
   });
@@ -272,7 +272,7 @@ describe('AssetsController', () => {
       const result = await controller.transferOwnership({ ticker }, body);
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
@@ -288,7 +288,7 @@ describe('AssetsController', () => {
       mockAssetsService.redeem.mockResolvedValue(txResult);
 
       const result = await controller.redeem({ ticker }, { signer, amount, from });
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.redeem).toHaveBeenCalledWith(ticker, { signer, amount, from });
     });
   });
@@ -299,7 +299,7 @@ describe('AssetsController', () => {
       mockAssetsService.freeze.mockResolvedValue(txResult);
 
       const result = await controller.freeze({ ticker }, { signer });
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.freeze).toHaveBeenCalledWith(ticker, { signer });
     });
   });
@@ -310,7 +310,7 @@ describe('AssetsController', () => {
       mockAssetsService.unfreeze.mockResolvedValue(txResult);
 
       const result = await controller.unfreeze({ ticker }, { signer });
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.unfreeze).toHaveBeenCalledWith(ticker, { signer });
     });
   });
@@ -325,7 +325,7 @@ describe('AssetsController', () => {
 
       const result = await controller.controllerTransfer({ ticker }, { signer, origin, amount });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.controllerTransfer).toHaveBeenCalledWith(ticker, {
         signer,
         origin,
@@ -391,7 +391,7 @@ describe('AssetsController', () => {
 
       const result = await controller.addRequiredMediators({ ticker }, { signer, mediators });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.addRequiredMediators).toHaveBeenCalledWith(ticker, {
         signer,
         mediators,
@@ -408,7 +408,7 @@ describe('AssetsController', () => {
 
       const result = await controller.removeRequiredMediators({ ticker }, { signer, mediators });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.removeRequiredMediators).toHaveBeenCalledWith(ticker, {
         signer,
         mediators,
@@ -424,7 +424,7 @@ describe('AssetsController', () => {
 
       const result = await controller.preApprove({ ticker }, { signer });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.preApprove).toHaveBeenCalledWith(ticker, {
         signer,
       });
@@ -439,7 +439,7 @@ describe('AssetsController', () => {
 
       const result = await controller.removePreApproval({ ticker }, { signer });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.removePreApproval).toHaveBeenCalledWith(ticker, {
         signer,
       });

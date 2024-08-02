@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Checkpoint } from '@polymeshassociation/polymesh-sdk/types';
 
 import { FromEntity } from '~/common/decorators/transformation';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
 export class CreatedCheckpointModel extends TransactionQueueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Identifiers of the newly created Checkpoint',
     example: {
       id: '1',

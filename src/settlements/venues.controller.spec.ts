@@ -5,7 +5,7 @@ import { when } from 'jest-when';
 
 import { SettlementsService } from '~/settlements/settlements.service';
 import { VenuesController } from '~/settlements/venues.controller';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockInstruction, MockVenue } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
 
@@ -65,7 +65,7 @@ describe('VenuesController', () => {
       const result = await controller.createVenue(body);
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         venue: mockVenue,
       });
     });
@@ -83,7 +83,7 @@ describe('VenuesController', () => {
 
       const result = await controller.modifyVenue({ id: new BigNumber(3) }, body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -103,7 +103,7 @@ describe('VenuesController', () => {
       const result = await controller.createInstruction({ id: new BigNumber(3) }, {} as any);
 
       expect(result).toEqual({
-        ...txResult,
+        ...processedTxResult,
         instruction: mockInstruction, // in jest the @FromEntity decorator is not applied
         legs: [],
       });

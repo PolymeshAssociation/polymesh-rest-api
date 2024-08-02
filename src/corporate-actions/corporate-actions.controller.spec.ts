@@ -12,7 +12,7 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 
 const { did, signer, txResult } = testValues;
 
@@ -73,7 +73,7 @@ describe('CorporateActionsController', () => {
 
       const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.updateDefaultConfigByTicker).toHaveBeenCalledWith(
         'TICKER',
         body
@@ -120,8 +120,8 @@ describe('CorporateActionsController', () => {
     it('should call the service and return the results', async () => {
       const mockDistribution = new MockDistribution();
       const response = {
-        result: mockDistribution,
         ...txResult,
+        result: mockDistribution,
       };
       mockCorporateActionsService.createDividendDistribution.mockResolvedValue(response);
       const mockDate = new Date();
@@ -160,7 +160,7 @@ describe('CorporateActionsController', () => {
         { signer }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.remove).toHaveBeenCalledWith('TICKER', new BigNumber(1), {
         signer,
       });
@@ -183,7 +183,7 @@ describe('CorporateActionsController', () => {
         body
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.payDividends).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
@@ -212,7 +212,7 @@ describe('CorporateActionsController', () => {
         body
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -228,7 +228,7 @@ describe('CorporateActionsController', () => {
         { signer }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.claimDividends).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
@@ -249,7 +249,7 @@ describe('CorporateActionsController', () => {
         { signer }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),
@@ -272,7 +272,7 @@ describe('CorporateActionsController', () => {
         body
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
         'TICKER',
         new BigNumber(1),

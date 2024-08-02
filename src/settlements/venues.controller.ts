@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Instruction, Venue } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';

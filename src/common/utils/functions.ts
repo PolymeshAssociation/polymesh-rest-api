@@ -21,7 +21,13 @@ import { ProcessMode } from '~/common/types';
 import { EventType } from '~/events/types';
 import { NotificationPayload } from '~/notifications/types';
 import { OfflineReceiptModel } from '~/offline-starter/models/offline-receipt.model';
-import { TransactionPayloadResult, TransactionResult } from '~/transactions/transactions.util';
+import {
+  DirectTransactionResult,
+  MultiSigProposalResult,
+  TransactionPayloadResult,
+  TransactionResult,
+} from '~/transactions/transactions.util';
+import { ResultType } from '~/transactions/types';
 
 export function getTxTags(): string[] {
   return flatten(Object.values(TxTags).map(txTag => Object.values(txTag)));
@@ -53,7 +59,7 @@ export type ServiceReturn<T> = Promise<
  * A helper type that lets a controller return a Model or a Subscription Receipt if webhookUrl is being used
  */
 export type TransactionResolver<T> = (
-  res: TransactionResult<T>
+  result: DirectTransactionResult<T>
 ) => Promise<TransactionQueueModel> | TransactionQueueModel;
 
 /**
@@ -78,7 +84,11 @@ export const handleServiceResult = <T>(
   }
 
   if ('transactions' in result) {
-    return resolver(result);
+    if (result.resultType === ResultType.MultiSigProposal) {
+      return multiSigProposalResolver(result);
+    } else {
+      return resolver(result);
+    }
   }
 
   if ('topicName' in result) {
@@ -93,6 +103,19 @@ export const handleServiceResult = <T>(
  */
 const basicModelResolver: TransactionResolver<unknown> = ({ transactions, details }) => {
   return new TransactionQueueModel({ transactions, details });
+};
+
+type MultiSigTransactionResolver = (res: MultiSigProposalResult) => TransactionQueueModel;
+
+/**
+ * Helper for transforming a MultiSigProposal result
+ */
+const multiSigProposalResolver: MultiSigTransactionResolver = ({
+  transactions,
+  details,
+  result: proposal,
+}) => {
+  return new TransactionQueueModel({ transactions, details, proposal });
 };
 
 /**
@@ -123,7 +146,7 @@ export const extractTxOptions = <T extends TransactionBaseDto>(
   args: Omit<T, keyof TransactionBaseDto>;
 } => {
   const { signer, webhookUrl, dryRun, options, ...args } = params;
-  const deprecatedParams = [signer, webhookUrl, dryRun].some(param => !!param);
+  const deprecatedParams = [].some(param => !!param);
 
   if (deprecatedParams && options) {
     throw new AppValidationError(

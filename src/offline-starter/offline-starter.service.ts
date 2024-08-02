@@ -41,6 +41,7 @@ export class OfflineStarterService {
       payload: payload.payload,
       metadata: payload.metadata,
       topicName,
+      multiSig: payload.multiSig,
     });
 
     return model;

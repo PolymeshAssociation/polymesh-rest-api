@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { MetadataEntryModel } from '~/metadata/models/metadata-entry.model';
 
 export class CreatedMetadataEntryModel extends TransactionQueueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Details of the newly created Asset Metadata',
     type: () => MetadataEntryModel,
   })

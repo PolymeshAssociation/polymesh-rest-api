@@ -129,6 +129,10 @@ Process modes include:
   - `offline` This creates an unsigned transaction and returns a serialized JSON payload. The information can be signed, and then submitted to the chain.
   - `AMQP` This creates an transaction to be processed by worker processes using an AMQP broker to ensure reliable processing
 
+### MultiSig
+
+If the signer of a transaction is a MultiSig signer the transaction will be implicitly wrapped as a MultiSigProposal. This mostly behaves as a normal transaction with a few exceptions. The transaction may need additional approvals depending on the MultiSig configuration, and will be scheduled to run in a later block. The filed `proposal` will be set and additional details will not be set, e.g. `POST /portfolios/create` will not return portfolio information for a MultiSig signer. For offline payloads the field `multiSig` will be set to the acting MultiSig address when a proposal is being made.
+
 ### Signing Managers
 
 A signing manager is required for `submit` and `submitWithCallback` processing modes.

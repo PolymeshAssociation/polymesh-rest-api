@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
-import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';

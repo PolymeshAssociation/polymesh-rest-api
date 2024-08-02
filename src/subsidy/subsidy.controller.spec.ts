@@ -12,7 +12,7 @@ import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
 import { SubsidyController } from '~/subsidy/subsidy.controller';
 import { SubsidyService } from '~/subsidy/subsidy.service';
-import { txResult } from '~/test-utils/consts';
+import { processedTxResult, txResult } from '~/test-utils/consts';
 import { createMockTransactionResult, MockAuthorizationRequest } from '~/test-utils/mocks';
 import { mockSubsidyServiceProvider } from '~/test-utils/service-mocks';
 
@@ -90,7 +90,7 @@ describe('SubsidyController', () => {
 
       expect(result).toEqual(
         new CreatedAuthorizationRequestModel({
-          ...txResult,
+          ...processedTxResult,
           transactions: [transaction],
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),

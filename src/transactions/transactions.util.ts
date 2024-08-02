@@ -3,6 +3,7 @@ import {
   ErrorCode,
   Fees,
   GenericPolymeshTransaction,
+  MultiSigProposal,
   NoArgsProcedureMethod,
   PayingAccountType,
   ProcedureMethod,
@@ -29,6 +30,7 @@ import {
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
 import { TransactionModel } from '~/common/models/transaction.model';
 import { ProcessMode } from '~/common/types';
+import { ResultType } from '~/transactions/types';
 
 export type TransactionDetails = {
   status: TransactionStatus;
@@ -41,11 +43,21 @@ export type TransactionDetails = {
   };
 };
 
-export type TransactionResult<T> = {
+export interface MultiSigProposalResult {
+  result: MultiSigProposal;
+  resultType: ResultType.MultiSigProposal;
+  transactions: (TransactionModel | BatchTransactionModel)[];
+  details: TransactionDetails;
+}
+
+export type DirectTransactionResult<T> = {
   result: T;
+  resultType: ResultType.Direct;
   transactions: (TransactionModel | BatchTransactionModel)[];
   details: TransactionDetails;
 };
+
+export type TransactionResult<T> = DirectTransactionResult<T> | MultiSigProposalResult;
 
 export type TransactionPayloadResult = {
   details: TransactionDetails;
@@ -92,10 +104,7 @@ export async function processTransaction<
 
     const supportsSubsidy = procedure.supportsSubsidy();
 
-    const [totalFees, result] = await Promise.all([
-      procedure.getTotalFees(),
-      processMode === 'submit' ? procedure.run() : ({} as TransformedReturnType),
-    ]);
+    const totalFees = await procedure.getTotalFees();
 
     const {
       fees,
@@ -114,13 +123,32 @@ export async function processTransaction<
     };
 
     if (processMode === ProcessMode.DryRun) {
-      return { details, result, transactions: [] };
+      if (procedure.multiSig) {
+        const multiSigAddress = procedure.multiSig.address;
+
+        return {
+          details,
+          // provide a fake proposal entity
+          result: { toHuman: () => ({ multiSigAddress, id: '-1' }) } as unknown as MultiSigProposal,
+          resultType: ResultType.MultiSigProposal,
+          transactions: [],
+        };
+      } else {
+        return {
+          details,
+          result: {} as TransformedReturnType,
+          resultType: ResultType.Direct,
+          transactions: [],
+        };
+      }
     }
 
     if (processMode === ProcessMode.Offline) {
       const transactionPayload = await procedure.toSignablePayload(metadata);
       return { details, transactionPayload };
     }
+
+    const result = procedure.multiSig ? await procedure.runAsProposal() : await procedure.run();
 
     const assembleTransactionResponse = <T, R = T>(
       transaction: GenericPolymeshTransaction<T, R>
@@ -155,8 +183,18 @@ export async function processTransaction<
       return new BatchTransactionModel(constructorParams);
     };
 
+    if (procedure.multiSig) {
+      return {
+        result: result as MultiSigProposal,
+        resultType: ResultType.MultiSigProposal,
+        transactions: [assembleTransactionResponse(procedure)],
+        details,
+      };
+    }
+
     return {
-      result,
+      result: result as TransformedReturnType,
+      resultType: ResultType.Direct,
       transactions: [assembleTransactionResponse(procedure)],
       details,
     };

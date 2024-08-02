@@ -14,7 +14,6 @@ import { CreateMetadataDto } from '~/metadata/dto/create-metadata.dto';
 import { SetMetadataDto } from '~/metadata/dto/set-metadata.dto';
 import { MetadataController } from '~/metadata/metadata.controller';
 import { MetadataService } from '~/metadata/metadata.service';
-import { CreatedMetadataEntryModel } from '~/metadata/models/created-metadata-entry.model';
 import { MetadataDetailsModel } from '~/metadata/models/metadata-details.model';
 import { MetadataEntryModel } from '~/metadata/models/metadata-entry.model';
 import { MetadataValueModel } from '~/metadata/models/metadata-value.model';
@@ -128,8 +127,7 @@ describe('MetadataController', () => {
       const result = await controller.createMetadata({ ticker }, mockPayload);
 
       expect(result).toEqual(
-        new CreatedMetadataEntryModel({
-          ...txResult,
+        expect.objectContaining({
           transactions: [transaction],
           metadata: new MetadataEntryModel({ asset: ticker, type, id }),
         })

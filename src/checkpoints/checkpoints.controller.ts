@@ -24,7 +24,7 @@ import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
 import { PeriodComplexityModel } from '~/checkpoints/models/period-complexity.model';
 import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { IsTicker } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';

@@ -3,7 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { AuthorizationsController } from '~/authorizations/authorizations.controller';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockAuthorizationsService } from '~/test-utils/service-mocks';
 
 describe('AuthorizationsController', () => {
@@ -34,7 +34,7 @@ describe('AuthorizationsController', () => {
       const authId = new BigNumber(1);
       const result = await controller.accept({ id: authId }, { signer });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAuthorizationsService.accept).toHaveBeenCalledWith(authId, { signer });
     });
   });
@@ -46,7 +46,7 @@ describe('AuthorizationsController', () => {
       const authId = new BigNumber(1);
       const result = await controller.remove({ id: authId }, { signer });
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
       expect(mockAuthorizationsService.remove).toHaveBeenCalledWith(authId, { signer });
     });
   });

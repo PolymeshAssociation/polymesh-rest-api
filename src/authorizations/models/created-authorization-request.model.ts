@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 
 export class CreatedAuthorizationRequestModel extends TransactionQueueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Details of the newly created Authorization Request',
     type: AuthorizationRequestModel,
   })

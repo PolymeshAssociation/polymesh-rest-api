@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { Instruction } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
@@ -14,7 +14,7 @@ import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
 
 @ApiExtraModels(LegModel, OffChainLegModel)
 export class CreatedInstructionModel extends TransactionQueueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: 'string',
     description: 'ID of the newly created settlement Instruction',
     example: '123',

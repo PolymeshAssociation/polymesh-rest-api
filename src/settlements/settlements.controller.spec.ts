@@ -15,7 +15,7 @@ import { LegType } from '~/common/types';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
 
@@ -126,7 +126,7 @@ describe('SettlementsController', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await controller.affirmInstruction({ id: new BigNumber(3) }, {} as any);
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -139,7 +139,7 @@ describe('SettlementsController', () => {
         { signer: 'signer' }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -152,7 +152,7 @@ describe('SettlementsController', () => {
         { signer: 'signer' }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -166,7 +166,7 @@ describe('SettlementsController', () => {
         {} as any
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -179,7 +179,7 @@ describe('SettlementsController', () => {
         { signer: 'signer' }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -192,7 +192,7 @@ describe('SettlementsController', () => {
         { signer: 'signer' }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -318,7 +318,7 @@ describe('SettlementsController', () => {
         { signer: 'signer' }
       );
 
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 });

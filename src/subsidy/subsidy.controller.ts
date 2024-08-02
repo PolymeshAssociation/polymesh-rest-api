@@ -10,7 +10,7 @@ import { AllowanceOperation } from '@polymeshassociation/polymesh-sdk/types';
 
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { AccountModel } from '~/identities/models/account.model';

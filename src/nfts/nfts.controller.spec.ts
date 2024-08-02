@@ -8,7 +8,7 @@ import { NftsController } from '~/nfts//nfts.controller';
 import { CollectionKeyModel } from '~/nfts/models/collection-key.model';
 import { NftModel } from '~/nfts/models/nft.model';
 import { NftsService } from '~/nfts/nfts.service';
-import { testValues } from '~/test-utils/consts';
+import { processedTxResult, testValues } from '~/test-utils/consts';
 import { mockNftsServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer, ticker, txResult } = testValues;
@@ -70,7 +70,7 @@ describe('NftController', () => {
       );
 
       const result = await controller.createNftCollection(input);
-      expect(result).toEqual(txResult);
+      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -80,7 +80,7 @@ describe('NftController', () => {
         signer,
         metadata: [],
       };
-      const fakeResult = txResult as unknown as ServiceReturn<Nft>;
+      const fakeResult = processedTxResult as unknown as ServiceReturn<Nft>;
       mockNftsService.issueNft.mockResolvedValue(fakeResult);
 
       const result = await controller.issueNft({ ticker }, input);
@@ -94,7 +94,7 @@ describe('NftController', () => {
         signer,
         from: new BigNumber(0),
       };
-      const fakeResult = txResult as unknown as ServiceReturn<void>;
+      const fakeResult = processedTxResult as unknown as ServiceReturn<void>;
       mockNftsService.redeemNft.mockResolvedValue(fakeResult);
 
       const result = await controller.redeem({ ticker, id }, input);

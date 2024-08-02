@@ -13,7 +13,7 @@ import {
   ApiArrayResponse,
   ApiTransactionFailedResponse,
   ApiTransactionResponse,
-} from '~/common/decorators/swagger';
+} from '~/common/decorators/';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';

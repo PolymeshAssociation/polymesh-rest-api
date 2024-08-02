@@ -6,7 +6,7 @@ import {
   ApiArrayResponse,
   ApiTransactionFailedResponse,
   ApiTransactionResponse,
-} from '~/common/decorators/swagger';
+} from '~/common/decorators/';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';

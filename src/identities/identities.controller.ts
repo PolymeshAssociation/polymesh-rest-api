@@ -42,7 +42,7 @@ import {
   ApiArrayResponseReplaceModelProperties,
   ApiTransactionFailedResponse,
   ApiTransactionResponse,
-} from '~/common/decorators/swagger';
+} from '~/common/decorators/';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';

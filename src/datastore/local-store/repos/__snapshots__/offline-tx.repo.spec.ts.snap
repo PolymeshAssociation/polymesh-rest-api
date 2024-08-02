@@ -10,6 +10,7 @@ exports[`LocalOfflineTxRepo OfflineEvent test suite method: createTx should reco
       "memo": "test utils payload",
     },
     "method": "0x01",
+    "multiSig": null,
     "payload": {
       "address": "address",
       "blockHash": "0x01",

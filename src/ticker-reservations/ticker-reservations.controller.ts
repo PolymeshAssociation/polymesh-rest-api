@@ -11,7 +11,7 @@ import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/po
 import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiTransactionResponse } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';

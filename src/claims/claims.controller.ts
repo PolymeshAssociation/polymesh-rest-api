@@ -20,7 +20,7 @@ import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
 import { RegisterCustomClaimTypeDto } from '~/claims/dto/register-custom-claim-type.dto';
 import { CustomClaimTypeModel } from '~/claims/models/custom-claim-type.model';
 import { CustomClaimTypeWithDid } from '~/claims/models/custom-claim-type-did.model';
-import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/swagger';
+import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
