@@ -2,7 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -31,6 +31,7 @@ export class RegisterIdentityDto extends TransactionBaseDto {
     type: 'boolean',
     example: false,
   })
+  @IsBoolean()
   readonly createCdd: boolean;
 
   @ApiPropertyOptional({
