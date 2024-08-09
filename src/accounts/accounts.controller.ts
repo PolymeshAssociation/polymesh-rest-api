@@ -324,6 +324,7 @@ export class AccountsController {
   @ApiNotFoundResponse({
     description: 'No Account found for the given address',
   })
+  @ApiTags('multi-sigs')
   @Get(':account')
   async getAccountDetails(@Param() { account }: AccountParamsDto): Promise<AccountDetailsModel> {
     const { identity, multiSigDetails } = await this.accountsService.getDetails(account);

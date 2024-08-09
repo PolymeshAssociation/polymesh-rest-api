@@ -7,13 +7,14 @@ import {
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TransactionType } from '~/common/types';
+import { ProcessMode, TransactionType } from '~/common/types';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
 import { DirectTransactionResult } from '~/transactions/transactions.util';
 import { ResultType } from '~/transactions/types';
 import { UserModel } from '~/users/model/user.model';
 
 const signer = 'alice';
+const options = { signer, processMode: ProcessMode.Submit };
 const did = '0x01'.padEnd(66, '0');
 const dryRun = false;
 const ticker = 'TICKER';
@@ -97,6 +98,7 @@ export const processedTxResult = processedResult;
 
 export const testValues = {
   signer,
+  options,
   did,
   user,
   offlineTx,

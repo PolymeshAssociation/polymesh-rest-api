@@ -33,7 +33,7 @@ export class AccountsService {
     private readonly transactionsService: TransactionsService
   ) {}
 
-  public async findOne(address: string): Promise<Account> {
+  public async findOne(address: string): Promise<Account | MultiSig> {
     const {
       polymeshService: { polymeshApi },
     } = this;

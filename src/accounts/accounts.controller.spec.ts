@@ -296,10 +296,13 @@ describe('AccountsController', () => {
   });
 
   describe('getDetails', () => {
-    it('should call the service and return AccountDetailsModel', async () => {
-      const fakeIdentityModel = 'fakeIdentityModel' as unknown as IdentityModel;
-      jest.spyOn(identityUtil, 'createIdentityModel').mockResolvedValue(fakeIdentityModel);
+    const fakeIdentityModel = 'fakeIdentityModel' as unknown as IdentityModel;
 
+    beforeEach(() => {
+      jest.spyOn(identityUtil, 'createIdentityModel').mockResolvedValue(fakeIdentityModel);
+    });
+
+    it('should call the service and return AccountDetailsModel', async () => {
       const mockResponse: AccountDetails = {
         identity: new MockIdentity() as unknown as Identity,
         multiSigDetails: null,
@@ -311,10 +314,27 @@ describe('AccountsController', () => {
 
       expect(result).toEqual({ identity: fakeIdentityModel });
     });
+
+    it('should handle MultiSig details', async () => {
+      const mockResponse: AccountDetails = {
+        identity: new MockIdentity() as unknown as Identity,
+        multiSigDetails: { signers: [], requiredSignatures: new BigNumber(1) },
+      };
+
+      mockAccountsService.getDetails.mockReturnValue(mockResponse);
+
+      const result = await controller.getAccountDetails({ account: '5xdd' });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          multiSig: expect.objectContaining({ signers: [], requiredSignatures: new BigNumber(1) }),
+        })
+      );
+    });
   });
 
   describe('getOffChainReceipts', () => {
-    it('should call the service and return AccountDetailsModel', async () => {
+    it('should call the service and return off chain receipts', async () => {
       const mockResponse = [new BigNumber(1), new BigNumber(2)];
       mockAccountsService.fetchOffChainReceipts.mockReturnValue(mockResponse);
 

@@ -107,6 +107,7 @@ export class MockPolymesh {
     subsidizeAccount: jest.fn(),
     getSubsidy: jest.fn(),
     isValidAddress: jest.fn(),
+    createMultiSigAccount: jest.fn(),
   };
 
   public identities = {

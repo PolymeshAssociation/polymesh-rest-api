@@ -18,6 +18,7 @@ import { DeveloperTestingModule } from '~/developer-testing/developer-testing.mo
 import { EventsModule } from '~/events/events.module';
 import { IdentitiesModule } from '~/identities/identities.module';
 import { MetadataModule } from '~/metadata/metadata.module';
+import { MultiSigsModule } from '~/multi-sigs/multi-sigs.module';
 import { NetworkModule } from '~/network/network.module';
 import { NftsModule } from '~/nfts/nfts.module';
 import { NotificationsModule } from '~/notifications/notifications.module';
@@ -105,6 +106,7 @@ import { UsersModule } from '~/users/users.module';
     OfflineSubmitterModule,
     OfflineStarterModule,
     OfflineRecorderModule,
+    MultiSigsModule,
   ],
 })
 export class AppModule {}

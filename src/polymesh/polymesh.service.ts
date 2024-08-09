@@ -26,6 +26,7 @@ export class PolymeshService {
     /* istanbul ignore next: remove when this is replaced by a real service */
   }
 
+  /* istanbul ignore next: not worth the trouble */
   /**
    * @hidden
    * Allows for the execution of a transaction defined in the polkadot.js instance, bypassing the SDK.

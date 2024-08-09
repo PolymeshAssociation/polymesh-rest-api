@@ -17,7 +17,7 @@ export class MultiSigDetailsModel {
   readonly signers: SignerModel[];
 
   @ApiProperty({
-    description: 'Required signers',
+    description: 'The required number of signers needed to approve a proposal',
     type: 'string',
     example: '2',
   })
