@@ -47,7 +47,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { assertTickerDefined, handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
@@ -242,7 +242,7 @@ export class IdentitiesController {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
-    description: 'List of all the held Assets',
+    description: 'List of all the held Asset IDs',
     paginated: true,
     example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
   })
@@ -257,7 +257,7 @@ export class IdentitiesController {
       new BigNumber(start || 0)
     );
     return new PaginatedResultsModel({
-      results: data.map(({ ticker }) => ticker),
+      results: data.map(({ id }) => id),
       total: count,
       next,
     });
@@ -745,7 +745,10 @@ export class IdentitiesController {
     );
 
     return new PaginatedResultsModel({
-      results: data.map(({ ticker }) => new PreApprovedModel({ ticker, did, isPreApproved: true })),
+      results: data.map(({ ticker }) => {
+        assertTickerDefined(ticker);
+        return new PreApprovedModel({ ticker, did, isPreApproved: true });
+      }),
       total: count,
       next,
     });

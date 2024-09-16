@@ -5,6 +5,7 @@ import {
   DividendDistribution,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { assertTickerDefined } from '~/common/utils';
 import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
@@ -27,6 +28,9 @@ export function createDividendDistributionModel(
     defaultTaxWithholding,
     taxWithholdings,
   } = distribution;
+
+  assertTickerDefined(ticker);
+
   return new DividendDistributionModel({
     origin: createPortfolioIdentifierModel(origin),
     currency,

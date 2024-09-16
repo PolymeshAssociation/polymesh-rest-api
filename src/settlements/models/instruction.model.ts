@@ -15,20 +15,21 @@ import { MediatorAffirmationModel } from '~/settlements/models/mediator-affirmat
 import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
 
 export class InstructionModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'ID of the Venue through which the settlement is handled',
     type: 'string',
     example: '123',
   })
   @FromEntity()
-  readonly venue: Venue;
+  readonly venue: Venue | null;
 
-  @ApiProperty({
-    description: 'Date when the Instruction was created',
+  @ApiPropertyOptional({
+    description:
+      'Date when the Instruction was created. Will be null if the Instruction has already executed',
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
   })
-  readonly createdAt: Date;
+  readonly createdAt: Date | null;
 
   @ApiProperty({
     description: 'The current status of the Instruction',

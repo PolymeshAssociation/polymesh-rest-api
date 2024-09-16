@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
@@ -21,8 +20,6 @@ import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class IdentitiesService {
-  private alicePair: KeyringPair;
-
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,

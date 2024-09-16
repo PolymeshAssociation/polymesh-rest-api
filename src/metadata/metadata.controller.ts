@@ -54,7 +54,7 @@ export class MetadataController {
 
     return new ResultsModel({
       results: result.map(
-        ({ asset: { ticker: asset }, id, type }) => new MetadataEntryModel({ asset, id, type })
+        ({ asset: { id: asset }, id, type }) => new MetadataEntryModel({ asset, id, type })
       ),
     });
   }
@@ -134,14 +134,14 @@ export class MetadataController {
 
     const resolver: TransactionResolver<MetadataEntry> = ({ details, transactions, result }) => {
       const {
-        asset: { ticker: assetTicker },
+        asset: { id: asset },
         id,
         type,
       } = result;
       return new CreatedMetadataEntryModel({
         details,
         transactions,
-        metadata: new MetadataEntryModel({ asset: assetTicker, id, type }),
+        metadata: new MetadataEntryModel({ asset, id, type }),
       });
     };
 

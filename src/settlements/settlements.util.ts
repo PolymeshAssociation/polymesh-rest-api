@@ -27,7 +27,7 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
       const {
         from: legFrom,
         to: legTo,
-        asset: { ticker },
+        asset: { id: asset },
       } = leg;
       const from = createPortfolioIdentifierModel(legFrom);
       const to = createPortfolioIdentifierModel(legTo);
@@ -36,7 +36,7 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
         const { amount } = leg;
         return new LegModel({
           type: LegType.onChain,
-          asset: ticker,
+          asset,
           from,
           to,
           amount,
@@ -47,7 +47,7 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
 
         return new LegModel({
           type: LegType.onChain,
-          asset: ticker,
+          asset,
           from,
           to,
           nfts: nfts.map(({ id }) => id),

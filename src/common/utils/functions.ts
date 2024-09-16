@@ -13,7 +13,7 @@ import { promisify } from 'util';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
-import { AppValidationError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { TransactionPayloadResultModel } from '~/common/models/transaction-payload-result.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -202,4 +202,15 @@ export function getNextYearISO(): string {
   nextYear.setFullYear(nextYear.getFullYear() + 1);
 
   return nextYear.toISOString();
+}
+
+/**
+ * v7 makes tickers optional, but for the dual version assume all assets have one
+ *
+ * @note TODO this should be removed with v6 support
+ */
+export function assertTickerDefined(ticker: string | undefined): asserts ticker is string {
+  if (!ticker) {
+    throw new AppNotFoundError('', 'ticker');
+  }
 }
