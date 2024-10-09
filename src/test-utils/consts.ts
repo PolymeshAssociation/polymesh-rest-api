@@ -18,6 +18,7 @@ const options = { signer, processMode: ProcessMode.Submit };
 const did = '0x01'.padEnd(66, '0');
 const dryRun = false;
 const ticker = 'TICKER';
+const assetId = '0xa3616b82e8e1080aedc952ea28b9db8b';
 
 const user = new UserModel({
   id: '-1',
@@ -107,6 +108,7 @@ export const testValues = {
   txResult,
   dryRun,
   ticker,
+  assetId,
 };
 
 export const extrinsic = {

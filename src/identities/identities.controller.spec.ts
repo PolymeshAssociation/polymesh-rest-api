@@ -49,7 +49,7 @@ import {
 } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-const { did, txResult, ticker } = testValues;
+const { did, txResult, ticker, assetId } = testValues;
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -116,7 +116,7 @@ describe('IdentitiesController', () => {
     it('should return a paginated list of held Assets', async () => {
       const mockResults = ['TICKER', 'TICKER2'];
       const mockAssets = {
-        data: mockResults.map(asset => ({ ticker: asset })),
+        data: mockResults.map(asset => ({ id: asset })),
         next: new BigNumber(2),
         count: new BigNumber(2),
       };
@@ -716,7 +716,7 @@ describe('IdentitiesController', () => {
 
       const result = await controller.getIsTickerPreApproved({ did }, { ticker });
 
-      expect(result).toEqual({ ticker, did, isPreApproved: true });
+      expect(result).toEqual({ asset: ticker, did, isPreApproved: true });
     });
   });
 
@@ -735,7 +735,7 @@ describe('IdentitiesController', () => {
       expect(result).toEqual({
         total: paginatedResult.count,
         next: paginatedResult.next,
-        results: [expect.objectContaining({ ticker, did, isPreApproved: true })],
+        results: [expect.objectContaining({ asset: assetId, did, isPreApproved: true })],
       });
     });
 
@@ -750,7 +750,7 @@ describe('IdentitiesController', () => {
       expect(result).toEqual({
         total: paginatedResult.count,
         next: paginatedResult.next,
-        results: [expect.objectContaining({ ticker, did, isPreApproved: true })],
+        results: [expect.objectContaining({ asset: assetId, did, isPreApproved: true })],
       });
     });
   });

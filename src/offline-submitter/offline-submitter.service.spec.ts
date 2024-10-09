@@ -1,5 +1,6 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ISubmittableResult } from '@polkadot/types/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
@@ -78,6 +79,7 @@ describe('OfflineSubmitterService', () => {
         blockHash: '0x02',
         transactionHash: '0x03',
         transactionIndex: new BigNumber(1),
+        result: 'someResult' as unknown as ISubmittableResult,
       });
 
       mockPolymeshService.polymeshApi.network = networkMock;

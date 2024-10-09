@@ -21,6 +21,8 @@ import { testValues } from '~/test-utils/consts';
 import { createMockMetadataEntry, createMockTransactionResult } from '~/test-utils/mocks';
 import { mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
+const { assetId } = testValues;
+
 describe('MetadataController', () => {
   const { txResult } = testValues;
   let controller: MetadataController;
@@ -56,7 +58,7 @@ describe('MetadataController', () => {
       const result = await controller.getMetadata({ ticker });
 
       expect(result).toEqual({
-        results: [new MetadataEntryModel({ asset: ticker, type, id })],
+        results: [new MetadataEntryModel({ asset: assetId, type, id })],
       });
     });
   });
@@ -89,7 +91,7 @@ describe('MetadataController', () => {
 
       expect(result).toEqual(
         new MetadataDetailsModel({
-          asset: ticker,
+          asset: assetId,
           type,
           id,
           ...mockDetails,
@@ -129,7 +131,7 @@ describe('MetadataController', () => {
       expect(result).toEqual(
         expect.objectContaining({
           transactions: [transaction],
-          metadata: new MetadataEntryModel({ asset: ticker, type, id }),
+          metadata: new MetadataEntryModel({ asset: assetId, type, id }),
         })
       );
     });
