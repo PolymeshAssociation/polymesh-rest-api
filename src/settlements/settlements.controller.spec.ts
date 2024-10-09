@@ -63,7 +63,7 @@ describe('SettlementsController', () => {
             to: new MockPortfolio(),
             amount: new BigNumber(100),
             asset: {
-              ticker: 'TICKER',
+              id: 'TICKER',
             },
           },
           {
@@ -71,7 +71,7 @@ describe('SettlementsController', () => {
             to: new MockPortfolio(),
             nfts: [createMock<Nft>({ id: new BigNumber(1) })],
             asset: {
-              ticker: 'TICKER',
+              id: 'TICKER',
             },
           },
           {
@@ -94,6 +94,7 @@ describe('SettlementsController', () => {
 
       expect(result).toEqual({
         ...mockInstructionDetails,
+        venue: mockInstructionDetails.venue.id,
         mediators: [{ identity: mediatorDid, status: AffirmationStatus.Pending }],
         legs: [
           ...[mockLegs.data[0], mockLegs.data[1]].map(({ from, to, amount, nfts, asset }) => ({
@@ -104,7 +105,7 @@ describe('SettlementsController', () => {
             amount,
             nfts,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            asset: (asset as any).ticker,
+            asset: (asset as any).id,
             type: LegType.onChain,
           })),
           {

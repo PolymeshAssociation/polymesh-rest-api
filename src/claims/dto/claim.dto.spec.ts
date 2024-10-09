@@ -146,7 +146,7 @@ describe('claimsDto', () => {
           type: ClaimType.Affiliate,
           scope: { type: 'Wrong', value: 123 },
         },
-        ['scope.type must be one of the following values: Identity, Ticker, Custom'],
+        ['scope.type must be one of the following values: Identity, Ticker, Asset, Custom'],
       ],
       [
         'CustomerDueDiligence without `cddId`',
