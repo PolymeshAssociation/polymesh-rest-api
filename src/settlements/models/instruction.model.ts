@@ -2,11 +2,11 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { InstructionStatus, InstructionType, Venue } from '@polymeshassociation/polymesh-sdk/types';
+import { InstructionStatus, InstructionType } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
-import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
+import { FromBigNumber } from '~/common/decorators/transformation';
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { LegType } from '~/common/types';
 import { AssetLegModel } from '~/settlements/models/asset-leg.model';
@@ -15,20 +15,21 @@ import { MediatorAffirmationModel } from '~/settlements/models/mediator-affirmat
 import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
 
 export class InstructionModel {
-  @ApiProperty({
-    description: 'ID of the Venue through which the settlement is handled',
+  @ApiPropertyOptional({
+    description:
+      'ID of the Venue through which the settlement is handled. NOTE: From 7.x.x chains, an instruction can be created without any Venue',
     type: 'string',
     example: '123',
   })
-  @FromEntity()
-  readonly venue: Venue;
+  @FromBigNumber()
+  readonly venue?: BigNumber;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Date when the Instruction was created',
     type: 'string',
     example: new Date('10/14/1987').toISOString(),
   })
-  readonly createdAt: Date;
+  readonly createdAt?: Date;
 
   @ApiProperty({
     description: 'The current status of the Instruction',
