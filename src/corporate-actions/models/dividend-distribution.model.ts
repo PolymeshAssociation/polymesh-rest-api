@@ -58,7 +58,7 @@ export class DividendDistributionModel extends CorporateActionModel {
   constructor(model: DividendDistributionModel) {
     const {
       id,
-      ticker,
+      asset,
       declarationDate,
       description,
       targets,
@@ -69,7 +69,7 @@ export class DividendDistributionModel extends CorporateActionModel {
 
     super({
       id,
-      ticker,
+      asset,
       declarationDate,
       description,
       targets,

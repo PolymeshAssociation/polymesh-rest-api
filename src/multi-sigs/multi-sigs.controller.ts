@@ -61,8 +61,9 @@ export class MultiSigsController {
 
   @ApiOperation({
     summary: "Join the creator's identity as a signing key",
-    description:
-      "This endpoint joins a MultiSig to its creator's identity. For the multiSig to join a DID not belonging to the creator then a join identity auth needs to be made and accepted by the MultiSig",
+    description: `This endpoint joins a MultiSig to its creator's identity. For the multiSig to join a DID not belonging to the creator then a join identity auth needs to be made and accepted by the MultiSig. 
+      NOTE: This endpoint is only applicable for 6.x.x chains as from 7.x.x chain, the MultiSig is automatically attached to the creator's identity`,
+    deprecated: true,
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',

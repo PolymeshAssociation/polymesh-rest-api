@@ -43,7 +43,7 @@ export class MetadataController {
     example: 'TICKER',
   })
   @ApiArrayResponse(MetadataEntryModel, {
-    description: 'List of Metadata entries distinguished by id, type and ticker',
+    description: 'List of Metadata entries distinguished by id, type and asset',
     paginated: false,
   })
   @Get()
@@ -54,7 +54,7 @@ export class MetadataController {
 
     return new ResultsModel({
       results: result.map(
-        ({ asset: { ticker: asset }, id, type }) => new MetadataEntryModel({ asset, id, type })
+        ({ asset: { id: asset }, id, type }) => new MetadataEntryModel({ asset, id, type })
       ),
     });
   }
@@ -134,14 +134,14 @@ export class MetadataController {
 
     const resolver: TransactionResolver<MetadataEntry> = ({ details, transactions, result }) => {
       const {
-        asset: { ticker: assetTicker },
+        asset: { id: assetId },
         id,
         type,
       } = result;
       return new CreatedMetadataEntryModel({
         details,
         transactions,
-        metadata: new MetadataEntryModel({ asset: assetTicker, id, type }),
+        metadata: new MetadataEntryModel({ asset: assetId, id, type }),
       });
     };
 

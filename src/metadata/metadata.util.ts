@@ -9,7 +9,7 @@ export async function createMetadataDetailsModel(
   const {
     id,
     type,
-    asset: { ticker },
+    asset: { id: assetId },
   } = metadataEntry;
 
   const [{ name, specs }, valueDetails] = await Promise.all([
@@ -29,5 +29,5 @@ export async function createMetadataDetailsModel(
     metadataValue = new MetadataValueModel({ value, expiry, lockStatus, lockedUntil });
   }
 
-  return new MetadataDetailsModel({ id, type, asset: ticker, name, specs, value: metadataValue });
+  return new MetadataDetailsModel({ id, type, asset: assetId, name, specs, value: metadataValue });
 }
