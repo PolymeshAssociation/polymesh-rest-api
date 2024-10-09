@@ -7,6 +7,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { Instruction } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
@@ -15,19 +16,21 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { AffirmAsMediatorDto } from '~/settlements/dto/affirm-as-mediator.dto';
 import { AffirmInstructionDto } from '~/settlements/dto/affirm-instruction.dto';
+import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { ExecuteInstructionDto } from '~/settlements/dto/execute-instruction.dto';
 import { LegIdParamsDto } from '~/settlements/dto/leg-id-params.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
+import { CreatedInstructionModel } from '~/settlements/models/created-instruction.model';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { InstructionAffirmationModel } from '~/settlements/models/instruction-affirmation.model';
 import { OffChainAffirmationModel } from '~/settlements/models/off-chain-affirmation.model';
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
 import { SettlementsService } from '~/settlements/settlements.service';
-import { createInstructionModel } from '~/settlements/settlements.util';
+import { createInstructionModel, legsToLegModel } from '~/settlements/settlements.util';
 
 @ApiTags('settlements')
 @Controller()
@@ -383,5 +386,40 @@ export class SettlementsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.executeInstruction(id, body);
     return handleServiceResult(result);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Create a new Instruction',
+  })
+  @ApiOkResponse({
+    description: 'The ID of the newly created Instruction',
+    type: CreatedInstructionModel,
+  })
+  @Post('instructions/create')
+  public async addInstruction(
+    @Body() createInstructionDto: CreateInstructionDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.settlementsService.createInstruction(
+      undefined,
+      createInstructionDto
+    );
+
+    const resolver: TransactionResolver<Instruction> = async ({
+      result: instruction,
+      transactions,
+      details,
+    }) => {
+      const { data: legs } = await instruction.getLegs();
+
+      return new CreatedInstructionModel({
+        instruction,
+        details,
+        transactions,
+        legs: legsToLegModel(legs),
+      });
+    };
+
+    return handleServiceResult(serviceResult, resolver);
   }
 }

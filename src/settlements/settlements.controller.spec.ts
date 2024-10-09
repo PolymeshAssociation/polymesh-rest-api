@@ -9,10 +9,12 @@ import {
   Nft,
   TransferError,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { LegType } from '~/common/types';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
+import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { processedTxResult, testValues } from '~/test-utils/consts';
@@ -320,6 +322,28 @@ describe('SettlementsController', () => {
       );
 
       expect(result).toEqual(processedTxResult);
+    });
+  });
+
+  describe('addInstruction', () => {
+    it('should create an instruction and return the data returned by the service', async () => {
+      const mockInstruction = new MockInstruction();
+
+      when(mockInstruction.getLegs).calledWith().mockResolvedValue({ data: [] });
+
+      const mockData = {
+        ...txResult,
+        result: mockInstruction,
+      };
+      mockSettlementsService.createInstruction.mockResolvedValue(mockData);
+
+      const result = await controller.addInstruction({} as CreateInstructionDto);
+
+      expect(result).toEqual({
+        ...processedTxResult,
+        instruction: mockInstruction, // in jest the @FromEntity decorator is not applied
+        legs: [],
+      });
     });
   });
 });

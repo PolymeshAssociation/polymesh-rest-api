@@ -120,6 +120,7 @@ export class MockPolymesh {
     getInstruction: jest.fn(),
     getVenue: jest.fn(),
     createVenue: jest.fn(),
+    addInstruction: jest.fn(),
   };
 
   public claims = {
