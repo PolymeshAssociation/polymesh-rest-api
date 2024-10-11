@@ -2,7 +2,9 @@ import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
+import { MockMiddlewareMetadata } from '~/network/mocks/middleware-metadata.mock';
 import { MockNetworkProperties } from '~/network/mocks/network-properties.mock';
+import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkBlockModel } from '~/network/models/network-block.model';
 import { NetworkController } from '~/network/network.controller';
 import { NetworkService } from '~/network/network.service';
@@ -47,6 +49,25 @@ describe('NetworkController', () => {
       const result = await controller.getLatestBlock();
 
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getMiddlewareMetadata', () => {
+    it('should return middleware metadata', async () => {
+      const mockServiceResult = new MockMiddlewareMetadata();
+
+      mockNetworkService.getMiddlewareMetadata.mockResolvedValue(mockServiceResult);
+
+      const modelResult = new MiddlewareMetadataModel(mockServiceResult);
+      const result = await controller.getMiddleWareMetaData();
+
+      expect(result).toEqual(modelResult);
+    });
+
+    it('should throw NotFoundException if middleware metadata is not found', async () => {
+      mockNetworkService.getMiddlewareMetadata.mockResolvedValue(null);
+
+      await expect(controller.getMiddleWareMetaData()).rejects.toThrowError();
     });
   });
 });
