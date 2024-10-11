@@ -242,9 +242,13 @@ export class IdentitiesController {
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
   @ApiArrayResponse('string', {
-    description: 'List of all the held Assets',
+    description:
+      'List of all the held Assets. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
     paginated: true,
-    example: ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
+    examples: [
+      ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
+      ['0xa3616b82e8e1080aedc952ea28b9db8b', '0x2593d3d0aca79e43ac0deaa16081eba2'],
+    ],
   })
   @Get(':did/held-assets')
   public async getHeldAssets(
@@ -257,7 +261,7 @@ export class IdentitiesController {
       new BigNumber(start || 0)
     );
     return new PaginatedResultsModel({
-      results: data.map(({ ticker }) => ticker),
+      results: data.map(({ id }) => id),
       total: count,
       next,
     });
@@ -702,7 +706,7 @@ export class IdentitiesController {
   ): Promise<PreApprovedModel> {
     const isPreApproved = await this.identitiesService.isTickerPreApproved(did, ticker);
 
-    return new PreApprovedModel({ ticker, did, isPreApproved });
+    return new PreApprovedModel({ asset: ticker, did, isPreApproved });
   }
 
   @ApiOperation({
@@ -745,7 +749,7 @@ export class IdentitiesController {
     );
 
     return new PaginatedResultsModel({
-      results: data.map(({ ticker }) => new PreApprovedModel({ ticker, did, isPreApproved: true })),
+      results: data.map(({ id }) => new PreApprovedModel({ asset: id, did, isPreApproved: true })),
       total: count,
       next,
     });

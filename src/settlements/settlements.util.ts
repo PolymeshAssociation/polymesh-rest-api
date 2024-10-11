@@ -27,7 +27,7 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
       const {
         from: legFrom,
         to: legTo,
-        asset: { ticker },
+        asset: { id },
       } = leg;
       const from = createPortfolioIdentifierModel(legFrom);
       const to = createPortfolioIdentifierModel(legTo);
@@ -36,7 +36,7 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
         const { amount } = leg;
         return new LegModel({
           type: LegType.onChain,
-          asset: ticker,
+          asset: id,
           from,
           to,
           amount,
@@ -47,10 +47,10 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
 
         return new LegModel({
           type: LegType.onChain,
-          asset: ticker,
+          asset: id,
           from,
           to,
-          nfts: nfts.map(({ id }) => id),
+          nfts: nfts.map(({ id: nftId }) => nftId),
         });
       }
     })
@@ -71,8 +71,6 @@ export async function createInstructionModel(instruction: Instruction): Promise<
 
   let instructionModelParams: ConstructorParameters<typeof InstructionModel>[0] = {
     status,
-    createdAt,
-    venue,
     type,
     legs: legs || [],
     mediators: mediators.map(mediator => ({
@@ -81,6 +79,14 @@ export async function createInstructionModel(instruction: Instruction): Promise<
       expiry: mediator.expiry,
     })),
   };
+
+  if (venue !== null) {
+    instructionModelParams = { ...instructionModelParams, venue: venue.id };
+  }
+
+  if (createdAt !== null) {
+    instructionModelParams = { ...instructionModelParams, createdAt };
+  }
 
   if (valueDate !== null) {
     instructionModelParams = { ...instructionModelParams, valueDate };

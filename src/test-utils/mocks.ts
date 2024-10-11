@@ -120,6 +120,7 @@ export class MockPolymesh {
     getInstruction: jest.fn(),
     getVenue: jest.fn(),
     createVenue: jest.fn(),
+    addInstruction: jest.fn(),
   };
 
   public claims = {
@@ -167,6 +168,7 @@ export class MockPolymesh {
 }
 
 export class MockAsset {
+  id = '0xa3616b82e8e1080aedc952ea28b9db8b';
   ticker = 'TICKER';
   public details = jest.fn();
   public getIdentifiers = jest.fn();
@@ -484,7 +486,7 @@ export function createMockMetadataEntry(
   partial: PartialFuncReturn<MetadataEntry> = {
     id: new BigNumber(1),
     type: MetadataType.Local,
-    asset: { ticker: 'TICKER' },
+    asset: { id: testValues.assetId, ticker: 'TICKER' },
   }
 ): DeepMocked<MetadataEntry> {
   return createMock<MetadataEntry>(partial);

@@ -9,10 +9,12 @@ import {
   Nft,
   TransferError,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { LegType } from '~/common/types';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
+import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { processedTxResult, testValues } from '~/test-utils/consts';
@@ -63,7 +65,7 @@ describe('SettlementsController', () => {
             to: new MockPortfolio(),
             amount: new BigNumber(100),
             asset: {
-              ticker: 'TICKER',
+              id: 'TICKER',
             },
           },
           {
@@ -71,7 +73,7 @@ describe('SettlementsController', () => {
             to: new MockPortfolio(),
             nfts: [createMock<Nft>({ id: new BigNumber(1) })],
             asset: {
-              ticker: 'TICKER',
+              id: 'TICKER',
             },
           },
           {
@@ -94,6 +96,7 @@ describe('SettlementsController', () => {
 
       expect(result).toEqual({
         ...mockInstructionDetails,
+        venue: mockInstructionDetails.venue.id,
         mediators: [{ identity: mediatorDid, status: AffirmationStatus.Pending }],
         legs: [
           ...[mockLegs.data[0], mockLegs.data[1]].map(({ from, to, amount, nfts, asset }) => ({
@@ -104,7 +107,7 @@ describe('SettlementsController', () => {
             amount,
             nfts,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            asset: (asset as any).ticker,
+            asset: (asset as any).id,
             type: LegType.onChain,
           })),
           {
@@ -319,6 +322,28 @@ describe('SettlementsController', () => {
       );
 
       expect(result).toEqual(processedTxResult);
+    });
+  });
+
+  describe('addInstruction', () => {
+    it('should create an instruction and return the data returned by the service', async () => {
+      const mockInstruction = new MockInstruction();
+
+      when(mockInstruction.getLegs).calledWith().mockResolvedValue({ data: [] });
+
+      const mockData = {
+        ...txResult,
+        result: mockInstruction,
+      };
+      mockSettlementsService.createInstruction.mockResolvedValue(mockData);
+
+      const result = await controller.addInstruction({} as CreateInstructionDto);
+
+      expect(result).toEqual({
+        ...processedTxResult,
+        instruction: mockInstruction, // in jest the @FromEntity decorator is not applied
+        legs: [],
+      });
     });
   });
 });

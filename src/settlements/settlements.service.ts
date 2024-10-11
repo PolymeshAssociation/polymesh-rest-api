@@ -57,18 +57,28 @@ export class SettlementsService {
   }
 
   public async createInstruction(
-    venueId: BigNumber,
+    venueId: BigNumber | undefined,
     createInstructionDto: CreateInstructionDto
   ): ServiceReturn<Instruction> {
     const { options, args } = extractTxOptions(createInstructionDto);
-    const venue = await this.findVenue(venueId);
+
+    const {
+      polymeshService: {
+        polymeshApi: { settlements },
+      },
+    } = this;
+
+    if (venueId) {
+      await this.findVenue(venueId); // Check if venue exists
+    }
 
     const params = {
       ...args,
       legs: args.legs.map(leg => leg.toLeg()),
+      venueId,
     };
 
-    return this.transactionsService.submit(venue.addInstruction, params, options);
+    return this.transactionsService.submit(settlements.addInstruction, params, options);
   }
 
   public async findVenuesByOwner(did: string): Promise<Venue[]> {

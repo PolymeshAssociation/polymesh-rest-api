@@ -19,7 +19,7 @@ import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/
 import { TransactionsService } from '~/transactions/transactions.service';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
-const { ticker, signer } = testValues;
+const { ticker, signer, assetId } = testValues;
 
 describe('NftService', () => {
   let service: NftsService;
@@ -152,7 +152,7 @@ describe('NftService', () => {
           value: 'someValue',
           name: 'some name',
           specs: {},
-          ticker,
+          assetId,
         },
       ];
 

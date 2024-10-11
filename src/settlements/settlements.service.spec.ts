@@ -19,6 +19,7 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
 import { LegDto } from '~/settlements/dto/leg.dto';
 import { OffChainAffirmationReceiptDto } from '~/settlements/dto/offchain-affirmation-receipt.dto';
 import { OffChainLegDto } from '~/settlements/dto/offchain-leg.dto';
@@ -165,7 +166,7 @@ describe('SettlementsService', () => {
   describe('createInstruction', () => {
     it('should run an addInstruction procedure and return the queue data', async () => {
       const mockVenue = new MockVenue();
-
+      const venueId = new BigNumber(123);
       const transaction = {
         blockHash: '0x1',
         txHash: '0x2',
@@ -182,6 +183,7 @@ describe('SettlementsService', () => {
       const findVenueSpy = jest.spyOn(service, 'findVenue');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findVenueSpy.mockResolvedValue(mockVenue as any);
+      mockPolymeshApi.settlements.addInstruction.mockResolvedValue(mockTransaction);
 
       const onChainLeg = {
         type: LegType.onChain,
@@ -208,30 +210,44 @@ describe('SettlementsService', () => {
         ...params,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.createInstruction(new BigNumber(123), body as any);
+      let result = await service.createInstruction(venueId, body as CreateInstructionDto);
+      const expectedLegs = [
+        {
+          from: 'fromDid',
+          to: { identity: 'toDid', id: new BigNumber(1) },
+          amount: new BigNumber(100),
+          asset: 'FAKE_TICKER',
+        },
+        {
+          from: '0x01',
+          to: '0x02',
+          offChainAmount: new BigNumber(100),
+          asset: 'OFF_CHAIN_TICKER',
+        },
+      ];
 
       expect(result).toEqual({
         result: mockInstruction,
         transactions: [mockTransaction],
       });
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
-        mockVenue.addInstruction,
+        mockPolymeshApi.settlements.addInstruction,
         {
-          legs: [
-            {
-              from: 'fromDid',
-              to: { identity: 'toDid', id: new BigNumber(1) },
-              amount: new BigNumber(100),
-              asset: 'FAKE_TICKER',
-            },
-            {
-              from: '0x01',
-              to: '0x02',
-              offChainAmount: new BigNumber(100),
-              asset: 'OFF_CHAIN_TICKER',
-            },
-          ],
+          legs: expectedLegs,
+          venueId,
+        },
+        expect.objectContaining({ signer })
+      );
+
+      result = await service.createInstruction(undefined, body as CreateInstructionDto);
+      expect(result).toEqual({
+        result: mockInstruction,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.settlements.addInstruction,
+        {
+          legs: expectedLegs,
         },
         expect.objectContaining({ signer })
       );
