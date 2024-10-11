@@ -3,6 +3,7 @@ import { hexStripPrefix } from '@polkadot/util';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Account, ExtrinsicDataWithFees } from '@polymeshassociation/polymesh-sdk/types';
 
+import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionDto } from '~/transactions/dto/transaction.dto';
@@ -39,5 +40,9 @@ export class NetworkService {
     );
 
     return new SubmitResultModel(result);
+  }
+
+  public async getMiddlewareMetadata(): Promise<MiddlewareMetadataModel | null> {
+    return this.polymeshService.polymeshApi.network.getMiddlewareMetadata();
   }
 }

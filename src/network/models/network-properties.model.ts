@@ -20,6 +20,13 @@ export class NetworkPropertiesModel {
   @FromBigNumber()
   readonly version: BigNumber;
 
+  @ApiProperty({
+    description: 'Genesis block hash',
+    type: 'string',
+    example: '0xabc',
+  })
+  readonly genesisHash: string;
+
   constructor(model: NetworkPropertiesModel) {
     Object.assign(this, model);
   }

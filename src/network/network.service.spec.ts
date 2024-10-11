@@ -4,6 +4,7 @@ const mockHexStripPrefix = jest.fn().mockImplementation(params => params);
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
+import { MockMiddlewareMetadata } from '~/network/mocks/middleware-metadata.mock';
 import { MockNetworkProperties } from '~/network/mocks/network-properties.mock';
 import { NetworkService } from '~/network/network.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -107,6 +108,18 @@ describe('NetworkService', () => {
       const result = await networkService.submitTransaction(mockBody);
 
       expect(result).toEqual(extrinsicWithFees);
+    });
+  });
+
+  describe('getMiddlewareMetadata', () => {
+    it('should return middleware metadata', async () => {
+      const middlewareMetadata = new MockMiddlewareMetadata();
+
+      mockPolymeshApi.network.getMiddlewareMetadata.mockReturnValue(middlewareMetadata);
+
+      const result = await networkService.getMiddlewareMetadata();
+
+      expect(result).toBe(middlewareMetadata);
     });
   });
 });
