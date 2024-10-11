@@ -82,6 +82,7 @@ export class MockPolymesh {
     getTreasuryAccount: jest.fn(),
     getTransactionByHash: jest.fn(),
     submitTransaction: jest.fn(),
+    getMiddlewareMetadata: jest.fn(),
   };
 
   public assets = {
