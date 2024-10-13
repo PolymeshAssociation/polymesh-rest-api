@@ -11,7 +11,7 @@ import {
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Checkpoint, CheckpointSchedule } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/ticker-params.dto';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckpointParamsDto } from '~/checkpoints/dto/checkpoint.dto';
@@ -25,7 +25,7 @@ import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-che
 import { PeriodComplexityModel } from '~/checkpoints/models/period-complexity.model';
 import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -35,17 +35,17 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 
 class DeleteCheckpointScheduleParamsDto extends IdParamsDto {
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 }
 
 class CheckpointScheduleParamsDto extends IdParamsDto {
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 }
 
 @ApiTags('assets', 'checkpoints')
-@Controller('assets/:ticker/checkpoints')
+@Controller('assets/:asset/checkpoints')
 export class CheckpointsController {
   constructor(private readonly checkpointsService: CheckpointsService) {}
 
@@ -54,8 +54,8 @@ export class CheckpointsController {
     description: 'This endpoint will provide the list of Checkpoints created on this Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose attached Checkpoints are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose attached Checkpoints are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -82,7 +82,7 @@ export class CheckpointsController {
   })
   @Get()
   public async getCheckpoints(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<CheckpointDetailsModel>> {
     const {
@@ -109,8 +109,8 @@ export class CheckpointsController {
     summary: 'Fetch details of an Asset Checkpoint',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Checkpoint is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Checkpoint is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -145,8 +145,8 @@ export class CheckpointsController {
       'This endpoint will create a snapshot of Asset holders and their respective balances at that moment',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the Checkpoint is to be created',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the Checkpoint is to be created',
     type: 'string',
     example: 'TICKER',
   })
@@ -156,7 +156,7 @@ export class CheckpointsController {
   })
   @Post()
   public async createCheckpoint(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() signerDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.checkpointsService.createByTicker(ticker, signerDto);
@@ -181,8 +181,9 @@ export class CheckpointsController {
       'This endpoint will provide the list of active Schedules which create Checkpoints for a specific Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose attached Checkpoint Schedules are to be fetched',
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose attached Checkpoint Schedules are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -192,7 +193,7 @@ export class CheckpointsController {
   })
   @Get('schedules')
   public async getSchedules(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<ResultsModel<CheckpointScheduleModel>> {
     const schedules = await this.checkpointsService.findSchedulesByTicker(ticker);
     return new ResultsModel({
@@ -213,8 +214,8 @@ export class CheckpointsController {
     summary: 'Fetch details of an Asset Checkpoint Schedule',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Checkpoint Schedule is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Checkpoint Schedule is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -254,8 +255,8 @@ export class CheckpointsController {
     description: 'This endpoint will create a Schedule that creates Checkpoints periodically',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the Checkpoint creation is to be scheduled',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the Checkpoint creation is to be scheduled',
     type: 'string',
     example: 'TICKER',
   })
@@ -265,7 +266,7 @@ export class CheckpointsController {
   })
   @Post('schedules/create')
   public async createSchedule(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() createCheckpointScheduleDto: CreateCheckpointScheduleDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.checkpointsService.createScheduleByTicker(
@@ -305,8 +306,8 @@ export class CheckpointsController {
     description: 'This endpoint returns the Asset balance of holders at a given Checkpoint',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which to fetch holder balances',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which to fetch holder balances',
     type: 'string',
     example: 'TICKER',
   })
@@ -362,8 +363,8 @@ export class CheckpointsController {
       'This endpoint returns the Asset balance an Identity has at a particular Checkpoint',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the balance is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the balance is to be fetched',
   })
   @ApiParam({
     name: 'id',
@@ -397,8 +398,8 @@ export class CheckpointsController {
     description: 'This endpoint will delete an existing Schedule for Checkpoint creation',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the Schedule is to be deleted',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the Schedule is to be deleted',
     type: 'string',
     example: 'TICKER',
   })
@@ -433,8 +434,8 @@ export class CheckpointsController {
     description: 'This endpoint returns all Checkpoints that were created from a specific Schedule',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Checkpoints are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Checkpoints are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -470,8 +471,8 @@ export class CheckpointsController {
     summary: 'Fetch Asset Schedules complexity',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which Schedule complexity is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which Schedule complexity is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -485,7 +486,7 @@ export class CheckpointsController {
   })
   @Get('/complexity')
   public async getComplexity(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<ScheduleComplexityModel[]> {
     const { schedules, maxComplexity } = await this.checkpointsService.getComplexityForAsset(
       ticker
@@ -504,8 +505,8 @@ export class CheckpointsController {
     summary: 'Fetch details of an Asset Checkpoint Schedule',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Checkpoint Schedule is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Checkpoint Schedule is to be fetched',
     type: 'string',
     example: 'TICKER',
   })

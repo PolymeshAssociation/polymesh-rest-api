@@ -63,7 +63,7 @@ export class ExtrinsicModel {
     isArray: true,
     example: [
       {
-        name: 'ticker',
+        name: 'asset',
         value: 'TICKER',
       },
     ],

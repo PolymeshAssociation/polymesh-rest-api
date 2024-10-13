@@ -55,7 +55,7 @@ describe('MetadataController', () => {
       const mockMetadataEntry = createMockMetadataEntry();
       when(mockService.findAll).calledWith(ticker).mockResolvedValue([mockMetadataEntry]);
 
-      const result = await controller.getMetadata({ ticker });
+      const result = await controller.getMetadata({ asset });
 
       expect(result).toEqual({
         results: [new MetadataEntryModel({ asset: assetId, type, id })],
@@ -126,7 +126,7 @@ describe('MetadataController', () => {
 
       when(mockService.create).calledWith(ticker, mockPayload).mockResolvedValue(testTxResult);
 
-      const result = await controller.createMetadata({ ticker }, mockPayload);
+      const result = await controller.createMetadata({ asset }, mockPayload);
 
       expect(result).toEqual(
         expect.objectContaining({

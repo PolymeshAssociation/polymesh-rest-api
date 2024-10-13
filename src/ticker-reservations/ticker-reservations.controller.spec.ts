@@ -53,7 +53,7 @@ describe('TickerReservationsController', () => {
       mockTickerReservationsService.findOne.mockResolvedValue(mockTickerReservation);
 
       const ticker = 'SOME_TICKER';
-      const result = await controller.getDetails({ ticker });
+      const result = await controller.getDetails({ asset });
 
       expect(result).toEqual(mockDetails);
       expect(mockTickerReservationsService.findOne).toHaveBeenCalledWith(ticker);
@@ -72,7 +72,7 @@ describe('TickerReservationsController', () => {
       const body = { signer, target: '0x1000' };
       const ticker = 'SOME_TICKER';
 
-      const result = await controller.transferOwnership({ ticker }, body);
+      const result = await controller.transferOwnership({ asset }, body);
 
       expect(result).toEqual({
         ...processedTxResult,
@@ -104,7 +104,7 @@ describe('TickerReservationsController', () => {
       const webhookUrl = 'http://example.com/webhook';
       const ticker = 'SOME_TICKER';
 
-      const result = await controller.extendReservation({ ticker }, { signer, webhookUrl, dryRun });
+      const result = await controller.extendReservation({ asset }, { signer, webhookUrl, dryRun });
 
       expect(result).toEqual({
         ...processedTxResult,

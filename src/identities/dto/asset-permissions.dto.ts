@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { SectionPermissions } from '@polymeshassociation/polymesh-sdk/types';
 import { IsArray } from 'class-validator';
 
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { PermissionTypeDto } from '~/identities/dto/permission-type.dto';
 
 export class AssetPermissionsDto extends PermissionTypeDto {
@@ -15,7 +15,7 @@ export class AssetPermissionsDto extends PermissionTypeDto {
     example: ['TICKER123456'],
   })
   @IsArray()
-  @IsTicker({ each: true })
+  @IsAsset({ each: true })
   readonly values: string[];
 
   public toAssetPermissions(): SectionPermissions<string> | null {

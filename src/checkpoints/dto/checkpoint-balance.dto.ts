@@ -1,10 +1,10 @@
 /* istanbul ignore file */
 
-import { IsDid, IsTicker } from '~/common/decorators/validation';
+import { IsAsset, IsDid } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 
 export class CheckPointBalanceParamsDto extends IdParamsDto {
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 
   @IsDid()

@@ -10,9 +10,9 @@ import {
 } from '@nestjs/swagger';
 import { DividendDistribution } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ResultsModel } from '~/common/models/results.model';
@@ -36,22 +36,22 @@ import { DividendDistributionDetailsModel } from '~/corporate-actions/models/div
 import { TaxWithholdingModel } from '~/corporate-actions/models/tax-withholding.model';
 
 class DividendDistributionParamsDto extends IdParamsDto {
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 }
 
 class DeleteCorporateActionParamsDto extends IdParamsDto {
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 }
 
 class DistributeFundsParamsDto extends IdParamsDto {
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 }
 
 @ApiTags('corporate-actions', 'assets')
-@Controller('assets/:ticker/corporate-actions')
+@Controller('assets/:asset/corporate-actions')
 export class CorporateActionsController {
   constructor(private readonly corporateActionsService: CorporateActionsService) {}
 
@@ -61,8 +61,9 @@ export class CorporateActionsController {
       "This endpoint will provide the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action Default Config is to be fetched',
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose Corporate Action Default Config is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -72,7 +73,7 @@ export class CorporateActionsController {
   })
   @Get('default-config')
   public async getDefaultConfig(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<CorporateActionDefaultConfigModel> {
     const { targets, defaultTaxWithholding, taxWithholdings } =
       await this.corporateActionsService.findDefaultConfigByTicker(ticker);
@@ -91,8 +92,9 @@ export class CorporateActionsController {
       "This endpoint updates the default target Identities, global tax withholding percentage, and per-Identity tax withholding percentages for the Asset's Corporate Actions. Any Corporate Action that is created will use these values unless they are explicitly overridden",
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action Default Config is to be updated',
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose Corporate Action Default Config is to be updated',
     type: 'string',
     example: 'TICKER',
   })
@@ -102,7 +104,7 @@ export class CorporateActionsController {
   })
   @Post('default-config/modify')
   public async updateDefaultConfig(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.updateDefaultConfigByTicker(
@@ -119,8 +121,8 @@ export class CorporateActionsController {
       'This endpoint will provide the list of Dividend Distributions associated with an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Dividend Distributions are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Dividend Distributions are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -130,7 +132,7 @@ export class CorporateActionsController {
   })
   @Get('dividend-distributions')
   public async getDividendDistributions(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<ResultsModel<DividendDistributionDetailsModel>> {
     const results = await this.corporateActionsService.findDistributionsByTicker(ticker);
     return new ResultsModel({
@@ -147,8 +149,8 @@ export class CorporateActionsController {
       'This endpoint will provide a specific Dividend Distribution associated with an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Dividend Distribution is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Dividend Distribution is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -177,8 +179,8 @@ export class CorporateActionsController {
       'This endpoint will create a Dividend Distribution for a subset of the Asset holders at a certain (existing or future) Checkpoint',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which a Dividend Distribution is to be created',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which a Dividend Distribution is to be created',
     type: 'string',
     example: 'TICKER',
   })
@@ -214,7 +216,7 @@ export class CorporateActionsController {
   })
   @Post('dividend-distributions/create')
   public async createDividendDistribution(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() dividendDistributionDto: DividendDistributionDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.corporateActionsService.createDividendDistribution(
@@ -248,8 +250,8 @@ export class CorporateActionsController {
     example: '1',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Corporate Action is to be deleted',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Corporate Action is to be deleted',
     type: 'string',
     example: 'TICKER',
   })
@@ -282,8 +284,8 @@ export class CorporateActionsController {
     example: '1',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which dividends are to be transferred',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which dividends are to be transferred',
     type: 'string',
     example: 'TICKER',
   })
@@ -316,8 +318,8 @@ export class CorporateActionsController {
       'This endpoint links a list of documents to the Corporate Action. Any previous links are removed in favor of the new list. All the documents to be linked should already be linked to the Asset of the Corporate Action.',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to which the documents are attached',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to which the documents are attached',
     type: 'string',
     example: 'TICKER',
   })
@@ -357,8 +359,8 @@ export class CorporateActionsController {
     example: '1',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which dividends are to be claimed',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which dividends are to be claimed',
     type: 'string',
     example: 'TICKER',
   })
@@ -395,8 +397,8 @@ export class CorporateActionsController {
       'This endpoint reclaims any remaining funds back to the origin Portfolio from which the initial dividend funds came from. This can only be done after the Distribution has expired',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which dividends are to be reclaimed',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which dividends are to be reclaimed',
     type: 'string',
     example: 'TICKER',
   })
@@ -438,8 +440,9 @@ export class CorporateActionsController {
       'This endpoint modifies the Checkpoint of a Dividend Distribution. The Checkpoint can be modified only if the payment period for the Distribution has not yet started',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Dividend Distribution Checkpoint is to be modified',
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose Dividend Distribution Checkpoint is to be modified',
     type: 'string',
     example: 'TICKER',
   })

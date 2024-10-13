@@ -36,7 +36,7 @@ describe('AppController (e2e)', () => {
     await Promise.all([app.close(), polymeshService.close()]);
   });
 
-  describe('/tokens/:ticker (GET)', () => {
+  describe('/tokens/:asset (GET)', () => {
     describe('if the token exists', () => {
       it('should return token details', () => {
         return request(app.getHttpServer()).get('/tokens/JERE02').expect(HttpStatus.OK).expect({

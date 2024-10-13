@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class ReserveTickerDto extends TransactionBaseDto {
@@ -11,6 +11,6 @@ export class ReserveTickerDto extends TransactionBaseDto {
     description: 'Ticker to be reserved',
     example: 'TICKER',
   })
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 }

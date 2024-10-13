@@ -21,7 +21,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import {
   authorizationRequestResolver,
@@ -702,7 +702,7 @@ export class IdentitiesController {
   @Get(':did/is-pre-approved')
   public async getIsTickerPreApproved(
     @Param() { did }: DidDto,
-    @Query() { ticker }: TickerParamsDto
+    @Query() { asset }: AssetParamsDto
   ): Promise<PreApprovedModel> {
     const isPreApproved = await this.identitiesService.isTickerPreApproved(did, ticker);
 

@@ -7,7 +7,7 @@ import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsAsset, IsBigNumber } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ToCaCheckpoint } from '~/corporate-actions/decorators/transformation';
 import { IsCaCheckpoint } from '~/corporate-actions/decorators/validation';
@@ -92,7 +92,7 @@ export class DividendDistributionDto extends TransactionBaseDto {
     type: 'string',
     example: 'TICKER',
   })
-  @IsTicker()
+  @IsAsset()
   readonly currency: string;
 
   @ApiProperty({

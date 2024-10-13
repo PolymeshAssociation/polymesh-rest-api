@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { LegType } from '~/common/types';
 
 export class AssetLegDto {
@@ -11,7 +11,7 @@ export class AssetLegDto {
     description: 'Ticker of the Asset',
     example: 'TICKER',
   })
-  @IsTicker()
+  @IsAsset()
   readonly asset: string;
 
   @ApiProperty({

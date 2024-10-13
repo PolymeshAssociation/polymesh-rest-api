@@ -714,7 +714,7 @@ describe('IdentitiesController', () => {
     it('should return the asset pre-approval status', async () => {
       mockIdentitiesService.isTickerPreApproved.mockResolvedValue(true);
 
-      const result = await controller.getIsTickerPreApproved({ did }, { ticker });
+      const result = await controller.getIsTickerPreApproved({ did }, { asset });
 
       expect(result).toEqual({ asset: ticker, did, isPreApproved: true });
     });

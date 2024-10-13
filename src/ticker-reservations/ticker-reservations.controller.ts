@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/ticker-params.dto';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiTransactionResponse } from '~/common/decorators';
@@ -52,7 +52,7 @@ export class TickerReservationsController {
     description: 'This endpoint returns details of ticker reservation',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'Ticker whose details are to be fetched',
     type: 'string',
     example: 'TICKER',
@@ -61,8 +61,8 @@ export class TickerReservationsController {
     description: 'Details of the ticker reservation',
     type: TickerReservationModel,
   })
-  @Get(':ticker')
-  public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<TickerReservationModel> {
+  @Get(':asset')
+  public async getDetails(@Param() { asset }: AssetParamsDto): Promise<TickerReservationModel> {
     const tickerReservation = await this.tickerReservationsService.findOne(ticker);
     return createTickerReservationModel(tickerReservation);
   }
@@ -73,7 +73,7 @@ export class TickerReservationsController {
       'This endpoint transfers ownership of the ticker Reservation to `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'Ticker whose ownership is to be transferred',
     type: 'string',
     example: 'TICKER',
@@ -85,9 +85,9 @@ export class TickerReservationsController {
   @ApiUnprocessableEntityResponse({
     description: 'Asset has already been created for the ticker',
   })
-  @Post(':ticker/transfer-ownership')
+  @Post(':asset/transfer-ownership')
   public async transferOwnership(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: TransferOwnershipDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.tickerReservationsService.transferOwnership(ticker, params);
@@ -112,7 +112,7 @@ export class TickerReservationsController {
       'This endpoint extends the time period of a ticker reservation for 60 days from now',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'Ticker whose expiry date is to be extended',
     type: 'string',
     example: 'TICKER',
@@ -128,9 +128,9 @@ export class TickerReservationsController {
       '<li>Ticker not reserved or the Reservation has expired</li>' +
       '</ul>',
   })
-  @Post(':ticker/extend')
+  @Post(':asset/extend')
   public async extendReservation(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.tickerReservationsService.extend(ticker, transactionBaseDto);

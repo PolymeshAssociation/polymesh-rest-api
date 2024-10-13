@@ -9,7 +9,7 @@ import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsAsset, IsBigNumber } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 export class CreateAssetDto extends TransactionBaseDto {
@@ -21,10 +21,10 @@ export class CreateAssetDto extends TransactionBaseDto {
   readonly name: string;
 
   @ApiProperty({
-    description: 'The ticker of the Asset. This must either be free or reserved by the Signer',
+    description: 'The Asset (Ticker/Asset ID). This must either be free or reserved by the Signer',
     example: 'TICKER',
   })
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 
   @ApiPropertyOptional({

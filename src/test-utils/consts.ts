@@ -121,7 +121,7 @@ export const extrinsic = {
   txTag: TxTags.asset.RegisterTicker,
   params: [
     {
-      name: 'ticker',
+      name: 'asset',
       value: 'TICKER',
     },
   ],
