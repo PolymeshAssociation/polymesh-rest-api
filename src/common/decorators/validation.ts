@@ -5,16 +5,14 @@ import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   IsHexadecimal,
-  IsUppercase,
   Length,
   Matches,
-  MaxLength,
   registerDecorator,
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
 
-import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
+import { ASSET_ID_LENGTH, MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';
 import { DID_LENGTH } from '~/identities/identities.consts';
 
@@ -35,11 +33,37 @@ export function IsDid(validationOptions?: ValidationOptions) {
   );
 }
 
-export function IsTicker(validationOptions?: ValidationOptions) {
-  return applyDecorators(
-    MaxLength(MAX_TICKER_LENGTH, validationOptions),
-    IsUppercase(validationOptions)
-  );
+export function IsAsset(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isAsset',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: string) {
+          if (value.length < MAX_TICKER_LENGTH) {
+            return false;
+          }
+          if (value.startsWith('0x')) {
+            // check for Asset ID
+            if (value.length < ASSET_ID_LENGTH) {
+              return false;
+            }
+          } else {
+            // ticker validation for UpperCase
+            return value === value.toUpperCase();
+          }
+
+          return true;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be either a Ticker (${MAX_TICKER_LENGTH} characters uppercase string) or an Asset ID (${ASSET_ID_LENGTH} characters long hex string)`;
+        },
+      },
+    });
+  };
 }
 
 export function IsBigNumber(

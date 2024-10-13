@@ -63,7 +63,7 @@ describe('TrustedClaimIssuersController', () => {
         .calledWith(mockParams.ticker, mockPayload)
         .mockResolvedValue(testTxResult);
 
-      const result = await controller.setTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+      const result = await controller.setTrustedClaimIssuers({ asset: 'TICKER' }, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });
@@ -83,7 +83,7 @@ describe('TrustedClaimIssuersController', () => {
         .calledWith(mockParams.ticker, mockPayload)
         .mockResolvedValue(testTxResult);
 
-      const result = await controller.addTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+      const result = await controller.addTrustedClaimIssuers({ asset: 'TICKER' }, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });
@@ -104,7 +104,7 @@ describe('TrustedClaimIssuersController', () => {
         .calledWith(mockParams.ticker, mockPayload)
         .mockResolvedValue(testTxResult);
 
-      const result = await controller.removeTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+      const result = await controller.removeTrustedClaimIssuers({ asset: 'TICKER' }, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });

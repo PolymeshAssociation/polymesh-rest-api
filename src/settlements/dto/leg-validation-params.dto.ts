@@ -5,7 +5,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
+import { IsAsset, IsBigNumber, IsDid } from '~/common/decorators/validation';
 
 export class LegValidationParamsDto {
   @ApiPropertyOptional({
@@ -70,6 +70,6 @@ export class LegValidationParamsDto {
     type: 'string',
     example: 'TICKER',
   })
-  @IsTicker()
+  @IsAsset()
   readonly asset: string;
 }

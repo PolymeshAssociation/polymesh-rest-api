@@ -38,7 +38,7 @@ describe('NftController', () => {
 
       mockNftsService.getCollectionKeys.mockResolvedValue(fakeResult);
 
-      const result = await controller.getCollectionKeys({ ticker });
+      const result = await controller.getCollectionKeys({ asset });
 
       expect(result).toEqual(fakeResult);
     });
@@ -83,7 +83,7 @@ describe('NftController', () => {
       const fakeResult = processedTxResult as unknown as ServiceReturn<Nft>;
       mockNftsService.issueNft.mockResolvedValue(fakeResult);
 
-      const result = await controller.issueNft({ ticker }, input);
+      const result = await controller.issueNft({ asset }, input);
       expect(result).toEqual(fakeResult);
     });
   });

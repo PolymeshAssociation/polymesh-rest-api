@@ -37,7 +37,7 @@ describe('OfferingsController', () => {
       mockOfferingsService.findAllByTicker.mockResolvedValue(mockOfferings);
 
       const result = await controller.getOfferings(
-        { ticker: 'TICKER' },
+        { asset: 'TICKER' },
         { timing: OfferingTimingStatus.Started }
       );
 

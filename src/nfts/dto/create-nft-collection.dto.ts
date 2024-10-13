@@ -7,7 +7,7 @@ import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SecurityIdentifierDto } from '~/assets/dto/security-identifier.dto';
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { CollectionKeyDto } from '~/nfts/dto/collection-key.dto';
 
@@ -24,7 +24,7 @@ export class CreateNftCollectionDto extends TransactionBaseDto {
       'The ticker of the NFT Collection. This must either be free or reserved by the Signer',
     example: 'TICKER',
   })
-  @IsTicker()
+  @IsAsset()
   readonly ticker: string;
 
   @ApiProperty({

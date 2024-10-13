@@ -57,7 +57,7 @@ describe('CorporateActionsController', () => {
         mockCorporateActionDefaultConfig
       );
 
-      const result = await controller.getDefaultConfig({ ticker: 'TICKER' });
+      const result = await controller.getDefaultConfig({ asset: 'TICKER' });
 
       expect(result).toEqual(mockCorporateActionDefaultConfig);
     });
@@ -71,7 +71,7 @@ describe('CorporateActionsController', () => {
         defaultTaxWithholding: new BigNumber(25),
       };
 
-      const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
+      const result = await controller.updateDefaultConfig({ asset: 'TICKER' }, body);
 
       expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.updateDefaultConfigByTicker).toHaveBeenCalledWith(
@@ -87,7 +87,7 @@ describe('CorporateActionsController', () => {
 
       mockCorporateActionsService.findDistributionsByTicker.mockResolvedValue(mockDistributions);
 
-      const result = await controller.getDividendDistributions({ ticker: 'TICKER' });
+      const result = await controller.getDividendDistributions({ asset: 'TICKER' });
 
       expect(result).toEqual(
         new ResultsModel({
@@ -136,7 +136,7 @@ describe('CorporateActionsController', () => {
         paymentDate: mockDate,
       };
 
-      const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
+      const result = await controller.createDividendDistribution({ asset: 'TICKER' }, body);
 
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

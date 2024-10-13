@@ -18,11 +18,12 @@ export class CorporateActionModel {
   readonly id: BigNumber;
 
   @ApiProperty({
-    description: 'Ticker of the Asset',
+    description:
+      'The Asset associated with the corporate action. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
     type: 'string',
     example: 'TICKER',
   })
-  readonly ticker: string;
+  readonly asset: string;
 
   @ApiProperty({
     description: 'Date at which the Corporate Action was created',

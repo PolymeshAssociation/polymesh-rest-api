@@ -83,7 +83,7 @@ describe('CheckpointsController', () => {
     it('should return the list of Checkpoints created on an Asset', async () => {
       mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
 
-      const result = await controller.getCheckpoints({ ticker }, { size: new BigNumber(1) });
+      const result = await controller.getCheckpoints({ asset }, { size: new BigNumber(1) });
 
       expect(result).toEqual(mockResult);
     });
@@ -92,7 +92,7 @@ describe('CheckpointsController', () => {
       mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
 
       const result = await controller.getCheckpoints(
-        { ticker },
+        { asset },
         { size: new BigNumber(1), start: 'START_KEY' }
       );
 
@@ -112,7 +112,7 @@ describe('CheckpointsController', () => {
         signer: 'signer',
       };
 
-      const result = await controller.createCheckpoint({ ticker }, body);
+      const result = await controller.createCheckpoint({ asset }, body);
 
       expect(result).toEqual({
         ...processedTxResult,
@@ -141,7 +141,7 @@ describe('CheckpointsController', () => {
 
       mockCheckpointsService.findSchedulesByTicker.mockResolvedValue(mockSchedules);
 
-      const result = await controller.getSchedules({ ticker });
+      const result = await controller.getSchedules({ asset });
 
       const mockResult = [
         new CheckpointScheduleModel({
@@ -212,7 +212,7 @@ describe('CheckpointsController', () => {
         points: [mockDate],
       };
 
-      const result = await controller.createSchedule({ ticker }, body);
+      const result = await controller.createSchedule({ asset }, body);
 
       const mockCreatedSchedule = new CheckpointScheduleModel({
         id: mockScheduleWithDetails.schedule.id,
@@ -339,7 +339,7 @@ describe('CheckpointsController', () => {
         maxComplexity,
       });
 
-      const result = await controller.getComplexity({ ticker: 'TICKER' });
+      const result = await controller.getComplexity({ asset: 'TICKER' });
 
       expect(result).toEqual([
         new ScheduleComplexityModel({

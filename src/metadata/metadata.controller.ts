@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { MetadataEntry, MetadataType } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/ticker-params.dto';
 import {
   ApiArrayResponse,
   ApiTransactionFailedResponse,
@@ -28,7 +28,7 @@ import { MetadataDetailsModel } from '~/metadata/models/metadata-details.model';
 import { MetadataEntryModel } from '~/metadata/models/metadata-entry.model';
 
 @ApiTags('asset', 'metadata')
-@Controller('assets/:ticker/metadata')
+@Controller('assets/:asset/metadata')
 export class MetadataController {
   constructor(private readonly metadataService: MetadataService) {}
 
@@ -37,24 +37,24 @@ export class MetadataController {
     description: 'This endpoint retrieves all the Metadata entries for a given Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose metadata are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose metadata are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
   @ApiArrayResponse(MetadataEntryModel, {
-    description: 'List of Metadata entries distinguished by id, type and ticker',
+    description: 'List of Metadata entries distinguished by id, type and asset',
     paginated: false,
   })
   @Get()
   public async getMetadata(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<ResultsModel<MetadataEntryModel>> {
     const result = await this.metadataService.findAll(ticker);
 
     return new ResultsModel({
       results: result.map(
-        ({ asset: { ticker: asset }, id, type }) => new MetadataEntryModel({ asset, id, type })
+        ({ asset: { id: asset }, id, type }) => new MetadataEntryModel({ asset, id, type })
       ),
     });
   }
@@ -65,8 +65,8 @@ export class MetadataController {
       'This endpoint retrieves the details of an Asset Metadata entry by its type and ID',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose metadata is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose metadata is to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -104,8 +104,8 @@ export class MetadataController {
       'This endpoint creates a local metadata for the given Asset. The metadata value can be set by passing `value` parameter and specifying other optional `details` about the value',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the metadata is to be created',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the metadata is to be created',
     type: 'string',
     example: 'TICKER',
   })
@@ -127,21 +127,21 @@ export class MetadataController {
   })
   @Post('create')
   public async createMetadata(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: CreateMetadataDto
   ): Promise<TransactionResponseModel> {
     const serviceResult = await this.metadataService.create(ticker, params);
 
     const resolver: TransactionResolver<MetadataEntry> = ({ details, transactions, result }) => {
       const {
-        asset: { ticker: assetTicker },
+        asset: { id: assetId },
         id,
         type,
       } = result;
       return new CreatedMetadataEntryModel({
         details,
         transactions,
-        metadata: new MetadataEntryModel({ asset: assetTicker, id, type }),
+        metadata: new MetadataEntryModel({ asset: assetId, id, type }),
       });
     };
 
@@ -154,8 +154,8 @@ export class MetadataController {
       'This endpoint assigns a new value for the Metadata along with its expiry and lock status (when provided with `details`) of the Metadata value. Note that the value of a locked Metadata cannot be altered',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the Metadata value is to be set',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the Metadata value is to be set',
     type: 'string',
     example: 'TICKER',
   })
@@ -200,8 +200,8 @@ export class MetadataController {
       "This endpoint removes the existing value of the Asset's Metadata. Note that value for a metadata can only be remove only if it is not locked.",
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the Metadata value is to be removed',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the Metadata value is to be removed',
     type: 'string',
     example: 'TICKER',
   })
@@ -241,8 +241,8 @@ export class MetadataController {
       'This endpoint removes a local Asset Metadata key. Note, a local metadata key can only be removed if it is not locked',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the Metadata is to be removed',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) for which the Metadata is to be removed',
     type: 'string',
     example: 'TICKER',
   })

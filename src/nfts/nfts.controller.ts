@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiGoneResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/ticker-params.dto';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
@@ -23,7 +23,7 @@ export class NftsController {
     description: 'This endpoint will provide the NFT collection keys for an NFT Collection',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'The ticker of the NFT Collection whose collection keys are to be fetched',
     type: 'string',
     example: 'TICKER',
@@ -32,9 +32,9 @@ export class NftsController {
     description: 'List of required metadata values for each NFT in the collection',
     paginated: true,
   })
-  @Get(':ticker/collection-keys')
+  @Get(':asset/collection-keys')
   public async getCollectionKeys(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<CollectionKeyModel[]> {
     return this.nftService.getCollectionKeys(ticker);
   }
@@ -44,7 +44,7 @@ export class NftsController {
     description: 'This endpoint will return the metadata details of an NFT',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'The ticker of the NFT Collection',
     type: 'string',
     example: 'TICKER',
@@ -59,7 +59,7 @@ export class NftsController {
     type: NftModel,
     description: 'List of required metadata values for each NFT in the collection',
   })
-  @Get(':ticker/:id')
+  @Get(':asset/:id')
   public async getNftDetails(@Param() { ticker, id }: NftParamsDto): Promise<NftModel> {
     return this.nftService.nftDetails(ticker, id);
   }
@@ -89,7 +89,7 @@ export class NftsController {
     description: 'This endpoint allows for the issuance of NFTs',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'The ticker of the NFT Collection to issue an NFT for',
     type: 'string',
     example: 'TICKER',
@@ -98,9 +98,9 @@ export class NftsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
-  @Post(':ticker/issue')
+  @Post(':asset/issue')
   public async issueNft(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: IssueNftDto
   ): Promise<TransactionResponseModel> {
     const result = await this.nftService.issueNft(ticker, params);
@@ -113,7 +113,7 @@ export class NftsController {
     description: 'This endpoint allows for the redemption (aka burning) of NFTs',
   })
   @ApiParam({
-    name: 'ticker',
+    name: 'asset',
     description: 'The ticker of the NFT Collection to redeem an NFT from',
     type: 'string',
     example: 'TICKER',
@@ -128,7 +128,7 @@ export class NftsController {
     description: 'Details about the transaction',
     type: TransactionQueueModel,
   })
-  @Post(':ticker/:id/redeem')
+  @Post(':asset/:id/redeem')
   public async redeem(
     @Param() { ticker, id }: NftParamsDto,
     @Body() params: RedeemNftDto
