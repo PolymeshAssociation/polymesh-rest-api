@@ -1,22 +1,31 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, NotFoundException, Param, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { MultiSig } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ApiTransactionResponse } from '~/common/decorators';
+import {
+  ApiArrayResponse,
+  ApiTransactionFailedResponse,
+  ApiTransactionResponse,
+} from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { IdentityModel } from '~/identities/models/identity.model';
+import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { CreateMultiSigDto } from '~/multi-sigs/dto/create-multi-sig.dto';
 import { JoinCreatorDto } from '~/multi-sigs/dto/join-creator.dto';
 import { ModifyMultiSigDto } from '~/multi-sigs/dto/modify-multi-sig.dto';
 import { MultiSigParamsDto } from '~/multi-sigs/dto/multi-sig-params.dto';
 import { MultiSigProposalParamsDto } from '~/multi-sigs/dto/multisig-proposal-params.dto';
+import { SetMultiSigAdminDto } from '~/multi-sigs/dto/set-multi-sig-admin.dto';
 import { MultiSigCreatedModel } from '~/multi-sigs/models/multi-sig-created.model';
 import { MultiSigProposalModel } from '~/multi-sigs/models/multi-sig-proposal.model';
 import { MultiSigsService } from '~/multi-sigs/multi-sigs.service';
@@ -112,6 +121,10 @@ export class MultiSigsController {
     summary: 'Get proposal details',
     description: 'This endpoint returns details for a multiSig proposal',
   })
+  @ApiOkResponse({
+    description: 'Details about the proposal',
+    type: MultiSigProposalModel,
+  })
   @Get(':multiSigAddress/proposals/:proposalId')
   async getProposal(@Param() params: MultiSigProposalParamsDto): Promise<unknown> {
     const proposal = await this.multiSigService.findProposal(params);
@@ -176,5 +189,192 @@ export class MultiSigsController {
     const serviceResult = await this.multiSigService.reject(params, body);
 
     return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: "Get the Identity of the MultiSig's admin",
+  })
+  @ApiOkResponse({
+    description: 'Returns basic details of the admin Identity for the MultiSig',
+    type: IdentityModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'MultiSig account not found',
+  })
+  @ApiNotFoundResponse({
+    description: 'No DID is associated with the given account',
+  })
+  @Get(':multiSigAddress/admin')
+  async getAdmin(@Param() { multiSigAddress }: MultiSigParamsDto): Promise<IdentitySignerModel> {
+    const identity = await this.multiSigService.getAdmin(multiSigAddress);
+
+    if (!identity) {
+      throw new NotFoundException('No DID is associated with the given account');
+    }
+    return new IdentitySignerModel({ did: identity.did });
+  }
+
+  @Post(':multiSigAddress/admin/set')
+  async setAdmin(
+    @Param() { multiSigAddress }: MultiSigParamsDto,
+    @Body() body: SetMultiSigAdminDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.multiSigService.setAdmin(multiSigAddress, body);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Remove MultiSig admin',
+    description: 'This endpoint allows for the removal of an admin from the MultiSig account',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['MultiSig account not found'],
+    [HttpStatus.BAD_REQUEST]: ['MultiSig admins are not supported on v6 chains'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'The multiSig does not have an admin set currently',
+      "Only the current admin's identity can remove themselves",
+    ],
+  })
+  @Post(':multiSigAddress/admin/remove')
+  async removeAdmin(
+    @Param() { multiSigAddress }: MultiSigParamsDto,
+    @Body() body: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.multiSigService.removeAdmin(multiSigAddress, body);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: "Get the Identity covering transaction fees for the MultiSig's ",
+  })
+  @ApiOkResponse({
+    description: 'Returns basic details of the Identity covering fees for the MultiSig',
+    type: IdentityModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'MultiSig account not found',
+  })
+  @ApiNotFoundResponse({
+    description: 'No DID is associated with the given account',
+  })
+  @Get(':multiSigAddress/payer')
+  async getPayer(@Param() { multiSigAddress }: MultiSigParamsDto): Promise<IdentitySignerModel> {
+    const identity = await this.multiSigService.getPayer(multiSigAddress);
+
+    if (!identity) {
+      throw new NotFoundException('No DID is associated with the given account');
+    }
+    return new IdentitySignerModel({ did: identity.did });
+  }
+
+  @ApiOperation({
+    summary: 'Remove payer',
+    description: 'This endpoint allows for the removal of the payer for the MultiSig account',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['MultiSig account not found'],
+    [HttpStatus.BAD_REQUEST]: ['MultiSig payers are not supported on v6 chains'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'The multiSig does not have a payer set',
+      "The signing account is not part of the MultiSig nor the payer's identity",
+    ],
+  })
+  @Post(':multiSigAddress/payer/remove')
+  async removePayer(
+    @Param() { multiSigAddress }: MultiSigParamsDto,
+    @Body() body: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.multiSigService.removePayer(multiSigAddress, body);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Set MultiSig admin',
+    description: 'This endpoint allows for the setting of an admin for the MultiSig account',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['MultiSig account not found'],
+    [HttpStatus.BAD_REQUEST]: ['MultiSig admins are not supported on v6 chains'],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: [
+      'The identity is already the admin of the MultiSig',
+      'The signing account is not part of the MultiSig',
+    ],
+  })
+  @ApiOperation({
+    summary: "Get the active proposals for the MultiSig's account",
+  })
+  @ApiArrayResponse(MultiSigProposalModel, {
+    description: 'Returns a list of active proposals for the MultiSig',
+    paginated: false,
+  })
+  @ApiNotFoundResponse({
+    description: 'MultiSig account not found',
+  })
+  @Get(':multiSigAddress/active-proposals')
+  async getProposals(
+    @Param() { multiSigAddress }: MultiSigParamsDto
+  ): Promise<MultiSigProposalModel[]> {
+    const proposals = await this.multiSigService.getProposals(multiSigAddress);
+
+    const detailsPromises = proposals.map(proposal => proposal.details());
+    const details = await Promise.all(detailsPromises);
+
+    return proposals.map((proposal, i) => {
+      return new MultiSigProposalModel({
+        multiSigAddress,
+        proposalId: proposal.id,
+        details: details[i],
+      });
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get the historical proposals for the MultiSig account',
+  })
+  @ApiNotFoundResponse({
+    description: 'MultiSig account not found',
+  })
+  @ApiArrayResponse(MultiSigProposalModel, {
+    description: 'List of historical proposals for the MultiSig',
+    paginated: true,
+  })
+  @Get(':multiSigAddress/historical-proposals')
+  async getHistoricalProposals(
+    @Param() { multiSigAddress }: MultiSigParamsDto
+  ): Promise<PaginatedResultsModel<MultiSigProposalModel>> {
+    const { data, next, count } = await this.multiSigService.getHistoricalProposals(
+      multiSigAddress
+    );
+
+    const detailsPromises = data.map(proposal => proposal.details());
+    const details = await Promise.all(detailsPromises);
+
+    return new PaginatedResultsModel({
+      results: data.map(
+        (proposal, i) =>
+          new MultiSigProposalModel({
+            multiSigAddress,
+            proposalId: proposal.id,
+            details: details[i],
+          })
+      ),
+      total: count,
+      next,
+    });
   }
 }

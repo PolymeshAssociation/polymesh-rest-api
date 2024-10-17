@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Identity,
   JoinCreatorParams,
   MultiSig,
   MultiSigProposal,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isMultiSigAccount } from '@polymeshassociation/polymesh-sdk/utils';
 
@@ -14,6 +17,7 @@ import { CreateMultiSigDto } from '~/multi-sigs/dto/create-multi-sig.dto';
 import { JoinCreatorDto } from '~/multi-sigs/dto/join-creator.dto';
 import { ModifyMultiSigDto } from '~/multi-sigs/dto/modify-multi-sig.dto';
 import { MultiSigProposalParamsDto } from '~/multi-sigs/dto/multisig-proposal-params.dto';
+import { SetMultiSigAdminDto } from '~/multi-sigs/dto/set-multi-sig-admin.dto';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
@@ -112,5 +116,72 @@ export class MultiSigsService {
     const proposal = await this.findProposal(proposalParams);
 
     return this.transactionsService.submit(proposal.reject, {}, options);
+  }
+
+  public async getAdmin(multiSigAddress: string): Promise<Identity | null> {
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return multiSig.getAdmin().catch(error => {
+      throw handleSdkError(error);
+    });
+  }
+
+  public async getPayer(multiSigAddress: string): Promise<Identity | null> {
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return multiSig.getPayer().catch(error => {
+      throw handleSdkError(error);
+    });
+  }
+
+  public async setAdmin(
+    multiSigAddress: string,
+    txParams: SetMultiSigAdminDto
+  ): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(txParams);
+
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return this.transactionsService.submit(multiSig.setAdmin, args, options);
+  }
+
+  public async removeAdmin(
+    multiSigAddress: string,
+    txParams: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const { options } = extractTxOptions(txParams);
+
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return this.transactionsService.submit(multiSig.setAdmin, { admin: null }, options);
+  }
+
+  public async removePayer(
+    multiSigAddress: string,
+    txParams: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const { options } = extractTxOptions(txParams);
+
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return this.transactionsService.submit(multiSig.removePayer, {}, options);
+  }
+
+  public async getProposals(multiSigAddress: string): Promise<MultiSigProposal[]> {
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return multiSig.getProposals().catch(error => {
+      throw handleSdkError(error);
+    });
+  }
+
+  public async getHistoricalProposals(
+    multiSigAddress: string,
+    size?: BigNumber,
+    start?: BigNumber
+  ): Promise<ResultSet<MultiSigProposal>> {
+    const multiSig = await this.findOne(multiSigAddress);
+
+    return multiSig.getHistoricalProposals({ size, start });
   }
 }

@@ -2,7 +2,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { IsString } from 'class-validator';
+import { ArrayMaxSize, IsString } from 'class-validator';
 
 import { IsBigNumber, ToBigNumber } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -22,6 +22,7 @@ export class CreateMultiSigDto extends TransactionBaseDto {
     isArray: true,
     example: ['5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV'],
   })
+  @ArrayMaxSize(50, { message: 'The maximum number of signers is 50' })
   @IsString({ each: true })
   readonly signers: string[];
 }
