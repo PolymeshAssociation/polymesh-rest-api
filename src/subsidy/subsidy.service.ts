@@ -27,7 +27,8 @@ export class SubsidyService {
 
   public async getSubsidy(address: string): Promise<SubsidyWithAllowance | null> {
     const account = await this.accountsService.findOne(address);
-    return account.getSubsidy();
+
+    return account.subsidies.getSubsidizer();
   }
 
   public findOne(beneficiary: string, subsidizer: string): Subsidy {

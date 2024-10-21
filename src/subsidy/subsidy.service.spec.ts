@@ -95,7 +95,7 @@ describe('SubsidyService', () => {
       };
 
       const mockAccount = new MockAccount();
-      mockAccount.getSubsidy.mockResolvedValue(mockSubsidyWithAllowance);
+      mockAccount.subsidies.getSubsidizer.mockResolvedValue(mockSubsidyWithAllowance);
 
       when(mockAccountsService.findOne).calledWith(subsidizer).mockResolvedValue(mockAccount);
 

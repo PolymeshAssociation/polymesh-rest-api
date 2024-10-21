@@ -473,6 +473,9 @@ export class MockAccount {
   getSubsidy = jest.fn();
   getMultiSig = jest.fn();
   getOffChainReceipts = jest.fn();
+  subsidies = {
+    getSubsidizer: jest.fn(),
+  };
 
   constructor(address = 'address') {
     this.address = address;
