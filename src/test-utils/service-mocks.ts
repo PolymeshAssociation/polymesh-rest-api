@@ -29,7 +29,7 @@ export class MockAssetService {
   findDocuments = jest.fn();
   setDocuments = jest.fn();
   findAllByOwner = jest.fn();
-  registerTicker = jest.fn();
+  RegisterUniqueTicker = jest.fn();
   createAsset = jest.fn();
   issue = jest.fn();
   transferOwnership = jest.fn();
@@ -148,7 +148,7 @@ export class MockIdentitiesService {
   registerDid = jest.fn();
   rotatePrimaryKey = jest.fn();
   attestPrimaryKeyRotation = jest.fn();
-  isTickerPreApproved = jest.fn();
+  isAssetPreApproved = jest.fn();
   getPreApprovedAssets = jest.fn();
 }
 
@@ -195,14 +195,14 @@ export class MockPortfoliosService {
 }
 
 export class MockOfferingsService {
-  findInvestmentsByTicker = jest.fn();
-  findAllByTicker = jest.fn();
+  findInvestmentsByAsset = jest.fn();
+  findAllByAsset = jest.fn();
 }
 
 export class MockCorporateActionsService {
-  findDefaultConfigByTicker = jest.fn();
-  updateDefaultConfigByTicker = jest.fn();
-  findDistributionsByTicker = jest.fn();
+  findDefaultConfigByAsset = jest.fn();
+  updateDefaultConfigByAsset = jest.fn();
+  findDistributionsByAsset = jest.fn();
   findDistribution = jest.fn();
   createDividendDistribution = jest.fn();
   remove = jest.fn();
@@ -214,14 +214,14 @@ export class MockCorporateActionsService {
 }
 
 export class MockCheckpointsService {
-  findAllByTicker = jest.fn();
-  findSchedulesByTicker = jest.fn();
+  findAllByAsset = jest.fn();
+  findSchedulesByAsset = jest.fn();
   findScheduleById = jest.fn();
-  createByTicker = jest.fn();
-  createScheduleByTicker = jest.fn();
+  createByAsset = jest.fn();
+  createScheduleByAsset = jest.fn();
   getAssetBalance = jest.fn();
   getHolders = jest.fn();
-  deleteScheduleByTicker = jest.fn();
+  deleteScheduleByAsset = jest.fn();
   findOne = jest.fn();
   findCheckpointsByScheduleId = jest.fn();
   getComplexityForAsset = jest.fn();

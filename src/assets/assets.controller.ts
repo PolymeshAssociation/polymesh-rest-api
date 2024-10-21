@@ -13,13 +13,13 @@ import {
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -69,20 +69,20 @@ export class AssetsController {
     description: 'This endpoint will provide the basic details of an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose details are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose details are to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiOkResponse({
     description: 'Basic details of the Asset',
     type: AssetDetailsModel,
   })
-  @Get(':ticker')
-  public async getDetails(@Param() { ticker }: TickerParamsDto): Promise<AssetDetailsModel> {
-    const asset = await this.assetsService.findOne(ticker);
+  @Get(':asset')
+  public async getDetails(@Param() { asset }: AssetParamsDto): Promise<AssetDetailsModel> {
+    const result = await this.assetsService.findOne(asset);
 
-    return createAssetDetailsModel(asset);
+    return createAssetDetailsModel(result);
   }
 
   @ApiOperation({
@@ -91,10 +91,10 @@ export class AssetsController {
       'This endpoint will provide the list of Asset holders along with their current balance',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose holders are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose holders are to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiQuery({
     name: 'size',
@@ -113,16 +113,16 @@ export class AssetsController {
     description: 'List of Asset holders, each consisting of a DID and their current Asset balance',
     paginated: true,
   })
-  @Get(':ticker/holders')
+  @Get(':asset/holders')
   public async getHolders(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<IdentityBalanceModel>> {
     const {
       data,
       count: total,
       next,
-    } = await this.assetsService.findHolders(ticker, size, start?.toString());
+    } = await this.assetsService.findHolders(asset, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -143,10 +143,10 @@ export class AssetsController {
     description: 'This endpoint will provide the list of documents attached to an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose attached documents are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose attached documents are to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiQuery({
     name: 'size',
@@ -166,16 +166,16 @@ export class AssetsController {
     description: 'List of documents attached to the Asset',
     paginated: true,
   })
-  @Get(':ticker/documents')
+  @Get(':asset/documents')
   public async getDocuments(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<AssetDocumentModel>> {
     const {
       data,
       count: total,
       next,
-    } = await this.assetsService.findDocuments(ticker, size, start?.toString());
+    } = await this.assetsService.findDocuments(asset, size, start?.toString());
 
     return new PaginatedResultsModel({
       results: data.map(
@@ -200,10 +200,10 @@ export class AssetsController {
       'This endpoint assigns a new list of Documents to the Asset by replacing the existing list of Documents with the ones passed in the body',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose documents are to be updated',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose documents are to be updated',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiOkResponse({
     description: 'Details of the transaction',
@@ -214,12 +214,12 @@ export class AssetsController {
   @ApiBadRequestResponse({
     description: 'The supplied Document list is equal to the current one',
   })
-  @Post(':ticker/documents/set')
+  @Post(':asset/documents/set')
   public async setDocuments(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() setAssetDocumentsDto: SetAssetDocumentsDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.setDocuments(ticker, setAssetDocumentsDto);
+    const result = await this.assetsService.setDocuments(asset, setAssetDocumentsDto);
     return handleServiceResult(result);
   }
 
@@ -228,10 +228,10 @@ export class AssetsController {
     description: 'This endpoint issues more of a given Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to issue',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to issue',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -240,12 +240,12 @@ export class AssetsController {
   @ApiNotFoundResponse({
     description: 'The Asset does not exist',
   })
-  @Post(':ticker/issue')
+  @Post(':asset/issue')
   public async issue(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: IssueDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.issue(ticker, params);
+    const result = await this.assetsService.issue(asset, params);
     return handleServiceResult(result);
   }
 
@@ -275,21 +275,21 @@ export class AssetsController {
       'This endpoint transfers ownership of the Asset to a `target` Identity. This generates an authorization request that must be accepted by the `target` Identity',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'Ticker of the Asset whose ownership is to be transferred',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose ownership is to be transferred',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedAuthorizationRequestModel,
   })
-  @Post('/:ticker/transfer-ownership')
+  @Post('/:asset/transfer-ownership')
   public async transferOwnership(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: TransferOwnershipDto
   ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.assetsService.transferOwnership(ticker, params);
+    const serviceResult = await this.assetsService.transferOwnership(asset, params);
 
     return handleServiceResult(serviceResult, authorizationRequestResolver);
   }
@@ -310,12 +310,12 @@ export class AssetsController {
     description:
       "The amount to be redeemed is larger than the free balance in the Signer's Default Portfolio",
   })
-  @Post(':ticker/redeem')
+  @Post(':asset/redeem')
   public async redeem(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: RedeemTokensDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.redeem(ticker, params);
+    const result = await this.assetsService.redeem(asset, params);
     return handleServiceResult(result);
   }
 
@@ -326,10 +326,10 @@ export class AssetsController {
       'This endpoint submits a transaction that causes the Asset to become frozen. This means that it cannot be transferred or minted until it is unfrozen',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to freeze',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to freeze',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -341,12 +341,12 @@ export class AssetsController {
   @ApiUnprocessableEntityResponse({
     description: 'The Asset is already frozen',
   })
-  @Post(':ticker/freeze')
+  @Post(':asset/freeze')
   public async freeze(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.freeze(ticker, transactionBaseDto);
+    const result = await this.assetsService.freeze(asset, transactionBaseDto);
     return handleServiceResult(result);
   }
 
@@ -357,10 +357,10 @@ export class AssetsController {
       'This endpoint submits a transaction that unfreezes the Asset. This means that transfers and minting can be performed until it is frozen again',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to unfreeze',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to unfreeze',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -372,12 +372,12 @@ export class AssetsController {
   @ApiUnprocessableEntityResponse({
     description: 'The Asset is already unfrozen',
   })
-  @Post(':ticker/unfreeze')
+  @Post(':asset/unfreeze')
   public async unfreeze(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.unfreeze(ticker, transactionBaseDto);
+    const result = await this.assetsService.unfreeze(asset, transactionBaseDto);
     return handleServiceResult(result);
   }
 
@@ -387,10 +387,10 @@ export class AssetsController {
       'This endpoint forces a transfer from the `origin` Portfolio to the signer’s Default Portfolio',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to be transferred',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to be transferred',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -402,12 +402,12 @@ export class AssetsController {
   @ApiUnprocessableEntityResponse({
     description: 'The `origin` Portfolio does not have enough free balance for the transfer',
   })
-  @Post(':ticker/controller-transfer')
+  @Post(':asset/controller-transfer')
   public async controllerTransfer(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: ControllerTransferDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.controllerTransfer(ticker, params);
+    const result = await this.assetsService.controllerTransfer(asset, params);
     return handleServiceResult(result);
   }
 
@@ -417,21 +417,21 @@ export class AssetsController {
       "This endpoint provides a list of events triggered by transactions performed by various agent Identities, related to the Asset's configuration",
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose operation history is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose operation history is to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiOkResponse({
     description: 'List of operations grouped by the agent Identity who performed them',
     isArray: true,
     type: AgentOperationModel,
   })
-  @Get(':ticker/operations')
+  @Get(':asset/operations')
   public async getOperationHistory(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<AgentOperationModel[]> {
-    const agentOperations = await this.assetsService.getOperationHistory(ticker);
+    const agentOperations = await this.assetsService.getOperationHistory(asset);
 
     return agentOperations.map(agentOperation => new AgentOperationModel(agentOperation));
   }
@@ -442,20 +442,20 @@ export class AssetsController {
       'This endpoint provides a list of required mediators for the asset. These identities must affirm any instruction involving the asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose required mediators is to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose required mediators is to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiOkResponse({
     description: 'The required mediators for the asset',
     type: RequiredMediatorsModel,
   })
-  @Get(':ticker/required-mediators')
+  @Get(':asset/required-mediators')
   public async getRequiredMediators(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<RequiredMediatorsModel> {
-    const mediatorIdentities = await this.assetsService.getRequiredMediators(ticker);
+    const mediatorIdentities = await this.assetsService.getRequiredMediators(asset);
     const mediators = mediatorIdentities.map(({ did }) => did);
 
     return new RequiredMediatorsModel({ mediators });
@@ -467,10 +467,10 @@ export class AssetsController {
       'This endpoint adds required mediators for an asset. These identities will need to affirm instructions involving this asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to set required mediators for',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to set required mediators for',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -479,12 +479,12 @@ export class AssetsController {
   @ApiNotFoundResponse({
     description: 'The Asset does not exist',
   })
-  @Post(':ticker/add-required-mediators')
+  @Post(':asset/add-required-mediators')
   public async addRequiredMediators(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: RequiredMediatorsDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.addRequiredMediators(ticker, params);
+    const result = await this.assetsService.addRequiredMediators(asset, params);
     return handleServiceResult(result);
   }
 
@@ -493,10 +493,10 @@ export class AssetsController {
     description: 'This endpoint removes required mediators for an asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to set required mediators for',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to set required mediators for',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -505,12 +505,12 @@ export class AssetsController {
   @ApiNotFoundResponse({
     description: 'The Asset does not exist',
   })
-  @Post(':ticker/remove-required-mediators')
+  @Post(':asset/remove-required-mediators')
   public async removeRequiredMediators(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: RequiredMediatorsDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.removeRequiredMediators(ticker, params);
+    const result = await this.assetsService.removeRequiredMediators(asset, params);
     return handleServiceResult(result);
   }
 
@@ -519,10 +519,10 @@ export class AssetsController {
     description: 'This endpoint enables automatic affirmation when receiving the asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to pre-approve',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to pre-approve',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -534,12 +534,12 @@ export class AssetsController {
   @ApiBadRequestResponse({
     description: 'The signing identity has already pre-approved the asset',
   })
-  @Post(':ticker/pre-approve')
+  @Post(':asset/pre-approve')
   public async preApprove(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.preApprove(ticker, params);
+    const result = await this.assetsService.preApprove(asset, params);
 
     return handleServiceResult(result);
   }
@@ -549,10 +549,10 @@ export class AssetsController {
     description: 'This endpoint disables automatic affirmation when receiving the asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to remove pre-approval for',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to remove pre-approval for',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -564,12 +564,12 @@ export class AssetsController {
   @ApiBadRequestResponse({
     description: 'The asset is not pre-approved for the signing identity',
   })
-  @Post(':ticker/remove-pre-approval')
+  @Post(':asset/remove-pre-approval')
   public async removePreApproval(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.assetsService.removePreApproval(ticker, params);
+    const result = await this.assetsService.removePreApproval(asset, params);
 
     return handleServiceResult(result);
   }

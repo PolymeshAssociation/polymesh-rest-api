@@ -14,7 +14,7 @@ import { InvestmentModel } from '~/offerings/models/investment.model';
 export class OfferingsService {
   constructor(private readonly assetsService: AssetsService) {}
 
-  public async findAllByTicker(
+  public async findAllByAsset(
     ticker: string,
     stoStatus?: Partial<OfferingStatus>
   ): Promise<OfferingWithDetails[]> {
@@ -23,7 +23,7 @@ export class OfferingsService {
   }
 
   public async findOne(ticker: string, id: BigNumber): Promise<OfferingWithDetails> {
-    const offerings = await this.findAllByTicker(ticker);
+    const offerings = await this.findAllByAsset(ticker);
     const offering = offerings.find(({ offering: { id: offeringId } }) => offeringId.eq(id));
     if (!offering) {
       throw new AppNotFoundError(id.toString(), `Asset "${ticker}" Offering`);
@@ -31,7 +31,7 @@ export class OfferingsService {
     return offering;
   }
 
-  public async findInvestmentsByTicker(
+  public async findInvestmentsByAsset(
     ticker: string,
     id: BigNumber,
     size: BigNumber,

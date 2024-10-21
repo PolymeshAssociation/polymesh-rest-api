@@ -36,7 +36,7 @@ describe('AppController (e2e)', () => {
     await Promise.all([app.close(), polymeshService.close()]);
   });
 
-  describe('/tokens/:ticker (GET)', () => {
+  describe('/assets/:asset (GET)', () => {
     describe('if the token exists', () => {
       it('should return token details', () => {
         return request(app.getHttpServer()).get('/tokens/JERE02').expect(HttpStatus.OK).expect({
@@ -52,7 +52,7 @@ describe('AppController (e2e)', () => {
     describe('if the ticker is too long', () => {
       it('should return a Bad Request error', () => {
         return request(app.getHttpServer())
-          .get('/tokens/JERE023465565435433566')
+          .get('/assets/JERE023465565435433566')
           .expect(HttpStatus.BAD_REQUEST)
           .expect({
             statusCode: 400,
@@ -64,7 +64,7 @@ describe('AppController (e2e)', () => {
     describe('otherwise', () => {
       it('should return a Not Found error', () => {
         return request(app.getHttpServer())
-          .get('/tokens/JERE9999')
+          .get('/assets/JERE9999')
           .expect(HttpStatus.NOT_FOUND)
           .expect({
             statusCode: HttpStatus.NOT_FOUND,
@@ -75,7 +75,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  describe('/identities/:did/tokens (GET)', () => {
+  describe('/identities/:did/assets (GET)', () => {
     describe('if the did is not a 66 digit hex value', () => {
       it('should return a Bad Request error', () => {
         return request(app.getHttpServer())
@@ -96,7 +96,7 @@ describe('AppController (e2e)', () => {
       it("should return a list of the Identity's tokens", () => {
         return request(app.getHttpServer())
           .get(
-            '/identities/0x0600000000000000000000000000000000000000000000000000000000000000/tokens'
+            '/identities/0x0600000000000000000000000000000000000000000000000000000000000000/assets'
           )
           .expect(HttpStatus.OK)
           .expect({
@@ -179,7 +179,7 @@ describe('AppController (e2e)', () => {
           .get('/instructions/911')
           .expect(HttpStatus.OK)
           .expect({
-            status: InstructionStatus.Executed,
+            status: InstructionStatus.Success,
             eventIdentifier: {
               blockNumber: '2719172',
               blockDate: '2021-06-26T01:47:45.000Z',

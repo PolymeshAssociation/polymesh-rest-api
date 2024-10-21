@@ -140,7 +140,7 @@ describe('addSecondaryAccountParamsDto', () => {
           permissions: {
             transactions: {
               type: PermissionType.Include,
-              values: [TxTags.identity.FreezeSecondaryKeys, TxTags.asset.RegisterTicker],
+              values: [TxTags.identity.FreezeSecondaryKeys, TxTags.asset.RegisterUniqueTicker],
             },
           },
           signer,
@@ -153,7 +153,7 @@ describe('addSecondaryAccountParamsDto', () => {
           permissions: {
             transactions: {
               type: PermissionType.Include,
-              values: [ModuleName.Identity, TxTags.asset.RegisterTicker],
+              values: [ModuleName.Identity, TxTags.asset.RegisterUniqueTicker],
             },
           },
           signer,
@@ -166,7 +166,7 @@ describe('addSecondaryAccountParamsDto', () => {
           permissions: {
             transactions: {
               type: PermissionType.Include,
-              values: [ModuleName.Identity, TxTags.asset.RegisterTicker],
+              values: [ModuleName.Identity, TxTags.asset.RegisterUniqueTicker],
               exceptions: [TxTags.identity.LeaveIdentityAsKey],
             },
           },
@@ -217,7 +217,9 @@ describe('addSecondaryAccountParamsDto', () => {
           },
           signer,
         },
-        ['permissions.assets.each value in values must be uppercase'],
+        [
+          'permissions.assets.values must be either a Ticker (12 characters uppercase string) or an Asset ID (34 characters long hex string)',
+        ],
       ],
       [
         'Invite with portfolios permissions with no portfolio details',
@@ -313,7 +315,7 @@ describe('addSecondaryAccountParamsDto', () => {
             transactions: {
               type: PermissionType.Include,
               values: [ModuleName.Asset],
-              exceptions: [TxTags.asset.RegisterTicker],
+              exceptions: [TxTags.asset.RegisterUniqueTicker],
             },
             transactionGroups: [],
           },

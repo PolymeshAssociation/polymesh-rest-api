@@ -253,7 +253,7 @@ describe('IdentitiesService', () => {
     });
   });
 
-  describe('isTickerPreApproved', () => {
+  describe('isAssetPreApproved', () => {
     it('should return if the asset is pre-approved', async () => {
       const mockIdentity = new MockIdentity();
 
@@ -261,7 +261,7 @@ describe('IdentitiesService', () => {
       jest.spyOn(service, 'findOne').mockResolvedValue(mockIdentity as any);
       mockIdentity.isAssetPreApproved.mockResolvedValue(true);
 
-      const result = await service.isTickerPreApproved('0x01', 'TICKER');
+      const result = await service.isAssetPreApproved('0x01', 'TICKER');
       expect(result).toEqual(true);
     });
   });

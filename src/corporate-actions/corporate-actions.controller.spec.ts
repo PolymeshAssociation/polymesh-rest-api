@@ -14,15 +14,15 @@ import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribut
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { processedTxResult, testValues } from '~/test-utils/consts';
 
-const { did, signer, txResult } = testValues;
+const { did, signer, txResult, assetId } = testValues;
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
 
   const mockCorporateActionsService = {
-    findDefaultConfigByTicker: jest.fn(),
-    updateDefaultConfigByTicker: jest.fn(),
-    findDistributionsByTicker: jest.fn(),
+    findDefaultConfigByAsset: jest.fn(),
+    updateDefaultConfigByAsset: jest.fn(),
+    findDistributionsByAsset: jest.fn(),
     findDistribution: jest.fn(),
     createDividendDistribution: jest.fn(),
     remove: jest.fn(),
@@ -53,11 +53,11 @@ describe('CorporateActionsController', () => {
     it('should return the Corporate Action Default Config for an Asset', async () => {
       const mockCorporateActionDefaultConfig = new MockCorporateActionDefaultConfig();
 
-      mockCorporateActionsService.findDefaultConfigByTicker.mockResolvedValue(
+      mockCorporateActionsService.findDefaultConfigByAsset.mockResolvedValue(
         mockCorporateActionDefaultConfig
       );
 
-      const result = await controller.getDefaultConfig({ ticker: 'TICKER' });
+      const result = await controller.getDefaultConfig({ asset: assetId });
 
       expect(result).toEqual(mockCorporateActionDefaultConfig);
     });
@@ -65,17 +65,17 @@ describe('CorporateActionsController', () => {
 
   describe('updateDefaultConfig', () => {
     it('should update the Corporate Action Default Config and return the details of transaction', async () => {
-      mockCorporateActionsService.updateDefaultConfigByTicker.mockResolvedValue(txResult);
+      mockCorporateActionsService.updateDefaultConfigByAsset.mockResolvedValue(txResult);
       const body = {
         signer,
         defaultTaxWithholding: new BigNumber(25),
       };
 
-      const result = await controller.updateDefaultConfig({ ticker: 'TICKER' }, body);
+      const result = await controller.updateDefaultConfig({ asset: assetId }, body);
 
       expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.updateDefaultConfigByTicker).toHaveBeenCalledWith(
-        'TICKER',
+      expect(mockCorporateActionsService.updateDefaultConfigByAsset).toHaveBeenCalledWith(
+        assetId,
         body
       );
     });
@@ -85,9 +85,9 @@ describe('CorporateActionsController', () => {
     it('should return the Dividend Distributions associated with an Asset', async () => {
       const mockDistributions = [new MockDistributionWithDetails()];
 
-      mockCorporateActionsService.findDistributionsByTicker.mockResolvedValue(mockDistributions);
+      mockCorporateActionsService.findDistributionsByAsset.mockResolvedValue(mockDistributions);
 
-      const result = await controller.getDividendDistributions({ ticker: 'TICKER' });
+      const result = await controller.getDividendDistributions({ asset: assetId });
 
       expect(result).toEqual(
         new ResultsModel({
@@ -107,7 +107,7 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.findDistribution.mockResolvedValue(mockDistribution);
 
       const result = await controller.getDividendDistribution({
-        ticker: 'TICKER',
+        asset: assetId,
         id: new BigNumber(1),
       });
 
@@ -130,13 +130,13 @@ describe('CorporateActionsController', () => {
         description: 'Corporate Action description',
         checkpoint: mockDate,
         originPortfolio: new BigNumber(0),
-        currency: 'TICKER',
+        currency: assetId,
         perShare: new BigNumber(2),
         maxAmount: new BigNumber(1000),
         paymentDate: mockDate,
       };
 
-      const result = await controller.createDividendDistribution({ ticker: 'TICKER' }, body);
+      const result = await controller.createDividendDistribution({ asset: assetId }, body);
 
       expect(result).toEqual({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,7 +145,7 @@ describe('CorporateActionsController', () => {
         details: txResult.details,
       });
       expect(mockCorporateActionsService.createDividendDistribution).toHaveBeenCalledWith(
-        'TICKER',
+        assetId,
         body
       );
     });
@@ -156,12 +156,12 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.remove.mockResolvedValue(txResult);
 
       const result = await controller.deleteCorporateAction(
-        { id: new BigNumber(1), ticker: 'TICKER' },
+        { id: new BigNumber(1), asset: assetId },
         { signer }
       );
 
       expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith('TICKER', new BigNumber(1), {
+      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(assetId, new BigNumber(1), {
         signer,
       });
     });
@@ -178,14 +178,14 @@ describe('CorporateActionsController', () => {
       const result = await controller.payDividends(
         {
           id: new BigNumber(1),
-          ticker: 'TICKER',
+          asset: assetId,
         },
         body
       );
 
       expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.payDividends).toHaveBeenCalledWith(
-        'TICKER',
+        assetId,
         new BigNumber(1),
         body
       );
@@ -207,10 +207,7 @@ describe('CorporateActionsController', () => {
 
       mockCorporateActionsService.linkDocuments.mockResolvedValue(txResult);
 
-      const result = await controller.linkDocuments(
-        { ticker: 'TICKER', id: new BigNumber(1) },
-        body
-      );
+      const result = await controller.linkDocuments({ asset: assetId, id: new BigNumber(1) }, body);
 
       expect(result).toEqual(processedTxResult);
     });
@@ -223,14 +220,14 @@ describe('CorporateActionsController', () => {
       const result = await controller.claimDividends(
         {
           id: new BigNumber(1),
-          ticker: 'TICKER',
+          asset: assetId,
         },
         { signer }
       );
 
       expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.claimDividends).toHaveBeenCalledWith(
-        'TICKER',
+        assetId,
         new BigNumber(1),
         { signer }
       );
@@ -244,14 +241,14 @@ describe('CorporateActionsController', () => {
       const result = await controller.reclaimRemainingFunds(
         {
           id: new BigNumber(1),
-          ticker: 'TICKER',
+          asset: assetId,
         },
         { signer }
       );
 
       expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
-        'TICKER',
+        assetId,
         new BigNumber(1),
         { signer }
       );
@@ -268,13 +265,13 @@ describe('CorporateActionsController', () => {
       mockCorporateActionsService.modifyCheckpoint.mockResolvedValue(txResult);
 
       const result = await controller.modifyDistributionCheckpoint(
-        { ticker: 'TICKER', id: new BigNumber(1) },
+        { asset: assetId, id: new BigNumber(1) },
         body
       );
 
       expect(result).toEqual(processedTxResult);
       expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
-        'TICKER',
+        assetId,
         new BigNumber(1),
         body
       );

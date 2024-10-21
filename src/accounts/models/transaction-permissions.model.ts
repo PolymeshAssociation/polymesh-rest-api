@@ -18,10 +18,10 @@ export class TransactionPermissionsModel extends PermissionTypeModel {
 
   @ApiPropertyOptional({
     description:
-      'Transactions exempted from inclusion or exclusion. For example, if "type" is "Include", "values" contains "asset" and "exceptions" includes "asset.registerTicker", it means that all transactions in the "asset" module are included, EXCEPT for "registerTicker"',
+      'Transactions exempted from inclusion or exclusion. For example, if "type" is "Include", "values" contains "asset" and "exceptions" includes "asset.RegisterUniqueTicker", it means that all transactions in the "asset" module are included, EXCEPT for "RegisterUniqueTicker"',
     isArray: true,
     enum: getTxTags(),
-    example: [TxTags.asset.RegisterTicker],
+    example: [TxTags.asset.RegisterUniqueTicker],
   })
   readonly exceptions?: TxTag[];
 

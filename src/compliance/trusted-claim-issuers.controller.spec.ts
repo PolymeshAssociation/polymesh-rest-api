@@ -7,11 +7,14 @@ import { RemoveTrustedClaimIssuersDto } from '~/compliance/dto/remove-trusted-cl
 import { SetTrustedClaimIssuersDto } from '~/compliance/dto/set-trusted-claim-issuers.dto';
 import { TrustedClaimIssuersController } from '~/compliance/trusted-claim-issuers.controller';
 import { TrustedClaimIssuersService } from '~/compliance/trusted-claim-issuers.service';
+import { testValues } from '~/test-utils/consts';
 import { createMockTxResult, mockTrustedClaimIssuer } from '~/test-utils/mocks';
 import { mockTrustedClaimIssuersServiceProvider } from '~/test-utils/service-mocks';
 
+const { assetId } = testValues;
+
 describe('TrustedClaimIssuersController', () => {
-  const mockParams = { ticker: 'TICKER' };
+  const mockParams = { asset: assetId };
   let controller: TrustedClaimIssuersController;
   let mockService: DeepMocked<TrustedClaimIssuersService>;
 
@@ -32,9 +35,7 @@ describe('TrustedClaimIssuersController', () => {
 
   describe('getTrustedClaimIssuers', () => {
     it('should return the list of all trusted Claim Issuers of an Asset', async () => {
-      when(mockService.find)
-        .calledWith(mockParams.ticker)
-        .mockResolvedValue([mockTrustedClaimIssuer]);
+      when(mockService.find).calledWith(assetId).mockResolvedValue([mockTrustedClaimIssuer]);
 
       const result = await controller.getTrustedClaimIssuers(mockParams);
 
@@ -59,11 +60,9 @@ describe('TrustedClaimIssuersController', () => {
         signer: 'Alice',
       };
 
-      when(mockService.set)
-        .calledWith(mockParams.ticker, mockPayload)
-        .mockResolvedValue(testTxResult);
+      when(mockService.set).calledWith(assetId, mockPayload).mockResolvedValue(testTxResult);
 
-      const result = await controller.setTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+      const result = await controller.setTrustedClaimIssuers(mockParams, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });
@@ -79,11 +78,9 @@ describe('TrustedClaimIssuersController', () => {
         signer: 'Alice',
       };
 
-      when(mockService.add)
-        .calledWith(mockParams.ticker, mockPayload)
-        .mockResolvedValue(testTxResult);
+      when(mockService.add).calledWith(assetId, mockPayload).mockResolvedValue(testTxResult);
 
-      const result = await controller.addTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+      const result = await controller.addTrustedClaimIssuers(mockParams, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });
@@ -100,11 +97,9 @@ describe('TrustedClaimIssuersController', () => {
         signer: 'Alice',
       };
 
-      when(mockService.remove)
-        .calledWith(mockParams.ticker, mockPayload)
-        .mockResolvedValue(testTxResult);
+      when(mockService.remove).calledWith(assetId, mockPayload).mockResolvedValue(testTxResult);
 
-      const result = await controller.removeTrustedClaimIssuers({ ticker: 'TICKER' }, mockPayload);
+      const result = await controller.removeTrustedClaimIssuers(mockParams, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });

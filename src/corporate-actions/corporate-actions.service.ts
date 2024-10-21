@@ -25,40 +25,40 @@ export class CorporateActionsService {
     private readonly transactionService: TransactionsService
   ) {}
 
-  public async findDefaultConfigByTicker(ticker: string): Promise<CorporateActionDefaultConfig> {
-    const asset = await this.assetsService.findFungible(ticker);
-    return asset.corporateActions.getDefaultConfig();
+  public async findDefaultConfigByAsset(asset: string): Promise<CorporateActionDefaultConfig> {
+    const fungibleAsset = await this.assetsService.findFungible(asset);
+    return fungibleAsset.corporateActions.getDefaultConfig();
   }
 
-  public async updateDefaultConfigByTicker(
-    ticker: string,
+  public async updateDefaultConfigByAsset(
+    asset: string,
     corporateActionDefaultConfigDto: CorporateActionDefaultConfigDto
   ): ServiceReturn<void> {
     const { options, args } = extractTxOptions(corporateActionDefaultConfigDto);
-    const asset = await this.assetsService.findFungible(ticker);
+    const fungibleAsset = await this.assetsService.findFungible(asset);
 
     return this.transactionService.submit(
-      asset.corporateActions.setDefaultConfig,
+      fungibleAsset.corporateActions.setDefaultConfig,
       args as Required<typeof args>,
       options
     );
   }
 
-  public async findDistributionsByTicker(ticker: string): Promise<DistributionWithDetails[]> {
-    const asset = await this.assetsService.findFungible(ticker);
-    return asset.corporateActions.distributions.get();
+  public async findDistributionsByAsset(asset: string): Promise<DistributionWithDetails[]> {
+    const fungibleAsset = await this.assetsService.findFungible(asset);
+    return fungibleAsset.corporateActions.distributions.get();
   }
 
-  public async findDistribution(ticker: string, id: BigNumber): Promise<DistributionWithDetails> {
-    const asset = await this.assetsService.findFungible(ticker);
+  public async findDistribution(asset: string, id: BigNumber): Promise<DistributionWithDetails> {
+    const fungibleAsset = await this.assetsService.findFungible(asset);
 
-    return await asset.corporateActions.distributions.getOne({ id }).catch(error => {
+    return await fungibleAsset.corporateActions.distributions.getOne({ id }).catch(error => {
       throw handleSdkError(error);
     });
   }
 
   public async createDividendDistribution(
-    ticker: string,
+    asset: string,
     dividendDistributionDto: DividendDistributionDto
   ): ServiceReturn<DividendDistribution> {
     const {
@@ -66,9 +66,9 @@ export class CorporateActionsService {
       args: { originPortfolio, ...rest },
     } = extractTxOptions(dividendDistributionDto);
 
-    const asset = await this.assetsService.findFungible(ticker);
+    const fungibleAsset = await this.assetsService.findFungible(asset);
     return this.transactionService.submit(
-      asset.corporateActions.distributions.configureDividendDistribution,
+      fungibleAsset.corporateActions.distributions.configureDividendDistribution,
       {
         ...rest,
         originPortfolio: toPortfolioId(originPortfolio),
@@ -78,32 +78,32 @@ export class CorporateActionsService {
   }
 
   public async remove(
-    ticker: string,
+    asset: string,
     corporateAction: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { options } = extractTxOptions(transactionBaseDto);
-    const asset = await this.assetsService.findFungible(ticker);
+    const fungibleAsset = await this.assetsService.findFungible(asset);
     return this.transactionService.submit(
-      asset.corporateActions.remove,
+      fungibleAsset.corporateActions.remove,
       { corporateAction },
       options
     );
   }
 
   public async payDividends(
-    ticker: string,
+    asset: string,
     id: BigNumber,
     payDividendsDto: PayDividendsDto
   ): ServiceReturn<void> {
     const { options, args } = extractTxOptions(payDividendsDto);
-    const { distribution } = await this.findDistribution(ticker, id);
+    const { distribution } = await this.findDistribution(asset, id);
 
     return this.transactionService.submit(distribution.pay, args, options);
   }
 
   public async linkDocuments(
-    ticker: string,
+    asset: string,
     id: BigNumber,
     linkDocumentsDto: LinkDocumentsDto
   ): ServiceReturn<void> {
@@ -112,7 +112,7 @@ export class CorporateActionsService {
       args: { documents },
     } = extractTxOptions(linkDocumentsDto);
 
-    const { distribution } = await this.findDistribution(ticker, id);
+    const { distribution } = await this.findDistribution(asset, id);
 
     const params = {
       documents: documents.map(document => document.toAssetDocument()),
@@ -121,34 +121,34 @@ export class CorporateActionsService {
   }
 
   public async claimDividends(
-    ticker: string,
+    asset: string,
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { options } = extractTxOptions(transactionBaseDto);
-    const { distribution } = await this.findDistribution(ticker, id);
+    const { distribution } = await this.findDistribution(asset, id);
     return this.transactionService.submit(distribution.claim, undefined, options);
   }
 
   public async reclaimRemainingFunds(
-    ticker: string,
+    asset: string,
     id: BigNumber,
     transactionBaseDto: TransactionBaseDto
   ): ServiceReturn<void> {
     const { options } = extractTxOptions(transactionBaseDto);
-    const { distribution } = await this.findDistribution(ticker, id);
+    const { distribution } = await this.findDistribution(asset, id);
 
     return this.transactionService.submit(distribution.reclaimFunds, undefined, options);
   }
 
   public async modifyCheckpoint(
-    ticker: string,
+    asset: string,
     id: BigNumber,
     modifyDistributionCheckpointDto: ModifyDistributionCheckpointDto
   ): ServiceReturn<void> {
     const { options, args } = extractTxOptions(modifyDistributionCheckpointDto);
 
-    const { distribution } = await this.findDistribution(ticker, id);
+    const { distribution } = await this.findDistribution(asset, id);
 
     return this.transactionService.submit(distribution.modifyCheckpoint, args, options);
   }

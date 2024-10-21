@@ -14,7 +14,7 @@ import {
   ValidationOptions,
 } from 'class-validator';
 
-import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
+import { ASSET_ID_LENGTH, MAX_TICKER_LENGTH } from '~/assets/assets.consts';
 import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';
 import { DID_LENGTH } from '~/identities/identities.consts';
 
@@ -40,6 +40,31 @@ export function IsTicker(validationOptions?: ValidationOptions) {
     MaxLength(MAX_TICKER_LENGTH, validationOptions),
     IsUppercase(validationOptions)
   );
+}
+
+export function IsAsset(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isAsset',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: string) {
+          if (value.startsWith('0x')) {
+            // check for Asset ID
+            return value.length === ASSET_ID_LENGTH;
+          }
+
+          return value.length <= MAX_TICKER_LENGTH && value === value.toUpperCase();
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be either a Ticker (${MAX_TICKER_LENGTH} characters uppercase string) or an Asset ID (${ASSET_ID_LENGTH} characters long hex string)`;
+        },
+      },
+    });
+  };
 }
 
 export function IsBigNumber(

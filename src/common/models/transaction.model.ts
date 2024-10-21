@@ -10,7 +10,7 @@ export class TransactionModel extends TransactionIdentifierModel {
     description:
       'Transaction type identifier (for UI purposes). The format is <palletName>.<transactionName>',
     type: 'string',
-    example: 'asset.registerTicker',
+    example: 'asset.RegisterUniqueTicker',
   })
   readonly transactionTag: string;
 

@@ -21,7 +21,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { AuthorizationsService } from '~/authorizations/authorizations.service';
 import {
   authorizationRequestResolver,
@@ -246,8 +246,8 @@ export class IdentitiesController {
       'List of all the held Assets. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
     paginated: true,
     examples: [
-      ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
       ['0xa3616b82e8e1080aedc952ea28b9db8b', '0x2593d3d0aca79e43ac0deaa16081eba2'],
+      ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
     ],
   })
   @Get(':did/held-assets')
@@ -685,7 +685,7 @@ export class IdentitiesController {
   }
 
   @ApiOperation({
-    summary: 'Check if a ticker is pre-approved for an identity',
+    summary: 'Check if a Asset is pre-approved for an identity',
     description: 'This endpoint returns wether or not an asset is pre-approved for an identity',
   })
   @ApiParam({
@@ -700,13 +700,13 @@ export class IdentitiesController {
     type: PreApprovedModel,
   })
   @Get(':did/is-pre-approved')
-  public async getIsTickerPreApproved(
+  public async getIsAssetPreApproved(
     @Param() { did }: DidDto,
-    @Query() { ticker }: TickerParamsDto
+    @Query() { asset }: AssetParamsDto
   ): Promise<PreApprovedModel> {
-    const isPreApproved = await this.identitiesService.isTickerPreApproved(did, ticker);
+    const isPreApproved = await this.identitiesService.isAssetPreApproved(did, asset);
 
-    return new PreApprovedModel({ asset: ticker, did, isPreApproved });
+    return new PreApprovedModel({ asset, did, isPreApproved });
   }
 
   @ApiOperation({

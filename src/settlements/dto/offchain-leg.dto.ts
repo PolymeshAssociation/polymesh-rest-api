@@ -6,11 +6,11 @@ import { InstructionOffChainLeg } from '@polymeshassociation/polymesh-sdk/types'
 import { IsEnum } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsDid } from '~/common/decorators/validation';
+import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
 import { LegType } from '~/common/types';
-import { AssetLegDto } from '~/settlements/dto/asset-leg.dto';
+import { AssetLegTypeDto } from '~/settlements/dto/asset-leg.dto';
 
-export class OffChainLegDto extends AssetLegDto {
+export class OffChainLegDto extends AssetLegTypeDto {
   @ApiProperty({
     description: 'DID of the sender',
     type: 'string',
@@ -39,6 +39,13 @@ export class OffChainLegDto extends AssetLegDto {
   @ApiProperty({ enum: LegType, default: LegType.offChain })
   @IsEnum(LegType)
   readonly type = LegType.offChain;
+
+  @ApiProperty({
+    description: 'Ticker of the off chain Asset',
+    example: 'OFF_CHAIN',
+  })
+  @IsTicker()
+  readonly asset: string;
 
   public toLeg(): InstructionOffChainLeg {
     const { from, to, asset, offChainAmount } = this;

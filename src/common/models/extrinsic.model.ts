@@ -54,7 +54,7 @@ export class ExtrinsicModel {
       'Transaction type identifier (for UI purposes). The format is <palletName>.<transactionName>',
     type: 'string',
     enum: getTxTags(),
-    example: TxTags.asset.RegisterTicker,
+    example: TxTags.asset.RegisterUniqueTicker,
   })
   readonly transactionTag: TxTag;
 
@@ -63,8 +63,8 @@ export class ExtrinsicModel {
     isArray: true,
     example: [
       {
-        name: 'ticker',
-        value: 'TICKER',
+        name: 'asset',
+        value: '0xa3616b82e8e1080aedc952ea28b9db8b',
       },
     ],
   })

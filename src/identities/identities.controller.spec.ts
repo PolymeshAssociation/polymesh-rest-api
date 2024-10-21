@@ -469,10 +469,10 @@ describe('IdentitiesController', () => {
     it('should return the list of Assets for which the Identity is a default trusted Claim Issuer', async () => {
       const mockAssets = [
         {
-          ticker: 'BAR_TICKER',
+          assetId: '0x1234',
         },
         {
-          ticker: 'FOO_TICKER',
+          assetId: '0x5678',
         },
       ];
       mockIdentitiesService.findTrustingAssets.mockResolvedValue(mockAssets);
@@ -712,11 +712,11 @@ describe('IdentitiesController', () => {
 
   describe('getIsPreApprove', () => {
     it('should return the asset pre-approval status', async () => {
-      mockIdentitiesService.isTickerPreApproved.mockResolvedValue(true);
+      mockIdentitiesService.isAssetPreApproved.mockResolvedValue(true);
 
-      const result = await controller.getIsTickerPreApproved({ did }, { ticker });
+      const result = await controller.getIsAssetPreApproved({ did }, { asset: assetId });
 
-      expect(result).toEqual({ asset: ticker, did, isPreApproved: true });
+      expect(result).toEqual({ asset: assetId, did, isPreApproved: true });
     });
   });
 

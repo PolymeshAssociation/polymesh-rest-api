@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
@@ -21,8 +20,6 @@ import { handleSdkError } from '~/transactions/transactions.util';
 
 @Injectable()
 export class IdentitiesService {
-  private alicePair: KeyringPair;
-
   constructor(
     private readonly polymeshService: PolymeshService,
     private readonly logger: PolymeshLogger,
@@ -150,9 +147,9 @@ export class IdentitiesService {
     return identity.preApprovedAssets({ size, start });
   }
 
-  public async isTickerPreApproved(did: string, ticker: string): Promise<boolean> {
+  public async isAssetPreApproved(did: string, asset: string): Promise<boolean> {
     const identity = await this.findOne(did);
 
-    return identity.isAssetPreApproved(ticker);
+    return identity.isAssetPreApproved(asset);
   }
 }

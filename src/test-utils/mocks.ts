@@ -342,7 +342,7 @@ export class MockPortfolio {
 
 export class MockCheckpoint {
   id = new BigNumber(1);
-  ticker = 'TICKER';
+  assetId = testValues.assetId;
   balance = jest.fn();
   allBalances = jest.fn();
   createdAt = jest.fn();
@@ -351,7 +351,7 @@ export class MockCheckpoint {
 
 export class MockCheckpointSchedule {
   id = new BigNumber(1);
-  ticker = 'TICKER';
+  assetId = testValues.assetId;
   pendingPoints = [new Date('10/14/1987')];
   expiryDate = new Date('10/14/2000');
   getCheckpoints = jest.fn();
@@ -432,13 +432,13 @@ class MockPolymeshTransactionBase {
   onStatusChange = jest.fn();
 }
 export class MockPolymeshTransaction extends MockPolymeshTransactionBase {
-  tag: TxTag = TxTags.asset.RegisterTicker;
+  tag: TxTag = TxTags.asset.RegisterUniqueTicker;
 }
 
 export class MockPolymeshTransactionBatch extends MockPolymeshTransactionBase {
   transactions: { tag: TxTag }[] = [
     {
-      tag: TxTags.asset.RegisterTicker,
+      tag: TxTags.asset.RegisterUniqueTicker,
     },
     {
       tag: TxTags.asset.CreateAsset,

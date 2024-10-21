@@ -15,11 +15,11 @@ export class CheckpointScheduleModel {
   readonly id: BigNumber;
 
   @ApiProperty({
-    description: 'Ticker of the Asset whose Checkpoints will be created with this Schedule',
+    description: 'The Asset (Asset ID/Ticker) whose Checkpoints will be created with this Schedule',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
-  readonly ticker: string;
+  readonly asset: string;
 
   @ApiProperty({
     description:

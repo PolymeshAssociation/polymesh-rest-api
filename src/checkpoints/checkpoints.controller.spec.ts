@@ -14,7 +14,7 @@ import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockCheckpoint, MockCheckpointSchedule } from '~/test-utils/mocks';
 import { MockCheckpointsService } from '~/test-utils/service-mocks';
 
-const { did, signer, txResult, ticker } = testValues;
+const { did, signer, txResult, assetId } = testValues;
 
 describe('CheckpointsController', () => {
   let controller: CheckpointsController;
@@ -48,7 +48,7 @@ describe('CheckpointsController', () => {
       mockCheckpoint.totalSupply.mockResolvedValue(totalSupply);
       mockCheckpointsService.findOne.mockResolvedValue(mockCheckpoint);
 
-      const result = await controller.getCheckpoint({ ticker, id });
+      const result = await controller.getCheckpoint({ asset: assetId, id });
       expect(result).toEqual(new CheckpointDetailsModel({ id, totalSupply, createdAt }));
     });
   });
@@ -81,18 +81,21 @@ describe('CheckpointsController', () => {
       next: '0xddddd',
     });
     it('should return the list of Checkpoints created on an Asset', async () => {
-      mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
+      mockCheckpointsService.findAllByAsset.mockResolvedValue(mockCheckpoints);
 
-      const result = await controller.getCheckpoints({ ticker }, { size: new BigNumber(1) });
+      const result = await controller.getCheckpoints(
+        { asset: assetId },
+        { size: new BigNumber(1) }
+      );
 
       expect(result).toEqual(mockResult);
     });
 
     it('should return the list of Checkpoints created on an Asset from start key', async () => {
-      mockCheckpointsService.findAllByTicker.mockResolvedValue(mockCheckpoints);
+      mockCheckpointsService.findAllByAsset.mockResolvedValue(mockCheckpoints);
 
       const result = await controller.getCheckpoints(
-        { ticker },
+        { asset: assetId },
         { size: new BigNumber(1), start: 'START_KEY' }
       );
 
@@ -107,12 +110,12 @@ describe('CheckpointsController', () => {
         ...txResult,
         result: mockCheckpoint,
       };
-      mockCheckpointsService.createByTicker.mockResolvedValue(response);
+      mockCheckpointsService.createByAsset.mockResolvedValue(response);
       const body = {
         signer: 'signer',
       };
 
-      const result = await controller.createCheckpoint({ ticker }, body);
+      const result = await controller.createCheckpoint({ asset: assetId }, body);
 
       expect(result).toEqual({
         ...processedTxResult,
@@ -139,14 +142,14 @@ describe('CheckpointsController', () => {
         },
       ];
 
-      mockCheckpointsService.findSchedulesByTicker.mockResolvedValue(mockSchedules);
+      mockCheckpointsService.findSchedulesByAsset.mockResolvedValue(mockSchedules);
 
-      const result = await controller.getSchedules({ ticker });
+      const result = await controller.getSchedules({ asset: assetId });
 
       const mockResult = [
         new CheckpointScheduleModel({
           id: new BigNumber(1),
-          ticker,
+          asset: assetId,
           pendingPoints: [mockDate],
           expiryDate: null,
           remainingCheckpoints: new BigNumber(1),
@@ -172,12 +175,12 @@ describe('CheckpointsController', () => {
       };
       mockCheckpointsService.findScheduleById.mockResolvedValue(mockScheduleWithDetails);
 
-      const result = await controller.getSchedule({ ticker, id: new BigNumber(1) });
+      const result = await controller.getSchedule({ asset: assetId, id: new BigNumber(1) });
 
       const mockResult = new CheckpointScheduleModel({
         id: mockScheduleWithDetails.schedule.id,
         expiryDate: mockScheduleWithDetails.schedule.expiryDate,
-        ticker: mockScheduleWithDetails.schedule.ticker,
+        asset: mockScheduleWithDetails.schedule.assetId,
         ...mockScheduleWithDetails.details,
         pendingPoints: [mockDate],
       });
@@ -194,7 +197,7 @@ describe('CheckpointsController', () => {
         ...txResult,
         result: mockCheckpointSchedule,
       };
-      mockCheckpointsService.createScheduleByTicker.mockResolvedValue(response);
+      mockCheckpointsService.createScheduleByAsset.mockResolvedValue(response);
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { getCheckpoints, ...schedule } = new MockCheckpointSchedule();
@@ -212,12 +215,12 @@ describe('CheckpointsController', () => {
         points: [mockDate],
       };
 
-      const result = await controller.createSchedule({ ticker }, body);
+      const result = await controller.createSchedule({ asset: assetId }, body);
 
       const mockCreatedSchedule = new CheckpointScheduleModel({
         id: mockScheduleWithDetails.schedule.id,
         expiryDate: mockScheduleWithDetails.schedule.expiryDate,
-        ticker: mockScheduleWithDetails.schedule.ticker,
+        asset: mockScheduleWithDetails.schedule.assetId,
         ...mockScheduleWithDetails.details,
         pendingPoints: [mockDate],
       });
@@ -263,7 +266,7 @@ describe('CheckpointsController', () => {
 
       const result = await controller.getHolders(
         {
-          ticker,
+          asset: assetId,
           id: new BigNumber(1),
         },
         { size: new BigNumber(10) }
@@ -283,21 +286,24 @@ describe('CheckpointsController', () => {
       mockCheckpointsService.getAssetBalance.mockResolvedValue(balanceModel);
 
       const result = await controller.getAssetBalance({
-        ticker,
+        asset: assetId,
         did,
         id,
       });
 
       expect(result).toEqual(balanceModel);
-      expect(mockCheckpointsService.getAssetBalance).toHaveBeenCalledWith(ticker, did, id);
+      expect(mockCheckpointsService.getAssetBalance).toHaveBeenCalledWith(assetId, did, id);
     });
   });
 
   describe('deleteSchedule', () => {
     it('should return the transaction details', async () => {
-      mockCheckpointsService.deleteScheduleByTicker.mockResolvedValue(txResult);
+      mockCheckpointsService.deleteScheduleByAsset.mockResolvedValue(txResult);
 
-      const result = await controller.deleteSchedule({ id: new BigNumber(1), ticker }, { signer });
+      const result = await controller.deleteSchedule(
+        { id: new BigNumber(1), asset: assetId },
+        { signer }
+      );
 
       expect(result).toEqual(processedTxResult);
     });
@@ -314,7 +320,7 @@ describe('CheckpointsController', () => {
         { checkpoint: mockCheckpoint, createdAt, totalSupply },
       ]);
 
-      const result = await controller.getCheckpointsBySchedule({ ticker, id });
+      const result = await controller.getCheckpointsBySchedule({ asset: assetId, id });
       expect(result).toEqual([new CheckpointDetailsModel({ id, totalSupply, createdAt })]);
     });
   });
@@ -339,7 +345,7 @@ describe('CheckpointsController', () => {
         maxComplexity,
       });
 
-      const result = await controller.getComplexity({ ticker: 'TICKER' });
+      const result = await controller.getComplexity({ asset: assetId });
 
       expect(result).toEqual([
         new ScheduleComplexityModel({
@@ -358,7 +364,7 @@ describe('CheckpointsController', () => {
       const start = new Date();
       const end = new Date();
       const result = await controller.getPeriodComplexity(
-        { ticker, id: new BigNumber(1) },
+        { asset: assetId, id: new BigNumber(1) },
         { start, end }
       );
 
@@ -367,7 +373,7 @@ describe('CheckpointsController', () => {
       });
       expect(result).toEqual(mockResult);
       expect(mockCheckpointsService.getComplexityForPeriod).toBeCalledWith(
-        ticker,
+        assetId,
         new BigNumber(1),
         start,
         end

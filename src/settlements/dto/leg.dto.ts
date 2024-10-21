@@ -7,13 +7,13 @@ import { Type } from 'class-transformer';
 import { IsEnum, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber } from '~/common/decorators/validation';
+import { IsAsset, IsBigNumber } from '~/common/decorators/validation';
 import { AppValidationError } from '~/common/errors';
 import { LegType } from '~/common/types';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
-import { AssetLegDto } from '~/settlements/dto/asset-leg.dto';
+import { AssetLegTypeDto } from '~/settlements/dto/asset-leg.dto';
 
-export class LegDto extends AssetLegDto {
+export class LegDto extends AssetLegTypeDto {
   @ApiPropertyOptional({
     description: 'Amount of the fungible Asset to be transferred',
     type: 'string',
@@ -57,6 +57,13 @@ export class LegDto extends AssetLegDto {
   @ValidateNested()
   @Type(() => PortfolioDto)
   readonly to: PortfolioDto;
+
+  @ApiProperty({
+    description: 'Asset associated with the leg',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+  })
+  @IsAsset()
+  readonly asset: string;
 
   @ApiProperty({ enum: LegType, default: LegType.onChain })
   @IsEnum(LegType)

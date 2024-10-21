@@ -157,7 +157,7 @@ describe('NotificationsService', () => {
       const scope = '0x01';
       const payload = {
         type: TransactionType.Single,
-        transactionTag: TxTags.asset.RegisterTicker,
+        transactionTag: TxTags.asset.RegisterUniqueTicker,
       };
       const mockIsExpired = jest.fn();
       mockSubscriptionsService.findOne.mockReturnValue({

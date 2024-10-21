@@ -334,9 +334,9 @@ export class PortfoliosController {
   @Get('/identities/:did/portfolios/:id/transactions')
   async getTransactionHistory(
     @Param() { did, id }: PortfolioDto,
-    @Query() { account, ticker }: GetTransactionsDto
+    @Query() { account, asset }: GetTransactionsDto
   ): Promise<ResultsModel<HistoricSettlementModel>> {
-    const data = await this.portfoliosService.getTransactions(did, id, account, ticker);
+    const data = await this.portfoliosService.getTransactions(did, id, account, asset);
 
     const results = data.map(settlement => new HistoricSettlementModel(settlement));
 

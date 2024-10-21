@@ -118,7 +118,7 @@ export const extrinsic = {
   extrinsicIdx: new BigNumber(1),
   address: 'someAccount',
   nonce: new BigNumber(123456),
-  txTag: TxTags.asset.RegisterTicker,
+  txTag: TxTags.asset.RegisterUniqueTicker,
   params: [
     {
       name: 'ticker',

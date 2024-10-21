@@ -5,15 +5,15 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { IsByteLength, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsTicker } from '~/common/decorators/validation';
+import { IsAsset, IsBigNumber } from '~/common/decorators/validation';
 
 export class PortfolioMovementDto {
   @ApiProperty({
-    description: 'Ticker of Asset to move',
+    description: 'Asset to move',
     example: 'TICKER',
   })
-  @IsTicker()
-  readonly ticker: string;
+  @IsAsset()
+  readonly asset: string;
 
   @ApiPropertyOptional({
     description: 'Amount of a Fungible Asset to move',

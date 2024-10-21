@@ -123,7 +123,7 @@ describe('MetadataService', () => {
       const mockMetadataEntry = createMockMetadataEntry();
       mockAsset.metadata.getOne.mockResolvedValue(mockMetadataEntry);
 
-      const result = await service.findOne({ ticker, type, id });
+      const result = await service.findOne({ asset: ticker, type, id });
 
       expect(result).toEqual(mockMetadataEntry);
     });
@@ -135,7 +135,7 @@ describe('MetadataService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(service.findOne({ ticker, type, id })).rejects.toThrowError();
+        await expect(service.findOne({ asset: ticker, type, id })).rejects.toThrowError();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -195,7 +195,7 @@ describe('MetadataService', () => {
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       when(findOneSpy)
-        .calledWith({ ticker, type, id })
+        .calledWith({ asset: ticker, type, id })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValue(mockMetadataEntry as any);
 
@@ -213,7 +213,7 @@ describe('MetadataService', () => {
         },
       };
 
-      const result = await service.setValue({ ticker, type, id }, body);
+      const result = await service.setValue({ asset: ticker, type, id }, body);
       expect(result).toEqual({
         result: mockMetadataEntry,
         transactions: [mockTransaction],
@@ -239,7 +239,7 @@ describe('MetadataService', () => {
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       when(findOneSpy)
-        .calledWith({ ticker, type, id })
+        .calledWith({ asset: ticker, type, id })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValue(mockMetadataEntry as any);
 
@@ -251,7 +251,7 @@ describe('MetadataService', () => {
         signer,
       };
 
-      const result = await service.clearValue({ ticker, type, id }, body);
+      const result = await service.clearValue({ asset: ticker, type, id }, body);
       expect(result).toEqual({
         transactions: [mockTransaction],
       });
@@ -276,7 +276,7 @@ describe('MetadataService', () => {
 
       const findOneSpy = jest.spyOn(service, 'findOne');
       when(findOneSpy)
-        .calledWith({ ticker, type, id })
+        .calledWith({ asset: ticker, type, id })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValue(mockMetadataEntry as any);
 
@@ -288,7 +288,7 @@ describe('MetadataService', () => {
         signer,
       };
 
-      const result = await service.removeKey({ ticker, type, id }, body);
+      const result = await service.removeKey({ asset: ticker, type, id }, body);
       expect(result).toEqual({
         transactions: [mockTransaction],
       });

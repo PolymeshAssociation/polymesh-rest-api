@@ -11,7 +11,7 @@ export class BatchTransactionModel extends TransactionIdentifierModel {
       'List of Transaction type identifier (for UI purposes). The format for each identifier is <palletName>.<transactionName>',
     type: 'string',
     isArray: true,
-    example: 'asset.registerTicker',
+    example: 'asset.RegisterUniqueTicker',
   })
   readonly transactionTags?: string[];
 

@@ -15,13 +15,13 @@ describe('signPayload', () => {
         payload: {
           status: TransactionStatus.Running,
           transactionHash: '0x01',
-          transactionTag: TxTags.asset.RegisterTicker,
+          transactionTag: TxTags.asset.RegisterUniqueTicker,
           type: TransactionType.Single,
         },
       },
       'someSecret'
     );
 
-    expect(result).toBe('iYFr08wYKxLP8eiFT7tOfkvid+0f3FT3h7wH81ELNsQ=');
+    expect(result).toBe('H967FW2eFJj1clXHP1HBfCjUGKm00EiiPbRVDkN0Gdc=');
   });
 });

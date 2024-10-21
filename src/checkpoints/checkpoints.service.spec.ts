@@ -28,7 +28,7 @@ jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   isPolymeshTransaction: mockIsPolymeshTransaction,
 }));
 
-const { signer } = testValues;
+const { signer, assetId } = testValues;
 const mockSchedules = [
   {
     schedule: {
@@ -81,7 +81,7 @@ describe('CheckpointsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAllByTicker', () => {
+  describe('findAllByAsset', () => {
     const mockCheckpoints = {
       data: [
         {
@@ -101,7 +101,7 @@ describe('CheckpointsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findAllByTicker('TICKER', new BigNumber(1));
+      const result = await service.findAllByAsset(assetId, new BigNumber(1));
 
       expect(result).toEqual(mockCheckpoints);
     });
@@ -112,22 +112,22 @@ describe('CheckpointsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findAllByTicker('TICKER', new BigNumber(1), 'START_KEY');
+      const result = await service.findAllByAsset(assetId, new BigNumber(1), 'START_KEY');
 
       expect(result).toEqual(mockCheckpoints);
     });
   });
 
   describe('findOne', () => {
-    it('should return a checkpoint for a valid ticker and id', async () => {
+    it('should return a checkpoint for a valid Asset and checkpoint id', async () => {
       const mockAsset = new MockAsset();
       const mockCheckpoint = new MockCheckpoint();
       mockAsset.checkpoints.getOne.mockResolvedValue(mockCheckpoint);
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findOne('TICKER', new BigNumber(1));
+      const result = await service.findOne(assetId, new BigNumber(1));
       expect(result).toEqual(mockCheckpoint);
-      expect(mockAssetsService.findFungible).toBeCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toBeCalledWith(assetId);
     });
 
     describe('otherwise', () => {
@@ -139,21 +139,21 @@ describe('CheckpointsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findOne('TICKER', new BigNumber(1))).rejects.toThrowError();
+        await expect(() => service.findOne(assetId, new BigNumber(1))).rejects.toThrowError();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
 
-  describe('findSchedulesByTicker', () => {
+  describe('findSchedulesByAsset', () => {
     it('should return the list of active Checkpoint Schedules for an Asset', async () => {
       const mockAsset = new MockAsset();
       mockAsset.checkpoints.schedules.get.mockResolvedValue(mockSchedules);
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findSchedulesByTicker('TICKER');
+      const result = await service.findSchedulesByAsset(assetId);
 
       expect(result).toEqual(mockSchedules);
     });
@@ -161,7 +161,7 @@ describe('CheckpointsService', () => {
 
   describe('findScheduleById', () => {
     let mockAsset: MockAsset;
-    const ticker = 'TICKER';
+
     const id = new BigNumber(1);
 
     beforeEach(() => {
@@ -169,7 +169,7 @@ describe('CheckpointsService', () => {
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
     });
 
-    it('should return the Schedule for a valid ticker and id', async () => {
+    it('should return the Schedule for a valid Asset and schedule id', async () => {
       const mockScheduleWithDetails = {
         schedule: new MockCheckpointSchedule(),
         details: {
@@ -179,7 +179,7 @@ describe('CheckpointsService', () => {
       };
       mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
 
-      const result = await service.findScheduleById(ticker, id);
+      const result = await service.findScheduleById(assetId, id);
 
       expect(result).toEqual(mockScheduleWithDetails);
     });
@@ -191,21 +191,21 @@ describe('CheckpointsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findScheduleById(ticker, id)).rejects.toThrowError();
+        await expect(() => service.findScheduleById(assetId, id)).rejects.toThrowError();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
 
     afterEach(() => {
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
       expect(mockAsset.checkpoints.schedules.getOne).toHaveBeenCalledWith({
         id,
       });
     });
   });
 
-  describe('createByTicker', () => {
+  describe('createByAsset', () => {
     it('should create a Checkpoint and return the queue results', async () => {
       const mockCheckpoint = new MockCheckpoint();
       const transaction = {
@@ -228,7 +228,7 @@ describe('CheckpointsService', () => {
         signer,
       };
 
-      const result = await service.createByTicker('TICKER', body);
+      const result = await service.createByAsset(assetId, body);
       expect(result).toEqual({
         result: mockCheckpoint,
         transactions: [mockTransaction],
@@ -240,11 +240,11 @@ describe('CheckpointsService', () => {
           signer,
         })
       );
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 
-  describe('createScheduleByTicker', () => {
+  describe('createScheduleByAsset', () => {
     it('should create a Checkpoint Schedule and return the queue results', async () => {
       const mockCheckpointSchedule = new MockCheckpointSchedule();
       const transaction = {
@@ -269,7 +269,7 @@ describe('CheckpointsService', () => {
         points: [mockDate],
       };
 
-      const result = await service.createScheduleByTicker('TICKER', params);
+      const result = await service.createScheduleByAsset(assetId, params);
       expect(result).toEqual({
         result: mockCheckpointSchedule,
         transactions: [mockTransaction],
@@ -283,7 +283,7 @@ describe('CheckpointsService', () => {
           signer,
         })
       );
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 
@@ -308,7 +308,7 @@ describe('CheckpointsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockCheckpoint as any);
 
-      const result = await service.getHolders('TICKER', new BigNumber(1), new BigNumber(1));
+      const result = await service.getHolders(assetId, new BigNumber(1), new BigNumber(1));
 
       expect(result).toEqual(mockHolders);
       expect(mockCheckpoint.allBalances).toHaveBeenCalledWith({
@@ -325,7 +325,7 @@ describe('CheckpointsService', () => {
       findOneSpy.mockResolvedValue(mockCheckpoint as any);
 
       const result = await service.getHolders(
-        'TICKER',
+        assetId,
         new BigNumber(1),
         new BigNumber(10),
         'START_KEY'
@@ -355,14 +355,14 @@ describe('CheckpointsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.getAssetBalance('TICKER', did, id);
+      const result = await service.getAssetBalance(assetId, did, id);
       expect(result).toEqual({ balance, identity: did });
       expect(mockCheckpoint.balance).toHaveBeenCalledWith({ identity: did });
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 
-  describe('deleteScheduleByTicker', () => {
+  describe('deleteScheduleByAsset', () => {
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
         const transaction = {
@@ -380,10 +380,10 @@ describe('CheckpointsService', () => {
         });
 
         mockAssetsService.findFungible.mockResolvedValue(mockAsset);
-        const ticker = 'TICKER';
+
         const id = new BigNumber(1);
 
-        const result = await service.deleteScheduleByTicker(ticker, id, { signer });
+        const result = await service.deleteScheduleByAsset(assetId, id, { signer });
         expect(result).toEqual({
           result: undefined,
           transactions: [mockTransaction],
@@ -397,7 +397,7 @@ describe('CheckpointsService', () => {
             signer,
           })
         );
-        expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+        expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
       });
     });
   });
@@ -405,7 +405,7 @@ describe('CheckpointsService', () => {
   describe('findCheckpointsByScheduleId', () => {
     let mockAsset: MockAsset;
     let mockCheckpoint: MockCheckpoint;
-    const ticker = 'TICKER';
+
     const id = new BigNumber(1);
     const createdAt = new Date();
     const totalSupply = new BigNumber(1000);
@@ -419,7 +419,7 @@ describe('CheckpointsService', () => {
       mockCheckpoint.totalSupply.mockResolvedValue(totalSupply);
     });
 
-    it('should return Checkpoints for a valid ticker and id', async () => {
+    it('should return Checkpoints for a valid Asset and checkpoint id', async () => {
       const mockSchedule = new MockCheckpointSchedule();
       mockSchedule.getCheckpoints.mockResolvedValue([mockCheckpoint]);
 
@@ -432,7 +432,7 @@ describe('CheckpointsService', () => {
       };
       mockAsset.checkpoints.schedules.getOne.mockResolvedValue(mockScheduleWithDetails);
 
-      const result = await service.findCheckpointsByScheduleId(ticker, id);
+      const result = await service.findCheckpointsByScheduleId(assetId, id);
 
       expect(result).toEqual([{ checkpoint: mockCheckpoint, createdAt, totalSupply }]);
     });
@@ -444,14 +444,14 @@ describe('CheckpointsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findCheckpointsByScheduleId(ticker, id)).rejects.toThrowError();
+        await expect(() => service.findCheckpointsByScheduleId(assetId, id)).rejects.toThrowError();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
 
     afterEach(() => {
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
       expect(mockAsset.checkpoints.schedules.getOne).toHaveBeenCalledWith({
         id,
       });
@@ -459,7 +459,7 @@ describe('CheckpointsService', () => {
   });
 
   describe('getComplexityForAsset', () => {
-    it('should return a maxComplexity and schedules for a valid ticker', async () => {
+    it('should return a maxComplexity and schedules for a valid Asset', async () => {
       const maxComplexity = new BigNumber(1);
       const mockResult = {
         schedules: mockSchedules,
@@ -472,15 +472,15 @@ describe('CheckpointsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.getComplexityForAsset('TICKER');
+      const result = await service.getComplexityForAsset(assetId);
       expect(result).toEqual(mockResult);
-      expect(mockAssetsService.findFungible).toBeCalledWith('TICKER');
+      expect(mockAssetsService.findFungible).toBeCalledWith(assetId);
     });
   });
 
   describe('getComplexityForPeriod', () => {
     let mockAsset: MockAsset;
-    const ticker = 'TICKER';
+
     const id = new BigNumber(1);
 
     const CHECKPOINT_DATE = new Date('2021-01-01');
@@ -510,7 +510,7 @@ describe('CheckpointsService', () => {
     it('should equal the length of all checkpoints for schedule if no period given', async () => {
       setupMocks(new Date());
 
-      const result = await service.getComplexityForPeriod(ticker, id);
+      const result = await service.getComplexityForPeriod(assetId, id);
 
       expect(result).toEqual(new BigNumber(1));
     });
@@ -518,7 +518,7 @@ describe('CheckpointsService', () => {
     it('should filter out checkpoints that are outside given period', async () => {
       setupMocks(CHECKPOINT_DATE, [PENDING_POINT_DATE_2]);
 
-      const result = await service.getComplexityForPeriod(ticker, id, START_DATE, END_DATE);
+      const result = await service.getComplexityForPeriod(assetId, id, START_DATE, END_DATE);
 
       expect(result).toEqual(new BigNumber(1));
     });
@@ -526,7 +526,7 @@ describe('CheckpointsService', () => {
     it('should filter if just start is given', async () => {
       setupMocks(CHECKPOINT_DATE, [PENDING_POINT_DATE_1]);
 
-      const result = await service.getComplexityForPeriod(ticker, id, START_DATE);
+      const result = await service.getComplexityForPeriod(assetId, id, START_DATE);
 
       expect(result).toEqual(new BigNumber(1));
     });
@@ -534,7 +534,7 @@ describe('CheckpointsService', () => {
     it('should filter if just end is given', async () => {
       setupMocks(CHECKPOINT_DATE, [PENDING_POINT_DATE_1]);
 
-      const result = await service.getComplexityForPeriod(ticker, id, undefined, START_DATE);
+      const result = await service.getComplexityForPeriod(assetId, id, undefined, START_DATE);
 
       expect(result).toEqual(new BigNumber(1));
     });

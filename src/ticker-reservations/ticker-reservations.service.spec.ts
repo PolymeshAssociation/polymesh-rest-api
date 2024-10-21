@@ -78,7 +78,7 @@ describe('TickerReservationsService', () => {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
-        tag: TxTags.asset.RegisterTicker,
+        tag: TxTags.asset.RegisterUniqueTicker,
       };
       const mockResult = new MockTickerReservation();
 
@@ -150,7 +150,7 @@ describe('TickerReservationsService', () => {
         blockHash: '0x1',
         txHash: '0x2',
         blockNumber: new BigNumber(1),
-        tag: TxTags.asset.RegisterTicker,
+        tag: TxTags.asset.RegisterUniqueTicker,
       };
 
       const findOneSpy = jest.spyOn(service, 'findOne');

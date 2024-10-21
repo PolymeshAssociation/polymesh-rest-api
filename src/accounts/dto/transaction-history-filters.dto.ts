@@ -36,7 +36,7 @@ export class TransactionHistoryFiltersDto {
     description: 'Transaction tags to be filtered',
     type: 'string',
     enum: getTxTags(),
-    example: TxTags.asset.RegisterTicker,
+    example: TxTags.asset.RegisterUniqueTicker,
   })
   @IsOptional()
   @IsTxTag()

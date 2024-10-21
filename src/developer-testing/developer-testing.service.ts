@@ -56,7 +56,7 @@ export class DeveloperTestingService {
 
     // Create a DID to attach claim too
     const createDidCalls = accounts.map(({ address }) => identity.cddRegisterDid(address, []));
-    await this.polymeshService.execTransaction(signerAddress, utility.batchAtomic, createDidCalls);
+    await this.polymeshService.execTransaction(signerAddress, utility.batch, createDidCalls);
 
     // Fetch the Account and Identity that was made
     const madeAccounts = await this.fetchAccountForAccountParams(accounts);

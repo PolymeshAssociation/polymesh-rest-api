@@ -44,7 +44,7 @@ describe('OfferingsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAllByTicker', () => {
+  describe('findAllByAsset', () => {
     it('should return the list of Offerings for an Asset', async () => {
       const mockOfferings = [new MockOfferingWithDetails()];
 
@@ -52,7 +52,7 @@ describe('OfferingsService', () => {
       mockAsset.offerings.get.mockResolvedValue(mockOfferings);
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findAllByTicker('TICKER', {
+      const result = await service.findAllByAsset('TICKER', {
         timing: OfferingTimingStatus.Started,
       });
 
@@ -60,13 +60,13 @@ describe('OfferingsService', () => {
     });
   });
 
-  describe('findInvestmentsByTicker', () => {
+  describe('findInvestmentsByAsset', () => {
     it('should return a list of investments', async () => {
       const findSpy = jest.spyOn(service, 'findOne');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findSpy.mockResolvedValue(mockOfferingWithDetails as any);
 
-      const result = await service.findInvestmentsByTicker(
+      const result = await service.findInvestmentsByAsset(
         'TICKER',
         new BigNumber(1),
         new BigNumber(0)
@@ -83,13 +83,13 @@ describe('OfferingsService', () => {
   describe('findOne', () => {
     describe('if the offering is not found', () => {
       it('should throw a AppNotFoundError', async () => {
-        const findSpy = jest.spyOn(service, 'findAllByTicker');
+        const findSpy = jest.spyOn(service, 'findAllByAsset');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findSpy.mockResolvedValue([mockOfferingWithDetails] as any);
 
         let error;
         try {
-          await service.findInvestmentsByTicker('TICKER', new BigNumber(99), new BigNumber(0));
+          await service.findInvestmentsByAsset('TICKER', new BigNumber(99), new BigNumber(0));
         } catch (err) {
           error = err;
         }
@@ -98,7 +98,7 @@ describe('OfferingsService', () => {
     });
     describe('otherwise', () => {
       it('should return the offering', async () => {
-        const findSpy = jest.spyOn(service, 'findAllByTicker');
+        const findSpy = jest.spyOn(service, 'findAllByAsset');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findSpy.mockResolvedValue([mockOfferingWithDetails] as any);
 

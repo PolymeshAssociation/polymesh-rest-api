@@ -3,7 +3,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 
 export class GetTransactionsDto {
   @ApiPropertyOptional({
@@ -19,6 +19,6 @@ export class GetTransactionsDto {
     example: '123',
   })
   @IsOptional()
-  @IsTicker()
-  readonly ticker?: string;
+  @IsAsset()
+  readonly asset?: string;
 }

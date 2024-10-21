@@ -17,7 +17,7 @@ import { MockAsset, MockTransaction } from '~/test-utils/mocks';
 import { MockAssetService, mockTransactionsProvider } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
-const { signer } = testValues;
+const { signer, assetId } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -48,7 +48,7 @@ describe('CorporateActionsService', () => {
     mockIsPolymeshTransaction.mockReset();
   });
 
-  describe('findDefaultConfigByTicker', () => {
+  describe('findDefaultConfigByAsset', () => {
     it('should return the Corporate Action Default Config for an Asset', async () => {
       const mockCorporateActionDefaultConfig = new MockCorporateActionDefaultConfig();
 
@@ -59,15 +59,14 @@ describe('CorporateActionsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findDefaultConfigByTicker('TICKER');
+      const result = await service.findDefaultConfigByAsset(assetId);
 
       expect(result).toEqual(mockCorporateActionDefaultConfig);
     });
   });
 
-  describe('updateDefaultConfigByTicker', () => {
+  describe('updateDefaultConfigByAsset', () => {
     let mockAsset: MockAsset;
-    const ticker = 'TICKER';
 
     beforeEach(() => {
       mockAsset = new MockAsset();
@@ -90,7 +89,7 @@ describe('CorporateActionsService', () => {
         signer,
         defaultTaxWithholding: new BigNumber(25),
       };
-      const result = await service.updateDefaultConfigByTicker(ticker, body);
+      const result = await service.updateDefaultConfigByAsset(assetId, body);
 
       expect(result).toEqual({
         result: undefined,
@@ -101,11 +100,11 @@ describe('CorporateActionsService', () => {
         { defaultTaxWithholding: new BigNumber(25) },
         expect.objectContaining({ signer })
       );
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 
-  describe('findDistributionsByTicker', () => {
+  describe('findDistributionsByAsset', () => {
     it('should return the Dividend Distributions associated with an Asset', async () => {
       const mockDistributions = [new MockDistributionWithDetails()];
 
@@ -114,14 +113,14 @@ describe('CorporateActionsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findDistributionsByTicker('TICKER');
+      const result = await service.findDistributionsByAsset(assetId);
 
       expect(result).toEqual(mockDistributions);
     });
   });
 
   describe('findDistribution', () => {
-    it('should return a specific Dividend Distribution associated with an given ticker', async () => {
+    it('should return a specific Dividend Distribution associated with an given Asset', async () => {
       const mockDistributions = new MockDistributionWithDetails();
 
       const mockAsset = new MockAsset();
@@ -129,7 +128,7 @@ describe('CorporateActionsService', () => {
 
       mockAssetsService.findFungible.mockResolvedValue(mockAsset);
 
-      const result = await service.findDistribution('TICKER', new BigNumber(1));
+      const result = await service.findDistribution(assetId, new BigNumber(1));
 
       expect(result).toEqual(mockDistributions);
     });
@@ -144,7 +143,7 @@ describe('CorporateActionsService', () => {
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
         await expect(() =>
-          service.findDistribution('TICKER', new BigNumber(1))
+          service.findDistribution(assetId, new BigNumber(1))
         ).rejects.toThrowError();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
@@ -154,14 +153,14 @@ describe('CorporateActionsService', () => {
 
   describe('createDividendDistribution', () => {
     let mockAsset: MockAsset;
-    const ticker = 'TICKER';
+
     const mockDate = new Date();
     const body = {
       signer,
       description: 'Corporate Action description',
       checkpoint: mockDate,
       originPortfolio: new BigNumber(0),
-      currency: 'TICKER',
+      currency: assetId,
       perShare: new BigNumber(2),
       maxAmount: new BigNumber(1000),
       paymentDate: mockDate,
@@ -186,19 +185,18 @@ describe('CorporateActionsService', () => {
         transactions: [mockTransaction],
       });
 
-      const result = await service.createDividendDistribution(ticker, body);
+      const result = await service.createDividendDistribution(assetId, body);
 
       expect(result).toEqual({
         result: mockDistribution,
         transactions: [mockTransaction],
       });
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 
   describe('remove', () => {
     let mockAsset: MockAsset;
-    const ticker = 'TICKER';
 
     beforeEach(() => {
       mockAsset = new MockAsset();
@@ -215,12 +213,12 @@ describe('CorporateActionsService', () => {
       const mockTransaction = new MockTransaction(transaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      const result = await service.remove(ticker, new BigNumber(1), { signer });
+      const result = await service.remove(assetId, new BigNumber(1), { signer });
 
       expect(result).toEqual({
         transactions: [mockTransaction],
       });
-      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(ticker);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 
@@ -246,7 +244,7 @@ describe('CorporateActionsService', () => {
         targets: ['0x6'.padEnd(66, '1')],
       };
 
-      const result = await service.payDividends('TICKER', new BigNumber(1), body);
+      const result = await service.payDividends(assetId, new BigNumber(1), body);
       expect(result).toEqual({
         result: undefined,
         transactions: [mockTransaction],
@@ -293,7 +291,7 @@ describe('CorporateActionsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
 
-      const result = await service.linkDocuments('TICKER', new BigNumber(1), body);
+      const result = await service.linkDocuments(assetId, new BigNumber(1), body);
       expect(result).toEqual({
         result: undefined,
         transactions: [mockTransaction],
@@ -320,7 +318,7 @@ describe('CorporateActionsService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
-        const result = await service.claimDividends('TICKER', new BigNumber(1), { signer });
+        const result = await service.claimDividends(assetId, new BigNumber(1), { signer });
         expect(result).toEqual({
           result: undefined,
           transactions: [mockTransaction],
@@ -356,7 +354,7 @@ describe('CorporateActionsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findDistributionSpy.mockResolvedValue(distributionWithDetails as any);
 
-      const result = await service.reclaimRemainingFunds('TICKER', new BigNumber(1), {
+      const result = await service.reclaimRemainingFunds(assetId, new BigNumber(1), {
         signer,
         webhookUrl,
         dryRun,
@@ -397,7 +395,7 @@ describe('CorporateActionsService', () => {
         },
         signer,
       };
-      const result = await service.modifyCheckpoint('TICKER', new BigNumber(1), body);
+      const result = await service.modifyCheckpoint(assetId, new BigNumber(1), body);
       expect(result).toEqual({
         result: undefined,
         transactions: [mockTransaction],

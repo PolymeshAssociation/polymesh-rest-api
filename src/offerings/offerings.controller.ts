@@ -7,9 +7,9 @@ import {
   OfferingTimingStatus,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ApiArrayResponse } from '~/common/decorators/swagger';
-import { IsTicker } from '~/common/decorators/validation';
+import { IsAsset } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -21,12 +21,12 @@ import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
 
 class OfferingParams extends IdParamsDto {
-  @IsTicker()
-  readonly ticker: string;
+  @IsAsset()
+  readonly asset: string;
 }
 
 @ApiTags('offerings')
-@Controller('assets/:ticker/offerings')
+@Controller('assets/:asset/offerings')
 export class OfferingsController {
   constructor(private readonly offeringsService: OfferingsService) {}
 
@@ -36,8 +36,8 @@ export class OfferingsController {
     description: 'This endpoint will provide the list of all Asset Offerings for an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Offerings are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Offerings are to be fetched',
     type: 'string',
     example: 'TICKER',
   })
@@ -65,10 +65,10 @@ export class OfferingsController {
   })
   @Get()
   public async getOfferings(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Query() { timing, balance, sale }: OfferingStatusFilterDto
   ): Promise<ResultsModel<OfferingDetailsModel>> {
-    const offerings = await this.offeringsService.findAllByTicker(ticker, {
+    const offerings = await this.offeringsService.findAllByAsset(asset, {
       timing,
       balance,
       sale,
@@ -84,8 +84,8 @@ export class OfferingsController {
       'This endpoint will return a list of Investments made in an Offering for a given Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID)',
     type: 'string',
     example: 'TICKER',
   })
@@ -115,15 +115,15 @@ export class OfferingsController {
   })
   @Get(':id/investments')
   public async getInvestments(
-    @Param() { ticker, id }: OfferingParams,
+    @Param() { asset, id }: OfferingParams,
     @Query() { size, start }: PaginatedParamsDto
   ): Promise<PaginatedResultsModel<InvestmentModel>> {
     const {
       data,
       count: total,
       next,
-    } = await this.offeringsService.findInvestmentsByTicker(
-      ticker,
+    } = await this.offeringsService.findInvestmentsByAsset(
+      asset,
       id,
       size,
       new BigNumber(start || 0)

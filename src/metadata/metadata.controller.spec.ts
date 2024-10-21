@@ -27,12 +27,10 @@ describe('MetadataController', () => {
   const { txResult } = testValues;
   let controller: MetadataController;
   let mockService: DeepMocked<MetadataService>;
-  let ticker: string;
   let type: MetadataType;
   let id: BigNumber;
 
   beforeEach(async () => {
-    ticker = 'TICKER';
     type = MetadataType.Local;
     id = new BigNumber(1);
 
@@ -53,9 +51,9 @@ describe('MetadataController', () => {
   describe('getMetadata', () => {
     it('should return the list of all metadata for a given ticker', async () => {
       const mockMetadataEntry = createMockMetadataEntry();
-      when(mockService.findAll).calledWith(ticker).mockResolvedValue([mockMetadataEntry]);
+      when(mockService.findAll).calledWith(assetId).mockResolvedValue([mockMetadataEntry]);
 
-      const result = await controller.getMetadata({ ticker });
+      const result = await controller.getMetadata({ asset: assetId });
 
       expect(result).toEqual({
         results: [new MetadataEntryModel({ asset: assetId, type, id })],
@@ -84,10 +82,10 @@ describe('MetadataController', () => {
       mockMetadataEntry.value.mockResolvedValue(mockValue);
 
       when(mockService.findOne)
-        .calledWith({ ticker, type, id })
+        .calledWith({ asset: assetId, type, id })
         .mockResolvedValue(mockMetadataEntry);
 
-      const result = await controller.getSingleMetadata({ ticker, type, id });
+      const result = await controller.getSingleMetadata({ asset: assetId, type, id });
 
       expect(result).toEqual(
         new MetadataDetailsModel({
@@ -124,9 +122,9 @@ describe('MetadataController', () => {
         signer: 'Alice',
       };
 
-      when(mockService.create).calledWith(ticker, mockPayload).mockResolvedValue(testTxResult);
+      when(mockService.create).calledWith(assetId, mockPayload).mockResolvedValue(testTxResult);
 
-      const result = await controller.createMetadata({ ticker }, mockPayload);
+      const result = await controller.createMetadata({ asset: assetId }, mockPayload);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -156,10 +154,10 @@ describe('MetadataController', () => {
       };
 
       when(mockService.setValue)
-        .calledWith({ ticker, type, id }, mockPayload)
+        .calledWith({ asset: assetId, type, id }, mockPayload)
         .mockResolvedValue(testTxResult);
 
-      const result = await controller.setMetadata({ ticker, type, id }, mockPayload);
+      const result = await controller.setMetadata({ asset: assetId, type, id }, mockPayload);
 
       expect(result).toEqual(testTxResult);
     });
@@ -183,10 +181,10 @@ describe('MetadataController', () => {
       };
 
       when(mockService.clearValue)
-        .calledWith({ ticker, type, id }, mockBody)
+        .calledWith({ asset: assetId, type, id }, mockBody)
         .mockResolvedValue(testTxResult);
 
-      const result = await controller.clearMetadata({ ticker, type, id }, mockBody);
+      const result = await controller.clearMetadata({ asset: assetId, type, id }, mockBody);
 
       expect(result).toEqual(testTxResult);
     });
@@ -211,10 +209,10 @@ describe('MetadataController', () => {
       });
 
       when(mockService.removeKey)
-        .calledWith({ ticker, type, id }, mockBody)
+        .calledWith({ asset: assetId, type, id }, mockBody)
         .mockResolvedValue(testTxResult);
 
-      const result = await controller.removeLocalMetadata({ ticker, type, id }, mockBody);
+      const result = await controller.removeLocalMetadata({ asset: assetId, type, id }, mockBody);
 
       expect(result).toEqual(testTxResult);
     });

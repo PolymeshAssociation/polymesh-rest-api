@@ -30,7 +30,7 @@ export class TransactionPermissionsDto extends PermissionTypeDto {
       'Transactions to be exempted from inclusion/exclusion. For example, if you wish to exclude the entire `asset` module except for `asset.createAsset`, you would pass `ModuleName.Asset` as part of the `values` array, and `TxTags.asset.CreateAsset` as part of the `exceptions` array',
     isArray: true,
     enum: getTxTags(),
-    example: [TxTags.asset.RegisterTicker],
+    example: [TxTags.asset.RegisterUniqueTicker],
   })
   @IsArray()
   @ArrayNotEmpty()

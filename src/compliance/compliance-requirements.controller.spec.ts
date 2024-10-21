@@ -17,9 +17,8 @@ import { mockComplianceRequirementsServiceProvider } from '~/test-utils/service-
 describe('ComplianceRequirementsController', () => {
   let controller: ComplianceRequirementsController;
   let mockService: ComplianceRequirementsService;
-  const { did, signer, txResult } = testValues;
+  const { did, signer, txResult, assetId } = testValues;
 
-  const ticker = 'TICKER';
   const validBody = {
     signer,
     requirements: [
@@ -59,10 +58,10 @@ describe('ComplianceRequirementsController', () => {
   describe('getComplianceRequirements', () => {
     it('should return the list of all compliance requirements of an Asset', async () => {
       when(mockService.findComplianceRequirements)
-        .calledWith(ticker)
+        .calledWith(assetId)
         .mockResolvedValue(mockComplianceRequirements);
 
-      const result = await controller.getComplianceRequirements({ ticker });
+      const result = await controller.getComplianceRequirements({ asset: assetId });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
@@ -74,10 +73,13 @@ describe('ComplianceRequirementsController', () => {
       const response = createMockTransactionResult<void>({ ...txResult, transactions: [] });
 
       when(mockService.setRequirements)
-        .calledWith(ticker, validBody as SetRequirementsDto)
+        .calledWith(assetId, validBody as SetRequirementsDto)
         .mockResolvedValue(response);
 
-      const result = await controller.setRequirements({ ticker }, validBody as SetRequirementsDto);
+      const result = await controller.setRequirements(
+        { asset: assetId },
+        validBody as SetRequirementsDto
+      );
       expect(result).toEqual(response);
     });
   });
@@ -85,10 +87,10 @@ describe('ComplianceRequirementsController', () => {
   describe('pauseRequirements', () => {
     it('should accept TransactionBaseDto and pause Asset Compliance Rules', async () => {
       when(mockService.pauseRequirements)
-        .calledWith(ticker, validBody)
+        .calledWith(assetId, validBody)
         .mockResolvedValue(txResponse);
 
-      const result = await controller.pauseRequirements({ ticker }, validBody);
+      const result = await controller.pauseRequirements({ asset: assetId }, validBody);
       expect(result).toEqual(txResponse);
     });
   });
@@ -96,29 +98,29 @@ describe('ComplianceRequirementsController', () => {
   describe('unpauseRequirements', () => {
     it('should accept TransactionBaseDto and unpause Asset Compliance Rules', async () => {
       when(mockService.unpauseRequirements)
-        .calledWith(ticker, validBody)
+        .calledWith(assetId, validBody)
         .mockResolvedValue(txResponse);
 
-      const result = await controller.unpauseRequirements({ ticker }, validBody);
+      const result = await controller.unpauseRequirements({ asset: assetId }, validBody);
       expect(result).toEqual(txResponse);
     });
   });
 
   describe('deleteRequirement', () => {
-    it('should accept TransactionBaseDto and compliance requirement ID and delete the corresponding Asset Compliance rule for the given ticker', async () => {
-      when(mockService.deleteOne).calledWith(ticker, id, validBody).mockResolvedValue(txResponse);
+    it('should accept TransactionBaseDto and compliance requirement ID and delete the corresponding Asset Compliance rule for the given Asset', async () => {
+      when(mockService.deleteOne).calledWith(assetId, id, validBody).mockResolvedValue(txResponse);
 
-      const result = await controller.deleteRequirement({ ticker, id }, validBody);
+      const result = await controller.deleteRequirement({ asset: assetId, id }, validBody);
 
       expect(result).toEqual(txResponse);
     });
   });
 
   describe('deleteRequirements', () => {
-    it('should accept TransactionBaseDto and delete all the Asset Compliance rules for the given ticker', async () => {
-      when(mockService.deleteAll).calledWith(ticker, validBody).mockResolvedValue(txResponse);
+    it('should accept TransactionBaseDto and delete all the Asset Compliance rules for the given Asset', async () => {
+      when(mockService.deleteAll).calledWith(assetId, validBody).mockResolvedValue(txResponse);
 
-      const result = await controller.deleteRequirements({ ticker }, validBody);
+      const result = await controller.deleteRequirements({ asset: assetId }, validBody);
 
       expect(result).toEqual(txResponse);
     });
@@ -129,13 +131,13 @@ describe('ComplianceRequirementsController', () => {
       const { requirements } = validBody;
 
       when(mockService.add)
-        .calledWith(ticker, {
+        .calledWith(assetId, {
           signer,
           conditions: requirements[0],
         } as RequirementDto)
         .mockResolvedValue(txResponse);
 
-      const result = await controller.addRequirement({ ticker }, {
+      const result = await controller.addRequirement({ asset: assetId }, {
         signer,
         conditions: requirements[0],
       } as RequirementDto);
@@ -149,13 +151,13 @@ describe('ComplianceRequirementsController', () => {
       const { requirements } = validBody;
 
       when(mockService.modify)
-        .calledWith(ticker, id, {
+        .calledWith(assetId, id, {
           signer,
           conditions: requirements[0],
         } as RequirementDto)
         .mockResolvedValue(response);
 
-      const result = await controller.modifyComplianceRequirement({ ticker, id }, {
+      const result = await controller.modifyComplianceRequirement({ asset: assetId, id }, {
         signer,
         conditions: requirements[0],
       } as RequirementDto);
@@ -168,9 +170,9 @@ describe('ComplianceRequirementsController', () => {
     it('should return the result of arePaused method', async () => {
       const response = false;
 
-      when(mockService.arePaused).calledWith(ticker).mockResolvedValue(response);
+      when(mockService.arePaused).calledWith(assetId).mockResolvedValue(response);
 
-      const result = await controller.areRequirementsPaused({ ticker });
+      const result = await controller.areRequirementsPaused({ asset: assetId });
 
       expect(result).toEqual(new ComplianceStatusModel({ arePaused: response }));
     });

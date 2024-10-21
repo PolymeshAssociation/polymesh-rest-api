@@ -29,7 +29,7 @@ import {
 } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
-const { signer, did } = testValues;
+const { signer, did, assetId } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -177,7 +177,7 @@ describe('PortfoliosService', () => {
         from: new BigNumber(0),
         items: [
           {
-            ticker: 'TICKER',
+            asset: assetId,
             amount: new BigNumber(123),
           },
         ],
@@ -195,7 +195,7 @@ describe('PortfoliosService', () => {
           items: [
             {
               amount: new BigNumber(123),
-              asset: 'TICKER',
+              asset: assetId,
               memo: undefined,
             },
           ],

@@ -27,26 +27,26 @@ export class MetadataService {
     return this.polymeshService.polymeshApi.assets.getGlobalMetadataKeys();
   }
 
-  public async findAll(ticker: string): Promise<MetadataEntry[]> {
-    const { metadata } = await this.assetsService.findOne(ticker);
+  public async findAll(asset: string): Promise<MetadataEntry[]> {
+    const { metadata } = await this.assetsService.findOne(asset);
 
     return metadata.get();
   }
 
-  public async findOne({ ticker, type, id }: MetadataParamsDto): Promise<MetadataEntry> {
-    const { metadata } = await this.assetsService.findOne(ticker);
+  public async findOne({ asset, type, id }: MetadataParamsDto): Promise<MetadataEntry> {
+    const { metadata } = await this.assetsService.findOne(asset);
 
     return await metadata.getOne({ type, id }).catch(error => {
       throw handleSdkError(error);
     });
   }
 
-  public async create(ticker: string, params: CreateMetadataDto): ServiceReturn<MetadataEntry> {
+  public async create(asset: string, params: CreateMetadataDto): ServiceReturn<MetadataEntry> {
     const { args, options } = extractTxOptions(params);
 
     const {
       metadata: { register },
-    } = await this.assetsService.findOne(ticker);
+    } = await this.assetsService.findOne(asset);
 
     return this.transactionsService.submit(register, args, options);
   }

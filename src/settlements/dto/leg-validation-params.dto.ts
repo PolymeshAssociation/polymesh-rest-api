@@ -5,7 +5,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
-import { IsBigNumber, IsDid, IsTicker } from '~/common/decorators/validation';
+import { IsAsset, IsBigNumber, IsDid } from '~/common/decorators/validation';
 
 export class LegValidationParamsDto {
   @ApiPropertyOptional({
@@ -66,10 +66,10 @@ export class LegValidationParamsDto {
   readonly toPortfolio: BigNumber;
 
   @ApiProperty({
-    description: 'Ticker of the Asset to be transferred',
+    description: 'The Asset (Asset ID/Ticker) to be transferred',
     type: 'string',
-    example: 'TICKER',
+    example: '0x12345678',
   })
-  @IsTicker()
+  @IsAsset()
   readonly asset: string;
 }

@@ -16,7 +16,7 @@ import { processedTxResult, testValues } from '~/test-utils/consts';
 import { createMockResultSet, MockHistoricSettlement, MockPortfolio } from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
-const { did, signer, txResult } = testValues;
+const { did, signer, txResult, assetId } = testValues;
 
 describe('PortfoliosController', () => {
   let controller: PortfoliosController;
@@ -62,7 +62,7 @@ describe('PortfoliosController', () => {
         signer: '0x6000',
         to: new BigNumber(2),
         from: new BigNumber(0),
-        items: [{ to: '3', ticker: 'TICKER', amount: new BigNumber(100) }],
+        items: [{ to: '3', asset: assetId, amount: new BigNumber(100) }],
       };
 
       const result = await controller.moveAssets({ did: '0x6000' }, params);

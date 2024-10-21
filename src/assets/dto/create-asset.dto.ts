@@ -15,17 +15,19 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 export class CreateAssetDto extends TransactionBaseDto {
   @ApiProperty({
     description: 'The name of the Asset',
-    example: 'Ticker Corp',
+    example: 'Asset Corp',
   })
   @IsString()
   readonly name: string;
 
-  @ApiProperty({
-    description: 'The ticker of the Asset. This must either be free or reserved by the Signer',
+  @ApiPropertyOptional({
+    description:
+      'The ticker of the Asset. This must either be free or reserved by the Signer. Note, this value is optional from 7.x chain',
     example: 'TICKER',
   })
+  @IsOptional()
   @IsTicker()
-  readonly ticker: string;
+  readonly ticker?: string;
 
   @ApiPropertyOptional({
     description: 'The initial supply count of the Asset',

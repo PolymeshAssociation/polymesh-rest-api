@@ -1,9 +1,8 @@
 /* istanbul ignore file */
 
 import { IsAsset } from '~/common/decorators/validation';
-import { IdParamsDto } from '~/common/dto/id-params.dto';
 
-export class CheckpointParamsDto extends IdParamsDto {
+export class AssetParamsDto {
   @IsAsset()
   readonly asset: string;
 }

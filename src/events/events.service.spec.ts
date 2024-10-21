@@ -24,7 +24,7 @@ describe('EventsService', () => {
     createdAt: new Date('10/14/1987'),
     payload: {
       type: TransactionType.Single,
-      transactionTag: TxTags.asset.RegisterTicker,
+      transactionTag: TxTags.asset.RegisterUniqueTicker,
       status: TransactionStatus.Unapproved,
     },
   });

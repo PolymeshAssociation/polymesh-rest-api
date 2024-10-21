@@ -12,6 +12,7 @@ import {
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { ASSET_ID_LENGTH } from '~/assets/assets.consts';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
@@ -34,18 +35,30 @@ export class AssetsService {
     private readonly transactionsService: TransactionsService
   ) {}
 
-  public async findOne(ticker: string): Promise<Asset> {
-    return await this.polymeshService.polymeshApi.assets.getAsset({ ticker }).catch(error => {
+  public async findOne(asset: string): Promise<Asset> {
+    let getAssetPromise;
+    if (asset.length === ASSET_ID_LENGTH) {
+      getAssetPromise = this.polymeshService.polymeshApi.assets.getAsset({ assetId: asset });
+    } else {
+      getAssetPromise = this.polymeshService.polymeshApi.assets.getAsset({ ticker: asset });
+    }
+    return await getAssetPromise.catch(error => {
       throw handleSdkError(error);
     });
   }
 
-  public async findFungible(ticker: string): Promise<FungibleAsset> {
-    return await this.polymeshService.polymeshApi.assets
-      .getFungibleAsset({ ticker })
-      .catch(error => {
-        throw handleSdkError(error);
+  public async findFungible(asset: string): Promise<FungibleAsset> {
+    let getAssetPromise;
+    if (asset.length === ASSET_ID_LENGTH) {
+      getAssetPromise = this.polymeshService.polymeshApi.assets.getFungibleAsset({
+        assetId: asset,
       });
+    } else {
+      getAssetPromise = this.polymeshService.polymeshApi.assets.getFungibleAsset({ ticker: asset });
+    }
+    return await getAssetPromise.catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async findAllByOwner(owner: string): Promise<(FungibleAsset | NftCollection)[]> {

@@ -10,11 +10,11 @@ import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber, IsDid } from '~/common/decorators/validation';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { LegType } from '~/common/types';
-import { AssetLegDto } from '~/settlements/dto/asset-leg.dto';
+import { AssetLegTypeDto } from '~/settlements/dto/asset-leg.dto';
 import { LegDto } from '~/settlements/dto/leg.dto';
 import { OffChainLegDto } from '~/settlements/dto/offchain-leg.dto';
 
-@ApiExtraModels(LegDto, OffChainLegDto, AssetLegDto)
+@ApiExtraModels(LegDto, OffChainLegDto, AssetLegTypeDto)
 export class CreateInstructionDto extends TransactionBaseDto {
   @ApiPropertyOneOf({
     description: 'Array of legs which can be either LegDto or OffChainLegDto',
@@ -22,7 +22,7 @@ export class CreateInstructionDto extends TransactionBaseDto {
     isArray: true,
   })
   @ValidateNested({ each: true })
-  @Type(() => AssetLegDto, {
+  @Type(() => AssetLegTypeDto, {
     keepDiscriminatorProperty: true,
     discriminator: {
       property: 'type',

@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { TickerParamsDto } from '~/assets/dto/ticker-params.dto';
+import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -22,7 +22,7 @@ import { RequirementModel } from '~/compliance/models/requirement.model';
 import { TrustedClaimIssuerModel } from '~/compliance/models/trusted-claim-issuer.model';
 
 @ApiTags('assets', 'compliance')
-@Controller('assets/:ticker/compliance-requirements')
+@Controller('assets/:asset/compliance-requirements')
 export class ComplianceRequirementsController {
   constructor(private readonly complianceRequirementsService: ComplianceRequirementsService) {}
 
@@ -32,10 +32,10 @@ export class ComplianceRequirementsController {
       'This endpoint will provide the list of all compliance requirements of an Asset along with Default Trusted Claim Issuers',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose Compliance Requirements are to be fetched',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Compliance Requirements are to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiOkResponse({
     description:
@@ -47,10 +47,10 @@ export class ComplianceRequirementsController {
   })
   @Get()
   public async getComplianceRequirements(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<ComplianceRequirementsModel> {
     const { requirements, defaultTrustedClaimIssuers } =
-      await this.complianceRequirementsService.findComplianceRequirements(ticker);
+      await this.complianceRequirementsService.findComplianceRequirements(asset);
 
     return new ComplianceRequirementsModel({
       requirements: requirements.map(
@@ -68,10 +68,10 @@ export class ComplianceRequirementsController {
       'This endpoint sets Compliance rules for an Asset. This method will replace the current rules',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be set',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be set',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -82,10 +82,10 @@ export class ComplianceRequirementsController {
   })
   @Post('set')
   public async setRequirements(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: SetRequirementsDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.setRequirements(ticker, params);
+    const result = await this.complianceRequirementsService.setRequirements(asset, params);
     return handleServiceResult(result);
   }
 
@@ -94,10 +94,10 @@ export class ComplianceRequirementsController {
     description: 'This endpoint pauses compliance rules for an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be paused',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be paused',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -109,11 +109,11 @@ export class ComplianceRequirementsController {
   })
   @Post('pause')
   public async pauseRequirements(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.pauseRequirements(
-      ticker,
+      asset,
       transactionBaseDto
     );
     return handleServiceResult(result);
@@ -124,10 +124,10 @@ export class ComplianceRequirementsController {
     description: 'This endpoint unpauses compliance rules for an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be unpaused',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be unpaused',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -138,11 +138,11 @@ export class ComplianceRequirementsController {
   })
   @Post('unpause')
   public async unpauseRequirements(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.unpauseRequirements(
-      ticker,
+      asset,
       transactionBaseDto
     );
     return handleServiceResult(result);
@@ -153,10 +153,10 @@ export class ComplianceRequirementsController {
     description: 'This endpoint deletes referenced compliance requirement for an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset from whose compliance requirement is to be deleted',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) from whose compliance requirement is to be deleted',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiParam({
     name: 'id',
@@ -174,11 +174,11 @@ export class ComplianceRequirementsController {
   })
   @Post(':id/delete')
   public async deleteRequirement(
-    @Param() { id, ticker }: RequirementParamsDto,
+    @Param() { id, asset }: RequirementParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.complianceRequirementsService.deleteOne(
-      ticker,
+      asset,
       id,
       transactionBaseDto
     );
@@ -191,10 +191,10 @@ export class ComplianceRequirementsController {
     description: 'This endpoint deletes all compliance requirements for an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements are to be deleted',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be deleted',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -208,10 +208,10 @@ export class ComplianceRequirementsController {
   })
   @Post('delete')
   public async deleteRequirements(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() transactionBaseDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.deleteAll(ticker, transactionBaseDto);
+    const result = await this.complianceRequirementsService.deleteAll(asset, transactionBaseDto);
 
     return handleServiceResult(result);
   }
@@ -222,10 +222,10 @@ export class ComplianceRequirementsController {
       "This endpoint adds a new compliance requirement to the specified Asset. This doesn't modify the existing requirements",
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset to which the compliance requirement is to be added',
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to which the compliance requirement is to be added',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -238,10 +238,10 @@ export class ComplianceRequirementsController {
   })
   @Post('add')
   public async addRequirement(
-    @Param() { ticker }: TickerParamsDto,
+    @Param() { asset }: AssetParamsDto,
     @Body() params: RequirementDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.add(ticker, params);
+    const result = await this.complianceRequirementsService.add(asset, params);
     return handleServiceResult(result);
   }
 
@@ -250,10 +250,11 @@ export class ComplianceRequirementsController {
     description: 'This endpoint modifies referenced compliance requirement for an Asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset for which the compliance requirement is to be modified',
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) for which the compliance requirement is to be modified',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiParam({
     name: 'id',
@@ -271,23 +272,23 @@ export class ComplianceRequirementsController {
   })
   @Post(':id/modify')
   public async modifyComplianceRequirement(
-    @Param() { id, ticker }: RequirementParamsDto,
+    @Param() { id, asset }: RequirementParamsDto,
     @Body() params: RequirementDto
   ): Promise<TransactionResponseModel> {
-    const result = await this.complianceRequirementsService.modify(ticker, id, params);
+    const result = await this.complianceRequirementsService.modify(asset, id, params);
     return handleServiceResult(result);
   }
 
   @ApiOperation({
     summary: 'Check if the requirements are paused',
-    description:
-      'This endpoint checks if the compliance requirements are paused for a given ticker',
+    description: 'This endpoint checks if the compliance requirements are paused for a given asset',
   })
   @ApiParam({
-    name: 'ticker',
-    description: 'The ticker of the Asset whose compliance requirements status are to be fetched',
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose compliance requirements status are to be fetched',
     type: 'string',
-    example: 'TICKER',
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   @ApiOkResponse({
     description: 'Compliance Requirement status',
@@ -298,9 +299,9 @@ export class ComplianceRequirementsController {
   })
   @Get('status')
   public async areRequirementsPaused(
-    @Param() { ticker }: TickerParamsDto
+    @Param() { asset }: AssetParamsDto
   ): Promise<ComplianceStatusModel> {
-    const arePaused = await this.complianceRequirementsService.arePaused(ticker);
+    const arePaused = await this.complianceRequirementsService.arePaused(asset);
 
     return new ComplianceStatusModel({ arePaused });
   }

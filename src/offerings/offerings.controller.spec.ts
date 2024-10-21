@@ -8,7 +8,10 @@ import { MockOfferingWithDetails } from '~/offerings/mocks/offering-with-details
 import { OfferingsController } from '~/offerings/offerings.controller';
 import { OfferingsService } from '~/offerings/offerings.service';
 import { createOfferingDetailsModel } from '~/offerings/offerings.util';
+import { testValues } from '~/test-utils/consts';
 import { MockOfferingsService } from '~/test-utils/service-mocks';
+
+const { assetId } = testValues;
 
 describe('OfferingsController', () => {
   let controller: OfferingsController;
@@ -34,10 +37,10 @@ describe('OfferingsController', () => {
     it('should return the list of Offerings for an Asset', async () => {
       const mockOfferings = [new MockOfferingWithDetails()];
 
-      mockOfferingsService.findAllByTicker.mockResolvedValue(mockOfferings);
+      mockOfferingsService.findAllByAsset.mockResolvedValue(mockOfferings);
 
       const result = await controller.getOfferings(
-        { ticker: 'TICKER' },
+        { asset: assetId },
         { timing: OfferingTimingStatus.Started }
       );
 
@@ -64,10 +67,10 @@ describe('OfferingsController', () => {
       count: new BigNumber(2),
     };
     it('should return a paginated list of Investments made in an Offering', async () => {
-      mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
+      mockOfferingsService.findInvestmentsByAsset.mockResolvedValue(mockInvestments);
 
       const result = await controller.getInvestments(
-        { ticker: 'TICKER', id: new BigNumber(1) },
+        { asset: assetId, id: new BigNumber(1) },
         { start: new BigNumber(0), size: new BigNumber(10) }
       );
 
@@ -81,10 +84,10 @@ describe('OfferingsController', () => {
     });
 
     it('should return a Investments made in an Offering when no start param is provided', async () => {
-      mockOfferingsService.findInvestmentsByTicker.mockResolvedValue(mockInvestments);
+      mockOfferingsService.findInvestmentsByAsset.mockResolvedValue(mockInvestments);
 
       const result = await controller.getInvestments(
-        { ticker: 'TICKER', id: new BigNumber(1) },
+        { asset: assetId, id: new BigNumber(1) },
         { size: new BigNumber(10) }
       );
 

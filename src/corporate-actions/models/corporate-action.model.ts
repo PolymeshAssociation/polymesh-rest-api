@@ -21,7 +21,7 @@ export class CorporateActionModel {
     description:
       'The Asset associated with the corporate action. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
     type: 'string',
-    examples: ['TICKER', '0xa3616b82e8e1080aedc952ea28b9db8b'],
+    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
   })
   readonly asset: string;
 

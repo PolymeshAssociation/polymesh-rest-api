@@ -66,7 +66,7 @@ export class PortfoliosService {
 
     const formattedArgs = {
       to: toPortfolioId(to),
-      items: items.map(({ ticker: asset, amount, memo, nfts }) => {
+      items: items.map(({ asset, amount, memo, nfts }) => {
         return {
           asset,
           amount,
