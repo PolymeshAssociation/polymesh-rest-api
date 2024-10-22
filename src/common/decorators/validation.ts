@@ -42,7 +42,7 @@ export function IsTicker(validationOptions?: ValidationOptions) {
   );
 }
 
-const assetIdRegex = /0x[0-9A-F]{32}/;
+const assetIdRegex = /0x[0-9a-fA-F]{32}/;
 export const isAssetId = (id: string): boolean => {
   return assetIdRegex.test(id);
 };
