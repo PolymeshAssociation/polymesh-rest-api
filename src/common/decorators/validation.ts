@@ -42,6 +42,11 @@ export function IsTicker(validationOptions?: ValidationOptions) {
   );
 }
 
+const assetIdRegex = /0x[0-9A-F]{32}/;
+export const isAssetId = (id: string): boolean => {
+  return assetIdRegex.test(id);
+};
+
 export function IsAsset(validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
@@ -52,12 +57,9 @@ export function IsAsset(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: string) {
-          if (value.startsWith('0x')) {
-            // check for Asset ID
-            return value.length === ASSET_ID_LENGTH;
-          }
-
-          return value.length <= MAX_TICKER_LENGTH && value === value.toUpperCase();
+          return (
+            isAssetId(value) || (value.length <= MAX_TICKER_LENGTH && value === value.toUpperCase())
+          );
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be either a Ticker (${MAX_TICKER_LENGTH} characters uppercase string) or an Asset ID (${ASSET_ID_LENGTH} characters long hex string)`;

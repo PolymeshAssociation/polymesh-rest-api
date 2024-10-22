@@ -12,13 +12,13 @@ import {
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ASSET_ID_LENGTH } from '~/assets/assets.consts';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { isAssetId } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { AppNotFoundError } from '~/common/errors';
@@ -37,7 +37,7 @@ export class AssetsService {
 
   public async findOne(asset: string): Promise<Asset> {
     let getAssetPromise;
-    if (asset.length === ASSET_ID_LENGTH) {
+    if (isAssetId(asset)) {
       getAssetPromise = this.polymeshService.polymeshApi.assets.getAsset({ assetId: asset });
     } else {
       getAssetPromise = this.polymeshService.polymeshApi.assets.getAsset({ ticker: asset });
@@ -49,7 +49,7 @@ export class AssetsService {
 
   public async findFungible(asset: string): Promise<FungibleAsset> {
     let getAssetPromise;
-    if (asset.length === ASSET_ID_LENGTH) {
+    if (isAssetId(asset)) {
       getAssetPromise = this.polymeshService.polymeshApi.assets.getFungibleAsset({
         assetId: asset,
       });
