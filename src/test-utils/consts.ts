@@ -18,7 +18,7 @@ const options = { signer, processMode: ProcessMode.Submit };
 const did = '0x01'.padEnd(66, '0');
 const dryRun = false;
 const ticker = 'TICKER';
-const assetId = '0xa3616b82e8e1080aedc952ea28b9db8b';
+const assetId = '3616b82e-8e10-80ae-dc95-2ea28b9db8b3';
 
 const user = new UserModel({
   id: '-1',

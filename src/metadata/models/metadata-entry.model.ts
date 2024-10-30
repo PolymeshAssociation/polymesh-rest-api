@@ -11,7 +11,7 @@ export class MetadataEntryModel {
     description:
       'The Asset for which this is the Metadata for. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   readonly asset: string;
 

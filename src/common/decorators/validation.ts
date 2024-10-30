@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { isHexUuid, isUuid } from '@polymeshassociation/polymesh-sdk/utils';
 import {
   IsHexadecimal,
   IsUppercase,
@@ -42,9 +43,8 @@ export function IsTicker(validationOptions?: ValidationOptions) {
   );
 }
 
-const assetIdRegex = /0x[0-9a-fA-F]{32}/;
 export const isAssetId = (id: string): boolean => {
-  return assetIdRegex.test(id);
+  return isHexUuid(id) || isUuid(id);
 };
 
 export function IsAsset(validationOptions?: ValidationOptions) {

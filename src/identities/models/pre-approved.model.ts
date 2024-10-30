@@ -6,7 +6,7 @@ export class PreApprovedModel {
   @ApiProperty({
     description:
       'The Asset that is subject to pre-approval. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   readonly asset: string;
 

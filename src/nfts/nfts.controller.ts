@@ -27,7 +27,7 @@ export class NftsController {
     description:
       'The Asset (Asset ID/Ticker) of the NFT Collection whose collection keys are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiArrayResponse(CollectionKeyModel, {
     description: 'List of required metadata values for each NFT in the collection',
@@ -48,7 +48,7 @@ export class NftsController {
     name: 'asset',
     description: 'The Asset (Asset ID/Ticker) of the NFT Collection',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -93,7 +93,7 @@ export class NftsController {
     name: 'asset',
     description: 'The Asset (Asset ID/Ticker) of the NFT Collection to issue an NFT for',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -117,7 +117,7 @@ export class NftsController {
     name: 'asset',
     description: 'The Asset (Asset ID/Ticker) of the NFT Collection to redeem an NFT from',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',

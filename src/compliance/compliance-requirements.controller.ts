@@ -35,7 +35,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Compliance Requirements are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description:
@@ -71,7 +71,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be set',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -97,7 +97,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be paused',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -127,7 +127,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be unpaused',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -156,7 +156,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) from whose compliance requirement is to be deleted',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -194,7 +194,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose compliance requirements are to be deleted',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -225,7 +225,7 @@ export class ComplianceRequirementsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to which the compliance requirement is to be added',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -254,7 +254,7 @@ export class ComplianceRequirementsController {
     description:
       'The Asset (Ticker/Asset ID) for which the compliance requirement is to be modified',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -288,7 +288,7 @@ export class ComplianceRequirementsController {
     description:
       'The Asset (Ticker/Asset ID) whose compliance requirements status are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Compliance Requirement status',

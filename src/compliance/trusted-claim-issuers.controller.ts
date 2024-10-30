@@ -29,7 +29,7 @@ export class TrustedClaimIssuersController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose trusted Claim Issuers are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiArrayResponse(TrustedClaimIssuerModel, {
     description: 'List of trusted Claim Issuers of the Asset',
@@ -56,7 +56,7 @@ export class TrustedClaimIssuersController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose trusted Claim Issuers are to be set',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -85,7 +85,7 @@ export class TrustedClaimIssuersController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose trusted Claim Issuers are to be added',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',
@@ -116,7 +116,7 @@ export class TrustedClaimIssuersController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose trusted Claim Issuers are to be removed',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the transaction',

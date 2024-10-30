@@ -17,7 +17,7 @@ export class CheckpointScheduleModel {
   @ApiProperty({
     description: 'The Asset (Asset ID/Ticker) whose Checkpoints will be created with this Schedule',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   readonly asset: string;
 

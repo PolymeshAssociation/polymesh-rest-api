@@ -65,7 +65,7 @@ export class CorporateActionsController {
     description:
       'The Asset (Ticker/Asset ID) whose Corporate Action Default Config is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Corporate Action Default Config for the specified Asset',
@@ -96,7 +96,7 @@ export class CorporateActionsController {
     description:
       'The Asset (Ticker/Asset ID) whose Corporate Action Default Config is to be updated',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Details about the transaction',
@@ -124,7 +124,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Dividend Distributions are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiArrayResponse(DividendDistributionDetailsModel, {
     description: 'List of Dividend Distributions associated with the specified Asset',
@@ -152,7 +152,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Dividend Distribution is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -182,7 +182,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which a Dividend Distribution is to be created',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the newly created Dividend Distribution',
@@ -253,7 +253,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Corporate Action is to be deleted',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Information about the transaction',
@@ -287,7 +287,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which dividends are to be transferred',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Information about the transaction',
@@ -321,7 +321,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to which the documents are attached',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -362,7 +362,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which dividends are to be claimed',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Information about the transaction',
@@ -396,7 +396,7 @@ export class CorporateActionsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which dividends are to be reclaimed',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -440,7 +440,7 @@ export class CorporateActionsController {
     description:
       'The Asset (Ticker/Asset ID) whose Dividend Distribution Checkpoint is to be modified',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',

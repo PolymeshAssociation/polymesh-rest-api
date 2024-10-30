@@ -10,6 +10,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -23,6 +24,7 @@ import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
+import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
@@ -33,7 +35,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { MetadataService } from '~/metadata/metadata.service';
 import { GlobalMetadataModel } from '~/metadata/models/global-metadata.model';
 
@@ -72,7 +74,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose details are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Basic details of the Asset',
@@ -94,7 +96,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose holders are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiQuery({
     name: 'size',
@@ -146,7 +148,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose attached documents are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiQuery({
     name: 'size',
@@ -203,7 +205,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose documents are to be updated',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'Details of the transaction',
@@ -231,7 +233,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to issue',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -266,7 +268,15 @@ export class AssetsController {
   @Post('create')
   public async createAsset(@Body() params: CreateAssetDto): Promise<TransactionResponseModel> {
     const result = await this.assetsService.createAsset(params);
-    return handleServiceResult(result);
+
+    const resolver: TransactionResolver<Asset> = ({ result: asset, transactions, details }) =>
+      new CreatedAssetModel({
+        asset,
+        transactions,
+        details,
+      });
+
+    return handleServiceResult(result, resolver);
   }
 
   @ApiOperation({
@@ -278,7 +288,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose ownership is to be transferred',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
@@ -329,7 +339,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to freeze',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -360,7 +370,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to unfreeze',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -390,7 +400,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to be transferred',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -420,7 +430,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose operation history is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'List of operations grouped by the agent Identity who performed them',
@@ -445,7 +455,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose required mediators is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
     description: 'The required mediators for the asset',
@@ -470,7 +480,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to set required mediators for',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -496,7 +506,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to set required mediators for',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -522,7 +532,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to pre-approve',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',
@@ -552,7 +562,7 @@ export class AssetsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) to remove pre-approval for',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',

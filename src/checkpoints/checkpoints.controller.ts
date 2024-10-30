@@ -57,7 +57,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose attached Checkpoints are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiQuery({
     name: 'size',
@@ -112,7 +112,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Checkpoint is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -148,7 +148,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which the Checkpoint is to be created',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the newly created Checkpoint',
@@ -185,7 +185,7 @@ export class CheckpointsController {
     description:
       'The Asset (Ticker/Asset ID) whose attached Checkpoint Schedules are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiArrayResponse(CheckpointScheduleModel, {
     description: 'List of active Schedules which create Checkpoints for a specific Asset',
@@ -217,7 +217,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Checkpoint Schedule is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -258,7 +258,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which the Checkpoint creation is to be scheduled',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiTransactionResponse({
     description: 'Details of the newly created Checkpoint Schedule',
@@ -309,7 +309,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which to fetch holder balances',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -401,7 +401,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which the Schedule is to be deleted',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',
@@ -437,7 +437,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Checkpoints are to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'scheduleId',
@@ -474,7 +474,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) for which Schedule complexity is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiNotFoundResponse({
     description: 'The Asset was not found',
@@ -506,7 +506,7 @@ export class CheckpointsController {
     name: 'asset',
     description: 'The Asset (Ticker/Asset ID) whose Checkpoint Schedule is to be fetched',
     type: 'string',
-    example: '0xa3616b82e8e1080aedc952ea28b9db8b',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiParam({
     name: 'id',

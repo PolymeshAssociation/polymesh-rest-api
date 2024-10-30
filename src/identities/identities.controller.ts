@@ -246,7 +246,7 @@ export class IdentitiesController {
       'List of all the held Assets. NOTE: For 6.x chains, asset is represented by its ticker, but from 7.x, asset is represented by its unique Asset ID',
     paginated: true,
     examples: [
-      ['0xa3616b82e8e1080aedc952ea28b9db8b', '0x2593d3d0aca79e43ac0deaa16081eba2'],
+      ['3616b82e-8e10-80ae-dc95-2ea28b9db8b3', '3616b82e-8e10-80ae-dc95-2ea28b9db8b3'],
       ['FOO_TICKER', 'BAR_TICKER', 'BAZ_TICKER'],
     ],
   })
