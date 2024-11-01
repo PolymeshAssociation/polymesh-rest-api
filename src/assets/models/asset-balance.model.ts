@@ -8,9 +8,9 @@ import { FromEntity } from '~/common/decorators/transformation';
 
 export class AssetBalanceModel extends BalanceModel {
   @ApiProperty({
-    description: 'Ticker of the Asset',
+    description: 'The Asset ID',
     type: 'string',
-    example: 'TICKER',
+    example: '6468aa16-7b77-8fcd-9605-da785c4005a8',
   })
   @FromEntity()
   readonly asset: FungibleAsset;

@@ -99,6 +99,7 @@ describe('AssetsController', () => {
 
       const mockResult = {
         ...mockAssetDetails,
+        assetId: mockAsset.id,
         securityIdentifiers: mockIdentifiers,
         fundingRound: mockFundingRound,
         isFrozen: mockAssetIsFrozen,

@@ -20,6 +20,13 @@ export class AssetDetailsModel {
   readonly owner: Identity;
 
   @ApiProperty({
+    description: 'The unique Asset ID',
+    type: 'string',
+    example: '6468aa16-7b77-8fcd-9605-da785c4005a8',
+  })
+  readonly assetId: string;
+
+  @ApiProperty({
     description: 'Type of the Asset',
     type: 'string',
     enum: KnownAssetType,

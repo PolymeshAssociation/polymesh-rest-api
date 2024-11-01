@@ -23,6 +23,7 @@ export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetail
 
   return new AssetDetailsModel({
     owner,
+    assetId: asset.id,
     assetType,
     name,
     totalSupply,
