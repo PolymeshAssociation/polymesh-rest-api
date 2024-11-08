@@ -26,7 +26,9 @@ export class ClaimDto {
       'The scope of the Claim. Required for most types except for `CustomerDueDiligence`, `InvestorUniquenessV2` and `NoData`',
     type: ScopeDto,
   })
-  @ValidateIf(claim => !isCddClaim(claim))
+  @ValidateIf(
+    claim => !isCddClaim(claim) && !(claim.type === ClaimType.Custom && claim.scope === undefined)
+  )
   @ValidateNested()
   @Type(() => ScopeDto)
   @IsNotEmptyObject()

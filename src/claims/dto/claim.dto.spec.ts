@@ -102,6 +102,13 @@ describe('claimsDto', () => {
           customClaimTypeId: new BigNumber('1'),
         },
       ],
+      [
+        'Custom claim with `customClaimTypeId` and no `scope`',
+        {
+          type: ClaimType.Custom,
+          customClaimTypeId: new BigNumber('1'),
+        },
+      ],
     ];
     test.each(cases)('%s', async (_, input) => {
       await target.transform(input, metadata).catch(err => {
@@ -174,6 +181,15 @@ describe('claimsDto', () => {
         [
           'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, Custom',
         ],
+      ],
+      [
+        'Custom with empty `scope`',
+        {
+          type: ClaimType.Custom,
+          scope: {},
+          customClaimTypeId: new BigNumber('1'),
+        },
+        ['scope.type must be one of the following values: Identity, Ticker, Asset, Custom'],
       ],
     ];
     test.each(cases)('%s', async (_, input, expected) => {
