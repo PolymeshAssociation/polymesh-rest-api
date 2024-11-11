@@ -25,7 +25,7 @@ import {
 import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
-const { did, signer } = testValues;
+const { did, signer, assetId } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -699,6 +699,68 @@ describe('AssetsService', () => {
 
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.settlements.removePreApproval,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('linkTickerToAsset', () => {
+    it('should link the given ticker', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.LinkTickerToAssetId,
+      };
+      const findSpy = jest.spyOn(service, 'findOne');
+
+      const mockTransaction = new MockTransaction(transaction);
+      const mockAsset = new MockAsset();
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const result = await service.linkTickerToAsset(assetId, { signer, ticker: 'TICKER' });
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.linkTicker,
+        {
+          ticker: 'TICKER',
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('unlinkTickerFromAsset', () => {
+    it('should unlink the ticker from the asset', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.UnlinkTickerFromAssetId,
+      };
+      const findSpy = jest.spyOn(service, 'findOne');
+
+      const mockTransaction = new MockTransaction(transaction);
+      const mockAsset = new MockAsset();
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      const result = await service.unlinkTickerFromAsset(assetId, { signer });
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.unlinkTicker,
         {},
         expect.objectContaining({ signer })
       );

@@ -18,6 +18,7 @@ import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
+import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
@@ -581,6 +582,49 @@ export class AssetsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.removePreApproval(asset, params);
 
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Link a ticker to an Asset',
+    description: 'This endpoint allows linking a ticker to an existing Asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Ticker is already linked with another asset',
+  })
+  @Post(':asset/link-ticker')
+  public async linkTicker(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: LinkTickerDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.linkTickerToAsset(asset, params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Unlink a ticker from an Asset',
+    description: 'This endpoint allows unlinking a ticker from an existing Asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Post(':asset/unlink-ticker')
+  public async unlinkTicker(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.unlinkTickerFromAsset(asset, params);
     return handleServiceResult(result);
   }
 }

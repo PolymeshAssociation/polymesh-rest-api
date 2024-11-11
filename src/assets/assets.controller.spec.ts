@@ -440,4 +440,25 @@ describe('AssetsController', () => {
       });
     });
   });
+
+  describe('linkTicker', () => {
+    it('should call the service and return the results', async () => {
+      const ticker = 'TICKER';
+      mockAssetsService.linkTickerToAsset.mockResolvedValue(txResult);
+
+      const result = await controller.linkTicker({ asset: assetId }, { signer, ticker });
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.linkTickerToAsset).toHaveBeenCalledWith(assetId, { signer, ticker });
+    });
+  });
+
+  describe('unlinkTicker', () => {
+    it('should call the service and return the results', async () => {
+      mockAssetsService.unlinkTickerFromAsset.mockResolvedValue(txResult);
+
+      const result = await controller.unlinkTicker({ asset: assetId }, { signer });
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.unlinkTickerFromAsset).toHaveBeenCalledWith(assetId, { signer });
+    });
+  });
 });
