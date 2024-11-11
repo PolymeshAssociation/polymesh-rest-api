@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Identity,
@@ -11,6 +11,13 @@ import {
 import { FromBigNumber, FromEntity, FromEntityObject } from '~/common/decorators/transformation';
 
 export class AssetDetailsModel {
+  @ApiPropertyOptional({
+    description: 'Ticker associated with the Asset',
+    type: 'string',
+    example: 'TICKER',
+  })
+  readonly ticker?: string;
+
   @ApiProperty({
     description: 'The DID of the Asset owner',
     type: 'string',

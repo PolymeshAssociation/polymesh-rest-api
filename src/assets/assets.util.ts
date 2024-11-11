@@ -10,7 +10,7 @@ import { AssetDetailsModel } from '~/assets/models/asset-details.model';
  */
 export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetailsModel> {
   const [
-    { owner, assetType, name, totalSupply, isDivisible },
+    { owner, assetType, name, totalSupply, isDivisible, ticker },
     securityIdentifiers,
     fundingRound,
     isFrozen,
@@ -22,6 +22,7 @@ export async function createAssetDetailsModel(asset: Asset): Promise<AssetDetail
   ]);
 
   return new AssetDetailsModel({
+    ticker,
     owner,
     assetId: asset.id,
     assetType,

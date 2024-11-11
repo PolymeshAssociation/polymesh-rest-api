@@ -76,6 +76,7 @@ describe('AssetsController', () => {
           did,
         },
         totalSupply: new BigNumber(1),
+        ticker: 'TICKER',
       };
       const mockIdentifiers = [
         {
