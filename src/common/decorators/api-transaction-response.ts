@@ -8,6 +8,7 @@ import {
   ApiResponseOptions,
 } from '@nestjs/swagger';
 
+import { AppInternalError } from '~/common/errors';
 import { NotificationPayloadModel } from '~/common/models/notification-payload-model';
 import { TransactionPayloadResultModel } from '~/common/models/transaction-payload-result.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -22,6 +23,12 @@ export function ApiTransactionResponse(
 ): ReturnType<typeof applyDecorators> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const optionType = (options as any).type;
+
+  if (!optionType) {
+    throw new AppInternalError(
+      `ApiTransactionResponse requires "type". Received: ${JSON.stringify(options)}`
+    );
+  }
 
   const extendsQueueModel = optionType.prototype instanceof TransactionQueueModel;
 

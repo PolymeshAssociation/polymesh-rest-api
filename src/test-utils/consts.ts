@@ -106,6 +106,7 @@ export const testValues = {
   resource,
   testAccount,
   txResult,
+  processedTxResult,
   dryRun,
   ticker,
   assetId,
