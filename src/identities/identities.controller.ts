@@ -48,6 +48,8 @@ import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
+import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
@@ -752,6 +754,37 @@ export class IdentitiesController {
       results: data.map(({ id }) => new PreApprovedModel({ asset: id, did, isPreApproved: true })),
       total: count,
       next,
+    });
+  }
+
+  @ApiTags('dividend-distributions')
+  @ApiOperation({
+    summary: 'Fetch eligible Dividend Distributions',
+    description:
+      'This endpoint will provide the list of Dividend Distributions that are eligible to be claimed by the current Identity',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which fetch pending Dividend Distributions for',
+    type: 'string',
+    required: true,
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse(DividendDistributionDetailsModel, {
+    description:
+      'List of Dividend Distributions that are eligible to be claimed by the specified Identity',
+    paginated: false,
+  })
+  @Get(':did/pending-distributions')
+  public async getPendingDistributions(
+    @Param() { did }: DidDto
+  ): Promise<ResultsModel<DividendDistributionDetailsModel>> {
+    const results = await this.identitiesService.getPendingDistributions(did);
+
+    return new ResultsModel({
+      results: results.map(distributionWithDetails =>
+        createDividendDistributionDetailsModel(distributionWithDetails)
+      ),
     });
   }
 }

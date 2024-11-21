@@ -6,6 +6,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
+import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -27,7 +28,7 @@ import {
 } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
-const { signer } = testValues;
+const { signer, did } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -288,6 +289,23 @@ describe('IdentitiesService', () => {
 
       const result = await service.getPreApprovedAssets('0x01', new BigNumber(2));
       expect(result).toEqual(mockAssets);
+    });
+  });
+
+  describe('getPendingDistributions', () => {
+    it('should return the Dividend Distributions associated with an Asset that have not been claimed', async () => {
+      const mockDistributions = [new MockDistributionWithDetails()];
+
+      const mockIdentity = new MockIdentity();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockIdentity as any);
+      mockIdentity.getPendingDistributions.mockResolvedValue(mockDistributions);
+
+      const result = await service.getPendingDistributions(did);
+
+      expect(result).toEqual(mockDistributions);
     });
   });
 });

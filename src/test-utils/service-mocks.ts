@@ -152,6 +152,7 @@ export class MockIdentitiesService {
   attestPrimaryKeyRotation = jest.fn();
   isAssetPreApproved = jest.fn();
   getPreApprovedAssets = jest.fn();
+  getPendingDistributions = jest.fn();
 }
 
 export class MockSettlementsService {

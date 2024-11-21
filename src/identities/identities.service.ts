@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
+  DistributionWithDetails,
   FungibleAsset,
   Identity,
   NftCollection,
@@ -151,5 +152,11 @@ export class IdentitiesService {
     const identity = await this.findOne(did);
 
     return identity.isAssetPreApproved(asset);
+  }
+
+  public async getPendingDistributions(did: string): Promise<DistributionWithDetails[]> {
+    const identity = await this.findOne(did);
+
+    return identity.getPendingDistributions();
   }
 }

@@ -31,6 +31,7 @@ describe('CorporateActionsController', () => {
     linkDocuments: jest.fn(),
     reclaimRemainingFunds: jest.fn(),
     modifyCheckpoint: jest.fn(),
+    findUnclaimedDistributionsByAsset: jest.fn(),
   };
 
   beforeEach(async () => {

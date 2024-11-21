@@ -320,6 +320,7 @@ export class MockIdentity {
   public getHeldAssets = jest.fn();
   public preApprovedAssets = jest.fn();
   public isAssetPreApproved = jest.fn();
+  public getPendingDistributions = jest.fn();
 }
 
 export class MockPortfolio {

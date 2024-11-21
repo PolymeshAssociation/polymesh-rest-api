@@ -21,6 +21,8 @@ import { PendingAuthorizationsModel } from '~/authorizations/models/pending-auth
 import { ClaimsService } from '~/claims/claims.service';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
+import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -752,6 +754,25 @@ describe('IdentitiesController', () => {
         next: paginatedResult.next,
         results: [expect.objectContaining({ asset: assetId, did, isPreApproved: true })],
       });
+    });
+  });
+
+  describe('getUnclaimedDividendDistributions', () => {
+    it('should return unclaimed Dividend Distributions associated with Identity', async () => {
+      const mockDistributions = [new MockDistributionWithDetails()];
+
+      mockIdentitiesService.getPendingDistributions.mockResolvedValue(mockDistributions);
+
+      const result = await controller.getPendingDistributions({ did });
+
+      expect(result).toEqual(
+        new ResultsModel({
+          results: mockDistributions.map(distributionWithDetails =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            createDividendDistributionDetailsModel(distributionWithDetails as any)
+          ),
+        })
+      );
     });
   });
 });
