@@ -1,7 +1,10 @@
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { DistributionPayment, ResultSet } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
 import { CorporateActionsService } from '~/corporate-actions/corporate-actions.service';
@@ -12,9 +15,10 @@ import {
 import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corporate-action-default-config.mock';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
+import { DistributionPaymentModel } from '~/corporate-actions/models/distribution-payment.model';
 import { processedTxResult, testValues } from '~/test-utils/consts';
 
-const { did, signer, txResult, assetId } = testValues;
+const { did, signer, txResult, assetId, blockHash, blockNumber } = testValues;
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -32,6 +36,7 @@ describe('CorporateActionsController', () => {
     reclaimRemainingFunds: jest.fn(),
     modifyCheckpoint: jest.fn(),
     findUnclaimedDistributionsByAsset: jest.fn(),
+    getPaymentHistory: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -275,6 +280,39 @@ describe('CorporateActionsController', () => {
         assetId,
         new BigNumber(1),
         body
+      );
+    });
+  });
+
+  describe('getPaymentHistory', () => {
+    it('should return a paginated list of payments for a specific Dividend Distribution', async () => {
+      const mockDistributionPayment = createMock<DistributionPayment>({
+        target: { did },
+        amount: new BigNumber(100),
+        date: new Date(),
+        blockHash,
+        blockNumber,
+        withheldTax: new BigNumber(10),
+      });
+      const { target, ...rest } = mockDistributionPayment;
+
+      const mockPaginatedResult = createMock<ResultSet<DistributionPayment>>({
+        data: [mockDistributionPayment],
+        next: new BigNumber(2),
+      });
+
+      mockCorporateActionsService.getPaymentHistory.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.getPaymentHistory(
+        { asset: assetId, id: new BigNumber(1) },
+        { size: new BigNumber(10), start: new BigNumber(0) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: [new DistributionPaymentModel({ ...rest, did: target.did })],
+          next: new BigNumber(2),
+        })
       );
     });
   });

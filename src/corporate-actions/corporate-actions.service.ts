@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   CorporateActionDefaultConfig,
+  DistributionPayment,
   DistributionWithDetails,
   DividendDistribution,
+  ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -151,5 +153,16 @@ export class CorporateActionsService {
     const { distribution } = await this.findDistribution(asset, id);
 
     return this.transactionService.submit(distribution.modifyCheckpoint, args, options);
+  }
+
+  public async getPaymentHistory(
+    asset: string,
+    id: BigNumber,
+    size: BigNumber,
+    start?: BigNumber
+  ): Promise<ResultSet<DistributionPayment>> {
+    const { distribution } = await this.findDistribution(asset, id);
+
+    return distribution.getPaymentHistory({ size, start });
   }
 }

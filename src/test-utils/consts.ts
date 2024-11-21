@@ -19,6 +19,9 @@ const did = '0x01'.padEnd(66, '0');
 const dryRun = false;
 const ticker = 'TICKER';
 const assetId = '3616b82e-8e10-80ae-dc95-2ea28b9db8b3';
+const blockNumber = new BigNumber(1);
+const blockHash = '0xec1d41dd553ce03c3e462aab8bcfba0e1726e6bf310db6e06a933bf0430419c0';
+const date = new Date('2001-01-01');
 
 const user = new UserModel({
   id: '-1',
@@ -110,6 +113,9 @@ export const testValues = {
   dryRun,
   ticker,
   assetId,
+  blockNumber,
+  blockHash,
+  date,
 };
 
 export const extrinsic = {

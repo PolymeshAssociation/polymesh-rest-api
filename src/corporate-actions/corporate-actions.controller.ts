@@ -8,13 +8,16 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { DividendDistribution } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { IsAsset } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
+import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
@@ -31,6 +34,7 @@ import { PayDividendsDto } from '~/corporate-actions/dto/pay-dividends.dto';
 import { CorporateActionDefaultConfigModel } from '~/corporate-actions/models/corporate-action-default-config.model';
 import { CorporateActionTargetsModel } from '~/corporate-actions/models/corporate-action-targets.model';
 import { CreatedDividendDistributionModel } from '~/corporate-actions/models/created-dividend-distribution.model';
+import { DistributionPaymentModel } from '~/corporate-actions/models/distribution-payment.model';
 import { DividendDistributionModel } from '~/corporate-actions/models/dividend-distribution.model';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { TaxWithholdingModel } from '~/corporate-actions/models/tax-withholding.model';
@@ -483,5 +487,52 @@ export class CorporateActionsController {
       modifyDistributionCheckpointDto
     );
     return handleServiceResult(result);
+  }
+
+  @ApiTags('dividend-distributions')
+  @ApiOperation({
+    summary: 'Get Payment History of a Dividend Distribution',
+    description: 'This endpoint retrieves the Payment History of a Dividend Distribution',
+  })
+  @ApiParam({
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose Dividend Distribution Payment History is to be retrieved',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiParam({
+    name: 'id',
+    description:
+      'The Corporate Action number for the the Dividend Distribution (Dividend Distribution ID)',
+    type: 'string',
+    example: '123',
+  })
+  @ApiNotFoundResponse({
+    description:
+      '<ul>' + '<li>Asset does not exist</li>' + '<li>Distribution does not exist</li>' + '</ul>',
+  })
+  @ApiArrayResponse(DistributionPaymentModel, {
+    description: 'List of payments made for the Distribution',
+    paginated: true,
+  })
+  @Get('dividend-distributions/:id/payment-history')
+  public async getPaymentHistory(
+    @Param() { id, asset }: DividendDistributionParamsDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<DistributionPaymentModel>> {
+    const result = await this.corporateActionsService.getPaymentHistory(
+      asset,
+      id,
+      size,
+      new BigNumber(start || 0)
+    );
+
+    return new PaginatedResultsModel({
+      results: result.data.map(
+        ({ target: { did }, ...rest }) => new DistributionPaymentModel({ did, ...rest })
+      ),
+      next: result.next,
+    });
   }
 }

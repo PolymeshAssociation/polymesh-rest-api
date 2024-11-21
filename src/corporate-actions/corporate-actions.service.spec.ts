@@ -1,9 +1,16 @@
 /* eslint-disable import/first */
 const mockIsPolymeshTransaction = jest.fn();
 
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { CaCheckpointType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  CaCheckpointType,
+  DistributionPayment,
+  DistributionWithDetails,
+  DividendDistribution,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
@@ -400,6 +407,36 @@ describe('CorporateActionsService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
+    });
+  });
+
+  describe('getPaymentHistory', () => {
+    it('should return the payment history for a specific Dividend Distribution', async () => {
+      const mockPaginatedResult = {
+        data: [createMock<DistributionPayment>()],
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+
+      const mockDistribution = createMock<DividendDistribution>({
+        getPaymentHistory: jest.fn().mockResolvedValue(mockPaginatedResult),
+      });
+
+      const mockDistributionWithDetails = createMock<DistributionWithDetails>({
+        distribution: mockDistribution,
+      });
+
+      const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+      findDistributionSpy.mockResolvedValue(mockDistributionWithDetails);
+
+      const result = await service.getPaymentHistory(
+        assetId,
+        new BigNumber(1),
+        new BigNumber(10),
+        new BigNumber(0)
+      );
+
+      expect(result).toEqual(mockPaginatedResult);
     });
   });
 });
