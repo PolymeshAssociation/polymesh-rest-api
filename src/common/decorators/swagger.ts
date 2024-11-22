@@ -8,6 +8,7 @@ import {
   ApiOkResponse,
   ApiProperty,
   ApiPropertyOptions,
+  ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
   getSchemaPath,
   OmitType,
@@ -178,7 +179,8 @@ export const ApiPropertyOneOf = ({
 type SupportedHttpStatusCodes =
   | HttpStatus.NOT_FOUND
   | HttpStatus.BAD_REQUEST
-  | HttpStatus.UNPROCESSABLE_ENTITY;
+  | HttpStatus.UNPROCESSABLE_ENTITY
+  | HttpStatus.UNAUTHORIZED;
 
 /**
  * A helper that combines responses for SDK Errors like `BadRequestException`, `NotFoundException`, `UnprocessableEntityException`
@@ -202,6 +204,9 @@ export function ApiTransactionFailedResponse(
         break;
       case HttpStatus.BAD_REQUEST:
         decorators.push(ApiBadRequestResponse({ description }));
+        break;
+      case HttpStatus.UNAUTHORIZED:
+        decorators.push(ApiUnauthorizedResponse({ description }));
         break;
       case HttpStatus.UNPROCESSABLE_ENTITY:
         decorators.push(ApiUnprocessableEntityResponse({ description }));

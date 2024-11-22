@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiGoneResponse,
@@ -10,13 +10,14 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { Asset, CustomPermissionGroup } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
 import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { CreatePermissionGroupDto } from '~/assets/dto/create-permission-group.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
@@ -26,11 +27,16 @@ import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { CreatedAssetModel } from '~/assets/models/created-asset.model';
+import { CreatedCustomPermissionGroupModel } from '~/assets/models/created-custom-permission-group.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
+import {
+  ApiArrayResponse,
+  ApiTransactionFailedResponse,
+  ApiTransactionResponse,
+} from '~/common/decorators/';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
@@ -626,5 +632,43 @@ export class AssetsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.unlinkTickerFromAsset(asset, params);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Create a permission group',
+    description: 'This endpoint allows for the creation of a permission group for an asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: ['There already exists a group with the exact same permissions'],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to create a permission group',
+    ],
+  })
+  @Post(':asset/create-permission-group')
+  public async createGroup(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: CreatePermissionGroupDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.createPermissionGroup(asset, params);
+
+    const resolver: TransactionResolver<CustomPermissionGroup> = ({
+      result: group,
+      transactions,
+      details,
+    }) =>
+      new CreatedCustomPermissionGroupModel({
+        id: group.id,
+        transactions,
+        details,
+      });
+
+    return handleServiceResult(result, resolver);
   }
 }

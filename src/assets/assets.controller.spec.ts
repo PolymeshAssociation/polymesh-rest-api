@@ -5,9 +5,11 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  CustomPermissionGroup,
   Identity,
   KnownAssetType,
   SecurityIdentifierType,
+  TxGroup,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
@@ -466,6 +468,21 @@ describe('AssetsController', () => {
       const result = await controller.unlinkTicker({ asset: assetId }, { signer });
       expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.unlinkTickerFromAsset).toHaveBeenCalledWith(assetId, { signer });
+    });
+  });
+
+  describe('createGroup', () => {
+    it('should call the service and return the results', async () => {
+      const mockGroup = createMock<CustomPermissionGroup>({ id: 'someId' });
+
+      mockAssetsService.createPermissionGroup.mockResolvedValue({ ...txResult, result: mockGroup });
+
+      const result = await controller.createGroup(
+        { asset: assetId },
+        { signer, transactionGroups: [TxGroup.Distribution] }
+      );
+
+      expect(result).toEqual({ ...processedTxResult, id: mockGroup.id });
     });
   });
 });

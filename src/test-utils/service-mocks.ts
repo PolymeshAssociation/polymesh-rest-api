@@ -45,6 +45,7 @@ export class MockAssetService {
   removePreApproval = jest.fn();
   linkTickerToAsset = jest.fn();
   unlinkTickerFromAsset = jest.fn();
+  createPermissionGroup = jest.fn();
 }
 
 export class MockTransactionsService {

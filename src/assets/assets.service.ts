@@ -4,16 +4,20 @@ import {
   Asset,
   AssetDocument,
   AuthorizationRequest,
+  CreateGroupParams,
+  CustomPermissionGroup,
   FungibleAsset,
   HistoricAgentOperation,
   Identity,
   IdentityBalance,
   NftCollection,
   ResultSet,
+  TransactionPermissions,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { CreatePermissionGroupDto } from '~/assets/dto/create-permission-group.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
@@ -251,5 +255,40 @@ export class AssetsService {
 
     const { unlinkTicker } = await this.findOne(assetInput);
     return this.transactionsService.submit(unlinkTicker, {}, options);
+  }
+
+  public async createPermissionGroup(
+    assetId: string,
+    params: CreatePermissionGroupDto
+  ): ServiceReturn<CustomPermissionGroup> {
+    const { options, args } = extractTxOptions(params);
+
+    const {
+      permissions: { createGroup },
+    } = await this.findOne(assetId);
+
+    const toCreateGroupParams = (
+      input: CreatePermissionGroupDto
+    ): CreateGroupParams['permissions'] => {
+      const { transactions, transactionGroups } = input;
+
+      let permissions = {} as CreateGroupParams['permissions'];
+
+      if (transactions) {
+        permissions = {
+          transactions: transactions.toTransactionPermissions() as TransactionPermissions,
+        };
+      } else if (transactionGroups) {
+        permissions = { transactionGroups };
+      }
+
+      return permissions;
+    };
+
+    return this.transactionsService.submit(
+      createGroup,
+      { permissions: toCreateGroupParams(args) },
+      options
+    );
   }
 }
