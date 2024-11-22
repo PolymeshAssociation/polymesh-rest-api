@@ -1,10 +1,14 @@
 /* eslint-disable import/first */
 const mockIsFungibleAsset = jest.fn();
 
-import { DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { KnownAssetType, SecurityIdentifierType } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  Identity,
+  KnownAssetType,
+  SecurityIdentifierType,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
@@ -68,6 +72,8 @@ describe('AssetsController', () => {
 
   describe('getDetails', () => {
     it('should return the details', async () => {
+      const mockFullAgents = [createMock<Identity>({ did })];
+
       const mockAssetDetails = {
         assetType: KnownAssetType.EquityCommon,
         isDivisible: false,
@@ -86,7 +92,7 @@ describe('AssetsController', () => {
       ];
       const mockAssetIsFrozen = false;
       const mockAsset = new MockAsset();
-      mockAsset.details.mockResolvedValue(mockAssetDetails);
+      mockAsset.details.mockResolvedValue({ ...mockAssetDetails, fullAgents: mockFullAgents });
       mockAsset.getIdentifiers.mockResolvedValue(mockIdentifiers);
       mockAsset.isFrozen.mockResolvedValue(mockAssetIsFrozen);
 
@@ -100,6 +106,7 @@ describe('AssetsController', () => {
 
       const mockResult = {
         ...mockAssetDetails,
+        agents: [did],
         assetId: mockAsset.id,
         securityIdentifiers: mockIdentifiers,
         fundingRound: mockFundingRound,

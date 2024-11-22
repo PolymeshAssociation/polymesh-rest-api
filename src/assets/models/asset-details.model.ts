@@ -91,6 +91,14 @@ export class AssetDetailsModel {
   })
   readonly isFrozen: boolean;
 
+  @ApiProperty({
+    description: 'List of Agents associated with the Asset',
+    type: 'string',
+    isArray: true,
+    example: ['0x0600000000000000000000000000000000000000000000000000000000000000'],
+  })
+  readonly agents: string[];
+
   constructor(model: AssetDetailsModel) {
     Object.assign(this, model);
   }
