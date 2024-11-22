@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiGoneResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { NftCollection } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
+import { CreatedNftCollectionModel } from '~/assets/models/created-nft-collection.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
-import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
+import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { CreateNftCollectionDto } from '~/nfts/dto/create-nft-collection.dto';
 import { IssueNftDto } from '~/nfts/dto/issue-nft.dto';
 import { NftParamsDto } from '~/nfts/dto/nft-params.dto';
@@ -70,7 +72,7 @@ export class NftsController {
     description: 'This endpoint allows for the creation of NFT collections',
   })
   @ApiTransactionResponse({
-    description: 'Details about the transaction',
+    description: 'Details about the transaction along with newly created nft collection',
     type: TransactionQueueModel,
   })
   @ApiGoneResponse({
@@ -82,7 +84,18 @@ export class NftsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.nftService.createNftCollection(params);
 
-    return handleServiceResult(result);
+    const resolver: TransactionResolver<NftCollection> = ({
+      result: collection,
+      transactions,
+      details,
+    }) =>
+      new CreatedNftCollectionModel({
+        collection,
+        transactions,
+        details,
+      });
+
+    return handleServiceResult(result, resolver);
   }
 
   @ApiOperation({
