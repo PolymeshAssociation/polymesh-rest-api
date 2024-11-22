@@ -21,11 +21,12 @@ export class CreateNftCollectionDto extends TransactionBaseDto {
 
   @ApiProperty({
     description:
-      'The ticker of the NFT Collection. This must either be free or reserved by the Signer',
+      'The ticker of the NFT Collection. This must either be free or reserved by the Signer. Note, this value is optional from 7.x chain',
     example: 'TICKER',
   })
+  @IsOptional()
   @IsTicker()
-  readonly ticker: string;
+  readonly ticker?: string;
 
   @ApiProperty({
     description: 'The type of Asset',
