@@ -7,9 +7,11 @@ import { isHexUuid, isUuid } from '@polymeshassociation/polymesh-sdk/utils';
 import {
   IsHexadecimal,
   IsUppercase,
+  isUppercase,
   Length,
   Matches,
   MaxLength,
+  maxLength,
   registerDecorator,
   ValidationArguments,
   ValidationOptions,
@@ -47,6 +49,10 @@ export const isAssetId = (id: string): boolean => {
   return isHexUuid(id) || isUuid(id);
 };
 
+export const isTicker = (ticker: string): boolean => {
+  return maxLength(ticker, MAX_TICKER_LENGTH) && isUppercase(ticker);
+};
+
 export function IsAsset(validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (object: Object, propertyName: string) {
@@ -57,9 +63,7 @@ export function IsAsset(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: string) {
-          return (
-            isAssetId(value) || (value.length <= MAX_TICKER_LENGTH && value === value.toUpperCase())
-          );
+          return isAssetId(value) || isTicker(value);
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be either a Ticker (${MAX_TICKER_LENGTH} characters uppercase string) or an Asset ID (${ASSET_ID_LENGTH} characters long hex string)`;

@@ -6,19 +6,17 @@ import { ScopeType } from '@polymeshassociation/polymesh-sdk/types';
 import {
   IsHexadecimal,
   isHexadecimal,
-  isUppercase,
   Length,
   length,
   Matches,
   matches,
-  maxLength,
   registerDecorator,
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
 import { isString } from 'lodash';
 
-import { MAX_TICKER_LENGTH } from '~/assets/assets.consts';
+import { isAssetId, isTicker } from '~/common/decorators';
 import { CDD_ID_LENGTH, DID_LENGTH } from '~/identities/identities.consts';
 
 export function IsCddId() {
@@ -54,8 +52,10 @@ export function IsValidScopeValue(property: string, validationOptions?: Validati
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const scopeType = (args.object as any)[scopeTypeField];
           switch (scopeType) {
+            case ScopeType.Asset:
+              return isString(value) && (isAssetId(value) || isTicker(value));
             case ScopeType.Ticker:
-              return maxLength(value, MAX_TICKER_LENGTH) && isUppercase(value);
+              return isString(value) && isTicker(value);
             case ScopeType.Identity:
               return (
                 isHexadecimal(value) &&
@@ -74,6 +74,8 @@ export function IsValidScopeValue(property: string, validationOptions?: Validati
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const scopeType = (args.object as any)[scopeTypeField];
           switch (scopeType) {
+            case ScopeType.Asset:
+              return 'value must be a valid Asset ID either in hex or UUID format';
             case ScopeType.Ticker:
               return `value must be all uppercase and no longer than 12 characters for type: ${scopeType}`;
             case ScopeType.Identity:
