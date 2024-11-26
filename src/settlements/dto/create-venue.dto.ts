@@ -1,8 +1,7 @@
 /* istanbul ignore file */
-
 import { ApiProperty } from '@nestjs/swagger';
 import { VenueType } from '@polymeshassociation/polymesh-sdk/types';
-import { IsEnum, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
@@ -29,6 +28,8 @@ export class CreateVenueDto extends TransactionBaseDto {
     isArray: true,
     example: ['5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV'],
   })
+  @IsOptional()
+  @IsArray()
   @IsString({ each: true })
   readonly signers?: string[];
 }
