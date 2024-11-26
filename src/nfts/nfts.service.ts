@@ -6,6 +6,7 @@ import {
   NftCollection,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { isAssetId } from '~/common/decorators';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { CreateNftCollectionDto } from '~/nfts/dto/create-nft-collection.dto';
 import { IssueNftDto } from '~/nfts/dto/issue-nft.dto';
@@ -24,22 +25,32 @@ export class NftsService {
     private readonly transactionsService: TransactionsService
   ) {}
 
-  public async findCollection(ticker: string): Promise<NftCollection> {
-    return this.polymeshService.polymeshApi.assets.getNftCollection({ ticker }).catch(error => {
+  public async findCollection(collection: string): Promise<NftCollection> {
+    let getNftCollectionPromise;
+    if (isAssetId(collection)) {
+      getNftCollectionPromise = this.polymeshService.polymeshApi.assets.getNftCollection({
+        assetId: collection,
+      });
+    } else {
+      getNftCollectionPromise = this.polymeshService.polymeshApi.assets.getNftCollection({
+        ticker: collection,
+      });
+    }
+    return await getNftCollectionPromise.catch(error => {
       throw handleSdkError(error);
     });
   }
 
-  public async findNft(ticker: string, id: BigNumber): Promise<Nft> {
-    const collection = await this.findCollection(ticker);
+  public async findNft(collection: string, id: BigNumber): Promise<Nft> {
+    const nftCollection = await this.findCollection(collection);
 
-    return collection.getNft({ id }).catch(error => {
+    return nftCollection.getNft({ id }).catch(error => {
       throw handleSdkError(error);
     });
   }
 
-  public async nftDetails(ticker: string, id: BigNumber): Promise<NftModel> {
-    const nft = await this.findNft(ticker, id);
+  public async nftDetails(collection: string, id: BigNumber): Promise<NftModel> {
+    const nft = await this.findNft(collection, id);
     const [metadata, imageUri, tokenUri] = await Promise.all([
       nft.getMetadata(),
       nft.getImageUri(),
@@ -48,17 +59,17 @@ export class NftsService {
 
     return new NftModel({
       id: nft.id,
-      ticker,
+      collection,
       metadata,
       imageUri,
       tokenUri,
     });
   }
 
-  public async getCollectionKeys(ticker: string): Promise<CollectionKeyModel[]> {
-    const collection = await this.findCollection(ticker);
+  public async getCollectionKeys(collection: string): Promise<CollectionKeyModel[]> {
+    const nftCollection = await this.findCollection(collection);
 
-    const keys = await collection.collectionKeys();
+    const keys = await nftCollection.collectionKeys();
 
     return keys.map(key => new CollectionKeyModel(key));
   }
@@ -74,18 +85,22 @@ export class NftsService {
     );
   }
 
-  public async issueNft(ticker: string, params: IssueNftDto): ServiceReturn<Nft> {
+  public async issueNft(collection: string, params: IssueNftDto): ServiceReturn<Nft> {
     const { options, args } = extractTxOptions(params);
 
-    const { issue } = await this.findCollection(ticker);
+    const { issue } = await this.findCollection(collection);
 
     return this.transactionsService.submit(issue, args, options);
   }
 
-  public async redeemNft(ticker: string, id: BigNumber, params: RedeemNftDto): ServiceReturn<void> {
+  public async redeemNft(
+    collection: string,
+    id: BigNumber,
+    params: RedeemNftDto
+  ): ServiceReturn<void> {
     const { options, args } = extractTxOptions(params);
 
-    const nft = await this.findNft(ticker, id);
+    const nft = await this.findNft(collection, id);
 
     return this.transactionsService.submit(nft.redeem, { from: toPortfolioId(args.from) }, options);
   }

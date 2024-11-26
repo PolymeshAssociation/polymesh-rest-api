@@ -16,9 +16,9 @@ export class NftModel {
   readonly id: BigNumber;
 
   @ApiProperty({
-    description: 'The collection ticker of which the NFT belongs to',
+    description: 'The collection (Ticker/Asset ID) of which the NFT belongs to',
   })
-  readonly ticker: string;
+  readonly collection: string;
 
   @ApiProperty({
     description: 'The metadata associated to the NFT',

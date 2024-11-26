@@ -71,9 +71,21 @@ describe('AssetsService', () => {
     it('should return the Asset for a valid ticker', async () => {
       const mockAsset = new MockAsset();
 
-      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+      when(mockPolymeshApi.assets.getAsset)
+        .calledWith({ ticker: 'TICKER' })
+        .mockResolvedValue(mockAsset);
 
       const result = await service.findOne('TICKER');
+
+      expect(result).toEqual(mockAsset);
+    });
+
+    it('should return the Asset for a valid Asset ID', async () => {
+      const mockAsset = new MockAsset();
+
+      when(mockPolymeshApi.assets.getAsset).calledWith({ assetId }).mockResolvedValue(mockAsset);
+
+      const result = await service.findOne(assetId);
 
       expect(result).toEqual(mockAsset);
     });

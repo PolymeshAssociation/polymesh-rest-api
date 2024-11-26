@@ -8,6 +8,7 @@ import {
   NftCollection,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { when } from 'jest-when';
 
 import { NftsService } from '~/nfts/nfts.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -55,20 +56,22 @@ describe('NftService', () => {
   describe('findCollection', () => {
     it('should return the collection for a valid ticker', async () => {
       const collection = createMock<NftCollection>();
-      mockPolymeshApi.assets.getNftCollection.mockResolvedValue(collection);
+      when(mockPolymeshApi.assets.getNftCollection)
+        .calledWith({ ticker })
+        .mockResolvedValue(collection);
 
       const result = await service.findCollection(ticker);
 
       expect(result).toEqual(collection);
     });
-  });
 
-  describe('findCollection', () => {
-    it('should return the collection for a valid ticker', async () => {
+    it('should return the collection for a valid collection ID', async () => {
       const collection = createMock<NftCollection>();
-      mockPolymeshApi.assets.getNftCollection.mockResolvedValue(collection);
+      when(mockPolymeshApi.assets.getNftCollection)
+        .calledWith({ assetId })
+        .mockResolvedValue(collection);
 
-      const result = await service.findCollection(ticker);
+      const result = await service.findCollection(assetId);
 
       expect(result).toEqual(collection);
     });
@@ -88,13 +91,13 @@ describe('NftService', () => {
   });
 
   describe('findNft', () => {
-    it('should return the NFT for a valid ticker and id', async () => {
+    it('should return the NFT for a valid collection and id', async () => {
       const collection = createMock<NftCollection>();
       const nft = createMock<Nft>();
       mockPolymeshApi.assets.getNftCollection.mockResolvedValue(collection);
       collection.getNft.mockResolvedValue(nft);
 
-      const result = await service.findNft(ticker, id);
+      const result = await service.findNft(assetId, id);
 
       expect(result).toEqual(nft);
     });
@@ -110,7 +113,7 @@ describe('NftService', () => {
 
       const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-      await expect(() => service.findNft(ticker, id)).rejects.toThrowError();
+      await expect(() => service.findNft(assetId, id)).rejects.toThrowError();
 
       expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
     });
@@ -128,10 +131,10 @@ describe('NftService', () => {
       const findNftSpy = jest.spyOn(service, 'findNft');
       findNftSpy.mockResolvedValue(nft);
 
-      const result = await service.nftDetails(ticker, id);
+      const result = await service.nftDetails(assetId, id);
       expect(result).toEqual({
         id,
-        ticker,
+        collection: assetId,
         imageUri,
         tokenUri,
         metadata: [],
@@ -158,7 +161,7 @@ describe('NftService', () => {
 
       collection.collectionKeys.mockResolvedValue(mockMetadata);
 
-      const result = await service.getCollectionKeys(ticker);
+      const result = await service.getCollectionKeys(assetId);
 
       expect(result).toEqual(
         expect.arrayContaining([
@@ -223,7 +226,7 @@ describe('NftService', () => {
         transactions: [mockTransaction],
       });
 
-      const result = await service.issueNft(ticker, input);
+      const result = await service.issueNft(assetId, input);
 
       expect(result).toEqual({
         result: mockNft,
@@ -254,7 +257,7 @@ describe('NftService', () => {
         transactions: [mockTransaction],
       });
 
-      const result = await service.redeemNft(ticker, id, input);
+      const result = await service.redeemNft(assetId, id, input);
 
       expect(result).toEqual({
         result: undefined,
