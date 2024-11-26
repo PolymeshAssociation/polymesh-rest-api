@@ -10,7 +10,7 @@ import { IsAsset, IsBigNumber } from '~/common/decorators/validation';
 export class PortfolioMovementDto {
   @ApiProperty({
     description: 'Asset to move',
-    example: 'TICKER',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @IsAsset()
   readonly asset: string;

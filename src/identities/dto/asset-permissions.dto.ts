@@ -12,7 +12,7 @@ export class AssetPermissionsDto extends PermissionTypeDto {
     description: 'List of assets to be included or excluded in the permissions',
     type: 'string',
     isArray: true,
-    example: ['TICKER123456'],
+    example: ['3616b82e-8e10-80ae-dc95-2ea28b9db8b3'],
   })
   @IsArray()
   @IsAsset({ each: true })

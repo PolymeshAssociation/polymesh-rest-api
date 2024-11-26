@@ -75,7 +75,7 @@ export function IsValidScopeValue(property: string, validationOptions?: Validati
           const scopeType = (args.object as any)[scopeTypeField];
           switch (scopeType) {
             case ScopeType.Asset:
-              return 'value must be a valid Asset ID either in hex or UUID format';
+              return 'value must be a valid Asset ID (either in hex or UUID format) or a valid ticker (all uppercase and no longer than 12 characters)';
             case ScopeType.Ticker:
               return `value must be all uppercase and no longer than 12 characters for type: ${scopeType}`;
             case ScopeType.Identity:

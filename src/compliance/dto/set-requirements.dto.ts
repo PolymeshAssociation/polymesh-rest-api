@@ -30,8 +30,8 @@ export class SetRequirementsDto extends TransactionBaseDto {
             {
               type: 'Jurisdiction',
               scope: {
-                type: 'Ticker',
-                value: 'TICKER',
+                type: 'Asset',
+                value: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
               },
               code: CountryCode.Us,
             },
@@ -51,8 +51,8 @@ export class SetRequirementsDto extends TransactionBaseDto {
           claim: {
             type: 'Accredited',
             scope: {
-              type: 'Ticker',
-              value: 'TICKER',
+              type: 'Asset',
+              value: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
             },
           },
         },

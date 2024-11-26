@@ -68,7 +68,7 @@ export class LegValidationParamsDto {
   @ApiProperty({
     description: 'The Asset (Asset ID/Ticker) to be transferred',
     type: 'string',
-    example: '0x12345678',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @IsAsset()
   readonly asset: string;
