@@ -51,7 +51,6 @@ import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
-import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
@@ -527,27 +526,6 @@ export class IdentitiesController {
   ): Promise<ResultsModel<TickerReservation>> {
     const results = await this.tickerReservationsService.findAllByOwner(did);
     return new ResultsModel({ results });
-  }
-
-  @ApiTags('developer-testing')
-  @ApiOperation({
-    summary:
-      'Creates a fake Identity for an Account and sets its POLYX balance (DEPRECATED: Use `/developer-testing/create-test-account` instead)',
-    description:
-      'This endpoint creates a Identity for an Account and sets its POLYX balance. A sudo account must be configured.',
-  })
-  @ApiOkResponse({ description: 'The details of the newly created Identity' })
-  @ApiBadRequestResponse({
-    description:
-      'This instance of the REST API is pointing to a chain that lacks development features. A proper CDD provider must be used instead',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Failed to execute an extrinsic, or something unexpected',
-  })
-  @Post('/mock-cdd')
-  public async createMockCdd(@Body() params: CreateMockIdentityDto): Promise<IdentityModel> {
-    const identity = await this.developerTestingService.createMockCdd(params);
-    return createIdentityModel(identity);
   }
 
   @ApiTags('claims')

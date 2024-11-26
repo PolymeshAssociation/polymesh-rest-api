@@ -143,23 +143,4 @@ describe('DeveloperTestingService', () => {
       );
     });
   });
-
-  describe('createMockCdd', () => {
-    it('should return the created Identity', async () => {
-      const params = {
-        address,
-        initialPolyx: new BigNumber(10),
-      };
-      mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
-
-      when(mockAccountsService.findOne)
-        .calledWith(address)
-        .mockResolvedValue({
-          getIdentity: jest.fn().mockResolvedValue('fakeId'),
-        });
-
-      const result = await service.createMockCdd(params);
-      expect(result).toEqual('fakeId');
-    });
-  });
 });

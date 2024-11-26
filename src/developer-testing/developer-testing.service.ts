@@ -5,7 +5,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { Account, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
-import { AppInternalError, AppValidationError } from '~/common/errors';
+import { AppInternalError } from '~/common/errors';
 import { isNotNull } from '~/common/utils';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
@@ -132,41 +132,5 @@ export class DeveloperTestingService {
     }
 
     return identities;
-  }
-
-  /**
-   * @deprecated Use @link{DeveloperTestingService.createAccount} (the batched version) instead
-   * @note intended for development chains only (i.e. Alice exists and can call `testUtils.createMockCddClaim`)
-   */
-  public async createMockCdd({ address, initialPolyx }: CreateMockIdentityDto): Promise<Identity> {
-    const {
-      _polkadotApi: {
-        tx: { testUtils, balances, sudo },
-      },
-    } = this.polymeshService.polymeshApi;
-
-    if (!testUtils) {
-      throw new AppValidationError(
-        'The chain does not have the `testUtils` pallet enabled. This endpoint is intended for development use only'
-      );
-    }
-
-    const targetAccount = await this.accountsService.findOne(address);
-
-    await this.polymeshService.execTransaction(
-      this.sudoPair,
-      testUtils.mockCddRegisterDid,
-      address
-    );
-    const setBalance = balances.setBalance(address, initialPolyx.shiftedBy(6).toNumber(), 0);
-    await this.polymeshService.execTransaction(this.sudoPair, sudo.sudo, setBalance);
-
-    const id = await targetAccount.getIdentity();
-
-    if (!id) {
-      throw new AppInternalError('The Identity was not created');
-    }
-
-    return id;
   }
 }
