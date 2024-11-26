@@ -7,7 +7,14 @@ import {
   isSingleClaimCondition,
 } from '@polymeshassociation/polymesh-sdk/utils';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsNotEmptyObject, ValidateIf, ValidateNested } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsOptional,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 
 import { ClaimDto } from '~/claims/dto/claim.dto';
 import { IsDid } from '~/common/decorators/validation';
@@ -38,6 +45,7 @@ export class ConditionDto {
   })
   @ValidateNested({ each: true })
   @Type(() => TrustedClaimIssuerDto)
+  @IsOptional()
   readonly trustedClaimIssuers?: TrustedClaimIssuerDto[];
 
   @ApiPropertyOptional({

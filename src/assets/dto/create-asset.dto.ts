@@ -59,6 +59,7 @@ export class CreateAssetDto extends TransactionBaseDto {
     isArray: true,
     type: SecurityIdentifierDto,
   })
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => SecurityIdentifierDto)
   readonly securityIdentifiers?: SecurityIdentifierDto[];
