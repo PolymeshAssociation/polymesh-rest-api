@@ -18,9 +18,11 @@ import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { CreatePermissionGroupDto } from '~/assets/dto/create-permission-group.dto';
+import { InviteAgentToGroupDto } from '~/assets/dto/invite-agent-to-group.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
+import { RemoveAgentFromGroupDto } from '~/assets/dto/remove-agent-from-grop.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
@@ -29,6 +31,7 @@ import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { CreatedCustomPermissionGroupModel } from '~/assets/models/created-custom-permission-group.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
+import { PermissionGroupWithPermissionsModel } from '~/assets/models/permission-group-with-permissions.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
@@ -41,6 +44,7 @@ import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { MetadataService } from '~/metadata/metadata.service';
@@ -651,7 +655,7 @@ export class AssetsController {
       'The signing identity does not have the required permissions to create a permission group',
     ],
   })
-  @Post(':asset/create-permission-group')
+  @Post(':asset/permission-groups/create')
   public async createGroup(
     @Param() { asset }: AssetParamsDto,
     @Body() params: CreatePermissionGroupDto
@@ -670,5 +674,84 @@ export class AssetsController {
       });
 
     return handleServiceResult(result, resolver);
+  }
+
+  @ApiOperation({
+    summary: 'Get Permission Groups with their permissions',
+    description: 'This endpoint allows fetching all Permission Groups with their permissions',
+  })
+  @ApiArrayResponse(PermissionGroupWithPermissionsModel, {
+    description: 'List of Permission Groups with their permissions',
+    paginated: false,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Get(':asset/permission-groups')
+  public async getPermissionGroupsWithPermissions(
+    @Param() { asset }: AssetParamsDto
+  ): Promise<ResultsModel<PermissionGroupWithPermissionsModel>> {
+    const result = await this.assetsService.getPermissionGroupsWithPermissions(asset);
+
+    return new ResultsModel({
+      results: result.map(group => new PermissionGroupWithPermissionsModel(group)),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Invite external agent',
+    description: 'This endpoint invites an external agent to an Asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: ['The target Identity is already an External Agent'],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to invite an external agent',
+    ],
+  })
+  @Post(':asset/permission-groups/invite-agent')
+  public async inviteAgent(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: InviteAgentToGroupDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.inviteAgentToGroup(asset, params);
+
+    return handleServiceResult(result, authorizationRequestResolver);
+  }
+
+  @ApiOperation({
+    summary: 'Remove external agent',
+    description: 'This endpoint removes an external agent from an Asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'The target is the last Agent with full permissions for this Asset. There should always be at least one Agent with full permissions',
+      'The target Identity is not an External Agent',
+    ],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to remove an agent from a permission group',
+    ],
+  })
+  @Post(':asset/permission-groups/remove-agent')
+  public async removeAgent(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: RemoveAgentFromGroupDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.removeAgentFromAsset(asset, params);
+
+    return handleServiceResult(result);
   }
 }

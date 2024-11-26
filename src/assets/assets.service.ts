@@ -4,23 +4,27 @@ import {
   Asset,
   AssetDocument,
   AuthorizationRequest,
-  CreateGroupParams,
   CustomPermissionGroup,
   FungibleAsset,
+  GroupPermissions,
   HistoricAgentOperation,
   Identity,
   IdentityBalance,
+  InviteExternalAgentParams,
   NftCollection,
+  PermissionGroupType,
   ResultSet,
-  TransactionPermissions,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { toPermissionGroupPermissions } from '~/assets/assets.util';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { CreatePermissionGroupDto } from '~/assets/dto/create-permission-group.dto';
+import { InviteAgentToGroupDto } from '~/assets/dto/invite-agent-to-group.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
+import { RemoveAgentFromGroupDto } from '~/assets/dto/remove-agent-from-grop.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { isAssetId } from '~/common/decorators';
@@ -267,28 +271,82 @@ export class AssetsService {
       permissions: { createGroup },
     } = await this.findOne(assetId);
 
-    const toCreateGroupParams = (
-      input: CreatePermissionGroupDto
-    ): CreateGroupParams['permissions'] => {
-      const { transactions, transactionGroups } = input;
-
-      let permissions = {} as CreateGroupParams['permissions'];
-
-      if (transactions) {
-        permissions = {
-          transactions: transactions.toTransactionPermissions() as TransactionPermissions,
-        };
-      } else if (transactionGroups) {
-        permissions = { transactionGroups };
-      }
-
-      return permissions;
-    };
-
     return this.transactionsService.submit(
       createGroup,
-      { permissions: toCreateGroupParams(args) },
+      { permissions: toPermissionGroupPermissions(args) },
       options
     );
+  }
+
+  public async getPermissionGroupsWithPermissions(
+    assetInput: string
+  ): Promise<
+    Array<
+      | { id: BigNumber; permissions: GroupPermissions }
+      | { type: PermissionGroupType; permissions: GroupPermissions }
+    >
+  > {
+    const asset = await this.findOne(assetInput);
+
+    const groups = await asset.permissions.getGroups();
+
+    const customPermissionPromises = groups.custom.map(group => group.getPermissions());
+    const knownPermissionPromises = groups.known.map(group => group.getPermissions());
+
+    const [customPermissions, knownPermissions] = await Promise.all([
+      Promise.all(customPermissionPromises),
+      Promise.all(knownPermissionPromises),
+    ]);
+
+    const customResults = groups.custom.map((group, index) => ({
+      id: group.id,
+      permissions: customPermissions[index],
+    }));
+
+    const knownResults = groups.known.map((group, index) => ({
+      type: group.type,
+      permissions: knownPermissions[index],
+    }));
+
+    return [...customResults, ...knownResults];
+  }
+
+  public async inviteAgentToGroup(
+    assetInput: string,
+    params: InviteAgentToGroupDto
+  ): ServiceReturn<AuthorizationRequest> {
+    const { options, args } = extractTxOptions(params);
+
+    const asset = await this.findOne(assetInput);
+
+    let permissions: InviteExternalAgentParams['permissions'];
+
+    if (BigNumber.isBigNumber(args.permissions)) {
+      permissions = await asset.permissions.getGroup({ id: args.permissions });
+    } else if (typeof args.permissions === 'string') {
+      permissions = await asset.permissions.getGroup({ type: args.permissions });
+    } else {
+      permissions = toPermissionGroupPermissions(args.permissions);
+    }
+
+    return this.transactionsService.submit(
+      asset.permissions.inviteAgent,
+      { target: args.target, permissions },
+      options
+    );
+  }
+
+  public async removeAgentFromAsset(
+    assetInput: string,
+    params: RemoveAgentFromGroupDto
+  ): ServiceReturn<void> {
+    const {
+      options,
+      args: { target },
+    } = extractTxOptions(params);
+
+    const asset = await this.findOne(assetInput);
+
+    return this.transactionsService.submit(asset.permissions.removeAgent, { target }, options);
   }
 }

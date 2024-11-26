@@ -257,6 +257,10 @@ export class MockAsset {
 
   public permissions = {
     createGroup: jest.fn(),
+    getGroups: jest.fn(),
+    inviteAgent: jest.fn(),
+    removeAgent: jest.fn(),
+    getGroup: jest.fn(),
   };
 
   public toHuman = jest.fn().mockImplementation(() => this.ticker);

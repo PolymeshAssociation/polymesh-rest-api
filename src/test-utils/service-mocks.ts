@@ -46,6 +46,9 @@ export class MockAssetService {
   linkTickerToAsset = jest.fn();
   unlinkTickerFromAsset = jest.fn();
   createPermissionGroup = jest.fn();
+  getPermissionGroupsWithPermissions = jest.fn();
+  inviteAgentToGroup = jest.fn();
+  removeAgentFromAsset = jest.fn();
 }
 
 export class MockTransactionsService {
