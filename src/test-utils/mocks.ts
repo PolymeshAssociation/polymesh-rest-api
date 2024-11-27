@@ -264,6 +264,7 @@ export class MockInstruction {
   public reject = jest.fn();
   public details = jest.fn();
   public getLegs = jest.fn();
+  public getLegsFromChain = jest.fn();
   public getAffirmations = jest.fn();
   public getOffChainAffirmations = jest.fn();
   public getOffChainAffirmationForLeg = jest.fn();

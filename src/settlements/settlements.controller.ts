@@ -410,7 +410,7 @@ export class SettlementsController {
       transactions,
       details,
     }) => {
-      const { data: legs } = await instruction.getLegs();
+      const { data: legs } = await instruction.getLegsFromChain();
 
       return new CreatedInstructionModel({
         instruction,

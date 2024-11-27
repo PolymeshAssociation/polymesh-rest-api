@@ -329,7 +329,7 @@ describe('SettlementsController', () => {
     it('should create an instruction and return the data returned by the service', async () => {
       const mockInstruction = new MockInstruction();
 
-      when(mockInstruction.getLegs).calledWith().mockResolvedValue({ data: [] });
+      when(mockInstruction.getLegsFromChain).calledWith().mockResolvedValue({ data: [] });
 
       const mockData = {
         ...txResult,
