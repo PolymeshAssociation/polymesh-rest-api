@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { CustomPermissionGroup } from '@polymeshassociation/polymesh-sdk/types';
@@ -14,10 +14,12 @@ import {
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GetPermissionGroupDto } from '~/permission-groups/dto/get-permission-group.dto';
 import { InviteAgentToGroupDto } from '~/permission-groups/dto/invite-agent-to-group.dto';
 import { RemoveAgentFromGroupDto } from '~/permission-groups/dto/remove-agent-from-grop.dto';
+import { CheckPermissionsResultModel } from '~/permission-groups/models/check-permissions-result.model';
 import { PermissionGroupWithPermissionsModel } from '~/permission-groups/models/permission-group-with-permissions.model';
 import { PermissionGroupsService } from '~/permission-groups/permission-groups.service';
 
@@ -197,5 +199,29 @@ export class PermissionGroupsController {
     const result = await this.permissionGroupsService.modifyPermissions(asset, id, body);
 
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get custom permission group permissions',
+    description: 'This endpoint allows fetching the permissions of a custom permission group',
+  })
+  @ApiOkResponse({
+    description: 'The result of the permission check',
+    type: CheckPermissionsResultModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @ApiNotFoundResponse({
+    description: 'The Identity does not exist',
+  })
+  @Get('check-permissions')
+  public async checkPermissions(
+    @Param() { asset }: AssetParamsDto,
+    @Query() query: CheckPermissionsDto
+  ): Promise<CheckPermissionsResultModel> {
+    const result = await this.permissionGroupsService.checkPermissions(asset, query);
+
+    return new CheckPermissionsResultModel(result);
   }
 }

@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { PermissionGroupType } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -7,12 +7,7 @@ import { ApiPropertyOneOf, IsDid } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ToGroupPermissions } from '~/permission-groups/decorators/transformation';
 import { IsGroupPermissions } from '~/permission-groups/decorators/validation';
-import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
-
-export class PermissionsDto extends PickType(CreatePermissionGroupDto, [
-  'transactions',
-  'transactionGroups',
-] as const) {}
+import { GroupPermissionsDto } from '~/permission-groups/dto/group-permissions.dto';
 
 export class InviteAgentToGroupDto extends TransactionBaseDto {
   @ApiProperty({
@@ -32,10 +27,10 @@ export class InviteAgentToGroupDto extends TransactionBaseDto {
         example: PermissionGroupType.Full,
       },
       { type: 'string', example: '1' },
-      PermissionsDto,
+      GroupPermissionsDto,
     ],
   })
   @ToGroupPermissions()
   @IsGroupPermissions()
-  readonly permissions: PermissionGroupType | BigNumber | PermissionsDto;
+  readonly permissions: PermissionGroupType | BigNumber | GroupPermissionsDto;
 }

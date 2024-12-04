@@ -5,6 +5,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Asset,
   CustomPermissionGroup,
   Identity,
   PermissionGroupType,
@@ -17,6 +18,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { AppNotFoundError } from '~/common/errors';
 import { TransactionPermissionsDto } from '~/identities/dto/transaction-permissions.dto';
 import { IdentitiesService } from '~/identities/identities.service';
+import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { InviteAgentToGroupDto } from '~/permission-groups/dto/invite-agent-to-group.dto';
 import { RemoveAgentFromGroupDto } from '~/permission-groups/dto/remove-agent-from-grop.dto';
 import { PermissionGroupsService } from '~/permission-groups/permission-groups.service';
@@ -434,6 +436,46 @@ describe('PermissionGroupsService', () => {
         }),
         expect.objectContaining({ signer })
       );
+    });
+  });
+
+  describe('checkPermissions', () => {
+    let findAssetSpy: jest.SpyInstance;
+    let findIdentitySpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      findAssetSpy = jest.spyOn(mockAssetsService, 'findOne');
+      findIdentitySpy = jest.spyOn(mockIdentitiesService, 'findOne');
+    });
+
+    it('should check permissions for an identity', async () => {
+      const mockAsset = createMock<Asset>({ id: assetId });
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          checkPermissions: jest.fn().mockResolvedValue({
+            missingPermissions: [TxTags.asset.Issue],
+            result: true,
+            message: 'You are not authorized to perform this action',
+          }),
+        },
+      });
+
+      const dto: CheckPermissionsDto = {
+        target: did,
+        transactions: [TxTags.asset.Issue, TxTags.asset.AddDocuments],
+      };
+
+      findAssetSpy.mockResolvedValue(mockAsset);
+      findIdentitySpy.mockResolvedValue(mockIdentity);
+
+      const result = await service.checkPermissions(assetId, dto);
+
+      expect(result).toEqual({
+        missingPermissions: [TxTags.asset.Issue],
+        result: true,
+        message: 'You are not authorized to perform this action',
+      });
     });
   });
 });

@@ -4,12 +4,14 @@ import {
   AuthorizationRequest,
   CustomPermissionGroup,
   TxGroup,
+  TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { BigNumber } from 'bignumber.js';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { ResultsModel } from '~/common/models/results.model';
 import { ServiceReturn } from '~/common/utils';
+import { CheckPermissionsResultModel } from '~/permission-groups/models/check-permissions-result.model';
 import { PermissionGroupWithPermissionsModel } from '~/permission-groups/models/permission-group-with-permissions.model';
 import { PermissionGroupsController } from '~/permission-groups/permission-groups.controller';
 import {
@@ -21,7 +23,7 @@ import { MockAuthorizationRequest } from '~/test-utils/mocks';
 
 describe('PermissionGroupsController', () => {
   let controller: PermissionGroupsController;
-  const { signer, txResult, assetId } = testValues;
+  const { signer, txResult, assetId, did } = testValues;
   const mockPermissionGroupsService = createMock<PermissionGroupsService>();
 
   beforeEach(async () => {
@@ -141,6 +143,24 @@ describe('PermissionGroupsController', () => {
         new BigNumber(1),
         { signer, transactionGroups: [TxGroup.Distribution] }
       );
+    });
+  });
+
+  describe('checkPermissions', () => {
+    it('should call the service and return the results', async () => {
+      const mockResult = {
+        missingPermissions: [],
+        result: true,
+        message: undefined,
+      };
+      mockPermissionGroupsService.checkPermissions.mockResolvedValue(mockResult);
+
+      const result = await controller.checkPermissions(
+        { asset: assetId },
+        { target: did, transactions: [TxTags.asset.Issue] }
+      );
+
+      expect(result).toEqual(new CheckPermissionsResultModel(mockResult));
     });
   });
 });

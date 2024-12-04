@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AuthorizationRequest,
+  CheckPermissionsResult,
   CustomPermissionGroup,
   GroupPermissions,
   InviteExternalAgentParams,
+  SignerType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
@@ -12,6 +14,7 @@ import { toPermissionGroupPermissions } from '~/assets/assets.util';
 import { AppNotFoundError } from '~/common/errors';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
+import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GetPermissionGroupDto } from '~/permission-groups/dto/get-permission-group.dto';
 import { InviteAgentToGroupDto } from '~/permission-groups/dto/invite-agent-to-group.dto';
@@ -134,5 +137,22 @@ export class PermissionGroupsService {
       { permissions: toPermissionGroupPermissions(args) },
       options
     );
+  }
+
+  public async checkPermissions(
+    assetInput: string,
+    body: CheckPermissionsDto
+  ): Promise<CheckPermissionsResult<SignerType.Identity>> {
+    const { target, transactions } = body;
+
+    const [asset, identity] = await Promise.all([
+      this.assetsService.findOne(assetInput),
+      this.identitiesService.findOne(target),
+    ]);
+
+    return identity.assetPermissions.checkPermissions({
+      asset,
+      transactions: transactions ?? null,
+    });
   }
 }
