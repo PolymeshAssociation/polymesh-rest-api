@@ -49,6 +49,7 @@ export class MockAssetService {
   getPermissionGroupsWithPermissions = jest.fn();
   inviteAgentToGroup = jest.fn();
   removeAgentFromAsset = jest.fn();
+  getGroupPermissions = jest.fn();
 }
 
 export class MockTransactionsService {

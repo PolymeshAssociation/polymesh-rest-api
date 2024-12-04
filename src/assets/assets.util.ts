@@ -9,9 +9,9 @@ import {
 import { isFungibleAsset } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
-import { CreatePermissionGroupDto } from '~/assets/dto/create-permission-group.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
-import { GroupPermissionsModel } from '~/assets/models/group-permissions.model';
+import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
+import { GroupPermissionsModel } from '~/permission-groups/models/group-permissions.model';
 
 /**
  * Fetch and assemble data for an Asset

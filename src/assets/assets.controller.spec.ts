@@ -5,22 +5,17 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
-  CustomPermissionGroup,
   Identity,
   KnownAssetType,
-  PermissionGroupType,
   SecurityIdentifierType,
-  TxGroup,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { PermissionGroupWithPermissionsModel } from '~/assets/models/permission-group-with-permissions.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
-import { ResultsModel } from '~/common/models/results.model';
 import { MetadataService } from '~/metadata/metadata.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { processedTxResult, testValues } from '~/test-utils/consts';
@@ -471,76 +466,6 @@ describe('AssetsController', () => {
       const result = await controller.unlinkTicker({ asset: assetId }, { signer });
       expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.unlinkTickerFromAsset).toHaveBeenCalledWith(assetId, { signer });
-    });
-  });
-
-  describe('createGroup', () => {
-    it('should call the service and return the results', async () => {
-      const mockGroup = createMock<CustomPermissionGroup>({ id: 'someId' });
-
-      mockAssetsService.createPermissionGroup.mockResolvedValue({ ...txResult, result: mockGroup });
-
-      const result = await controller.createGroup(
-        { asset: assetId },
-        { signer, transactionGroups: [TxGroup.Distribution] }
-      );
-
-      expect(result).toEqual({ ...processedTxResult, id: mockGroup.id });
-    });
-  });
-
-  describe('getPermissionGroupsWithPermissions', () => {
-    it('should call the service and return the results', async () => {
-      const mockResult = [
-        { id: new BigNumber(1), permissions: [] },
-        { type: PermissionGroupType.Full, permissions: [] },
-      ];
-      mockAssetsService.getPermissionGroupsWithPermissions.mockResolvedValue(mockResult);
-
-      const result = await controller.getPermissionGroupsWithPermissions({ asset: assetId });
-
-      expect(result).toEqual(
-        new ResultsModel({
-          results: mockResult.map(
-            group =>
-              new PermissionGroupWithPermissionsModel(
-                group as unknown as PermissionGroupWithPermissionsModel
-              )
-          ),
-        })
-      );
-    });
-  });
-
-  describe('inviteAgent', () => {
-    it('should call the service and return the results', async () => {
-      const mockAuthorization = new MockAuthorizationRequest();
-      const mockData = {
-        ...txResult,
-        result: mockAuthorization,
-      };
-      mockAssetsService.inviteAgentToGroup.mockResolvedValue(mockData);
-
-      const result = await controller.inviteAgent(
-        { asset: assetId },
-        { signer, target: '0x1000', permissions: new BigNumber(1) }
-      );
-
-      expect(result).toEqual({
-        ...processedTxResult,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
-      });
-    });
-  });
-
-  describe('removeAgent', () => {
-    it('should call the service and return the results', async () => {
-      mockAssetsService.removeAgentFromAsset.mockResolvedValue(txResult);
-
-      const result = await controller.removeAgent({ asset: assetId }, { signer, target: '0x1000' });
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 });

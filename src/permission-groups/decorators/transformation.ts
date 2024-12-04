@@ -6,7 +6,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { PermissionGroupType } from '@polymeshassociation/polymesh-sdk/types';
 import { plainToClass, Transform } from 'class-transformer';
 
-import { PermissionsDto } from '~/assets/dto/invite-agent-to-group.dto';
+import { PermissionsDto } from '~/permission-groups/dto/invite-agent-to-group.dto';
 
 /**
  * String | { type: string; id: string; } -> PermissionsDto | BigNumber | PermissionGroupType

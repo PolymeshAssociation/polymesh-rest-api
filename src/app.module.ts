@@ -27,6 +27,7 @@ import { OfflineRecorderModule } from '~/offline-recorder/offline-recorder.modul
 import { OfflineSignerModule } from '~/offline-signer/offline-signer.module';
 import { OfflineStarterModule } from '~/offline-starter/offline-starter.module';
 import { OfflineSubmitterModule } from '~/offline-submitter/offline-submitter.module';
+import { PermissionGroupsModule } from '~/permission-groups/permission-groups.module';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { ScheduleModule } from '~/schedule/schedule.module';
@@ -37,7 +38,6 @@ import { SubsidyModule } from '~/subsidy/subsidy.module';
 import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
 import { UsersModule } from '~/users/users.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -107,6 +107,7 @@ import { UsersModule } from '~/users/users.module';
     OfflineStarterModule,
     OfflineRecorderModule,
     MultiSigsModule,
+    PermissionGroupsModule,
   ],
 })
 export class AppModule {}

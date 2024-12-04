@@ -1,12 +1,13 @@
+/* istanbul ignore file */
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { PermissionGroupType } from '@polymeshassociation/polymesh-sdk/types';
 
-import { ToGroupPermissions } from '~/assets/decorators/transformation';
-import { IsGroupPermissions } from '~/assets/decorators/validation';
-import { CreatePermissionGroupDto } from '~/assets/dto/create-permission-group.dto';
 import { ApiPropertyOneOf, IsDid } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { ToGroupPermissions } from '~/permission-groups/decorators/transformation';
+import { IsGroupPermissions } from '~/permission-groups/decorators/validation';
+import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 
 export class PermissionsDto extends PickType(CreatePermissionGroupDto, [
   'transactions',
@@ -15,7 +16,7 @@ export class PermissionsDto extends PickType(CreatePermissionGroupDto, [
 
 export class InviteAgentToGroupDto extends TransactionBaseDto {
   @ApiProperty({
-    description: 'The did of the target identity to invite to the group',
+    description: 'The DID of the target identity to invite to the group',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })

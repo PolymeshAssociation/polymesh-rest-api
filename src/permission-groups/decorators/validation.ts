@@ -5,7 +5,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { PermissionGroupType } from '@polymeshassociation/polymesh-sdk/types';
 import { registerDecorator, validate as validateClass, ValidationArguments } from 'class-validator';
 
-import { PermissionsDto } from '~/assets/dto/invite-agent-to-group.dto';
+import { PermissionsDto } from '~/permission-groups/dto/invite-agent-to-group.dto';
 
 export function IsGroupPermissions() {
   // eslint-disable-next-line @typescript-eslint/ban-types

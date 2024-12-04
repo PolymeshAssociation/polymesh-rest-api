@@ -17,7 +17,7 @@ export class GroupPermissionsModel {
 
   @ApiProperty({
     description:
-      'Transaction Groups that the Account can execute. Having permissions over a [TxGroup](https://github.com/polymeshassociation/polymesh-sdk/blob/docs/v14/docs/enums/txgroup.md) means having permissions over every TxTag in said group. Note if `transactions` is null, ignore this value',
+      'Transaction Groups that the Account can execute. Having permissions over a TxGroup means having permissions over every TxTag in said group. Note if `transactions` is null, ignore this value',
     isArray: true,
     enum: TxGroup,
     example: [TxGroup.PortfolioManagement],
