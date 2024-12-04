@@ -123,4 +123,24 @@ describe('PermissionGroupsController', () => {
       );
     });
   });
+
+  describe('setPermissions', () => {
+    it('should call the service and return the results', async () => {
+      mockPermissionGroupsService.modifyPermissions.mockResolvedValue({
+        ...txResult,
+      });
+
+      const result = await controller.setPermissions(
+        { asset: assetId, id: new BigNumber(1) },
+        { signer, transactionGroups: [TxGroup.Distribution] }
+      );
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockPermissionGroupsService.modifyPermissions).toHaveBeenCalledWith(
+        assetId,
+        new BigNumber(1),
+        { signer, transactionGroups: [TxGroup.Distribution] }
+      );
+    });
+  });
 });

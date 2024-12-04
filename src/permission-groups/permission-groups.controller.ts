@@ -169,4 +169,33 @@ export class PermissionGroupsController {
 
     return new PermissionGroupWithPermissionsModel(result);
   }
+
+  @ApiOperation({
+    summary: 'Modify custom permission group permissions',
+    description: 'This endpoint allows modifying the permissions of a custom permission group',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: ['New permissions are the same as the current ones'],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to set group permissions',
+    ],
+    [HttpStatus.NOT_FOUND]: [
+      'The Identity does not exist',
+      'The Asset does not exist',
+      'The Permission Group does not exist',
+    ],
+  })
+  @Post(':id/set')
+  public async setPermissions(
+    @Param() { asset, id }: GetPermissionGroupDto,
+    @Body() body: CreatePermissionGroupDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.permissionGroupsService.modifyPermissions(asset, id, body);
+
+    return handleServiceResult(result);
+  }
 }

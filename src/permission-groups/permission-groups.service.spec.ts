@@ -72,6 +72,42 @@ describe('PermissionGroupsService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('findOne', () => {
+    let findAssetSpy: jest.SpyInstance;
+    let mockAsset: MockAsset;
+
+    beforeEach(() => {
+      findAssetSpy = jest.spyOn(mockAssetsService, 'findOne');
+      mockAsset = new MockAsset();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findAssetSpy.mockResolvedValue(mockAsset as any);
+    });
+
+    it('should return a custom permission group', async () => {
+      const mockCustomGroup = createMock<CustomPermissionGroup>({
+        id: new BigNumber(1),
+        exists: jest.fn().mockResolvedValue(true),
+      });
+
+      mockAsset.permissions.getGroup.mockResolvedValue(mockCustomGroup);
+
+      const result = await service.findOne(assetId, new BigNumber(1));
+
+      expect(result).toEqual(mockCustomGroup);
+
+      expect(mockAsset.permissions.getGroup).toHaveBeenCalled();
+    });
+
+    it('should throw an error if the custom permission group does not exist', async () => {
+      const mockNotFoundGroup = createMock<CustomPermissionGroup>({
+        exists: jest.fn().mockResolvedValue(false),
+      });
+      mockAsset.permissions.getGroup.mockResolvedValue(mockNotFoundGroup);
+
+      await expect(service.findOne(assetId, new BigNumber(1))).rejects.toThrow(AppNotFoundError);
+    });
+  });
+
   describe('createPermissionGroup', () => {
     let findAssetSpy: jest.SpyInstance;
     let mockAsset: MockAsset;
@@ -330,6 +366,74 @@ describe('PermissionGroupsService', () => {
         service.getGroupPermissions({ asset: assetId, id: new BigNumber(1) })
       ).rejects.toThrow(AppNotFoundError);
       expect(mockNotFoundGroup.getPermissions).toBeCalledTimes(0);
+    });
+  });
+
+  describe('modifyPermissions', () => {
+    let mockPermissionGroup: CustomPermissionGroup;
+    let mockTransaction: MockTransaction;
+
+    beforeEach(() => {
+      mockPermissionGroup = createMock<CustomPermissionGroup>();
+      service.findOne = jest.fn().mockResolvedValue(mockPermissionGroup);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.externalAgents.SetGroupPermissions,
+      };
+      mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+    });
+
+    it('should set the permissions of a permission group with the given transaction group permissions', async () => {
+      const result = await service.modifyPermissions(assetId, new BigNumber(1), {
+        signer,
+        transactionGroups: [TxGroup.Distribution],
+      });
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPermissionGroup.setPermissions,
+        expect.objectContaining({
+          permissions: {
+            transactionGroups: [TxGroup.Distribution],
+          },
+        }),
+        expect.objectContaining({ signer })
+      );
+    });
+
+    it('should set the permissions of a permission group with the given transaction permissions', async () => {
+      const transactions = new TransactionPermissionsDto({
+        values: [TxTags.asset.RegisterUniqueTicker],
+        type: PermissionType.Include,
+        exceptions: [TxTags.asset.AcceptTickerTransfer],
+      });
+
+      const result = await service.modifyPermissions(assetId, new BigNumber(1), {
+        signer,
+        transactions,
+      });
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPermissionGroup.setPermissions,
+        expect.objectContaining({
+          permissions: {
+            transactions,
+          },
+        }),
+        expect.objectContaining({ signer })
+      );
     });
   });
 });

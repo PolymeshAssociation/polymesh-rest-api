@@ -31,6 +31,18 @@ export class PermissionGroupsService {
     private readonly identitiesService: IdentitiesService
   ) {}
 
+  public async findOne(assetInput: string, id: BigNumber): Promise<CustomPermissionGroup> {
+    const asset = await this.assetsService.findOne(assetInput);
+    const group = await asset.permissions.getGroup({ id });
+    const exists = await group.exists();
+
+    if (!exists) {
+      throw new AppNotFoundError(id.toString(), 'Custom permission group');
+    }
+
+    return group;
+  }
+
   public async createPermissionGroup(
     assetId: string,
     params: CreatePermissionGroupDto
@@ -101,16 +113,26 @@ export class PermissionGroupsService {
   public async getGroupPermissions(params: GetPermissionGroupDto): Promise<GroupWithPermissions> {
     const { asset: assetInput, id } = params;
 
-    const asset = await this.assetsService.findOne(assetInput);
-    const group = await asset.permissions.getGroup({ id });
-    const exists = await group.exists();
-
-    if (!exists) {
-      throw new AppNotFoundError(id.toString(), 'Custom permission group');
-    }
+    const group = await this.findOne(assetInput, id);
 
     const permissions = await group.getPermissions();
 
     return { id, permissions };
+  }
+
+  public async modifyPermissions(
+    assetInput: string,
+    groupId: BigNumber,
+    params: CreatePermissionGroupDto
+  ): ServiceReturn<void> {
+    const group = await this.findOne(assetInput, groupId);
+
+    const { options, args } = extractTxOptions(params);
+
+    return this.transactionsService.submit(
+      group.setPermissions,
+      { permissions: toPermissionGroupPermissions(args) },
+      options
+    );
   }
 }
