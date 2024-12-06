@@ -153,7 +153,7 @@ describe('claimsDto', () => {
           type: ClaimType.Affiliate,
           scope: { type: 'Wrong', value: 123 },
         },
-        ['scope.type must be one of the following values: Identity, Ticker, Asset, Custom'],
+        ['scope.type must be one of the following values: Identity, Asset, Custom'],
       ],
       [
         'CustomerDueDiligence without `cddId`',
@@ -189,7 +189,7 @@ describe('claimsDto', () => {
           scope: {},
           customClaimTypeId: new BigNumber('1'),
         },
-        ['scope.type must be one of the following values: Identity, Ticker, Asset, Custom'],
+        ['scope.type must be one of the following values: Identity, Asset, Custom'],
       ],
     ];
     test.each(cases)('%s', async (_, input, expected) => {

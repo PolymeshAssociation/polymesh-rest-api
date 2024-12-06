@@ -763,7 +763,6 @@ describe('IdentitiesController', () => {
     it('should return the Assets for which the Identity has permissions', async () => {
       const asset = createMock<Asset>({
         id: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
-        ticker: 'SOME_TICKER',
       });
       const assetGroups = [
         { asset, group: createMock<CustomPermissionGroup>({ id: new BigNumber(1), asset }) },

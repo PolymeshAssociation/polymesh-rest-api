@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  HistoricalMultiSigProposal,
   Identity,
-  JoinCreatorParams,
   MultiSig,
   MultiSigProposal,
   ResultSet,
@@ -14,7 +14,6 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { AppValidationError } from '~/common/errors';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { CreateMultiSigDto } from '~/multi-sigs/dto/create-multi-sig.dto';
-import { JoinCreatorDto } from '~/multi-sigs/dto/join-creator.dto';
 import { ModifyMultiSigDto } from '~/multi-sigs/dto/modify-multi-sig.dto';
 import { MultiSigProposalParamsDto } from '~/multi-sigs/dto/multisig-proposal-params.dto';
 import { SetMultiSigAdminDto } from '~/multi-sigs/dto/set-multi-sig-admin.dto';
@@ -86,14 +85,6 @@ export class MultiSigsService {
     const multiSig = await this.findOne(multiSigAddress);
 
     return this.transactionsService.submit(multiSig.modify, { signers: signerAccounts }, options);
-  }
-
-  public async joinCreator(multiSigAddress: string, params: JoinCreatorDto): ServiceReturn<void> {
-    const { options, args } = extractTxOptions(params);
-
-    const multi = await this.findOne(multiSigAddress);
-
-    return this.transactionsService.submit(multi.joinCreator, args as JoinCreatorParams, options);
   }
 
   public async approve(
@@ -179,7 +170,7 @@ export class MultiSigsService {
     multiSigAddress: string,
     size?: BigNumber,
     start?: BigNumber
-  ): Promise<ResultSet<MultiSigProposal>> {
+  ): Promise<ResultSet<HistoricalMultiSigProposal>> {
     const multiSig = await this.findOne(multiSigAddress);
 
     return multiSig.getHistoricalProposals({ size, start });

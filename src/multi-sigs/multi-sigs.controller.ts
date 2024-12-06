@@ -21,7 +21,6 @@ import { handleServiceResult, TransactionResolver, TransactionResponseModel } fr
 import { IdentityModel } from '~/identities/models/identity.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { CreateMultiSigDto } from '~/multi-sigs/dto/create-multi-sig.dto';
-import { JoinCreatorDto } from '~/multi-sigs/dto/join-creator.dto';
 import { ModifyMultiSigDto } from '~/multi-sigs/dto/modify-multi-sig.dto';
 import { MultiSigParamsDto } from '~/multi-sigs/dto/multi-sig-params.dto';
 import { MultiSigProposalParamsDto } from '~/multi-sigs/dto/multisig-proposal-params.dto';
@@ -66,29 +65,6 @@ export class MultiSigsController {
     };
 
     return handleServiceResult(serviceResult, resolver);
-  }
-
-  @ApiOperation({
-    summary: "Join the creator's identity as a signing key",
-    description: `This endpoint joins a MultiSig to its creator's identity. For the multiSig to join a DID not belonging to the creator then a join identity auth needs to be made and accepted by the MultiSig. 
-      NOTE: This endpoint is only applicable for 6.x.x chains as from 7.x.x chain, the MultiSig is automatically attached to the creator's identity`,
-    deprecated: true,
-  })
-  @ApiTransactionResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiBadRequestResponse({
-    description: '<ul>' + '<li>The multiSig is already attached to an identity</li>' + '</ul>',
-  })
-  @Post(':multiSigAddress/join-creator')
-  async joinCreator(
-    @Param() { multiSigAddress }: MultiSigParamsDto,
-    @Body() params: JoinCreatorDto
-  ): Promise<TransactionResponseModel> {
-    const serviceResult = await this.multiSigService.joinCreator(multiSigAddress, params);
-
-    return handleServiceResult(serviceResult);
   }
 
   @ApiOperation({
@@ -361,12 +337,12 @@ export class MultiSigsController {
       multiSigAddress
     );
 
-    const detailsPromises = data.map(proposal => proposal.details());
+    const detailsPromises = data.map(({ proposal }) => proposal.details());
     const details = await Promise.all(detailsPromises);
 
     return new PaginatedResultsModel({
       results: data.map(
-        (proposal, i) =>
+        ({ proposal }, i) =>
           new MultiSigProposalModel({
             multiSigAddress,
             proposalId: proposal.id,

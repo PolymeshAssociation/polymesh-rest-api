@@ -6,6 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Account,
+  HistoricalMultiSigProposal,
   Identity,
   MultiSig,
   MultiSigProposal,
@@ -41,6 +42,7 @@ describe('MultiSigsService', () => {
 
   let multiSig: DeepMocked<MultiSig>;
   let proposal: DeepMocked<MultiSigProposal>;
+  let historicalProposal: DeepMocked<HistoricalMultiSigProposal>;
 
   beforeEach(async () => {
     mockAccountService = createMock<AccountsService>();
@@ -48,6 +50,7 @@ describe('MultiSigsService', () => {
 
     multiSig = createMock<MultiSig>({ address: multiSigAddress });
     proposal = createMock<MultiSigProposal>({ id: proposalId });
+    historicalProposal = createMock<HistoricalMultiSigProposal>({ proposal });
     mockPolymeshApi = new MockPolymesh();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -150,14 +153,6 @@ describe('MultiSigsService', () => {
     });
   });
 
-  describe('joinCreator', () => {
-    it('should join the multiSig to the creator', async () => {
-      const result = await service.joinCreator(multiSigAddress, { options });
-
-      expect(result).toEqual(txResult);
-    });
-  });
-
   describe('approve', () => {
     it('should approve the proposal', async () => {
       const result = await service.approve(proposalParams, { options });
@@ -177,7 +172,7 @@ describe('MultiSigsService', () => {
   describe('getHistoricalProposals', () => {
     it('should return historical proposals', async () => {
       const mockResultSet = {
-        data: [proposal],
+        data: [historicalProposal],
         next: new BigNumber(2),
         count: new BigNumber(1),
       };

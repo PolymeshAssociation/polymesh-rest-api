@@ -502,7 +502,7 @@ export function createMockMetadataEntry(
   partial: PartialFuncReturn<MetadataEntry> = {
     id: new BigNumber(1),
     type: MetadataType.Local,
-    asset: { id: testValues.assetId, ticker: 'TICKER' },
+    asset: { id: testValues.assetId },
   }
 ): DeepMocked<MetadataEntry> {
   return createMock<MetadataEntry>(partial);

@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  HistoricalMultiSigProposal,
   Identity,
   MultiSig,
   MultiSigProposal,
@@ -53,18 +54,6 @@ describe('MultiSigsController', () => {
       const result = await controller.create(params);
 
       expect(result).toEqual({ ...processedTxResult, multiSigAddress });
-    });
-  });
-
-  describe('joinCreator', () => {
-    it('should call the service and return the result', async () => {
-      const params = { asPrimary: true };
-
-      when(service.joinCreator).calledWith(multiSigAddress, params).mockResolvedValue(txResult);
-
-      const result = await controller.joinCreator({ multiSigAddress }, params);
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -190,11 +179,20 @@ describe('MultiSigsController', () => {
         details: jest.fn().mockResolvedValue(mockDetails),
         id: new BigNumber(2),
       });
-      const mockPaginatedResult = createMock<ResultSet<MultiSigProposal>>({
-        data: [mockProposal1, mockProposal2],
+
+      const historic1 = createMock<HistoricalMultiSigProposal>({
+        proposal: mockProposal1,
+      });
+      const historic2 = createMock<HistoricalMultiSigProposal>({
+        proposal: mockProposal2,
+      });
+
+      // Passing `HistoricalMultiSigProposal` would give an infinite type error
+      const mockPaginatedResult = createMock<ResultSet<unknown>>({
+        data: [historic1, historic2],
         next: new BigNumber(2),
         count: new BigNumber(2),
-      });
+      }) as ResultSet<HistoricalMultiSigProposal>;
 
       when(service.getHistoricalProposals)
         .calledWith(multiSigAddress)
