@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  AssetWithGroup,
   AuthorizationRequest,
   DistributionWithDetails,
   FungibleAsset,
@@ -158,5 +159,11 @@ export class IdentitiesService {
     const identity = await this.findOne(did);
 
     return identity.getPendingDistributions();
+  }
+
+  public async findDidExternalAgentOf(did: string): Promise<AssetWithGroup[]> {
+    const identity = await this.findOne(did);
+
+    return identity.assetPermissions.get();
   }
 }

@@ -1,12 +1,14 @@
-import { DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Asset,
   AuthorizationType,
   CddClaim,
   ClaimData,
   ClaimScope,
   ClaimType,
+  CustomPermissionGroup,
   GenericAuthorizationData,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -27,6 +29,7 @@ import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AccountModel } from '~/identities/models/account.model';
+import { AssetWithGroupModel } from '~/identities/models/asset-with-group.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
@@ -751,6 +754,27 @@ describe('IdentitiesController', () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             createDividendDistributionDetailsModel(distributionWithDetails as any)
           ),
+        })
+      );
+    });
+  });
+
+  describe('getAssetPermissions', () => {
+    it('should return the Assets for which the Identity has permissions', async () => {
+      const asset = createMock<Asset>({
+        id: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+        ticker: 'SOME_TICKER',
+      });
+      const assetGroups = [
+        { asset, group: createMock<CustomPermissionGroup>({ id: new BigNumber(1), asset }) },
+      ];
+      mockIdentitiesService.findDidExternalAgentOf.mockResolvedValue(assetGroups);
+
+      const result = await controller.getAssetPermissions({ did });
+
+      expect(result).toEqual(
+        new ResultsModel({
+          results: assetGroups.map(assetGroup => new AssetWithGroupModel(assetGroup)),
         })
       );
     });

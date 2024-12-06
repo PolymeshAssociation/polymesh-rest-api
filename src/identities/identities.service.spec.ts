@@ -1,9 +1,15 @@
 /* eslint-disable import/first */
 const mockIsPolymeshTransaction = jest.fn();
 
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  Asset,
+  CustomPermissionGroup,
+  Identity,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
@@ -306,6 +312,28 @@ describe('IdentitiesService', () => {
       const result = await service.getPendingDistributions(did);
 
       expect(result).toEqual(mockDistributions);
+    });
+  });
+
+  describe('findDidExternalAgentOf', () => {
+    it('should return the list of AssetsGroups for which the Identity has permissions', async () => {
+      const asset = createMock<Asset>({
+        id: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+        ticker: 'SOME_TICKER',
+      });
+      const assetGroups = [
+        { asset, group: createMock<CustomPermissionGroup>({ id: new BigNumber(1), asset }) },
+      ];
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: { get: jest.fn().mockResolvedValue(assetGroups) },
+      });
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      findOneSpy.mockResolvedValue(mockIdentity);
+
+      const result = await service.findDidExternalAgentOf(did);
+      expect(result).toEqual(assetGroups);
     });
   });
 });

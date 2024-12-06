@@ -16,6 +16,7 @@ import {
   ClaimType,
   FungibleAsset,
   NftCollection,
+  PermissionGroupType,
   TickerReservation,
   Venue,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -50,12 +51,12 @@ import { ResultsModel } from '~/common/models/results.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
-import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
+import { AssetWithGroupModel } from '~/identities/models/asset-with-group.model';
 import { CreatedIdentityModel } from '~/identities/models/created-identity.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { createIdentityResolver } from '~/identities/models/identity.util';
@@ -75,7 +76,6 @@ export class IdentitiesController {
     private readonly authorizationsService: AuthorizationsService,
     private readonly claimsService: ClaimsService,
     private readonly tickerReservationsService: TickerReservationsService,
-    private readonly developerTestingService: DeveloperTestingService,
     private readonly logger: PolymeshLogger
   ) {
     logger.setContext(IdentitiesController.name);
@@ -764,5 +764,36 @@ export class IdentitiesController {
         createDividendDistributionDetailsModel(distributionWithDetails)
       ),
     });
+  }
+
+  @ApiTags('assets')
+  @ApiOperation({
+    summary: 'Fetch all Assets for which an Identity has permissions',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity for which the Asset permissions are to be fetched',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiArrayResponse('string', {
+    description: 'List of Assets for which the Identity has permissions',
+    paginated: false,
+    example: [
+      {
+        asset: 'SOME_TICKER',
+        group: {
+          type: PermissionGroupType.Full,
+          assetId: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+          ticker: 'SOME_TICKER',
+        },
+      },
+    ],
+  })
+  @Get(':did/external-agent')
+  async getAssetPermissions(@Param() { did }: DidDto): Promise<ResultsModel<AssetWithGroupModel>> {
+    const results = await this.identitiesService.findDidExternalAgentOf(did);
+
+    return new ResultsModel({ results: results.map(result => new AssetWithGroupModel(result)) });
   }
 }

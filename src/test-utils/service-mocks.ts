@@ -158,6 +158,7 @@ export class MockIdentitiesService {
   isAssetPreApproved = jest.fn();
   getPreApprovedAssets = jest.fn();
   getPendingDistributions = jest.fn();
+  findDidExternalAgentOf = jest.fn();
 }
 
 export class MockSettlementsService {
