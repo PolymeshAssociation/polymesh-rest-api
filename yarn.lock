@@ -1954,10 +1954,10 @@
   dependencies:
     "@polymeshassociation/signing-manager-types" "^3.3.0"
 
-"@polymeshassociation/polymesh-sdk@^27.0.0-alpha.9":
-  version "27.0.0-alpha.9"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-27.0.0-alpha.9.tgz#dde78bc4e7ba259b93de42ee5a04970f934e90a7"
-  integrity sha512-lt45p8B/UEwIlDbfyC7SpYnFPa7kwWr+CLTwl5Akep5/puzz6h1vahdOCEuUld7AvG27xWQof4gesm4jnJBiRg==
+"@polymeshassociation/polymesh-sdk@27.0.2":
+  version "27.0.2"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-27.0.2.tgz#a5e47e356b671aed71071a5e5d1afdb03ee2e74c"
+  integrity sha512-GTbGF9MWI/yU7Kwbkqo6Kq2YVI/pbY9GUI/aw5/xkn9O4ZPMyLbvO3wspWkVzF8tNy6Apt/olEHs/9+HzG3M0g==
   dependencies:
     "@apollo/client" "^3.8.1"
     "@polkadot/api" "11.2.1"
