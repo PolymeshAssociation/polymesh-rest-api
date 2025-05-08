@@ -33,4 +33,15 @@ describe('SigningController', () => {
       return expect(controller.getSignerAddress({ signer })).resolves.toEqual(expectedResult);
     });
   });
+
+  describe('addSigner', () => {
+    it('should call the service and return the result', () => {
+      const handle = 'test-handle';
+      const mnemonic = 'test mnemonic phrase';
+      const expectedResult = new SignerModel({ address });
+
+      when(signingService.addSigner).calledWith(handle, mnemonic).mockResolvedValue(address);
+      return expect(controller.addSigner({ handle, mnemonic })).resolves.toEqual(expectedResult);
+    });
+  });
 });

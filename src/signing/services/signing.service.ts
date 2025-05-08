@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 import { SigningManager } from '@polymeshassociation/signing-manager-types';
 
-import { AppNotFoundError } from '~/common/errors';
+import { AppInternalError, AppNotFoundError } from '~/common/errors';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 
 @Injectable()
@@ -28,5 +28,10 @@ export abstract class SigningService {
 
   protected throwNoSigner(handle: string): never {
     throw new AppNotFoundError(handle, 'signer');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async addSigner(handle: string, mnemonic: string): Promise<string> {
+    throw new AppInternalError('Adding signers is not supported with the configured service');
   }
 }

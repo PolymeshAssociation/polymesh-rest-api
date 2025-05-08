@@ -1,6 +1,7 @@
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 import { forEach } from 'lodash';
 
+import { AppConflictError } from '~/common/errors';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services/signing.service';
@@ -43,5 +44,18 @@ export class LocalSigningService extends SigningService {
 
   private logKey(handle: string, address: string): void {
     this.logger.log(`Key "${handle}" with address "${address}" was loaded`);
+  }
+
+  public async addSigner(handle: string, mnemonic: string): Promise<string> {
+    const existingAddress = this.addressBook[handle];
+    if (existingAddress) {
+      throw new AppConflictError(existingAddress, handle);
+    }
+
+    const address = this.signingManager.addAccount({ mnemonic });
+    this.setAddressByHandle(handle, address);
+    this.logKey(handle, address);
+
+    return address;
   }
 }

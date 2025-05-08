@@ -22,7 +22,6 @@ services:
       start_period: 10s
 
   subquery:
-    platform: 'linux/amd64'
     image: '${SUBQUERY_IMAGE}'
     init: true
     restart: unless-stopped

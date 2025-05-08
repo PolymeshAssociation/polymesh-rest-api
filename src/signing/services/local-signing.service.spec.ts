@@ -4,7 +4,7 @@ import { LocalSigningManager } from '@polymeshassociation/local-signing-manager'
 import { PolkadotSigner } from '@polymeshassociation/signing-manager-types';
 import { when } from 'jest-when';
 
-import { AppNotFoundError } from '~/common/errors';
+import { AppConflictError, AppNotFoundError } from '~/common/errors';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -100,6 +100,27 @@ describe('LocalSigningService', () => {
       const result = await service.signPayload(payload);
 
       expect(result).toEqual(signature);
+    });
+  });
+
+  describe('addSigner', () => {
+    it('should add a new signer and return its address', async () => {
+      const handle = 'newSigner';
+      const mnemonic = '//Alice';
+      const expectedAddress = '15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5';
+
+      const result = await service.addSigner(handle, mnemonic);
+
+      expect(result).toBe(expectedAddress);
+    });
+
+    it('should throw AppConflictError when adding a signer with existing handle', async () => {
+      const handle = 'existingSigner';
+      const mnemonic = '//Alice';
+
+      await service.addSigner(handle, mnemonic);
+
+      await expect(service.addSigner(handle, mnemonic)).rejects.toThrow(AppConflictError);
     });
   });
 });

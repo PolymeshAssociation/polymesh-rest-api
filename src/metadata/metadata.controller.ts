@@ -250,7 +250,7 @@ export class MetadataController {
   @ApiParam({
     name: 'type',
     description: 'The type of Asset Metadata',
-    enum: MetadataType.Local,
+    enum: MetadataType,
     example: MetadataType.Local,
   })
   @ApiParam({
