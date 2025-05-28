@@ -1954,10 +1954,10 @@
   dependencies:
     "@polymeshassociation/signing-manager-types" "^3.3.0"
 
-"@polymeshassociation/polymesh-sdk@27.3.1-alpha.1":
-  version "27.3.1-alpha.1"
-  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-27.3.1-alpha.1.tgz#f26dc483788ef21925419ff00ecb35a860351cec"
-  integrity sha512-mpx8Zlnq36Pcv4bskUJDWESgps+3xKC3rjwwsuXG0GWXXdur8RWi4vR5NWEGXPaOHtNLzqNDINyIztcNbUi86A==
+"@polymeshassociation/polymesh-sdk@27.6.0":
+  version "27.6.0"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-sdk/-/polymesh-sdk-27.6.0.tgz#498a64554c0f1fb9926d2e2605bff576ced8a615"
+  integrity sha512-H3aRVYRokp5dMIeEYrYpS9XRadERpNginbxPMQpDypOoRDxP0lc0NhuNLiubV23Js+woUgd4T3EB56drQKF9sQ==
   dependencies:
     "@apollo/client" "^3.8.1"
     "@polkadot/api" "11.2.1"
@@ -1973,6 +1973,7 @@
     json-stable-stringify "^1.0.2"
     lodash "^4.17.21"
     semver "^7.5.4"
+    ts-morph "^25.0.1"
     websocket "^1.0.34"
 
 "@polymeshassociation/signing-manager-types@^3.2.0":
@@ -2244,6 +2245,15 @@
   version "1.44.0"
   resolved "https://registry.yarnpkg.com/@substrate/ss58-registry/-/ss58-registry-1.44.0.tgz#54f214e2a44f450b7bbc9252891c1879a54e0606"
   integrity sha512-7lQ/7mMCzVNSEfDS4BCqnRnKCFKpcOaPrxMeGTXHX1YQzM/m2BBHjbK2C3dJvjv7GYxMiaTq/HdWQj1xS6ss+A==
+
+"@ts-morph/common@~0.26.0":
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/@ts-morph/common/-/common-0.26.1.tgz#a346188e59d2befe4c71f66a7d626d81b1abe2a8"
+  integrity sha512-Sn28TGl/4cFpcM+jwsH1wLncYq3FtN/BIpem+HOygfBWPT5pAeS5dB4VFVzV8FbnOKHpDLZmvAl4AjPEev5idA==
+  dependencies:
+    fast-glob "^3.3.2"
+    minimatch "^9.0.4"
+    path-browserify "^1.0.1"
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
@@ -3846,6 +3856,11 @@ co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
   integrity sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==
+
+code-block-writer@^13.0.3:
+  version "13.0.3"
+  resolved "https://registry.yarnpkg.com/code-block-writer/-/code-block-writer-13.0.3.tgz#90f8a84763a5012da7af61319dd638655ae90b5b"
+  integrity sha512-Oofo0pq3IKnsFtuHqSF7TqBfr71aeyZDVJ0HpmqB7FBM2qEigL0iPONSCZSO9pE9dZTAxANe5XHG9Uy0YMv8cg==
 
 collect-v8-coverage@^1.0.0:
   version "1.0.1"
@@ -8521,6 +8536,11 @@ passport@^0.7.0:
     pause "0.0.1"
     utils-merge "^1.0.1"
 
+path-browserify@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-1.0.1.tgz#d98454a9c3753d5790860f16f68867b9e46be1fd"
+  integrity sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==
+
 path-exists@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/path-exists/-/path-exists-3.0.0.tgz#ce0ebeaa5f78cb18925ea7d810d7b59b010fd515"
@@ -10225,6 +10245,14 @@ ts-loader@9.4.4:
     enhanced-resolve "^5.0.0"
     micromatch "^4.0.0"
     semver "^7.3.4"
+
+ts-morph@^25.0.1:
+  version "25.0.1"
+  resolved "https://registry.yarnpkg.com/ts-morph/-/ts-morph-25.0.1.tgz#7de0b60fcc6e86955c8766831bcd2c5d87ffbd4f"
+  integrity sha512-QJEiTdnz1YjrB3JFhd626gX4rKHDLSjSVMvGGG4v7ONc3RBwa0Eei98G9AT9uNFDMtV54JyuXsFeC+OH0n6bXQ==
+  dependencies:
+    "@ts-morph/common" "~0.26.0"
+    code-block-writer "^13.0.3"
 
 ts-node@10.9.1, ts-node@^10.8.1:
   version "10.9.1"
