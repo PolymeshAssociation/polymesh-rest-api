@@ -5,7 +5,7 @@ set -exu -o pipefail
 declare nextVersion=$1
 
 # This needs to be set to and SDK compatible value
-CHAIN_TAG='6.0.0-develop-debian'
+CHAIN_TAG='7.2.0-testnet-debian'
 
 # This lets it work on arm64, like Mac Books
 ARCHITECTURE=$(uname -m)
