@@ -38,6 +38,7 @@ import { SubsidyModule } from '~/subsidy/subsidy.module';
 import { TickerReservationsModule } from '~/ticker-reservations/ticker-reservations.module';
 import { TransactionsModule } from '~/transactions/transactions.module';
 import { UsersModule } from '~/users/users.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({

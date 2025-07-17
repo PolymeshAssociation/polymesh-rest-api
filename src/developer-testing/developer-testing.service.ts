@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { OpenAPIObject } from '@nestjs/swagger';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Account, Identity } from '@polymeshassociation/polymesh-sdk/types';
+import { Request } from 'express';
+import pathToRegexp from 'path-to-regexp';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { AppInternalError } from '~/common/errors';
@@ -10,6 +14,8 @@ import { isNotNull } from '~/common/utils';
 import { CreateMockIdentityDto } from '~/developer-testing/dto/create-mock-identity.dto';
 import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
 import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
+import { CoverageReportModel } from '~/developer-testing/models/coverage-report.model';
+import { PathCoverageRecord } from '~/developer-testing/types';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services';
 
@@ -18,6 +24,7 @@ const unitsPerPolyx = 1000000;
 @Injectable()
 export class DeveloperTestingService {
   private _sudoPair: KeyringPair;
+  private routeRecords: PathCoverageRecord[];
 
   constructor(
     private readonly polymeshService: PolymeshService,
@@ -132,5 +139,41 @@ export class DeveloperTestingService {
     }
 
     return identities;
+  }
+
+  public loadSwagger(swaggerDoc: OpenAPIObject): void {
+    this.routeRecords = Object.entries(swaggerDoc.paths).map(([path]) => {
+      return {
+        path,
+        // convert swagger syntax
+        matcher: pathToRegexp(path.replace(/\{(.*?)\}/g, ':$1')),
+        covered: false,
+      };
+    });
+  }
+
+  public recordRoute(request: Request): void {
+    const url = request.url;
+    const urlObject = new URL(url, 'http://localhost:2000');
+
+    this.routeRecords.forEach(endpoint => {
+      const result = endpoint.matcher.exec(urlObject.pathname);
+
+      if (result) {
+        endpoint.covered = true;
+      }
+    });
+  }
+
+  public reportCoverage(): CoverageReportModel {
+    const covered = this.routeRecords.filter(path => path.covered);
+    const unCovered = this.routeRecords.filter(path => !path.covered);
+
+    const total = new BigNumber(this.routeRecords.length);
+    const coverage = new BigNumber((covered.length / total.toNumber()) * 100);
+    const uncoveredPaths = unCovered.map(record => record.path);
+    const totalUncovered = new BigNumber(uncoveredPaths.length);
+
+    return new CoverageReportModel({ total, totalUncovered, coverage, uncoveredPaths });
   }
 }

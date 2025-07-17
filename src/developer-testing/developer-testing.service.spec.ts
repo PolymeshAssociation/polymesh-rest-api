@@ -1,6 +1,10 @@
+import { createMock } from '@golevelup/ts-jest';
+import { OpenAPIObject } from '@nestjs/swagger';
+import { PathsObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { cryptoWaitReady } from '@polymeshassociation/polymesh-sdk/utils';
+import { Request } from 'express';
 import { when } from 'jest-when';
 
 import { AccountsService } from '~/accounts/accounts.service';
@@ -141,6 +145,27 @@ describe('DeveloperTestingService', () => {
         expect.anything(),
         expect.anything()
       );
+    });
+  });
+
+  describe('reportCoverage', () => {
+    it('should process the swagger document, record a route and provide a report', () => {
+      const mockSwagger = createMock<OpenAPIObject>({
+        paths: createMock<PathsObject>({ '/abc': createMock() }),
+      });
+      service.loadSwagger(mockSwagger);
+
+      const mockRequest = createMock<Request>({ url: '/abc' });
+      service.recordRoute(mockRequest);
+
+      const report = service.reportCoverage();
+
+      expect(report).toEqual({
+        coverage: new BigNumber(100),
+        total: new BigNumber(1),
+        totalUncovered: new BigNumber(0),
+        uncoveredPaths: [],
+      });
     });
   });
 });

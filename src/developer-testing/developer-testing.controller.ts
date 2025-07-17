@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Res } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
@@ -7,6 +7,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
 import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
+import { CoverageReportModel } from '~/developer-testing/models/coverage-report.model';
 import { createIdentityModel } from '~/identities/identities.util';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
@@ -76,5 +77,14 @@ export class DeveloperTestingController {
     const results = await Promise.all(ids.map(id => createIdentityModel(id)));
 
     return new ResultsModel({ results });
+  }
+
+  @ApiOperation({
+    summary: 'Lists routes that have not been invoked',
+    description: 'Provides the routes that have *not* been invoked since startup',
+  })
+  @Get('/coverage')
+  async coverage(): Promise<CoverageReportModel> {
+    return this.developerTestingService.reportCoverage();
   }
 }

@@ -9,6 +9,7 @@ import { DeveloperTestingController } from '~/developer-testing/developer-testin
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CreateTestAccountsDto } from '~/developer-testing/dto/create-test-accounts.dto';
 import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.dto';
+import { CoverageReportModel } from '~/developer-testing/models/coverage-report.model';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
 import { testValues } from '~/test-utils/consts';
 import { mockDeveloperServiceProvider } from '~/test-utils/service-mocks';
@@ -84,6 +85,24 @@ describe('DeveloperTestingController', () => {
 
       expect(result).toEqual({ results: serviceResponse });
       expect(mockService.createTestAccounts).toHaveBeenCalledWith(params);
+    });
+  });
+
+  describe('testCoverage', () => {
+    it('call the service with the params and return the result', async () => {
+      const serviceResponse: CoverageReportModel = new CoverageReportModel({
+        coverage: new BigNumber(100),
+        total: new BigNumber(3),
+        totalUncovered: new BigNumber(0),
+        uncoveredPaths: [],
+      });
+
+      when(mockService.reportCoverage).mockReturnValue(serviceResponse);
+
+      const result = await controller.coverage();
+
+      expect(result).toEqual(serviceResponse);
+      expect(mockService.createTestAccounts).toHaveBeenCalled();
     });
   });
 });
