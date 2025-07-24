@@ -106,40 +106,6 @@ export class CheckpointsController {
   }
 
   @ApiOperation({
-    summary: 'Fetch details of an Asset Checkpoint',
-  })
-  @ApiParam({
-    name: 'asset',
-    description: 'The Asset (Ticker/Asset ID) whose Checkpoint is to be fetched',
-    type: 'string',
-    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Checkpoint to be fetched',
-    type: 'string',
-    example: '1',
-  })
-  @ApiNotFoundResponse({
-    description: 'Either the Asset or the Checkpoint was not found',
-  })
-  @ApiOkResponse({
-    description: 'The Checkpoint details',
-    type: CheckpointDetailsModel,
-  })
-  @Get('/:id')
-  public async getCheckpoint(
-    @Param() { asset, id }: CheckpointParamsDto
-  ): Promise<CheckpointDetailsModel> {
-    const checkpoint = await this.checkpointsService.findOne(asset, id);
-    const [createdAt, totalSupply] = await Promise.all([
-      checkpoint.createdAt(),
-      checkpoint.totalSupply(),
-    ]);
-    return new CheckpointDetailsModel({ id, createdAt, totalSupply });
-  }
-
-  @ApiOperation({
     summary: 'Create Checkpoint',
     description:
       'This endpoint will create a snapshot of Asset holders and their respective balances at that moment',
@@ -545,5 +511,39 @@ export class CheckpointsController {
     return new PeriodComplexityModel({
       complexity,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Fetch details of an Asset Checkpoint',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose Checkpoint is to be fetched',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Checkpoint to be fetched',
+    type: 'string',
+    example: '1',
+  })
+  @ApiNotFoundResponse({
+    description: 'Either the Asset or the Checkpoint was not found',
+  })
+  @ApiOkResponse({
+    description: 'The Checkpoint details',
+    type: CheckpointDetailsModel,
+  })
+  @Get('/:id')
+  public async getCheckpoint(
+    @Param() { asset, id }: CheckpointParamsDto
+  ): Promise<CheckpointDetailsModel> {
+    const checkpoint = await this.checkpointsService.findOne(asset, id);
+    const [createdAt, totalSupply] = await Promise.all([
+      checkpoint.createdAt(),
+      checkpoint.totalSupply(),
+    ]);
+    return new CheckpointDetailsModel({ id, createdAt, totalSupply });
   }
 }
