@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsArray, IsDate } from 'class-validator';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -15,5 +16,6 @@ export class CreateCheckpointScheduleDto extends TransactionBaseDto {
   })
   @IsArray()
   @IsDate({ each: true })
+  @Type(() => Date)
   readonly points: Date[];
 }
