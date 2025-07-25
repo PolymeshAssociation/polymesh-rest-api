@@ -496,7 +496,7 @@ export class CheckpointsController {
   })
   @ApiOkResponse({
     description: 'The complexity of the Schedule for the given period',
-    type: ScheduleComplexityModel,
+    type: PeriodComplexityModel,
   })
   @ApiNotFoundResponse({
     description: 'Either the Asset or the Checkpoint Schedule does not exist',
