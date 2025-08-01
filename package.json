@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "dedupe": "npx yarn-deduplicate yarn.lock",
     "prebuild": "rimraf dist",
-    "postinstall": "rimraf node_modules/@polymeshassociation/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto,util,wasm-bridge} && rimraf node_modules/@polymeshassociation/{hashicorp-vault-signing-manager,fireblocks-signing-manager}/node_modules/@polkadot/{util,util-crypto,wasm-bridge}",
+    "postinstall": "rimraf --glob 'node_modules/@polymeshassociation/polymesh-sdk/node_modules/@polkadot/{util-crypto,wasm-crypto,util,wasm-bridge}' && rimraf --glob 'node_modules/@polymeshassociation/{hashicorp-vault-signing-manager,fireblocks-signing-manager}/node_modules/@polkadot/{util,util-crypto,wasm-bridge}'",
     "build": "nest build",
     "commit": "npx git-cz",
     "format": "prettier-eslint --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -120,5 +120,6 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  }
+  },
+  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c"
 }
