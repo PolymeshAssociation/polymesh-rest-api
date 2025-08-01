@@ -44,10 +44,15 @@ jobs:
         with:
           fetch-depth: 1
 <<<<<<< HEAD
+<<<<<<< HEAD
       - name: Enable Corepack
         run: corepack enable
 =======
 >>>>>>> 7bc0088 (chore: 🤖 upgrade to yarn v4)
+=======
+      - name: Enable Corepack
+        run: corepack enable
+>>>>>>> 3118e8c (chore: 🤖 add integration test release gate)
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
@@ -67,10 +72,15 @@ jobs:
         with:
           fetch-depth: 1
 <<<<<<< HEAD
+<<<<<<< HEAD
       - name: Enable Corepack
         run: corepack enable
 =======
 >>>>>>> 7bc0088 (chore: 🤖 upgrade to yarn v4)
+=======
+      - name: Enable Corepack
+        run: corepack enable
+>>>>>>> 3118e8c (chore: 🤖 add integration test release gate)
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
@@ -96,6 +106,8 @@ jobs:
           cache: 'yarn'
       - name: install dependencies
         run: yarn --frozen-lockfile
+      - name: integration test
+        run: yarn test:integration
       - name: Setup SSH signing key
         run: |
           echo "$SSH_KEY_PRIVATE" | tr -d '\r' > /tmp/id_ed25519
