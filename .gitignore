@@ -2,6 +2,7 @@
 /dist
 /node_modules
 polymesh-rest-api-swagger-spec.json
+.yarn/*
 
 # Logs
 logs

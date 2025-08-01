@@ -13,7 +13,6 @@ on:
       - synchronize
       - reopened
 
-
 jobs:
   lint:
     name: Linting
@@ -21,12 +20,14 @@ jobs:
     env:
       CI: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v3
+      - name: Enable Corepack
+        run: corepack enable
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
         run: yarn --frozen-lockfile
@@ -39,12 +40,14 @@ jobs:
     env:
       CI: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v3
+      - name: Enable Corepack
+        run: corepack enable
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
         run: yarn --frozen-lockfile
@@ -57,12 +60,14 @@ jobs:
     env:
       CI: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v3
+      - name: Enable Corepack
+        run: corepack enable
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
         run: yarn --frozen-lockfile
@@ -75,13 +80,13 @@ jobs:
     needs: [lint, build, test]
     if: github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 1
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
         run: yarn --frozen-lockfile
@@ -113,7 +118,7 @@ jobs:
       - name: Clear SSH key
         run: |
           shred /tmp/id_ed25519
-  
+
   check-fast-forward:
     name: Check if fast forwarding is possible
     runs-on: ubuntu-latest
@@ -137,4 +142,3 @@ jobs:
           # never post a comment.  (In all cases the information is
           # still available in the step's summary.)
           comment: never
-# TODO @polymath-eric: add SonarCloud step when the account confusion is sorted
