@@ -90,6 +90,8 @@ jobs:
           cache: 'yarn'
       - name: install dependencies
         run: yarn --immutable
+      - name: integration test
+        run: yarn test:integration
       - name: Setup SSH signing key
         run: |
           echo "$SSH_KEY_PRIVATE" | tr -d '\r' > /tmp/id_ed25519
