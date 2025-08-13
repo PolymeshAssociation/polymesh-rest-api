@@ -28,7 +28,15 @@ export function ToBigNumber() {
  * Entity -> POJO
  */
 export function FromEntity() {
-  return applyDecorators(Transform(({ value }: { value: Entity<unknown> }) => value?.toHuman()));
+  return applyDecorators(
+    Transform(({ value }: { value: Entity<unknown> }) => {
+      if (typeof value.toHuman === 'function') {
+        return value.toHuman();
+      }
+
+      return undefined;
+    })
+  );
 }
 
 /**

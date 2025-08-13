@@ -105,7 +105,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
   }
 
   if (details.type === InstructionType.SettleManual) {
-    instructionModelParams = { ...instructionModelParams, endBlock: details.endAfterBlock };
+    instructionModelParams = { ...instructionModelParams, endAfterBlock: details.endAfterBlock };
   }
 
   if (instructionStatus.status !== InstructionStatus.Pending) {
