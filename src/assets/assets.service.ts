@@ -10,6 +10,7 @@ import {
   IdentityBalance,
   NftCollection,
   ResultSet,
+  TransferRestrictionValues,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
@@ -251,5 +252,11 @@ export class AssetsService {
 
     const { unlinkTicker } = await this.findOne(assetInput);
     return this.transactionsService.submit(unlinkTicker, {}, options);
+  }
+
+  public async getTransferRestrictions(assetInput: string): Promise<TransferRestrictionValues[]> {
+    const asset = await this.findFungible(assetInput);
+
+    return asset.transferRestrictions.getValues();
   }
 }

@@ -5,15 +5,19 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  ClaimType,
+  CountryCode,
   Identity,
   KnownAssetType,
   SecurityIdentifierType,
+  TransferRestrictionType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { MetadataService } from '~/metadata/metadata.service';
@@ -466,6 +470,103 @@ describe('AssetsController', () => {
       const result = await controller.unlinkTicker({ asset: assetId }, { signer });
       expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.unlinkTickerFromAsset).toHaveBeenCalledWith(assetId, { signer });
+    });
+  });
+
+  describe('getTransferRestrictions', () => {
+    it('should return the transfer restrictions for the asset with Count and Percentage types', async () => {
+      const mockTransferRestrictionValues = [
+        {
+          restriction: {
+            type: TransferRestrictionType.Count,
+            value: new BigNumber(1),
+          },
+          value: new BigNumber(1),
+        },
+        {
+          restriction: {
+            type: TransferRestrictionType.Percentage,
+            value: new BigNumber(2),
+          },
+          value: new BigNumber(2),
+        },
+      ];
+
+      mockAssetsService.getTransferRestrictions.mockResolvedValue(mockTransferRestrictionValues);
+
+      const result = await controller.getTransferRestrictions({ asset: assetId });
+
+      expect(result).toEqual(mockTransferRestrictionValues);
+      expect(mockAssetsService.getTransferRestrictions).toHaveBeenCalledWith(assetId);
+
+      // Verify that each result item is an instance of TransferRestrictionsValueModel
+      result.forEach(item => {
+        expect(item).toBeInstanceOf(TransferRestrictionsValueModel);
+      });
+    });
+
+    it('should handle ClaimCount and ClaimPercentage restrictions', async () => {
+      const mockClaimTypeRestrictions = [
+        {
+          restriction: {
+            type: TransferRestrictionType.ClaimCount,
+            value: {
+              min: new BigNumber(10),
+              max: new BigNumber(50),
+              issuer: {
+                did: '0x2000',
+              },
+              claim: {
+                type: ClaimType.Accredited,
+                accredited: true,
+              },
+            },
+          },
+          value: new BigNumber(5),
+        },
+        {
+          restriction: {
+            type: TransferRestrictionType.ClaimPercentage,
+            value: {
+              min: new BigNumber(10),
+              max: new BigNumber(50),
+              issuer: {
+                did: '0x2000',
+              },
+              claim: {
+                type: ClaimType.Affiliate,
+                affiliate: true,
+              },
+            },
+          },
+          value: new BigNumber(25),
+        },
+        {
+          restriction: {
+            type: TransferRestrictionType.ClaimCount,
+            value: {
+              min: new BigNumber(10),
+              max: new BigNumber(50),
+              issuer: {
+                did: '0x2000',
+              },
+              claim: {
+                type: ClaimType.Jurisdiction,
+                countryCode: CountryCode.Us,
+              },
+            }
+          },
+          value: new BigNumber(0),
+        },
+
+      ];
+
+      mockAssetsService.getTransferRestrictions.mockResolvedValue(mockClaimTypeRestrictions);
+
+      const result = await controller.getTransferRestrictions({ asset: assetId });
+
+      expect(result).toEqual(mockClaimTypeRestrictions);
+      expect(mockAssetsService.getTransferRestrictions).toHaveBeenCalledWith(assetId);
     });
   });
 });

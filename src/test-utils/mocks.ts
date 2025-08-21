@@ -264,6 +264,10 @@ export class MockAsset {
   };
 
   public toHuman = jest.fn().mockImplementation(() => this.ticker);
+
+  public transferRestrictions = {
+    getValues: jest.fn(),
+  };
 }
 
 export class MockInstruction {

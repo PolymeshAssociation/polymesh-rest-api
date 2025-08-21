@@ -28,6 +28,7 @@ import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
+import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
@@ -626,5 +627,31 @@ export class AssetsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.unlinkTickerFromAsset(asset, params);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: "Fetch an Asset's transfer restrictions",
+    description: 'This endpoint provides a list of transfer restrictions for the asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose transfer restrictions is to be fetched',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiOkResponse({
+    description: 'The transfer restrictions for the asset',
+    type: TransferRestrictionsValueModel,
+    isArray: true,
+  })
+  @Get(':asset/transfer-restrictions')
+  public async getTransferRestrictions(
+    @Param() { asset }: AssetParamsDto
+  ): Promise<TransferRestrictionsValueModel[]> {
+    const transferRestrictions = await this.assetsService.getTransferRestrictions(asset);
+
+    return transferRestrictions.map(
+      transferRestriction => new TransferRestrictionsValueModel(transferRestriction)
+    );
   }
 }

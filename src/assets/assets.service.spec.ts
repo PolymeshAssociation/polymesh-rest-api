@@ -3,7 +3,12 @@ const mockIsPolymeshTransaction = jest.fn();
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { AffirmationStatus, KnownAssetType, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  AffirmationStatus,
+  KnownAssetType,
+  TransferRestrictionType,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
@@ -776,6 +781,27 @@ describe('AssetsService', () => {
         {},
         expect.objectContaining({ signer })
       );
+    });
+  });
+
+  describe('getTransferRestrictions', () => {
+    it('should return the transfer restrictions for the asset', async () => {
+      const mockAsset = new MockAsset();
+      const mockTransferRestrictionValues = [
+        {
+          restriction: {
+            type: TransferRestrictionType.Count,
+            value: new BigNumber(100),
+          },
+          value: new BigNumber(100),
+        },
+      ];
+      mockAsset.transferRestrictions.getValues.mockResolvedValue(mockTransferRestrictionValues);
+      mockPolymeshApi.assets.getFungibleAsset.mockResolvedValue(mockAsset);
+
+      const result = await service.getTransferRestrictions('TICKER');
+
+      expect(result).toEqual(mockTransferRestrictionValues);
     });
   });
 });
