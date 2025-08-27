@@ -179,7 +179,7 @@ describe('claimsDto', () => {
           ],
         },
         [
-          'trustedClaimIssuers.0.each value in trustedFor must be one of the following values: Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, Custom',
+          'trustedClaimIssuers.0.trustedFor must be either null, a Accredited, Affiliate, BuyLockup, SellLockup, CustomerDueDiligence, KnowYourCustomer, Jurisdiction, Exempted, Blocked, or a custom claim object with structure { type: ClaimType.Custom; customClaimTypeId: BigNumber }',
         ],
       ],
       [

@@ -1,27 +1,35 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
-import { IsEnum, IsOptional } from 'class-validator';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
+import { ClaimType, TrustedFor } from '@polymeshassociation/polymesh-sdk/types';
 
-import { IsDid } from '~/common/decorators/validation';
+import { ApiPropertyOneOf } from '~/common/decorators/swagger';
+import { ToTrustedFor } from '~/common/decorators/transformation';
+import { IsDid, IsTrustedForClaimType } from '~/common/decorators/validation';
+import { TrustedForCustomClaimDto } from '~/compliance/dto/trusted-for-custom-claim.dto';
 
+@ApiExtraModels(TrustedForCustomClaimDto)
 export class TrustedClaimIssuerDto {
-  @ApiPropertyOptional({
+  @ApiPropertyOneOf({
     description:
       'List of Claim types for which an Identity is trusted for verifying. Defaults to all types',
-    enum: ClaimType,
     isArray: true,
     nullable: true,
     default: null,
+    union: [
+      {
+        type: 'string',
+        enum: Object.values(ClaimType).filter(claimType => claimType !== ClaimType.Custom),
+      },
+      TrustedForCustomClaimDto,
+    ],
   })
-  @IsOptional()
-  @IsEnum(ClaimType, { each: true })
-  readonly trustedFor: ClaimType[] | null;
+  @ToTrustedFor({ each: true })
+  @IsTrustedForClaimType({ each: true })
+  readonly trustedFor: TrustedFor[] | null;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The Identity of the Claim Issuer',
     type: 'string',
   })
-  @IsOptional()
   @IsDid()
   readonly identity: string;
 }

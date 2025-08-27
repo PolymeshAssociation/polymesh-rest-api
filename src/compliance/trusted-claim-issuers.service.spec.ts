@@ -1,6 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ClaimType, FungibleAsset, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  ClaimType,
+  FungibleAsset,
+  TrustedFor,
+  TxTags,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { BatchTransactionModel } from '~/common/models/batch-transaction.model';
@@ -35,7 +40,7 @@ describe('TrustedClaimIssuersService', () => {
   const mockClaimIssuers = [
     {
       identity: 'Ox6'.padEnd(66, '0'),
-      trustedFor: [ClaimType.Accredited, ClaimType.Affiliate],
+      trustedFor: [ClaimType.Accredited, ClaimType.Affiliate] as TrustedFor[],
     },
   ];
 

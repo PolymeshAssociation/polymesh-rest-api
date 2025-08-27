@@ -40,13 +40,13 @@ export class PolymeshService {
     const txName = tx.method;
     let unsub: Promise<() => void>;
     return new Promise((resolve, reject) => {
-      unsub = tx(...params).signAndSend(signer, { nonce: -1 }, (receipt: ISubmittableResult) => {
+      unsub = tx(...params).signAndSend(signer, { nonce: -1 }, ((receipt: ISubmittableResult) => {
         const { status } = receipt;
         if (status.isInBlock) {
           this.handlePolkadotErrors(receipt, txName, reject);
           resolve('ok');
         }
-      }) as Promise<() => void>;
+      }) as (result: unknown) => void | Promise<void>) as Promise<() => void>;
     }).then(async () => {
       (await unsub)();
     });

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
+import { ClaimType, TrustedFor } from '@polymeshassociation/polymesh-sdk/types';
+import BigNumber from 'bignumber.js';
 
 export class TrustedClaimIssuerModel {
   @ApiProperty({
@@ -15,10 +16,13 @@ export class TrustedClaimIssuerModel {
     type: 'string',
     enum: ClaimType,
     isArray: true,
-    example: [ClaimType.Accredited, ClaimType.Affiliate],
+    example: [
+      ClaimType.Accredited,
+      { type: ClaimType.Custom, customClaimTypeId: new BigNumber(1) },
+    ],
     nullable: true,
   })
-  readonly trustedFor: ClaimType[] | null;
+  readonly trustedFor: TrustedFor[] | null;
 
   constructor(model: TrustedClaimIssuerModel) {
     Object.assign(this, model);

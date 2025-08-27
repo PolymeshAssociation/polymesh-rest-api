@@ -63,6 +63,7 @@ describe('conditionDto', () => {
           claim: validClaim,
           trustedClaimIssuers: [
             {
+              trustedFor: null,
               identity: address,
             },
           ],
@@ -70,9 +71,7 @@ describe('conditionDto', () => {
       ],
     ];
     test.each(cases)('%s', async (_, input) => {
-      await target.transform(input, metadata).catch(err => {
-        fail(`should not get any errors. Received: ${err.getResponse().message}`);
-      });
+      await expect(target.transform(input, metadata)).resolves.toBeDefined();
     });
   });
 
@@ -115,6 +114,7 @@ describe('conditionDto', () => {
           claim: validClaim,
           trustedClaimIssuers: [
             {
+              trustedFor: null,
               identity: 123,
             },
           ],

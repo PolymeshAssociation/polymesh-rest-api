@@ -3,8 +3,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  TransferRestrictionStatValues,
   TransferRestrictionType,
-  TransferRestrictionValues,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 
@@ -60,7 +60,7 @@ export class TransferRestrictionsValueModel {
   @FromBigNumber()
   readonly value: BigNumber;
 
-  constructor(model: TransferRestrictionValues) {
+  constructor(model: TransferRestrictionStatValues) {
     Object.assign(this, model);
   }
 }

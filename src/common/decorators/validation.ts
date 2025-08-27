@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 import { isHexUuid, isUuid } from '@polymeshassociation/polymesh-sdk/utils';
 import {
   IsHexadecimal,
@@ -247,5 +248,67 @@ export function IncompatibleWith(
   return function (target: object, key: string) {
     notSibling(target, key);
     validateIf(target, key);
+  };
+}
+
+/**
+ * Validates that a claim type is either null, a valid non-custom claim type, or a custom claim object.
+ * This decorator ensures the value is either:
+ * - null
+ * - one of the predefined claim types from the Polymesh SDK (excluding Custom)
+ * - an object with structure { type: ClaimType.Custom; customClaimId: BigNumber }
+ *
+ * @param validationOptions - Optional validation options to customize the validation behavior and error messages
+ *
+ * @example
+ * class IsTrustedFor {
+ *   @IsTrustedForClaimType()
+ *   readonly type: Exclude<ClaimType, ClaimType.Custom> | { type: ClaimType.Custom; customClaimId: BigNumber } | null;
+ * }
+ */
+export function IsTrustedForClaimType(validationOptions?: ValidationOptions) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isTrustedForClaimType',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          // Allow null values
+          if (value === null) {
+            return true;
+          }
+
+          // Check if it's a valid non-custom claim type string
+          if (typeof value === 'string') {
+            const validClaimTypes = Object.values(ClaimType).filter(
+              claimType => claimType !== ClaimType.Custom
+            );
+            return validClaimTypes.includes(value as ClaimType);
+          }
+
+          // Check if it's a custom claim object
+          if (typeof value === 'object') {
+            const obj = value as Record<string, unknown>;
+
+            // Check if it has the required properties
+            if (obj.type === ClaimType.Custom && typeof obj.customClaimTypeId !== 'undefined') {
+              return obj.customClaimTypeId instanceof BigNumber;
+            }
+          }
+
+          return false;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be either null, a ${Object.values(ClaimType)
+            .filter(claimType => claimType !== ClaimType.Custom)
+            .join(
+              ', '
+            )}, or a custom claim object with structure { type: ClaimType.Custom; customClaimTypeId: BigNumber }`;
+        },
+      },
+    });
   };
 }

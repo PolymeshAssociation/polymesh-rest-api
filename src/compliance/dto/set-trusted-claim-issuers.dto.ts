@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 import { ApiProperty } from '@nestjs/swagger';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
@@ -16,7 +17,11 @@ export class SetTrustedClaimIssuersDto extends TransactionBaseDto {
     example: [
       {
         identity: '0x0600000000000000000000000000000000000000000000000000000000000000',
-        trustedFor: [ClaimType.Accredited, ClaimType.KnowYourCustomer],
+        trustedFor: [
+          ClaimType.Accredited,
+          ClaimType.KnowYourCustomer,
+          { type: ClaimType.Custom, customClaimTypeId: new BigNumber(1) },
+        ],
       },
     ],
   })
