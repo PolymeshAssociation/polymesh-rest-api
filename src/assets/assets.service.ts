@@ -10,9 +10,18 @@ import {
   IdentityBalance,
   NftCollection,
   ResultSet,
+  TransferRestrictionClaimCountInput,
+  TransferRestrictionInputClaimPercentage,
+  TransferRestrictionParams,
   TransferRestrictionStatValues,
+  TransferRestrictionType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import {
+  isSameRestriction,
+  normalizeExistingRestrictions,
+  transferRestrictionsDtoToRestrictions,
+} from '~/assets/assets.util';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
@@ -20,11 +29,14 @@ import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { isAssetId } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
-import { AppNotFoundError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
+import { IdentitiesService } from '~/identities/identities.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -34,7 +46,8 @@ import { handleSdkError } from '~/transactions/transactions.util';
 export class AssetsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private readonly transactionsService: TransactionsService
+    private readonly transactionsService: TransactionsService,
+    private readonly identitiesService: IdentitiesService
   ) {}
 
   public async findOne(asset: string): Promise<Asset> {
@@ -260,5 +273,92 @@ export class AssetsService {
     const asset = await this.findFungible(assetInput);
 
     return asset.transferRestrictions.getValues();
+  }
+
+  public async setTransferRestrictions(
+    assetInput: string,
+    params: SetTransferRestrictionsDto
+  ): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+    const asset = await this.findFungible(assetInput);
+
+    const restrictions = await transferRestrictionsDtoToRestrictions(args, did =>
+      this.identitiesService.findOne(did)
+    );
+
+    return this.transactionsService.submit(
+      asset.transferRestrictions.setRestrictions,
+      { restrictions },
+      options
+    );
+  }
+
+  private async transferRestrictionsDtoToRestrictions(
+    input: Omit<SetTransferRestrictionsDto, keyof TransactionBaseDto>
+  ): Promise<TransferRestrictionParams['restrictions']> {
+    return await Promise.all(
+      input.restrictions.map(async restriction => {
+        if (
+          restriction.type === TransferRestrictionType.ClaimCount ||
+          restriction.type === TransferRestrictionType.ClaimPercentage
+        ) {
+          const issuer = await this.identitiesService.findOne(restriction.issuer);
+
+          return {
+            ...restriction,
+            issuer,
+          } as TransferRestrictionClaimCountInput | TransferRestrictionInputClaimPercentage;
+        }
+
+        return restriction;
+      })
+    );
+  }
+
+  public async addTransferRestrictions(
+    assetInput: string,
+    params: SetTransferRestrictionsDto
+  ): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+    const asset = await this.findFungible(assetInput);
+
+    const { restrictions: currentValueRestrictions } =
+      await asset.transferRestrictions.getRestrictions();
+    const currentRestrictions = normalizeExistingRestrictions(currentValueRestrictions);
+    const newRestrictions = await transferRestrictionsDtoToRestrictions(args, did =>
+      this.identitiesService.findOne(did)
+    );
+
+    const duplicates = newRestrictions.filter(nr =>
+      currentRestrictions.some(er => isSameRestriction(er, nr))
+    );
+
+    if (duplicates.length) {
+      throw new AppValidationError('One or more transfer restrictions already exist');
+    }
+
+    const restrictions = [
+      ...currentRestrictions,
+      ...newRestrictions,
+    ] as TransferRestrictionParams['restrictions'];
+
+    return this.transactionsService.submit(
+      asset.transferRestrictions.setRestrictions,
+      { restrictions },
+      options
+    );
+  }
+
+  public async removeTransferRestrictions(
+    assetInput: string,
+    options: TransactionOptionsDto
+  ): ServiceReturn<void> {
+    const asset = await this.findFungible(assetInput);
+
+    return this.transactionsService.submit(
+      asset.transferRestrictions.setRestrictions,
+      { restrictions: [] },
+      options
+    );
   }
 }

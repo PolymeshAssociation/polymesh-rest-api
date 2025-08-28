@@ -267,6 +267,8 @@ export class MockAsset {
 
   public transferRestrictions = {
     getValues: jest.fn(),
+    getRestrictions: jest.fn(),
+    setRestrictions: jest.fn(),
   };
 }
 

@@ -4,12 +4,23 @@ import {
   Asset,
   CreateGroupParams,
   GroupPermissions,
+  Identity,
+  InputStatClaim,
   TransactionPermissions,
+  TransferRestriction,
+  TransferRestrictionClaimCountInput,
+  TransferRestrictionInputClaimPercentage,
+  TransferRestrictionInputCount,
+  TransferRestrictionInputPercentage,
+  TransferRestrictionParams,
+  TransferRestrictionType,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isFungibleAsset } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
+import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GroupPermissionsModel } from '~/permission-groups/models/group-permissions.model';
 
@@ -78,3 +89,111 @@ export const toPermissionGroupPermissions = (
 
   return permissions;
 };
+
+// Transfer Restrictions helpers
+
+export function normalizeExistingRestrictions(
+  restrictions: TransferRestriction[]
+): TransferRestrictionParams['restrictions'] {
+  return restrictions.map(r => {
+    if (r.type === TransferRestrictionType.Count) {
+      return {
+        type: TransferRestrictionType.Count,
+        count: r.value,
+      } as TransferRestrictionInputCount;
+    }
+
+    if (r.type === TransferRestrictionType.Percentage) {
+      return {
+        type: TransferRestrictionType.Percentage,
+        percentage: r.value,
+      } as TransferRestrictionInputPercentage;
+    }
+
+    if (r.type === TransferRestrictionType.ClaimCount) {
+      return {
+        type: TransferRestrictionType.ClaimCount,
+        min: r.value.min,
+        max: r.value.max,
+        issuer: r.value.issuer,
+        claim: r.value.claim,
+      } as TransferRestrictionClaimCountInput;
+    }
+
+    // ClaimPercentage
+    return {
+      type: TransferRestrictionType.ClaimPercentage,
+      min: r.value.min,
+      max: r.value.max,
+      issuer: r.value.issuer,
+      claim: r.value.claim,
+    } as TransferRestrictionInputClaimPercentage;
+  });
+}
+
+export function isSameStatClaim(a: InputStatClaim, b: InputStatClaim): boolean {
+  if (a.type === 'Accredited' && b.type === 'Accredited') {
+    return a.accredited === b.accredited;
+  }
+  if (a.type === 'Affiliate' && b.type === 'Affiliate') {
+    return a.affiliate === b.affiliate;
+  }
+  if (a.type === 'Jurisdiction' && b.type === 'Jurisdiction') {
+    return a.countryCode === b.countryCode;
+  }
+  return false;
+}
+
+export function isSameRestriction(
+  a: TransferRestrictionParams['restrictions'][number],
+  b: TransferRestrictionParams['restrictions'][number]
+): boolean {
+  if (a.type !== b.type) return false;
+  switch (a.type) {
+    case TransferRestrictionType.Count:
+      return a.count.eq((b as typeof a).count);
+    case TransferRestrictionType.Percentage:
+      return a.percentage.eq((b as typeof a).percentage);
+    case TransferRestrictionType.ClaimCount: {
+      const bb = b as typeof a;
+      return (
+        a.min.eq(bb.min) &&
+        ((a.max === undefined && bb.max === undefined) ||
+          (!!a.max && !!bb.max && a.max.eq(bb.max))) &&
+        a.issuer.did === bb.issuer.did &&
+        isSameStatClaim(a.claim as InputStatClaim, bb.claim as InputStatClaim)
+      );
+    }
+    case TransferRestrictionType.ClaimPercentage: {
+      const bb = b as typeof a;
+      return (
+        a.min.eq(bb.min) &&
+        a.max.eq(bb.max) &&
+        a.issuer.did === bb.issuer.did &&
+        isSameStatClaim(a.claim as InputStatClaim, bb.claim as InputStatClaim)
+      );
+    }
+  }
+}
+
+export async function transferRestrictionsDtoToRestrictions(
+  input: Omit<SetTransferRestrictionsDto, keyof TransactionBaseDto>,
+  resolveIdentity: (did: string) => Promise<Identity>
+): Promise<TransferRestrictionParams['restrictions']> {
+  return await Promise.all(
+    input.restrictions.map(async restriction => {
+      if (
+        restriction.type === TransferRestrictionType.ClaimCount ||
+        restriction.type === TransferRestrictionType.ClaimPercentage
+      ) {
+        const issuer = await resolveIdentity(restriction.issuer);
+        return {
+          ...restriction,
+          issuer,
+        } as TransferRestrictionClaimCountInput | TransferRestrictionInputClaimPercentage;
+      }
+
+      return restriction as unknown as TransferRestrictionParams['restrictions'][number];
+    })
+  );
+}

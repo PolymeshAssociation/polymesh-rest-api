@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiGoneResponse,
@@ -22,6 +22,7 @@ import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -31,9 +32,14 @@ import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
-import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
+import {
+  ApiArrayResponse,
+  ApiTransactionFailedResponse,
+  ApiTransactionResponse,
+} from '~/common/decorators/';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
@@ -653,5 +659,103 @@ export class AssetsController {
     return transferRestrictions.map(
       transferRestriction => new TransferRestrictionsValueModel(transferRestriction)
     );
+  }
+
+  @ApiOperation({
+    summary: 'Set transfer restrictions for an Asset',
+    description: 'This endpoint sets transfer restrictions for an Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to set transfer restrictions for',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'Some of the supplied Identity IDs do not exist',
+      'The Asset does not exist',
+    ],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to set transfer restrictions',
+    ],
+  })
+  @Post(':asset/transfer-restrictions/set')
+  public async setTransferRestrictions(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: SetTransferRestrictionsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.setTransferRestrictions(asset, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Add transfer restrictions for an Asset',
+    description: 'This endpoint adds transfer restrictions for an Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to add transfer restrictions for',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'Some of the supplied Identity IDs do not exist',
+      'The Asset does not exist',
+    ],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to set transfer restrictions',
+    ],
+    [HttpStatus.BAD_REQUEST]: ['The supplied transfer restrictions are already set for the Asset'],
+  })
+  @Post(':asset/transfer-restrictions/add')
+  public async addTransferRestrictions(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: SetTransferRestrictionsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.addTransferRestrictions(asset, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Remove all transfer restrictions for an Asset',
+    description:
+      'This endpoint provides a shorthand method for removing all transfer restrictions for an Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to remove all transfer restrictions for',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: ['The Asset does not exist'],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to set transfer restrictions',
+    ],
+  })
+  @Post(':asset/transfer-restrictions/remove')
+  public async removeTransferRestrictions(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: TransactionOptionsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.removeTransferRestrictions(asset, params);
+
+    return handleServiceResult(result);
   }
 }

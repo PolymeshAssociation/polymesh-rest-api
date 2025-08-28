@@ -51,6 +51,9 @@ export class MockAssetService {
   removeAgentFromAsset = jest.fn();
   getGroupPermissions = jest.fn();
   getTransferRestrictions = jest.fn();
+  setTransferRestrictions = jest.fn();
+  addTransferRestrictions = jest.fn();
+  removeTransferRestrictions = jest.fn();
 }
 
 export class MockTransactionsService {

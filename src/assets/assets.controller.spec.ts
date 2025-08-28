@@ -17,9 +17,11 @@ import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ProcessMode } from '~/common/types';
 import { MetadataService } from '~/metadata/metadata.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { processedTxResult, testValues } from '~/test-utils/consts';
@@ -554,11 +556,10 @@ describe('AssetsController', () => {
                 type: ClaimType.Jurisdiction,
                 countryCode: CountryCode.Us,
               },
-            }
+            },
           },
           value: new BigNumber(0),
         },
-
       ];
 
       mockAssetsService.getTransferRestrictions.mockResolvedValue(mockClaimTypeRestrictions);
@@ -567,6 +568,58 @@ describe('AssetsController', () => {
 
       expect(result).toEqual(mockClaimTypeRestrictions);
       expect(mockAssetsService.getTransferRestrictions).toHaveBeenCalledWith(assetId);
+    });
+  });
+
+  describe('setTransferRestrictions', () => {
+    it('should call the service and return the results', async () => {
+      mockAssetsService.setTransferRestrictions.mockResolvedValue(txResult);
+
+      const dto = {
+        signer,
+        restrictions: [{ type: TransferRestrictionType.Count, count: new BigNumber(5) }],
+      };
+
+      const result = await controller.setTransferRestrictions(
+        { asset: assetId },
+        dto as SetTransferRestrictionsDto
+      );
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.setTransferRestrictions).toHaveBeenCalledWith(assetId, dto);
+    });
+  });
+
+  describe('addTransferRestrictions', () => {
+    it('should call the service and return the results', async () => {
+      mockAssetsService.addTransferRestrictions.mockResolvedValue(txResult);
+
+      const dto = {
+        signer,
+        restrictions: [{ type: TransferRestrictionType.Percentage, percentage: new BigNumber(10) }],
+      };
+
+      const result = await controller.addTransferRestrictions(
+        { asset: assetId },
+        dto as SetTransferRestrictionsDto
+      );
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.addTransferRestrictions).toHaveBeenCalledWith(assetId, dto);
+    });
+  });
+
+  describe('removeTransferRestrictions', () => {
+    it('should call the service and return the results', async () => {
+      mockAssetsService.removeTransferRestrictions.mockResolvedValue(txResult);
+
+      const result = await controller.removeTransferRestrictions(
+        { asset: assetId },
+        { signer, processMode: ProcessMode.Submit }
+      );
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.removeTransferRestrictions).toHaveBeenCalledWith(assetId, {
+        signer,
+        processMode: ProcessMode.Submit,
+      });
     });
   });
 });

@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AffirmationStatus,
+  FungibleAsset,
   KnownAssetType,
   TransferRestrictionType,
   TxTags,
@@ -14,7 +15,9 @@ import { when } from 'jest-when';
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
-import { AppNotFoundError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
+import { ProcessMode } from '~/common/types';
+import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
@@ -27,7 +30,11 @@ import {
   MockPolymesh,
   MockTransaction,
 } from '~/test-utils/mocks';
-import { mockTransactionsProvider, MockTransactionsService } from '~/test-utils/service-mocks';
+import {
+  MockIdentitiesService,
+  mockTransactionsProvider,
+  MockTransactionsService,
+} from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 const { did, signer, assetId } = testValues;
@@ -42,16 +49,19 @@ describe('AssetsService', () => {
   let polymeshService: PolymeshService;
   let mockPolymeshApi: MockPolymesh;
   let mockTransactionsService: MockTransactionsService;
+  const mockIdentitiesService = new MockIdentitiesService();
 
   beforeEach(async () => {
     mockPolymeshApi = new MockPolymesh();
     mockTransactionsService = mockTransactionsProvider.useValue;
     const module: TestingModule = await Test.createTestingModule({
       imports: [PolymeshModule],
-      providers: [AssetsService, mockTransactionsProvider],
+      providers: [AssetsService, IdentitiesService, mockTransactionsProvider],
     })
       .overrideProvider(POLYMESH_API)
       .useValue(mockPolymeshApi)
+      .overrideProvider(IdentitiesService)
+      .useValue(mockIdentitiesService)
       .compile();
 
     service = module.get<AssetsService>(AssetsService);
@@ -501,8 +511,7 @@ describe('AssetsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findSpy = jest.spyOn(service, 'findFungible');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findSpy.mockResolvedValue(mockAsset as any);
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.controllerTransfer('TICKER', { signer, origin, amount });
 
@@ -530,8 +539,7 @@ describe('AssetsService', () => {
       const mockAsset = new MockAsset();
 
       const findOneSpy = jest.spyOn(service, 'findFungible');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockAsset as any);
+      findOneSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const mockOperations = [
         {
@@ -560,8 +568,7 @@ describe('AssetsService', () => {
       const mockAsset = new MockAsset();
 
       const findOneSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findOneSpy.mockResolvedValue(mockAsset as any);
+      findOneSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const identity = new MockIdentity();
 
@@ -593,8 +600,7 @@ describe('AssetsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findSpy.mockResolvedValue(mockAsset as any);
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.addRequiredMediators('TICKER', {
         signer,
@@ -631,8 +637,7 @@ describe('AssetsService', () => {
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
       const findSpy = jest.spyOn(service, 'findOne');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findSpy.mockResolvedValue(mockAsset as any);
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.removeRequiredMediators('TICKER', {
         signer,
@@ -668,8 +673,7 @@ describe('AssetsService', () => {
       mockAsset.settlements.preApprove.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset as any);
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.preApprove('TICKER', {
         signer,
@@ -702,8 +706,7 @@ describe('AssetsService', () => {
       mockAsset.settlements.removePreApproval.mockResolvedValue(mockTransaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset as any);
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.removePreApproval('TICKER', {
         signer,
@@ -735,8 +738,7 @@ describe('AssetsService', () => {
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findSpy.mockResolvedValue(mockAsset as any);
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.linkTickerToAsset(assetId, { signer, ticker: 'TICKER' });
       expect(result).toEqual({
@@ -767,8 +769,7 @@ describe('AssetsService', () => {
       const mockTransaction = new MockTransaction(transaction);
       const mockAsset = new MockAsset();
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findSpy.mockResolvedValue(mockAsset as any);
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
 
       const result = await service.unlinkTickerFromAsset(assetId, { signer });
       expect(result).toEqual({
@@ -802,6 +803,165 @@ describe('AssetsService', () => {
       const result = await service.getTransferRestrictions('TICKER');
 
       expect(result).toEqual(mockTransferRestrictionValues);
+    });
+  });
+
+  describe('setTransferRestrictions', () => {
+    it('submits setRestrictions with resolved issuer for claim-based restrictions', async () => {
+      const mockAsset = new MockAsset();
+      mockAsset.transferRestrictions.setRestrictions.mockResolvedValue(undefined);
+      const findSpy = jest.spyOn(service, 'findFungible');
+
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const identity = new MockIdentity();
+      mockIdentitiesService.findOne.mockResolvedValue(identity);
+
+      const dto = {
+        signer,
+        restrictions: [
+          {
+            type: TransferRestrictionType.ClaimCount,
+            min: new BigNumber(1),
+            max: new BigNumber(10),
+            issuer: did,
+            claim: { type: 'Accredited', accredited: true },
+          },
+        ],
+      };
+
+      const tx = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.statistics.SetAssetTransferCompliance,
+      });
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [tx] });
+
+      const result = await service.setTransferRestrictions('TICKER', dto as never);
+
+      expect(result).toEqual({ result: undefined, transactions: [tx] });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.transferRestrictions.setRestrictions,
+        {
+          restrictions: [
+            {
+              type: TransferRestrictionType.ClaimCount,
+              min: new BigNumber(1),
+              max: new BigNumber(10),
+              issuer: identity,
+              claim: { type: 'Accredited', accredited: true },
+            },
+          ],
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('addTransferRestrictions', () => {
+    it('merges with existing and submits setRestrictions', async () => {
+      const mockAsset = new MockAsset();
+      mockAsset.transferRestrictions.getRestrictions.mockResolvedValue({
+        paused: false,
+        restrictions: [],
+      });
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const identity = new MockIdentity();
+      mockIdentitiesService.findOne.mockResolvedValue(identity);
+
+      const dto = {
+        signer,
+        restrictions: [
+          {
+            type: TransferRestrictionType.Count,
+            count: new BigNumber(5),
+          },
+        ],
+      };
+
+      const tx = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.statistics.SetAssetTransferCompliance,
+      });
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [tx] });
+
+      const result = await service.addTransferRestrictions('TICKER', dto as never);
+
+      expect(result).toEqual({ result: undefined, transactions: [tx] });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.transferRestrictions.setRestrictions,
+        {
+          restrictions: [
+            {
+              type: TransferRestrictionType.Count,
+              count: new BigNumber(5),
+            },
+          ],
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+
+    it('throws validation error when adding duplicates', async () => {
+      const mockAsset = new MockAsset();
+      mockAsset.transferRestrictions.getRestrictions.mockResolvedValue({
+        paused: false,
+        restrictions: [
+          {
+            type: TransferRestrictionType.Count,
+            value: new BigNumber(5),
+          },
+        ],
+      });
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const dto = {
+        signer,
+        restrictions: [
+          {
+            type: TransferRestrictionType.Count,
+            count: new BigNumber(5),
+          },
+        ],
+      };
+
+      await expect(service.addTransferRestrictions('TICKER', dto as never)).rejects.toBeInstanceOf(
+        AppValidationError
+      );
+    });
+  });
+
+  describe('removeTransferRestrictions', () => {
+    it('submits setRestrictions with empty list', async () => {
+      const mockAsset = new MockAsset();
+      mockAsset.transferRestrictions.setRestrictions.mockResolvedValue(undefined);
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const tx = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.statistics.SetAssetTransferCompliance,
+      });
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [tx] });
+
+      const result = await service.removeTransferRestrictions('TICKER', {
+        signer,
+        processMode: ProcessMode.Submit,
+      });
+      expect(result).toEqual({ result: undefined, transactions: [tx] });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.transferRestrictions.setRestrictions,
+        { restrictions: [] },
+        expect.objectContaining({ signer })
+      );
     });
   });
 });
