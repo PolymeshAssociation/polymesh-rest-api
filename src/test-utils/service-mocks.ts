@@ -59,6 +59,9 @@ export class MockAssetService {
   setTransferRestrictions = jest.fn();
   addTransferRestrictions = jest.fn();
   removeTransferRestrictions = jest.fn();
+  // Statistics endpoints
+  getStats = jest.fn();
+  setStats = jest.fn();
 }
 
 export class MockTransactionsService {

@@ -273,6 +273,8 @@ export class MockAsset {
     getValues: jest.fn(),
     getRestrictions: jest.fn(),
     setRestrictions: jest.fn(),
+    getStats: jest.fn(),
+    setStats: jest.fn(),
   };
 }
 

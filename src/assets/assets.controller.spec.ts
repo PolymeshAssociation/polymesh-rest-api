@@ -10,6 +10,7 @@ import {
   Identity,
   KnownAssetType,
   SecurityIdentifierType,
+  StatType,
   TransferRestrictionType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -17,6 +18,7 @@ import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsController } from '~/assets/assets.controller';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
@@ -685,6 +687,38 @@ describe('AssetsController', () => {
         signer,
         processMode: ProcessMode.Submit,
       });
+    });
+  });
+
+  describe('getStats', () => {
+    it('should return the enabled statistics for the asset', async () => {
+      const mockStats = [{ type: 'Count', value: new BigNumber(100) }] as unknown as object[];
+
+      mockAssetsService.getStats.mockResolvedValue(mockStats as unknown as never);
+
+      const result = await controller.getStats({ asset: assetId });
+      expect(result).toEqual(mockStats);
+      expect(mockAssetsService.getStats).toHaveBeenCalledWith(assetId);
+    });
+  });
+
+  describe('setStats', () => {
+    it('should call the service and return the results', async () => {
+      mockAssetsService.setStats.mockResolvedValue(txResult);
+
+      const dto = {
+        signer,
+        stats: [
+          {
+            type: StatType.Count,
+            count: new BigNumber(100),
+          },
+        ],
+      } as unknown as SetStatsDto;
+
+      const result = await controller.setStats({ asset: assetId }, dto);
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.setStats).toHaveBeenCalledWith(assetId, dto);
     });
   });
 });

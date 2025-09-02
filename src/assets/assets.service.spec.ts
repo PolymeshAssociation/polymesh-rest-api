@@ -7,6 +7,7 @@ import {
   AffirmationStatus,
   FungibleAsset,
   KnownAssetType,
+  StatType,
   TransferRestrictionType,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -1061,6 +1062,66 @@ describe('AssetsService', () => {
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockAsset.transferRestrictions.setRestrictions,
         { restrictions: [] },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('getStats', () => {
+    it('returns the enabled statistics for the asset', async () => {
+      const mockAsset = new MockAsset();
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const mockStats = [
+        // shape is SDK-defined; using loose typing for the mock
+        { type: 'Count', value: new BigNumber(100) },
+      ] as unknown as object[];
+
+      mockAsset.transferRestrictions.getStats.mockResolvedValue(mockStats as unknown as never);
+
+      const result = await service.getStats('TICKER');
+      expect(result).toEqual(mockStats);
+      expect(mockAsset.transferRestrictions.getStats).toHaveBeenCalled();
+    });
+  });
+
+  describe('setStats', () => {
+    it('submits setStats with provided statistics', async () => {
+      const mockAsset = new MockAsset();
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const tx = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.statistics.SetAssetTransferCompliance,
+      });
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [tx] });
+
+      const dto = {
+        signer,
+        stats: [
+          {
+            type: StatType.Count,
+            count: new BigNumber(100),
+          },
+        ],
+      } as never;
+
+      const result = await service.setStats('TICKER', dto);
+      expect(result).toEqual({ result: undefined, transactions: [tx] });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.transferRestrictions.setStats,
+        {
+          stats: [
+            {
+              type: StatType.Count,
+              count: new BigNumber(100),
+            },
+          ],
+        },
         expect.objectContaining({ signer })
       );
     });
