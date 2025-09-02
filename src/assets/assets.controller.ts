@@ -10,7 +10,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { Asset, AssetStat } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -22,6 +22,7 @@ import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
@@ -755,6 +756,53 @@ export class AssetsController {
     @Body() params: TransactionOptionsDto
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.removeTransferRestrictions(asset, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Fetch transfer restriction statistics',
+    description:
+      'This endpoint provides the list of enabled statistics used for transfer restrictions',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose statistics are to be fetched',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiOkResponse({
+    description: 'List of enabled statistics for the asset',
+    isArray: true,
+  })
+  @Get(':asset/transfer-restrictions/stats')
+  public async getStats(@Param() { asset }: AssetParamsDto): Promise<AssetStat[]> {
+    return this.assetsService.getStats(asset);
+  }
+
+  @ApiOperation({
+    summary: 'Set transfer restriction statistics for an Asset',
+    description: 'This endpoint enables statistics that can be referenced by transfer restrictions',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) to set statistics for',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiNotFoundResponse({
+    description: 'The Asset does not exist',
+  })
+  @Post(':asset/transfer-restrictions/stats/set')
+  public async setStats(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: SetStatsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.setStats(asset, params);
 
     return handleServiceResult(result);
   }

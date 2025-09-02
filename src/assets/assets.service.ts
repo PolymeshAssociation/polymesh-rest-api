@@ -3,6 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Asset,
   AssetDocument,
+  AssetStat,
   AuthorizationRequest,
   FungibleAsset,
   HistoricAgentOperation,
@@ -29,6 +30,7 @@ import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { isAssetId } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -360,5 +362,18 @@ export class AssetsService {
       { restrictions: [] },
       options
     );
+  }
+
+  public async getStats(assetInput: string): Promise<AssetStat[]> {
+    const asset = await this.findFungible(assetInput);
+
+    return asset.transferRestrictions.getStats();
+  }
+
+  public async setStats(assetInput: string, params: SetStatsDto): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+    const asset = await this.findFungible(assetInput);
+
+    return this.transactionsService.submit(asset.transferRestrictions.setStats, args, options);
   }
 }
