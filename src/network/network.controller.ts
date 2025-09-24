@@ -4,6 +4,7 @@ import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nest
 import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkBlockModel } from '~/network/models/network-block.model';
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
+import { NetworkVersionModel } from '~/network/models/network-version.model';
 import { NetworkService } from '~/network/network.service';
 
 @ApiTags('network')
@@ -24,6 +25,21 @@ export class NetworkController {
     const networkProperties = await this.networkService.getNetworkProperties();
 
     return new NetworkPropertiesModel(networkProperties);
+  }
+
+  @ApiOperation({
+    summary: 'Get the chain version',
+    description: 'This endpoint will provide the current chain version',
+  })
+  @ApiOkResponse({
+    description: 'Chain version response',
+    type: NetworkVersionModel,
+  })
+  @Get('version')
+  public async getVersion(): Promise<NetworkVersionModel> {
+    const version = await this.networkService.getVersion();
+
+    return new NetworkVersionModel({ version });
   }
 
   @ApiOperation({

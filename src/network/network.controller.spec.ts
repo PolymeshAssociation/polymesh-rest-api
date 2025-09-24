@@ -6,6 +6,7 @@ import { MockMiddlewareMetadata } from '~/network/mocks/middleware-metadata.mock
 import { MockNetworkProperties } from '~/network/mocks/network-properties.mock';
 import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkBlockModel } from '~/network/models/network-block.model';
+import { NetworkVersionModel } from '~/network/models/network-version.model';
 import { NetworkController } from '~/network/network.controller';
 import { NetworkService } from '~/network/network.service';
 import { mockNetworkServiceProvider } from '~/test-utils/service-mocks';
@@ -37,6 +38,18 @@ describe('NetworkController', () => {
       const result = await controller.getNetworkProperties();
 
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getVersion', () => {
+    it('should return chain version as NetworkVersionModel', async () => {
+      const version = '6.1.0';
+
+      mockNetworkService.getVersion.mockResolvedValue(version);
+
+      const result = await controller.getVersion();
+
+      expect(result).toEqual(new NetworkVersionModel({ version }));
     });
   });
 

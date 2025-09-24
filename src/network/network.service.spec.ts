@@ -61,6 +61,18 @@ describe('NetworkService', () => {
     });
   });
 
+  describe('getVersion', () => {
+    it('should return chain version', async () => {
+      const version = '6.1.0';
+
+      mockPolymeshApi.network.getVersion.mockReturnValue(version);
+
+      const result = await networkService.getVersion();
+
+      expect(result).toBe(version);
+    });
+  });
+
   describe('getLatestBlock', () => {
     it('should latest block ID', async () => {
       const mockResult = new BigNumber(1);

@@ -45,4 +45,8 @@ export class NetworkService {
   public async getMiddlewareMetadata(): Promise<MiddlewareMetadataModel | null> {
     return this.polymeshService.polymeshApi.network.getMiddlewareMetadata();
   }
+
+  public async getVersion(): Promise<string> {
+    return this.polymeshService.polymeshApi.network.getVersion();
+  }
 }
