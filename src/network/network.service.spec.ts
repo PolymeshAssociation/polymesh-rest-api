@@ -83,6 +83,19 @@ describe('NetworkService', () => {
     });
   });
 
+  describe('getTreasuryBalance', () => {
+    it('should return the treasury balance', async () => {
+      const balance = new BigNumber(100);
+
+      mockPolymeshApi.network.getTreasuryBalance.mockResolvedValue(balance);
+
+      const result = await networkService.getTreasuryBalance();
+
+      expect(result).toBe(balance);
+      expect(mockPolymeshApi.network.getTreasuryBalance).toHaveBeenCalled();
+    });
+  });
+
   describe('getTransactionByHash', () => {
     it('should return the extrinsic details', async () => {
       mockPolymeshApi.network.getTransactionByHash.mockReturnValue(extrinsicWithFees);

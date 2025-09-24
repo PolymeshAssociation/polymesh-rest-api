@@ -21,6 +21,7 @@ import * as identityUtil from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
 import { IdentityModel } from '~/identities/models/identity.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
+import { TreasuryBalanceModel } from '~/network/models/treasury-balance.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { extrinsic, processedTxResult, testValues } from '~/test-utils/consts';
@@ -292,6 +293,18 @@ describe('AccountsController', () => {
       const result = controller.getTreasuryAccount();
 
       expect(result).toEqual(new AccountModel({ address: testAccount.address }));
+    });
+  });
+
+  describe('getTreasuryBalance', () => {
+    it('should call the service and return the treasury balance', async () => {
+      const balance = new BigNumber(100);
+
+      mockNetworkService.getTreasuryBalance.mockResolvedValue(balance);
+
+      const result = await controller.getTreasuryBalance();
+
+      expect(result).toEqual(new TreasuryBalanceModel({ balance }));
     });
   });
 

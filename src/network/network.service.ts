@@ -25,6 +25,10 @@ export class NetworkService {
     return this.polymeshService.polymeshApi.network.getTreasuryAccount();
   }
 
+  public async getTreasuryBalance(): Promise<BigNumber> {
+    return this.polymeshService.polymeshApi.network.getTreasuryBalance();
+  }
+
   public getTransactionByHash(hash: string): Promise<ExtrinsicDataWithFees | null> {
     return this.polymeshService.polymeshApi.network.getTransactionByHash({
       txHash: hexStripPrefix(hash),

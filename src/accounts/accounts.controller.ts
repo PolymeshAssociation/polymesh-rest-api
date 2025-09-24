@@ -42,6 +42,7 @@ import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { createIdentityModel, createSignerModel } from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
 import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
+import { TreasuryBalanceModel } from '~/network/models/treasury-balance.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyModel } from '~/subsidy/models/subsidy.model';
 import { SubsidyService } from '~/subsidy/subsidy.service';
@@ -304,6 +305,21 @@ export class AccountsController {
     const { address } = this.networkService.getTreasuryAccount();
 
     return new AccountModel({ address });
+  }
+
+  @ApiOperation({
+    summary: 'Get the treasury balance',
+    description: 'This endpoint will provide the balance held in the network treasury',
+  })
+  @ApiOkResponse({
+    description: 'Treasury balance response',
+    type: TreasuryBalanceModel,
+  })
+  @Get('treasury/balance')
+  async getTreasuryBalance(): Promise<TreasuryBalanceModel> {
+    const balance = await this.networkService.getTreasuryBalance();
+
+    return new TreasuryBalanceModel({ balance });
   }
 
   @ApiOperation({
