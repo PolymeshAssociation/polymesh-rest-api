@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { hexStripPrefix } from '@polkadot/util';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Account, ExtrinsicDataWithFees } from '@polymeshassociation/polymesh-sdk/types';
+import { ProtocolFees } from '@polymeshassociation/polymesh-sdk/api/client/types';
+import { Account, ExtrinsicDataWithFees, TxTag } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
@@ -27,6 +28,12 @@ export class NetworkService {
 
   public async getTreasuryBalance(): Promise<BigNumber> {
     return this.polymeshService.polymeshApi.network.getTreasuryBalance();
+  }
+
+  public async getProtocolFees(tags: TxTag[], blockHash?: string): Promise<ProtocolFees[]> {
+    const args = blockHash ? { tags, blockHash } : { tags };
+
+    return this.polymeshService.polymeshApi.network.getProtocolFees(args);
   }
 
   public getTransactionByHash(hash: string): Promise<ExtrinsicDataWithFees | null> {

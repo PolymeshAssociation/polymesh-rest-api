@@ -202,3 +202,24 @@ export function getNextYearISO(): string {
 
   return nextYear.toISOString();
 }
+
+/**
+ * Helper to convert a string to an array
+ *
+ * @param value - The value to convert to an array
+ * @returns The value as an array
+ */
+export function toArray(value: unknown): string[] | undefined {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  return undefined;
+}

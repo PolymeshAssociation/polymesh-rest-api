@@ -1,9 +1,11 @@
-import { Controller, Get, NotFoundException } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Query } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ProtocolFeesQueryDto } from '~/network/dto/protocol-fees-query.dto';
 import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkBlockModel } from '~/network/models/network-block.model';
 import { NetworkPropertiesModel } from '~/network/models/network-properties.model';
+import { ProtocolFeeModel } from '~/network/models/protocol-fee.model';
 import { NetworkService } from '~/network/network.service';
 
 @ApiTags('network')
@@ -24,6 +26,25 @@ export class NetworkController {
     const networkProperties = await this.networkService.getNetworkProperties();
 
     return new NetworkPropertiesModel(networkProperties);
+  }
+
+  @ApiOperation({
+    summary: 'Get protocol fees for transactions',
+    description: 'Returns the protocol fees charged for the specified transaction tags',
+  })
+  @ApiOkResponse({
+    description: 'Protocol fees per transaction tag',
+    type: ProtocolFeeModel,
+    isArray: true,
+  })
+  @Get('protocol-fees')
+  public async getProtocolFees(@Query() query: ProtocolFeesQueryDto): Promise<ProtocolFeeModel[]> {
+    const { tags, blockHash } = query;
+    const fees = await this.networkService.getProtocolFees(tags, blockHash);
+
+    return fees.map(
+      protocolFee => new ProtocolFeeModel({ tag: protocolFee.tag, fee: protocolFee.fees })
+    );
   }
 
   @ApiOperation({

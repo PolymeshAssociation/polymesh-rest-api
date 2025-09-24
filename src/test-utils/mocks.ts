@@ -81,6 +81,7 @@ export class MockPolymesh {
     getNetworkProperties: jest.fn(),
     getTreasuryAccount: jest.fn(),
     getTreasuryBalance: jest.fn(),
+    getProtocolFees: jest.fn(),
     getTransactionByHash: jest.fn(),
     submitTransaction: jest.fn(),
     getMiddlewareMetadata: jest.fn(),

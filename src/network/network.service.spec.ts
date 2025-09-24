@@ -3,6 +3,7 @@ const mockHexStripPrefix = jest.fn().mockImplementation(params => params);
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MockMiddlewareMetadata } from '~/network/mocks/middleware-metadata.mock';
 import { MockNetworkProperties } from '~/network/mocks/network-properties.mock';
@@ -93,6 +94,39 @@ describe('NetworkService', () => {
 
       expect(result).toBe(balance);
       expect(mockPolymeshApi.network.getTreasuryBalance).toHaveBeenCalled();
+    });
+  });
+
+  describe('getProtocolFees', () => {
+    it('should return protocol fees for the provided tags', async () => {
+      const tag = TxTags.asset.CreateAsset;
+      const protocolFees = [{ tag, fees: new BigNumber(1) }];
+
+      mockPolymeshApi.network.getProtocolFees.mockResolvedValue(protocolFees);
+
+      const result = await networkService.getProtocolFees([tag]);
+
+      expect(result).toBe(protocolFees);
+      expect(mockPolymeshApi.network.getProtocolFees).toHaveBeenCalledWith({
+        tags: [tag],
+        blockHash: undefined,
+      });
+    });
+
+    it('should forward block hash when provided', async () => {
+      const tag = TxTags.asset.CreateAsset;
+      const blockHash = '0x123';
+      const protocolFees = [{ tag, fees: new BigNumber(2) }];
+
+      mockPolymeshApi.network.getProtocolFees.mockResolvedValue(protocolFees);
+
+      const result = await networkService.getProtocolFees([tag], blockHash);
+
+      expect(result).toBe(protocolFees);
+      expect(mockPolymeshApi.network.getProtocolFees).toHaveBeenCalledWith({
+        tags: [tag],
+        blockHash,
+      });
     });
   });
 

@@ -1,11 +1,13 @@
 import { DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 
 import { MockMiddlewareMetadata } from '~/network/mocks/middleware-metadata.mock';
 import { MockNetworkProperties } from '~/network/mocks/network-properties.mock';
 import { MiddlewareMetadataModel } from '~/network/models/middleware-metadata.model';
 import { NetworkBlockModel } from '~/network/models/network-block.model';
+import { ProtocolFeeModel } from '~/network/models/protocol-fee.model';
 import { NetworkController } from '~/network/network.controller';
 import { NetworkService } from '~/network/network.service';
 import { mockNetworkServiceProvider } from '~/test-utils/service-mocks';
@@ -37,6 +39,19 @@ describe('NetworkController', () => {
       const result = await controller.getNetworkProperties();
 
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getProtocolFees', () => {
+    it('should return protocol fees as ProtocolFeeModel[]', async () => {
+      const tag = TxTags.asset.CreateAsset;
+      const mockServiceResult = [{ tag, fees: new BigNumber(1) }];
+
+      mockNetworkService.getProtocolFees.mockResolvedValue(mockServiceResult);
+
+      const result = await controller.getProtocolFees({ tags: [tag] });
+
+      expect(result).toEqual([new ProtocolFeeModel({ tag, fee: new BigNumber(1) })]);
     });
   });
 
