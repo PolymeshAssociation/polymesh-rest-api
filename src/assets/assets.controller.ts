@@ -23,6 +23,7 @@ import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
+import { VenueIdsDto } from '~/assets/dto/venue-ids.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
@@ -30,6 +31,7 @@ import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
+import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import {
@@ -231,6 +233,121 @@ export class AssetsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.setDocuments(asset, setAssetDocumentsDto);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Enable venue filtering for an Asset',
+    description:
+      'When enabled, only explicitly allowed venues can create instructions for the Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose venue filtering will be enabled',
+    type: 'string',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':asset/venue-filtering/enable')
+  public async enableVenueFiltering(
+    @Param() { asset }: AssetParamsDto,
+    @Body() transactionBaseDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.enableVenueFiltering(asset, transactionBaseDto);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Disable venue filtering for an Asset',
+    description: 'When disabled, any venue can create instructions for the Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose venue filtering will be disabled',
+    type: 'string',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':asset/venue-filtering/disable')
+  public async disableVenueFiltering(
+    @Param() { asset }: AssetParamsDto,
+    @Body() transactionBaseDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.disableVenueFiltering(asset, transactionBaseDto);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Allow specific venues to settle instructions for an Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose venue allowlist will be updated',
+    type: 'string',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':asset/venue-filtering/allow')
+  public async allowVenues(
+    @Param() { asset }: AssetParamsDto,
+    @Body() venueIdsDto: VenueIdsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.allowVenues(asset, venueIdsDto);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Disallow specific venues from settling instructions for an Asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose venue allowlist will be updated',
+    type: 'string',
+  })
+  @ApiTransactionResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':asset/venue-filtering/disallow')
+  public async disallowVenues(
+    @Param() { asset }: AssetParamsDto,
+    @Body() venueIdsDto: VenueIdsDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.disallowVenues(asset, venueIdsDto);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get venue filtering details for an Asset',
+    description:
+      'Returns the current filtering status alongside the allowed and disallowed venue identifiers',
+  })
+  @ApiParam({
+    name: 'asset',
+    description:
+      'The Asset (Ticker/Asset ID) whose venue filtering configuration will be retrieved',
+    type: 'string',
+  })
+  @ApiOkResponse({
+    description: 'Venue filtering configuration for the Asset',
+    type: VenueFilteringDetailsModel,
+  })
+  @Get(':asset/venue-filtering')
+  public async getVenueFilteringDetails(
+    @Param() { asset }: AssetParamsDto
+  ): Promise<VenueFilteringDetailsModel> {
+    const details = await this.assetsService.getVenueFilteringDetails(asset);
+
+    return new VenueFilteringDetailsModel(details);
   }
 
   @ApiOperation({

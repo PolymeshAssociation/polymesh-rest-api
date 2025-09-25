@@ -28,6 +28,11 @@ export class MockAssetService {
   findHolders = jest.fn();
   findDocuments = jest.fn();
   setDocuments = jest.fn();
+  enableVenueFiltering = jest.fn();
+  disableVenueFiltering = jest.fn();
+  allowVenues = jest.fn();
+  disallowVenues = jest.fn();
+  getVenueFilteringDetails = jest.fn();
   findAllByOwner = jest.fn();
   RegisterUniqueTicker = jest.fn();
   createAsset = jest.fn();

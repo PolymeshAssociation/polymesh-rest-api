@@ -177,6 +177,8 @@ export class MockAsset {
   public currentFundingRound = jest.fn();
   public isFrozen = jest.fn();
   public transferOwnership = jest.fn();
+  public setVenueFiltering = jest.fn();
+  public getVenueFilteringDetails = jest.fn();
   public redeem = jest.fn();
   public freeze = jest.fn();
   public unfreeze = jest.fn();

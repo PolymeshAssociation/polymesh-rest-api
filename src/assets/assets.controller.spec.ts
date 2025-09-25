@@ -19,6 +19,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
+import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ProcessMode } from '~/common/types';
@@ -236,6 +237,70 @@ describe('AssetsController', () => {
       const result = await controller.setDocuments({ asset: assetId }, body);
       expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.setDocuments).toHaveBeenCalledWith(assetId, body);
+    });
+  });
+
+  describe('enableVenueFiltering', () => {
+    it('should enable venue filtering for the asset', async () => {
+      mockAssetsService.enableVenueFiltering.mockResolvedValue(txResult);
+      const body = { signer };
+
+      const result = await controller.enableVenueFiltering({ asset: assetId }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.enableVenueFiltering).toHaveBeenCalledWith(assetId, body);
+    });
+  });
+
+  describe('disableVenueFiltering', () => {
+    it('should disable venue filtering for the asset', async () => {
+      mockAssetsService.disableVenueFiltering.mockResolvedValue(txResult);
+      const body = { signer };
+
+      const result = await controller.disableVenueFiltering({ asset: assetId }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.disableVenueFiltering).toHaveBeenCalledWith(assetId, body);
+    });
+  });
+
+  describe('allowVenues', () => {
+    it('should allow venues for the asset', async () => {
+      mockAssetsService.allowVenues.mockResolvedValue(txResult);
+      const body = { signer, venues: [new BigNumber(1)] };
+
+      const result = await controller.allowVenues({ asset: assetId }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.allowVenues).toHaveBeenCalledWith(assetId, body);
+    });
+  });
+
+  describe('disallowVenues', () => {
+    it('should disallow venues for the asset', async () => {
+      mockAssetsService.disallowVenues.mockResolvedValue(txResult);
+      const body = { signer, venues: [new BigNumber(2)] };
+
+      const result = await controller.disallowVenues({ asset: assetId }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.disallowVenues).toHaveBeenCalledWith(assetId, body);
+    });
+  });
+
+  describe('getVenueFilteringDetails', () => {
+    it('should return the venue filtering details', async () => {
+      const details = {
+        isEnabled: true,
+        allowedVenues: [new BigNumber(1)],
+        disallowedVenues: [],
+      };
+      mockAssetsService.getVenueFilteringDetails.mockResolvedValue(details);
+
+      const result = await controller.getVenueFilteringDetails({ asset: assetId });
+
+      expect(result).toEqual(new VenueFilteringDetailsModel(details));
+      expect(mockAssetsService.getVenueFilteringDetails).toHaveBeenCalledWith(assetId);
     });
   });
 

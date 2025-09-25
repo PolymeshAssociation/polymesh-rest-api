@@ -29,6 +29,7 @@ import {
   MockIdentity,
   MockPolymesh,
   MockTransaction,
+  MockVenue,
 } from '~/test-utils/mocks';
 import {
   MockIdentitiesService,
@@ -37,7 +38,7 @@ import {
 } from '~/test-utils/service-mocks';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
-const { did, signer, assetId } = testValues;
+const { did, signer, assetId, ticker, txResult } = testValues;
 
 jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
   ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
@@ -297,6 +298,107 @@ describe('AssetsService', () => {
     });
   });
 
+  describe('enableVenueFiltering', () => {
+    it('should submit a transaction enabling venue filtering', async () => {
+      const mockAsset = new MockAsset();
+      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const body = { signer };
+
+      const result = await service.enableVenueFiltering(ticker, body);
+
+      expect(result).toBe(txResult);
+      expect(mockPolymeshApi.assets.getAsset).toHaveBeenCalledWith({ ticker });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.setVenueFiltering,
+        { enabled: true },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('disableVenueFiltering', () => {
+    it('should submit a transaction disabling venue filtering', async () => {
+      const mockAsset = new MockAsset();
+      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const body = { signer };
+
+      const result = await service.disableVenueFiltering(assetId, body);
+
+      expect(result).toBe(txResult);
+      expect(mockPolymeshApi.assets.getAsset).toHaveBeenCalledWith({ assetId });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.setVenueFiltering,
+        { enabled: false },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('allowVenues', () => {
+    it('should submit a transaction allowing venues', async () => {
+      const mockAsset = new MockAsset();
+      const venues = [new BigNumber(1)];
+      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const body = { signer, venues };
+
+      const result = await service.allowVenues(ticker, body);
+
+      expect(result).toBe(txResult);
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.setVenueFiltering,
+        { allowedVenues: venues },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('disallowVenues', () => {
+    it('should submit a transaction disallowing venues', async () => {
+      const mockAsset = new MockAsset();
+      const venues = [new BigNumber(2)];
+      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+      mockTransactionsService.submit.mockResolvedValue(txResult);
+
+      const body = { signer, venues };
+
+      const result = await service.disallowVenues(ticker, body);
+
+      expect(result).toBe(txResult);
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.setVenueFiltering,
+        { disallowedVenues: venues },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('getVenueFilteringDetails', () => {
+    it('should return the venue filtering details', async () => {
+      const mockAsset = new MockAsset();
+      const allowedVenues = [new MockVenue(), new MockVenue()];
+      allowedVenues[0].id = new BigNumber(5);
+      allowedVenues[1].id = new BigNumber(7);
+
+      mockAsset.getVenueFilteringDetails.mockResolvedValue({ isEnabled: true, allowedVenues });
+      mockPolymeshApi.assets.getAsset.mockResolvedValue(mockAsset);
+
+      const result = await service.getVenueFilteringDetails(assetId);
+
+      expect(result).toEqual({
+        isEnabled: true,
+        allowedVenues: allowedVenues.map(({ id }) => id),
+        disallowedVenues: [],
+      });
+      expect(mockAsset.getVenueFilteringDetails).toHaveBeenCalled();
+    });
+  });
+
   describe('createAsset', () => {
     const createBody = {
       signer,
@@ -357,7 +459,6 @@ describe('AssetsService', () => {
   });
 
   describe('transferOwnership', () => {
-    const ticker = 'TICKER';
     const body = {
       signer,
       target: '0x1000',

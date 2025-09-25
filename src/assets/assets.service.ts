@@ -30,6 +30,7 @@ import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
+import { VenueIdsDto } from '~/assets/dto/venue-ids.dto';
 import { isAssetId } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransactionOptionsDto } from '~/common/dto/transaction-options.dto';
@@ -114,6 +115,72 @@ export class AssetsService {
     const { options, args } = extractTxOptions(params);
 
     return this.transactionsService.submit(set, args, options);
+  }
+
+  public async enableVenueFiltering(
+    assetInput: string,
+    params: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const { options } = extractTxOptions(params);
+    const asset = await this.findOne(assetInput);
+
+    return this.transactionsService.submit(asset.setVenueFiltering, { enabled: true }, options);
+  }
+
+  public async disableVenueFiltering(
+    assetInput: string,
+    params: TransactionBaseDto
+  ): ServiceReturn<void> {
+    const { options } = extractTxOptions(params);
+    const asset = await this.findOne(assetInput);
+
+    return this.transactionsService.submit(asset.setVenueFiltering, { enabled: false }, options);
+  }
+
+  public async allowVenues(assetInput: string, params: VenueIdsDto): ServiceReturn<void> {
+    const {
+      options,
+      args: { venues },
+    } = extractTxOptions(params);
+    const asset = await this.findOne(assetInput);
+
+    return this.transactionsService.submit(
+      asset.setVenueFiltering,
+      { allowedVenues: venues },
+      options
+    );
+  }
+
+  public async disallowVenues(assetInput: string, params: VenueIdsDto): ServiceReturn<void> {
+    const {
+      options,
+      args: { venues },
+    } = extractTxOptions(params);
+    const asset = await this.findOne(assetInput);
+
+    return this.transactionsService.submit(
+      asset.setVenueFiltering,
+      { disallowedVenues: venues },
+      options
+    );
+  }
+
+  public async getVenueFilteringDetails(
+    assetInput: string
+  ): Promise<{ isEnabled: boolean; allowedVenues: BigNumber[]; disallowedVenues: BigNumber[] }> {
+    const asset = await this.findOne(assetInput);
+
+    try {
+      const { isEnabled, allowedVenues } = await asset.getVenueFilteringDetails();
+
+      return {
+        isEnabled,
+        allowedVenues: allowedVenues.map(({ id }) => id),
+        disallowedVenues: [],
+      };
+    } catch (error) {
+      throw handleSdkError(error);
+    }
   }
 
   public async createAsset(params: CreateAssetDto): ServiceReturn<FungibleAsset> {
