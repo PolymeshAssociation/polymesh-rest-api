@@ -9,16 +9,18 @@ RUN apk add --no-cache \
 
 WORKDIR /app/builder
 RUN chown -R node: /app
+RUN corepack enable
 
 USER node
 
 COPY --chown=node:node . .
 
-RUN corepack enable && \
-    yarn install \
-    --ignore-scripts \
+ENV YARN_ENABLE_SCRIPTS=false
+
+RUN yarn install \
     --immutable \
-    --no-progress && \
+    --inline-builds \
+    --mode=skip-build && \
     yarn build && \
     yarn remove $(cat package.json | jq -r '.devDependencies | keys | join(" ")') && \
     rm -r /home/node/.cache/
