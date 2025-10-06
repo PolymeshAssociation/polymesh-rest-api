@@ -149,7 +149,7 @@ describe('PortfoliosService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findOne(owner, new BigNumber(2))).rejects.toThrowError();
+        await expect(() => service.findOne(owner, new BigNumber(2))).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -441,7 +441,7 @@ describe('PortfoliosService', () => {
 
   describe('createdAt', () => {
     it('should throw an error if default Portfolio details are requested', () => {
-      return expect(() => service.createdAt(did, new BigNumber(0))).rejects.toThrowError();
+      return expect(() => service.createdAt(did, new BigNumber(0))).rejects.toThrow();
     });
 
     describe('otherwise', () => {

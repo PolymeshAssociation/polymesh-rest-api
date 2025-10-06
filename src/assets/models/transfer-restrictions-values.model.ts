@@ -129,7 +129,6 @@ export class TransferRestrictionClaimDetailsModel {
   @ApiPropertyOneOf({
     description:
       'Breakdown of holders or balances for the statistic. Jurisdiction claims include an entry per country code, while other claims display holders with/without the claim.',
-    required: false,
     union: [
       TransferRestrictionClaimValueBreakdownModel,
       {

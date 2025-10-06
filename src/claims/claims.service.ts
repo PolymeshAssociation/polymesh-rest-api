@@ -24,7 +24,7 @@ import { TransactionsService } from '~/transactions/transactions.service';
 export class ClaimsService {
   constructor(
     private readonly polymeshService: PolymeshService,
-    private transactionsService: TransactionsService
+    private readonly transactionsService: TransactionsService
   ) {}
 
   public async findIssuedByDid(

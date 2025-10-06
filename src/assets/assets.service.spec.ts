@@ -117,7 +117,7 @@ describe('AssetsService', () => {
 
         const address = 'address';
 
-        await expect(() => service.findOne(address)).rejects.toThrowError();
+        await expect(() => service.findOne(address)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -144,7 +144,7 @@ describe('AssetsService', () => {
 
         const address = 'address';
 
-        await expect(() => service.findFungible(address)).rejects.toThrowError();
+        await expect(() => service.findFungible(address)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

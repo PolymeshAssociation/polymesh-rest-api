@@ -124,7 +124,7 @@ describe('DeveloperTestingService', () => {
         'At least one identity was not found which should have been made'
       );
 
-      return expect(service.createTestAccounts(params)).rejects.toThrowError(expectedError);
+      return expect(service.createTestAccounts(params)).rejects.toThrow(expectedError);
     });
 
     it('should call execTransaction with the default sudo signer if `signer` is not specified', async () => {

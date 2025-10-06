@@ -47,14 +47,14 @@ describe('PostgresApiKeyRepo', () => {
 
       mockRepository.save.mockRejectedValue(typeOrmError);
 
-      return expect(repo.createUser({ name })).rejects.toThrowError(typeOrmError);
+      return expect(repo.createUser({ name })).rejects.toThrow(typeOrmError);
     });
 
     it('should throw errors as they are', () => {
       const error = new Error('Testing for when something goes wrong');
       mockRepository.save.mockRejectedValue(error);
 
-      return expect(repo.createUser({ name })).rejects.toThrowError(error);
+      return expect(repo.createUser({ name })).rejects.toThrow(error);
     });
   });
 });

@@ -319,7 +319,7 @@ describe('SubsidyService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.getAllowance(beneficiary, subsidizer)).rejects.toThrowError();
+        await expect(() => service.getAllowance(beneficiary, subsidizer)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

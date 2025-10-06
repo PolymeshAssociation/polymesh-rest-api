@@ -127,7 +127,7 @@ describe('CheckpointsService', () => {
 
       const result = await service.findOne(assetId, new BigNumber(1));
       expect(result).toEqual(mockCheckpoint);
-      expect(mockAssetsService.findFungible).toBeCalledWith(assetId);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
 
     describe('otherwise', () => {
@@ -139,7 +139,7 @@ describe('CheckpointsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findOne(assetId, new BigNumber(1))).rejects.toThrowError();
+        await expect(() => service.findOne(assetId, new BigNumber(1))).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -191,7 +191,7 @@ describe('CheckpointsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findScheduleById(assetId, id)).rejects.toThrowError();
+        await expect(() => service.findScheduleById(assetId, id)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -444,7 +444,7 @@ describe('CheckpointsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findCheckpointsByScheduleId(assetId, id)).rejects.toThrowError();
+        await expect(() => service.findCheckpointsByScheduleId(assetId, id)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -474,7 +474,7 @@ describe('CheckpointsService', () => {
 
       const result = await service.getComplexityForAsset(assetId);
       expect(result).toEqual(mockResult);
-      expect(mockAssetsService.findFungible).toBeCalledWith(assetId);
+      expect(mockAssetsService.findFungible).toHaveBeenCalledWith(assetId);
     });
   });
 

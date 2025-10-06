@@ -1,3 +1,4 @@
+import { AnyModel } from '~/offline-recorder/model/any.model';
 import { OfflineEventModel } from '~/offline-recorder/model/offline-event.model';
 import { OfflineEventRepo } from '~/offline-recorder/repo/offline-event.repo';
 
@@ -8,7 +9,7 @@ export const testOfflineEventRepo = async (offlineRepo: OfflineEventRepo): Promi
 
   describe('method: recordEvent', () => {
     it('should record an event', async () => {
-      event = await offlineRepo.recordEvent(body);
+      event = await offlineRepo.recordEvent(new AnyModel(body));
       expect(event).toMatchSnapshot();
     });
   });

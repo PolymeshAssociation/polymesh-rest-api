@@ -150,7 +150,10 @@ export const ApiArrayResponseReplaceModelProperties = <T, K extends keyof T>(
   );
 };
 
-type ApiPropertyOneOfOptions = Omit<ApiPropertyOptions, 'oneOf' | 'type'> & {
+type ApiPropertyOneOfOptions = Omit<
+  ApiPropertyOptions,
+  'oneOf' | 'type' | 'additionalProperties' | 'selfRequired' | 'properties' | 'required'
+> & {
   union: (Omit<SchemaObject, 'oneOf'> | Type)[];
 };
 

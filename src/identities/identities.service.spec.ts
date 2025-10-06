@@ -112,7 +112,7 @@ describe('IdentitiesService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findOne('invalidDID')).rejects.toThrowError();
+        await expect(() => service.findOne('invalidDID')).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

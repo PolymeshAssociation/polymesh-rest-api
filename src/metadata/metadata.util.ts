@@ -26,7 +26,12 @@ export async function createMetadataDetailsModel(
       lockedUntil = valueDetails.lockedUntil;
     }
 
-    metadataValue = new MetadataValueModel({ value, expiry, lockStatus, lockedUntil });
+    metadataValue = new MetadataValueModel({
+      value: value!,
+      expiry: expiry!,
+      lockStatus: lockStatus!,
+      lockedUntil,
+    });
   }
 
   return new MetadataDetailsModel({ id, type, asset: assetId, name, specs, value: metadataValue });

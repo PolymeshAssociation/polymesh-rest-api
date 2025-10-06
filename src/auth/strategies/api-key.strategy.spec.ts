@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { when } from 'jest-when';
-import passport from 'passport';
 
 import { ApiKeyStrategy } from '~/auth/strategies/api-key.strategy';
-import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { MockAuthService, mockAuthServiceProvider } from '~/test-utils/service-mocks';
 
 describe('ApiKeyStrategy', () => {
@@ -26,42 +24,15 @@ describe('ApiKeyStrategy', () => {
   });
 
   it('should verify with the user when given a valid api key', async () => {
-    const mockRequest = {
-      headers: {
-        'x-api-key': mockApiKey,
-      },
-    };
+    when(authService.validateApiKey).calledWith(mockApiKey).mockResolvedValue(mockedUser);
 
-    when(authService.validateApiKey).calledWith(mockApiKey).mockReturnValue(mockedUser);
-
-    let authorizedUser;
-    passport.authenticate(
-      AuthStrategy.ApiKey,
-      (request: unknown, user: Express.User | false | null) => {
-        authorizedUser = user;
-      }
-    )(mockRequest, {}, {});
-
-    expect(authorizedUser).toEqual(mockedUser);
+    const result = await strategy.validate(mockApiKey);
+    expect(result).toEqual(mockedUser);
   });
 
   it('should return an Unauthorized response if the key is not found', async () => {
-    const mockRequest = {
-      headers: {
-        'x-api-key': 'not-a-secret',
-      },
-    };
+    when(authService.validateApiKey).calledWith('not-a-secret').mockResolvedValue(null);
 
-    when(authService.validateApiKey).calledWith(mockApiKey).mockReturnValue(mockedUser);
-
-    let authorizedUser;
-    passport.authenticate(
-      AuthStrategy.ApiKey,
-      (request: unknown, user: Express.User | false | null) => {
-        authorizedUser = user;
-      }
-    )(mockRequest, {}, {});
-
-    expect(authorizedUser).toBeFalsy();
+    await expect(strategy.validate('not-a-secret')).rejects.toThrow('API key not found');
   });
 });

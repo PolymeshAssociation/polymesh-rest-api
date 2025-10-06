@@ -76,7 +76,7 @@ describe('AuthService', () => {
 
       await service.deleteApiKey({ apiKey: testApiKey });
 
-      expect(mockApiKeyRepo.deleteApiKey).toBeCalledWith(testApiKey);
+      expect(mockApiKeyRepo.deleteApiKey).toHaveBeenCalledWith(testApiKey);
     });
   });
 });

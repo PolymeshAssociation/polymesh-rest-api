@@ -149,9 +149,7 @@ describe('CorporateActionsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() =>
-          service.findDistribution(assetId, new BigNumber(1))
-        ).rejects.toThrowError();
+        await expect(() => service.findDistribution(assetId, new BigNumber(1))).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

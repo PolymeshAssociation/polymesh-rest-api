@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { QueueName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { MessageService } from '~/message/common/message.service';
+import { AnyModel } from '~/offline-recorder/model/any.model';
 import { OfflineRecorderService } from '~/offline-recorder/offline-recorder.service';
 import { OfflineEventRepo } from '~/offline-recorder/repo/offline-event.repo';
 import { mockMessageServiceProvider, mockOfflineRepoProvider } from '~/test-utils/service-mocks';
@@ -46,7 +47,7 @@ describe('OfflineRecorderService', () => {
     it('should save an event', async () => {
       const msg = { id: 'someId' };
 
-      await service.recordEvent(msg);
+      await service.recordEvent(new AnyModel(msg));
 
       expect(mockOfflineRepo.recordEvent).toHaveBeenCalledWith(msg);
     });

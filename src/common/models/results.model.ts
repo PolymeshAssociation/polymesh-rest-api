@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { FromEntityObject } from '~/common/decorators/transformation';
 
 export class ResultsModel<DataType> {
-  @ApiProperty({ type: 'generic array' })
+  @ApiProperty({ type: 'array' })
   @FromEntityObject()
   readonly results: DataType[];
 

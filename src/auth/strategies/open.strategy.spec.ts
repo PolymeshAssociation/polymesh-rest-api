@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import passport from 'passport';
 
 import { OpenStrategy } from '~/auth/strategies/open.strategy';
-import { AuthStrategy } from '~/auth/strategies/strategies.consts';
 import { defaultUser } from '~/users/user.consts';
 
 describe('OpenStrategy', () => {
@@ -21,14 +19,8 @@ describe('OpenStrategy', () => {
   });
 
   it('should verify with the open user', async () => {
-    let authorizedUser;
-    passport.authenticate(
-      AuthStrategy.Open,
-      (request: unknown, user: Express.User | false | null) => {
-        authorizedUser = user;
-      }
-    )({}, {}, {});
-
-    expect(authorizedUser).toEqual(defaultUser);
+    // Test the validate method directly
+    const result = strategy.validate();
+    expect(result).toEqual(defaultUser);
   });
 });

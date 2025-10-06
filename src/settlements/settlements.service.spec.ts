@@ -123,7 +123,7 @@ describe('SettlementsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findInstruction(new BigNumber(123))).rejects.toThrowError();
+        await expect(() => service.findInstruction(new BigNumber(123))).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -145,7 +145,7 @@ describe('SettlementsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.findVenue(new BigNumber(123))).rejects.toThrowError();
+        await expect(() => service.findVenue(new BigNumber(123))).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

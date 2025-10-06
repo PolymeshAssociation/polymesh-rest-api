@@ -145,7 +145,7 @@ export class MockPolymesh {
   public _polkadotApi = {
     tx: {
       balances: {
-        transfer: jest.fn(),
+        transferWithMemo: jest.fn(),
         setBalance: jest.fn(),
       },
       cddServiceProviders: {

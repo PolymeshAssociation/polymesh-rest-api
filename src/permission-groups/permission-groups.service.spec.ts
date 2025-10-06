@@ -521,7 +521,7 @@ describe('PermissionGroupsService', () => {
       await expect(
         service.getGroupPermissions({ asset: assetId, id: new BigNumber(1) })
       ).rejects.toThrow(AppNotFoundError);
-      expect(mockNotFoundGroup.getPermissions).toBeCalledTimes(0);
+      expect(mockNotFoundGroup.getPermissions).toHaveBeenCalledTimes(0);
     });
   });
 

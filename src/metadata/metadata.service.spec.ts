@@ -135,7 +135,7 @@ describe('MetadataService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(service.findOne({ asset: ticker, type, id })).rejects.toThrowError();
+        await expect(service.findOne({ asset: ticker, type, id })).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

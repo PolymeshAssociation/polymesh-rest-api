@@ -6,7 +6,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Account, Identity } from '@polymeshassociation/polymesh-sdk/types';
 import { Request } from 'express';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp } from 'path-to-regexp';
 
 import { AccountsService } from '~/accounts/accounts.service';
 import { AppInternalError } from '~/common/errors';
@@ -78,7 +78,7 @@ export class DeveloperTestingService {
     const initialPolyxCalls = accounts
       .filter(({ initialPolyx }) => initialPolyx.gt(0))
       .map(({ address, initialPolyx }) =>
-        balances.transfer(address, initialPolyx.toNumber() * unitsPerPolyx)
+        balances.transferWithMemo(address, initialPolyx.toNumber() * unitsPerPolyx, 'Initial Polyx')
       );
 
     await this.polymeshService.execTransaction(signerAddress, utility.batchAll, [
@@ -146,7 +146,7 @@ export class DeveloperTestingService {
       return {
         path,
         // convert swagger syntax
-        matcher: pathToRegexp(path.replace(/\{(.*?)\}/g, ':$1')),
+        matcher: pathToRegexp(path.replace(/\{(.*?)\}/g, ':$1')).regexp,
         covered: false,
       };
     });

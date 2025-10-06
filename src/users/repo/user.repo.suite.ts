@@ -18,7 +18,7 @@ export const testUsersRepo = async (usersRepo: UsersRepo): Promise<void> => {
     it('should throw ExistsError if user exists with given name', () => {
       const expectedError = new AppConflictError(name, UsersRepo.type);
 
-      return expect(usersRepo.createUser({ name })).rejects.toThrowError(expectedError);
+      return expect(usersRepo.createUser({ name })).rejects.toThrow(expectedError);
     });
   });
 
@@ -31,7 +31,7 @@ export const testUsersRepo = async (usersRepo: UsersRepo): Promise<void> => {
     it('should throw NotFoundError if the user does not exist', async () => {
       const unknownName = 'unknownName';
       const expectedError = new AppNotFoundError(unknownName, UsersRepo.type);
-      return expect(usersRepo.findByName(unknownName)).rejects.toThrowError(expectedError);
+      return expect(usersRepo.findByName(unknownName)).rejects.toThrow(expectedError);
     });
   });
 };

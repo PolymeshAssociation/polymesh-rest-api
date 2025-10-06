@@ -86,7 +86,7 @@ describe('AccountsService', () => {
 
         const address = 'address';
 
-        await expect(() => service.findOne(address)).rejects.toThrowError();
+        await expect(() => service.findOne(address)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -217,7 +217,7 @@ describe('AccountsService', () => {
 
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-        await expect(() => service.getPermissions('address')).rejects.toThrowError();
+        await expect(() => service.getPermissions('address')).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });

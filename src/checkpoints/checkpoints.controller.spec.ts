@@ -272,7 +272,7 @@ describe('CheckpointsController', () => {
         { size: new BigNumber(10) }
       );
       expect(result).toEqual(mockResult);
-      expect(mockCheckpointsService.getHolders).toBeCalled();
+      expect(mockCheckpointsService.getHolders).toHaveBeenCalled();
     });
   });
 
@@ -372,7 +372,7 @@ describe('CheckpointsController', () => {
         complexity,
       });
       expect(result).toEqual(mockResult);
-      expect(mockCheckpointsService.getComplexityForPeriod).toBeCalledWith(
+      expect(mockCheckpointsService.getComplexityForPeriod).toHaveBeenCalledWith(
         assetId,
         new BigNumber(1),
         start,

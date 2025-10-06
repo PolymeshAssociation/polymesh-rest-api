@@ -82,7 +82,7 @@ describe('NetworkController', () => {
     it('should throw NotFoundException if middleware metadata is not found', async () => {
       mockNetworkService.getMiddlewareMetadata.mockResolvedValue(null);
 
-      await expect(controller.getMiddleWareMetaData()).rejects.toThrowError();
+      await expect(controller.getMiddleWareMetaData()).rejects.toThrow();
     });
   });
 });

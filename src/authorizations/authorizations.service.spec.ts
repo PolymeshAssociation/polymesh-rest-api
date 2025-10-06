@@ -178,7 +178,7 @@ describe('AuthorizationsService', () => {
         await expect(() =>
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           service.findOne(mockAccount as any, new BigNumber(1))
-        ).rejects.toThrowError();
+        ).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -226,7 +226,7 @@ describe('AuthorizationsService', () => {
         .calledWith(mockIdentity as any, id)
         .mockRejectedValue(mockError);
 
-      await expect(() => service.getAuthRequest(address, id)).rejects.toThrowError(mockError);
+      await expect(() => service.getAuthRequest(address, id)).rejects.toThrow(mockError);
 
       when(findOneSpy)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

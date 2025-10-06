@@ -84,7 +84,7 @@ describe('NftService', () => {
 
       const address = 'address';
 
-      await expect(() => service.findCollection(address)).rejects.toThrowError();
+      await expect(() => service.findCollection(address)).rejects.toThrow();
 
       expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
     });
@@ -113,7 +113,7 @@ describe('NftService', () => {
 
       const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
-      await expect(() => service.findNft(assetId, id)).rejects.toThrowError();
+      await expect(() => service.findNft(assetId, id)).rejects.toThrow();
 
       expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
     });
