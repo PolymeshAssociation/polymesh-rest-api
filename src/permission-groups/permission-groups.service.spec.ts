@@ -139,7 +139,7 @@ describe('PermissionGroupsService', () => {
     it('should create a permission group with the given transaction group permissions', async () => {
       const result = await service.createPermissionGroup(assetId, {
         signer,
-        transactionGroups: [TxGroup.Distribution],
+        transactionGroups: [TxGroup.CapitalDistribution],
       });
 
       expect(result).toEqual({
@@ -151,7 +151,7 @@ describe('PermissionGroupsService', () => {
         mockAsset.permissions.createGroup,
         expect.objectContaining({
           permissions: {
-            transactionGroups: [TxGroup.Distribution],
+            transactionGroups: [TxGroup.CapitalDistribution],
           },
         }),
         expect.objectContaining({ signer })
@@ -198,7 +198,7 @@ describe('PermissionGroupsService', () => {
     it('should return list of custom permission groups', async () => {
       const mockCustomPermissions = {
         id: new BigNumber(1),
-        transactionGroups: [TxGroup.Distribution],
+        transactionGroups: [TxGroup.CapitalDistribution],
       };
       const mockCustomGroup = createMock<CustomPermissionGroup>({
         id: new BigNumber(1),
@@ -337,7 +337,7 @@ describe('PermissionGroupsService', () => {
     });
 
     it('should return both custom and known permission groups with their permissions', async () => {
-      const mockCustomPermissions = { transactionGroups: [TxGroup.Distribution] };
+      const mockCustomPermissions = { transactionGroups: [TxGroup.CapitalDistribution] };
       const mockCustomGroup = createMock<CustomPermissionGroup>({
         id: new BigNumber(1),
         getPermissions: jest.fn().mockResolvedValue(mockCustomPermissions),
@@ -393,7 +393,7 @@ describe('PermissionGroupsService', () => {
     it('should set the permissions of a permission group with the given transaction group permissions', async () => {
       const result = await service.modifyPermissions(assetId, new BigNumber(1), {
         signer,
-        transactionGroups: [TxGroup.Distribution],
+        transactionGroups: [TxGroup.CapitalDistribution],
       });
 
       expect(result).toEqual({
@@ -404,7 +404,7 @@ describe('PermissionGroupsService', () => {
         mockPermissionGroup.setPermissions,
         expect.objectContaining({
           permissions: {
-            transactionGroups: [TxGroup.Distribution],
+            transactionGroups: [TxGroup.CapitalDistribution],
           },
         }),
         expect.objectContaining({ signer })

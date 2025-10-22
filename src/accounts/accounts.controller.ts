@@ -58,6 +58,21 @@ export class AccountsController {
   ) {}
 
   @ApiOperation({
+    summary: 'Get the treasury balance',
+    description: 'This endpoint will provide the balance held in the network treasury',
+  })
+  @ApiOkResponse({
+    description: 'Treasury balance response',
+    type: TreasuryBalanceModel,
+  })
+  @Get('treasury/balance')
+  async getTreasuryBalance(): Promise<TreasuryBalanceModel> {
+    const balance = await this.networkService.getTreasuryBalance();
+
+    return new TreasuryBalanceModel({ balance });
+  }
+
+  @ApiOperation({
     summary: 'Get the DID associated with an Account',
     description: 'This endpoint provides account to identity lookup',
   })
@@ -305,21 +320,6 @@ export class AccountsController {
     const { address } = this.networkService.getTreasuryAccount();
 
     return new AccountModel({ address });
-  }
-
-  @ApiOperation({
-    summary: 'Get the treasury balance',
-    description: 'This endpoint will provide the balance held in the network treasury',
-  })
-  @ApiOkResponse({
-    description: 'Treasury balance response',
-    type: TreasuryBalanceModel,
-  })
-  @Get('treasury/balance')
-  async getTreasuryBalance(): Promise<TreasuryBalanceModel> {
-    const balance = await this.networkService.getTreasuryBalance();
-
-    return new TreasuryBalanceModel({ balance });
   }
 
   @ApiOperation({

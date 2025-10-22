@@ -14,7 +14,7 @@ import { StatAccreditedClaimModel } from '~/assets/models/stat-claim-accredited.
 import { StatAffiliateClaimModel } from '~/assets/models/stat-claim-affiliate.model';
 import { StatJurisdictionClaimModel } from '~/assets/models/stat-claim-jurisdiction.model';
 import { ApiPropertyOneOf } from '~/common/decorators';
-import { FromEntity } from '~/common/decorators/transformation';
+import { FromBigNumber, FromEntity } from '~/common/decorators/transformation';
 
 export class TransferRestrictionClaimValueModel {
   declare readonly type: TransferRestrictionType.ClaimCount;
@@ -22,16 +22,19 @@ export class TransferRestrictionClaimValueModel {
   @ApiProperty({
     description: 'The claim count/percentage restriction value',
     example: '10',
-    type: 'object',
+    type: 'string',
   })
+  @FromBigNumber()
   readonly min: BigNumber;
 
   @ApiProperty({
     description: 'The maximum claim count/percentage restriction value',
     example: '40',
-    type: 'object',
+    type: 'string',
+    required: false,
   })
-  readonly max: BigNumber;
+  @FromBigNumber()
+  readonly max?: BigNumber;
 
   @ApiProperty({
     description: 'The DID of the claim issuer',
@@ -43,11 +46,7 @@ export class TransferRestrictionClaimValueModel {
 
   @ApiPropertyOneOf({
     description: 'The claim associated with the transfer restriction',
-    union: [
-      StatAccreditedClaimModel,
-      StatAffiliateClaimModel,
-      StatJurisdictionClaimModel,
-    ],
+    union: [StatAccreditedClaimModel, StatAffiliateClaimModel, StatJurisdictionClaimModel],
   })
   @Type(() => StatClaimModel, {
     keepDiscriminatorProperty: true,

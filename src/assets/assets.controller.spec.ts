@@ -20,7 +20,14 @@ import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
-import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
+import { StatAccreditedClaimModel } from '~/assets/models/stat-claim-accredited.model';
+import { StatAffiliateClaimModel } from '~/assets/models/stat-claim-affiliate.model';
+import { StatJurisdictionClaimModel } from '~/assets/models/stat-claim-jurisdiction.model';
+import { TransferRestrictionClaimCountModel } from '~/assets/models/transfer-restriction-claim-count.model';
+import { TransferRestrictionClaimPercentageModel } from '~/assets/models/transfer-restriction-claim-percentage.model';
+import { TransferRestrictionCountModel } from '~/assets/models/transfer-restriction-count.model';
+import { TransferRestrictionPercentageModel } from '~/assets/models/transfer-restriction-percentage.model';
+import { TransferRestrictionsModel } from '~/assets/models/transfer-restrictions.model';
 import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -543,98 +550,136 @@ describe('AssetsController', () => {
   });
 
   describe('getTransferRestrictions', () => {
-    it('should return the transfer restrictions for the asset with Count and Percentage types', async () => {
-      const mockTransferRestrictionValues = [
-        {
-          restriction: {
+    it('should return active transfer restrictions with basic types', async () => {
+      const mockTransferRestrictions = {
+        paused: false,
+        restrictions: [
+          {
             type: TransferRestrictionType.Count,
             value: new BigNumber(1),
+            exemptedIds: ['0x1000'],
           },
-          value: new BigNumber(1),
-        },
-        {
-          restriction: {
+          {
             type: TransferRestrictionType.Percentage,
-            value: new BigNumber(2),
+            value: new BigNumber(50),
           },
-          value: new BigNumber(2),
-        },
-      ];
+        ],
+      };
 
-      mockAssetsService.getTransferRestrictions.mockResolvedValue(mockTransferRestrictionValues);
+      mockAssetsService.getTransferRestrictions.mockResolvedValue(mockTransferRestrictions);
 
       const result = await controller.getTransferRestrictions({ asset: assetId });
 
-      expect(result).toEqual(mockTransferRestrictionValues);
       expect(mockAssetsService.getTransferRestrictions).toHaveBeenCalledWith(assetId);
+      expect(result).toBeInstanceOf(TransferRestrictionsModel);
+      expect(result.paused).toBe(false);
+      expect(result.restrictions).toHaveLength(mockTransferRestrictions.restrictions.length);
 
-      // Verify that each result item is an instance of TransferRestrictionsValueModel
-      result.forEach(item => {
-        expect(item).toBeInstanceOf(TransferRestrictionsValueModel);
-      });
+      const [countRestriction, percentageRestriction] = result.restrictions;
+
+      expect(countRestriction).toBeInstanceOf(TransferRestrictionCountModel);
+      const countRestrictionModel = countRestriction as TransferRestrictionCountModel;
+      expect(countRestrictionModel.type).toBe(TransferRestrictionType.Count);
+      expect(countRestrictionModel.value.toString()).toBe('1');
+      expect(countRestrictionModel.exemptedIds).toEqual(
+        mockTransferRestrictions.restrictions[0].exemptedIds
+      );
+
+      expect(percentageRestriction).toBeInstanceOf(TransferRestrictionPercentageModel);
+      const percentageRestrictionModel =
+        percentageRestriction as TransferRestrictionPercentageModel;
+      expect(percentageRestrictionModel.type).toBe(TransferRestrictionType.Percentage);
+      expect(percentageRestrictionModel.value.toString()).toBe('50');
     });
 
-    it('should handle ClaimCount and ClaimPercentage restrictions', async () => {
-      const mockClaimTypeRestrictions = [
-        {
-          restriction: {
+    it('should map claim-based restrictions into the response model', async () => {
+      const affiliateIssuer = { did: '0x2000' } as unknown as Identity;
+      const jurisdictionIssuer = { did: '0x3000' } as unknown as Identity;
+
+      const mockTransferRestrictions = {
+        paused: true,
+        restrictions: [
+          {
             type: TransferRestrictionType.ClaimCount,
+            exemptedIds: ['0x4000'],
             value: {
-              min: new BigNumber(10),
-              max: new BigNumber(50),
-              issuer: {
-                did: '0x2000',
-              },
+              min: new BigNumber(5),
+              max: new BigNumber(10),
+              issuer: affiliateIssuer,
               claim: {
                 type: ClaimType.Accredited,
                 accredited: true,
               },
             },
           },
-          value: new BigNumber(5),
-        },
-        {
-          restriction: {
+          {
             type: TransferRestrictionType.ClaimPercentage,
             value: {
-              min: new BigNumber(10),
-              max: new BigNumber(50),
-              issuer: {
-                did: '0x2000',
-              },
+              min: new BigNumber(15),
+              max: new BigNumber(30),
+              issuer: affiliateIssuer,
               claim: {
                 type: ClaimType.Affiliate,
                 affiliate: true,
               },
             },
           },
-          value: new BigNumber(25),
-        },
-        {
-          restriction: {
-            type: TransferRestrictionType.ClaimCount,
+          {
+            type: TransferRestrictionType.ClaimPercentage,
             value: {
-              min: new BigNumber(10),
-              max: new BigNumber(50),
-              issuer: {
-                did: '0x2000',
-              },
+              min: new BigNumber(20),
+              max: new BigNumber(40),
+              issuer: jurisdictionIssuer,
               claim: {
                 type: ClaimType.Jurisdiction,
                 countryCode: CountryCode.Us,
               },
             },
           },
-          value: new BigNumber(0),
-        },
-      ];
+        ],
+      };
 
-      mockAssetsService.getTransferRestrictions.mockResolvedValue(mockClaimTypeRestrictions);
+      mockAssetsService.getTransferRestrictions.mockResolvedValue(mockTransferRestrictions);
 
       const result = await controller.getTransferRestrictions({ asset: assetId });
 
-      expect(result).toEqual(mockClaimTypeRestrictions);
       expect(mockAssetsService.getTransferRestrictions).toHaveBeenCalledWith(assetId);
+      expect(result.paused).toBe(true);
+      expect(result.restrictions).toHaveLength(mockTransferRestrictions.restrictions.length);
+
+      const [claimCount, affiliatePercentage, jurisdictionPercentage] = result.restrictions;
+
+      expect(claimCount).toBeInstanceOf(TransferRestrictionClaimCountModel);
+      const claimCountModel = claimCount as TransferRestrictionClaimCountModel;
+      expect(claimCountModel.type).toBe(TransferRestrictionType.ClaimCount);
+      expect(claimCountModel.exemptedIds).toEqual(['0x4000']);
+      expect(claimCountModel.value.min.toString()).toBe('5');
+      expect(claimCountModel.value.max?.toString()).toBe('10');
+      expect(claimCountModel.value.issuer).toEqual(affiliateIssuer);
+      expect(claimCountModel.value.claim.type).toBe(ClaimType.Accredited);
+      expect(claimCountModel.value.claim).toBeInstanceOf(StatAccreditedClaimModel);
+      const accreditedClaim = claimCountModel.value.claim as StatAccreditedClaimModel;
+      expect(accreditedClaim.accredited).toBe(true);
+
+      expect(affiliatePercentage).toBeInstanceOf(TransferRestrictionClaimPercentageModel);
+      const affiliatePercentageModel =
+        affiliatePercentage as TransferRestrictionClaimPercentageModel;
+      expect(affiliatePercentageModel.type).toBe(TransferRestrictionType.ClaimPercentage);
+      expect(affiliatePercentageModel.value.min.toString()).toBe('15');
+      expect(affiliatePercentageModel.value.max?.toString()).toBe('30');
+      expect(affiliatePercentageModel.value.claim.type).toBe(ClaimType.Affiliate);
+      expect(affiliatePercentageModel.value.claim).toBeInstanceOf(StatAffiliateClaimModel);
+      const affiliateClaim = affiliatePercentageModel.value.claim as StatAffiliateClaimModel;
+      expect(affiliateClaim.affiliate).toBe(true);
+
+      expect(jurisdictionPercentage).toBeInstanceOf(TransferRestrictionClaimPercentageModel);
+      const jurisdictionPercentageModel =
+        jurisdictionPercentage as TransferRestrictionClaimPercentageModel;
+      expect(jurisdictionPercentageModel.value.claim.type).toBe(ClaimType.Jurisdiction);
+      expect(jurisdictionPercentageModel.value.claim).toBeInstanceOf(StatJurisdictionClaimModel);
+      const jurisdictionClaim = jurisdictionPercentageModel.value
+        .claim as StatJurisdictionClaimModel;
+      expect(jurisdictionClaim.countryCode).toBe(CountryCode.Us);
     });
   });
 
@@ -692,12 +737,14 @@ describe('AssetsController', () => {
 
   describe('getStats', () => {
     it('should return the enabled statistics for the asset', async () => {
-      const mockStats = [{ type: 'Count', value: new BigNumber(100) }] as unknown as object[];
+      const mockStats = [{ type: 'Count' }] as unknown as object[];
 
       mockAssetsService.getStats.mockResolvedValue(mockStats as unknown as never);
 
       const result = await controller.getStats({ asset: assetId });
-      expect(result).toEqual(mockStats);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty('type', 'Count');
+      expect(result[0]).not.toHaveProperty('value');
       expect(mockAssetsService.getStats).toHaveBeenCalledWith(assetId);
     });
   });

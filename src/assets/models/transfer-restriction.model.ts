@@ -11,6 +11,15 @@ export class TransferRestrictionModel {
   })
   readonly type: TransferRestrictionType;
 
+  @ApiProperty({
+    description: 'DIDs that are exempted from this restriction',
+    type: 'string',
+    isArray: true,
+    required: false,
+    example: ['0x0600...', '0x0100...'],
+  })
+  readonly exemptedIds?: string[];
+
   constructor(model: TransferRestrictionModel) {
     Object.assign(this, model);
   }

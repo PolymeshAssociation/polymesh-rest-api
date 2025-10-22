@@ -34,7 +34,9 @@
     "postgres:dev:migration:generate": "source ./postgres.dev.config && yarn postgres migration:generate",
     "postgres:dev:migration:run": "source ./postgres.dev.config && yarn postgres migration:run",
     "postgres:dev:migration:revert": "source ./postgres.dev.config && yarn postgres migration:revert",
-    "postgres:migration:run": "yarn postgres migration:run"
+    "postgres:migration:run": "yarn postgres migration:run",
+    "docker:build": "docker build -t polymeshassociation/polymesh-rest-api:local .",
+    "docker:build:no-cache": "docker build --no-cache -t polymeshassociation/polymesh-rest-api:local ."
   },
   "dependencies": {
     "@golevelup/ts-jest": "^0.3.3",
@@ -50,7 +52,7 @@
     "@polymeshassociation/fireblocks-signing-manager": "^2.5.0",
     "@polymeshassociation/hashicorp-vault-signing-manager": "^3.4.0",
     "@polymeshassociation/local-signing-manager": "^3.3.0",
-    "@polymeshassociation/polymesh-sdk": "28.0.0",
+    "@polymeshassociation/polymesh-sdk": "v29.1.0-beta.9",
     "@polymeshassociation/polymesh-types": "^6.2.0",
     "@polymeshassociation/signing-manager-types": "^3.2.0",
     "class-transformer": "0.5.1",

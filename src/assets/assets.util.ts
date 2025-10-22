@@ -2,6 +2,7 @@
 
 import {
   Asset,
+  ClaimType,
   CreateGroupParams,
   GroupPermissions,
   Identity,
@@ -18,6 +19,12 @@ import {
 import { isFungibleAsset } from '@polymeshassociation/polymesh-sdk/utils';
 
 import { TransactionPermissionsModel } from '~/accounts/models/transaction-permissions.model';
+import {
+  StatAccreditedClaimDto,
+  StatAffiliateClaimDto,
+  StatClaimDto,
+  StatJurisdictionClaimDto,
+} from '~/assets/dto/stat-claim.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -180,20 +187,76 @@ export async function transferRestrictionsDtoToRestrictions(
   input: Omit<SetTransferRestrictionsDto, keyof TransactionBaseDto>,
   resolveIdentity: (did: string) => Promise<Identity>
 ): Promise<TransferRestrictionParams['restrictions']> {
+  const toInputStatClaim = (claim: StatClaimDto): InputStatClaim => {
+    switch (claim.type) {
+      case ClaimType.Accredited: {
+        const accreditedClaim = claim as StatAccreditedClaimDto;
+        return {
+          type: ClaimType.Accredited,
+          accredited: accreditedClaim.accredited,
+        };
+      }
+      case ClaimType.Affiliate: {
+        const affiliateClaim = claim as StatAffiliateClaimDto;
+        return {
+          type: ClaimType.Affiliate,
+          affiliate: affiliateClaim.affiliate,
+        };
+      }
+      case ClaimType.Jurisdiction: {
+        const jurisdictionClaim = claim as StatJurisdictionClaimDto;
+        return {
+          type: ClaimType.Jurisdiction,
+          countryCode: jurisdictionClaim.countryCode,
+        };
+      }
+      default:
+        throw new Error(`Unsupported stat claim type: ${claim.type}`);
+    }
+  };
+
   return await Promise.all(
     input.restrictions.map(async restriction => {
-      if (
-        restriction.type === TransferRestrictionType.ClaimCount ||
-        restriction.type === TransferRestrictionType.ClaimPercentage
-      ) {
-        const issuer = await resolveIdentity(restriction.issuer);
-        return {
-          ...restriction,
-          issuer,
-        } as TransferRestrictionClaimCountInput | TransferRestrictionInputClaimPercentage;
+      switch (restriction.type) {
+        case TransferRestrictionType.Count: {
+          const countRestriction: TransferRestrictionInputCount = {
+            type: TransferRestrictionType.Count,
+            count: restriction.count,
+          };
+          return countRestriction;
+        }
+        case TransferRestrictionType.Percentage: {
+          const percentageRestriction: TransferRestrictionInputPercentage = {
+            type: TransferRestrictionType.Percentage,
+            percentage: restriction.percentage,
+          };
+          return percentageRestriction;
+        }
+        case TransferRestrictionType.ClaimCount: {
+          const issuer = await resolveIdentity(restriction.issuer);
+          const claimRestriction: TransferRestrictionClaimCountInput = {
+            type: TransferRestrictionType.ClaimCount,
+            min: restriction.min,
+            max: restriction.max,
+            claim: toInputStatClaim(restriction.claim),
+            issuer,
+          };
+          return claimRestriction;
+        }
+        case TransferRestrictionType.ClaimPercentage: {
+          const issuer = await resolveIdentity(restriction.issuer);
+          const claimRestriction: TransferRestrictionInputClaimPercentage = {
+            type: TransferRestrictionType.ClaimPercentage,
+            min: restriction.min,
+            max: restriction.max,
+            claim: toInputStatClaim(restriction.claim),
+            issuer,
+          };
+          return claimRestriction;
+        }
+        default:
+          throw new Error('Unsupported transfer restriction type');
       }
-
-      return restriction as unknown as TransferRestrictionParams['restrictions'][number];
     })
   );
 }

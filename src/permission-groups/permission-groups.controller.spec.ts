@@ -53,7 +53,7 @@ describe('PermissionGroupsController', () => {
 
       const result = await controller.createGroup(
         { asset: assetId },
-        { signer, transactionGroups: [TxGroup.Distribution] }
+        { signer, transactionGroups: [TxGroup.CapitalDistribution] }
       );
 
       expect(result).toEqual({ ...processedTxResult, id: mockGroup.id });
@@ -134,14 +134,14 @@ describe('PermissionGroupsController', () => {
 
       const result = await controller.setPermissions(
         { asset: assetId, id: new BigNumber(1) },
-        { signer, transactionGroups: [TxGroup.Distribution] }
+        { signer, transactionGroups: [TxGroup.CapitalDistribution] }
       );
 
       expect(result).toEqual(processedTxResult);
       expect(mockPermissionGroupsService.modifyPermissions).toHaveBeenCalledWith(
         assetId,
         new BigNumber(1),
-        { signer, transactionGroups: [TxGroup.Distribution] }
+        { signer, transactionGroups: [TxGroup.CapitalDistribution] }
       );
     });
   });

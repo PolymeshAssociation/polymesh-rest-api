@@ -2512,16 +2512,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polymeshassociation/polymesh-sdk@npm:28.0.0":
-  version: 28.0.0
-  resolution: "@polymeshassociation/polymesh-sdk@npm:28.0.0"
+"@polymeshassociation/polymesh-sdk@npm:v29.1.0-beta.9":
+  version: 29.1.0-beta.9
+  resolution: "@polymeshassociation/polymesh-sdk@npm:29.1.0-beta.9"
   dependencies:
     "@apollo/client": "npm:^3.8.1"
     "@polkadot/api": "npm:11.2.1"
     "@polkadot/util": "npm:12.6.2"
     "@polkadot/util-crypto": "npm:12.6.2"
+    "@polymeshassociation/polymesh-types": "npm:^6.2.0"
     bignumber.js: "npm:9.0.1"
-    bluebird: "npm:^3.7.2"
     cross-fetch: "npm:^4.0.0"
     dayjs: "npm:1.11.9"
     graphql: "npm:^16.8.0"
@@ -2532,7 +2532,7 @@ __metadata:
     semver: "npm:^7.5.4"
     ts-morph: "npm:^25.0.1"
     websocket: "npm:^1.0.34"
-  checksum: 10c0/71e36966ae20cf62bb9c5ff96f7e56f93a22e37d028334df0ef5e8b22a8f3f1768938e5ad447421dd6c221b2f043cba2d20527a06fcb204d122cfc4fe000f72c
+  checksum: 10c0/ad690573767eb54a97942d63693231f3a8364c946676462acec7ef56b3000e864c4ea08a9cc48391532a036d01d63271085ece01f26304cf45217276a638e61f
   languageName: node
   linkType: hard
 
@@ -4390,13 +4390,6 @@ __metadata:
     inherits: "npm:^2.0.4"
     readable-stream: "npm:^3.4.0"
   checksum: 10c0/02847e1d2cb089c9dc6958add42e3cdeaf07d13f575973963335ac0fdece563a50ac770ac4c8fa06492d2dd276f6cc3b7f08c7cd9c7a7ad0f8d388b2a28def5f
-  languageName: node
-  linkType: hard
-
-"bluebird@npm:^3.7.2":
-  version: 3.7.2
-  resolution: "bluebird@npm:3.7.2"
-  checksum: 10c0/680de03adc54ff925eaa6c7bb9a47a0690e8b5de60f4792604aae8ed618c65e6b63a7893b57ca924beaf53eee69c5af4f8314148c08124c550fe1df1add897d2
   languageName: node
   linkType: hard
 
@@ -11278,7 +11271,7 @@ __metadata:
     "@polymeshassociation/fireblocks-signing-manager": "npm:^2.5.0"
     "@polymeshassociation/hashicorp-vault-signing-manager": "npm:^3.4.0"
     "@polymeshassociation/local-signing-manager": "npm:^3.3.0"
-    "@polymeshassociation/polymesh-sdk": "npm:28.0.0"
+    "@polymeshassociation/polymesh-sdk": "npm:v29.1.0-beta.9"
     "@polymeshassociation/polymesh-types": "npm:^6.2.0"
     "@polymeshassociation/signing-manager-types": "npm:^3.2.0"
     "@semantic-release/changelog": "npm:^6.0.3"

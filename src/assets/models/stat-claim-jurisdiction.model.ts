@@ -11,9 +11,10 @@ export class StatJurisdictionClaimModel extends StatClaimModel {
   @ApiProperty({
     description: 'Country code for the jurisdiction claim',
     enum: CountryCode,
+    nullable: true,
     example: CountryCode.Ca,
   })
-  readonly countryCode: CountryCode;
+  readonly countryCode: CountryCode | null;
 
   constructor(model: StatJurisdictionClaimModel) {
     super(model);

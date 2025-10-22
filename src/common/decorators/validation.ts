@@ -6,11 +6,8 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { ClaimType } from '@polymeshassociation/polymesh-sdk/types';
 import { isHexUuid, isUuid } from '@polymeshassociation/polymesh-sdk/utils';
 import {
-  IsHexadecimal,
   IsUppercase,
   isUppercase,
-  Length,
-  Matches,
   MaxLength,
   maxLength,
   registerDecorator,
@@ -26,20 +23,35 @@ import { getTxTags, getTxTagsWithModuleNames } from '~/common/utils';
 import { DID_LENGTH } from '~/identities/identities.consts';
 
 export function IsDid(validationOptions?: ValidationOptions) {
-  return applyDecorators(
-    IsHexadecimal({
-      ...validationOptions,
-      message: 'DID must be a hexadecimal number',
-    }),
-    Matches(/^0x.+/, {
-      ...validationOptions,
-      message: 'DID must start with "0x"',
-    }),
-    Length(DID_LENGTH, undefined, {
-      ...validationOptions,
-      message: `DID must be ${DID_LENGTH} characters long`,
-    })
-  );
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isDid',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          if (typeof value !== 'string') {
+            return false;
+          }
+          if (value.length === 0) {
+            return false;
+          }
+          if (!value.startsWith('0x')) {
+            return false;
+          }
+          if (value.length !== DID_LENGTH) {
+            return false;
+          }
+          const hexValue = value.slice(2);
+          return /^[0-9a-fA-F]+$/.test(hexValue);
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a valid DID (received: "${args.value}")`;
+        },
+      },
+    });
+  };
 }
 
 export function IsTicker(validationOptions?: ValidationOptions) {

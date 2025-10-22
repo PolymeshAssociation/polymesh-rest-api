@@ -5,13 +5,13 @@ import {
   CddClaim,
   ClaimData,
   ClaimScope,
-  ClaimType,
   CustomClaimType,
   CustomClaimTypeWithDid,
   ModifyClaimsParams,
   ResultSet,
   RevokeClaimsParams,
   Scope,
+  TrustedFor,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ModifyClaimsDto } from '~/claims/dto/modify-claims.dto';
@@ -44,7 +44,7 @@ export class ClaimsService {
   public async findAssociatedByDid(
     target: string,
     scope?: Scope,
-    claimTypes?: ClaimType[],
+    claimTypes?: TrustedFor[],
     includeExpired?: boolean,
     size?: BigNumber,
     start?: BigNumber

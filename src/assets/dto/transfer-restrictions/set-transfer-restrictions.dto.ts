@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiExtraModels } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
@@ -9,7 +9,6 @@ import { TransferRestrictionClaimCountInputDto } from '~/assets/dto/transfer-res
 import { TransferRestrictionClaimPercentageInputDto } from '~/assets/dto/transfer-restrictions/transfer-restriction-claim-percentage-input.dto';
 import { TransferRestrictionCountInputDto } from '~/assets/dto/transfer-restrictions/transfer-restriction-count-input.dto';
 import { TransferRestrictionPercentageInputDto } from '~/assets/dto/transfer-restrictions/transfer-restriction-percentage-input.dto';
-import { ApiPropertyOneOf } from '~/common/decorators';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 
 @ApiExtraModels(
@@ -19,14 +18,46 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
   TransferRestrictionClaimPercentageInputDto
 )
 export class SetTransferRestrictionsDto extends TransactionBaseDto {
-  @ApiPropertyOneOf({
+  @ApiProperty({
     description: 'Transfer restrictions to set',
-    isArray: true,
-    union: [
-      TransferRestrictionCountInputDto,
-      TransferRestrictionPercentageInputDto,
-      TransferRestrictionClaimCountInputDto,
-      TransferRestrictionClaimPercentageInputDto,
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: '#/components/schemas/TransferRestrictionCountInputDto' },
+        { $ref: '#/components/schemas/TransferRestrictionPercentageInputDto' },
+        { $ref: '#/components/schemas/TransferRestrictionClaimCountInputDto' },
+        { $ref: '#/components/schemas/TransferRestrictionClaimPercentageInputDto' },
+      ],
+    },
+    example: [
+      {
+        type: 'Count',
+        count: '100',
+      },
+      {
+        type: 'Percentage',
+        percentage: '50',
+      },
+      {
+        type: 'ClaimCount',
+        issuer: '0x0600000000000000000000000000000000000000000000000000000000000000',
+        claim: {
+          type: 'Accredited',
+          accredited: true,
+        },
+        min: '1',
+        max: '10',
+      },
+      {
+        type: 'ClaimPercentage',
+        issuer: '0x0600000000000000000000000000000000000000000000000000000000000000',
+        claim: {
+          type: 'Accredited',
+          accredited: true,
+        },
+        min: '1',
+        max: '10',
+      },
     ],
   })
   @ValidateNested({ each: true })

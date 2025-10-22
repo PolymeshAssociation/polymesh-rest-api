@@ -1,7 +1,11 @@
 /* istanbul ignore file */
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { TxGroup } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  AGENT_TX_GROUP_VALUES,
+  AgentTxGroup,
+  TxGroup,
+} from '@polymeshassociation/polymesh-sdk/types';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, ValidateNested } from 'class-validator';
 
@@ -27,13 +31,13 @@ export class CreatePermissionGroupDto extends TransactionBaseDto {
     description:
       'Transaction Groups that `external agent` has permission to execute. This value should not be passed along with the `transactions`.',
     isArray: true,
-    enum: TxGroup,
-    example: [TxGroup.Distribution],
+    enum: AGENT_TX_GROUP_VALUES,
+    example: [TxGroup.CapitalDistribution],
   })
   @IncompatibleWith(['transactions'], {
     message: 'Cannot specify both transactions and transactionGroups',
   })
   @IsArray()
-  @IsEnum(TxGroup, { each: true })
-  readonly transactionGroups?: TxGroup[];
+  @IsEnum(AGENT_TX_GROUP_VALUES, { each: true })
+  readonly transactionGroups?: AgentTxGroup[];
 }

@@ -1,30 +1,30 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { MetadataLockStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 export class MetadataValueModel {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Value of the Asset Metadata',
     type: 'string',
     example: 'Some metadata',
   })
-  readonly value: string;
+  readonly value?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Date at which the Metadata value expires, null if it never expires',
     type: 'string',
     example: new Date('05/23/2021').toISOString(),
     nullable: true,
   })
-  readonly expiry: Date | null;
+  readonly expiry?: Date | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Lock status of Metadata value',
     enum: MetadataLockStatus,
     example: MetadataLockStatus.LockedUntil,
   })
-  readonly lockStatus: MetadataLockStatus;
+  readonly lockStatus?: MetadataLockStatus;
 
   @ApiPropertyOptional({
     description:

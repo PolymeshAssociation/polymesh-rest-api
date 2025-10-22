@@ -8,7 +8,7 @@ import { TransferRestrictionModel } from '~/assets/models/transfer-restriction.m
 import { FromBigNumber } from '~/common/decorators/transformation';
 
 export class TransferRestrictionPercentageModel extends TransferRestrictionModel {
-  declare readonly type: TransferRestrictionType.Count;
+  declare readonly type: TransferRestrictionType.Percentage;
 
   @ApiProperty({
     description: 'The percentage value for the transfer restriction',

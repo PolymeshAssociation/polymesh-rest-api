@@ -29,6 +29,7 @@ import {
   MockAuthorizationRequest,
   MockIdentity,
   MockPolymesh,
+  MockPortfolio,
   MockTransaction,
   MockVenue,
 } from '~/test-utils/mocks';
@@ -194,11 +195,16 @@ describe('AssetsService', () => {
 
     it('should return the list of Asset holders', async () => {
       const mockAsset = new MockAsset();
+      const mockIdentity = new MockIdentity();
+      const mockPortfolio = new MockPortfolio();
 
       const findOneSpy = jest.spyOn(service, 'findFungible');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findOneSpy.mockResolvedValue(mockAsset as any);
       mockAsset.assetHolders.get.mockResolvedValue(mockHolders);
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolios.mockResolvedValue([mockPortfolio]);
+      mockPortfolio.getAssetBalances.mockResolvedValue([]);
 
       const result = await service.findHolders('TICKER', new BigNumber(10));
       expect(result).toEqual(mockHolders);
@@ -892,19 +898,22 @@ describe('AssetsService', () => {
       const mockAsset = new MockAsset();
       const mockTransferRestrictionValues = [
         {
-          restriction: {
-            type: TransferRestrictionType.Count,
-            value: new BigNumber(100),
-          },
+          type: TransferRestrictionType.Count,
           value: new BigNumber(100),
         },
       ];
-      mockAsset.transferRestrictions.getValues.mockResolvedValue(mockTransferRestrictionValues);
+      const mockActiveTransferRestrictions = {
+        paused: false,
+        restrictions: mockTransferRestrictionValues,
+      };
+      mockAsset.transferRestrictions.getRestrictions.mockResolvedValue(
+        mockActiveTransferRestrictions as never
+      );
       mockPolymeshApi.assets.getFungibleAsset.mockResolvedValue(mockAsset);
 
       const result = await service.getTransferRestrictions('TICKER');
 
-      expect(result).toEqual(mockTransferRestrictionValues);
+      expect(result).toEqual(mockActiveTransferRestrictions);
     });
   });
 

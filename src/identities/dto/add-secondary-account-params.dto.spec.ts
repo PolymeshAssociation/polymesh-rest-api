@@ -257,10 +257,8 @@ describe('addSecondaryAccountParamsDto', () => {
           signer,
         },
         [
-          'permissions.portfolios.values.0.DID must be 66 characters long',
-          'permissions.portfolios.values.1.DID must be a hexadecimal number',
-          'permissions.portfolios.values.1.DID must start with "0x"',
-          'permissions.portfolios.values.1.DID must be 66 characters long',
+          'permissions.portfolios.values.0.did must be a valid DID (received: "0x6")',
+          'permissions.portfolios.values.1.did must be a valid DID (received: "DID")',
         ],
       ],
       [
@@ -273,7 +271,7 @@ describe('addSecondaryAccountParamsDto', () => {
           signer,
         },
         [
-          'permissions.each value in transactionGroups must be one of the following values: PortfolioManagement, AssetManagement, AdvancedAssetManagement, Distribution, Issuance, TrustedClaimIssuersManagement, ClaimsManagement, ComplianceRequirementsManagement, CorporateActionsManagement, StoManagement',
+          'permissions.each value in transactionGroups must be one of the following values: AdvancedAssetManagement, AssetManagement, AssetDocumentManagement, AssetMetadataManagement, AssetRegistration, AuthorizationManagement, CapitalDistribution, CddRegistration, CheckpointManagement, ClaimsManagement, ComplianceManagement, CorporateActionsManagement, CorporateBallotManagement, CorporateVoting, ExternalAgentManagement, ExternalAgentParticipation, Issuance, MultiSigManagement, PortfolioManagement, RelayerManagement, Redemption, SettlementManagement, StoManagement, TrustedClaimIssuersManagement',
         ],
       ],
       [

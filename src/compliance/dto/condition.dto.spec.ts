@@ -100,11 +100,7 @@ describe('conditionDto', () => {
       [
         'IsIdentity without `identity`',
         { type: ConditionType.IsIdentity, target: ConditionTarget.Receiver },
-        [
-          'DID must be a hexadecimal number',
-          'DID must start with "0x"',
-          'DID must be 66 characters long',
-        ],
+        ['identity must be a valid DID (received: "undefined")'],
       ],
       [
         'IsPresent with invalid `identity` in `trustedClaimIssuers`',
@@ -119,11 +115,7 @@ describe('conditionDto', () => {
             },
           ],
         },
-        [
-          'trustedClaimIssuers.0.DID must be a hexadecimal number',
-          'trustedClaimIssuers.0.DID must start with "0x"',
-          'trustedClaimIssuers.0.DID must be 66 characters long',
-        ],
+        ['trustedClaimIssuers.0.identity must be a valid DID (received: "123")'],
       ],
     ];
 

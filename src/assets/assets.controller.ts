@@ -10,7 +10,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { Asset, AssetStat } from '@polymeshassociation/polymesh-sdk/types';
+import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -28,9 +28,11 @@ import { VenueIdsDto } from '~/assets/dto/venue-ids.dto';
 import { AgentOperationModel } from '~/assets/models/agent-operation.model';
 import { AssetDetailsModel } from '~/assets/models/asset-details.model';
 import { AssetDocumentModel } from '~/assets/models/asset-document.model';
+import { AssetStatModel } from '~/assets/models/asset-stat.model';
 import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
+import { TransferRestrictionsModel } from '~/assets/models/transfer-restrictions.model';
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
 import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
@@ -764,15 +766,38 @@ export class AssetsController {
     example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
-    description: 'The transfer restrictions for the asset',
-    type: TransferRestrictionsValueModel,
-    isArray: true,
+    description: 'The active transfer restrictions for the asset',
+    type: TransferRestrictionsModel,
   })
   @Get(':asset/transfer-restrictions')
   public async getTransferRestrictions(
     @Param() { asset }: AssetParamsDto
-  ): Promise<TransferRestrictionsValueModel[]> {
+  ): Promise<TransferRestrictionsModel> {
     const transferRestrictions = await this.assetsService.getTransferRestrictions(asset);
+
+    return new TransferRestrictionsModel(transferRestrictions);
+  }
+
+  @ApiOperation({
+    summary: "Fetch an Asset's transfer restrictions",
+    description: 'This endpoint provides a list of transfer restrictions for the asset',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose transfer restrictions is to be fetched',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiOkResponse({
+    description: 'The transfer restrictions for the asset',
+    type: TransferRestrictionsValueModel,
+    isArray: true,
+  })
+  @Get(':asset/transfer-restrictions/values')
+  public async getTransferRestrictionValues(
+    @Param() { asset }: AssetParamsDto
+  ): Promise<TransferRestrictionsValueModel[]> {
+    const transferRestrictions = await this.assetsService.getTransferRestrictionValues(asset);
 
     return transferRestrictions.map(
       transferRestriction => new TransferRestrictionsValueModel(transferRestriction)
@@ -890,11 +915,14 @@ export class AssetsController {
   })
   @ApiOkResponse({
     description: 'List of enabled statistics for the asset',
+    type: AssetStatModel,
     isArray: true,
   })
   @Get(':asset/transfer-restrictions/stats')
-  public async getStats(@Param() { asset }: AssetParamsDto): Promise<AssetStat[]> {
-    return this.assetsService.getStats(asset);
+  public async getStats(@Param() { asset }: AssetParamsDto): Promise<AssetStatModel[]> {
+    const stats = await this.assetsService.getStats(asset);
+
+    return stats.map(stat => new AssetStatModel(stat));
   }
 
   @ApiOperation({

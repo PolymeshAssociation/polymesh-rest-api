@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  ActiveTransferRestrictions,
   Asset,
   AssetDocument,
   AssetStat,
@@ -11,11 +12,8 @@ import {
   IdentityBalance,
   NftCollection,
   ResultSet,
-  TransferRestrictionClaimCountInput,
-  TransferRestrictionInputClaimPercentage,
   TransferRestrictionParams,
   TransferRestrictionStatValues,
-  TransferRestrictionType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import {
@@ -98,6 +96,7 @@ export class AssetsService {
     start?: string
   ): Promise<ResultSet<IdentityBalance>> {
     const asset = await this.findFungible(assetInput);
+
     return asset.assetHolders.get({ size, start });
   }
 
@@ -336,7 +335,13 @@ export class AssetsService {
     return this.transactionsService.submit(unlinkTicker, {}, options);
   }
 
-  public async getTransferRestrictions(
+  public async getTransferRestrictions(assetInput: string): Promise<ActiveTransferRestrictions> {
+    const asset = await this.findFungible(assetInput);
+
+    return asset.transferRestrictions.getRestrictions();
+  }
+
+  public async getTransferRestrictionValues(
     assetInput: string
   ): Promise<TransferRestrictionStatValues[]> {
     const asset = await this.findFungible(assetInput);
@@ -359,28 +364,6 @@ export class AssetsService {
       asset.transferRestrictions.setRestrictions,
       { restrictions },
       options
-    );
-  }
-
-  private async transferRestrictionsDtoToRestrictions(
-    input: Omit<SetTransferRestrictionsDto, keyof TransactionBaseDto>
-  ): Promise<TransferRestrictionParams['restrictions']> {
-    return await Promise.all(
-      input.restrictions.map(async restriction => {
-        if (
-          restriction.type === TransferRestrictionType.ClaimCount ||
-          restriction.type === TransferRestrictionType.ClaimPercentage
-        ) {
-          const issuer = await this.identitiesService.findOne(restriction.issuer);
-
-          return {
-            ...restriction,
-            issuer,
-          } as TransferRestrictionClaimCountInput | TransferRestrictionInputClaimPercentage;
-        }
-
-        return restriction;
-      })
     );
   }
 
