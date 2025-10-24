@@ -15,6 +15,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { AbdicateAgentDto } from '~/permission-groups/dto/abdicate-agent.dto';
+import { AssignAgentToGroupDto } from '~/permission-groups/dto/assign-agent-to-group.dto';
 import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GetPermissionGroupDto } from '~/permission-groups/dto/get-permission-group.dto';
@@ -119,6 +120,40 @@ export class PermissionGroupsController {
     const result = await this.permissionGroupsService.inviteAgentToGroup(asset, params);
 
     return handleServiceResult(result, authorizationRequestResolver);
+  }
+
+  @ApiOperation({
+    summary: 'Assign external agent to a different permission group',
+    description:
+      'This endpoint moves an existing external agent to another permission group for the same Asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: [
+      'The Agent is already part of this permission group',
+      'The target must already be an Agent for the Asset',
+      'The target is the last Agent with full permissions for this Asset. There should always be at least one Agent with full permissions',
+    ],
+    [HttpStatus.UNAUTHORIZED]: [
+      "The signing identity does not have the required permissions to change an agent's permission group",
+    ],
+    [HttpStatus.NOT_FOUND]: [
+      'The Permission Group does not exist',
+      'The Identity does not exist',
+      'The Asset does not exist',
+    ],
+  })
+  @Post('assign-agent')
+  public async assignAgentToGroup(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: AssignAgentToGroupDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.permissionGroupsService.assignAgentToGroup(asset, params);
+
+    return handleServiceResult(result);
   }
 
   @ApiOperation({

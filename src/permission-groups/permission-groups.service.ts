@@ -6,6 +6,8 @@ import {
   CustomPermissionGroup,
   GroupPermissions,
   InviteExternalAgentParams,
+  KnownPermissionGroup,
+  SetPermissionGroupParams,
   SignerType,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -15,6 +17,7 @@ import { AppNotFoundError } from '~/common/errors';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AbdicateAgentDto } from '~/permission-groups/dto/abdicate-agent.dto';
+import { AssignAgentToGroupDto } from '~/permission-groups/dto/assign-agent-to-group.dto';
 import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GetPermissionGroupDto } from '~/permission-groups/dto/get-permission-group.dto';
@@ -98,6 +101,38 @@ export class PermissionGroupsService {
       { target, permissions },
       options
     );
+  }
+
+  public async assignAgentToGroup(
+    assetInput: string,
+    params: AssignAgentToGroupDto
+  ): ServiceReturn<CustomPermissionGroup | KnownPermissionGroup> {
+    const { options, args } = extractTxOptions(params);
+
+    const [asset, identity] = await Promise.all([
+      this.assetsService.findOne(assetInput),
+      this.identitiesService.findOne(args.target),
+    ]);
+
+    let group: SetPermissionGroupParams['group'];
+
+    if (BigNumber.isBigNumber(args.permissions)) {
+      group = await asset.permissions.getGroup({ id: args.permissions });
+    } else if (typeof args.permissions === 'string') {
+      group = await asset.permissions.getGroup({ type: args.permissions });
+    } else {
+      const permissions = toPermissionGroupPermissions(args.permissions);
+
+      if ('transactions' in permissions) {
+        group = { asset: assetInput, transactions: permissions.transactions };
+      } else if ('transactionGroups' in permissions) {
+        group = { asset: assetInput, transactionGroups: permissions.transactionGroups };
+      } else {
+        group = { asset: assetInput, transactions: null };
+      }
+    }
+
+    return this.transactionsService.submit(identity.assetPermissions.setGroup, { group }, options);
   }
 
   public async removeAgentFromAsset(
