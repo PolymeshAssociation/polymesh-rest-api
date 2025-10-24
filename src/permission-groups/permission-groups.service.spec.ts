@@ -18,6 +18,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { AppNotFoundError } from '~/common/errors';
 import { TransactionPermissionsDto } from '~/identities/dto/transaction-permissions.dto';
 import { IdentitiesService } from '~/identities/identities.service';
+import { AssignAgentToGroupDto } from '~/permission-groups/dto/assign-agent-to-group.dto';
 import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { InviteAgentToGroupDto } from '~/permission-groups/dto/invite-agent-to-group.dto';
 import { RemoveAgentFromGroupDto } from '~/permission-groups/dto/remove-agent-from-grop.dto';
@@ -274,6 +275,99 @@ describe('PermissionGroupsService', () => {
         {
           target: mockIdentity,
           permissions: { type: PermissionGroupType.Full },
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('assignAgentToGroup', () => {
+    let mockAsset: MockAsset;
+    let findAssetSpy: jest.SpyInstance;
+    const transaction = {
+      blockHash: '0x1',
+      txHash: '0x2',
+      blockNumber: new BigNumber(1),
+      tag: TxTags.externalAgents.ChangeGroup,
+    };
+
+    beforeEach(() => {
+      findAssetSpy = jest.spyOn(mockAssetsService, 'findOne');
+      mockAsset = new MockAsset();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findAssetSpy.mockResolvedValue(mockAsset as any);
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should assign an agent to a permission group by id', async () => {
+      const setGroupMock = jest.fn();
+      const setGroupProcedure = setGroupMock as unknown as Identity['assetPermissions']['setGroup'];
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          setGroup: setGroupProcedure,
+        },
+      });
+      const mockGroup = createMock<CustomPermissionGroup>();
+      const mockTransaction = new MockTransaction(transaction);
+      const dto: AssignAgentToGroupDto = {
+        target: did,
+        permissions: new BigNumber(1),
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockAsset.permissions.getGroup.mockResolvedValue(mockGroup);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.assignAgentToGroup(assetId, dto);
+
+      expect(result).toEqual({ transactions: [mockTransaction] });
+      expect(findAssetSpy).toHaveBeenCalledWith(assetId);
+      expect(mockAsset.permissions.getGroup).toHaveBeenCalledWith({ id: dto.permissions });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        setGroupProcedure,
+        { group: mockGroup },
+        expect.objectContaining({ signer })
+      );
+    });
+
+    it('should assign an agent using transaction groups permissions', async () => {
+      const setGroupMock = jest.fn();
+      const setGroupProcedure = setGroupMock as unknown as Identity['assetPermissions']['setGroup'];
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          setGroup: setGroupProcedure,
+        },
+      });
+      const mockTransaction = new MockTransaction(transaction);
+      const transactionGroups = [TxGroup.CapitalDistribution];
+      const dto: AssignAgentToGroupDto = {
+        target: did,
+        permissions: {
+          transactionGroups,
+        } as unknown as AssignAgentToGroupDto['permissions'],
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.assignAgentToGroup(assetId, dto);
+
+      expect(result).toEqual({ transactions: [mockTransaction] });
+      expect(mockAsset.permissions.getGroup).not.toHaveBeenCalled();
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        setGroupProcedure,
+        {
+          group: expect.objectContaining({
+            asset: assetId,
+            transactionGroups,
+          }),
         },
         expect.objectContaining({ signer })
       );

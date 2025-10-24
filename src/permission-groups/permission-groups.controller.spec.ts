@@ -11,6 +11,7 @@ import { BigNumber } from 'bignumber.js';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { ResultsModel } from '~/common/models/results.model';
 import { ServiceReturn } from '~/common/utils';
+import { AssignAgentToGroupDto } from '~/permission-groups/dto/assign-agent-to-group.dto';
 import { CheckPermissionsResultModel } from '~/permission-groups/models/check-permissions-result.model';
 import { PermissionGroupWithPermissionsModel } from '~/permission-groups/models/permission-group-with-permissions.model';
 import { PermissionGroupsController } from '~/permission-groups/permission-groups.controller';
@@ -96,6 +97,22 @@ describe('PermissionGroupsController', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
       });
+    });
+  });
+
+  describe('assignAgentToGroup', () => {
+    it('should call the service and return the results', async () => {
+      mockPermissionGroupsService.assignAgentToGroup.mockResolvedValue(txResult);
+
+      const params: AssignAgentToGroupDto = {
+        signer,
+        target: '0x1000',
+        permissions: new BigNumber(1),
+      };
+      const result = await controller.assignAgentToGroup({ asset: assetId }, params);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockPermissionGroupsService.assignAgentToGroup).toHaveBeenCalledWith(assetId, params);
     });
   });
 
