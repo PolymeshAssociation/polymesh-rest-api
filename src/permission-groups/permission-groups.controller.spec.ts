@@ -109,6 +109,20 @@ describe('PermissionGroupsController', () => {
     });
   });
 
+  describe('abdicateAgent', () => {
+    it('should call the service and return the results', async () => {
+      mockPermissionGroupsService.abdicateAgent.mockResolvedValue(txResult);
+
+      const result = await controller.abdicateAgent({ asset: assetId }, { signer, identity: did });
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockPermissionGroupsService.abdicateAgent).toHaveBeenCalledWith(
+        assetId,
+        expect.objectContaining({ signer, identity: did })
+      );
+    });
+  });
+
   describe('getGroupPermissions', () => {
     it('should call the service and return the results', async () => {
       const mockResult = { id: new BigNumber(1), permissions: [] };

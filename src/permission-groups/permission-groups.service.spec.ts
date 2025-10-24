@@ -325,6 +325,34 @@ describe('PermissionGroupsService', () => {
     });
   });
 
+  describe('abdicateAgent', () => {
+    it('should submit a transaction for an Identity to abdicate its permissions', async () => {
+      const mockAsset = new MockAsset();
+      const waive = jest.fn() as unknown as Identity['assetPermissions']['waive'];
+      const mockIdentity = createMock<Identity>({
+        assetPermissions: {
+          waive,
+        },
+      });
+
+      jest.spyOn(mockAssetsService, 'findOne').mockResolvedValue(mockAsset as unknown as Asset);
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      const abdicateResult = { transactions: [] };
+      mockTransactionsService.submit.mockResolvedValue(abdicateResult);
+
+      const result = await service.abdicateAgent(assetId, { signer, identity: did });
+
+      expect(result).toEqual(abdicateResult);
+      expect(mockAssetsService.findOne).toHaveBeenCalledWith(assetId);
+      expect(mockIdentitiesService.findOne).toHaveBeenCalledWith(did);
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        waive,
+        { asset: assetId },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
   describe('getGroupPermissions', () => {
     let findAssetSpy: jest.SpyInstance;
     let mockAsset: MockAsset;

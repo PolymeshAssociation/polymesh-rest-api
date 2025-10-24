@@ -14,6 +14,7 @@ import { toPermissionGroupPermissions } from '~/assets/assets.util';
 import { AppNotFoundError } from '~/common/errors';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { IdentitiesService } from '~/identities/identities.service';
+import { AbdicateAgentDto } from '~/permission-groups/dto/abdicate-agent.dto';
 import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GetPermissionGroupDto } from '~/permission-groups/dto/get-permission-group.dto';
@@ -154,5 +155,23 @@ export class PermissionGroupsService {
       asset,
       transactions: transactions ?? null,
     });
+  }
+
+  public async abdicateAgent(assetInput: string, params: AbdicateAgentDto): ServiceReturn<void> {
+    const {
+      options,
+      args: { identity: identityDid },
+    } = extractTxOptions(params);
+
+    const [, identity] = await Promise.all([
+      this.assetsService.findOne(assetInput),
+      this.identitiesService.findOne(identityDid),
+    ]);
+
+    return this.transactionsService.submit(
+      identity.assetPermissions.waive,
+      { asset: assetInput },
+      options
+    );
   }
 }

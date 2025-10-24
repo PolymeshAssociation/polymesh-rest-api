@@ -14,6 +14,7 @@ import {
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { AbdicateAgentDto } from '~/permission-groups/dto/abdicate-agent.dto';
 import { CheckPermissionsDto } from '~/permission-groups/dto/check-permissions.dto';
 import { CreatePermissionGroupDto } from '~/permission-groups/dto/create-permission-group.dto';
 import { GetPermissionGroupDto } from '~/permission-groups/dto/get-permission-group.dto';
@@ -23,7 +24,7 @@ import { CheckPermissionsResultModel } from '~/permission-groups/models/check-pe
 import { PermissionGroupWithPermissionsModel } from '~/permission-groups/models/permission-group-with-permissions.model';
 import { PermissionGroupsService } from '~/permission-groups/permission-groups.service';
 
-@Controller(':asset/permission-groups')
+@Controller('assets/:asset/permission-groups')
 @ApiTags('permission-groups', 'assets')
 export class PermissionGroupsController {
   constructor(private readonly permissionGroupsService: PermissionGroupsService) {}
@@ -145,6 +146,31 @@ export class PermissionGroupsController {
     @Body() params: RemoveAgentFromGroupDto
   ): Promise<TransactionResponseModel> {
     const result = await this.permissionGroupsService.removeAgentFromAsset(asset, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Abdicate external agent permissions',
+    description: 'This endpoint allows an Identity to abdicate its permissions for an Asset',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.BAD_REQUEST]: ['The Identity is not currently an agent for the supplied Asset'],
+    [HttpStatus.UNAUTHORIZED]: [
+      'The signing identity does not have the required permissions to abdicate',
+    ],
+    [HttpStatus.NOT_FOUND]: ['The Identity does not exist', 'The Asset does not exist'],
+  })
+  @Post('abdicate')
+  public async abdicateAgent(
+    @Param() { asset }: AssetParamsDto,
+    @Body() body: AbdicateAgentDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.permissionGroupsService.abdicateAgent(asset, body);
 
     return handleServiceResult(result);
   }
