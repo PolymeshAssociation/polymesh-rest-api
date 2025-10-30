@@ -7,6 +7,7 @@ import {
   GroupPermissions,
   InviteExternalAgentParams,
   KnownPermissionGroup,
+  PermissionGroupType,
   SetPermissionGroupParams,
   SignerType,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -29,6 +30,13 @@ export type GroupWithPermissions = {
   id: BigNumber;
   permissions: GroupPermissions;
 };
+
+export type KnownGroupWithPermissions = {
+  type: PermissionGroupType;
+  permissions: GroupPermissions;
+};
+
+export type PermissionGroupWithPermissions = KnownGroupWithPermissions | GroupWithPermissions;
 
 @Injectable()
 export class PermissionGroupsService {
@@ -67,12 +75,26 @@ export class PermissionGroupsService {
     );
   }
 
-  public async getPermissionGroups(assetInput: string): Promise<BigNumber[]> {
+  public async getPermissionGroups(assetInput: string): Promise<PermissionGroupWithPermissions[]> {
     const asset = await this.assetsService.findOne(assetInput);
 
     const groups = await asset.permissions.getGroups();
 
-    return groups.custom.map(group => group.id);
+    const knownGroups = await Promise.all(
+      groups.known.map(async group => ({
+        type: group.type,
+        permissions: await group.getPermissions(),
+      }))
+    );
+
+    const customGroups = await Promise.all(
+      groups.custom.map(async group => ({
+        id: group.id,
+        permissions: await group.getPermissions(),
+      }))
+    );
+
+    return [...knownGroups, ...customGroups];
   }
 
   public async inviteAgentToGroup(

@@ -1,6 +1,11 @@
 /* istanbul ignore file */
 
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  AddClaimCountStatParams,
+  AddClaimPercentageStatParams,
+  AddCountStatParams,
+  AddPercentageStatParams,
   Asset,
   ClaimType,
   CreateGroupParams,
@@ -259,4 +264,72 @@ export async function transferRestrictionsDtoToRestrictions(
       }
     })
   );
+}
+
+/**
+ * Ensures BigNumber conversions are applied to stats.
+ * Converts string values to BigNumber instances where needed.
+ */
+export function ensureStatsBigNumberConversion(
+  stats: (
+    | AddCountStatParams
+    | AddPercentageStatParams
+    | AddClaimCountStatParams
+    | AddClaimPercentageStatParams
+  )[]
+): (
+  | AddCountStatParams
+  | AddPercentageStatParams
+  | AddClaimCountStatParams
+  | AddClaimPercentageStatParams
+)[] {
+  return stats.map(stat => {
+    if (typeof stat === 'object' && stat !== null && 'type' in stat) {
+      const statObj = stat as Record<string, unknown>;
+      const transformed = { ...statObj };
+
+      // Convert count for Count stats
+      if (statObj.type === 'Count' && typeof statObj.count === 'string') {
+        transformed.count = new BigNumber(statObj.count as string);
+      }
+
+      // Convert nested value properties for ScopedCount stats
+      if (statObj.type === 'ScopedCount' && statObj.value) {
+        if (typeof statObj.value === 'object' && !Array.isArray(statObj.value)) {
+          const valueObj = statObj.value as Record<string, unknown>;
+          const transformedValue: Record<string, unknown> = {};
+          Object.keys(valueObj).forEach(key => {
+            const val = valueObj[key];
+            if (
+              typeof val === 'string' &&
+              (key === 'accredited' ||
+                key === 'nonAccredited' ||
+                key === 'affiliate' ||
+                key === 'nonAffiliate')
+            ) {
+              transformedValue[key] = new BigNumber(val);
+            } else {
+              transformedValue[key] = val;
+            }
+          });
+          transformed.value = transformedValue;
+        } else if (Array.isArray(statObj.value)) {
+          transformed.value = statObj.value.map(
+            (item: { count?: string; countryCode?: string }) => ({
+              ...item,
+              count: typeof item.count === 'string' ? new BigNumber(item.count) : item.count,
+            })
+          );
+        }
+      }
+
+      return transformed;
+    }
+    return stat;
+  }) as (
+    | AddCountStatParams
+    | AddPercentageStatParams
+    | AddClaimCountStatParams
+    | AddClaimPercentageStatParams
+  )[];
 }

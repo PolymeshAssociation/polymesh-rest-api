@@ -8,6 +8,7 @@ import {
   Asset,
   CustomPermissionGroup,
   Identity,
+  KnownPermissionGroup,
   PermissionGroupType,
   PermissionType,
   TxGroup,
@@ -198,7 +199,7 @@ describe('PermissionGroupsService', () => {
 
     it('should return list of custom permission groups', async () => {
       const mockCustomPermissions = {
-        id: new BigNumber(1),
+        transactions: null,
         transactionGroups: [TxGroup.CapitalDistribution],
       };
       const mockCustomGroup = createMock<CustomPermissionGroup>({
@@ -213,8 +214,39 @@ describe('PermissionGroupsService', () => {
 
       const result = await service.getPermissionGroups(assetId);
 
-      expect(result).toEqual([mockCustomGroup.id]);
+      expect(result).toEqual([
+        {
+          id: mockCustomGroup.id,
+          permissions: mockCustomPermissions,
+        },
+      ]);
 
+      expect(mockAsset.permissions.getGroups).toHaveBeenCalled();
+    });
+
+    it('should include known permission groups', async () => {
+      const mockKnownPermissions = {
+        transactions: null,
+        transactionGroups: [TxGroup.PortfolioManagement],
+      };
+      const mockKnownGroup = createMock<KnownPermissionGroup>({
+        type: PermissionGroupType.Full,
+        getPermissions: jest.fn().mockResolvedValue(mockKnownPermissions),
+      });
+
+      mockAsset.permissions.getGroups.mockResolvedValue({
+        custom: [],
+        known: [mockKnownGroup],
+      });
+
+      const result = await service.getPermissionGroups(assetId);
+
+      expect(result).toEqual([
+        {
+          type: mockKnownGroup.type,
+          permissions: mockKnownPermissions,
+        },
+      ]);
       expect(mockAsset.permissions.getGroups).toHaveBeenCalled();
     });
 

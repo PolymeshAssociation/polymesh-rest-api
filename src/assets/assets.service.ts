@@ -17,6 +17,7 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 
 import {
+  ensureStatsBigNumberConversion,
   isSameRestriction,
   normalizeExistingRestrictions,
   transferRestrictionsDtoToRestrictions,
@@ -424,6 +425,10 @@ export class AssetsService {
     const { options, args } = extractTxOptions(params);
     const asset = await this.findFungible(assetInput);
 
-    return this.transactionsService.submit(asset.transferRestrictions.setStats, args, options);
+    return this.transactionsService.submit(
+      asset.transferRestrictions.setStats,
+      { stats: ensureStatsBigNumberConversion(args.stats) },
+      options
+    );
   }
 }

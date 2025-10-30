@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TxTag, TxTags } from '@polymeshassociation/polymesh-sdk/types';
+import { Transform } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 
 import { IsDid, IsTxTag } from '~/common/decorators';
@@ -23,6 +24,7 @@ export class CheckPermissionsDto {
     example: [TxTags.asset.Issue],
     nullable: true,
   })
+  @Transform(({ value }) => (value == null ? value : Array.isArray(value) ? value : [value]))
   @IsArray()
   @ArrayNotEmpty()
   @IsTxTag({ each: true })

@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   AuthorizationRequest,
   CustomPermissionGroup,
+  PermissionGroupType,
   TxGroup,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -18,6 +19,7 @@ import { PermissionGroupsController } from '~/permission-groups/permission-group
 import {
   GroupWithPermissions,
   PermissionGroupsService,
+  PermissionGroupWithPermissions,
 } from '~/permission-groups/permission-groups.service';
 import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockAuthorizationRequest } from '~/test-utils/mocks';
@@ -63,14 +65,22 @@ describe('PermissionGroupsController', () => {
 
   describe('getPermissionGroups', () => {
     it('should call the service and return the results', async () => {
-      const mockResult = [new BigNumber(1)];
+      const permissions = {
+        transactions: null,
+        transactionGroups: [TxGroup.CapitalDistribution],
+      };
+      const mockResult: PermissionGroupWithPermissions[] = [
+        { type: PermissionGroupType.Full, permissions },
+        { id: new BigNumber(1), permissions },
+      ];
+
       mockPermissionGroupsService.getPermissionGroups.mockResolvedValue(mockResult);
 
       const result = await controller.getPermissionGroupsWithPermissions({ asset: assetId });
 
       expect(result).toEqual(
         new ResultsModel({
-          results: mockResult,
+          results: mockResult.map(group => new PermissionGroupWithPermissionsModel(group)),
         })
       );
     });
