@@ -35,8 +35,8 @@
     "postgres:dev:migration:run": "source ./postgres.dev.config && yarn postgres migration:run",
     "postgres:dev:migration:revert": "source ./postgres.dev.config && yarn postgres migration:revert",
     "postgres:migration:run": "yarn postgres migration:run",
-    "docker:build": "docker build -t polymeshassociation/polymesh-rest-api:local .",
-    "docker:build:no-cache": "docker build --no-cache -t polymeshassociation/polymesh-rest-api:local ."
+    "docker:build": "yarn build && docker build -t polymeshassociation/polymesh-rest-api:local .",
+    "docker:build:no-cache": "yarn build && docker build --no-cache -t polymeshassociation/polymesh-rest-api:local ."
   },
   "dependencies": {
     "@golevelup/ts-jest": "0.3.3",

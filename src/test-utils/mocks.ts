@@ -145,6 +145,7 @@ export class MockPolymesh {
   public _polkadotApi = {
     tx: {
       balances: {
+        transfer: jest.fn(),
         transferWithMemo: jest.fn(),
         setBalance: jest.fn(),
       },
@@ -164,6 +165,7 @@ export class MockPolymesh {
         }),
       },
       utility: {
+        batch: jest.fn(),
         batchAll: jest.fn(),
       },
     },

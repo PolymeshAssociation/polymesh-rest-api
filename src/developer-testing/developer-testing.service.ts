@@ -78,7 +78,7 @@ export class DeveloperTestingService {
     const initialPolyxCalls = accounts
       .filter(({ initialPolyx }) => initialPolyx.gt(0))
       .map(({ address, initialPolyx }) =>
-        balances.transferWithMemo(address, initialPolyx.toNumber() * unitsPerPolyx, 'Initial Polyx')
+        balances.transfer(address, initialPolyx.toNumber() * unitsPerPolyx)
       );
 
     await this.polymeshService.execTransaction(signerAddress, utility.batchAll, [
