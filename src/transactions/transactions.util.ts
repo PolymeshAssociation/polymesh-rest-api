@@ -48,6 +48,7 @@ export interface MultiSigProposalResult {
   resultType: ResultType.MultiSigProposal;
   transactions: (TransactionModel | BatchTransactionModel)[];
   details: TransactionDetails;
+  isDryRun?: boolean;
 }
 
 export type DirectTransactionResult<T> = {
@@ -55,6 +56,7 @@ export type DirectTransactionResult<T> = {
   resultType: ResultType.Direct;
   transactions: (TransactionModel | BatchTransactionModel)[];
   details: TransactionDetails;
+  isDryRun?: boolean;
 };
 
 export type TransactionResult<T> = DirectTransactionResult<T> | MultiSigProposalResult;
@@ -132,6 +134,7 @@ export async function processTransaction<
           result: { toHuman: () => ({ multiSigAddress, id: '-1' }) } as unknown as MultiSigProposal,
           resultType: ResultType.MultiSigProposal,
           transactions: [],
+          isDryRun: true,
         };
       } else {
         return {
@@ -139,6 +142,7 @@ export async function processTransaction<
           result: {} as TransformedReturnType,
           resultType: ResultType.Direct,
           transactions: [],
+          isDryRun: true,
         };
       }
     }
