@@ -86,6 +86,14 @@ export const handleServiceResult = <T>(
     if (result.resultType === ResultType.MultiSigProposal) {
       return multiSigProposalResolver(result);
     } else {
+      // Skip resolver in dry run mode
+      if (result.isDryRun) {
+        return new TransactionQueueModel({
+          transactions: result.transactions,
+          details: result.details,
+        });
+      }
+
       return resolver(result);
     }
   }
