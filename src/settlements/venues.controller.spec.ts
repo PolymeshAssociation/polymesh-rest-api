@@ -109,4 +109,56 @@ describe('VenuesController', () => {
       });
     });
   });
+  describe('getAllowedSigners', () => {
+    it('should return the list of allowed signers', async () => {
+      const mockSigners = [{ address: 'signer1' }, { address: 'signer2' }];
+      mockSettlementsService.fetchAllowedSigners.mockResolvedValue(mockSigners);
+
+      const result = await controller.getAllowedSigners({ id: new BigNumber(3) });
+
+      expect(result).toEqual({
+        results: ['signer1', 'signer2'],
+      });
+    });
+  });
+
+  describe('addVenueSigners', () => {
+    it('should add signers to a venue and return the data returned by the service', async () => {
+      mockSettlementsService.updateVenueSigners.mockResolvedValue(txResult);
+
+      const body = {
+        signer,
+        signers: ['signer1'],
+      };
+
+      const result = await controller.addVenueSigners({ id: new BigNumber(3) }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockSettlementsService.updateVenueSigners).toHaveBeenCalledWith(
+        new BigNumber(3),
+        body,
+        true
+      );
+    });
+  });
+
+  describe('removeVenueSigners', () => {
+    it('should remove signers from a venue and return the data returned by the service', async () => {
+      mockSettlementsService.updateVenueSigners.mockResolvedValue(txResult);
+
+      const body = {
+        signer,
+        signers: ['signer1'],
+      };
+
+      const result = await controller.removeVenueSigners({ id: new BigNumber(3) }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockSettlementsService.updateVenueSigners).toHaveBeenCalledWith(
+        new BigNumber(3),
+        body,
+        false
+      );
+    });
+  });
 });

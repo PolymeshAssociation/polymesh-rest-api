@@ -108,6 +108,102 @@ describe('ClaimsService', () => {
         count: new BigNumber(1),
       });
     });
+
+    it('should return empty array when data[0] has no claims property', async () => {
+      const mockIdentitiesWithClaims = {
+        data: [
+          {
+            identity: {
+              did,
+            },
+            // claims property is missing
+          },
+        ],
+        next: null,
+        count: new BigNumber(1),
+      };
+      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
+      const result = await claimsService.findAssociatedByDid(did);
+      expect(result).toStrictEqual({
+        data: [],
+        next: null,
+        count: new BigNumber(1),
+      });
+    });
+
+    it('should return empty array when data[0] has null claims', async () => {
+      const mockIdentitiesWithClaims = {
+        data: [
+          {
+            identity: {
+              did,
+            },
+            claims: null,
+          },
+        ],
+        next: null,
+        count: new BigNumber(1),
+      };
+      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
+      const result = await claimsService.findAssociatedByDid(did);
+      expect(result).toStrictEqual({
+        data: [],
+        next: null,
+        count: new BigNumber(1),
+      });
+    });
+
+    it('should return empty array when data[0] has undefined claims', async () => {
+      const mockIdentitiesWithClaims = {
+        data: [
+          {
+            identity: {
+              did,
+            },
+            claims: undefined,
+          },
+        ],
+        next: null,
+        count: new BigNumber(1),
+      };
+      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
+      const result = await claimsService.findAssociatedByDid(did);
+      expect(result).toStrictEqual({
+        data: [],
+        next: null,
+        count: new BigNumber(1),
+      });
+    });
+
+    it('should return empty array when data array is empty', async () => {
+      const mockIdentitiesWithClaims = {
+        data: [],
+        next: null,
+        count: new BigNumber(0),
+      };
+      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
+      const result = await claimsService.findAssociatedByDid(did);
+      expect(result).toStrictEqual({
+        data: [],
+        next: null,
+        count: new BigNumber(0),
+      });
+    });
+
+    it('should return empty array when data is undefined', async () => {
+      const mockIdentitiesWithClaims = {
+        data: undefined,
+        next: null,
+        count: new BigNumber(0),
+      };
+      mockPolymeshApi.claims.getIdentitiesWithClaims.mockResolvedValue(mockIdentitiesWithClaims);
+      const result = await claimsService.findAssociatedByDid(did);
+      expect(result).toStrictEqual({
+        data: [],
+        next: null,
+        count: new BigNumber(0),
+      });
+    });
   });
 
   describe('addClaimsToDid', () => {

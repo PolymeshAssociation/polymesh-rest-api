@@ -381,6 +381,26 @@ describe('AccountsService', () => {
 
       expect(result).toStrictEqual(fakeResult);
     });
+
+    it('should return null for multiSigDetails when account has no multiSig', async () => {
+      const mockAccount = new MockAccount();
+      const mockIdentity = new MockIdentity();
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      findOneSpy.mockResolvedValue(mockAccount as unknown as Account);
+
+      mockAccount.getIdentity.mockResolvedValue(mockIdentity);
+      mockAccount.getMultiSig.mockResolvedValue(null);
+
+      const result = await service.getDetails('address');
+
+      const fakeResult = {
+        identity: mockIdentity,
+        multiSigDetails: null,
+      };
+
+      expect(result).toStrictEqual(fakeResult);
+    });
   });
 
   describe('fetchOffChainReceipts', () => {

@@ -281,6 +281,7 @@ export class MockAsset {
 }
 
 export class MockInstruction {
+  public executeManually = jest.fn();
   public getStatus = jest.fn();
   public affirm = jest.fn();
   public reject = jest.fn();

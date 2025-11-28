@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   DefaultPortfolio,

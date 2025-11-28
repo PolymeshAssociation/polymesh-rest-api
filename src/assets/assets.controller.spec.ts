@@ -701,6 +701,32 @@ describe('AssetsController', () => {
     });
   });
 
+  describe('getTransferRestrictionValues', () => {
+    it('should return transfer restriction values', async () => {
+      const mockTransferRestrictionValues = [
+        {
+          type: TransferRestrictionType.Count,
+          value: new BigNumber(100),
+        },
+        {
+          type: TransferRestrictionType.Percentage,
+          value: new BigNumber(50),
+        },
+      ];
+
+      mockAssetsService.getTransferRestrictionValues.mockResolvedValue(
+        mockTransferRestrictionValues as never
+      );
+
+      const result = await controller.getTransferRestrictionValues({ asset: assetId });
+
+      expect(mockAssetsService.getTransferRestrictionValues).toHaveBeenCalledWith(assetId);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBeDefined();
+      expect(result[1]).toBeDefined();
+    });
+  });
+
   describe('addTransferRestrictions', () => {
     it('should call the service and return the results', async () => {
       mockAssetsService.addTransferRestrictions.mockResolvedValue(txResult);

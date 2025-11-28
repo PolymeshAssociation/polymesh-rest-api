@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { ClaimType, StatType } from '@polymeshassociation/polymesh-sdk/types';
 import {
   registerDecorator,

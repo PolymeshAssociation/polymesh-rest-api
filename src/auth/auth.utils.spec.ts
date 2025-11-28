@@ -23,4 +23,14 @@ describe('parseApiKeysConfig', () => {
     const result = parseApiKeysConfig('abc,def, ghi ');
     expect(result).toEqual(['abc', 'def', 'ghi']);
   });
+
+  it('should return empty array for empty string', () => {
+    const result = parseApiKeysConfig('');
+    expect(result).toEqual([]);
+  });
+
+  it('should return empty array for whitespace-only string', () => {
+    const result = parseApiKeysConfig('   ');
+    expect(result).toEqual([]);
+  });
 });

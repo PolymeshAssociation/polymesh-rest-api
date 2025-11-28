@@ -139,7 +139,7 @@ describe('PortfoliosService', () => {
     });
 
     describe('otherwise', () => {
-      it('should call the handleSdkError method and throw an error', async () => {
+      it('should call the handleSdkError method and throw an error when portfolioId is provided', async () => {
         const mockError = new Error('foo');
         const mockIdentity = new MockIdentity();
         const owner = '0x6000';
@@ -150,6 +150,21 @@ describe('PortfoliosService', () => {
         const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
 
         await expect(() => service.findOne(owner, new BigNumber(2))).rejects.toThrow();
+
+        expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
+      });
+
+      it('should call the handleSdkError method and throw an error when portfolioId is not provided', async () => {
+        const mockError = new Error('foo');
+        const mockIdentity = new MockIdentity();
+        const owner = '0x6000';
+        mockIdentity.portfolios.getPortfolio.mockRejectedValue(mockError);
+
+        mockIdentitiesService.findOne.mockReturnValue(mockIdentity);
+
+        const handleSdkErrorSpy = jest.spyOn(transactionsUtilModule, 'handleSdkError');
+
+        await expect(() => service.findOne(owner)).rejects.toThrow();
 
         expect(handleSdkErrorSpy).toHaveBeenCalledWith(mockError);
       });
@@ -174,7 +189,7 @@ describe('PortfoliosService', () => {
       const body = {
         signer: '0x6000',
         to: new BigNumber(2),
-        from: new BigNumber(0),
+        from: new BigNumber(1), // Non-zero to cover the fromId truthy branch
         items: [
           {
             asset: assetId,
@@ -188,10 +203,61 @@ describe('PortfoliosService', () => {
         result: undefined,
         transactions: [mockTransaction],
       });
+      // Verify findOne was called with portfolioId (for numbered portfolio)
+      expect(findOneSpy).toHaveBeenCalledWith('0x6000', new BigNumber(1));
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockPortfolio.moveFunds,
         {
           to: new BigNumber(2),
+          items: [
+            {
+              amount: new BigNumber(123),
+              asset: assetId,
+              memo: undefined,
+            },
+          ],
+        },
+        expect.objectContaining({ signer: '0x6000' })
+      );
+    });
+
+    it('should call findOne without portfolioId when fromId is undefined (from is 0)', async () => {
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      const mockDefaultPortfolio = new MockPortfolio();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockDefaultPortfolio as any);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.portfolio.MovePortfolioFunds,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const body = {
+        signer: '0x6000',
+        to: new BigNumber(1),
+        from: new BigNumber(0), // This will result in fromId being undefined
+        items: [
+          {
+            asset: assetId,
+            amount: new BigNumber(123),
+          },
+        ],
+      };
+
+      const result = await service.moveAssets('0x6000', body);
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      // Verify findOne was called without portfolioId (for default portfolio)
+      expect(findOneSpy).toHaveBeenCalledWith('0x6000');
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockDefaultPortfolio.moveFunds,
+        {
+          to: new BigNumber(1),
           items: [
             {
               amount: new BigNumber(123),

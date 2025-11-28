@@ -1,7 +1,5 @@
-import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { DistributionPayment, ResultSet } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -16,9 +14,14 @@ import { MockCorporateActionDefaultConfig } from '~/corporate-actions/mocks/corp
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { MockDistribution } from '~/corporate-actions/mocks/dividend-distribution.mock';
 import { DistributionPaymentModel } from '~/corporate-actions/models/distribution-payment.model';
-import { processedTxResult, testValues } from '~/test-utils/consts';
+import { testValues } from '~/test-utils/consts';
+import {
+  createMockDistributionPayment,
+  createMockPaymentHistoryResult,
+  testControllerTxResult,
+} from '~/test-utils/test-helpers';
 
-const { did, signer, txResult, assetId, blockHash, blockNumber } = testValues;
+const { did, signer, txResult, assetId } = testValues;
 
 describe('CorporateActionsController', () => {
   let controller: CorporateActionsController;
@@ -71,18 +74,17 @@ describe('CorporateActionsController', () => {
 
   describe('updateDefaultConfig', () => {
     it('should update the Corporate Action Default Config and return the details of transaction', async () => {
-      mockCorporateActionsService.updateDefaultConfigByAsset.mockResolvedValue(txResult);
       const body = {
         signer,
         defaultTaxWithholding: new BigNumber(25),
       };
 
-      const result = await controller.updateDefaultConfig({ asset: assetId }, body);
-
-      expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.updateDefaultConfigByAsset).toHaveBeenCalledWith(
-        assetId,
-        body
+      await testControllerTxResult(
+        controller.updateDefaultConfig.bind(controller),
+        mockCorporateActionsService.updateDefaultConfigByAsset,
+        { asset: assetId },
+        body,
+        (params, bodyParam) => [params.asset, bodyParam]
       );
     });
   });
@@ -159,41 +161,32 @@ describe('CorporateActionsController', () => {
 
   describe('deleteCorporateAction', () => {
     it('should call the service and return the transaction details', async () => {
-      mockCorporateActionsService.remove.mockResolvedValue(txResult);
-
-      const result = await controller.deleteCorporateAction(
+      await testControllerTxResult(
+        controller.deleteCorporateAction.bind(controller),
+        mockCorporateActionsService.remove,
         { id: new BigNumber(1), asset: assetId },
-        { signer }
+        { signer },
+        (params, body) => [params.asset, params.id, body]
       );
-
-      expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.remove).toHaveBeenCalledWith(assetId, new BigNumber(1), {
-        signer,
-      });
     });
   });
 
   describe('payDividends', () => {
     it('should call the service and return the transaction details', async () => {
-      mockCorporateActionsService.payDividends.mockResolvedValue(txResult);
-
       const body = {
         signer,
         targets: [did],
       };
-      const result = await controller.payDividends(
+
+      await testControllerTxResult(
+        controller.payDividends.bind(controller),
+        mockCorporateActionsService.payDividends,
         {
           id: new BigNumber(1),
           asset: assetId,
         },
-        body
-      );
-
-      expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.payDividends).toHaveBeenCalledWith(
-        assetId,
-        new BigNumber(1),
-        body
+        body,
+        (params, bodyParam) => [params.asset, params.id, bodyParam]
       );
     });
   });
@@ -211,52 +204,41 @@ describe('CorporateActionsController', () => {
         signer,
       };
 
-      mockCorporateActionsService.linkDocuments.mockResolvedValue(txResult);
-
-      const result = await controller.linkDocuments({ asset: assetId, id: new BigNumber(1) }, body);
-
-      expect(result).toEqual(processedTxResult);
+      await testControllerTxResult(
+        controller.linkDocuments.bind(controller),
+        mockCorporateActionsService.linkDocuments,
+        { asset: assetId, id: new BigNumber(1) },
+        body
+      );
     });
   });
 
   describe('claimDividends', () => {
     it('should call the service and return the transaction details', async () => {
-      mockCorporateActionsService.claimDividends.mockResolvedValue(txResult);
-
-      const result = await controller.claimDividends(
+      await testControllerTxResult(
+        controller.claimDividends.bind(controller),
+        mockCorporateActionsService.claimDividends,
         {
           id: new BigNumber(1),
           asset: assetId,
         },
-        { signer }
-      );
-
-      expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.claimDividends).toHaveBeenCalledWith(
-        assetId,
-        new BigNumber(1),
-        { signer }
+        { signer },
+        (params, body) => [params.asset, params.id, body]
       );
     });
   });
 
   describe('reclaimDividends', () => {
     it('should call the service and return the transaction details', async () => {
-      mockCorporateActionsService.reclaimRemainingFunds.mockResolvedValue(txResult);
-
-      const result = await controller.reclaimRemainingFunds(
+      await testControllerTxResult(
+        controller.reclaimRemainingFunds.bind(controller),
+        mockCorporateActionsService.reclaimRemainingFunds,
         {
           id: new BigNumber(1),
           asset: assetId,
         },
-        { signer }
-      );
-
-      expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.reclaimRemainingFunds).toHaveBeenCalledWith(
-        assetId,
-        new BigNumber(1),
-        { signer }
+        { signer },
+        (params, body) => [params.asset, params.id, body]
       );
     });
   });
@@ -268,38 +250,20 @@ describe('CorporateActionsController', () => {
         signer,
       };
 
-      mockCorporateActionsService.modifyCheckpoint.mockResolvedValue(txResult);
-
-      const result = await controller.modifyDistributionCheckpoint(
+      await testControllerTxResult(
+        controller.modifyDistributionCheckpoint.bind(controller),
+        mockCorporateActionsService.modifyCheckpoint,
         { asset: assetId, id: new BigNumber(1) },
-        body
-      );
-
-      expect(result).toEqual(processedTxResult);
-      expect(mockCorporateActionsService.modifyCheckpoint).toHaveBeenCalledWith(
-        assetId,
-        new BigNumber(1),
-        body
+        body,
+        (params, bodyParam) => [params.asset, params.id, bodyParam]
       );
     });
   });
 
   describe('getPaymentHistory', () => {
     it('should return a paginated list of payments for a specific Dividend Distribution', async () => {
-      const mockDistributionPayment = createMock<DistributionPayment>({
-        target: { did },
-        amount: new BigNumber(100),
-        date: new Date(),
-        blockHash,
-        blockNumber,
-        withheldTax: new BigNumber(10),
-      });
-      const { target, ...rest } = mockDistributionPayment;
-
-      const mockPaginatedResult = createMock<ResultSet<DistributionPayment>>({
-        data: [mockDistributionPayment],
-        next: new BigNumber(2),
-      });
+      const { payment, rest, targetDid } = createMockDistributionPayment(did);
+      const mockPaginatedResult = createMockPaymentHistoryResult(payment);
 
       mockCorporateActionsService.getPaymentHistory.mockResolvedValue(mockPaginatedResult);
 
@@ -310,7 +274,32 @@ describe('CorporateActionsController', () => {
 
       expect(result).toEqual(
         new PaginatedResultsModel({
-          results: [new DistributionPaymentModel({ ...rest, did: target.did })],
+          results: [new DistributionPaymentModel({ ...rest, did: targetDid })],
+          next: new BigNumber(2),
+        })
+      );
+    });
+
+    it('should handle undefined start parameter', async () => {
+      const { payment, rest, targetDid } = createMockDistributionPayment(did);
+      const mockPaginatedResult = createMockPaymentHistoryResult(payment);
+
+      mockCorporateActionsService.getPaymentHistory.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.getPaymentHistory(
+        { asset: assetId, id: new BigNumber(1) },
+        { size: new BigNumber(10), start: undefined }
+      );
+
+      expect(mockCorporateActionsService.getPaymentHistory).toHaveBeenCalledWith(
+        assetId,
+        new BigNumber(1),
+        new BigNumber(10),
+        new BigNumber(0)
+      );
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: [new DistributionPaymentModel({ ...rest, did: targetDid })],
           next: new BigNumber(2),
         })
       );

@@ -2,6 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { when } from 'jest-when';
 import { Repository } from 'typeorm';
 
+import { AppNotFoundError } from '~/common/errors';
 import { Notification } from '~/datastore/postgres/entities/notification.entity';
 import { PostgresNotificationRepo } from '~/datastore/postgres/repos/notification.repo';
 import { NotificationModel } from '~/notifications/model/notification.model';
@@ -33,6 +34,14 @@ describe(`PostgresNotificationRepo ${NotificationRepo.type} test suite`, () => {
   when(mockRepository.findOneBy)
     .calledWith({ id: mockNotification.id })
     .mockResolvedValue(mockNotification);
+
+  describe('findById', () => {
+    it('should throw AppNotFoundError when entity is not found', async () => {
+      when(mockRepository.findOneBy).calledWith({ id: 999 }).mockResolvedValue(null);
+
+      await expect(repo.findById(999)).rejects.toThrow(AppNotFoundError);
+    });
+  });
 
   NotificationRepo.test(repo);
 });

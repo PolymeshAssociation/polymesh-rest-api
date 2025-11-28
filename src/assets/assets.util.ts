@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AddClaimCountStatParams,
@@ -12,6 +10,7 @@ import {
   GroupPermissions,
   Identity,
   InputStatClaim,
+  StatType,
   TransactionPermissions,
   TransferRestriction,
   TransferRestrictionClaimCountInput,
@@ -266,70 +265,181 @@ export async function transferRestrictionsDtoToRestrictions(
   );
 }
 
+type StatParams =
+  | AddCountStatParams
+  | AddPercentageStatParams
+  | AddClaimCountStatParams
+  | AddClaimPercentageStatParams;
+
+type StatParamsWithStringValues =
+  | (Omit<AddCountStatParams, 'count'> & { count: string | BigNumber })
+  | AddPercentageStatParams
+  | (Omit<AddClaimCountStatParams, 'value'> & {
+      value:
+        | {
+            accredited?: string | BigNumber;
+            nonAccredited?: string | BigNumber;
+            affiliate?: string | BigNumber;
+            nonAffiliate?: string | BigNumber;
+            [key: string]: unknown;
+          }
+        | Array<{
+            count?: string | BigNumber | number;
+            countryCode?: string;
+            [key: string]: unknown;
+          }>;
+    })
+  | AddClaimPercentageStatParams;
+
+/**
+ * Type guard for AddCountStatParams
+ */
+function isAddCountStatParams(
+  stat: unknown
+): stat is StatParamsWithStringValues & { type: StatType.Count } {
+  return (
+    typeof stat === 'object' &&
+    stat !== null &&
+    'type' in stat &&
+    (stat as { type: unknown }).type === StatType.Count &&
+    'count' in stat
+  );
+}
+
+/**
+ * Type guard for AddPercentageStatParams
+ */
+function isAddPercentageStatParams(stat: unknown): stat is AddPercentageStatParams {
+  return (
+    typeof stat === 'object' &&
+    stat !== null &&
+    'type' in stat &&
+    (stat as { type: unknown }).type === StatType.Balance
+  );
+}
+
+/**
+ * Type guard for AddClaimCountStatParams
+ */
+function isAddClaimCountStatParams(
+  stat: unknown
+): stat is StatParamsWithStringValues & { type: StatType.ScopedCount } {
+  return (
+    typeof stat === 'object' &&
+    stat !== null &&
+    'type' in stat &&
+    (stat as { type: unknown }).type === StatType.ScopedCount &&
+    'value' in stat
+  );
+}
+
+/**
+ * Type guard for AddClaimPercentageStatParams
+ */
+function isAddClaimPercentageStatParams(stat: unknown): stat is AddClaimPercentageStatParams {
+  return (
+    typeof stat === 'object' &&
+    stat !== null &&
+    'type' in stat &&
+    (stat as { type: unknown }).type === StatType.ScopedBalance
+  );
+}
+
+/**
+ * Converts string count values to BigNumber for Count stats
+ */
+function convertCountStat(
+  stat: StatParamsWithStringValues & { type: StatType.Count }
+): AddCountStatParams {
+  const count = typeof stat.count === 'string' ? new BigNumber(stat.count) : stat.count;
+  return {
+    ...stat,
+    count,
+  };
+}
+
+/**
+ * Converts string values to BigNumber for ScopedCount stats
+ */
+function convertScopedCountStat(
+  stat: StatParamsWithStringValues & { type: StatType.ScopedCount }
+): AddClaimCountStatParams {
+  if (!stat.value) {
+    return stat as AddClaimCountStatParams;
+  }
+
+  // Handle object value (Accredited or Affiliate claim types)
+  if (typeof stat.value === 'object' && !Array.isArray(stat.value)) {
+    const valueObj = stat.value as Record<string, unknown>;
+    const transformedValue: Record<string, unknown> = {};
+
+    for (const [key, val] of Object.entries(valueObj)) {
+      if (
+        typeof val === 'string' &&
+        (key === 'accredited' ||
+          key === 'nonAccredited' ||
+          key === 'affiliate' ||
+          key === 'nonAffiliate')
+      ) {
+        transformedValue[key] = new BigNumber(val);
+      } else {
+        transformedValue[key] = val;
+      }
+    }
+
+    return {
+      ...stat,
+      value: transformedValue,
+    } as AddClaimCountStatParams;
+  }
+
+  // Handle array value (Jurisdiction claim type)
+  if (Array.isArray(stat.value)) {
+    const transformedValue = stat.value.map(item => {
+      if (typeof item === 'object' && item !== null && 'count' in item) {
+        const count = typeof item.count === 'string' ? new BigNumber(item.count) : item.count;
+        return {
+          ...item,
+          count,
+        };
+      }
+      return item;
+    });
+
+    return {
+      ...stat,
+      value: transformedValue,
+    } as AddClaimCountStatParams;
+  }
+
+  return stat as AddClaimCountStatParams;
+}
+
 /**
  * Ensures BigNumber conversions are applied to stats.
  * Converts string values to BigNumber instances where needed.
  */
-export function ensureStatsBigNumberConversion(
-  stats: (
-    | AddCountStatParams
-    | AddPercentageStatParams
-    | AddClaimCountStatParams
-    | AddClaimPercentageStatParams
-  )[]
-): (
-  | AddCountStatParams
-  | AddPercentageStatParams
-  | AddClaimCountStatParams
-  | AddClaimPercentageStatParams
-)[] {
+export function ensureStatsBigNumberConversion(stats: StatParamsWithStringValues[]): StatParams[] {
   return stats.map(stat => {
-    if (typeof stat === 'object' && stat !== null && 'type' in stat) {
-      const statObj = stat as Record<string, unknown>;
-      const transformed = { ...statObj };
-
-      // Convert count for Count stats
-      if (statObj.type === 'Count' && typeof statObj.count === 'string') {
-        transformed.count = new BigNumber(statObj.count as string);
-      }
-
-      // Convert nested value properties for ScopedCount stats
-      if (statObj.type === 'ScopedCount' && statObj.value) {
-        if (typeof statObj.value === 'object' && !Array.isArray(statObj.value)) {
-          const valueObj = statObj.value as Record<string, unknown>;
-          const transformedValue: Record<string, unknown> = {};
-          Object.keys(valueObj).forEach(key => {
-            const val = valueObj[key];
-            if (
-              typeof val === 'string' &&
-              (key === 'accredited' ||
-                key === 'nonAccredited' ||
-                key === 'affiliate' ||
-                key === 'nonAffiliate')
-            ) {
-              transformedValue[key] = new BigNumber(val);
-            } else {
-              transformedValue[key] = val;
-            }
-          });
-          transformed.value = transformedValue;
-        } else if (Array.isArray(statObj.value)) {
-          transformed.value = statObj.value.map(
-            (item: { count?: string; countryCode?: string }) => ({
-              ...item,
-              count: typeof item.count === 'string' ? new BigNumber(item.count) : item.count,
-            })
-          );
-        }
-      }
-
-      return transformed;
+    if (isAddCountStatParams(stat)) {
+      return convertCountStat(stat);
     }
-    return stat;
-  }) as (
-    | AddCountStatParams
-    | AddPercentageStatParams
-    | AddClaimCountStatParams
-    | AddClaimPercentageStatParams
-  )[];
+
+    if (isAddClaimCountStatParams(stat)) {
+      return convertScopedCountStat(stat);
+    }
+
+    if (isAddPercentageStatParams(stat) || isAddClaimPercentageStatParams(stat)) {
+      return stat;
+    }
+
+    // Unknown stat type - throw validation error
+    const statType =
+      typeof stat === 'object' && stat !== null && 'type' in stat
+        ? (stat as { type: unknown }).type
+        : 'unknown';
+    throw new Error(
+      `Unsupported stat type: ${statType}. Expected one of: Count, Balance, ScopedCount, ScopedBalance`
+    );
+  });
 }

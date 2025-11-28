@@ -155,6 +155,33 @@ describe('PortfoliosController', () => {
         new PaginatedResultsModel({ results: [mockDetails], next: '0', total: new BigNumber(1) })
       );
     });
+
+    it('should handle undefined start parameter', async () => {
+      const mockPortfolio = new MockPortfolio();
+      mockPortfolio.getAssetBalances.mockResolvedValue([]);
+      mockPortfolio.getCustodian.mockResolvedValue({ did });
+      mockPortfolio.getName.mockResolvedValue('P-1');
+
+      mockPortfoliosService.getCustodiedPortfolios.mockResolvedValue(
+        createMockResultSet([mockPortfolio])
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockDetails = createPortfolioIdentifierModel(mockPortfolio as any);
+
+      const result = await controller.getCustodiedPortfolios(
+        { did },
+        { size: new BigNumber(1), start: undefined }
+      );
+
+      expect(mockPortfoliosService.getCustodiedPortfolios).toHaveBeenCalledWith(did, {
+        size: new BigNumber(1),
+        start: undefined,
+      });
+      expect(result).toEqual(
+        new PaginatedResultsModel({ results: [mockDetails], next: '0', total: new BigNumber(1) })
+      );
+    });
   });
 
   describe('getPortfolio', () => {

@@ -274,6 +274,44 @@ describe('CheckpointsController', () => {
       expect(result).toEqual(mockResult);
       expect(mockCheckpointsService.getHolders).toHaveBeenCalled();
     });
+
+    it('should handle undefined start parameter', async () => {
+      mockCheckpointsService.getHolders.mockResolvedValue(mockAssetHolders);
+
+      const result = await controller.getHolders(
+        {
+          asset: assetId,
+          id: new BigNumber(1),
+        },
+        { size: new BigNumber(10), start: undefined }
+      );
+      expect(result).toEqual(mockResult);
+      expect(mockCheckpointsService.getHolders).toHaveBeenCalledWith(
+        assetId,
+        new BigNumber(1),
+        new BigNumber(10),
+        undefined
+      );
+    });
+
+    it('should handle defined start parameter', async () => {
+      mockCheckpointsService.getHolders.mockResolvedValue(mockAssetHolders);
+
+      const result = await controller.getHolders(
+        {
+          asset: assetId,
+          id: new BigNumber(1),
+        },
+        { size: new BigNumber(10), start: new BigNumber(5) }
+      );
+      expect(result).toEqual(mockResult);
+      expect(mockCheckpointsService.getHolders).toHaveBeenCalledWith(
+        assetId,
+        new BigNumber(1),
+        new BigNumber(10),
+        '5'
+      );
+    });
   });
 
   describe('getAssetBalance', () => {

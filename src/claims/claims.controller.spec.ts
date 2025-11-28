@@ -199,5 +199,49 @@ describe('ClaimsController', () => {
       );
       expect(result).toEqual(mockResponse);
     });
+
+    it('should handle undefined start parameter', async () => {
+      mockClaimsService.getRegisteredCustomClaimTypes.mockResolvedValue(mockResult);
+      const size = new BigNumber(10);
+
+      const result = await controller.getCustomClaimTypes({ size, start: undefined });
+
+      expect(mockClaimsService.getRegisteredCustomClaimTypes).toHaveBeenCalledWith(
+        size,
+        new BigNumber(0),
+        undefined
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle null start parameter', async () => {
+      mockClaimsService.getRegisteredCustomClaimTypes.mockResolvedValue(mockResult);
+      const size = new BigNumber(10);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await controller.getCustomClaimTypes({ size, start: null as any });
+
+      expect(mockClaimsService.getRegisteredCustomClaimTypes).toHaveBeenCalledWith(
+        size,
+        new BigNumber(0),
+        undefined
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle defined start parameter', async () => {
+      mockClaimsService.getRegisteredCustomClaimTypes.mockResolvedValue(mockResult);
+      const size = new BigNumber(10);
+      const start = new BigNumber(5);
+
+      const result = await controller.getCustomClaimTypes({ size, start });
+
+      expect(mockClaimsService.getRegisteredCustomClaimTypes).toHaveBeenCalledWith(
+        size,
+        start,
+        undefined
+      );
+      expect(result).toEqual(mockResponse);
+    });
   });
 });

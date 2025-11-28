@@ -1,6 +1,7 @@
-import { DeepMocked } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { ComplianceRequirements } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
 import { ComplianceRequirementsController } from '~/compliance/compliance-requirements.controller';
@@ -65,6 +66,30 @@ describe('ComplianceRequirementsController', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(result).toEqual(new ComplianceRequirementsModel(mockComplianceRequirements as any));
+    });
+
+    it('should map defaultTrustedClaimIssuers correctly', async () => {
+      const mockWithTrustedClaimIssuers = createMock<ComplianceRequirements>({
+        ...mockComplianceRequirements,
+        defaultTrustedClaimIssuers: [
+          {
+            identity: { did },
+            trustedFor: null,
+          },
+        ],
+      });
+
+      when(mockService.findComplianceRequirements)
+        .calledWith(assetId)
+        .mockResolvedValue(mockWithTrustedClaimIssuers);
+
+      const result = await controller.getComplianceRequirements({ asset: assetId });
+
+      expect(result.defaultTrustedClaimIssuers).toHaveLength(1);
+      expect(result.defaultTrustedClaimIssuers[0]).toEqual({
+        did,
+        trustedFor: null,
+      });
     });
   });
 

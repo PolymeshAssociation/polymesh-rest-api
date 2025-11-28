@@ -138,6 +138,35 @@ describe('IdentitiesController', () => {
         })
       );
     });
+
+    it('should handle undefined start parameter', async () => {
+      const mockResults = ['TICKER', 'TICKER2'];
+      const mockAssets = {
+        data: mockResults.map(asset => ({ id: asset })),
+        next: new BigNumber(2),
+        count: new BigNumber(2),
+      };
+
+      mockIdentitiesService.findHeldAssets.mockResolvedValue(mockAssets);
+
+      const result = await controller.getHeldAssets(
+        { did: '0x1' },
+        { start: undefined, size: new BigNumber(2) }
+      );
+
+      expect(mockIdentitiesService.findHeldAssets).toHaveBeenCalledWith(
+        '0x1',
+        new BigNumber(2),
+        new BigNumber(0)
+      );
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: mockResults,
+          total: new BigNumber(mockAssets.count),
+          next: mockAssets.next,
+        })
+      );
+    });
   });
 
   describe('getPendingInstructions', () => {
@@ -318,6 +347,62 @@ describe('IdentitiesController', () => {
         })
       );
     });
+
+    it('should filter sent authorizations when type is undefined and authorization is not expired', async () => {
+      const nonExpiredAuthorization = {
+        ...issuedAuthorization,
+        isExpired: jest.fn().mockReturnValue(false),
+      };
+      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({
+        data: [nonExpiredAuthorization],
+      });
+
+      const result = await controller.getPendingAuthorizations({ did }, { includeExpired: false });
+
+      expect(result.sent).toHaveLength(1);
+    });
+
+    it('should filter sent authorizations when type matches and authorization is not expired', async () => {
+      const nonExpiredAuthorization = {
+        ...issuedAuthorization,
+        data: {
+          type: AuthorizationType.TransferAssetOwnership,
+          value: 'FOO2',
+        } as unknown as GenericAuthorizationData,
+        isExpired: jest.fn().mockReturnValue(false),
+      };
+      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({
+        data: [nonExpiredAuthorization],
+      });
+
+      const result = await controller.getPendingAuthorizations(
+        { did },
+        { type: AuthorizationType.TransferAssetOwnership, includeExpired: false }
+      );
+
+      expect(result.sent).toHaveLength(1);
+    });
+
+    it('should filter out sent authorizations when type does not match', async () => {
+      const nonExpiredAuthorization = {
+        ...issuedAuthorization,
+        data: {
+          type: AuthorizationType.TransferAssetOwnership,
+          value: 'FOO2',
+        } as unknown as GenericAuthorizationData,
+        isExpired: jest.fn().mockReturnValue(false),
+      };
+      mockAuthorizationsService.findIssuedByDid.mockResolvedValue({
+        data: [nonExpiredAuthorization],
+      });
+
+      const result = await controller.getPendingAuthorizations(
+        { did },
+        { type: AuthorizationType.TransferTicker, includeExpired: true }
+      );
+
+      expect(result.sent).toHaveLength(0);
+    });
   });
 
   describe('getPendingAuthorization', () => {
@@ -395,6 +480,26 @@ describe('IdentitiesController', () => {
         results: paginatedResult.data,
       });
     });
+
+    it('should handle undefined start parameter', async () => {
+      mockClaimsService.findIssuedByDid.mockResolvedValue(paginatedResult as ResultSet<ClaimData>);
+      const result = await controller.getIssuedClaims(
+        { did },
+        { size: new BigNumber(10), start: undefined },
+        { includeExpired: false }
+      );
+      expect(mockClaimsService.findIssuedByDid).toHaveBeenCalledWith(
+        did,
+        false,
+        new BigNumber(10),
+        new BigNumber(0)
+      );
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: paginatedResult.data,
+      });
+    });
   });
 
   describe('getAssociatedClaims', () => {
@@ -462,6 +567,26 @@ describe('IdentitiesController', () => {
         { did },
         { size: new BigNumber(10), start: new BigNumber(1) },
         { includeExpired: true }
+      );
+      expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
+    });
+
+    it('should handle undefined start parameter', async () => {
+      mockClaimsService.findAssociatedByDid.mockResolvedValue(
+        mockAssociatedClaims as unknown as ResultSet<ClaimData>
+      );
+      const result = await controller.getAssociatedClaims(
+        { did },
+        { size: new BigNumber(10), start: undefined },
+        { includeExpired: true }
+      );
+      expect(mockClaimsService.findAssociatedByDid).toHaveBeenCalledWith(
+        did,
+        undefined,
+        undefined,
+        true,
+        new BigNumber(10),
+        new BigNumber(0)
       );
       expect(result).toEqual(new ResultsModel({ results: mockAssociatedClaims.data }));
     });

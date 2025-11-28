@@ -72,7 +72,7 @@ export async function createInstructionModel(instruction: Instruction): Promise<
   let instructionModelParams: ConstructorParameters<typeof InstructionModel>[0] = {
     status,
     type,
-    legs: legs || [],
+    legs,
     mediators: mediators.map(mediator => ({
       status: mediator.status,
       identity: mediator.identity.did,

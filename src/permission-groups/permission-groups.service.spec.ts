@@ -311,6 +311,65 @@ describe('PermissionGroupsService', () => {
         expect.objectContaining({ signer })
       );
     });
+
+    it('should invite an agent to a permission group by id', async () => {
+      const mockIdentity = createMock<Identity>({ did });
+      const mockTransaction = new MockTransaction(transaction);
+      const mockGroup = createMock<CustomPermissionGroup>();
+      const dto: InviteAgentToGroupDto = {
+        target: did,
+        permissions: new BigNumber(1),
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+      mockAsset.permissions.getGroup.mockResolvedValue(mockGroup);
+
+      const result = await service.inviteAgentToGroup(assetId, dto);
+
+      expect(result).toBeDefined();
+      expect(mockAsset.permissions.getGroup).toHaveBeenCalledWith({ id: new BigNumber(1) });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.permissions.inviteAgent,
+        {
+          target: mockIdentity,
+          permissions: mockGroup,
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+
+    it('should invite an agent with custom permissions object', async () => {
+      const mockIdentity = createMock<Identity>({ did });
+      const mockTransaction = new MockTransaction(transaction);
+      const transactionGroups = [TxGroup.CapitalDistribution];
+      const dto: InviteAgentToGroupDto = {
+        target: did,
+        permissions: {
+          transactionGroups,
+        } as unknown as InviteAgentToGroupDto['permissions'],
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.inviteAgentToGroup(assetId, dto);
+
+      expect(result).toBeDefined();
+      expect(mockAsset.permissions.getGroup).not.toHaveBeenCalled();
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.permissions.inviteAgent,
+        {
+          target: mockIdentity,
+          permissions: expect.objectContaining({
+            transactionGroups,
+          }),
+        },
+        expect.objectContaining({ signer })
+      );
+    });
   });
 
   describe('assignAgentToGroup', () => {
@@ -367,6 +426,40 @@ describe('PermissionGroupsService', () => {
       );
     });
 
+    it('should assign an agent to a permission group by type string', async () => {
+      const setGroupMock = jest.fn();
+      const setGroupProcedure = setGroupMock as unknown as Identity['assetPermissions']['setGroup'];
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          setGroup: setGroupProcedure,
+        },
+      });
+      const mockGroup = createMock<CustomPermissionGroup>();
+      const mockTransaction = new MockTransaction(transaction);
+      const dto: AssignAgentToGroupDto = {
+        target: did,
+        permissions: PermissionGroupType.Full,
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockAsset.permissions.getGroup.mockResolvedValue(mockGroup);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.assignAgentToGroup(assetId, dto);
+
+      expect(result).toEqual({ transactions: [mockTransaction] });
+      expect(mockAsset.permissions.getGroup).toHaveBeenCalledWith({
+        type: PermissionGroupType.Full,
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        setGroupProcedure,
+        { group: mockGroup },
+        expect.objectContaining({ signer })
+      );
+    });
+
     it('should assign an agent using transaction groups permissions', async () => {
       const setGroupMock = jest.fn();
       const setGroupProcedure = setGroupMock as unknown as Identity['assetPermissions']['setGroup'];
@@ -399,6 +492,85 @@ describe('PermissionGroupsService', () => {
           group: expect.objectContaining({
             asset: assetId,
             transactionGroups,
+          }),
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+
+    it('should assign an agent using transactions permissions', async () => {
+      const setGroupMock = jest.fn();
+      const setGroupProcedure = setGroupMock as unknown as Identity['assetPermissions']['setGroup'];
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          setGroup: setGroupProcedure,
+        },
+      });
+      const mockTransaction = new MockTransaction(transaction);
+      const { TransactionPermissionsDto: TransactionPermissionsDtoClass } = await import(
+        '~/identities/dto/transaction-permissions.dto'
+      );
+      const dto: AssignAgentToGroupDto = {
+        target: did,
+        permissions: {
+          transactions: new TransactionPermissionsDtoClass({
+            values: [TxTags.asset.Issue],
+            type: PermissionType.Include,
+          }),
+        } as unknown as AssignAgentToGroupDto['permissions'],
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.assignAgentToGroup(assetId, dto);
+
+      expect(result).toEqual({ transactions: [mockTransaction] });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        setGroupProcedure,
+        {
+          group: expect.objectContaining({
+            asset: assetId,
+            transactions: expect.objectContaining({
+              values: [TxTags.asset.Issue],
+              type: PermissionType.Include,
+            }),
+          }),
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+
+    it('should assign an agent with transactions null', async () => {
+      const setGroupMock = jest.fn();
+      const setGroupProcedure = setGroupMock as unknown as Identity['assetPermissions']['setGroup'];
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          setGroup: setGroupProcedure,
+        },
+      });
+      const mockTransaction = new MockTransaction(transaction);
+      const dto: AssignAgentToGroupDto = {
+        target: did,
+        permissions: {} as unknown as AssignAgentToGroupDto['permissions'],
+        signer,
+      };
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.assignAgentToGroup(assetId, dto);
+
+      expect(result).toEqual({ transactions: [mockTransaction] });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        setGroupProcedure,
+        {
+          group: expect.objectContaining({
+            asset: assetId,
+            transactions: null,
           }),
         },
         expect.objectContaining({ signer })
@@ -629,6 +801,41 @@ describe('PermissionGroupsService', () => {
         missingPermissions: [TxTags.asset.Issue],
         result: true,
         message: 'You are not authorized to perform this action',
+      });
+    });
+
+    it('should handle undefined transactions', async () => {
+      const mockAsset = createMock<Asset>({ id: assetId });
+      const checkPermissionsSpy = jest.fn().mockResolvedValue({
+        missingPermissions: [],
+        result: false,
+        message: 'All permissions are granted',
+      });
+      const mockIdentity = createMock<Identity>({
+        did,
+        assetPermissions: {
+          checkPermissions: checkPermissionsSpy,
+        },
+      });
+
+      const dto: CheckPermissionsDto = {
+        target: did,
+        transactions: undefined,
+      };
+
+      findAssetSpy.mockResolvedValue(mockAsset);
+      findIdentitySpy.mockResolvedValue(mockIdentity);
+
+      const result = await service.checkPermissions(assetId, dto);
+
+      expect(result).toEqual({
+        missingPermissions: [],
+        result: false,
+        message: 'All permissions are granted',
+      });
+      expect(checkPermissionsSpy).toHaveBeenCalledWith({
+        asset: mockAsset,
+        transactions: null,
       });
     });
   });

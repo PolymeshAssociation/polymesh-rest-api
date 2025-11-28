@@ -59,7 +59,7 @@ export class ClaimsService {
         start,
       });
     return {
-      data: identitiesWithClaims.data?.[0].claims || [],
+      data: identitiesWithClaims.data?.[0]?.claims || [],
       next: identitiesWithClaims.next,
       count: identitiesWithClaims.count,
     };

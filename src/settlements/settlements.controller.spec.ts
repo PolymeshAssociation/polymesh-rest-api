@@ -15,11 +15,14 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { LegType } from '~/common/types';
 import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
+import { LegModel } from '~/settlements/models/leg.model';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
+import * as settlementsUtil from '~/settlements/settlements.util';
 import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
+import { setupInstructionMock, testControllerTxResult } from '~/test-utils/test-helpers';
 
 const { did, txResult } = testValues;
 
@@ -37,6 +40,10 @@ describe('SettlementsController', () => {
       .compile();
 
     controller = module.get<SettlementsController>(SettlementsController);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -120,82 +127,174 @@ describe('SettlementsController', () => {
         ],
       });
     });
+
+    it('should handle SettleManual instruction type', async () => {
+      const mockInstruction = new MockInstruction();
+      const date = new Date();
+      const mockInstructionDetails = {
+        venue: {
+          id: new BigNumber(123),
+        },
+        status: InstructionStatus.Pending,
+        createdAt: date,
+        type: InstructionType.SettleManual,
+        endAfterBlock: new BigNumber(1000000),
+      };
+      setupInstructionMock(mockInstruction, mockInstructionDetails);
+      mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
+      const result = await controller.getInstruction({ id: new BigNumber(3) });
+
+      expect(result).toBeDefined();
+      expect(result.type).toBe(InstructionType.SettleManual);
+      expect(result.endAfterBlock).toEqual(new BigNumber(1000000));
+    });
+
+    it('should handle non-Pending instruction status', async () => {
+      const mockInstruction = new MockInstruction();
+      const date = new Date();
+      const mockEventIdentifier = {
+        blockNumber: new BigNumber(1000),
+        eventIndex: new BigNumber(1),
+      };
+      const mockInstructionDetails = {
+        venue: {
+          id: new BigNumber(123),
+        },
+        status: InstructionStatus.Failed,
+        createdAt: date,
+        type: InstructionType.SettleOnBlock,
+        endBlock: new BigNumber(1000000),
+      };
+      mockInstruction.details.mockResolvedValue(mockInstructionDetails);
+      mockInstruction.getStatus.mockResolvedValue({
+        status: InstructionStatus.Failed,
+        eventIdentifier: mockEventIdentifier,
+      });
+      mockInstruction.getLegs.mockResolvedValue({ data: [], next: null });
+      mockInstruction.getMediators.mockResolvedValue([]);
+      mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
+      const result = await controller.getInstruction({ id: new BigNumber(3) });
+
+      expect(result).toBeDefined();
+      expect(result.status).toBe(InstructionStatus.Failed);
+      expect(result.eventIdentifier).toBeDefined();
+    });
+
+    it('should handle empty legs array', async () => {
+      const mockInstruction = new MockInstruction();
+      const date = new Date();
+      const mockInstructionDetails = {
+        venue: {
+          id: new BigNumber(123),
+        },
+        status: InstructionStatus.Pending,
+        createdAt: date,
+        type: InstructionType.SettleOnBlock,
+        endBlock: new BigNumber(1000000),
+      };
+      setupInstructionMock(mockInstruction, mockInstructionDetails);
+      mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
+      const result = await controller.getInstruction({ id: new BigNumber(3) });
+
+      expect(result).toBeDefined();
+      expect(result.legs).toEqual([]);
+    });
+
+    it('should handle null legs from legsToLegModel', async () => {
+      const mockInstruction = new MockInstruction();
+      const date = new Date();
+      const mockInstructionDetails = {
+        venue: {
+          id: new BigNumber(123),
+        },
+        status: InstructionStatus.Pending,
+        createdAt: date,
+        type: InstructionType.SettleOnBlock,
+        endBlock: new BigNumber(1000000),
+      };
+      setupInstructionMock(mockInstruction, mockInstructionDetails);
+      mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
+
+      // Mock legsToLegModel to return null to trigger the legs ?? [] fallback
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const legsToLegModelSpy = jest
+        .spyOn(settlementsUtil, 'legsToLegModel')
+        .mockReturnValue(null as unknown as LegModel[]);
+
+      const result = await controller.getInstruction({ id: new BigNumber(3) });
+
+      expect(result).toBeDefined();
+      expect(result.legs).toEqual([]);
+
+      legsToLegModelSpy.mockRestore();
+    });
   });
 
   describe('affirmInstruction', () => {
     it('should affirm an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.affirmInstruction.mockResolvedValue(txResult);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await controller.affirmInstruction({ id: new BigNumber(3) }, {} as any);
-
-      expect(result).toEqual(processedTxResult);
+      await testControllerTxResult(
+        controller.affirmInstruction.bind(controller),
+        mockSettlementsService.affirmInstruction,
+        { id: new BigNumber(3) },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        {} as any
+      );
     });
   });
 
   describe('rejectInstruction', () => {
     it('should reject an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.rejectInstruction.mockResolvedValue(txResult);
-
-      const result = await controller.rejectInstruction(
+      await testControllerTxResult(
+        controller.rejectInstruction.bind(controller),
+        mockSettlementsService.rejectInstruction,
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 
   describe('withdrawAffirmation', () => {
     it('should withdraw affirmation from an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.withdrawAffirmation.mockResolvedValue(txResult);
-
-      const result = await controller.withdrawAffirmation(
+      await testControllerTxResult(
+        controller.withdrawAffirmation.bind(controller),
+        mockSettlementsService.withdrawAffirmation,
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 
   describe('affirmInstructionAsMediator', () => {
     it('should affirm an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.affirmInstructionAsMediator.mockResolvedValue(txResult);
-
-      const result = await controller.affirmInstructionAsMediator(
+      await testControllerTxResult(
+        controller.affirmInstructionAsMediator.bind(controller),
+        mockSettlementsService.affirmInstructionAsMediator,
         { id: new BigNumber(3) },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {} as any
       );
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 
   describe('rejectInstructionAsMediator', () => {
     it('should reject an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.rejectInstructionAsMediator.mockResolvedValue(txResult);
-
-      const result = await controller.rejectInstructionAsMediator(
+      await testControllerTxResult(
+        controller.rejectInstructionAsMediator.bind(controller),
+        mockSettlementsService.rejectInstructionAsMediator,
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 
   describe('withdrawAffirmationAsMediator', () => {
     it('should withdraw affirmation from an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.withdrawAffirmationAsMediator.mockResolvedValue(txResult);
-
-      const result = await controller.withdrawAffirmationAsMediator(
+      await testControllerTxResult(
+        controller.withdrawAffirmationAsMediator.bind(controller),
+        mockSettlementsService.withdrawAffirmationAsMediator,
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 
@@ -314,14 +413,12 @@ describe('SettlementsController', () => {
 
   describe('executeInstruction', () => {
     it('should execute an instruction and return the data returned by the service', async () => {
-      mockSettlementsService.executeInstruction.mockResolvedValue(txResult);
-
-      const result = await controller.executeInstruction(
+      await testControllerTxResult(
+        controller.executeInstruction.bind(controller),
+        mockSettlementsService.executeInstruction,
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
-
-      expect(result).toEqual(processedTxResult);
     });
   });
 

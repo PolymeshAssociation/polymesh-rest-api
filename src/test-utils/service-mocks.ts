@@ -56,6 +56,7 @@ export class MockAssetService {
   removeAgentFromAsset = jest.fn();
   getGroupPermissions = jest.fn();
   getTransferRestrictions = jest.fn();
+  getTransferRestrictionValues = jest.fn();
   setTransferRestrictions = jest.fn();
   addTransferRestrictions = jest.fn();
   removeTransferRestrictions = jest.fn();
@@ -193,6 +194,8 @@ export class MockSettlementsService {
   rejectInstructionAsMediator = jest.fn();
   withdrawAffirmationAsMediator = jest.fn();
   executeInstruction = jest.fn();
+  fetchAllowedSigners = jest.fn();
+  updateVenueSigners = jest.fn();
 }
 
 export class MockClaimsService {

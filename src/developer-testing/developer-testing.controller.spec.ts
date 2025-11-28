@@ -12,6 +12,7 @@ import { CreateTestAdminsDto } from '~/developer-testing/dto/create-test-admins.
 import { CoverageReportModel } from '~/developer-testing/models/coverage-report.model';
 import { HANDSHAKE_HEADER_KEY } from '~/subscriptions/subscriptions.consts';
 import { testValues } from '~/test-utils/consts';
+import { MockIdentity } from '~/test-utils/mocks';
 import { mockDeveloperServiceProvider } from '~/test-utils/service-mocks';
 
 describe('DeveloperTestingController', () => {
@@ -69,6 +70,47 @@ describe('DeveloperTestingController', () => {
       expect(result).toEqual({ results: serviceResponse });
       expect(mockService.createTestAdmins).toHaveBeenCalledWith(params);
     });
+
+    it('should map identities to IdentityModel using createIdentityModel', async () => {
+      const mockIdentity1 = new MockIdentity();
+      const mockIdentity2 = new MockIdentity();
+      const serviceResponse: Identity[] = [
+        mockIdentity1 as unknown as Identity,
+        mockIdentity2 as unknown as Identity,
+      ];
+
+      const params = {
+        accounts: [
+          { address, initialPolyx: new BigNumber(10) },
+          {
+            address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+            initialPolyx: new BigNumber(20),
+          },
+        ],
+      } as CreateTestAdminsDto;
+
+      // Mock the methods that createIdentityModel calls
+      mockIdentity1.getPrimaryAccount.mockResolvedValue({
+        account: { address },
+        permissions: [],
+      });
+      mockIdentity1.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      mockIdentity1.getSecondaryAccounts.mockResolvedValue({ data: [], next: null });
+
+      mockIdentity2.getPrimaryAccount.mockResolvedValue({
+        account: { address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty' },
+        permissions: [],
+      });
+      mockIdentity2.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      mockIdentity2.getSecondaryAccounts.mockResolvedValue({ data: [], next: null });
+
+      when(mockService.createTestAdmins).calledWith(params).mockResolvedValue(serviceResponse);
+
+      const result = await controller.createTestAdmins(params);
+
+      expect(result.results).toHaveLength(2);
+      expect(mockService.createTestAdmins).toHaveBeenCalledWith(params);
+    });
   });
 
   describe('createTestAccount', () => {
@@ -84,6 +126,47 @@ describe('DeveloperTestingController', () => {
       const result = await controller.createTestAccounts(params);
 
       expect(result).toEqual({ results: serviceResponse });
+      expect(mockService.createTestAccounts).toHaveBeenCalledWith(params);
+    });
+
+    it('should map identities to IdentityModel using createIdentityModel', async () => {
+      const mockIdentity1 = new MockIdentity();
+      const mockIdentity2 = new MockIdentity();
+      const serviceResponse: Identity[] = [
+        mockIdentity1 as unknown as Identity,
+        mockIdentity2 as unknown as Identity,
+      ];
+
+      const params = {
+        accounts: [
+          { address, initialPolyx: new BigNumber(10) },
+          {
+            address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+            initialPolyx: new BigNumber(20),
+          },
+        ],
+      } as CreateTestAccountsDto;
+
+      // Mock the methods that createIdentityModel calls
+      mockIdentity1.getPrimaryAccount.mockResolvedValue({
+        account: { address },
+        permissions: [],
+      });
+      mockIdentity1.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      mockIdentity1.getSecondaryAccounts.mockResolvedValue({ data: [], next: null });
+
+      mockIdentity2.getPrimaryAccount.mockResolvedValue({
+        account: { address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty' },
+        permissions: [],
+      });
+      mockIdentity2.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      mockIdentity2.getSecondaryAccounts.mockResolvedValue({ data: [], next: null });
+
+      when(mockService.createTestAccounts).calledWith(params).mockResolvedValue(serviceResponse);
+
+      const result = await controller.createTestAccounts(params);
+
+      expect(result.results).toHaveLength(2);
       expect(mockService.createTestAccounts).toHaveBeenCalledWith(params);
     });
   });

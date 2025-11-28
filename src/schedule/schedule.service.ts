@@ -22,7 +22,9 @@ export class ScheduleService {
   }
 
   public deleteInterval(id: string): void {
-    this.schedulerRegistry.deleteInterval(id);
+    if (this.schedulerRegistry.doesExist('interval', id)) {
+      this.schedulerRegistry.deleteInterval(id);
+    }
   }
 
   public addTimeout(id: string, cb: () => void | Promise<void>, ms: number): void {
@@ -34,7 +36,9 @@ export class ScheduleService {
   }
 
   public deleteTimeout(id: string): void {
-    this.schedulerRegistry.deleteTimeout(id);
+    if (this.schedulerRegistry.doesExist('timeout', id)) {
+      this.schedulerRegistry.deleteTimeout(id);
+    }
   }
 
   /**

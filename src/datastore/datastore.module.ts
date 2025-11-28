@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Inject, Module, OnModuleDestroy, Optional } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { ConfigurableModuleClass } from '~/datastore/config.module-definition';
@@ -14,7 +14,11 @@ import { createDataSource } from '~/datastore/postgres/source';
  * @note defaults to LocalStoreModule
  */
 @Module({})
-export class DatastoreModule extends ConfigurableModuleClass {
+export class DatastoreModule extends ConfigurableModuleClass implements OnModuleDestroy {
+  constructor(@Optional() @Inject(DataSource) private readonly dataSource: DataSource) {
+    super();
+  }
+
   public static registerAsync(): DynamicModule {
     const postgresSource = createDataSource();
     if (!postgresSource) {
@@ -36,6 +40,12 @@ export class DatastoreModule extends ConfigurableModuleClass {
         module: PostgresModule,
         exports: [PostgresModule],
       };
+    }
+  }
+
+  public async onModuleDestroy(): Promise<void> {
+    if (this.dataSource?.isInitialized) {
+      await this.dataSource.destroy();
     }
   }
 }

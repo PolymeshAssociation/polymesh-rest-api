@@ -21,17 +21,18 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { testValues } from '~/test-utils/consts';
-import {
-  createMockTxResult,
-  MockIdentity,
-  MockPolymesh,
-  MockTransaction,
-} from '~/test-utils/mocks';
+import { createMockTxResult, MockIdentity, MockPolymesh } from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
   MockTransactionsService,
 } from '~/test-utils/service-mocks';
+import {
+  expectLastSubmitCall,
+  expectTransactionResult,
+  setupMockTransaction,
+  testServiceTransactionResult,
+} from '~/test-utils/test-helpers';
 import * as transactionsUtilModule from '~/transactions/transactions.util';
 
 const { signer, did } = testValues;
@@ -170,53 +171,200 @@ describe('IdentitiesService', () => {
   describe('addSecondaryAccount', () => {
     describe('otherwise', () => {
       it('should return the transaction details', async () => {
-        const transaction = {
-          blockHash: '0x1',
-          txHash: '0x2',
-          blockNumber: new BigNumber(1),
-          tag: TxTags.identity.JoinIdentityAsKey,
-        };
-        const mockTransaction = new MockTransaction(transaction);
-        mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
-
         const body = {
           signer,
           secondaryAccount: 'address',
         };
 
+        await testServiceTransactionResult(
+          service.addSecondaryAccount.bind(service),
+          mockTransactionsService,
+          body,
+          TxTags.identity.JoinIdentityAsKey
+        );
+      });
+
+      it('should handle undefined permissions', async () => {
+        const mockTransaction = setupMockTransaction(
+          mockTransactionsService,
+          TxTags.identity.JoinIdentityAsKey
+        );
+
+        const body = {
+          signer,
+          secondaryAccount: 'address',
+          permissions: undefined,
+        };
+
         const result = await service.addSecondaryAccount(body);
-        expect(result).toEqual({
-          result: undefined,
-          transactions: [mockTransaction],
+        expectTransactionResult(result, mockTransaction);
+        expectLastSubmitCall(mockTransactionsService, {
+          permissions: undefined,
         });
-        expect(mockTransactionsService.submit).toHaveBeenCalled();
+      });
+
+      it('should handle null permissions', async () => {
+        const mockTransaction = setupMockTransaction(
+          mockTransactionsService,
+          TxTags.identity.JoinIdentityAsKey
+        );
+
+        const body = {
+          signer,
+          secondaryAccount: 'address',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          permissions: null as any,
+        };
+
+        const result = await service.addSecondaryAccount(body);
+        expectTransactionResult(result, mockTransaction);
+        expectLastSubmitCall(mockTransactionsService, {
+          permissions: undefined,
+        });
+      });
+
+      it('should call toPermissionsLike when permissions is defined', async () => {
+        const mockTransaction = setupMockTransaction(
+          mockTransactionsService,
+          TxTags.identity.JoinIdentityAsKey
+        );
+
+        const { PermissionsLikeDto } = await import('~/identities/dto/permissions-like.dto');
+        const mockPermissions = new PermissionsLikeDto({
+          assets: null,
+          portfolios: null,
+          transactions: null,
+          transactionGroups: [],
+        });
+        const toPermissionsLikeSpy = jest.spyOn(mockPermissions, 'toPermissionsLike');
+
+        const body = {
+          signer,
+          secondaryAccount: 'address',
+          permissions: mockPermissions,
+        };
+
+        const result = await service.addSecondaryAccount(body);
+        expectTransactionResult(result, mockTransaction);
+        expect(toPermissionsLikeSpy).toHaveBeenCalled();
       });
     });
   });
 
   describe('registerDid', () => {
     it('should return the transaction details', async () => {
-      const transaction = {
-        blockHash: '0x1',
-        txHash: '0x2',
-        blockNumber: new BigNumber(1),
-        tag: TxTags.identity.CddRegisterDid,
-      };
-      const mockTransaction = new MockTransaction(transaction);
-      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
-
       const body: RegisterIdentityDto = {
         signer,
         targetAccount: 'address',
         createCdd: false,
       };
 
+      await testServiceTransactionResult(
+        service.registerDid.bind(service),
+        mockTransactionsService,
+        body,
+        TxTags.identity.CddRegisterDid
+      );
+    });
+
+    it('should map secondaryAccounts with permissions', async () => {
+      const mockTransaction = setupMockTransaction(
+        mockTransactionsService,
+        TxTags.identity.CddRegisterDid
+      );
+
+      const { PermissionedAccountDto } = await import('~/accounts/dto/permissioned-account.dto');
+      const { PermissionsLikeDto } = await import('~/identities/dto/permissions-like.dto');
+
+      const body: RegisterIdentityDto = {
+        signer,
+        targetAccount: 'address',
+        createCdd: false,
+        secondaryAccounts: [
+          new PermissionedAccountDto({
+            secondaryAccount: 'secondaryAddress',
+            permissions: new PermissionsLikeDto({
+              assets: null,
+              portfolios: null,
+              transactions: null,
+              transactionGroups: [],
+            }),
+          }),
+        ],
+      };
+
       const result = await service.registerDid(body);
-      expect(result).toEqual({
-        result: undefined,
-        transactions: [mockTransaction],
+      expectTransactionResult(result, mockTransaction);
+      expectLastSubmitCall(mockTransactionsService, {
+        secondaryAccounts: [
+          {
+            secondaryAccount: 'secondaryAddress',
+            permissions: expect.anything(),
+          },
+        ],
       });
-      expect(mockTransactionsService.submit).toHaveBeenCalled();
+    });
+
+    it('should handle secondaryAccounts with undefined permissions', async () => {
+      const mockTransaction = setupMockTransaction(
+        mockTransactionsService,
+        TxTags.identity.CddRegisterDid
+      );
+
+      // Use plain object to bypass DTO validation and allow undefined permissions
+      const body = {
+        signer,
+        targetAccount: 'address',
+        createCdd: false,
+        secondaryAccounts: [
+          {
+            secondaryAccount: 'secondaryAddress',
+            permissions: undefined,
+          },
+        ],
+      } as unknown as RegisterIdentityDto;
+
+      const result = await service.registerDid(body);
+      expectTransactionResult(result, mockTransaction);
+      expectLastSubmitCall(mockTransactionsService, {
+        secondaryAccounts: [
+          {
+            secondaryAccount: 'secondaryAddress',
+            permissions: undefined,
+          },
+        ],
+      });
+    });
+
+    it('should handle secondaryAccounts with null permissions', async () => {
+      const mockTransaction = setupMockTransaction(
+        mockTransactionsService,
+        TxTags.identity.CddRegisterDid
+      );
+
+      // Use plain object to bypass DTO validation and allow null permissions
+      const body = {
+        signer,
+        targetAccount: 'address',
+        createCdd: false,
+        secondaryAccounts: [
+          {
+            secondaryAccount: 'secondaryAddress',
+            permissions: null,
+          },
+        ],
+      } as unknown as RegisterIdentityDto;
+
+      const result = await service.registerDid(body);
+      expectTransactionResult(result, mockTransaction);
+      expectLastSubmitCall(mockTransactionsService, {
+        secondaryAccounts: [
+          {
+            secondaryAccount: 'secondaryAddress',
+            permissions: undefined,
+          },
+        ],
+      });
     });
   });
 

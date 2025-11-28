@@ -167,5 +167,29 @@ describe('DeveloperTestingService', () => {
         uncoveredPaths: [],
       });
     });
+
+    it('should map uncovered paths when some routes are not covered', () => {
+      const mockSwagger = createMock<OpenAPIObject>({
+        paths: createMock<PathsObject>({
+          '/abc': createMock(),
+          '/def': createMock(),
+          '/ghi': createMock(),
+        }),
+      });
+      service.loadSwagger(mockSwagger);
+
+      // Only record one route, leaving others uncovered
+      const mockRequest = createMock<Request>({ url: '/abc' });
+      service.recordRoute(mockRequest);
+
+      const report = service.reportCoverage();
+
+      expect(report.total).toEqual(new BigNumber(3));
+      expect(report.totalUncovered).toEqual(new BigNumber(2));
+      expect(report.uncoveredPaths).toHaveLength(2);
+      expect(report.uncoveredPaths).toContain('/def');
+      expect(report.uncoveredPaths).toContain('/ghi');
+      expect(report.coverage.toNumber()).toBeCloseTo(33.33, 1);
+    });
   });
 });

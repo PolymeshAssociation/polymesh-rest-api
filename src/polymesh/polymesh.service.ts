@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { AddressOrPair, AugmentedSubmittable, SubmittableExtrinsic } from '@polkadot/api/types';
 import { ISubmittableResult } from '@polkadot/types/types';
 import { Polymesh } from '@polymeshassociation/polymesh-sdk';
@@ -8,25 +8,24 @@ import { POLYMESH_API } from '~/polymesh/polymesh.consts';
 import { ScheduleService } from '~/schedule/schedule.service';
 
 @Injectable()
-export class PolymeshService {
+export class PolymeshService implements OnModuleDestroy, OnModuleInit {
   private heartbeatIntervalId = 'polymeshHeartbeat';
 
   constructor(
     @Inject(POLYMESH_API) public readonly polymeshApi: Polymesh,
     private readonly scheduleService: ScheduleService
-  ) {
-    scheduleService.addInterval(
+  ) {}
+
+  public onModuleInit(): void {
+    this.scheduleService.addInterval(
       this.heartbeatIntervalId,
       () => {
-        polymeshApi.network.getLatestBlock();
+        this.polymeshApi.network.getLatestBlock();
       },
       10000
     );
-
-    /* istanbul ignore next: remove when this is replaced by a real service */
   }
 
-  /* istanbul ignore next: not worth the trouble */
   /**
    * @hidden
    * Allows for the execution of a transaction defined in the polkadot.js instance, bypassing the SDK.
@@ -39,15 +38,15 @@ export class PolymeshService {
   ): Promise<void> {
     const txName = tx.method;
     let unsub: Promise<() => void>;
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       unsub = tx(...params).signAndSend(signer, { nonce: -1 }, ((receipt: ISubmittableResult) => {
         const { status } = receipt;
         if (status.isInBlock) {
           this.handlePolkadotErrors(receipt, txName, reject);
-          resolve('ok');
+          resolve();
         }
       }) as (result: unknown) => void | Promise<void>) as Promise<() => void>;
-    }).then(async () => {
+    }).finally(async () => {
       (await unsub)();
     });
   }
@@ -80,5 +79,9 @@ export class PolymeshService {
     const { polymeshApi, scheduleService, heartbeatIntervalId } = this;
     scheduleService.deleteInterval(heartbeatIntervalId);
     return polymeshApi.disconnect();
+  }
+
+  public async onModuleDestroy(): Promise<void> {
+    await this.close();
   }
 }

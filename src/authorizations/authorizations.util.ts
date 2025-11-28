@@ -1,5 +1,3 @@
-/** istanbul ignore file */
-
 import { AuthorizationRequest } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AuthorizationRequestModel } from '~/authorizations/models/authorization-request.model';

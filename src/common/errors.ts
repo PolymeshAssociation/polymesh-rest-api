@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 export enum AppErrorCode {
   NotFound = 'NotFound',
   Conflict = 'Conflict',

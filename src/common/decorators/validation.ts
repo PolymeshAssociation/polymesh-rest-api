@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { applyDecorators } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
@@ -262,6 +260,9 @@ export function IncompatibleWith(
     validateIf(target, key);
   };
 }
+
+// Exported for testing default messages
+export const TestIsNotSiblingOfConstraint = IsNotSiblingOfConstraint;
 
 /**
  * Validates that a claim type is either null, a valid non-custom claim type, or a custom claim object.
