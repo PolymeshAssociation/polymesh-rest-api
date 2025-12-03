@@ -2,10 +2,10 @@
 
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import {
+  AddBalanceStatParams,
+  AddClaimBalanceStatParams,
   AddClaimCountStatParams,
-  AddClaimPercentageStatParams,
   AddCountStatParams,
-  AddPercentageStatParams,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { ValidateNested } from 'class-validator';
 
@@ -96,8 +96,8 @@ export class SetStatsDto extends TransactionBaseDto {
   @TransformScopedCountStats()
   readonly stats: (
     | AddCountStatParams
-    | AddPercentageStatParams
+    | AddBalanceStatParams
     | AddClaimCountStatParams
-    | AddClaimPercentageStatParams
+    | AddClaimBalanceStatParams
   )[];
 }

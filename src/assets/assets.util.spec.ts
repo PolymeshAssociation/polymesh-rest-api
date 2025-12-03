@@ -1,10 +1,10 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  AddBalanceStatParams,
+  AddClaimBalanceStatParams,
   AddClaimCountStatParams,
-  AddClaimPercentageStatParams,
   AddCountStatParams,
-  AddPercentageStatParams,
   Asset,
   ClaimType,
   CountryCode,
@@ -225,9 +225,9 @@ describe('assets.util', () => {
   it('converts stats string values to BigNumber where needed', () => {
     const stats: (
       | AddCountStatParams
-      | AddPercentageStatParams
+      | AddBalanceStatParams
       | AddClaimCountStatParams
-      | AddClaimPercentageStatParams
+      | AddClaimBalanceStatParams
     )[] = [
       { type: 'Count', count: new BigNumber(10) } as AddCountStatParams,
       {
@@ -368,7 +368,7 @@ describe('assets.util', () => {
 
       expect(converted).toHaveLength(1);
       expect((converted[0] as AddCountStatParams).count).toBeInstanceOf(BigNumber);
-      expect((converted[0] as AddCountStatParams).count.toString()).toBe('100');
+      expect((converted[0] as AddCountStatParams).count!.toString()).toBe('100');
     });
 
     it('handles Count stat with BigNumber count value (already converted)', () => {
@@ -380,11 +380,11 @@ describe('assets.util', () => {
 
       expect(converted).toHaveLength(1);
       expect((converted[0] as AddCountStatParams).count).toBeInstanceOf(BigNumber);
-      expect((converted[0] as AddCountStatParams).count.toString()).toBe('50');
+      expect((converted[0] as AddCountStatParams).count!.toString()).toBe('50');
     });
 
     it('handles Balance stat type (AddPercentageStatParams)', () => {
-      const stats = [{ type: StatType.Balance } as AddPercentageStatParams];
+      const stats = [{ type: StatType.Balance } as AddBalanceStatParams];
 
       const converted = ensureStatsBigNumberConversion(stats);
 
@@ -399,7 +399,7 @@ describe('assets.util', () => {
           type: StatType.ScopedBalance,
           issuer: mockIdentity,
           claimType: ClaimType.Accredited,
-        } as AddClaimPercentageStatParams,
+        } as AddClaimBalanceStatParams,
       ];
 
       const converted = ensureStatsBigNumberConversion(stats);

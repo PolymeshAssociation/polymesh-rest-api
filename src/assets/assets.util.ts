@@ -1,9 +1,9 @@
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  AddBalanceStatParams,
+  AddClaimBalanceStatParams,
   AddClaimCountStatParams,
-  AddClaimPercentageStatParams,
   AddCountStatParams,
-  AddPercentageStatParams,
   Asset,
   ClaimType,
   CreateGroupParams,
@@ -267,15 +267,15 @@ export async function transferRestrictionsDtoToRestrictions(
 
 type StatParams =
   | AddCountStatParams
-  | AddPercentageStatParams
+  | AddBalanceStatParams
   | AddClaimCountStatParams
-  | AddClaimPercentageStatParams;
+  | AddClaimBalanceStatParams;
 
 type StatParamsWithStringValues =
-  | (Omit<AddCountStatParams, 'count'> & { count: string | BigNumber })
-  | AddPercentageStatParams
+  | (Omit<AddCountStatParams, 'count'> & { count?: string | BigNumber })
+  | AddBalanceStatParams
   | (Omit<AddClaimCountStatParams, 'value'> & {
-      value:
+      value?:
         | {
             accredited?: string | BigNumber;
             nonAccredited?: string | BigNumber;
@@ -289,7 +289,7 @@ type StatParamsWithStringValues =
             [key: string]: unknown;
           }>;
     })
-  | AddClaimPercentageStatParams;
+  | AddClaimBalanceStatParams;
 
 /**
  * Type guard for AddCountStatParams
@@ -309,7 +309,7 @@ function isAddCountStatParams(
 /**
  * Type guard for AddPercentageStatParams
  */
-function isAddPercentageStatParams(stat: unknown): stat is AddPercentageStatParams {
+function isAddPercentageStatParams(stat: unknown): stat is AddBalanceStatParams {
   return (
     typeof stat === 'object' &&
     stat !== null &&
@@ -334,9 +334,9 @@ function isAddClaimCountStatParams(
 }
 
 /**
- * Type guard for AddClaimPercentageStatParams
+ * Type guard for AddClaimBalanceStatParams
  */
-function isAddClaimPercentageStatParams(stat: unknown): stat is AddClaimPercentageStatParams {
+function isAddClaimBalanceStatParams(stat: unknown): stat is AddClaimBalanceStatParams {
   return (
     typeof stat === 'object' &&
     stat !== null &&
@@ -429,7 +429,7 @@ export function ensureStatsBigNumberConversion(stats: StatParamsWithStringValues
       return convertScopedCountStat(stat);
     }
 
-    if (isAddPercentageStatParams(stat) || isAddClaimPercentageStatParams(stat)) {
+    if (isAddPercentageStatParams(stat) || isAddClaimBalanceStatParams(stat)) {
       return stat;
     }
 

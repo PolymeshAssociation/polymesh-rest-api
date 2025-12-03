@@ -52,7 +52,7 @@
     "@polymeshassociation/fireblocks-signing-manager": "^2.5.0",
     "@polymeshassociation/hashicorp-vault-signing-manager": "^3.5.0",
     "@polymeshassociation/local-signing-manager": "^3.5.2",
-    "@polymeshassociation/polymesh-sdk": "v29.1.0-beta.9",
+    "@polymeshassociation/polymesh-sdk": "v29.1.0-beta.15",
     "@polymeshassociation/polymesh-types": "^6.2.0",
     "@polymeshassociation/signing-manager-types": "^3.4.2",
     "class-transformer": "0.5.1",
