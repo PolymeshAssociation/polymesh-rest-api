@@ -10,6 +10,7 @@ import {
   ClaimType,
   CustomPermissionGroup,
   GenericAuthorizationData,
+  ReceiverAffirmationRequirement,
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -26,6 +27,7 @@ import { ResultsModel } from '~/common/models/results.model';
 import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
 import { MockDistributionWithDetails } from '~/corporate-actions/mocks/distribution-with-details.mock';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
+import { SetMandatoryReceiverAffirmationDto } from '~/identities/dto/set-mandatory-receiver-affirmation.dto';
 import { IdentitiesController } from '~/identities/identities.controller';
 import { IdentitiesService } from '~/identities/identities.service';
 import { AccountModel } from '~/identities/models/account.model';
@@ -53,7 +55,7 @@ import {
 } from '~/test-utils/service-mocks';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
-const { did, txResult, ticker, assetId } = testValues;
+const { did, txResult, ticker, assetId, signer } = testValues;
 
 describe('IdentitiesController', () => {
   let controller: IdentitiesController;
@@ -699,6 +701,66 @@ describe('IdentitiesController', () => {
       const result = await controller.getCddClaims({ did }, { includeExpired: true });
       expect(result).toEqual(new ResultsModel({ results: mockCddClaims }));
       expect(mockClaimsService.findCddClaimsByDid).toHaveBeenCalledWith(did, true);
+    });
+  });
+
+  describe('selfRegisterDid', () => {
+    it('should return transaction details for self-registration', async () => {
+      const identity = new MockIdentity();
+      const address = 'address';
+      identity.getPrimaryAccount.mockResolvedValue({
+        account: { address },
+        permissions: [],
+      });
+      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+
+      const identityData = new IdentityModel({
+        did,
+        primaryAccount: new PermissionedAccountModel({
+          account: new AccountModel({ address }),
+          permissions: new PermissionsModel({
+            assets: null,
+            portfolios: null,
+            transactionGroups: [],
+            transactions: null,
+          }),
+        }),
+        secondaryAccounts: [],
+        secondaryAccountsFrozen: false,
+      });
+
+      mockIdentitiesService.selfRegisterDid.mockResolvedValue({
+        ...txResult,
+        result: identity,
+      });
+
+      const result = await controller.selfRegisterDid({ signer });
+
+      expect(result).toEqual({
+        ...processedTxResult,
+        identity: identityData,
+      });
+      expect(mockIdentitiesService.selfRegisterDid).toHaveBeenCalledWith({ signer });
+    });
+  });
+
+  describe('setMandatoryReceiverAffirmation', () => {
+    it('should return transaction details', async () => {
+      const params: SetMandatoryReceiverAffirmationDto = {
+        signer,
+        requirement: ReceiverAffirmationRequirement.Required,
+      };
+
+      mockIdentitiesService.setMandatoryReceiverAffirmation.mockResolvedValue(txResult);
+
+      const result = await controller.setMandatoryReceiverAffirmation({ did }, params);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockIdentitiesService.setMandatoryReceiverAffirmation).toHaveBeenCalledWith(
+        did,
+        params
+      );
     });
   });
 

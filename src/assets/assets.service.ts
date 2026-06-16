@@ -22,13 +22,16 @@ import {
   normalizeExistingRestrictions,
   transferRestrictionsDtoToRestrictions,
 } from '~/assets/assets.util';
+import { ApproveAllowanceDto } from '~/assets/dto/approve-allowance.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { GetAllowanceParamsDto } from '~/assets/dto/get-allowance-params.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { TransferFundsDto } from '~/assets/dto/transfer-funds.dto';
 import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { VenueIdsDto } from '~/assets/dto/venue-ids.dto';
@@ -214,11 +217,11 @@ export class AssetsService {
 
     const { redeem } = await this.findFungible(assetInput);
 
-    return this.transactionsService.submit(
-      redeem,
-      { ...args, from: toPortfolioId(args.from) },
-      options
-    );
+    const redeemParams = args.fromAccount
+      ? { amount: args.amount, fromAccount: args.fromAccount }
+      : { amount: args.amount, from: toPortfolioId(args.from!) };
+
+    return this.transactionsService.submit(redeem, redeemParams, options);
   }
 
   public async freeze(
@@ -247,15 +250,65 @@ export class AssetsService {
   ): ServiceReturn<void> {
     const {
       options,
-      args: { origin, amount },
+      args: { origin, amount, destination },
     } = extractTxOptions(params);
     const { controllerTransfer } = await this.findFungible(assetInput);
 
     return this.transactionsService.submit(
       controllerTransfer,
-      { originPortfolio: origin.toPortfolioLike(), amount },
+      {
+        originPortfolio: origin.toPortfolioLike(),
+        amount,
+        ...(destination ? { destination: destination.toAssetHolderLike() } : {}),
+      },
       options
     );
+  }
+
+  public async transferFunds(params: TransferFundsDto): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+    const { from, to, asset, amount, nfts, memo } = args;
+
+    const transferParams = amount
+      ? {
+          from: from.toAssetHolderLike(),
+          to: to.toAssetHolderLike(),
+          asset,
+          amount,
+          ...(memo ? { memo } : {}),
+        }
+      : {
+          from: from.toAssetHolderLike(),
+          to: to.toAssetHolderLike(),
+          asset,
+          nfts: nfts!,
+          ...(memo ? { memo } : {}),
+        };
+
+    const { transferFunds } = this.polymeshService.polymeshApi.assets;
+
+    return this.transactionsService.submit(transferFunds, transferParams, options);
+  }
+
+  public async approveAllowance(
+    assetInput: string,
+    params: ApproveAllowanceDto
+  ): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+    const fungible = await this.findFungible(assetInput);
+
+    return this.transactionsService.submit(fungible.approveAllowance, args, options);
+  }
+
+  public async getAllowance(
+    assetInput: string,
+    { owner, spender }: GetAllowanceParamsDto
+  ): Promise<BigNumber> {
+    const fungible = await this.findFungible(assetInput);
+
+    return fungible.getAllowance({ owner, spender }).catch(error => {
+      throw handleSdkError(error);
+    });
   }
 
   public async getOperationHistory(assetInput: string): Promise<HistoricAgentOperation[]> {

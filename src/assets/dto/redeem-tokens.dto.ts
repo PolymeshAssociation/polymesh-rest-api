@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -17,13 +18,22 @@ export class RedeemTokensDto extends TransactionBaseDto {
   @IsBigNumber()
   readonly amount: BigNumber;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Portfolio number from which the Asset tokens must be redeemed. Use 0 for the Default Portfolio',
     example: '1',
     type: 'string',
   })
+  @ValidateIf(({ fromAccount }) => !fromAccount)
   @IsBigNumber()
   @ToBigNumber()
-  readonly from: BigNumber;
+  readonly from?: BigNumber;
+
+  @ApiPropertyOptional({
+    description:
+      'Account from which the Asset tokens must be redeemed (alternative to from portfolio)',
+    example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
+  })
+  @ValidateIf(({ from }) => from === undefined)
+  readonly fromAccount?: string;
 }

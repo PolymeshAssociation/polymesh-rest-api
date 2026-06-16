@@ -1,12 +1,13 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { IsOptional, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
+import { AssetHolderDto } from '~/common/dto/asset-holder.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 
@@ -27,4 +28,14 @@ export class ControllerTransferDto extends TransactionBaseDto {
   @ToBigNumber()
   @IsBigNumber()
   readonly amount: BigNumber;
+
+  @ApiPropertyOptional({
+    description:
+      'Destination asset holder (account or portfolio) to receive the tokens. Defaults to the signer default portfolio',
+    type: () => AssetHolderDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AssetHolderDto)
+  readonly destination?: AssetHolderDto;
 }

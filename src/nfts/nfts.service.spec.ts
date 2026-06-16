@@ -264,5 +264,37 @@ describe('NftService', () => {
         transactions: [mockTransaction],
       });
     });
+
+    it('should redeem from an account when fromAccount is provided', async () => {
+      const fromAccount = '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM';
+      const input = {
+        signer,
+        fromAccount,
+      };
+      const mockTransactions = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.nft.RedeemNft,
+      };
+      const mockTransaction = new MockTransaction(mockTransactions);
+      const mockCollection = createMock<NftCollection>();
+
+      jest.spyOn(service, 'findCollection').mockResolvedValue(mockCollection);
+
+      when(mockTransactionsService.submit)
+        .calledWith(expect.anything(), { fromAccount }, expect.objectContaining({ signer }))
+        .mockResolvedValue({
+          result: undefined,
+          transactions: [mockTransaction],
+        });
+
+      const result = await service.redeemNft(assetId, id, input);
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
   });
 });

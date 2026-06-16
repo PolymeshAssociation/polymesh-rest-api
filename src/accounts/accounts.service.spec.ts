@@ -417,4 +417,52 @@ describe('AccountsService', () => {
       expect(result).toEqual(mockResult);
     });
   });
+
+  describe('getAssetBalances', () => {
+    it('should return fungible asset balances for an Account', async () => {
+      const mockAccount = new MockAccount();
+      const mockBalances = [
+        {
+          asset: new MockAsset(),
+          total: new BigNumber(100),
+          free: new BigNumber(80),
+          locked: new BigNumber(20),
+        },
+      ];
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAccount as any);
+      mockAccount.getAssetBalances.mockResolvedValue(mockBalances);
+
+      const result = await service.getAssetBalances('address');
+
+      expect(result).toEqual(mockBalances);
+      expect(mockAccount.getAssetBalances).toHaveBeenCalled();
+    });
+  });
+
+  describe('getCollections', () => {
+    it('should return NFT collections held by an Account', async () => {
+      const mockAccount = new MockAccount();
+      const mockCollections = [
+        {
+          collection: { id: 'collection-id' },
+          free: [],
+          locked: [],
+          total: new BigNumber(1),
+        },
+      ];
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findOneSpy.mockResolvedValue(mockAccount as any);
+      mockAccount.getCollections.mockResolvedValue(mockCollections);
+
+      const result = await service.getCollections('address');
+
+      expect(result).toEqual(mockCollections);
+      expect(mockAccount.getCollections).toHaveBeenCalled();
+    });
+  });
 });

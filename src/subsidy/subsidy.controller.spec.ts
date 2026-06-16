@@ -7,9 +7,11 @@ import { when } from 'jest-when';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ProcessMode, TransactionType } from '~/common/types';
+import { AcceptSubsidyDto } from '~/subsidy/dto/accept-subsidy.dto';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
+import { RevokeSubsidyDto } from '~/subsidy/dto/revoke-subsidy.dto';
 import { SubsidyController } from '~/subsidy/subsidy.controller';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { processedTxResult, txResult } from '~/test-utils/consts';
@@ -96,6 +98,64 @@ describe('SubsidyController', () => {
           authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
         })
       );
+    });
+  });
+
+  describe('approveSubsidy', () => {
+    it('should accept CreateSubsidyDto and return transaction details', async () => {
+      const mockPayload: CreateSubsidyDto = {
+        signer: 'Alice',
+        beneficiary,
+        allowance,
+      };
+
+      when(mockService.approveSubsidy)
+        .calledWith(mockPayload)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(txResult as any);
+
+      const result = await controller.approveSubsidy(mockPayload);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockService.approveSubsidy).toHaveBeenCalledWith(mockPayload);
+    });
+  });
+
+  describe('acceptSubsidy', () => {
+    it('should accept AcceptSubsidyDto and return transaction details', async () => {
+      const mockPayload: AcceptSubsidyDto = {
+        signer: beneficiary,
+        subsidizer,
+      };
+
+      when(mockService.acceptSubsidy)
+        .calledWith(mockPayload)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(txResult as any);
+
+      const result = await controller.acceptSubsidy(mockPayload);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockService.acceptSubsidy).toHaveBeenCalledWith(mockPayload);
+    });
+  });
+
+  describe('revokeSubsidy', () => {
+    it('should accept RevokeSubsidyDto and return transaction details', async () => {
+      const mockPayload: RevokeSubsidyDto = {
+        signer: subsidizer,
+        beneficiary,
+      };
+
+      when(mockService.revokeSubsidy)
+        .calledWith(mockPayload)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockResolvedValue(txResult as any);
+
+      const result = await controller.revokeSubsidy(mockPayload);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockService.revokeSubsidy).toHaveBeenCalledWith(mockPayload);
     });
   });
 

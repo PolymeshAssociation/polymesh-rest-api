@@ -8,9 +8,9 @@ import { IsEnum, ValidateIf, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsAsset, IsBigNumber } from '~/common/decorators/validation';
+import { AssetHolderDto } from '~/common/dto/asset-holder.dto';
 import { AppValidationError } from '~/common/errors';
 import { LegType } from '~/common/types';
-import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { AssetLegTypeDto } from '~/settlements/dto/asset-leg.dto';
 
 export class LegDto extends AssetLegTypeDto {
@@ -35,28 +35,28 @@ export class LegDto extends AssetLegTypeDto {
   readonly nfts?: BigNumber[];
 
   @ApiProperty({
-    description: 'Portfolio of the sender',
-    type: () => PortfolioDto,
+    description: 'Asset holder of the sender (Account or Portfolio)',
+    type: () => AssetHolderDto,
     example: {
       did: '0x0600000000000000000000000000000000000000000000000000000000000000',
       id: 1,
     },
   })
   @ValidateNested()
-  @Type(() => PortfolioDto)
-  readonly from: PortfolioDto;
+  @Type(() => AssetHolderDto)
+  readonly from: AssetHolderDto;
 
   @ApiProperty({
-    description: 'Portfolio of the receiver',
-    type: () => PortfolioDto,
+    description: 'Asset holder of the receiver (Account or Portfolio)',
+    type: () => AssetHolderDto,
     example: {
       did: '0x0111111111111111111111111111111111111111111111111111111111111111',
       id: 0,
     },
   })
   @ValidateNested()
-  @Type(() => PortfolioDto)
-  readonly to: PortfolioDto;
+  @Type(() => AssetHolderDto)
+  readonly to: AssetHolderDto;
 
   @ApiProperty({
     description: 'Asset associated with the leg',
@@ -73,8 +73,8 @@ export class LegDto extends AssetLegTypeDto {
     const { amount, nfts, asset, from, to } = this;
     if (amount) {
       return {
-        from: from.toPortfolioLike(),
-        to: to.toPortfolioLike(),
+        from: from.toAssetHolderLike(),
+        to: to.toAssetHolderLike(),
         asset,
         amount,
       };
@@ -84,8 +84,8 @@ export class LegDto extends AssetLegTypeDto {
       return {
         nfts,
         asset,
-        from: from.toPortfolioLike(),
-        to: to.toPortfolioLike(),
+        from: from.toAssetHolderLike(),
+        to: to.toAssetHolderLike(),
       };
     }
     throw new AppValidationError('Either nfts/amount should be specific for a on-chain leg');

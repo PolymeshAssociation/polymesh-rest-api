@@ -14,8 +14,11 @@ import { Response } from 'express';
 import { AccountsController } from '~/accounts/accounts.controller';
 import { AccountDetails, AccountsService } from '~/accounts/accounts.service';
 import { PermissionedAccountDto } from '~/accounts/dto/permissioned-account.dto';
+import { AccountCollectionModel } from '~/accounts/models/account-collection.model';
+import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
+import { ResultsModel } from '~/common/models/results.model';
 import { PermissionsLikeDto } from '~/identities/dto/permissions-like.dto';
 import * as identityUtil from '~/identities/identities.util';
 import { AccountModel } from '~/identities/models/account.model';
@@ -24,6 +27,7 @@ import { IdentitySignerModel } from '~/identities/models/identity-signer.model';
 import { TreasuryBalanceModel } from '~/network/models/treasury-balance.model';
 import { NetworkService } from '~/network/network.service';
 import { SubsidyService } from '~/subsidy/subsidy.service';
+import { createSubsidyModel } from '~/subsidy/subsidy.util';
 import { extrinsic, processedTxResult, testValues } from '~/test-utils/consts';
 import {
   createMockResponseObject,
@@ -218,6 +222,84 @@ describe('AccountsController', () => {
         subsidizer: new AccountModel({ address: 'subsidizer' }),
         allowance: new BigNumber(10),
       });
+    });
+  });
+
+  describe('getPendingSubsidies', () => {
+    it('should return pending subsidies for an account', async () => {
+      const subsidyWithAllowance = {
+        subsidy: createMockSubsidy(),
+        allowance: new BigNumber(10),
+      };
+
+      mockSubsidyService.getPendingSubsidies.mockResolvedValue([subsidyWithAllowance as never]);
+
+      const result = await controller.getPendingSubsidies({ account: 'someAccount' });
+
+      expect(result).toEqual(
+        new ResultsModel({
+          results: [createSubsidyModel(subsidyWithAllowance as never)],
+        })
+      );
+    });
+  });
+
+  describe('getAssetBalances', () => {
+    it('should return fungible asset balances for an account', async () => {
+      const mockAsset = new MockAsset();
+      const balances = [
+        {
+          asset: mockAsset,
+          total: new BigNumber(100),
+          free: new BigNumber(80),
+          locked: new BigNumber(20),
+        },
+      ];
+
+      mockAccountsService.getAssetBalances.mockResolvedValue(balances as never);
+
+      const result = await controller.getAssetBalances({ account: 'someAccount' });
+
+      expect(result).toEqual(
+        new ResultsModel({
+          results: [
+            new AssetBalanceModel({
+              asset: mockAsset as never,
+              total: new BigNumber(100),
+              free: new BigNumber(80),
+              locked: new BigNumber(20),
+            }),
+          ],
+        })
+      );
+    });
+  });
+
+  describe('getCollections', () => {
+    it('should return NFT collections held by an account', async () => {
+      const collections = [
+        {
+          collection: { id: 'collection-id' },
+          free: [],
+          locked: [],
+          total: new BigNumber(2),
+        },
+      ];
+
+      mockAccountsService.getCollections.mockResolvedValue(collections as never);
+
+      const result = await controller.getCollections({ account: 'someAccount' });
+
+      expect(result).toEqual(
+        new ResultsModel({
+          results: [
+            new AccountCollectionModel({
+              collection: { id: 'collection-id' } as never,
+              total: new BigNumber(2),
+            }),
+          ],
+        })
+      );
     });
   });
 

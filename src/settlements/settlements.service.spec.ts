@@ -13,6 +13,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 
 import { AssetsService } from '~/assets/assets.service';
+import { AssetHolderDto, AssetHolderType } from '~/common/dto/asset-holder.dto';
 import { LegType } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -421,7 +422,29 @@ describe('SettlementsService', () => {
       });
       expect(mockTransactionsService.submit).toHaveBeenCalledWith(
         mockInstruction.affirm,
-        { portfolios: ['0x01'] },
+        { holders: ['0x01'] },
+        expect.objectContaining({ signer })
+      );
+
+      mockTransactionsService.submit.mockClear();
+
+      result = await service.affirmInstruction(new BigNumber(123), {
+        ...body,
+        holders: [
+          new AssetHolderDto({
+            type: AssetHolderType.account,
+            address: '0xaccount',
+          }),
+        ],
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.affirm,
+        { holders: ['0xaccount'] },
         expect.objectContaining({ signer })
       );
 
@@ -471,6 +494,30 @@ describe('SettlementsService', () => {
         mockInstruction.affirm,
         { receipts: [receipt, receipt2] },
         expect.objectContaining({ signer })
+      );
+
+      mockTransactionsService.submit.mockClear();
+      mockInstruction.generateOffChainAffirmationReceipt.mockClear();
+
+      const expiresAt = new Date('2026-01-01T00:00:00.000Z');
+
+      result = await service.affirmInstruction(new BigNumber(123), {
+        ...body,
+        receipts: [
+          {
+            legId: new BigNumber(0),
+            uid: new BigNumber(1),
+            signer: 'some_signer',
+            signature: {
+              type: SignerKeyRingType.Sr25519,
+            },
+            expiresAt,
+          },
+        ],
+      });
+
+      expect(mockInstruction.generateOffChainAffirmationReceipt).toHaveBeenCalledWith(
+        expect.objectContaining({ expiresAt })
       );
     });
   });

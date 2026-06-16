@@ -325,4 +325,118 @@ describe('SubsidyService', () => {
       });
     });
   });
+
+  describe('approveSubsidy', () => {
+    it('should run an approveSubsidy procedure and return the queue results', async () => {
+      const mockTransaction = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.relayer.SetPayingKey,
+      });
+
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+
+      const body = {
+        signer,
+        beneficiary,
+        allowance,
+      };
+
+      const result = await service.approveSubsidy(body);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.approveSubsidy,
+        { beneficiary, allowance },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('acceptSubsidy', () => {
+    it('should run an acceptSubsidy procedure and return the queue results', async () => {
+      const mockTransaction = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.relayer.AcceptPayingKey,
+      });
+
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+
+      const body = {
+        signer: beneficiary,
+        subsidizer,
+      };
+
+      const result = await service.acceptSubsidy(body);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.acceptSubsidy,
+        { subsidizer },
+        expect.objectContaining({ signer: beneficiary })
+      );
+    });
+  });
+
+  describe('revokeSubsidy', () => {
+    it('should run a revokeSubsidy procedure and return the queue results', async () => {
+      const mockTransaction = new MockTransaction({
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.relayer.RemovePayingKey,
+      });
+
+      mockTransactionsService.submit.mockResolvedValue({
+        transactions: [mockTransaction],
+      });
+
+      const body = {
+        signer: subsidizer,
+        beneficiary,
+      };
+
+      const result = await service.revokeSubsidy(body);
+
+      expect(result).toEqual({
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.accountManagement.revokeSubsidy,
+        { beneficiary },
+        expect.objectContaining({ signer: subsidizer })
+      );
+    });
+  });
+
+  describe('getPendingSubsidies', () => {
+    it('should return pending subsidies for a beneficiary account', async () => {
+      const mockPending = [
+        {
+          subsidy: mockSubsidy,
+          allowance,
+        },
+      ];
+      const mockAccount = new MockAccount();
+      mockAccount.subsidies.getPendingSubsidies.mockResolvedValue(mockPending);
+
+      when(mockAccountsService.findOne).calledWith(beneficiary).mockResolvedValue(mockAccount);
+
+      const result = await service.getPendingSubsidies(beneficiary);
+
+      expect(result).toEqual(mockPending);
+      expect(mockAccount.subsidies.getPendingSubsidies).toHaveBeenCalled();
+    });
+  });
 });

@@ -14,14 +14,17 @@ import { Asset } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
+import { ApproveAllowanceDto } from '~/assets/dto/approve-allowance.dto';
 import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { GetAllowanceParamsDto } from '~/assets/dto/get-allowance-params.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
 import { RedeemTokensDto } from '~/assets/dto/redeem-tokens.dto';
 import { RequiredMediatorsDto } from '~/assets/dto/required-mediators.dto';
 import { SetAssetDocumentsDto } from '~/assets/dto/set-asset-documents.dto';
+import { TransferFundsDto } from '~/assets/dto/transfer-funds.dto';
 import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
 import { VenueIdsDto } from '~/assets/dto/venue-ids.dto';
@@ -76,6 +79,21 @@ export class AssetsController {
     const result = await this.metadataService.findGlobalKeys();
 
     return result.map(globalKey => new GlobalMetadataModel(globalKey));
+  }
+
+  @ApiOperation({
+    summary: 'Transfer funds between asset holders',
+    description:
+      'Transfers fungible tokens or NFTs between asset holders (accounts or portfolios) owned by the same identity',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('transfer-funds')
+  public async transferFunds(@Body() params: TransferFundsDto): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.transferFunds(params);
+    return handleServiceResult(result);
   }
 
   @ApiTags('nfts')
@@ -547,6 +565,54 @@ export class AssetsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.assetsService.controllerTransfer(asset, params);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Approve fungible asset allowance',
+    description:
+      'Approves a spender account allowance for transferring fungible asset tokens on chain v8',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The fungible Asset (Ticker/Asset ID)',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':asset/allowance/approve')
+  public async approveAllowance(
+    @Param() { asset }: AssetParamsDto,
+    @Body() params: ApproveAllowanceDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.assetsService.approveAllowance(asset, params);
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get fungible asset allowance',
+    description: 'Retrieves the allowance amount approved by an owner for a spender account',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The fungible Asset (Ticker/Asset ID)',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiOkResponse({
+    description: 'Allowance amount approved for the spender',
+    type: 'string',
+    example: '1000',
+  })
+  @Get(':asset/allowance')
+  public async getAllowance(
+    @Param() { asset }: AssetParamsDto,
+    @Query() params: GetAllowanceParamsDto
+  ): Promise<string> {
+    const allowance = await this.assetsService.getAllowance(asset, params);
+    return allowance.toString();
   }
 
   @ApiOperation({

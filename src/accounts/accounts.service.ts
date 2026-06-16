@@ -3,6 +3,8 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   Account,
   AccountBalance,
+  AccountCollection,
+  AssetHolderBalance,
   ExtrinsicData,
   Identity,
   MultiSig,
@@ -147,5 +149,17 @@ export class AccountsService {
   public async fetchOffChainReceipts(address: string): Promise<BigNumber[]> {
     const account = await this.findOne(address);
     return account.getOffChainReceipts();
+  }
+
+  public async getAssetBalances(address: string): Promise<AssetHolderBalance[]> {
+    const account = await this.findOne(address);
+
+    return account.getAssetBalances();
+  }
+
+  public async getCollections(address: string): Promise<AccountCollection[]> {
+    const account = await this.findOne(address);
+
+    return account.getCollections();
   }
 }

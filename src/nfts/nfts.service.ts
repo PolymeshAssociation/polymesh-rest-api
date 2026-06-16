@@ -102,6 +102,10 @@ export class NftsService {
 
     const nft = await this.findNft(collection, id);
 
-    return this.transactionsService.submit(nft.redeem, { from: toPortfolioId(args.from) }, options);
+    const redeemParams = args.fromAccount
+      ? { fromAccount: args.fromAccount }
+      : { from: toPortfolioId(args.from!) };
+
+    return this.transactionsService.submit(nft.redeem, redeemParams, options);
   }
 }

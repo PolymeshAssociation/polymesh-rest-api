@@ -9,12 +9,14 @@ import { FromEntityObject } from '~/common/decorators/transformation';
 
 export class TransferBreakdownModel {
   @ApiProperty({
-    description: 'List of general transfer errors',
-    type: 'string',
-    enum: TransferError,
+    description: 'List of general transfer errors or custom chain error messages',
+    type: 'array',
+    items: {
+      oneOf: [{ type: 'string', enum: Object.values(TransferError) }, { type: 'string' }],
+    },
     example: [TransferError.InvalidSenderPortfolio, TransferError.InvalidSenderCdd],
   })
-  readonly general: TransferError[];
+  readonly general: (TransferError | string)[];
 
   @ApiProperty({
     description: 'Compliance rules for the Asset, and whether the Asset transfer adheres to them',

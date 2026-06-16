@@ -11,10 +11,12 @@ import {
   ResultSet,
 } from '@polymeshassociation/polymesh-sdk/types';
 
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
+import { SetMandatoryReceiverAffirmationDto } from '~/identities/dto/set-mandatory-receiver-affirmation.dto';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -74,6 +76,27 @@ export class IdentitiesService {
     const { inviteAccount } = this.polymeshService.polymeshApi.accountManagement;
 
     return this.transactionsService.submit(inviteAccount, params, options);
+  }
+
+  public async selfRegisterDid(transactionBaseDto: TransactionBaseDto): ServiceReturn<Identity> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+
+    const { options } = extractTxOptions(transactionBaseDto);
+    const { selfRegisterDid } = polymeshApi.identities;
+
+    return this.transactionsService.submit(selfRegisterDid, undefined, options);
+  }
+
+  public async setMandatoryReceiverAffirmation(
+    did: string,
+    params: SetMandatoryReceiverAffirmationDto
+  ): ServiceReturn<void> {
+    const identity = await this.findOne(did);
+    const { options, args } = extractTxOptions(params);
+
+    return this.transactionsService.submit(identity.setMandatoryReceiverAffirmation, args, options);
   }
 
   public async registerDid(registerIdentityDto: RegisterIdentityDto): ServiceReturn<Identity> {

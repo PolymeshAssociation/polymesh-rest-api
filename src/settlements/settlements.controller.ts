@@ -10,14 +10,15 @@ import {
 import { Instruction } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
+import { AssetHolderDto } from '~/common/dto/asset-holder.dto';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
+import { createInstructionPartyModel } from '~/common/models/asset-holder.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
-import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { AffirmAsMediatorDto } from '~/settlements/dto/affirm-as-mediator.dto';
 import { AffirmInstructionDto } from '~/settlements/dto/affirm-instruction.dto';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
@@ -26,7 +27,10 @@ import { LegIdParamsDto } from '~/settlements/dto/leg-id-params.dto';
 import { LegValidationParamsDto } from '~/settlements/dto/leg-validation-params.dto';
 import { CreatedInstructionModel } from '~/settlements/models/created-instruction.model';
 import { InstructionModel } from '~/settlements/models/instruction.model';
-import { InstructionAffirmationModel } from '~/settlements/models/instruction-affirmation.model';
+import {
+  InstructionAffirmationModel,
+  InstructionAffirmationPartyType,
+} from '~/settlements/models/instruction-affirmation.model';
 import { OffChainAffirmationModel } from '~/settlements/models/off-chain-affirmation.model';
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -113,7 +117,9 @@ export class SettlementsController {
   @ApiTags('instructions')
   @ApiOperation({
     summary: 'Withdraw affirmation from an existing Instruction',
-    description: 'This endpoint will withdraw an affirmation from an Instruction',
+    description:
+      'This endpoint will withdraw an affirmation from an Instruction. Deprecated on chain v8 where affirmation withdraw is no longer supported',
+    deprecated: true,
   })
   @ApiParam({
     name: 'id',
@@ -189,7 +195,9 @@ export class SettlementsController {
   @ApiTags('instructions')
   @ApiOperation({
     summary: 'Withdraw affirmation from an existing Instruction as a mediator',
-    description: 'This endpoint will withdraw an affirmation from an Instruction',
+    description:
+      'This endpoint will withdraw a mediator affirmation from an Instruction. Deprecated on chain v8 where affirmation withdraw is no longer supported',
+    deprecated: true,
   })
   @ApiParam({
     name: 'id',
@@ -255,13 +263,17 @@ export class SettlementsController {
     );
     return new PaginatedResultsModel({
       results:
-        data?.map(
-          ({ identity, status }) =>
-            new InstructionAffirmationModel({
-              identity,
-              status,
-            })
-        ) ?? [],
+        data?.map(({ party, status }) => {
+          const partyModel = createInstructionPartyModel(party);
+          return new InstructionAffirmationModel({
+            party: partyModel.party,
+            partyType: partyModel.identity
+              ? InstructionAffirmationPartyType.identity
+              : InstructionAffirmationPartyType.account,
+            identity: partyModel.identity,
+            status,
+          });
+        }) ?? [],
       total: count,
       next,
     });
@@ -345,13 +357,20 @@ export class SettlementsController {
   @Get('leg-validations')
   public async validateLeg(
     @Query()
-    { asset, amount, nfts, fromDid, fromPortfolio, toDid, toPortfolio }: LegValidationParamsDto
+    {
+      asset,
+      amount,
+      nfts,
+      fromDid,
+      fromPortfolio,
+      fromAccount,
+      toDid,
+      toPortfolio,
+      toAccount,
+    }: LegValidationParamsDto
   ): Promise<TransferBreakdownModel> {
-    const fromPortfolioLike = new PortfolioDto({
-      did: fromDid,
-      id: fromPortfolio,
-    }).toPortfolioLike();
-    const toPortfolioLike = new PortfolioDto({ did: toDid, id: toPortfolio }).toPortfolioLike();
+    const fromPortfolioLike = fromAccount || new AssetHolderDto({ did: fromDid!, id: fromPortfolio! }).toAssetHolderLike();
+    const toPortfolioLike = toAccount || new AssetHolderDto({ did: toDid!, id: toPortfolio! }).toAssetHolderLike();
 
     const transferBreakdown = await this.settlementsService.canTransfer(
       fromPortfolioLike,

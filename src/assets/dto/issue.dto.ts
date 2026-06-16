@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
@@ -16,4 +16,11 @@ export class IssueDto extends TransactionBaseDto {
   @ToBigNumber()
   @IsBigNumber()
   readonly amount: BigNumber;
+
+  @ApiPropertyOptional({
+    description:
+      'Account to which tokens are issued. Use when not issuing to a portfolio. Only one of account or portfolioId should be provided',
+    example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
+  })
+  readonly account?: string;
 }

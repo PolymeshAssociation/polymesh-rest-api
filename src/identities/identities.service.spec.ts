@@ -8,6 +8,7 @@ import {
   Asset,
   CustomPermissionGroup,
   Identity,
+  ReceiverAffirmationRequirement,
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 
@@ -365,6 +366,62 @@ describe('IdentitiesService', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('selfRegisterDid', () => {
+    it('should submit selfRegisterDid and return transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.CddRegisterDid,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.selfRegisterDid({ signer });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.identities.selfRegisterDid,
+        undefined,
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('setMandatoryReceiverAffirmation', () => {
+    it('should submit setMandatoryReceiverAffirmation on the identity', async () => {
+      const mockIdentity = createMock<Identity>({
+        setMandatoryReceiverAffirmation: jest.fn(),
+      });
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.identity.CddRegisterDid,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockIdentity);
+
+      const requirement = ReceiverAffirmationRequirement.Required;
+      const result = await service.setMandatoryReceiverAffirmation(did, { signer, requirement });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockIdentity.setMandatoryReceiverAffirmation,
+        { requirement },
+        expect.objectContaining({ signer })
+      );
     });
   });
 

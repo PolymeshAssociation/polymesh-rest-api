@@ -4,12 +4,12 @@ import {
   Account,
   AffirmationStatus,
   AffirmInstructionParams,
+  AssetHolderLike,
   GroupedInstructions,
   Instruction,
   InstructionAffirmation,
   OffChainAffirmation,
   OffChainAffirmationReceipt,
-  PortfolioLike,
   ResultSet,
   TransferBreakdown,
   Venue,
@@ -163,8 +163,8 @@ export class SettlementsService {
   }
 
   public async canTransfer(
-    from: PortfolioLike,
-    to: PortfolioLike,
+    from: AssetHolderLike,
+    to: AssetHolderLike,
     ticker: string,
     transferAmount?: BigNumber,
     transferNfts?: BigNumber[]
@@ -181,14 +181,19 @@ export class SettlementsService {
   ): ServiceReturn<Instruction> {
     const { options, args } = extractTxOptions(affirmInstructionDto);
 
-    const { portfolios, receipts } = args;
+    const { holders, portfolios, receipts } = args;
 
     const instruction = await this.findInstruction(id);
 
     const params = {} as AffirmInstructionParams;
 
-    if (portfolios) {
-      params.portfolios = portfolios.map(portfolio => portfolio.toPortfolioLike());
+    const assetHolders = holders ?? portfolios?.map(portfolio => portfolio.toPortfolioLike());
+    if (assetHolders) {
+      params.holders = assetHolders.map(holder =>
+        typeof holder === 'object' && 'toAssetHolderLike' in holder
+          ? holder.toAssetHolderLike()
+          : holder
+      );
     }
 
     if (receipts) {
@@ -200,6 +205,7 @@ export class SettlementsService {
             signer,
             signature: { type: signerKeyRingType, value: signatureValue },
             metadata,
+            expiresAt,
           } = receipt;
           if (signatureValue) {
             return Promise.resolve(receipt as OffChainAffirmationReceipt);
@@ -210,6 +216,7 @@ export class SettlementsService {
             signer,
             signerKeyRingType,
             metadata,
+            expiresAt,
           });
         })
       );

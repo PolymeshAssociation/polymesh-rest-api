@@ -6,10 +6,10 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { isOffChainLeg } from '@polymeshassociation/polymesh-sdk/utils';
 
+import { createAssetHolderModel } from '~/common/models/asset-holder.model';
 import { EventIdentifierModel } from '~/common/models/event-identifier.model';
 import { LegType } from '~/common/types';
 import { isFungibleLeg } from '~/common/utils';
-import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { InstructionModel } from '~/settlements/models/instruction.model';
 import { LegModel } from '~/settlements/models/leg.model';
 import { OffChainLegModel } from '~/settlements/models/offchain-leg.model';
@@ -29,8 +29,8 @@ export function legsToLegModel(legs: Leg[]): LegModel[] {
         to: legTo,
         asset: { id },
       } = leg;
-      const from = createPortfolioIdentifierModel(legFrom);
-      const to = createPortfolioIdentifierModel(legTo);
+      const from = createAssetHolderModel(legFrom);
+      const to = createAssetHolderModel(legTo);
 
       if (isFungibleLeg(leg)) {
         const { amount } = leg;

@@ -16,6 +16,7 @@ import { when } from 'jest-when';
 import { MAX_CONTENT_HASH_LENGTH } from '~/assets/assets.consts';
 import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { AssetHolderDto, AssetHolderType } from '~/common/dto/asset-holder.dto';
 import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { ProcessMode } from '~/common/types';
 import { IdentitiesService } from '~/identities/identities.service';
@@ -522,6 +523,32 @@ describe('AssetsService', () => {
       result = await service.redeem('TICKER', { ...redeemBody, from: new BigNumber(0) });
       expectTransactionResult(result, mockTransaction);
     });
+
+    it('should redeem from an account when fromAccount is provided', async () => {
+      const fromAccount = '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM';
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.Redeem,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockAsset = new MockAsset();
+      const findSpy = jest.spyOn(service, 'findFungible');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findSpy.mockResolvedValue(mockAsset as any);
+
+      when(mockTransactionsService.submit)
+        .calledWith(mockAsset.redeem, { amount, fromAccount }, expect.objectContaining({ signer }))
+        .mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.redeem('TICKER', { signer, amount, fromAccount });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
   });
 
   describe('freeze', () => {
@@ -586,6 +613,132 @@ describe('AssetsService', () => {
         },
         expect.objectContaining({ signer })
       );
+    });
+
+    it('should pass destination when provided', async () => {
+      const origin = new PortfolioDto({ id: new BigNumber(1), did });
+      const destination = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
+      });
+      const amount = new BigNumber(100);
+
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.ControllerTransfer,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockAsset = new MockAsset();
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      await service.controllerTransfer('TICKER', { signer, origin, amount, destination });
+
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockAsset.controllerTransfer,
+        {
+          originPortfolio: {
+            identity: did,
+            id: new BigNumber(1),
+          },
+          amount,
+          destination: destination.address,
+        },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('transferFunds', () => {
+    it('should submit transferFunds with fungible amount', async () => {
+      const from = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: 'fromAddress',
+      });
+      const to = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: 'toAddress',
+      });
+      const amount = new BigNumber(100);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.Redeem,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+
+      when(mockTransactionsService.submit)
+        .calledWith(
+          mockPolymeshApi.assets.transferFunds,
+          { from: 'fromAddress', to: 'toAddress', asset: ticker, amount },
+          expect.objectContaining({ signer })
+        )
+        .mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.transferFunds({ signer, from, to, asset: ticker, amount });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('approveAllowance', () => {
+    it('should submit approveAllowance on the fungible asset', async () => {
+      const spender = 'spenderAddress';
+      const amount = new BigNumber(500);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.Redeem,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockAsset = new MockAsset();
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      when(mockTransactionsService.submit)
+        .calledWith(
+          mockAsset.approveAllowance,
+          { spender, amount },
+          expect.objectContaining({ signer })
+        )
+        .mockResolvedValue({ transactions: [mockTransaction] });
+
+      const result = await service.approveAllowance('TICKER', { signer, spender, amount });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+    });
+  });
+
+  describe('getAllowance', () => {
+    it('should return allowance from the fungible asset', async () => {
+      const mockAsset = new MockAsset();
+      const allowance = new BigNumber(250);
+      const findSpy = jest.spyOn(service, 'findFungible');
+      findSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+      mockAsset.getAllowance.mockResolvedValue(allowance);
+
+      const result = await service.getAllowance('TICKER', {
+        owner: 'ownerAddress',
+        spender: 'spenderAddress',
+      });
+
+      expect(result).toEqual(allowance);
+      expect(mockAsset.getAllowance).toHaveBeenCalledWith({
+        owner: 'ownerAddress',
+        spender: 'spenderAddress',
+      });
     });
   });
 

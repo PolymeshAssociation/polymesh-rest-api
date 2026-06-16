@@ -42,6 +42,9 @@ export class MockAssetService {
   freeze = jest.fn();
   unfreeze = jest.fn();
   controllerTransfer = jest.fn();
+  transferFunds = jest.fn();
+  approveAllowance = jest.fn();
+  getAllowance = jest.fn();
   getOperationHistory = jest.fn();
   getRequiredMediators = jest.fn();
   addRequiredMediators = jest.fn();
@@ -127,6 +130,8 @@ export class MockAccountsService {
   getIdentity = jest.fn();
   getDetails = jest.fn();
   fetchOffChainReceipts = jest.fn();
+  getAssetBalances = jest.fn();
+  getCollections = jest.fn();
 }
 
 export class MockEventsService {
@@ -166,6 +171,8 @@ export class MockIdentitiesService {
   addSecondaryAccount = jest.fn();
   createMockCdd = jest.fn();
   registerDid = jest.fn();
+  selfRegisterDid = jest.fn();
+  setMandatoryReceiverAffirmation = jest.fn();
   rotatePrimaryKey = jest.fn();
   attestPrimaryKeyRotation = jest.fn();
   isAssetPreApproved = jest.fn();

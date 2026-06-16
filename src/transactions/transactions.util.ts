@@ -237,6 +237,10 @@ export function handleSdkError(err: unknown): AppError {
         return new AppNotFoundError(message, '');
       case ErrorCode.NotAuthorized:
         return new AppUnauthorizedError(message);
+      case ErrorCode.NotSupported:
+        return new AppUnprocessableError(
+          message || 'This operation is not supported on this chain version'
+        );
       default:
         return new AppInternalError(message);
     }

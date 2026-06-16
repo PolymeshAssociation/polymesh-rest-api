@@ -46,14 +46,17 @@ import {
 } from '~/common/decorators/';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
+import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
+import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
+import { SetMandatoryReceiverAffirmationDto } from '~/identities/dto/set-mandatory-receiver-affirmation.dto';
 import { IdentitiesService } from '~/identities/identities.service';
 import { createIdentityModel } from '~/identities/identities.util';
 import { AssetWithGroupModel } from '~/identities/models/asset-with-group.model';
@@ -81,11 +84,29 @@ export class IdentitiesController {
     logger.setContext(IdentitiesController.name);
   }
 
+  @Post('self-register')
+  @ApiOperation({
+    summary: 'Self-register Identity',
+    description:
+      'Registers a new DID for the signing Account on chain v8 without a CDD provider. Not supported on chain v7',
+  })
+  @ApiTransactionResponse({
+    description: 'Newly created Identity along with transaction details',
+    type: CreatedIdentityModel,
+  })
+  async selfRegisterDid(
+    @Body() transactionBaseDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.identitiesService.selfRegisterDid(transactionBaseDto);
+
+    return handleServiceResult(serviceResult, createIdentityResolver);
+  }
+
   @Post('register')
   @ApiOperation({
     summary: 'Register Identity',
     description:
-      'This endpoint allows registering a new Identity. The transaction signer must be a CDD provider. This will create Authorization Requests which have to be accepted by any secondary accounts if they were specified.',
+      'This endpoint allows registering a new Identity. The transaction signer must be a CDD provider (Did Registrar on chain v8). This will create Authorization Requests which have to be accepted by any secondary accounts if they were specified.',
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
@@ -531,7 +552,9 @@ export class IdentitiesController {
   @ApiTags('claims')
   @ApiOperation({
     summary: 'Fetch all CDD claims for an Identity',
-    description: 'This endpoint will fetch the list of CDD claims for a target DID',
+    description:
+      'This endpoint will fetch the list of CDD claims for a target DID. Deprecated on chain v8 where CDD claims are no longer supported',
+    deprecated: true,
   })
   @ApiParam({
     name: 'did',
@@ -593,6 +616,11 @@ export class IdentitiesController {
   }
 
   @Get(':did/grouped-instructions')
+  @ApiOperation({
+    summary: 'Get grouped Instructions for an Identity',
+    description:
+      'Returns Instructions where the Identity is custodian of portfolios in legs or owns accounts in legs',
+  })
   @ApiParam({
     name: 'did',
     description: 'The DID of the Identity for which to get grouped Instructions',
@@ -608,6 +636,31 @@ export class IdentitiesController {
     const result = await this.settlementsService.findGroupedInstructionsByDid(did);
 
     return new GroupedInstructionModel(result);
+  }
+
+  @ApiOperation({
+    summary: 'Set mandatory receiver affirmation',
+    description:
+      'Enable or disable mandatory receiver affirmation for incoming settlement transfers on chain v8',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Identity',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post(':did/mandatory-receiver-affirmation')
+  async setMandatoryReceiverAffirmation(
+    @Param() { did }: DidDto,
+    @Body() params: SetMandatoryReceiverAffirmationDto
+  ): Promise<TransactionResponseModel> {
+    const serviceResult = await this.identitiesService.setMandatoryReceiverAffirmation(did, params);
+
+    return handleServiceResult(serviceResult);
   }
 
   @ApiOperation({

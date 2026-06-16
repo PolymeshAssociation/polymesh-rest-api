@@ -1,9 +1,9 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -53,6 +53,16 @@ export class OffChainAffirmationReceiptDto {
   @IsOptional()
   @IsString()
   readonly metadata?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Expiration date for the off-chain affirmation receipt. Required on chain v8 when generating receipts',
+    type: 'string',
+    example: new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+  })
+  @IsOptional()
+  @IsDate()
+  readonly expiresAt?: Date;
 
   constructor(dto: OffChainAffirmationReceiptDto) {
     Object.assign(this, dto);

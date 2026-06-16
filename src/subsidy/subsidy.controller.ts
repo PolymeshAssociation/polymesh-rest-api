@@ -14,9 +14,11 @@ import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/d
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { AccountModel } from '~/identities/models/account.model';
+import { AcceptSubsidyDto } from '~/subsidy/dto/accept-subsidy.dto';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
+import { RevokeSubsidyDto } from '~/subsidy/dto/revoke-subsidy.dto';
 import { SubsidyParamsDto } from '~/subsidy/dto/subsidy-params.dto';
 import { SubsidyModel } from '~/subsidy/models/subsidy.model';
 import { SubsidyService } from '~/subsidy/subsidy.service';
@@ -64,7 +66,8 @@ export class SubsidyController {
   @ApiOperation({
     summary: 'Subsidize an account',
     description:
-      'This endpoint sends an Authorization Request to an Account to subsidize its transaction fees',
+      'This endpoint sends an Authorization Request to an Account to subsidize its transaction fees. Deprecated on chain v8; use approve and accept instead',
+    deprecated: true,
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
@@ -80,6 +83,52 @@ export class SubsidyController {
     const serviceResult = await this.subsidyService.subsidizeAccount(params);
 
     return handleServiceResult(serviceResult, authorizationRequestResolver);
+  }
+
+  @ApiOperation({
+    summary: 'Approve a subsidy for a beneficiary account',
+    description:
+      'This endpoint allows a subsidizer to approve an allowance for a beneficiary account on chain v8',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('approve')
+  async approveSubsidy(@Body() params: CreateSubsidyDto): Promise<TransactionResponseModel> {
+    const serviceResult = await this.subsidyService.approveSubsidy(params);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Accept a pending subsidy',
+    description: 'This endpoint allows a beneficiary to accept a pending subsidy from a subsidizer',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('accept')
+  async acceptSubsidy(@Body() params: AcceptSubsidyDto): Promise<TransactionResponseModel> {
+    const serviceResult = await this.subsidyService.acceptSubsidy(params);
+
+    return handleServiceResult(serviceResult);
+  }
+
+  @ApiOperation({
+    summary: 'Revoke a pending subsidy',
+    description: 'This endpoint allows a subsidizer to revoke a pending subsidy for a beneficiary',
+  })
+  @ApiTransactionResponse({
+    description: 'Details about the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('revoke')
+  async revokeSubsidy(@Body() params: RevokeSubsidyDto): Promise<TransactionResponseModel> {
+    const serviceResult = await this.subsidyService.revokeSubsidy(params);
+
+    return handleServiceResult(serviceResult);
   }
 
   @ApiOperation({

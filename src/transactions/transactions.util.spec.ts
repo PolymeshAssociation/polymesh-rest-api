@@ -38,6 +38,7 @@ describe('processTransaction', () => {
       [ErrorCode.InsufficientBalance, AppUnprocessableError],
       [ErrorCode.DataUnavailable, AppNotFoundError],
       [ErrorCode.FatalError, AppInternalError],
+      [ErrorCode.NotSupported, AppUnprocessableError],
     ];
     test.each(cases)('should transform %p into %p', async (code, expected) => {
       const mockVenue = new MockVenue();
@@ -230,6 +231,12 @@ const testCases = [
     inputError: new PolymeshError({ code: ErrorCode.FatalError, message: '' }),
     expectedError: AppInternalError,
     description: 'Unknown PolymeshError code',
+    isPolymeshError: true,
+  },
+  {
+    inputError: new PolymeshError({ code: ErrorCode.NotSupported, message: '' }),
+    expectedError: AppUnprocessableError,
+    description: 'NotSupported error',
     isPolymeshError: true,
   },
   {

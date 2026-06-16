@@ -94,6 +94,7 @@ export class MockPolymesh {
     getNftCollection: jest.fn(),
     reserveTicker: jest.fn(),
     createAsset: jest.fn(),
+    transferFunds: jest.fn(),
     getTickerReservation: jest.fn(),
     getTickerReservations: jest.fn(),
     getGlobalMetadataKeys: jest.fn(),
@@ -108,6 +109,9 @@ export class MockPolymesh {
     revokePermissions: jest.fn(),
     modifyPermissions: jest.fn(),
     subsidizeAccount: jest.fn(),
+    approveSubsidy: jest.fn(),
+    acceptSubsidy: jest.fn(),
+    revokeSubsidy: jest.fn(),
     getSubsidy: jest.fn(),
     isValidAddress: jest.fn(),
     createMultiSigAccount: jest.fn(),
@@ -117,6 +121,7 @@ export class MockPolymesh {
     isIdentityValid: jest.fn(),
     getIdentity: jest.fn(),
     createPortfolio: jest.fn(),
+    selfRegisterDid: jest.fn(),
   };
 
   public settlements = {
@@ -186,6 +191,8 @@ export class MockAsset {
   public freeze = jest.fn();
   public unfreeze = jest.fn();
   public controllerTransfer = jest.fn();
+  public approveAllowance = jest.fn();
+  public getAllowance = jest.fn();
   public getOperationHistory = jest.fn();
   public getRequiredMediators = jest.fn();
   public addRequiredMediators = jest.fn();
@@ -502,7 +509,11 @@ export class MockAccount {
   getOffChainReceipts = jest.fn();
   subsidies = {
     getSubsidizer: jest.fn(),
+    getPendingSubsidies: jest.fn(),
   };
+
+  getAssetBalances = jest.fn();
+  getCollections = jest.fn();
 
   constructor(address = 'address') {
     this.address = address;

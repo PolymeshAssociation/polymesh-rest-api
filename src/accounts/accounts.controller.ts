@@ -28,9 +28,14 @@ import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
 import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import {
+  AccountCollectionModel,
+  createAccountCollectionModel,
+} from '~/accounts/models/account-collection.model';
 import { AccountDetailsModel } from '~/accounts/models/account-details.model';
 import { MultiSigDetailsModel } from '~/accounts/models/multi-sig-details.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
+import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
 import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -223,6 +228,90 @@ export class AccountsController {
     } else {
       res.status(HttpStatus.NO_CONTENT).send({});
     }
+  }
+
+  @ApiOperation({
+    summary: 'Get pending subsidies for an Account',
+    description:
+      'Returns pending subsidy requests awaiting acceptance by the beneficiary account on chain v8',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The beneficiary Account address',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiArrayResponse(SubsidyModel, {
+    description: 'List of pending subsidies for the Account',
+    paginated: false,
+  })
+  @Get(':account/pending-subsidies')
+  async getPendingSubsidies(
+    @Param() { account }: AccountParamsDto
+  ): Promise<ResultsModel<SubsidyModel>> {
+    const pendingSubsidies = await this.subsidyService.getPendingSubsidies(account);
+
+    return new ResultsModel({
+      results: pendingSubsidies.map(createSubsidyModel),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get fungible asset balances held by an Account',
+    description: 'Returns balances of all fungible assets held in the Account on chain v8',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiArrayResponse(AssetBalanceModel, {
+    description: 'List of fungible asset balances held by the Account',
+    paginated: false,
+  })
+  @Get(':account/asset-balances')
+  async getAssetBalances(
+    @Param() { account }: AccountParamsDto
+  ): Promise<ResultsModel<AssetBalanceModel>> {
+    const balances = await this.accountsService.getAssetBalances(account);
+
+    return new ResultsModel({
+      results: balances.map(
+        ({ asset, total, free, locked }) =>
+          new AssetBalanceModel({
+            asset,
+            total,
+            free,
+            locked,
+          })
+      ),
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Get NFT collections held by an Account',
+    description: 'Returns NFT collections and holdings for the Account on chain v8',
+  })
+  @ApiParam({
+    name: 'account',
+    description: 'The Account address',
+    type: 'string',
+    example: '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV',
+  })
+  @ApiArrayResponse(AccountCollectionModel, {
+    description: 'List of NFT collections held by the Account',
+    paginated: false,
+  })
+  @Get(':account/collections')
+  async getCollections(
+    @Param() { account }: AccountParamsDto
+  ): Promise<ResultsModel<AccountCollectionModel>> {
+    const collections = await this.accountsService.getCollections(account);
+
+    return new ResultsModel({
+      results: collections.map(createAccountCollectionModel),
+    });
   }
 
   @ApiOperation({

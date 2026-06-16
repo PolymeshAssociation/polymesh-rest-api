@@ -1,6 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Account } from '@polymeshassociation/polymesh-sdk/internal';
 import {
   AffirmationStatus,
   Identity,
@@ -11,10 +12,11 @@ import {
 } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
+import { createAssetHolderModel } from '~/common/models/asset-holder.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { LegType } from '~/common/types';
-import { createPortfolioIdentifierModel } from '~/portfolios/portfolios.util';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
+import { InstructionAffirmationPartyType } from '~/settlements/models/instruction-affirmation.model';
 import { LegModel } from '~/settlements/models/leg.model';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -25,6 +27,12 @@ import { MockSettlementsService } from '~/test-utils/service-mocks';
 import { setupInstructionMock, testControllerTxResult } from '~/test-utils/test-helpers';
 
 const { did, txResult } = testValues;
+
+function createTestAccount(address: string): Account {
+  const account = Object.create(Account.prototype) as Account;
+  account.address = address;
+  return account;
+}
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
@@ -108,9 +116,9 @@ describe('SettlementsController', () => {
         legs: [
           ...[mockLegs.data[0], mockLegs.data[1]].map(({ from, to, amount, nfts, asset }) => ({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            from: createPortfolioIdentifierModel(from as any),
+            from: createAssetHolderModel(from as any),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            to: createPortfolioIdentifierModel(to as any),
+            to: createAssetHolderModel(to as any),
             amount,
             nfts,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -303,7 +311,7 @@ describe('SettlementsController', () => {
       const mockAffirmations = {
         data: [
           {
-            identity: {
+            party: {
               did,
             },
             status: AffirmationStatus.Pending,
@@ -320,7 +328,14 @@ describe('SettlementsController', () => {
 
       expect(result).toEqual(
         new PaginatedResultsModel({
-          results: mockAffirmations.data,
+          results: [
+            {
+              party: { did },
+              partyType: InstructionAffirmationPartyType.identity,
+              identity: { did },
+              status: AffirmationStatus.Pending,
+            },
+          ],
           next: null,
         })
       );
@@ -341,6 +356,40 @@ describe('SettlementsController', () => {
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: [],
+          next: null,
+        })
+      );
+    });
+
+    it('should return account party type for account affirmations', async () => {
+      const accountAddress = '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM';
+      const account = createTestAccount(accountAddress);
+      const mockAffirmations = {
+        data: [
+          {
+            party: account,
+            status: AffirmationStatus.Pending,
+          },
+        ],
+        next: null,
+      };
+      mockSettlementsService.findAffirmations.mockResolvedValue(mockAffirmations);
+
+      const result = await controller.getAffirmations(
+        { id: new BigNumber(3) },
+        { size: new BigNumber(10) }
+      );
+
+      expect(result).toEqual(
+        new PaginatedResultsModel({
+          results: [
+            {
+              party: createAssetHolderModel(account),
+              partyType: InstructionAffirmationPartyType.account,
+              identity: undefined,
+              status: AffirmationStatus.Pending,
+            },
+          ],
           next: null,
         })
       );
@@ -407,6 +456,38 @@ describe('SettlementsController', () => {
         amount: new BigNumber(123),
       });
 
+      expect(result).toEqual(mockTransferBreakdown);
+    });
+
+    it('should use fromAccount and toAccount when provided', async () => {
+      const mockTransferBreakdown = {
+        general: [TransferError.SelfTransfer],
+        compliance: {
+          requirements: [],
+          complies: false,
+        },
+        restrictions: [],
+        result: false,
+      };
+      const fromAccount = 'fromAddress';
+      const toAccount = 'toAddress';
+
+      mockSettlementsService.canTransfer.mockResolvedValue(mockTransferBreakdown);
+
+      const result = await controller.validateLeg({
+        fromAccount,
+        toAccount,
+        asset: 'TICKER',
+        amount: new BigNumber(123),
+      });
+
+      expect(mockSettlementsService.canTransfer).toHaveBeenCalledWith(
+        fromAccount,
+        toAccount,
+        'TICKER',
+        new BigNumber(123),
+        undefined
+      );
       expect(result).toEqual(mockTransferBreakdown);
     });
   });

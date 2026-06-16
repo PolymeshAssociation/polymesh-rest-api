@@ -27,9 +27,10 @@ export class RegisterIdentityDto extends TransactionBaseDto {
 
   @ApiProperty({
     description:
-      'Issue a CDD claim for the created DID, completing the onboarding process for the Account',
+      'Issue a CDD claim for the created DID, completing the onboarding process for the Account. Deprecated on chain v8',
     type: 'boolean',
     example: false,
+    deprecated: true,
   })
   @IsBoolean()
   readonly createCdd: boolean;

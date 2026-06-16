@@ -30,6 +30,7 @@ import { TransferRestrictionPercentageModel } from '~/assets/models/transfer-res
 import { TransferRestrictionsModel } from '~/assets/models/transfer-restrictions.model';
 import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
+import { AssetHolderDto, AssetHolderType } from '~/common/dto/asset-holder.dto';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ProcessMode } from '~/common/types';
 import { MetadataService } from '~/metadata/metadata.service';
@@ -412,6 +413,60 @@ describe('AssetsController', () => {
         signer,
         origin,
         amount,
+      });
+    });
+  });
+
+  describe('transferFunds', () => {
+    it('should call the service and return the results', async () => {
+      const from = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: 'fromAddress',
+      });
+      const to = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: 'toAddress',
+      });
+      const amount = new BigNumber(100);
+      const body = { signer, from, to, asset: assetId, amount };
+
+      mockAssetsService.transferFunds.mockResolvedValue(txResult);
+
+      const result = await controller.transferFunds(body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.transferFunds).toHaveBeenCalledWith(body);
+    });
+  });
+
+  describe('approveAllowance', () => {
+    it('should call the service and return the results', async () => {
+      const spender = 'spenderAddress';
+      const amount = new BigNumber(500);
+      const body = { signer, spender, amount };
+
+      mockAssetsService.approveAllowance.mockResolvedValue(txResult);
+
+      const result = await controller.approveAllowance({ asset: assetId }, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockAssetsService.approveAllowance).toHaveBeenCalledWith(assetId, body);
+    });
+  });
+
+  describe('getAllowance', () => {
+    it('should return the allowance as a string', async () => {
+      mockAssetsService.getAllowance.mockResolvedValue(new BigNumber(1000));
+
+      const result = await controller.getAllowance(
+        { asset: assetId },
+        { owner: 'ownerAddress', spender: 'spenderAddress' }
+      );
+
+      expect(result).toBe('1000');
+      expect(mockAssetsService.getAllowance).toHaveBeenCalledWith(assetId, {
+        owner: 'ownerAddress',
+        spender: 'spenderAddress',
       });
     });
   });

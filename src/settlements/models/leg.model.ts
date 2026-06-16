@@ -5,24 +5,24 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
+import { AssetHolderModel } from '~/common/models/asset-holder.model';
 import { LegType } from '~/common/types';
-import { PortfolioIdentifierModel } from '~/portfolios/models/portfolio-identifier.model';
 import { AssetLegModel } from '~/settlements/models/asset-leg.model';
 
 export class LegModel extends AssetLegModel {
   @ApiProperty({
-    description: 'Portfolio from which the transfer is to be made',
-    type: PortfolioIdentifierModel,
+    description: 'Asset holder from which the transfer is to be made',
+    type: AssetHolderModel,
   })
-  @Type(() => PortfolioIdentifierModel)
-  readonly from: PortfolioIdentifierModel;
+  @Type(() => AssetHolderModel)
+  readonly from: AssetHolderModel;
 
   @ApiProperty({
-    description: 'Portfolio to which the transfer is to be made',
-    type: PortfolioIdentifierModel,
+    description: 'Asset holder to which the transfer is to be made',
+    type: AssetHolderModel,
   })
-  @Type(() => PortfolioIdentifierModel)
-  readonly to: PortfolioIdentifierModel;
+  @Type(() => AssetHolderModel)
+  readonly to: AssetHolderModel;
 
   @ApiPropertyOptional({
     description: 'Amount of fungible tokens to be transferred',

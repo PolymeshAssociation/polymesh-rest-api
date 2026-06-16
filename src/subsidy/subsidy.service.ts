@@ -11,9 +11,11 @@ import { AccountsService } from '~/accounts/accounts.service';
 import { AppValidationError } from '~/common/errors';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { PolymeshService } from '~/polymesh/polymesh.service';
+import { AcceptSubsidyDto } from '~/subsidy/dto/accept-subsidy.dto';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
 import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
+import { RevokeSubsidyDto } from '~/subsidy/dto/revoke-subsidy.dto';
 import { TransactionsService } from '~/transactions/transactions.service';
 import { handleSdkError } from '~/transactions/transactions.util';
 
@@ -44,6 +46,36 @@ export class SubsidyService {
     const { subsidizeAccount } = this.polymeshService.polymeshApi.accountManagement;
 
     return this.transactionsService.submit(subsidizeAccount, args, options);
+  }
+
+  public async approveSubsidy(params: CreateSubsidyDto): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+
+    const { approveSubsidy } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(approveSubsidy, args, options);
+  }
+
+  public async acceptSubsidy(params: AcceptSubsidyDto): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+
+    const { acceptSubsidy } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(acceptSubsidy, args, options);
+  }
+
+  public async revokeSubsidy(params: RevokeSubsidyDto): ServiceReturn<void> {
+    const { options, args } = extractTxOptions(params);
+
+    const { revokeSubsidy } = this.polymeshService.polymeshApi.accountManagement;
+
+    return this.transactionsService.submit(revokeSubsidy, args, options);
+  }
+
+  public async getPendingSubsidies(address: string): Promise<SubsidyWithAllowance[]> {
+    const account = await this.accountsService.findOne(address);
+
+    return account.subsidies.getPendingSubsidies();
   }
 
   public async quit(params: QuitSubsidyDto): ServiceReturn<void> {

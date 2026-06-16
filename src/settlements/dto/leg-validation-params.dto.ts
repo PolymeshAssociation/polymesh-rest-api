@@ -29,41 +29,61 @@ export class LegValidationParamsDto {
   @ToBigNumber()
   readonly nfts?: BigNumber[];
 
-  @ApiProperty({
-    description: 'DID of the sender',
+  @ApiPropertyOptional({
+    description: 'DID of the sender portfolio owner (use with fromPortfolio)',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
+  @ValidateIf(({ fromAccount }) => !fromAccount)
   @IsDid()
-  readonly fromDid: string;
+  readonly fromDid?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Portfolio ID of the sender from which Asset is to be transferred. Use 0 for the Default Portfolio',
     type: 'string',
     example: '1',
   })
+  @ValidateIf(({ fromAccount }) => !fromAccount)
   @IsBigNumber()
   @ToBigNumber()
-  readonly fromPortfolio: BigNumber;
+  readonly fromPortfolio?: BigNumber;
 
-  @ApiProperty({
-    description: 'DID of the receiver',
+  @ApiPropertyOptional({
+    description: 'Account address of the sender (alternative to fromDid/fromPortfolio)',
+    type: 'string',
+    example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
+  })
+  @ValidateIf(({ fromDid, fromPortfolio }) => !fromDid && fromPortfolio === undefined)
+  readonly fromAccount?: string;
+
+  @ApiPropertyOptional({
+    description: 'DID of the receiver portfolio owner (use with toPortfolio)',
     type: 'string',
     example: '0x0600000000000000000000000000000000000000000000000000000000000000',
   })
+  @ValidateIf(({ toAccount }) => !toAccount)
   @IsDid()
-  readonly toDid: string;
+  readonly toDid?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Portfolio ID of the receiver to which Asset is to be transferred. Use 0 for Default Portfolio',
     type: 'string',
     example: '2',
   })
+  @ValidateIf(({ toAccount }) => !toAccount)
   @IsBigNumber()
   @ToBigNumber()
-  readonly toPortfolio: BigNumber;
+  readonly toPortfolio?: BigNumber;
+
+  @ApiPropertyOptional({
+    description: 'Account address of the receiver (alternative to toDid/toPortfolio)',
+    type: 'string',
+    example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
+  })
+  @ValidateIf(({ toDid, toPortfolio }) => !toDid && toPortfolio === undefined)
+  readonly toAccount?: string;
 
   @ApiProperty({
     description: 'The Asset (Asset ID/Ticker) to be transferred',
