@@ -1,8 +1,8 @@
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { Account } from '@polymeshassociation/polymesh-sdk/internal';
 import {
+  Account,
   AffirmationStatus,
   Identity,
   InstructionStatus,
@@ -10,13 +10,18 @@ import {
   Nft,
   TransferError,
 } from '@polymeshassociation/polymesh-sdk/types';
+import { isAccount, isDefaultPortfolio } from '@polymeshassociation/polymesh-sdk/utils';
 import { when } from 'jest-when';
 
-import { createAssetHolderModel } from '~/common/models/asset-holder.model';
+import { AssetHolderType } from '~/common/dto/asset-holder.dto';
+import { AssetHolderModel, createAssetHolderModel } from '~/common/models/asset-holder.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { LegType } from '~/common/types';
 import { CreateInstructionDto } from '~/settlements/dto/create-instruction.dto';
-import { InstructionAffirmationPartyType } from '~/settlements/models/instruction-affirmation.model';
+import {
+  InstructionAffirmationModel,
+  InstructionAffirmationPartyType,
+} from '~/settlements/models/instruction-affirmation.model';
 import { LegModel } from '~/settlements/models/leg.model';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -26,19 +31,27 @@ import { MockInstruction, MockPortfolio } from '~/test-utils/mocks';
 import { MockSettlementsService } from '~/test-utils/service-mocks';
 import { setupInstructionMock, testControllerTxResult } from '~/test-utils/test-helpers';
 
-const { did, txResult } = testValues;
+jest.mock('@polymeshassociation/polymesh-sdk/utils', () => ({
+  ...jest.requireActual('@polymeshassociation/polymesh-sdk/utils'),
+  isAccount: jest.fn(),
+  isDefaultPortfolio: jest.fn(),
+}));
 
-function createTestAccount(address: string): Account {
-  const account = Object.create(Account.prototype) as Account;
-  account.address = address;
-  return account;
-}
+const mockIsAccount = isAccount as unknown as jest.MockedFunction<typeof isAccount>;
+const mockIsDefaultPortfolio = isDefaultPortfolio as unknown as jest.MockedFunction<
+  typeof isDefaultPortfolio
+>;
+const { did, txResult } = testValues;
 
 describe('SettlementsController', () => {
   let controller: SettlementsController;
   const mockSettlementsService = new MockSettlementsService();
 
   beforeEach(async () => {
+    mockIsAccount.mockImplementation((val: unknown) =>
+      Boolean((val as { address?: string } | undefined)?.address)
+    );
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SettlementsController],
       providers: [SettlementsService],
@@ -107,6 +120,7 @@ describe('SettlementsController', () => {
         { identity: createMock<Identity>({ did: mediatorDid }), status: AffirmationStatus.Pending },
       ]);
       mockSettlementsService.findInstruction.mockResolvedValue(mockInstruction);
+      mockIsDefaultPortfolio.mockReturnValue(true);
       const result = await controller.getInstruction({ id: new BigNumber(3) });
 
       expect(result).toEqual({
@@ -363,11 +377,11 @@ describe('SettlementsController', () => {
 
     it('should return account party type for account affirmations', async () => {
       const accountAddress = '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM';
-      const account = createTestAccount(accountAddress);
+      mockIsAccount.mockReturnValue(true);
       const mockAffirmations = {
         data: [
           {
-            party: account,
+            party: { address: accountAddress } as Account,
             status: AffirmationStatus.Pending,
           },
         ],
@@ -383,12 +397,15 @@ describe('SettlementsController', () => {
       expect(result).toEqual(
         new PaginatedResultsModel({
           results: [
-            {
-              party: createAssetHolderModel(account),
+            new InstructionAffirmationModel({
+              party: new AssetHolderModel({
+                type: AssetHolderType.account,
+                address: accountAddress,
+              }),
               partyType: InstructionAffirmationPartyType.account,
               identity: undefined,
               status: AffirmationStatus.Pending,
-            },
+            }),
           ],
           next: null,
         })

@@ -20,5 +20,4 @@ export class TransferRestrictionClaimCountInputDto extends TransferRestrictionCl
   @ToBigNumber()
   @IsBigNumber()
   readonly max?: BigNumber;
-
 }

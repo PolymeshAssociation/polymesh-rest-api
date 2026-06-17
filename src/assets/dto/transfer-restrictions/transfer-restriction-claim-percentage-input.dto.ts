@@ -20,5 +20,4 @@ export class TransferRestrictionClaimPercentageInputDto extends TransferRestrict
   @ToBigNumber()
   @IsBigNumber({ min: 0, max: 100 })
   readonly max: BigNumber;
-
 }

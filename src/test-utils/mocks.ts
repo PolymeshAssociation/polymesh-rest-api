@@ -3,7 +3,6 @@
 import { createMock, DeepMocked, PartialFuncReturn } from '@golevelup/ts-jest';
 import { ValueProvider } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/internal';
 import {
   Account,
   AuthorizationType,
@@ -373,10 +372,6 @@ export class MockPortfolio {
       did,
     };
   });
-
-  constructor() {
-    Object.setPrototypeOf(this, NumberedPortfolio.prototype);
-  }
 }
 
 export class MockCheckpoint {

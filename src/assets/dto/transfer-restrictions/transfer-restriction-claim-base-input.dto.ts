@@ -4,7 +4,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
-import { StatAccreditedClaimDto, StatAffiliateClaimDto, StatClaimDto, StatJurisdictionClaimDto } from '~/assets/dto/stat-claim.dto';
+import {
+  StatAccreditedClaimDto,
+  StatAffiliateClaimDto,
+  StatClaimDto,
+  StatJurisdictionClaimDto,
+} from '~/assets/dto/stat-claim.dto';
 import { TransferRestrictionBaseDto } from '~/assets/dto/transfer-restrictions/transfer-restriction-base.dto';
 import { ApiPropertyOneOf } from '~/common/decorators';
 import { IsDid } from '~/common/decorators/validation';
@@ -36,4 +41,3 @@ export class TransferRestrictionClaimBaseInputDto extends TransferRestrictionBas
   })
   readonly claim: StatClaimDto;
 }
-

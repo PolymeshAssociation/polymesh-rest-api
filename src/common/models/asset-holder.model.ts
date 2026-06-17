@@ -43,7 +43,7 @@ export function createAssetHolderModel(holder: AssetHolder): AssetHolderModel {
   if (isAccount(holder)) {
     return new AssetHolderModel({
       type: AssetHolderType.account,
-      address: (holder as Account).address,
+      address: holder.address,
     });
   }
 

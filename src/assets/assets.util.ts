@@ -275,20 +275,20 @@ type StatParamsWithStringValues =
   | (Omit<AddCountStatParams, 'count'> & { count?: string | BigNumber })
   | AddBalanceStatParams
   | (Omit<AddClaimCountStatParams, 'value'> & {
-    value?:
-    | {
-      accredited?: string | BigNumber;
-      nonAccredited?: string | BigNumber;
-      affiliate?: string | BigNumber;
-      nonAffiliate?: string | BigNumber;
-      [key: string]: unknown;
-    }
-    | Array<{
-      count?: string | BigNumber | number;
-      countryCode?: string;
-      [key: string]: unknown;
-    }>;
-  })
+      value?:
+        | {
+            accredited?: string | BigNumber;
+            nonAccredited?: string | BigNumber;
+            affiliate?: string | BigNumber;
+            nonAffiliate?: string | BigNumber;
+            [key: string]: unknown;
+          }
+        | Array<{
+            count?: string | BigNumber | number;
+            countryCode?: string;
+            [key: string]: unknown;
+          }>;
+    })
   | AddClaimBalanceStatParams;
 
 /**
