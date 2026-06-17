@@ -1,6 +1,5 @@
-import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Account } from '@polymeshassociation/polymesh-sdk/internal';
-import { Identity } from '@polymeshassociation/polymesh-sdk/types';
+import { DefaultPortfolio, Identity } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetHolderType } from '~/common/dto/asset-holder.dto';
 import {
@@ -37,7 +36,7 @@ describe('asset-holder.model', () => {
     it('should map a portfolio to a portfolio holder model', () => {
       const portfolio = new MockPortfolio();
 
-      const result = createAssetHolderModel(portfolio as never);
+      const result = createAssetHolderModel(portfolio as unknown as DefaultPortfolio);
 
       expect(result).toEqual(
         expect.objectContaining({

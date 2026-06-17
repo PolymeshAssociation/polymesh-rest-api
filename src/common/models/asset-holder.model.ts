@@ -1,13 +1,7 @@
 /* istanbul ignore file */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Account,
-  AssetHolder,
-  DefaultPortfolio,
-  Identity,
-  NumberedPortfolio,
-} from '@polymeshassociation/polymesh-sdk/types';
+import { Account, AssetHolder, Identity } from '@polymeshassociation/polymesh-sdk/types';
 import {
   isAccount,
   isDefaultPortfolio,
@@ -45,7 +39,7 @@ export class AssetHolderModel {
   }
 }
 
-export function createAssetHolderModel(holder: AssetHolder | Account): AssetHolderModel {
+export function createAssetHolderModel(holder: AssetHolder): AssetHolderModel {
   if (isAccount(holder)) {
     return new AssetHolderModel({
       type: AssetHolderType.account,
@@ -56,14 +50,7 @@ export function createAssetHolderModel(holder: AssetHolder | Account): AssetHold
   if (isDefaultPortfolio(holder) || isNumberedPortfolio(holder)) {
     return new AssetHolderModel({
       type: AssetHolderType.portfolio,
-      portfolio: createPortfolioIdentifierModel(holder as DefaultPortfolio | NumberedPortfolio),
-    });
-  }
-
-  if (typeof (holder as { toHuman?: () => unknown }).toHuman === 'function') {
-    return new AssetHolderModel({
-      type: AssetHolderType.portfolio,
-      portfolio: createPortfolioIdentifierModel(holder as DefaultPortfolio | NumberedPortfolio),
+      portfolio: createPortfolioIdentifierModel(holder),
     });
   }
 

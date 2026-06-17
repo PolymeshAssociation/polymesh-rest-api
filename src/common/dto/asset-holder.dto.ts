@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { AssetHolderLike } from '@polymeshassociation/polymesh-sdk/types';
 import { IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';

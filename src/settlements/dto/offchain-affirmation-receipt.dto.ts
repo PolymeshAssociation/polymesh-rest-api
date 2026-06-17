@@ -58,7 +58,7 @@ export class OffChainAffirmationReceiptDto {
     description:
       'Expiration date for the off-chain affirmation receipt. Required on chain v8 when generating receipts',
     type: 'string',
-    example: new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    example: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
   })
   @IsOptional()
   @IsDate()

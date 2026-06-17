@@ -35,16 +35,6 @@ export class TransferFundsDto extends TransactionBaseDto {
   readonly asset: string;
 
   @ApiPropertyOptional({
-    description: 'Amount of fungible Asset tokens to transfer',
-    type: 'string',
-    example: '1000',
-  })
-  @ValidateIf(({ nfts }) => !nfts)
-  @IsBigNumber()
-  @ToBigNumber()
-  readonly amount?: BigNumber;
-
-  @ApiPropertyOptional({
     description: 'NFT IDs to transfer from the collection',
     type: 'string',
     isArray: true,
@@ -54,6 +44,16 @@ export class TransferFundsDto extends TransactionBaseDto {
   @IsBigNumber()
   @ToBigNumber()
   readonly nfts?: BigNumber[];
+
+  @ApiPropertyOptional({
+    description: 'Amount of fungible Asset tokens to transfer',
+    type: 'string',
+    example: '1000',
+  })
+  @ValidateIf(({ nfts }) => !nfts)
+  @IsBigNumber()
+  @ToBigNumber()
+  readonly amount?: BigNumber;
 
   @ApiPropertyOptional({
     description: 'Optional memo for the transfer',

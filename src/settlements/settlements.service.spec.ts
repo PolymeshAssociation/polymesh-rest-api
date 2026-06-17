@@ -501,7 +501,7 @@ describe('SettlementsService', () => {
 
       const expiresAt = new Date('2026-01-01T00:00:00.000Z');
 
-      result = await service.affirmInstruction(new BigNumber(123), {
+      await service.affirmInstruction(new BigNumber(123), {
         ...body,
         receipts: [
           {

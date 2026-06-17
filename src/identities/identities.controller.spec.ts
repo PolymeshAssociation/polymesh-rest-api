@@ -707,16 +707,22 @@ describe('IdentitiesController', () => {
   describe('selfRegisterDid', () => {
     it('should return transaction details for self-registration', async () => {
       const identity = new MockIdentity();
+
       const address = 'address';
+
+      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+
+      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+
       identity.getPrimaryAccount.mockResolvedValue({
         account: { address },
         permissions: [],
       });
-      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
-      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
 
       const identityData = new IdentityModel({
         did,
+        secondaryAccounts: [],
+        secondaryAccountsFrozen: false,
         primaryAccount: new PermissionedAccountModel({
           account: new AccountModel({ address }),
           permissions: new PermissionsModel({
@@ -726,8 +732,6 @@ describe('IdentitiesController', () => {
             transactions: null,
           }),
         }),
-        secondaryAccounts: [],
-        secondaryAccountsFrozen: false,
       });
 
       mockIdentitiesService.selfRegisterDid.mockResolvedValue({

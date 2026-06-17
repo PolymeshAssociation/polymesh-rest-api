@@ -238,7 +238,7 @@ describe('AccountsController', () => {
 
       expect(result).toEqual(
         new ResultsModel({
-          results: [createSubsidyModel(subsidyWithAllowance as never)],
+          results: [createSubsidyModel(subsidyWithAllowance)],
         })
       );
     });
@@ -256,7 +256,7 @@ describe('AccountsController', () => {
         },
       ];
 
-      mockAccountsService.getAssetBalances.mockResolvedValue(balances as never);
+      mockAccountsService.getAssetBalances.mockResolvedValue(balances);
 
       const result = await controller.getAssetBalances({ account: 'someAccount' });
 
@@ -286,7 +286,7 @@ describe('AccountsController', () => {
         },
       ];
 
-      mockAccountsService.getCollections.mockResolvedValue(collections as never);
+      mockAccountsService.getCollections.mockResolvedValue(collections);
 
       const result = await controller.getCollections({ account: 'someAccount' });
 

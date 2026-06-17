@@ -22,7 +22,12 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { testValues } from '~/test-utils/consts';
-import { createMockTxResult, MockIdentity, MockPolymesh } from '~/test-utils/mocks';
+import {
+  createMockTxResult,
+  MockIdentity,
+  MockPolymesh,
+  MockTransaction,
+} from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
@@ -372,10 +377,10 @@ describe('IdentitiesService', () => {
   describe('selfRegisterDid', () => {
     it('should submit selfRegisterDid and return transaction details', async () => {
       const transaction = {
-        blockHash: '0x1',
         txHash: '0x2',
+        blockHash: '0x1',
         blockNumber: new BigNumber(1),
-        tag: TxTags.identity.CddRegisterDid,
+        tag: TxTags.identity.SelfRegisterDid,
       };
       const mockTransaction = new MockTransaction(transaction);
       mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });

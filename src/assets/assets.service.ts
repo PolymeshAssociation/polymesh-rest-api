@@ -219,7 +219,7 @@ export class AssetsService {
 
     const redeemParams = args.fromAccount
       ? { amount: args.amount, fromAccount: args.fromAccount }
-      : { amount: args.amount, from: toPortfolioId(args.from!) };
+      : { amount: args.amount, from: toPortfolioId(args.from ?? new BigNumber(0)) };
 
     return this.transactionsService.submit(redeem, redeemParams, options);
   }

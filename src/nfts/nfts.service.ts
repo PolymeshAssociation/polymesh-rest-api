@@ -104,7 +104,7 @@ export class NftsService {
 
     const redeemParams = args.fromAccount
       ? { fromAccount: args.fromAccount }
-      : { from: toPortfolioId(args.from!) };
+      : { from: toPortfolioId(args.from ?? new BigNumber(0)) };
 
     return this.transactionsService.submit(nft.redeem, redeemParams, options);
   }
