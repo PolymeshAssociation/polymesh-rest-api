@@ -59,7 +59,7 @@ export class MiddlewareMetadataModel {
   @ApiProperty({
     description: 'Subquery version',
     type: 'string',
-    example: '13.0.0',
+    example: '19.0.0',
   })
   readonly sqVersion: string;
 
