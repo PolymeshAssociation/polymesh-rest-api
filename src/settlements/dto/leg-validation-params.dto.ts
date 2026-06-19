@@ -2,7 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ValidateIf } from 'class-validator';
+import { IsString, ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsAsset, IsBigNumber, IsDid } from '~/common/decorators/validation';
@@ -55,6 +55,7 @@ export class LegValidationParamsDto {
     example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
   })
   @ValidateIf(({ fromDid, fromPortfolio }) => !fromDid && fromPortfolio === undefined)
+  @IsString()
   readonly fromAccount?: string;
 
   @ApiPropertyOptional({
@@ -83,6 +84,7 @@ export class LegValidationParamsDto {
     example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
   })
   @ValidateIf(({ toDid, toPortfolio }) => !toDid && toPortfolio === undefined)
+  @IsString()
   readonly toAccount?: string;
 
   @ApiProperty({

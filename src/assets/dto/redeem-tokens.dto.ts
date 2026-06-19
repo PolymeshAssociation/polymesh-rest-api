@@ -2,7 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
-import { ValidateIf } from 'class-validator';
+import { IsString, ValidateIf } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -35,5 +35,6 @@ export class RedeemTokensDto extends TransactionBaseDto {
     example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
   })
   @ValidateIf(({ from }) => from === undefined)
+  @IsString()
   readonly fromAccount?: string;
 }

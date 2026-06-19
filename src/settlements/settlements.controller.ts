@@ -370,9 +370,9 @@ export class SettlementsController {
     }: LegValidationParamsDto
   ): Promise<TransferBreakdownModel> {
     const fromPortfolioLike =
-      fromAccount || new AssetHolderDto({ did: fromDid!, id: fromPortfolio! }).toAssetHolderLike();
+      fromAccount ?? new AssetHolderDto({ did: fromDid!, id: fromPortfolio! }).toAssetHolderLike();
     const toPortfolioLike =
-      toAccount || new AssetHolderDto({ did: toDid!, id: toPortfolio! }).toAssetHolderLike();
+      toAccount ?? new AssetHolderDto({ did: toDid!, id: toPortfolio! }).toAssetHolderLike();
 
     const transferBreakdown = await this.settlementsService.canTransfer(
       fromPortfolioLike,

@@ -2,6 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { IsOptional, IsString } from 'class-validator';
 
 import { ToBigNumber } from '~/common/decorators/transformation';
 import { IsBigNumber } from '~/common/decorators/validation';
@@ -19,8 +20,10 @@ export class IssueDto extends TransactionBaseDto {
 
   @ApiPropertyOptional({
     description:
-      'Account to which tokens are issued. Use when not issuing to a portfolio. Only one of account or portfolioId should be provided',
+      "Account to which tokens are issued. When omitted, tokens are issued to the signer's default portfolio",
     example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
   })
+  @IsOptional()
+  @IsString()
   readonly account?: string;
 }
