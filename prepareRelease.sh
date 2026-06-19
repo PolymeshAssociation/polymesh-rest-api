@@ -20,7 +20,7 @@ rm src/main.ts.bak
 export CHAIN_IMAGE="$CHAIN_REPO:$CHAIN_TAG"
 export SUBQUERY_IMAGE="polymeshassociation/polymesh-subquery:v12.1.0"
 
-docker compose up -d chain
+docker compose up -d --wait chain
 
 SWAGGER_VERSION=$nextVersion POLYMESH_NODE_URL='ws://localhost:9944' yarn generate:swagger > /dev/null 2>&1
 

@@ -5,8 +5,7 @@ services:
     restart: unless-stopped
     ports:
       # expose ports to localhost
-      - '9944:9944' # ws://
-      - '9933:9933' # http://
+      - '9944:9944' # ws:// and http://
       - '30333:30333' # for other nodes
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -15,7 +14,7 @@ services:
     entrypoint: '/chain-entry.sh'
     command: [ '--alice --chain dev' ]
     healthcheck:
-      test: "timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/9933' && exit 0 || exit 1"
+      test: "timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/9944' && exit 0 || exit 1"
       interval: 5s
       timeout: 5s
       retries: 20
@@ -33,7 +32,7 @@ services:
     environment:
       START_BLOCK: 1
       NETWORK_ENDPOINT: ws://chain:9944
-      NETWORK_HTTP_ENDPOINT: http://chain:9933
+      NETWORK_HTTP_ENDPOINT: http://chain:9944
       DB_USER: '${PG_USER:-postgres}'
       DB_PASS: '${PG_PASSWORD:-postgres}'
       DB_DATABASE: '${PG_DB:-postgres}'
