@@ -28,6 +28,18 @@ export class LocalSigningService extends SigningService {
     return Promise.resolve(address);
   }
 
+  public override async getHandleByAddress(address: string): Promise<string> {
+    const handle = Object.entries(this.addressBook).find(
+      ([, keyAddress]) => keyAddress === address
+    )?.[0];
+
+    if (handle) {
+      return handle;
+    }
+
+    this.throwNoSigner(address);
+  }
+
   public setAddressByHandle(handle: string, address: string): void {
     this.addressBook[handle] = address;
   }

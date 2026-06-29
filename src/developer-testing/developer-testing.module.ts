@@ -8,6 +8,7 @@ import { DeveloperTestingController } from '~/developer-testing/developer-testin
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { SigningModule } from '~/signing/signing.module';
+import { TransactionsModule } from '~/transactions/transactions.module';
 
 @Module({})
 export class DeveloperTestingModule {
@@ -22,7 +23,7 @@ export class DeveloperTestingModule {
 
     return {
       module: DeveloperTestingModule,
-      imports: [PolymeshModule, AccountsModule, SigningModule, ConfigModule],
+      imports: [PolymeshModule, AccountsModule, SigningModule, TransactionsModule, ConfigModule],
       controllers,
       providers: [DeveloperTestingService],
       exports: [DeveloperTestingService],

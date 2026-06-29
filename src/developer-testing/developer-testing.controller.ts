@@ -80,6 +80,16 @@ export class DeveloperTestingController {
   }
 
   @ApiOperation({
+    summary: 'Prefunds accounts with POLYX before they have an Identity',
+    description:
+      'Transfers POLYX using a raw balance transfer so self-registration fees can be paid (DEV ONLY)',
+  })
+  @Post('/prefund-accounts')
+  async prefundAccounts(@Body() params: CreateTestAccountsDto): Promise<void> {
+    return this.developerTestingService.prefundAccounts(params);
+  }
+
+  @ApiOperation({
     summary: 'Lists routes that have not been invoked',
     description: 'Provides the routes that have *not* been invoked since startup',
   })

@@ -31,6 +31,17 @@ export class VaultSigningService extends SigningService {
     }
   }
 
+  public override async getHandleByAddress(address: string): Promise<string> {
+    const keys = await this.signingManager.getVaultKeys();
+
+    const key = keys.find(({ address: keyAddress }) => keyAddress === address);
+    if (key) {
+      return `${key.name}-${key.version}`;
+    }
+
+    this.throwNoSigner(address);
+  }
+
   public async logKeys(): Promise<void> {
     const keys = await this.signingManager.getVaultKeys();
 

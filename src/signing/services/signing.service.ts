@@ -12,6 +12,10 @@ export abstract class SigningService {
 
   public abstract getAddressByHandle(handle: string): Promise<string>;
 
+  public async getHandleByAddress(address: string): Promise<string> {
+    throw new AppNotFoundError(address, 'address');
+  }
+
   public isAddress(address: string): boolean {
     return this.polymeshService.polymeshApi.accountManagement.isValidAddress({ address });
   }
