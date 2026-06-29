@@ -153,16 +153,23 @@ export class DeveloperTestingService {
     accounts,
     signer,
   }: CreateTestAccountsDto): Promise<Identity[]> {
-    const {
-      identities,
-      network,
-      _polkadotApi: {
-        tx: { balances },
-      },
-    } = this.polymeshService.polymeshApi;
+    const accountsWithoutIdentity = await this.findAccountsWithoutIdentity(accounts);
 
-    const { selfRegisterDid } = identities;
+    if (accountsWithoutIdentity.length) {
+      await this.prefundNewAccountsForV8(accountsWithoutIdentity, signer);
+    }
 
+    await this.selfRegisterNewAccountsForV8(accounts);
+    await this.fundAccountsWithInitialPolyxForV8(accounts, signer);
+
+    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
+
+    return this.fetchAccountsIdentities(madeAccounts);
+  }
+
+  private async findAccountsWithoutIdentity(
+    accounts: CreateTestAccountsDto['accounts']
+  ): Promise<CreateTestAccountsDto['accounts']> {
     const accountsWithoutIdentity: CreateTestAccountsDto['accounts'] = [];
 
     for (const { address } of accounts) {
@@ -174,51 +181,93 @@ export class DeveloperTestingService {
       }
     }
 
-    if (accountsWithoutIdentity.length) {
-      if (signer) {
-        await this.prefundAccounts({ accounts: accountsWithoutIdentity, signer });
-      } else {
-        const prefundAmount = new BigNumber(100);
+    return accountsWithoutIdentity;
+  }
 
-        for (const { address } of accountsWithoutIdentity) {
-          const { free } = await this.accountsService.getAccountBalance(address);
+  private async prefundNewAccountsForV8(
+    accountsWithoutIdentity: CreateTestAccountsDto['accounts'],
+    signer?: string
+  ): Promise<void> {
+    if (signer) {
+      await this.prefundAccounts({ accounts: accountsWithoutIdentity, signer });
 
-          if (free.gte(prefundAmount)) {
-            continue;
-          }
-
-          await this.polymeshService.execTransaction(
-            this.sudoPair,
-            balances.transferWithMemo,
-            address,
-            prefundAmount.minus(free).toNumber() * unitsPerPolyx,
-            null
-          );
-        }
-      }
+      return;
     }
+
+    await this.sudoPrefundAccounts(accountsWithoutIdentity, new BigNumber(100));
+  }
+
+  private async sudoPrefundAccounts(
+    accounts: CreateTestAccountsDto['accounts'],
+    amount: BigNumber
+  ): Promise<void> {
+    const {
+      _polkadotApi: {
+        tx: { balances },
+      },
+    } = this.polymeshService.polymeshApi;
+
+    for (const { address } of accounts) {
+      const { free } = await this.accountsService.getAccountBalance(address);
+
+      if (free.gte(amount)) {
+        continue;
+      }
+
+      await this.polymeshService.execTransaction(
+        this.sudoPair,
+        balances.transferWithMemo,
+        address,
+        amount.minus(free).toNumber() * unitsPerPolyx,
+        null
+      );
+    }
+  }
+
+  private async selfRegisterNewAccountsForV8(
+    accounts: CreateTestAccountsDto['accounts']
+  ): Promise<void> {
+    const { selfRegisterDid } = this.polymeshService.polymeshApi.identities;
 
     for (const { address } of accounts) {
       const account = await this.accountsService.findOne(address);
       const existingIdentity = await account.getIdentity();
 
-      if (!existingIdentity) {
-        let vaultHandle: string | undefined;
-
-        try {
-          vaultHandle = await this.signingService.getHandleByAddress(address);
-        } catch {
-          vaultHandle = undefined;
-        }
-
-        if (vaultHandle) {
-          await this.transactionsService.submit(selfRegisterDid, undefined, {
-            signer: vaultHandle,
-            processMode: ProcessMode.Submit,
-          });
-        }
+      if (existingIdentity) {
+        continue;
       }
+
+      const vaultHandle = await this.getVaultHandleForAddress(address);
+
+      if (!vaultHandle) {
+        continue;
+      }
+
+      await this.transactionsService.submit(selfRegisterDid, undefined, {
+        signer: vaultHandle,
+        processMode: ProcessMode.Submit,
+      });
     }
+  }
+
+  private async getVaultHandleForAddress(address: string): Promise<string | undefined> {
+    try {
+      return await this.signingService.getHandleByAddress(address);
+    } catch {
+      return undefined;
+    }
+  }
+
+  private async fundAccountsWithInitialPolyxForV8(
+    accounts: CreateTestAccountsDto['accounts'],
+    signer?: string
+  ): Promise<void> {
+    const {
+      network,
+      _polkadotApi: {
+        tx: { balances },
+      },
+    } = this.polymeshService.polymeshApi;
 
     const accountsToFund = accounts.filter(({ initialPolyx }) => initialPolyx.gt(0));
 
@@ -247,10 +296,6 @@ export class DeveloperTestingService {
         );
       }
     }
-
-    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
-
-    return this.fetchAccountsIdentities(madeAccounts);
   }
 
   private isChainV7(): boolean {

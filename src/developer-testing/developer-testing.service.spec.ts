@@ -16,7 +16,11 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { mockSigningProvider } from '~/signing/signing.mock';
 import { testValues } from '~/test-utils/consts';
 import { MockPolymesh } from '~/test-utils/mocks';
-import { makeMockConfigProvider, MockAccountsService } from '~/test-utils/service-mocks';
+import {
+  makeMockConfigProvider,
+  MockAccountsService,
+  mockTransactionsProvider,
+} from '~/test-utils/service-mocks';
 
 const {
   testAccount: { address },
@@ -42,6 +46,7 @@ describe('DeveloperTestingService', () => {
         DeveloperTestingService,
         AccountsService,
         mockSigningProvider,
+        mockTransactionsProvider,
         makeMockConfigProvider({ DEVELOPER_SUDO_MNEMONIC: '//Bob' }),
       ],
     })
@@ -56,6 +61,7 @@ describe('DeveloperTestingService', () => {
 
     polymeshService.execTransaction = jest.fn();
     mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
+    Object.assign(mockPolymeshApi, { context: { isV7: true } });
   });
 
   afterEach(async () => {
@@ -72,13 +78,13 @@ describe('DeveloperTestingService', () => {
       when(mockAccountsService.findOne)
         .calledWith(address)
         .mockResolvedValue({
-          getIdentity: jest.fn().mockResolvedValue('fakeId'),
+          getIdentity: jest.fn().mockResolvedValue({ did: 'fakeId' }),
         });
 
       when(mockAccountsService.findOne)
         .calledWith(secondaryAddress)
         .mockResolvedValue({
-          getIdentity: jest.fn().mockResolvedValue('fakeSecondaryId'),
+          getIdentity: jest.fn().mockResolvedValue({ did: 'fakeSecondaryId' }),
         });
 
       const params = {
@@ -90,14 +96,14 @@ describe('DeveloperTestingService', () => {
 
       const identities = await service.createTestAdmins(params);
 
-      expect(identities).toEqual(['fakeId', 'fakeSecondaryId']);
+      expect(identities).toEqual([{ did: 'fakeId' }, { did: 'fakeSecondaryId' }]);
     });
   });
 
   describe('createTestAccounts', () => {
     it('should return test Identities', async () => {
       mockAccountsService.findOne.mockResolvedValue({
-        getIdentity: jest.fn().mockResolvedValue('fakeId'),
+        getIdentity: jest.fn().mockResolvedValue({ did: 'fakeId' }),
       });
 
       const params = {
@@ -107,7 +113,7 @@ describe('DeveloperTestingService', () => {
 
       const identities = await service.createTestAccounts(params);
 
-      expect(identities).toEqual(['fakeId']);
+      expect(identities).toEqual([{ did: 'fakeId' }]);
     });
 
     it('should throw an error if an Identity is not made', async () => {
@@ -135,7 +141,7 @@ describe('DeveloperTestingService', () => {
       when(mockAccountsService.findOne)
         .calledWith(address)
         .mockResolvedValue({
-          getIdentity: jest.fn().mockResolvedValue('fakeId'),
+          getIdentity: jest.fn().mockResolvedValue({ did: 'fakeId' }),
         });
 
       await service.createTestAccounts(params);
