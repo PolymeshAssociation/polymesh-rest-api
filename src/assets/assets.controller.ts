@@ -10,7 +10,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { Asset } from '@polymeshassociation/polymesh-sdk/types';
+import { Asset, Instruction } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetsService } from '~/assets/assets.service';
 import { createAssetDetailsModel } from '~/assets/assets.util';
@@ -35,6 +35,7 @@ import { AssetStatModel } from '~/assets/models/asset-stat.model';
 import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
+import { TransferFundsResultModel } from '~/assets/models/transfer-funds-result.model';
 import { TransferRestrictionsModel } from '~/assets/models/transfer-restrictions.model';
 import { TransferRestrictionsValueModel } from '~/assets/models/transfer-restrictions-values.model';
 import { VenueFilteringDetailsModel } from '~/assets/models/venue-filtering-details.model';
@@ -84,16 +85,24 @@ export class AssetsController {
   @ApiOperation({
     summary: 'Transfer funds between asset holders',
     description:
-      'Transfers fungible tokens or NFTs between asset holders (accounts or portfolios) owned by the same identity',
+      'Transfers fungible tokens or NFTs between asset holders (accounts or portfolios). The holders may belong to different Identities, in which case a settlement Instruction is created and auto affirmed on behalf of the sender. It settles in the same transaction if the receiving Identity affirms automatically, otherwise the returned Instruction is left pending the receiver affirmation',
   })
   @ApiTransactionResponse({
-    description: 'Details about the transaction',
-    type: TransactionQueueModel,
+    description:
+      'Details about the transaction, along with the pending Instruction if the transfer did not settle immediately',
+    type: TransferFundsResultModel,
   })
   @Post('transfer-funds')
   public async transferFunds(@Body() params: TransferFundsDto): Promise<TransactionResponseModel> {
     const result = await this.assetsService.transferFunds(params);
-    return handleServiceResult(result);
+
+    const resolver: TransactionResolver<Instruction | undefined> = ({
+      result: instruction,
+      transactions,
+      details,
+    }) => new TransferFundsResultModel({ instruction, transactions, details });
+
+    return handleServiceResult(result, resolver);
   }
 
   @ApiTags('nfts')

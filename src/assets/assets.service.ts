@@ -10,6 +10,7 @@ import {
   HistoricAgentOperation,
   Identity,
   IdentityBalance,
+  Instruction,
   NftCollection,
   ResultSet,
   TransferRestrictionParams,
@@ -265,7 +266,7 @@ export class AssetsService {
     );
   }
 
-  public async transferFunds(params: TransferFundsDto): ServiceReturn<void> {
+  public async transferFunds(params: TransferFundsDto): ServiceReturn<Instruction | undefined> {
     const { options, args } = extractTxOptions(params);
     const { from, to, asset, amount, nfts, memo } = args;
 

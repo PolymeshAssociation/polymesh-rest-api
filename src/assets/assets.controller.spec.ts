@@ -36,7 +36,7 @@ import { ProcessMode } from '~/common/types';
 import { MetadataService } from '~/metadata/metadata.service';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
 import { processedTxResult, testValues } from '~/test-utils/consts';
-import { MockAsset, MockAuthorizationRequest } from '~/test-utils/mocks';
+import { MockAsset, MockAuthorizationRequest, MockInstruction } from '~/test-utils/mocks';
 import { MockAssetService, mockMetadataServiceProvider } from '~/test-utils/service-mocks';
 
 const { signer, did, txResult, assetId } = testValues;
@@ -436,6 +436,33 @@ describe('AssetsController', () => {
 
       expect(result).toEqual(processedTxResult);
       expect(mockAssetsService.transferFunds).toHaveBeenCalledWith(body);
+    });
+
+    it('should return the pending Instruction when the transfer does not settle immediately', async () => {
+      const from = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: 'fromAddress',
+      });
+      const to = new AssetHolderDto({
+        type: AssetHolderType.account,
+        address: 'toAddress',
+      });
+      const amount = new BigNumber(100);
+      const body = { signer, from, to, asset: assetId, amount };
+
+      const mockInstruction = new MockInstruction();
+
+      mockAssetsService.transferFunds.mockResolvedValue({
+        ...txResult,
+        result: mockInstruction,
+      });
+
+      const result = await controller.transferFunds(body);
+
+      expect(result).toEqual({
+        ...processedTxResult,
+        instruction: mockInstruction,
+      });
     });
   });
 
