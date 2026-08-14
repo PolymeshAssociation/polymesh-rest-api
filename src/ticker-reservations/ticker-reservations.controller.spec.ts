@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { TickerReservationStatus } from '@polymeshassociation/polymesh-sdk/types';
 
 import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
 import { processedTxResult, testValues } from '~/test-utils/consts';
 import { MockAuthorizationRequest, MockIdentity, MockTickerReservation } from '~/test-utils/mocks';
 import { MockTickerReservationsService } from '~/test-utils/service-mocks';
+import { TickerRegistrationConfigModel } from '~/ticker-reservations/models/ticker-registration-config.model';
 import { TickerReservationsController } from '~/ticker-reservations/ticker-reservations.controller';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 
@@ -38,6 +40,20 @@ describe('TickerReservationsController', () => {
 
       expect(result).toEqual(processedTxResult);
       expect(mockTickerReservationsService.reserve).toHaveBeenCalledWith(ticker, { signer });
+    });
+  });
+
+  describe('getTickerRegistrationConfig', () => {
+    it('should call the service and return the configuration', async () => {
+      const mockConfig = {
+        maxTickerLength: new BigNumber(12),
+        registrationLength: new BigNumber(5184000000),
+      };
+      mockTickerReservationsService.getTickerRegistrationConfig.mockResolvedValue(mockConfig);
+
+      const result = await controller.getTickerRegistrationConfig();
+
+      expect(result).toEqual(new TickerRegistrationConfigModel(mockConfig));
     });
   });
 

@@ -18,6 +18,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { ReserveTickerDto } from '~/ticker-reservations/dto/reserve-ticker.dto';
 import { ExtendedTickerReservationModel } from '~/ticker-reservations/models/extended-ticker-reservation.model';
+import { TickerRegistrationConfigModel } from '~/ticker-reservations/models/ticker-registration-config.model';
 import { TickerReservationModel } from '~/ticker-reservations/models/ticker-reservation.model';
 import { TickerReservationsService } from '~/ticker-reservations/ticker-reservations.service';
 import { createTickerReservationModel } from '~/ticker-reservations/ticker-reservations.util';
@@ -45,6 +46,21 @@ export class TickerReservationsController {
     const result = await this.tickerReservationsService.reserve(ticker, transactionBaseDto);
 
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get ticker registration configuration',
+    description:
+      'This endpoint returns the chain-wide rules used to validate ticker registrations',
+  })
+  @ApiOkResponse({
+    description: 'Chain-wide ticker registration configuration',
+    type: TickerRegistrationConfigModel,
+  })
+  @Get('config')
+  public async getTickerRegistrationConfig(): Promise<TickerRegistrationConfigModel> {
+    const config = await this.tickerReservationsService.getTickerRegistrationConfig();
+    return new TickerRegistrationConfigModel(config);
   }
 
   @ApiOperation({

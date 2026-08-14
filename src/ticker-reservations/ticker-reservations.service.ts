@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { AuthorizationRequest, TickerReservation } from '@polymeshassociation/polymesh-sdk/types';
+import {
+  AuthorizationRequest,
+  TickerRegistrationConfig,
+  TickerReservation,
+} from '@polymeshassociation/polymesh-sdk/types';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { TransferOwnershipDto } from '~/common/dto/transfer-ownership.dto';
@@ -56,5 +60,12 @@ export class TickerReservationsService {
       polymeshService: { polymeshApi },
     } = this;
     return polymeshApi.assets.getTickerReservations({ owner });
+  }
+
+  public async getTickerRegistrationConfig(): Promise<TickerRegistrationConfig> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+    return polymeshApi.assets.getTickerRegistrationConfig();
   }
 }

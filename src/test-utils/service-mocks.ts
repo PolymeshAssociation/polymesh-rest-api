@@ -107,6 +107,7 @@ export class MockTickerReservationsService {
   transferOwnership = jest.fn();
   extend = jest.fn();
   findAllByOwner = jest.fn();
+  getTickerRegistrationConfig = jest.fn();
 }
 
 export class MockAuthorizationsService {

@@ -182,4 +182,17 @@ describe('TickerReservationsService', () => {
       expect(result).toEqual([mockTickerReservation]);
     });
   });
+
+  describe('getTickerRegistrationConfig', () => {
+    it('should return the chain-wide ticker registration configuration', async () => {
+      const mockConfig = {
+        maxTickerLength: new BigNumber(12),
+        registrationLength: new BigNumber(5184000000),
+      };
+      mockPolymeshApi.assets.getTickerRegistrationConfig.mockResolvedValue(mockConfig);
+
+      const result = await service.getTickerRegistrationConfig();
+      expect(result).toEqual(mockConfig);
+    });
+  });
 });

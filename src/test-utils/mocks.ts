@@ -97,6 +97,7 @@ export class MockPolymesh {
     transferFunds: jest.fn(),
     getTickerReservation: jest.fn(),
     getTickerReservations: jest.fn(),
+    getTickerRegistrationConfig: jest.fn(),
     getGlobalMetadataKeys: jest.fn(),
   };
 
