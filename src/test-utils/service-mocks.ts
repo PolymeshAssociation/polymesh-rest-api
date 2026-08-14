@@ -256,6 +256,7 @@ export class MockCheckpointsService {
   findAllByAsset = jest.fn();
   findSchedulesByAsset = jest.fn();
   findScheduleById = jest.fn();
+  getNextCheckpoint = jest.fn();
   createByAsset = jest.fn();
   createScheduleByAsset = jest.fn();
   getAssetBalance = jest.fn();

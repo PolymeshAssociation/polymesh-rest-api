@@ -243,6 +243,7 @@ export class MockAsset {
       create: jest.fn(),
       remove: jest.fn(),
       maxComplexity: jest.fn(),
+      getNextCheckpoint: jest.fn(),
     },
   };
 

@@ -6,6 +6,7 @@ import { CheckpointsController } from '~/checkpoints/checkpoints.controller';
 import { CheckpointsService } from '~/checkpoints/checkpoints.service';
 import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.model';
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
+import { NextCheckpointModel } from '~/checkpoints/models/next-checkpoint.model';
 import { PeriodComplexityModel } from '~/checkpoints/models/period-complexity.model';
 import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
@@ -158,6 +159,29 @@ describe('CheckpointsController', () => {
       ];
 
       expect(result).toEqual(new ResultsModel({ results: mockResult }));
+    });
+  });
+
+  describe('getNextCheckpoint', () => {
+    it('should return the next Checkpoint details', async () => {
+      const mockNextCheckpoint = {
+        nextAt: new Date('10/14/1987'),
+        totalPending: new BigNumber(1),
+        schedules: [{ id: new BigNumber(1), nextAt: new Date('10/14/1987') }],
+      };
+      mockCheckpointsService.getNextCheckpoint.mockResolvedValue(mockNextCheckpoint);
+
+      const result = await controller.getNextCheckpoint({ asset: assetId });
+
+      expect(result).toEqual(new NextCheckpointModel(mockNextCheckpoint));
+    });
+
+    it('should return null if the Asset has no active Schedules', async () => {
+      mockCheckpointsService.getNextCheckpoint.mockResolvedValue(null);
+
+      const result = await controller.getNextCheckpoint({ asset: assetId });
+
+      expect(result).toBeNull();
     });
   });
 

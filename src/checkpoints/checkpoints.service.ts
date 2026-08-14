@@ -5,6 +5,7 @@ import {
   CheckpointSchedule,
   CheckpointWithData,
   IdentityBalance,
+  NextCheckpoints,
   ResultSet,
   ScheduleWithDetails,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -58,6 +59,12 @@ export class CheckpointsService {
     return await fungibleAsset.checkpoints.schedules.getOne({ id }).catch(error => {
       throw handleSdkError(error);
     });
+  }
+
+  public async getNextCheckpoint(asset: string): Promise<NextCheckpoints | null> {
+    const fungibleAsset = await this.assetsService.findFungible(asset);
+
+    return fungibleAsset.checkpoints.schedules.getNextCheckpoint();
   }
 
   public async createByAsset(

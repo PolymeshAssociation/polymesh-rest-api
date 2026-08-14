@@ -22,6 +22,7 @@ import { CheckpointDetailsModel } from '~/checkpoints/models/checkpoint-details.
 import { CheckpointScheduleModel } from '~/checkpoints/models/checkpoint-schedule.model';
 import { CreatedCheckpointModel } from '~/checkpoints/models/created-checkpoint.model';
 import { CreatedCheckpointScheduleModel } from '~/checkpoints/models/created-checkpoint-schedule.model';
+import { NextCheckpointModel } from '~/checkpoints/models/next-checkpoint.model';
 import { PeriodComplexityModel } from '~/checkpoints/models/period-complexity.model';
 import { ScheduleComplexityModel } from '~/checkpoints/models/schedule-complexity.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
@@ -174,6 +175,35 @@ export class CheckpointsController {
           })
       ),
     });
+  }
+
+  @ApiOperation({
+    summary: "Fetch the closest upcoming Checkpoint across an Asset's active Schedules",
+    description:
+      'This endpoint returns the closest upcoming Checkpoint across all of the given Asset active Schedules',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose next Checkpoint is to be fetched',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiOkResponse({
+    description:
+      'The next Checkpoint details, or null if the Asset has no active Schedules',
+    type: NextCheckpointModel,
+  })
+  @Get('schedules/next')
+  public async getNextCheckpoint(
+    @Param() { asset }: AssetParamsDto
+  ): Promise<NextCheckpointModel | null> {
+    const nextCheckpoint = await this.checkpointsService.getNextCheckpoint(asset);
+
+    if (!nextCheckpoint) {
+      return null;
+    }
+
+    return new NextCheckpointModel(nextCheckpoint);
   }
 
   @ApiOperation({

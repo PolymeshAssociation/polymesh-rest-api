@@ -159,6 +159,35 @@ describe('CheckpointsService', () => {
     });
   });
 
+  describe('getNextCheckpoint', () => {
+    it('should return the next Checkpoint details', async () => {
+      const mockAsset = new MockAsset();
+      const mockNextCheckpoint = {
+        nextAt: new Date('10/14/1987'),
+        totalPending: new BigNumber(1),
+        schedules: [{ id: new BigNumber(1), nextAt: new Date('10/14/1987') }],
+      };
+      mockAsset.checkpoints.schedules.getNextCheckpoint.mockResolvedValue(mockNextCheckpoint);
+
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
+
+      const result = await service.getNextCheckpoint(assetId);
+
+      expect(result).toEqual(mockNextCheckpoint);
+    });
+
+    it('should return null if the Asset has no active Schedules', async () => {
+      const mockAsset = new MockAsset();
+      mockAsset.checkpoints.schedules.getNextCheckpoint.mockResolvedValue(null);
+
+      mockAssetsService.findFungible.mockResolvedValue(mockAsset);
+
+      const result = await service.getNextCheckpoint(assetId);
+
+      expect(result).toBeNull();
+    });
+  });
+
   describe('findScheduleById', () => {
     let mockAsset: MockAsset;
 
