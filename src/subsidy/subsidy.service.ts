@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
   AllowanceOperation,
-  AuthorizationRequest,
   Subsidy,
   SubsidyWithAllowance,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -38,14 +37,6 @@ export class SubsidyService {
       beneficiary,
       subsidizer,
     });
-  }
-
-  public async subsidizeAccount(params: CreateSubsidyDto): ServiceReturn<AuthorizationRequest> {
-    const { options, args } = extractTxOptions(params);
-
-    const { subsidizeAccount } = this.polymeshService.polymeshApi.accountManagement;
-
-    return this.transactionsService.submit(subsidizeAccount, args, options);
   }
 
   public async approveSubsidy(params: CreateSubsidyDto): ServiceReturn<void> {

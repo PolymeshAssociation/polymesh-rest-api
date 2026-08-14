@@ -4,8 +4,6 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { AllowanceOperation, TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
-import { createAuthorizationRequestModel } from '~/authorizations/authorizations.util';
-import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ProcessMode, TransactionType } from '~/common/types';
 import { AcceptSubsidyDto } from '~/subsidy/dto/accept-subsidy.dto';
 import { CreateSubsidyDto } from '~/subsidy/dto/create-subsidy.dto';
@@ -15,7 +13,7 @@ import { RevokeSubsidyDto } from '~/subsidy/dto/revoke-subsidy.dto';
 import { SubsidyController } from '~/subsidy/subsidy.controller';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { processedTxResult, txResult } from '~/test-utils/consts';
-import { createMockTransactionResult, MockAuthorizationRequest } from '~/test-utils/mocks';
+import { createMockTransactionResult } from '~/test-utils/mocks';
 import { mockSubsidyServiceProvider } from '~/test-utils/service-mocks';
 
 describe('SubsidyController', () => {
@@ -57,45 +55,6 @@ describe('SubsidyController', () => {
           beneficiary: expect.objectContaining({ address: beneficiary }),
           subsidizer: expect.objectContaining({ address: subsidizer }),
           allowance,
-        })
-      );
-    });
-  });
-
-  describe('subsidizeAccount', () => {
-    it('should accept CreateSubsidyDto and return the authorization request for adding as paying key', async () => {
-      const transaction = {
-        blockHash: '0x1',
-        transactionHash: '0x2',
-        blockNumber: new BigNumber(1),
-        type: TransactionType.Single,
-        transactionTag: TxTags.relayer.AcceptPayingKey,
-      };
-      const mockAuthorization = new MockAuthorizationRequest();
-      const testTxResult = createMockTransactionResult<MockAuthorizationRequest>({
-        ...txResult,
-        transactions: [transaction],
-        result: mockAuthorization,
-      });
-      const mockPayload: CreateSubsidyDto = {
-        signer: 'Alice',
-        beneficiary,
-        allowance,
-      };
-
-      when(mockService.subsidizeAccount)
-        .calledWith(mockPayload)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValue(testTxResult as any);
-
-      const result = await controller.subsidizeAccount(mockPayload);
-
-      expect(result).toEqual(
-        new CreatedAuthorizationRequestModel({
-          ...processedTxResult,
-          transactions: [transaction],
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          authorizationRequest: createAuthorizationRequestModel(mockAuthorization as any),
         })
       );
     });

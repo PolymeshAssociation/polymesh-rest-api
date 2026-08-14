@@ -16,13 +16,7 @@ import { ModifyAllowanceDto } from '~/subsidy/dto/modify-allowance.dto';
 import { QuitSubsidyDto } from '~/subsidy/dto/quit-subsidy.dto';
 import { SubsidyService } from '~/subsidy/subsidy.service';
 import { testValues } from '~/test-utils/consts';
-import {
-  createMockSubsidy,
-  MockAccount,
-  MockAuthorizationRequest,
-  MockPolymesh,
-  MockTransaction,
-} from '~/test-utils/mocks';
+import { createMockSubsidy, MockAccount, MockPolymesh, MockTransaction } from '~/test-utils/mocks';
 import {
   MockAccountsService,
   mockTransactionsProvider,
@@ -114,42 +108,6 @@ describe('SubsidyService', () => {
       const result = service.findOne(beneficiary, subsidizer);
 
       expect(result).toEqual(mockSubsidy);
-    });
-  });
-
-  describe('subsidizeAccount', () => {
-    it('should run a subsidizeAccount procedure and return the queue results', async () => {
-      const mockAuthRequest = new MockAuthorizationRequest();
-      const mockTransactions = {
-        blockHash: '0x1',
-        txHash: '0x2',
-        blockNumber: new BigNumber(1),
-        tag: TxTags.relayer.SetPayingKey,
-      };
-      const mockTransaction = new MockTransaction(mockTransactions);
-
-      mockTransactionsService.submit.mockResolvedValue({
-        result: mockAuthRequest,
-        transactions: [mockTransaction],
-      });
-
-      const body = {
-        signer,
-        beneficiary,
-        allowance: new BigNumber(100),
-      };
-
-      const result = await service.subsidizeAccount(body);
-      expect(result).toEqual({
-        result: mockAuthRequest,
-        transactions: [mockTransaction],
-      });
-
-      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
-        mockPolymeshApi.accountManagement.subsidizeAccount,
-        { beneficiary, allowance },
-        expect.objectContaining({ signer })
-      );
     });
   });
 

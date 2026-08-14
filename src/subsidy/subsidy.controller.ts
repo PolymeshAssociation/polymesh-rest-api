@@ -8,8 +8,6 @@ import {
 } from '@nestjs/swagger';
 import { AllowanceOperation } from '@polymeshassociation/polymesh-sdk/types';
 
-import { authorizationRequestResolver } from '~/authorizations/authorizations.util';
-import { CreatedAuthorizationRequestModel } from '~/authorizations/models/created-authorization-request.model';
 import { ApiTransactionFailedResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
@@ -64,31 +62,8 @@ export class SubsidyController {
   }
 
   @ApiOperation({
-    summary: 'Subsidize an account',
-    description:
-      'This endpoint sends an Authorization Request to an Account to subsidize its transaction fees. Deprecated on chain v8; use approve and accept instead',
-    deprecated: true,
-  })
-  @ApiTransactionResponse({
-    description: 'Newly created Authorization Request along with transaction details',
-    type: CreatedAuthorizationRequestModel,
-  })
-  @ApiTransactionFailedResponse({
-    [HttpStatus.BAD_REQUEST]: [
-      'The Beneficiary Account already has a pending invitation to add this account as a subsidizer with the same allowance',
-    ],
-  })
-  @Post('create')
-  async subsidizeAccount(@Body() params: CreateSubsidyDto): Promise<TransactionResponseModel> {
-    const serviceResult = await this.subsidyService.subsidizeAccount(params);
-
-    return handleServiceResult(serviceResult, authorizationRequestResolver);
-  }
-
-  @ApiOperation({
     summary: 'Approve a subsidy for a beneficiary account',
-    description:
-      'This endpoint allows a subsidizer to approve an allowance for a beneficiary account on chain v8',
+    description: 'This endpoint allows a subsidizer to approve an allowance for a beneficiary',
   })
   @ApiTransactionResponse({
     description: 'Details about the transaction',

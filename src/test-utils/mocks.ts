@@ -108,7 +108,6 @@ export class MockPolymesh {
     unfreezeSecondaryAccounts: jest.fn(),
     revokePermissions: jest.fn(),
     modifyPermissions: jest.fn(),
-    subsidizeAccount: jest.fn(),
     approveSubsidy: jest.fn(),
     acceptSubsidy: jest.fn(),
     revokeSubsidy: jest.fn(),
