@@ -23,10 +23,6 @@ import { TransactionsService } from '~/transactions/transactions.service';
 
 const unitsPerPolyx = 1000000;
 
-type PolymeshWithContext = PolymeshService['polymeshApi'] & {
-  context: { isV7: boolean };
-};
-
 @Injectable()
 export class DeveloperTestingService {
   private _sudoPair: KeyringPair;
@@ -46,25 +42,30 @@ export class DeveloperTestingService {
   public async createTestAdmins({ accounts }: CreateTestAdminsDto): Promise<Identity[]> {
     const identities = await this.createTestAccounts({ accounts });
 
-    if (this.isChainV7()) {
-      await this.createCddProvidersBatch(identities);
-    }
+    await this.createDidRegistrarsBatch(identities);
 
     return identities;
   }
 
   /**
-   * @note the `signer` must be a CDD provider and have sufficient POLYX to cover the `initialPolyx`
+   * @note the `signer` must have sufficient POLYX to cover the `initialPolyx`
    */
   public async createTestAccounts({
     accounts,
     signer,
   }: CreateTestAccountsDto): Promise<Identity[]> {
-    if (this.isChainV7()) {
-      return this.createTestAccountsV7({ accounts, signer });
+    const accountsWithoutIdentity = await this.findAccountsWithoutIdentity(accounts);
+
+    if (accountsWithoutIdentity.length) {
+      await this.prefundNewAccounts(accountsWithoutIdentity, signer);
     }
 
-    return this.createTestAccountsV8({ accounts, signer });
+    await this.selfRegisterNewAccounts(accounts);
+    await this.fundAccountsWithInitialPolyx(accounts, signer);
+
+    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
+
+    return this.fetchAccountsIdentities(madeAccounts);
   }
 
   /**
@@ -83,7 +84,7 @@ export class DeveloperTestingService {
     } = this.polymeshService.polymeshApi;
 
     if (!signer) {
-      throw new AppInternalError('A signer is required to prefund accounts on chain v8');
+      throw new AppInternalError('A signer is required to prefund accounts');
     }
 
     const fundingAddress = await this.signingService.getAddressByHandle(signer);
@@ -107,66 +108,6 @@ export class DeveloperTestingService {
     }
   }
 
-  private async createTestAccountsV7({
-    accounts,
-    signer,
-  }: CreateTestAccountsDto): Promise<Identity[]> {
-    const {
-      _polkadotApi: {
-        tx: { utility, balances, identity },
-      },
-    } = this.polymeshService.polymeshApi;
-
-    const signerAddress = signer
-      ? await this.signingService.getAddressByHandle(signer)
-      : this.sudoPair;
-
-    // Create a DID to attach claim too
-    const createDidCalls = accounts.map(({ address }) => identity.cddRegisterDid(address, []));
-    await this.polymeshService.execTransaction(signerAddress, utility.batch, createDidCalls);
-
-    // Fetch the Account and Identity that was made
-    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
-    const identities = await this.fetchAccountsIdentities(madeAccounts);
-
-    // Now create a CDD claim for each Identity
-    const createCddCalls = identities.map(({ did }) =>
-      identity.addClaim(did, { CustomerDueDiligence: did }, null)
-    );
-
-    // and provide POLYX for those that are supposed to get some
-    const initialPolyxCalls = accounts
-      .filter(({ initialPolyx }) => initialPolyx.gt(0))
-      .map(({ address, initialPolyx }) =>
-        balances.transferWithMemo(address, initialPolyx.toNumber() * unitsPerPolyx, null)
-      );
-
-    await this.polymeshService.execTransaction(signerAddress, utility.batchAll, [
-      ...createCddCalls,
-      ...initialPolyxCalls,
-    ]);
-
-    return identities;
-  }
-
-  private async createTestAccountsV8({
-    accounts,
-    signer,
-  }: CreateTestAccountsDto): Promise<Identity[]> {
-    const accountsWithoutIdentity = await this.findAccountsWithoutIdentity(accounts);
-
-    if (accountsWithoutIdentity.length) {
-      await this.prefundNewAccountsForV8(accountsWithoutIdentity, signer);
-    }
-
-    await this.selfRegisterNewAccountsForV8(accounts);
-    await this.fundAccountsWithInitialPolyxForV8(accounts, signer);
-
-    const madeAccounts = await this.fetchAccountForAccountParams(accounts);
-
-    return this.fetchAccountsIdentities(madeAccounts);
-  }
-
   private async findAccountsWithoutIdentity(
     accounts: CreateTestAccountsDto['accounts']
   ): Promise<CreateTestAccountsDto['accounts']> {
@@ -184,7 +125,7 @@ export class DeveloperTestingService {
     return accountsWithoutIdentity;
   }
 
-  private async prefundNewAccountsForV8(
+  private async prefundNewAccounts(
     accountsWithoutIdentity: CreateTestAccountsDto['accounts'],
     signer?: string
   ): Promise<void> {
@@ -224,7 +165,7 @@ export class DeveloperTestingService {
     }
   }
 
-  private async selfRegisterNewAccountsForV8(
+  private async selfRegisterNewAccounts(
     accounts: CreateTestAccountsDto['accounts']
   ): Promise<void> {
     const { selfRegisterDid } = this.polymeshService.polymeshApi.identities;
@@ -258,7 +199,7 @@ export class DeveloperTestingService {
     }
   }
 
-  private async fundAccountsWithInitialPolyxForV8(
+  private async fundAccountsWithInitialPolyx(
     accounts: CreateTestAccountsDto['accounts'],
     signer?: string
   ): Promise<void> {
@@ -298,30 +239,26 @@ export class DeveloperTestingService {
     }
   }
 
-  private isChainV7(): boolean {
-    return (this.polymeshService.polymeshApi as PolymeshWithContext).context.isV7;
-  }
-
   /**
    * @note relies on having a sudo account configured
    */
-  private async createCddProvidersBatch(identities: Identity[]): Promise<void> {
+  private async createDidRegistrarsBatch(identities: Identity[]): Promise<void> {
     const {
       polymeshService: {
         polymeshApi: {
           _polkadotApi: {
-            tx: { cddServiceProviders, sudo, utility },
+            tx: { didRegistrars, sudo, utility },
           },
         },
       },
       sudoPair,
     } = this;
 
-    const cddCalls = identities.map(({ did }) => {
-      return cddServiceProviders.addMember(did);
+    const registrarCalls = identities.map(({ did }) => {
+      return didRegistrars.addMember(did);
     });
 
-    const batchTx = utility.batchAll(cddCalls);
+    const batchTx = utility.batchAll(registrarCalls);
 
     await this.polymeshService.execTransaction(sudoPair, sudo.sudo, batchTx);
   }

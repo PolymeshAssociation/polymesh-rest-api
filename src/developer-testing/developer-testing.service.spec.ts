@@ -61,7 +61,7 @@ describe('DeveloperTestingService', () => {
 
     polymeshService.execTransaction = jest.fn();
     mockPolymeshApi.network.getSs58Format.mockReturnValue(new BigNumber(42));
-    Object.assign(mockPolymeshApi, { context: { isV7: true } });
+    mockAccountsService.getAccountBalance.mockResolvedValue({ free: new BigNumber(0) });
   });
 
   afterEach(async () => {
@@ -97,6 +97,12 @@ describe('DeveloperTestingService', () => {
       const identities = await service.createTestAdmins(params);
 
       expect(identities).toEqual([{ did: 'fakeId' }, { did: 'fakeSecondaryId' }]);
+      expect(mockPolymeshApi._polkadotApi.tx.didRegistrars.addMember).toHaveBeenCalledWith(
+        'fakeId'
+      );
+      expect(mockPolymeshApi._polkadotApi.tx.didRegistrars.addMember).toHaveBeenCalledWith(
+        'fakeSecondaryId'
+      );
     });
   });
 
@@ -149,7 +155,9 @@ describe('DeveloperTestingService', () => {
       expect(polymeshService.execTransaction).toHaveBeenCalledWith(
         expect.objectContaining({ address: defaultAdminAddress }),
         expect.anything(),
-        expect.anything()
+        address,
+        expect.anything(),
+        null
       );
     });
   });

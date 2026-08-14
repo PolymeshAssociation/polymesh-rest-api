@@ -152,7 +152,7 @@ export class MockPolymesh {
         transferWithMemo: jest.fn(),
         setBalance: jest.fn(),
       },
-      cddServiceProviders: {
+      didRegistrars: {
         addMember: jest.fn(),
       },
       identity: {
