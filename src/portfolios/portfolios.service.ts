@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  Asset,
   AuthorizationRequest,
   DefaultPortfolio,
   EventIdentifier,
@@ -20,6 +21,7 @@ import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { PreApproveAssetDto } from '~/portfolios/dto/pre-approve-asset.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { toPortfolioId } from '~/portfolios/portfolios.util';
 import { TransactionsService } from '~/transactions/transactions.service';
@@ -172,5 +174,50 @@ export class PortfoliosService {
     }
     const portfolio = await this.findOne(did, portfolioId);
     return portfolio.createdAt();
+  }
+
+  public async preApproveAsset(
+    portfolioParams: PortfolioDto,
+    params: PreApproveAssetDto
+  ): ServiceReturn<void> {
+    const { did, id } = portfolioParams;
+    const {
+      options,
+      args: { asset },
+    } = extractTxOptions(params);
+    const portfolio = await this.findOne(did, id);
+
+    return this.transactionsService.submit(portfolio.preApproveAsset, { asset }, options);
+  }
+
+  public async removeAssetPreApproval(
+    portfolioParams: PortfolioDto,
+    params: PreApproveAssetDto
+  ): ServiceReturn<void> {
+    const { did, id } = portfolioParams;
+    const {
+      options,
+      args: { asset },
+    } = extractTxOptions(params);
+    const portfolio = await this.findOne(did, id);
+
+    return this.transactionsService.submit(portfolio.removeAssetPreApproval, { asset }, options);
+  }
+
+  public async isAssetPreApproved(portfolioParams: PortfolioDto, asset: string): Promise<boolean> {
+    const { did, id } = portfolioParams;
+    const portfolio = await this.findOne(did, id);
+
+    return portfolio.isAssetPreApproved(asset);
+  }
+
+  public async getPreApprovedAssets(
+    portfolioParams: PortfolioDto,
+    paginationOptions: PaginationOptions
+  ): Promise<ResultSet<Asset>> {
+    const { did, id } = portfolioParams;
+    const portfolio = await this.findOne(did, id);
+
+    return portfolio.preApprovedAssets(paginationOptions);
   }
 }

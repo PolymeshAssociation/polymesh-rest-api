@@ -362,6 +362,10 @@ export class MockPortfolio {
   public moveFunds = jest.fn();
   public getTransactionHistory = jest.fn();
   public quitCustody = jest.fn();
+  public preApproveAsset = jest.fn();
+  public removeAssetPreApproval = jest.fn();
+  public isAssetPreApproved = jest.fn();
+  public preApprovedAssets = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {
       id: '1',

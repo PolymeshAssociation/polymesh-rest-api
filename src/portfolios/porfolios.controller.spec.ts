@@ -13,7 +13,12 @@ import { PortfoliosController } from '~/portfolios/portfolios.controller';
 import { PortfoliosService } from '~/portfolios/portfolios.service';
 import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfolios/portfolios.util';
 import { processedTxResult, testValues } from '~/test-utils/consts';
-import { createMockResultSet, MockHistoricSettlement, MockPortfolio } from '~/test-utils/mocks';
+import {
+  createMockResultSet,
+  MockAsset,
+  MockHistoricSettlement,
+  MockPortfolio,
+} from '~/test-utils/mocks';
 import { MockPortfoliosService } from '~/test-utils/service-mocks';
 
 const { did, signer, txResult, assetId } = testValues;
@@ -283,6 +288,90 @@ describe('PortfoliosController', () => {
         const result = await controller.createdAt(new PortfolioDto({ id: new BigNumber(1), did }));
 
         expect(result).toEqual(new EventIdentifierModel(eventIdentifier));
+      });
+    });
+  });
+
+  describe('preApproveAsset', () => {
+    it('should return the transaction details', async () => {
+      mockPortfoliosService.preApproveAsset.mockResolvedValue(txResult);
+
+      const portfolioParams = new PortfolioDto({ id: new BigNumber(1), did });
+      const body = { signer, asset: assetId };
+
+      const result = await controller.preApproveAsset(portfolioParams, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockPortfoliosService.preApproveAsset).toHaveBeenCalledWith(portfolioParams, body);
+    });
+  });
+
+  describe('removeAssetPreApproval', () => {
+    it('should return the transaction details', async () => {
+      mockPortfoliosService.removeAssetPreApproval.mockResolvedValue(txResult);
+
+      const portfolioParams = new PortfolioDto({ id: new BigNumber(1), did });
+      const body = { signer, asset: assetId };
+
+      const result = await controller.removeAssetPreApproval(portfolioParams, body);
+
+      expect(result).toEqual(processedTxResult);
+      expect(mockPortfoliosService.removeAssetPreApproval).toHaveBeenCalledWith(
+        portfolioParams,
+        body
+      );
+    });
+  });
+
+  describe('getIsAssetPreApproved', () => {
+    it('should return the asset pre-approval status', async () => {
+      mockPortfoliosService.isAssetPreApproved.mockResolvedValue(true);
+
+      const portfolioParams = new PortfolioDto({ id: new BigNumber(1), did });
+
+      const result = await controller.getIsAssetPreApproved(portfolioParams, { asset: assetId });
+
+      expect(result).toEqual({ asset: assetId, did, isPreApproved: true });
+    });
+  });
+
+  describe('getPreApprovedAssets', () => {
+    const paginatedResult = {
+      data: [new MockAsset()],
+      next: null,
+      count: new BigNumber(1),
+    };
+
+    it('should return pre-approved assets without start value', async () => {
+      mockPortfoliosService.getPreApprovedAssets.mockResolvedValue(paginatedResult);
+
+      const portfolioParams = new PortfolioDto({ id: new BigNumber(1), did });
+
+      const result = await controller.getPreApprovedAssets(portfolioParams, {
+        size: new BigNumber(10),
+      });
+
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: [expect.objectContaining({ asset: assetId, did, isPreApproved: true })],
+      });
+    });
+
+    it('should give pre-approved assets with start value', async () => {
+      mockPortfoliosService.getPreApprovedAssets.mockResolvedValue(paginatedResult);
+
+      const portfolioParams = new PortfolioDto({ id: new BigNumber(1), did });
+
+      const result = await controller.getPreApprovedAssets(portfolioParams, {
+        size: new BigNumber(10),
+        start: new BigNumber(1),
+      });
+
+      expect(result).toEqual({
+        total: paginatedResult.count,
+        next: paginatedResult.next,
+        results: [expect.objectContaining({ asset: assetId, did, isPreApproved: true })],
       });
     });
   });

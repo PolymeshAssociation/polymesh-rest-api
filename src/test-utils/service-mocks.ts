@@ -220,6 +220,10 @@ export class MockPortfoliosService {
   createdAt = jest.fn();
   setCustodian = jest.fn();
   quitCustody = jest.fn();
+  preApproveAsset = jest.fn();
+  removeAssetPreApproval = jest.fn();
+  isAssetPreApproved = jest.fn();
+  getPreApprovedAssets = jest.fn();
 }
 
 export class MockOfferingsService {

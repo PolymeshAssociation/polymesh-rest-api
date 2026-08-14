@@ -528,4 +528,115 @@ describe('PortfoliosService', () => {
       });
     });
   });
+
+  describe('preApproveAsset', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.PreApproveAsset,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.preApproveAsset.mockResolvedValue(mockTransaction);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.preApproveAsset(
+        new PortfolioDto({ did, id: mockPortfolio.id }),
+        { signer, asset: assetId }
+      );
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPortfolio.preApproveAsset,
+        { asset: assetId },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('removeAssetPreApproval', () => {
+    it('should return the transaction details', async () => {
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.asset.RemoveAssetPreApproval,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.removeAssetPreApproval.mockResolvedValue(mockTransaction);
+
+      mockTransactionsService.submit.mockResolvedValue({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+
+      const result = await service.removeAssetPreApproval(
+        new PortfolioDto({ did, id: mockPortfolio.id }),
+        { signer, asset: assetId }
+      );
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPortfolio.removeAssetPreApproval,
+        { asset: assetId },
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('isAssetPreApproved', () => {
+    it('should return whether the Asset is pre-approved for the Portfolio', async () => {
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.isAssetPreApproved.mockResolvedValue(true);
+
+      const result = await service.isAssetPreApproved(new PortfolioDto({ did, id: mockPortfolio.id }), assetId);
+
+      expect(result).toBe(true);
+      expect(mockPortfolio.isAssetPreApproved).toHaveBeenCalledWith(assetId);
+    });
+  });
+
+  describe('getPreApprovedAssets', () => {
+    it('should return the pre-approved Assets for the Portfolio', async () => {
+      const mockPortfolio = new MockPortfolio();
+      const mockIdentity = new MockIdentity();
+      const mockResultSet = createMockResultSet([{ id: assetId }]);
+
+      mockIdentitiesService.findOne.mockResolvedValue(mockIdentity);
+      mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
+      mockPortfolio.preApprovedAssets.mockResolvedValue(mockResultSet);
+
+      const result = await service.getPreApprovedAssets(
+        new PortfolioDto({ did, id: mockPortfolio.id }),
+        { size: new BigNumber(10) }
+      );
+
+      expect(result).toEqual(mockResultSet);
+    });
+  });
 });

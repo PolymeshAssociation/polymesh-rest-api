@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { NumberedPortfolio } from '@polymeshassociation/polymesh-sdk/types';
 
+import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import {
   ApiArrayResponse,
   ApiTransactionFailedResponse,
@@ -31,12 +32,14 @@ import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
+import { PreApprovedModel } from '~/identities/models/pre-approved.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { GetTransactionsDto } from '~/portfolios/dto/get-transactions.dto';
 import { ModifyPortfolioDto } from '~/portfolios/dto/modify-portfolio.dto';
 import { PortfolioDto } from '~/portfolios/dto/portfolio.dto';
+import { PreApproveAssetDto } from '~/portfolios/dto/pre-approve-asset.dto';
 import { SetCustodianDto } from '~/portfolios/dto/set-custodian.dto';
 import { CreatedPortfolioModel } from '~/portfolios/models/created-portfolio.model';
 import { HistoricSettlementModel } from '~/portfolios/models/historic-settlement.model';
@@ -420,5 +423,150 @@ export class PortfoliosController {
     }
 
     return new EventIdentifierModel(result);
+  }
+
+  @ApiOperation({
+    summary: 'Pre-approve receiving an Asset for a Portfolio',
+    description:
+      'This endpoint pre-approves receiving an Asset for the given Portfolio, so incoming transfers of it auto-affirm without a manual affirm step',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Portfolio for which to pre-approve the Asset',
+    type: 'string',
+    example: '1',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['The Portfolio has already pre-approved the Asset'],
+  })
+  @Post('/identities/:did/portfolios/:id/pre-approve-asset')
+  public async preApproveAsset(
+    @Param() portfolioParams: PortfolioDto,
+    @Body() params: PreApproveAssetDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.portfoliosService.preApproveAsset(portfolioParams, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Remove pre-approval for receiving an Asset for a Portfolio',
+    description:
+      'This endpoint disables automatic affirmation when the Portfolio receives the Asset',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Portfolio for which to remove the Asset pre-approval',
+    type: 'string',
+    example: '1',
+  })
+  @ApiTransactionResponse({
+    description: 'Information about the transaction',
+    type: TransactionQueueModel,
+  })
+  @ApiTransactionFailedResponse({
+    [HttpStatus.NOT_FOUND]: [
+      'The Portfolio with provided ID was not found',
+      'The Identity with provided DID was not found',
+    ],
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ['The Asset is not pre-approved for the Portfolio'],
+  })
+  @Post('/identities/:did/portfolios/:id/remove-pre-approval')
+  public async removeAssetPreApproval(
+    @Param() portfolioParams: PortfolioDto,
+    @Body() params: PreApproveAssetDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.portfoliosService.removeAssetPreApproval(portfolioParams, params);
+
+    return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Check if an Asset is pre-approved for a Portfolio',
+    description: 'This endpoint returns whether or not an Asset is pre-approved for a Portfolio',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Portfolio for which to check the Asset pre-approval',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Returns pre-approval status for the Asset',
+    type: PreApprovedModel,
+  })
+  @Get('/identities/:did/portfolios/:id/is-pre-approved')
+  public async getIsAssetPreApproved(
+    @Param() portfolioParams: PortfolioDto,
+    @Query() { asset }: AssetParamsDto
+  ): Promise<PreApprovedModel> {
+    const { did } = portfolioParams;
+    const isPreApproved = await this.portfoliosService.isAssetPreApproved(portfolioParams, asset);
+
+    return new PreApprovedModel({ asset, did, isPreApproved });
+  }
+
+  @ApiOperation({
+    summary: 'Get Assets pre-approved by a Portfolio',
+    description: 'This endpoint returns the Assets the given Portfolio has pre-approved',
+  })
+  @ApiParam({
+    name: 'did',
+    description: 'The DID of the Portfolio owner',
+    type: 'string',
+    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Portfolio for which to fetch pre-approved Assets',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Returns pre-approved Assets for the Portfolio',
+    type: PaginatedResultsModel<PreApprovedModel>,
+  })
+  @Get('/identities/:did/portfolios/:id/pre-approved-assets')
+  public async getPreApprovedAssets(
+    @Param() portfolioParams: PortfolioDto,
+    @Query() { size, start }: PaginatedParamsDto
+  ): Promise<PaginatedResultsModel<PreApprovedModel>> {
+    const { did } = portfolioParams;
+    const { data, count, next } = await this.portfoliosService.getPreApprovedAssets(
+      portfolioParams,
+      { size, start: start?.toString() }
+    );
+
+    return new PaginatedResultsModel({
+      results: data.map(({ id }) => new PreApprovedModel({ asset: id, did, isPreApproved: true })),
+      total: count,
+      next,
+    });
   }
 }
