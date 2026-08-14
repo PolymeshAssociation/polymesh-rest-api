@@ -94,6 +94,8 @@ describe('AccountsController', () => {
         free: new BigNumber(10),
         locked: new BigNumber(1),
         total: new BigNumber(11),
+        reserved: new BigNumber(1),
+        frozen: new BigNumber(0),
       };
       mockAccountsService.getAccountBalance.mockResolvedValue(mockResult);
 

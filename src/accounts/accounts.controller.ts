@@ -28,6 +28,7 @@ import { ModifyPermissionsDto } from '~/accounts/dto/modify-permissions.dto';
 import { RevokePermissionsDto } from '~/accounts/dto/revoke-permissions.dto';
 import { TransactionHistoryFiltersDto } from '~/accounts/dto/transaction-history-filters.dto';
 import { TransferPolyxDto } from '~/accounts/dto/transfer-polyx.dto';
+import { AccountBalanceModel } from '~/accounts/models/account-balance.model';
 import {
   AccountCollectionModel,
   createAccountCollectionModel,
@@ -36,7 +37,6 @@ import { AccountDetailsModel } from '~/accounts/models/account-details.model';
 import { MultiSigDetailsModel } from '~/accounts/models/multi-sig-details.model';
 import { PermissionsModel } from '~/accounts/models/permissions.model';
 import { AssetBalanceModel } from '~/assets/models/asset-balance.model';
-import { BalanceModel } from '~/assets/models/balance.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { ExtrinsicModel } from '~/common/models/extrinsic.model';
@@ -106,7 +106,8 @@ export class AccountsController {
 
   @ApiOperation({
     summary: 'Get POLYX balance of an Account',
-    description: 'This endpoint provides the free, locked and total POLYX balance of an Account',
+    description:
+      'This endpoint provides the free, locked and total POLYX balance of an Account. Note: as of chain v8, `locked` also includes funds on hold (e.g. bonded for staking), which is reflected in the `reserved` and `frozen` fields',
   })
   @ApiParam({
     name: 'account',
@@ -116,12 +117,12 @@ export class AccountsController {
   })
   @ApiOkResponse({
     description: 'Free, locked and total POLYX balance of the Account',
-    type: BalanceModel,
+    type: AccountBalanceModel,
   })
   @Get(':account/balance')
-  async getAccountBalance(@Param() { account }: AccountParamsDto): Promise<BalanceModel> {
+  async getAccountBalance(@Param() { account }: AccountParamsDto): Promise<AccountBalanceModel> {
     const accountBalance = await this.accountsService.getAccountBalance(account);
-    return new BalanceModel(accountBalance);
+    return new AccountBalanceModel(accountBalance);
   }
 
   @ApiOperation({
