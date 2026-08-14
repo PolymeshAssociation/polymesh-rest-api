@@ -81,8 +81,7 @@ export class IdentitiesController {
   @Post('self-register')
   @ApiOperation({
     summary: 'Self-register Identity',
-    description:
-      'Registers a new DID for the signing Account on chain v8 without a CDD provider. Not supported on chain v7',
+    description: 'Registers a new DID for the signing Account without requiring a DID Registrar',
   })
   @ApiTransactionResponse({
     description: 'Newly created Identity along with transaction details',
@@ -100,7 +99,7 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Register Identity',
     description:
-      'This endpoint allows registering a new Identity. The transaction signer must be a CDD provider (Did Registrar on chain v8). This will create Authorization Requests which have to be accepted by any secondary accounts if they were specified.',
+      'This endpoint allows registering a new Identity. The transaction signer must be a DID Registrar. This will create Authorization Requests which have to be accepted by any secondary accounts if they were specified.',
   })
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
@@ -592,7 +591,7 @@ export class IdentitiesController {
   @ApiOperation({
     summary: 'Set mandatory receiver affirmation',
     description:
-      'Enable or disable mandatory receiver affirmation for incoming settlement transfers on chain v8',
+      'Enable or disable mandatory receiver affirmation for incoming settlement transfers',
   })
   @ApiParam({
     name: 'did',

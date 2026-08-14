@@ -232,8 +232,7 @@ export class AccountsController {
 
   @ApiOperation({
     summary: 'Get pending subsidies for an Account',
-    description:
-      'Returns pending subsidy requests awaiting acceptance by the beneficiary account on chain v8',
+    description: 'Returns pending subsidy requests awaiting acceptance by the beneficiary account',
   })
   @ApiParam({
     name: 'account',
@@ -258,7 +257,7 @@ export class AccountsController {
 
   @ApiOperation({
     summary: 'Get fungible asset balances held by an Account',
-    description: 'Returns balances of all fungible assets held in the Account on chain v8',
+    description: 'Returns balances of all fungible assets held in the Account',
   })
   @ApiParam({
     name: 'account',
@@ -291,7 +290,7 @@ export class AccountsController {
 
   @ApiOperation({
     summary: 'Get NFT collections held by an Account',
-    description: 'Returns NFT collections and holdings for the Account on chain v8',
+    description: 'Returns NFT collections and holdings for the Account',
   })
   @ApiParam({
     name: 'account',

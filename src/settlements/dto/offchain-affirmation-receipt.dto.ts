@@ -55,8 +55,7 @@ export class OffChainAffirmationReceiptDto {
   readonly metadata?: string;
 
   @ApiPropertyOptional({
-    description:
-      'Expiration date for the off-chain affirmation receipt. Required on chain v8 when generating receipts',
+    description: 'Expiration date for the off-chain affirmation receipt. Required when generating receipts',
     type: 'string',
     example: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
   })

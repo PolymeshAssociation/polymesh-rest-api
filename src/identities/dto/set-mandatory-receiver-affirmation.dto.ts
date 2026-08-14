@@ -9,7 +9,7 @@ import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 export class SetMandatoryReceiverAffirmationDto extends TransactionBaseDto {
   @ApiProperty({
     description:
-      'Whether receiver affirmation is required for incoming settlement transfers. Automatic affirms by default on chain v8',
+      'Whether receiver affirmation is required for incoming settlement transfers. Automatic affirms by default',
     enum: ReceiverAffirmationRequirement,
     example: ReceiverAffirmationRequirement.Required,
   })

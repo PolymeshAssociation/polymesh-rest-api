@@ -578,8 +578,7 @@ export class AssetsController {
 
   @ApiOperation({
     summary: 'Approve fungible asset allowance',
-    description:
-      'Approves a spender account allowance for transferring fungible asset tokens on chain v8',
+    description: 'Approves a spender account allowance for transferring fungible asset tokens',
   })
   @ApiParam({
     name: 'asset',
