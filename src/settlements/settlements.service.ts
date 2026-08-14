@@ -8,6 +8,7 @@ import {
   GroupedInstructions,
   Instruction,
   InstructionAffirmation,
+  InstructionRelockStatus,
   OffChainAffirmation,
   OffChainAffirmationReceipt,
   ResultSet,
@@ -263,5 +264,31 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return this.transactionsService.submit(instruction.rejectAsMediator, {}, options);
+  }
+
+  public async lockInstructionForExecution(
+    id: BigNumber,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { options } = extractTxOptions(transactionBaseDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.lockForExecution, {}, options);
+  }
+
+  public async unlockInstructionForExecution(
+    id: BigNumber,
+    transactionBaseDto: TransactionBaseDto
+  ): ServiceReturn<Instruction> {
+    const { options } = extractTxOptions(transactionBaseDto);
+    const instruction = await this.findInstruction(id);
+
+    return this.transactionsService.submit(instruction.unlockForExecution, {}, options);
+  }
+
+  public async getRelockStatus(id: BigNumber): Promise<InstructionRelockStatus> {
+    const instruction = await this.findInstruction(id);
+
+    return instruction.getRelockStatus();
   }
 }

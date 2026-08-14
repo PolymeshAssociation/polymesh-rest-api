@@ -201,6 +201,9 @@ export class MockSettlementsService {
   executeInstruction = jest.fn();
   fetchAllowedSigners = jest.fn();
   updateVenueSigners = jest.fn();
+  lockInstructionForExecution = jest.fn();
+  unlockInstructionForExecution = jest.fn();
+  getRelockStatus = jest.fn();
 }
 
 export class MockClaimsService {

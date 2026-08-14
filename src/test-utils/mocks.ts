@@ -300,6 +300,9 @@ export class MockInstruction {
   public getMediators = jest.fn();
   public affirmAsMediator = jest.fn();
   public rejectAsMediator = jest.fn();
+  public lockForExecution = jest.fn();
+  public unlockForExecution = jest.fn();
+  public getRelockStatus = jest.fn();
   public generateOffChainAffirmationReceipt = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {

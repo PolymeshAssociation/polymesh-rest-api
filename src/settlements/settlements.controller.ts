@@ -32,6 +32,7 @@ import {
   InstructionAffirmationPartyType,
 } from '~/settlements/models/instruction-affirmation.model';
 import { OffChainAffirmationModel } from '~/settlements/models/off-chain-affirmation.model';
+import { RelockStatusModel } from '~/settlements/models/relock-status.model';
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { createInstructionModel, legsToLegModel } from '~/settlements/settlements.util';
@@ -160,6 +161,78 @@ export class SettlementsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.rejectInstructionAsMediator(id, signerDto);
     return handleServiceResult(result);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Lock an Instruction for execution',
+    description:
+      'This endpoint locks a pending Instruction, moving it into the LockedForExecution status',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction to be locked',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('instructions/:id/lock')
+  public async lockInstructionForExecution(
+    @Param() { id }: IdParamsDto,
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.lockInstructionForExecution(id, signerDto);
+    return handleServiceResult(result);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Unlock an Instruction from execution',
+    description:
+      'This endpoint moves a LockedForExecution Instruction back to Pending. Can only be called by a mediator on the Instruction, and is subject to a relock cooldown period',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction to be unlocked',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'Details of the transaction',
+    type: TransactionQueueModel,
+  })
+  @Post('instructions/:id/unlock')
+  public async unlockInstructionForExecution(
+    @Param() { id }: IdParamsDto,
+    @Body() signerDto: TransactionBaseDto
+  ): Promise<TransactionResponseModel> {
+    const result = await this.settlementsService.unlockInstructionForExecution(id, signerDto);
+    return handleServiceResult(result);
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Get the relock status of an Instruction',
+    description:
+      "This endpoint returns the mediator's last unlock timestamp, relock count, max relock count and the relock cooldown window for an Instruction",
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction whose relock status is to be fetched',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'The relock status of the Instruction',
+    type: RelockStatusModel,
+  })
+  @Get('instructions/:id/relock-status')
+  public async getRelockStatus(@Param() { id }: IdParamsDto): Promise<RelockStatusModel> {
+    const result = await this.settlementsService.getRelockStatus(id);
+    return new RelockStatusModel(result);
   }
 
   @ApiTags('instructions')

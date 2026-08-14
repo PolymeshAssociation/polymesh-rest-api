@@ -23,6 +23,7 @@ import {
   InstructionAffirmationPartyType,
 } from '~/settlements/models/instruction-affirmation.model';
 import { LegModel } from '~/settlements/models/leg.model';
+import { RelockStatusModel } from '~/settlements/models/relock-status.model';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
 import * as settlementsUtil from '~/settlements/settlements.util';
@@ -295,6 +296,44 @@ describe('SettlementsController', () => {
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );
+    });
+  });
+
+  describe('lockInstructionForExecution', () => {
+    it('should lock an instruction and return the data returned by the service', async () => {
+      await testControllerTxResult(
+        controller.lockInstructionForExecution.bind(controller),
+        mockSettlementsService.lockInstructionForExecution,
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+    });
+  });
+
+  describe('unlockInstructionForExecution', () => {
+    it('should unlock an instruction and return the data returned by the service', async () => {
+      await testControllerTxResult(
+        controller.unlockInstructionForExecution.bind(controller),
+        mockSettlementsService.unlockInstructionForExecution,
+        { id: new BigNumber(3) },
+        { signer: 'signer' }
+      );
+    });
+  });
+
+  describe('getRelockStatus', () => {
+    it('should return the relock status of the Instruction', async () => {
+      const mockRelockStatus = {
+        unlockedAt: null,
+        relockCount: new BigNumber(0),
+        maxRelockCount: new BigNumber(1),
+        cooldownEndsAt: null,
+      };
+      mockSettlementsService.getRelockStatus.mockResolvedValue(mockRelockStatus);
+
+      const result = await controller.getRelockStatus({ id: new BigNumber(3) });
+
+      expect(result).toEqual(new RelockStatusModel(mockRelockStatus));
     });
   });
 

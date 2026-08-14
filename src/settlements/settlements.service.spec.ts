@@ -806,4 +806,89 @@ describe('SettlementsService', () => {
       );
     });
   });
+
+  describe('lockInstructionForExecution', () => {
+    it('should run a lock procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.LockInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.lockInstructionForExecution(new BigNumber(123), {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.lockForExecution,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('unlockInstructionForExecution', () => {
+    it('should run an unlock procedure and return the queue data', async () => {
+      const mockInstruction = new MockInstruction();
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.UnlockInstruction,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      mockTransactionsService.submit.mockResolvedValue({ transactions: [mockTransaction] });
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.unlockInstructionForExecution(new BigNumber(123), {
+        signer,
+      });
+
+      expect(result).toEqual({
+        result: undefined,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockInstruction.unlockForExecution,
+        {},
+        expect.objectContaining({ signer })
+      );
+    });
+  });
+
+  describe('getRelockStatus', () => {
+    it('should return the relock status of the Instruction', async () => {
+      const mockInstruction = new MockInstruction();
+      const mockRelockStatus = {
+        unlockedAt: null,
+        relockCount: new BigNumber(0),
+        maxRelockCount: new BigNumber(1),
+        cooldownEndsAt: null,
+      };
+      mockInstruction.getRelockStatus.mockResolvedValue(mockRelockStatus);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.getRelockStatus(new BigNumber(123));
+
+      expect(result).toEqual(mockRelockStatus);
+    });
+  });
 });
