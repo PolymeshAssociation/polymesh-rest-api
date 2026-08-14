@@ -304,6 +304,22 @@ describe('CorporateActionsService', () => {
     });
   });
 
+  describe('getDocuments', () => {
+    it('should return the documents linked to the Corporate Action', async () => {
+      const mockDistributionWithDetails = new MockDistributionWithDetails();
+      const mockDocuments = [{ name: 'DOC_NAME', uri: 'DOC_URI', id: new BigNumber(1) }];
+      mockDistributionWithDetails.distribution.getDocuments.mockResolvedValue(mockDocuments);
+
+      const findDistributionSpy = jest.spyOn(service, 'findDistribution');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findDistributionSpy.mockResolvedValue(mockDistributionWithDetails as any);
+
+      const result = await service.getDocuments(assetId, new BigNumber(1));
+
+      expect(result).toEqual(mockDocuments);
+    });
+  });
+
   describe('claimDividends', () => {
     describe('otherwise', () => {
       it('should return the transaction details', async () => {

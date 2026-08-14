@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
+import { AssetDocumentWithIdModel } from '~/assets/models/asset-document-with-id.model';
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
 import { CorporateActionsController } from '~/corporate-actions/corporate-actions.controller';
@@ -36,6 +37,7 @@ describe('CorporateActionsController', () => {
     payDividends: jest.fn(),
     claimDividends: jest.fn(),
     linkDocuments: jest.fn(),
+    getDocuments: jest.fn(),
     reclaimRemainingFunds: jest.fn(),
     modifyCheckpoint: jest.fn(),
     findUnclaimedDistributionsByAsset: jest.fn(),
@@ -210,6 +212,19 @@ describe('CorporateActionsController', () => {
         { asset: assetId, id: new BigNumber(1) },
         body
       );
+    });
+  });
+
+  describe('getDocuments', () => {
+    it('should return the documents linked to the Corporate Action', async () => {
+      const mockDocuments = [{ name: 'DOC_NAME', uri: 'DOC_URI', id: new BigNumber(1) }];
+      mockCorporateActionsService.getDocuments.mockResolvedValue(mockDocuments);
+
+      const result = await controller.getDocuments({ asset: assetId, id: new BigNumber(1) });
+
+      expect(result).toEqual({
+        results: mockDocuments.map(document => new AssetDocumentWithIdModel(document)),
+      });
     });
   });
 

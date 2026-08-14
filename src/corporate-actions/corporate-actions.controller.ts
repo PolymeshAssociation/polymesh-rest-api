@@ -12,6 +12,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { DividendDistribution } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
+import { AssetDocumentWithIdModel } from '~/assets/models/asset-document-with-id.model';
 import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { IsAsset } from '~/common/decorators/validation';
 import { IdParamsDto } from '~/common/dto/id-params.dto';
@@ -347,6 +348,37 @@ export class CorporateActionsController {
   ): Promise<TransactionResponseModel> {
     const result = await this.corporateActionsService.linkDocuments(asset, id, linkDocumentsDto);
     return handleServiceResult(result);
+  }
+
+  @ApiOperation({
+    summary: 'Get documents linked to a Corporate Action',
+    description: 'This endpoint retrieves the documents linked to a Corporate Action',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) of the Corporate Action',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Corporate Action',
+    type: 'string',
+    example: '123',
+  })
+  @ApiArrayResponse(AssetDocumentWithIdModel, {
+    description: 'List of documents linked to the Corporate Action',
+    paginated: false,
+  })
+  @Get(':id/documents')
+  public async getDocuments(
+    @Param() { asset, id }: DividendDistributionParamsDto
+  ): Promise<ResultsModel<AssetDocumentWithIdModel>> {
+    const documents = await this.corporateActionsService.getDocuments(asset, id);
+
+    const results = documents.map(document => new AssetDocumentWithIdModel(document));
+
+    return new ResultsModel({ results });
   }
 
   @ApiTags('dividend-distributions')

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import {
+  AssetDocumentWithId,
   CorporateActionDefaultConfig,
   DistributionPayment,
   DistributionWithDetails,
@@ -120,6 +121,12 @@ export class CorporateActionsService {
       documents: documents.map(document => document.toAssetDocument()),
     };
     return this.transactionService.submit(distribution.linkDocuments, params, options);
+  }
+
+  public async getDocuments(asset: string, id: BigNumber): Promise<AssetDocumentWithId[]> {
+    const { distribution } = await this.findDistribution(asset, id);
+
+    return distribution.getDocuments();
   }
 
   public async claimDividends(
