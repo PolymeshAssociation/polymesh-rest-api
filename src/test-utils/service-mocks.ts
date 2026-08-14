@@ -49,6 +49,7 @@ export class MockAssetService {
   getRequiredMediators = jest.fn();
   addRequiredMediators = jest.fn();
   removeRequiredMediators = jest.fn();
+  getIssuedInFundingRound = jest.fn();
   preApprove = jest.fn();
   removePreApproval = jest.fn();
   linkTickerToAsset = jest.fn();

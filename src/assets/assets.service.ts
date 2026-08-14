@@ -324,6 +324,14 @@ export class AssetsService {
     });
   }
 
+  public async getIssuedInFundingRound(
+    assetInput: string,
+    fundingRound: string
+  ): Promise<BigNumber> {
+    const asset = await this.findOne(assetInput);
+    return asset.getIssuedInFundingRound(fundingRound);
+  }
+
   public async addRequiredMediators(
     assetInput: string,
     params: RequiredMediatorsDto

@@ -18,6 +18,7 @@ import { ApproveAllowanceDto } from '~/assets/dto/approve-allowance.dto';
 import { AssetParamsDto } from '~/assets/dto/asset-params.dto';
 import { ControllerTransferDto } from '~/assets/dto/controller-transfer.dto';
 import { CreateAssetDto } from '~/assets/dto/create-asset.dto';
+import { FundingRoundParamsDto } from '~/assets/dto/funding-round-params.dto';
 import { GetAllowanceParamsDto } from '~/assets/dto/get-allowance-params.dto';
 import { IssueDto } from '~/assets/dto/issue.dto';
 import { LinkTickerDto } from '~/assets/dto/link-ticker.dto';
@@ -34,6 +35,7 @@ import { AssetDocumentModel } from '~/assets/models/asset-document.model';
 import { AssetStatModel } from '~/assets/models/asset-stat.model';
 import { CreatedAssetModel } from '~/assets/models/created-asset.model';
 import { IdentityBalanceModel } from '~/assets/models/identity-balance.model';
+import { IssuedInFundingRoundModel } from '~/assets/models/issued-in-funding-round.model';
 import { RequiredMediatorsModel } from '~/assets/models/required-mediators.model';
 import { TransferFundsResultModel } from '~/assets/models/transfer-funds-result.model';
 import { TransferRestrictionsModel } from '~/assets/models/transfer-restrictions.model';
@@ -671,6 +673,36 @@ export class AssetsController {
     const mediators = mediatorIdentities.map(({ did }) => did);
 
     return new RequiredMediatorsModel({ mediators });
+  }
+
+  @ApiOperation({
+    summary: 'Get the total amount issued in a funding round',
+    description:
+      'This endpoint returns the total amount of the Asset issued in the given funding round',
+  })
+  @ApiParam({
+    name: 'asset',
+    description: 'The Asset (Ticker/Asset ID) whose issued amount is to be fetched',
+    type: 'string',
+    example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
+  })
+  @ApiParam({
+    name: 'round',
+    description: 'The name of the funding round',
+    type: 'string',
+    example: 'Series A',
+  })
+  @ApiOkResponse({
+    description: 'The total amount of the Asset issued in the funding round',
+    type: IssuedInFundingRoundModel,
+  })
+  @Get(':asset/funding-rounds/:round/issued')
+  public async getIssuedInFundingRound(
+    @Param() { asset, round }: FundingRoundParamsDto
+  ): Promise<IssuedInFundingRoundModel> {
+    const issued = await this.assetsService.getIssuedInFundingRound(asset, round);
+
+    return new IssuedInFundingRoundModel({ fundingRound: round, issued });
   }
 
   @ApiOperation({

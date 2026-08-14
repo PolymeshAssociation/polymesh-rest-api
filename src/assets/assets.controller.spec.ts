@@ -20,6 +20,7 @@ import { AssetsService } from '~/assets/assets.service';
 import { AssetDocumentDto } from '~/assets/dto/asset-document.dto';
 import { SetStatsDto } from '~/assets/dto/transfer-restrictions/set-stats.dto';
 import { SetTransferRestrictionsDto } from '~/assets/dto/transfer-restrictions/set-transfer-restrictions.dto';
+import { IssuedInFundingRoundModel } from '~/assets/models/issued-in-funding-round.model';
 import { StatAccreditedClaimModel } from '~/assets/models/stat-claim-accredited.model';
 import { StatAffiliateClaimModel } from '~/assets/models/stat-claim-affiliate.model';
 import { StatJurisdictionClaimModel } from '~/assets/models/stat-claim-jurisdiction.model';
@@ -543,6 +544,21 @@ describe('AssetsController', () => {
       expect(result).toEqual({
         mediators: [mockMediator.did],
       });
+    });
+  });
+
+  describe('getIssuedInFundingRound', () => {
+    it('should call the service and return the amount issued in the funding round', async () => {
+      mockAssetsService.getIssuedInFundingRound.mockResolvedValue(new BigNumber(1000));
+
+      const result = await controller.getIssuedInFundingRound({
+        asset: assetId,
+        round: 'Series A',
+      });
+
+      expect(result).toEqual(
+        new IssuedInFundingRoundModel({ fundingRound: 'Series A', issued: new BigNumber(1000) })
+      );
     });
   });
 

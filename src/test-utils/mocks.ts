@@ -195,6 +195,7 @@ export class MockAsset {
   public getRequiredMediators = jest.fn();
   public addRequiredMediators = jest.fn();
   public removeRequiredMediators = jest.fn();
+  public getIssuedInFundingRound = jest.fn();
   public linkTicker = jest.fn();
   public unlinkTicker = jest.fn();
 

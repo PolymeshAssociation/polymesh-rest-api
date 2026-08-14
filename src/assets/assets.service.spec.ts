@@ -808,6 +808,21 @@ describe('AssetsService', () => {
     });
   });
 
+  describe('getIssuedInFundingRound', () => {
+    it('should return the amount issued in the funding round', async () => {
+      const mockAsset = new MockAsset();
+      mockAsset.getIssuedInFundingRound.mockResolvedValue(new BigNumber(1000));
+
+      const findOneSpy = jest.spyOn(service, 'findOne');
+      findOneSpy.mockResolvedValue(mockAsset as unknown as FungibleAsset);
+
+      const result = await service.getIssuedInFundingRound('TICKER', 'Series A');
+
+      expect(result).toEqual(new BigNumber(1000));
+      expect(mockAsset.getIssuedInFundingRound).toHaveBeenCalledWith('Series A');
+    });
+  });
+
   describe('addRequiredMediators', () => {
     it('should run a addRequiredMediators procedure and return the transaction results', async () => {
       const mockTransaction = setupMockTransaction(
