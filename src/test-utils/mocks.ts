@@ -297,12 +297,10 @@ export class MockInstruction {
   public getAffirmations = jest.fn();
   public getOffChainAffirmations = jest.fn();
   public getOffChainAffirmationForLeg = jest.fn();
-  public withdraw = jest.fn();
   public reschedule = jest.fn();
   public getMediators = jest.fn();
   public affirmAsMediator = jest.fn();
   public rejectAsMediator = jest.fn();
-  public withdrawAsMediator = jest.fn();
   public generateOffChainAffirmationReceipt = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {

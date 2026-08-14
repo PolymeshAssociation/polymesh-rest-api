@@ -245,16 +245,6 @@ export class SettlementsService {
     return this.transactionsService.submit(instruction.executeManually, args, options);
   }
 
-  public async withdrawAffirmation(
-    id: BigNumber,
-    signerDto: TransactionBaseDto
-  ): ServiceReturn<Instruction> {
-    const { options } = extractTxOptions(signerDto);
-    const instruction = await this.findInstruction(id);
-
-    return this.transactionsService.submit(instruction.withdraw, {}, options);
-  }
-
   public async affirmInstructionAsMediator(
     id: BigNumber,
     transactionBaseDto: AffirmAsMediatorDto
@@ -273,15 +263,5 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return this.transactionsService.submit(instruction.rejectAsMediator, {}, options);
-  }
-
-  public async withdrawAffirmationAsMediator(
-    id: BigNumber,
-    signerDto: TransactionBaseDto
-  ): ServiceReturn<Instruction> {
-    const { options } = extractTxOptions(signerDto);
-    const instruction = await this.findInstruction(id);
-
-    return this.transactionsService.submit(instruction.withdrawAsMediator, {}, options);
   }
 }

@@ -116,36 +116,6 @@ export class SettlementsController {
 
   @ApiTags('instructions')
   @ApiOperation({
-    summary: 'Withdraw affirmation from an existing Instruction',
-    description:
-      'This endpoint will withdraw an affirmation from an Instruction. Deprecated on chain v8 where affirmation withdraw is no longer supported',
-    deprecated: true,
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Instruction from which to withdraw the affirmation',
-    type: 'string',
-    example: '123',
-  })
-  @ApiOkResponse({
-    description: 'Details of the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiNotFoundResponse({
-    description: 'The requested Instruction was not found',
-  })
-  @Post('instructions/:id/withdraw')
-  public async withdrawAffirmation(
-    @Param() { id }: IdParamsDto,
-    @Body() signerDto: TransactionBaseDto
-  ): Promise<TransactionResponseModel> {
-    const result = await this.settlementsService.withdrawAffirmation(id, signerDto);
-
-    return handleServiceResult(result);
-  }
-
-  @ApiTags('instructions')
-  @ApiOperation({
     summary: 'Affirm an existing Instruction as a mediator',
     description: 'This endpoint will affirm a pending Instruction as a mediator',
   })
@@ -189,36 +159,6 @@ export class SettlementsController {
     @Body() signerDto: TransactionBaseDto
   ): Promise<TransactionResponseModel> {
     const result = await this.settlementsService.rejectInstructionAsMediator(id, signerDto);
-    return handleServiceResult(result);
-  }
-
-  @ApiTags('instructions')
-  @ApiOperation({
-    summary: 'Withdraw affirmation from an existing Instruction as a mediator',
-    description:
-      'This endpoint will withdraw a mediator affirmation from an Instruction. Deprecated on chain v8 where affirmation withdraw is no longer supported',
-    deprecated: true,
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Instruction from which to withdraw the affirmation',
-    type: 'string',
-    example: '123',
-  })
-  @ApiOkResponse({
-    description: 'Details of the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiNotFoundResponse({
-    description: 'The requested Instruction was not found',
-  })
-  @Post('instructions/:id/withdraw-as-mediator')
-  public async withdrawAffirmationAsMediator(
-    @Param() { id }: IdParamsDto,
-    @Body() signerDto: TransactionBaseDto
-  ): Promise<TransactionResponseModel> {
-    const result = await this.settlementsService.withdrawAffirmationAsMediator(id, signerDto);
-
     return handleServiceResult(result);
   }
 

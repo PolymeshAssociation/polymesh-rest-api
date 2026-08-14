@@ -275,17 +275,6 @@ describe('SettlementsController', () => {
     });
   });
 
-  describe('withdrawAffirmation', () => {
-    it('should withdraw affirmation from an instruction and return the data returned by the service', async () => {
-      await testControllerTxResult(
-        controller.withdrawAffirmation.bind(controller),
-        mockSettlementsService.withdrawAffirmation,
-        { id: new BigNumber(3) },
-        { signer: 'signer' }
-      );
-    });
-  });
-
   describe('affirmInstructionAsMediator', () => {
     it('should affirm an instruction and return the data returned by the service', async () => {
       await testControllerTxResult(
@@ -303,17 +292,6 @@ describe('SettlementsController', () => {
       await testControllerTxResult(
         controller.rejectInstructionAsMediator.bind(controller),
         mockSettlementsService.rejectInstructionAsMediator,
-        { id: new BigNumber(3) },
-        { signer: 'signer' }
-      );
-    });
-  });
-
-  describe('withdrawAffirmationAsMediator', () => {
-    it('should withdraw affirmation from an instruction and return the data returned by the service', async () => {
-      await testControllerTxResult(
-        controller.withdrawAffirmationAsMediator.bind(controller),
-        mockSettlementsService.withdrawAffirmationAsMediator,
         { id: new BigNumber(3) },
         { signer: 'signer' }
       );

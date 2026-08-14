@@ -195,11 +195,9 @@ export class MockSettlementsService {
   canTransfer = jest.fn();
   findGroupedInstructionsByDid = jest.fn();
   findVenuesByOwner = jest.fn();
-  withdrawAffirmation = jest.fn();
   rescheduleInstruction = jest.fn();
   affirmInstructionAsMediator = jest.fn();
   rejectInstructionAsMediator = jest.fn();
-  withdrawAffirmationAsMediator = jest.fn();
   executeInstruction = jest.fn();
   fetchAllowedSigners = jest.fn();
   updateVenueSigners = jest.fn();
