@@ -3,7 +3,14 @@
 import { ApiExtraModels, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
-import { IsByteLength, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsByteLength,
+  IsDate,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 import { ApiPropertyOneOf } from '~/common/decorators/swagger';
 import { ToBigNumber } from '~/common/decorators/transformation';
@@ -77,6 +84,16 @@ export class CreateInstructionDto extends TransactionBaseDto {
   @IsBigNumber()
   @ToBigNumber()
   readonly endAfterBlock?: BigNumber;
+
+  @ApiPropertyOptional({
+    type: 'boolean',
+    description:
+      'If true, the Instruction will only execute once all parties (including mediators) have affirmed and a mediator has locked it for execution via lockForExecution. Ignored if endBlock or endAfterBlock is also provided. Requires at least one mediator',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  readonly endAfterLock?: boolean;
 
   @ApiPropertyOptional({
     description: 'Identifier string to help differentiate instructions. Maximum 32 bytes',

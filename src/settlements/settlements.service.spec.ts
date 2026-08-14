@@ -253,6 +253,58 @@ describe('SettlementsService', () => {
         expect.objectContaining({ signer })
       );
     });
+
+    it('should pass through endAfterLock and mediators', async () => {
+      const mockVenue = new MockVenue();
+      const venueId = new BigNumber(123);
+      const transaction = {
+        blockHash: '0x1',
+        txHash: '0x2',
+        blockNumber: new BigNumber(1),
+        tag: TxTags.settlement.AddAndAffirmWithMediators,
+      };
+      const mockTransaction = new MockTransaction(transaction);
+      const mockInstruction = 'instruction';
+      mockTransactionsService.submit.mockResolvedValue({
+        result: mockInstruction,
+        transactions: [mockTransaction],
+      });
+
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
+
+      const onChainLeg = {
+        type: LegType.onChain,
+        from: new PortfolioDto({ did: 'fromDid', id: new BigNumber(0) }),
+        to: new PortfolioDto({ did: 'toDid', id: new BigNumber(1) }),
+        amount: new BigNumber(100),
+        asset: 'FAKE_TICKER',
+      };
+
+      const body = {
+        signer,
+        legs: [plainToInstance(LegDto, onChainLeg)],
+        endAfterLock: true,
+        mediators: ['mediatorDid'],
+      };
+
+      const result = await service.createInstruction(venueId, body as CreateInstructionDto);
+
+      expect(result).toEqual({
+        result: mockInstruction,
+        transactions: [mockTransaction],
+      });
+      expect(mockTransactionsService.submit).toHaveBeenCalledWith(
+        mockPolymeshApi.settlements.addInstruction,
+        expect.objectContaining({
+          endAfterLock: true,
+          mediators: ['mediatorDid'],
+          venueId,
+        }),
+        expect.objectContaining({ signer })
+      );
+    });
   });
 
   describe('createVenue', () => {
