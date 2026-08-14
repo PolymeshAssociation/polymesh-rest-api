@@ -8,7 +8,7 @@
 
 A REST API wrapper for the Polymesh blockchain.
 
-This version is compatible with chain versions 7.3.x - 8.x
+This version is compatible with chain versions 8.0.x - 8.1.x. Chain v7 is no longer supported — the SDK throws on initialization if pointed at a v7 node.
 
 ## Setup
 
