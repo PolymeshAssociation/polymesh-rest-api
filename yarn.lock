@@ -2797,15 +2797,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polymeshassociation/polymesh-sdk@npm:v30.0.0":
-  version: 30.0.0
-  resolution: "@polymeshassociation/polymesh-sdk@npm:30.0.0"
+"@polymeshassociation/polymesh-sdk@npm:31.0.0-beta.7":
+  version: 31.0.0-beta.7
+  resolution: "@polymeshassociation/polymesh-sdk@npm:31.0.0-beta.7"
   dependencies:
     "@apollo/client": "npm:^3.8.1"
     "@polkadot/api": "npm:16.5.2"
     "@polkadot/util": "npm:13.5.9"
     "@polkadot/util-crypto": "npm:13.5.9"
-    "@polymeshassociation/polymesh-types": "npm:^7.4.0"
+    "@polymeshassociation/polymesh-types": "npm:^7.5.0"
     bignumber.js: "npm:9.0.1"
     cross-fetch: "npm:^4.0.0"
     dayjs: "npm:1.11.9"
@@ -2817,20 +2817,20 @@ __metadata:
     semver: "npm:^7.5.4"
     ts-morph: "npm:^25.0.1"
     ws: "npm:^8.18.3"
-  checksum: 10c0/c1689fc9ef7632d9f7743dce0e4250f8a7005e161fac034b3d0f02530dea50152a9b21fd5e6bb08d5f5bd2ace22494b9194ba0129d36c966c9310673c120f4e5
+  checksum: 10c0/15239455c18e2af83ee4e5b01ece76a36905d705713cfad0d8674fb8ba56163144d274f696538c2be9a1ad8d58f7cd2bfe1b92facd2cfcce3f00ede0a32d2e4b
   languageName: node
   linkType: hard
 
-"@polymeshassociation/polymesh-types@npm:^7.4.0":
-  version: 7.4.0
-  resolution: "@polymeshassociation/polymesh-types@npm:7.4.0"
+"@polymeshassociation/polymesh-types@npm:^7.5.0":
+  version: 7.5.0
+  resolution: "@polymeshassociation/polymesh-types@npm:7.5.0"
   dependencies:
     "@polkadot/api": "npm:16.5.2"
     "@polkadot/api-base": "npm:16.5.2"
     "@polkadot/rpc-core": "npm:16.5.2"
     "@polkadot/types": "npm:16.5.2"
     "@polkadot/types-codec": "npm:16.5.2"
-  checksum: 10c0/e0ba7d34eee7171f8ed02dfe47295fdbb55bcc4b315d327a724312242fcea3b485064f64a453c9f13cdd1b75197626714482a0e16fe15274223bd3f150c554b8
+  checksum: 10c0/cdb8191954e864e5eee65aca83205b6e2e002c7bcf78b6bc6a24d101bc09e0d904d7015a08dd3734cdead839bc457b9acb884d5799fae73a52ab4de131d7c03c
   languageName: node
   linkType: hard
 
@@ -11409,8 +11409,8 @@ __metadata:
     "@polymeshassociation/fireblocks-signing-manager": "npm:^3.0.0"
     "@polymeshassociation/hashicorp-vault-signing-manager": "npm:^4.1.0"
     "@polymeshassociation/local-signing-manager": "npm:^4.1.1"
-    "@polymeshassociation/polymesh-sdk": "npm:v30.0.0"
-    "@polymeshassociation/polymesh-types": "npm:^7.4.0"
+    "@polymeshassociation/polymesh-sdk": "npm:31.0.0-beta.7"
+    "@polymeshassociation/polymesh-types": "npm:^7.5.0"
     "@polymeshassociation/signing-manager-types": "npm:^3.7.1"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/exec": "npm:^7.1.0"
