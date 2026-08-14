@@ -663,7 +663,7 @@ describe('SettlementsService', () => {
 
   describe('canTransfer', () => {
     const mockTransferBreakdown = {
-      general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+      general: [TransferError.SelfTransfer, TransferError.InvalidReceiverIdentity],
       compliance: {
         requirements: [],
         complies: false,

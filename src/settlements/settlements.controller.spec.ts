@@ -431,7 +431,7 @@ describe('SettlementsController', () => {
   describe('validateLeg', () => {
     it('should call the service and return the Leg validations', async () => {
       const mockTransferBreakdown = {
-        general: [TransferError.SelfTransfer, TransferError.ScopeClaimMissing],
+        general: [TransferError.SelfTransfer, TransferError.InvalidReceiverIdentity],
         compliance: {
           requirements: [],
           complies: false,

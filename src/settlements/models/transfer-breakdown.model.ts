@@ -14,7 +14,7 @@ export class TransferBreakdownModel {
     items: {
       oneOf: [{ type: 'string', enum: Object.values(TransferError) }, { type: 'string' }],
     },
-    example: [TransferError.InvalidSenderPortfolio, TransferError.InvalidSenderCdd],
+    example: [TransferError.InvalidSenderPortfolio, TransferError.InvalidReceiverIdentity],
   })
   readonly general: (TransferError | string)[];
 
