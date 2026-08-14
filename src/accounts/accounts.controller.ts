@@ -137,7 +137,6 @@ export class AccountsController {
     description:
       '<ul>' +
       "<li>The destination Account doesn't have an associated Identity</li>" +
-      '<li>The receiver Identity has an invalid CDD claim</li>' +
       '<li>Insufficient free balance</li>' +
       '</ul>',
   })
