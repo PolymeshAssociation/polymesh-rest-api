@@ -201,6 +201,7 @@ export class MockSettlementsService {
   rejectInstructionAsMediator = jest.fn();
   executeInstruction = jest.fn();
   fetchAllowedSigners = jest.fn();
+  fetchSignerCount = jest.fn();
   updateVenueSigners = jest.fn();
   lockInstructionForExecution = jest.fn();
   unlockInstructionForExecution = jest.fn();

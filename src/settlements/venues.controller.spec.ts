@@ -3,6 +3,7 @@ import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { VenueType } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
+import { SignerCountModel } from '~/settlements/models/signer-count.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { VenuesController } from '~/settlements/venues.controller';
 import { processedTxResult, testValues } from '~/test-utils/consts';
@@ -119,6 +120,16 @@ describe('VenuesController', () => {
       expect(result).toEqual({
         results: ['signer1', 'signer2'],
       });
+    });
+  });
+
+  describe('getSignerCount', () => {
+    it('should return the number of signers allowed by the Venue', async () => {
+      mockSettlementsService.fetchSignerCount.mockResolvedValue(new BigNumber(2));
+
+      const result = await controller.getSignerCount({ id: new BigNumber(3) });
+
+      expect(result).toEqual(new SignerCountModel({ count: new BigNumber(2) }));
     });
   });
 

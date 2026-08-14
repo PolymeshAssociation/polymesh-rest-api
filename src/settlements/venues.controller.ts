@@ -13,6 +13,7 @@ import { ModifyVenueDto } from '~/settlements/dto/modify-venue.dto';
 import { UpdateVenueSignersDto } from '~/settlements/dto/update-venue-signers.dto';
 import { CreatedInstructionModel } from '~/settlements/models/created-instruction.model';
 import { CreatedVenueModel } from '~/settlements/models/created-venue.model';
+import { SignerCountModel } from '~/settlements/models/signer-count.model';
 import { VenueDetailsModel } from '~/settlements/models/venue-details.model';
 import { SettlementsService } from '~/settlements/settlements.service';
 import { legsToLegModel } from '~/settlements/settlements.util';
@@ -64,6 +65,26 @@ export class VenuesController {
     return new ResultsModel({
       results: results.map(({ address }) => address),
     });
+  }
+
+  @ApiOperation({
+    summary: 'Get the number of signers allowed by a Venue',
+    description: 'This endpoint returns the number of signers allowed by a Venue',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Venue whose signer count is being fetched',
+    type: 'string',
+    example: '123',
+  })
+  @ApiOkResponse({
+    description: 'The number of signers allowed by the Venue',
+    type: SignerCountModel,
+  })
+  @Get('/:id/signer-count')
+  public async getSignerCount(@Param() { id }: IdParamsDto): Promise<SignerCountModel> {
+    const count = await this.settlementsService.fetchSignerCount(id);
+    return new SignerCountModel({ count });
   }
 
   @ApiOperation({

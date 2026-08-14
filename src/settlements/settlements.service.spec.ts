@@ -592,6 +592,21 @@ describe('SettlementsService', () => {
     });
   });
 
+  describe('fetchSignerCount', () => {
+    it('should return the number of signers allowed by a Venue', async () => {
+      const mockVenue = new MockVenue();
+      mockVenue.getSignerCount.mockResolvedValue(new BigNumber(2));
+
+      const findVenueSpy = jest.spyOn(service, 'findVenue');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findVenueSpy.mockResolvedValue(mockVenue as any);
+
+      const result = await service.fetchSignerCount(new BigNumber(12));
+
+      expect(result).toEqual(new BigNumber(2));
+    });
+  });
+
   describe('findAffirmations', () => {
     it('should return a list of affirmations for an Instruction', async () => {
       const mockAffirmations = {

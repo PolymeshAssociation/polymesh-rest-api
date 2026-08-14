@@ -110,6 +110,12 @@ export class SettlementsService {
     return venue.getAllowedSigners();
   }
 
+  public async fetchSignerCount(id: BigNumber): Promise<BigNumber> {
+    const venue = await this.findVenue(id);
+
+    return venue.getSignerCount();
+  }
+
   public async findAffirmations(
     id: BigNumber,
     size: BigNumber,

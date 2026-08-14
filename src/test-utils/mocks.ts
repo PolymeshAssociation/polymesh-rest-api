@@ -321,6 +321,7 @@ export class MockVenue {
   public getAllowedSigners = jest.fn();
   public addSigners = jest.fn();
   public removeSigners = jest.fn();
+  public getSignerCount = jest.fn();
 }
 
 export class MockIdentityAuthorization {
