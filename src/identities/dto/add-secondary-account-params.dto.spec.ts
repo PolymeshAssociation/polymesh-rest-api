@@ -271,7 +271,7 @@ describe('addSecondaryAccountParamsDto', () => {
           signer,
         },
         [
-          'permissions.each value in transactionGroups must be one of the following values: AdvancedAssetManagement, AssetManagement, AssetDocumentManagement, AssetMetadataManagement, AssetRegistration, AuthorizationManagement, CapitalDistribution, CddRegistration, CheckpointManagement, ClaimsManagement, ComplianceManagement, CorporateActionsManagement, CorporateBallotManagement, CorporateVoting, ExternalAgentManagement, ExternalAgentParticipation, Issuance, MultiSigManagement, PortfolioManagement, RelayerManagement, Redemption, SettlementManagement, StoManagement, TrustedClaimIssuersManagement',
+          'permissions.each value in transactionGroups must be one of the following values: AdvancedAssetManagement, AssetManagement, AssetDocumentManagement, AssetMetadataManagement, AssetRegistration, AuthorizationManagement, CapitalDistribution, CddRegistration, DidRegistration, InstructionMediation, CheckpointManagement, ClaimsManagement, ComplianceManagement, CorporateActionsManagement, CorporateBallotManagement, CorporateVoting, ExternalAgentManagement, ExternalAgentParticipation, Issuance, MultiSigManagement, PortfolioManagement, Redemption, SettlementManagement, StoManagement, TrustedClaimIssuersManagement',
         ],
       ],
       [
