@@ -204,6 +204,7 @@ export class MockSettlementsService {
   lockInstructionForExecution = jest.fn();
   unlockInstructionForExecution = jest.fn();
   getRelockStatus = jest.fn();
+  getLegStatus = jest.fn();
 }
 
 export class MockClaimsService {

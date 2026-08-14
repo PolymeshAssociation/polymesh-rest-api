@@ -7,7 +7,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Instruction } from '@polymeshassociation/polymesh-sdk/types';
+import { Instruction, LegStatusType } from '@polymeshassociation/polymesh-sdk/types';
 
 import { ApiArrayResponse } from '~/common/decorators/swagger';
 import { AssetHolderDto } from '~/common/dto/asset-holder.dto';
@@ -31,6 +31,7 @@ import {
   InstructionAffirmationModel,
   InstructionAffirmationPartyType,
 } from '~/settlements/models/instruction-affirmation.model';
+import { LegStatusModel } from '~/settlements/models/leg-status.model';
 import { OffChainAffirmationModel } from '~/settlements/models/off-chain-affirmation.model';
 import { RelockStatusModel } from '~/settlements/models/relock-status.model';
 import { TransferBreakdownModel } from '~/settlements/models/transfer-breakdown.model';
@@ -355,6 +356,39 @@ export class SettlementsController {
       legId,
       status,
     });
+  }
+
+  @ApiTags('instructions')
+  @ApiOperation({
+    summary: 'Get the status of a Leg in an Instruction',
+    description: 'This endpoint returns the execution status of a specific Leg in an Instruction',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the Instruction the Leg belongs to',
+    type: 'string',
+    example: '123',
+  })
+  @ApiParam({
+    name: 'legId',
+    description: 'The index of the Leg whose status is to be fetched',
+    type: 'string',
+    example: '0',
+  })
+  @ApiOkResponse({
+    description: 'The status of the Leg',
+    type: LegStatusModel,
+  })
+  @Get('instructions/:id/legs/:legId/status')
+  public async getLegStatus(@Param() { id, legId }: LegIdParamsDto): Promise<LegStatusModel> {
+    const result = await this.settlementsService.getLegStatus(id, legId);
+
+    if (result.type === LegStatusType.ExecutionToBeSkipped) {
+      const { type, signer, uid } = result;
+      return new LegStatusModel({ type, signer: signer.address, uid });
+    }
+
+    return new LegStatusModel(result);
   }
 
   @ApiTags('assets')

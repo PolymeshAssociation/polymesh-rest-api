@@ -7,6 +7,7 @@ import {
   Identity,
   InstructionStatus,
   InstructionType,
+  LegStatusType,
   Nft,
   TransferError,
 } from '@polymeshassociation/polymesh-sdk/types';
@@ -23,6 +24,7 @@ import {
   InstructionAffirmationPartyType,
 } from '~/settlements/models/instruction-affirmation.model';
 import { LegModel } from '~/settlements/models/leg.model';
+import { LegStatusModel } from '~/settlements/models/leg-status.model';
 import { RelockStatusModel } from '~/settlements/models/relock-status.model';
 import { SettlementsController } from '~/settlements/settlements.controller';
 import { SettlementsService } from '~/settlements/settlements.service';
@@ -334,6 +336,43 @@ describe('SettlementsController', () => {
       const result = await controller.getRelockStatus({ id: new BigNumber(3) });
 
       expect(result).toEqual(new RelockStatusModel(mockRelockStatus));
+    });
+  });
+
+  describe('getLegStatus', () => {
+    it('should return the status of a Leg with ExecutionPending', async () => {
+      mockSettlementsService.getLegStatus.mockResolvedValue({
+        type: LegStatusType.ExecutionPending,
+      });
+
+      const result = await controller.getLegStatus({
+        id: new BigNumber(3),
+        legId: new BigNumber(0),
+      });
+
+      expect(result).toEqual(new LegStatusModel({ type: LegStatusType.ExecutionPending }));
+    });
+
+    it('should return the status of a Leg with ExecutionToBeSkipped, mapping the signer to its address', async () => {
+      const address = '5GwwYnwCYcJ1Rkop35y7SDHAzbxrCkNUDD4YuCUJRPPXbvyV';
+      mockSettlementsService.getLegStatus.mockResolvedValue({
+        type: LegStatusType.ExecutionToBeSkipped,
+        signer: { address },
+        uid: new BigNumber(1),
+      });
+
+      const result = await controller.getLegStatus({
+        id: new BigNumber(3),
+        legId: new BigNumber(0),
+      });
+
+      expect(result).toEqual(
+        new LegStatusModel({
+          type: LegStatusType.ExecutionToBeSkipped,
+          signer: address,
+          uid: new BigNumber(1),
+        })
+      );
     });
   });
 

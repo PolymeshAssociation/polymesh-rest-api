@@ -891,4 +891,21 @@ describe('SettlementsService', () => {
       expect(result).toEqual(mockRelockStatus);
     });
   });
+
+  describe('getLegStatus', () => {
+    it('should return the status of the Leg', async () => {
+      const mockInstruction = new MockInstruction();
+      const mockLegStatus = { type: 'ExecutionPending' };
+      mockInstruction.getLegStatus.mockResolvedValue(mockLegStatus);
+
+      const findInstructionSpy = jest.spyOn(service, 'findInstruction');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findInstructionSpy.mockResolvedValue(mockInstruction as any);
+
+      const result = await service.getLegStatus(new BigNumber(123), new BigNumber(0));
+
+      expect(result).toEqual(mockLegStatus);
+      expect(mockInstruction.getLegStatus).toHaveBeenCalledWith({ legId: new BigNumber(0) });
+    });
+  });
 });

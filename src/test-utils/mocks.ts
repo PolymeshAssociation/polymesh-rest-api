@@ -303,6 +303,7 @@ export class MockInstruction {
   public lockForExecution = jest.fn();
   public unlockForExecution = jest.fn();
   public getRelockStatus = jest.fn();
+  public getLegStatus = jest.fn();
   public generateOffChainAffirmationReceipt = jest.fn();
   public toHuman = jest.fn().mockImplementation(() => {
     return {

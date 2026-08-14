@@ -9,6 +9,7 @@ import {
   Instruction,
   InstructionAffirmation,
   InstructionRelockStatus,
+  LegStatus,
   OffChainAffirmation,
   OffChainAffirmationReceipt,
   ResultSet,
@@ -290,5 +291,11 @@ export class SettlementsService {
     const instruction = await this.findInstruction(id);
 
     return instruction.getRelockStatus();
+  }
+
+  public async getLegStatus(id: BigNumber, legId: BigNumber): Promise<LegStatus> {
+    const instruction = await this.findInstruction(id);
+
+    return instruction.getLegStatus({ legId });
   }
 }
