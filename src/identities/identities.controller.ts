@@ -35,12 +35,10 @@ import { CreatedAuthorizationRequestModel } from '~/authorizations/models/create
 import { PendingAuthorizationsModel } from '~/authorizations/models/pending-authorizations.model';
 import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
-import { CddClaimModel } from '~/claims/models/cdd-claim.model';
 import { ClaimModel } from '~/claims/models/claim.model';
 import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
 import {
   ApiArrayResponse,
-  ApiArrayResponseReplaceModelProperties,
   ApiTransactionFailedResponse,
   ApiTransactionResponse,
 } from '~/common/decorators/';
@@ -547,46 +545,6 @@ export class IdentitiesController {
   ): Promise<ResultsModel<TickerReservation>> {
     const results = await this.tickerReservationsService.findAllByOwner(did);
     return new ResultsModel({ results });
-  }
-
-  @ApiTags('claims')
-  @ApiOperation({
-    summary: 'Fetch all CDD claims for an Identity',
-    description:
-      'This endpoint will fetch the list of CDD claims for a target DID. Deprecated on chain v8 where CDD claims are no longer supported',
-    deprecated: true,
-  })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Identity whose CDD claims are to be fetched',
-    type: 'string',
-    required: true,
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiQuery({
-    name: 'includeExpired',
-    description: 'Indicates whether to include expired CDD claims or not. Defaults to true',
-    type: 'boolean',
-    required: false,
-  })
-  @ApiArrayResponseReplaceModelProperties(
-    ClaimModel,
-    {
-      description: 'List of CDD claims for the target DID',
-      paginated: false,
-    },
-    { claim: CddClaimModel }
-  )
-  @Get(':did/cdd-claims')
-  public async getCddClaims(
-    @Param() { did }: DidDto,
-    @Query() { includeExpired }: IncludeExpiredFilterDto
-  ): Promise<ResultsModel<ClaimModel<CddClaimModel>>> {
-    const cddClaims = await this.claimsService.findCddClaimsByDid(did, includeExpired);
-
-    const results = cddClaims.map(claim => new ClaimModel<CddClaimModel>(claim));
-
-    return { results };
   }
 
   @ApiTags('claims')

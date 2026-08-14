@@ -206,7 +206,6 @@ export class MockSettlementsService {
 export class MockClaimsService {
   findIssuedByDid = jest.fn();
   findAssociatedByDid = jest.fn();
-  findCddClaimsByDid = jest.fn();
 }
 
 export class MockPortfoliosService {
