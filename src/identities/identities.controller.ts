@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -37,11 +37,7 @@ import { ClaimsService } from '~/claims/claims.service';
 import { ClaimsFilterDto } from '~/claims/dto/claims-filter.dto';
 import { ClaimModel } from '~/claims/models/claim.model';
 import { ClaimScopeModel } from '~/claims/models/claim-scope.model';
-import {
-  ApiArrayResponse,
-  ApiTransactionFailedResponse,
-  ApiTransactionResponse,
-} from '~/common/decorators/';
+import { ApiArrayResponse, ApiTransactionResponse } from '~/common/decorators/';
 import { PaginatedParamsDto } from '~/common/dto/paginated-params.dto';
 import { DidDto, IncludeExpiredFilterDto } from '~/common/dto/params.dto';
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -109,9 +105,6 @@ export class IdentitiesController {
   @ApiTransactionResponse({
     description: 'Newly created Authorization Request along with transaction details',
     type: CreatedIdentityModel,
-  })
-  @ApiTransactionFailedResponse({
-    [HttpStatus.BAD_REQUEST]: ['Expiry cannot be set unless a CDD claim is being created'],
   })
   async registerIdentity(
     @Body() registerIdentityDto: RegisterIdentityDto

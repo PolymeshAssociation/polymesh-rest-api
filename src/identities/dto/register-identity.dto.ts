@@ -25,20 +25,23 @@ export class RegisterIdentityDto extends TransactionBaseDto {
   @Type(() => PermissionedAccountDto)
   readonly secondaryAccounts?: PermissionedAccountDto[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
-      'Issue a CDD claim for the created DID, completing the onboarding process for the Account. Deprecated on chain v8',
+      'Issue a CDD claim for the created DID. Deprecated: as of chain v8 this no longer has any on-chain effect',
     type: 'boolean',
     example: false,
     deprecated: true,
   })
+  @IsOptional()
   @IsBoolean()
-  readonly createCdd: boolean;
+  readonly createCdd?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Date at which the Identity will expire (to be used together with createCdd)',
+    description:
+      'Date at which the Identity will expire. Deprecated: as of chain v8 this no longer has any on-chain effect',
     example: new Date(new Date().getTime() + +365 * 24 * 60 * 60 * 1000).toISOString(),
     type: 'string',
+    deprecated: true,
   })
   @IsOptional()
   @IsDate()
