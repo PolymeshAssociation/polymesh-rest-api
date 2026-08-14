@@ -248,6 +248,7 @@ export class MockCorporateActionsService {
   payDividends = jest.fn();
   claimDividends = jest.fn();
   linkDocuments = jest.fn();
+  getDocuments = jest.fn();
   reclaimRemainingFunds = jest.fn();
   modifyCheckpoint = jest.fn();
 }
