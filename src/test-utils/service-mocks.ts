@@ -171,6 +171,7 @@ export class MockIdentitiesService {
   addSecondaryAccount = jest.fn();
   createMockCdd = jest.fn();
   registerDid = jest.fn();
+  registerDidAsRegistrar = jest.fn();
   selfRegisterDid = jest.fn();
   setMandatoryReceiverAffirmation = jest.fn();
   rotatePrimaryKey = jest.fn();

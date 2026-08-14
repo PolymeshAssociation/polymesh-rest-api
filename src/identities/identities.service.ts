@@ -14,6 +14,7 @@ import {
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { extractTxOptions, ServiceReturn } from '~/common/utils';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { RegisterDidDto } from '~/identities/dto/register-did.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
 import { SetMandatoryReceiverAffirmationDto } from '~/identities/dto/set-mandatory-receiver-affirmation.dto';
@@ -122,6 +123,21 @@ export class IdentitiesService {
     const { registerIdentity } = polymeshApi.identities;
 
     return this.transactionsService.submit(registerIdentity, params, options);
+  }
+
+  public async registerDidAsRegistrar(registerDidDto: RegisterDidDto): ServiceReturn<Identity> {
+    const {
+      polymeshService: { polymeshApi },
+    } = this;
+
+    const {
+      options,
+      args: { targetAccount },
+    } = extractTxOptions(registerDidDto);
+
+    const { registerDid } = polymeshApi.identities;
+
+    return this.transactionsService.submit(registerDid, { targetAccount }, options);
   }
 
   public async rotatePrimaryKey(

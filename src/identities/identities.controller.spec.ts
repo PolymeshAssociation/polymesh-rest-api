@@ -781,6 +781,53 @@ describe('IdentitiesController', () => {
     });
   });
 
+  describe('registerDid', () => {
+    it('should return the transaction details on registering a DID', async () => {
+      const identity = new MockIdentity();
+      const address = 'address';
+      identity.getPrimaryAccount.mockResolvedValue({
+        account: { address },
+        permissions: [],
+      });
+      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+
+      const identityData = new IdentityModel({
+        did,
+        primaryAccount: new PermissionedAccountModel({
+          account: new AccountModel({ address }),
+          permissions: new PermissionsModel({
+            assets: null,
+            portfolios: null,
+            transactionGroups: [],
+            transactions: null,
+          }),
+        }),
+        secondaryAccounts: [],
+        secondaryAccountsFrozen: false,
+      });
+
+      const mockData = {
+        ...txResult,
+        result: identity,
+      };
+      mockIdentitiesService.registerDidAsRegistrar.mockResolvedValue(mockData);
+
+      const data = {
+        signer: 'Ox60',
+        targetAccount: 'address',
+      };
+
+      const result = await controller.registerDid(data);
+
+      expect(result).toEqual({
+        ...processedTxResult,
+        identity: identityData,
+      });
+      expect(mockIdentitiesService.registerDidAsRegistrar).toHaveBeenCalledWith(data);
+    });
+  });
+
   describe('getGroupedInstructions', () => {
     it("should return the Identity's Instructions", async () => {
       const expectedInstructionIds = [new BigNumber(1), new BigNumber(2), new BigNumber(3)];

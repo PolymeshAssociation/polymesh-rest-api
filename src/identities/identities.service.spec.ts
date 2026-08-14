@@ -374,6 +374,38 @@ describe('IdentitiesService', () => {
     });
   });
 
+  describe('registerDidAsRegistrar', () => {
+    it('should return the transaction details', async () => {
+      const body = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      await testServiceTransactionResult(
+        service.registerDidAsRegistrar.bind(service),
+        mockTransactionsService,
+        body,
+        TxTags.identity.RegisterDid
+      );
+    });
+
+    it('should submit only the targetAccount', async () => {
+      const mockTransaction = setupMockTransaction(
+        mockTransactionsService,
+        TxTags.identity.RegisterDid
+      );
+
+      const body = {
+        signer,
+        targetAccount: 'address',
+      };
+
+      const result = await service.registerDidAsRegistrar(body);
+      expectTransactionResult(result, mockTransaction);
+      expectLastSubmitCall(mockTransactionsService, { targetAccount: 'address' });
+    });
+  });
+
   describe('selfRegisterDid', () => {
     it('should submit selfRegisterDid and return transaction details', async () => {
       const transaction = {

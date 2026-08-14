@@ -48,6 +48,7 @@ import { handleServiceResult, TransactionResponseModel } from '~/common/utils';
 import { createDividendDistributionDetailsModel } from '~/corporate-actions/corporate-actions.util';
 import { DividendDistributionDetailsModel } from '~/corporate-actions/models/dividend-distribution-details.model';
 import { AddSecondaryAccountParamsDto } from '~/identities/dto/add-secondary-account-params.dto';
+import { RegisterDidDto } from '~/identities/dto/register-did.dto';
 import { RegisterIdentityDto } from '~/identities/dto/register-identity.dto';
 import { RotatePrimaryKeyParamsDto } from '~/identities/dto/rotate-primary-key-params.dto';
 import { SetMandatoryReceiverAffirmationDto } from '~/identities/dto/set-mandatory-receiver-affirmation.dto';
@@ -110,6 +111,25 @@ export class IdentitiesController {
   ): Promise<TransactionResponseModel> {
     this.logger.debug('Registering new identity');
     const serviceResult = await this.identitiesService.registerDid(registerIdentityDto);
+
+    return handleServiceResult(serviceResult, createIdentityResolver);
+  }
+
+  @Post('register-did')
+  @ApiOperation({
+    summary: 'Register DID',
+    description:
+      "Registers a new DID for the target Account. The transaction signer must be an active DID Registrar. Unlike 'Register Identity', this does not support secondary keys or CDD claims",
+  })
+  @ApiTransactionResponse({
+    description: 'Newly created Identity along with transaction details',
+    type: CreatedIdentityModel,
+  })
+  async registerDid(
+    @Body() registerDidDto: RegisterDidDto
+  ): Promise<TransactionResponseModel> {
+    this.logger.debug('Registering new DID');
+    const serviceResult = await this.identitiesService.registerDidAsRegistrar(registerDidDto);
 
     return handleServiceResult(serviceResult, createIdentityResolver);
   }
