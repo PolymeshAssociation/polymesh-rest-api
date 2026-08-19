@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -54,14 +54,13 @@ export class OffChainAffirmationReceiptDto {
   @IsString()
   readonly metadata?: string;
 
-  @ApiPropertyOptional({
-    description: 'Expiration date for the off-chain affirmation receipt. Required when generating receipts',
+  @ApiProperty({
+    description: 'Expiration date for the off-chain affirmation receipt',
     type: 'string',
     example: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
   })
-  @IsOptional()
   @IsDate()
-  readonly expiresAt?: Date;
+  readonly expiresAt: Date;
 
   constructor(dto: OffChainAffirmationReceiptDto) {
     Object.assign(this, dto);

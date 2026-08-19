@@ -510,6 +510,7 @@ describe('SettlementsService', () => {
           type: SignerKeyRingType.Sr25519,
           value: '0xsomesignature',
         },
+        expiresAt: new Date('2026-01-01T00:00:00.000Z'),
       });
 
       const receipt2 = new OffChainAffirmationReceiptDto({
@@ -521,6 +522,7 @@ describe('SettlementsService', () => {
           value: '0xsomesignature2',
         },
         metadata: 'random metadata',
+        expiresAt: new Date('2026-01-01T00:00:00.000Z'),
       });
 
       mockInstruction.generateOffChainAffirmationReceipt.mockResolvedValue(receipt2);
