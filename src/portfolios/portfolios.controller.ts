@@ -34,6 +34,7 @@ import { TransactionQueueModel } from '~/common/models/transaction-queue.model';
 import { handleServiceResult, TransactionResolver, TransactionResponseModel } from '~/common/utils';
 import { PreApprovedModel } from '~/identities/models/pre-approved.model';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
+import { ApiPortfolioAssetPreApprovalResponses } from '~/portfolios/decorators/swagger';
 import { AssetMovementDto } from '~/portfolios/dto/asset-movement.dto';
 import { CreatePortfolioDto } from '~/portfolios/dto/create-portfolio.dto';
 import { GetTransactionsDto } from '~/portfolios/dto/get-transactions.dto';
@@ -430,28 +431,9 @@ export class PortfoliosController {
     description:
       'This endpoint pre-approves receiving an Asset for the given Portfolio, so incoming transfers of it auto-affirm without a manual affirm step',
   })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Portfolio owner',
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Portfolio for which to pre-approve the Asset',
-    type: 'string',
-    example: '1',
-  })
-  @ApiTransactionResponse({
-    description: 'Information about the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiTransactionFailedResponse({
-    [HttpStatus.NOT_FOUND]: [
-      'The Portfolio with provided ID was not found',
-      'The Identity with provided DID was not found',
-    ],
-    [HttpStatus.UNPROCESSABLE_ENTITY]: ['The Portfolio has already pre-approved the Asset'],
+  @ApiPortfolioAssetPreApprovalResponses({
+    idDescription: 'The ID of the Portfolio for which to pre-approve the Asset',
+    unprocessableEntityMessage: 'The Portfolio has already pre-approved the Asset',
   })
   @Post('/identities/:did/portfolios/:id/pre-approve-asset')
   public async preApproveAsset(
@@ -468,28 +450,9 @@ export class PortfoliosController {
     description:
       'This endpoint disables automatic affirmation when the Portfolio receives the Asset',
   })
-  @ApiParam({
-    name: 'did',
-    description: 'The DID of the Portfolio owner',
-    type: 'string',
-    example: '0x0600000000000000000000000000000000000000000000000000000000000000',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the Portfolio for which to remove the Asset pre-approval',
-    type: 'string',
-    example: '1',
-  })
-  @ApiTransactionResponse({
-    description: 'Information about the transaction',
-    type: TransactionQueueModel,
-  })
-  @ApiTransactionFailedResponse({
-    [HttpStatus.NOT_FOUND]: [
-      'The Portfolio with provided ID was not found',
-      'The Identity with provided DID was not found',
-    ],
-    [HttpStatus.UNPROCESSABLE_ENTITY]: ['The Asset is not pre-approved for the Portfolio'],
+  @ApiPortfolioAssetPreApprovalResponses({
+    idDescription: 'The ID of the Portfolio for which to remove the Asset pre-approval',
+    unprocessableEntityMessage: 'The Asset is not pre-approved for the Portfolio',
   })
   @Post('/identities/:did/portfolios/:id/remove-pre-approval')
   public async removeAssetPreApproval(
