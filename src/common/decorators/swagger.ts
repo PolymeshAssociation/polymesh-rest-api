@@ -11,7 +11,6 @@ import {
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
   getSchemaPath,
-  OmitType,
 } from '@nestjs/swagger';
 import {
   ReferenceObject,
@@ -20,7 +19,6 @@ import {
 
 import { PaginatedResultsModel } from '~/common/models/paginated-results.model';
 import { ResultsModel } from '~/common/models/results.model';
-import { Class } from '~/common/types';
 
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
@@ -45,85 +43,6 @@ export const ApiArrayResponse = <TModel extends Type | string>(
   } else {
     extraModels.push(model);
     items = { $ref: getSchemaPath(model) };
-  }
-
-  return applyDecorators(
-    ApiOkResponse({
-      description,
-      schema: {
-        allOf: [
-          { $ref: getSchemaPath(paginated ? PaginatedResultsModel : ResultsModel) },
-          {
-            properties: {
-              results: {
-                type: 'array',
-                items,
-                example,
-                examples,
-                description,
-              },
-            },
-          },
-        ],
-      },
-    }),
-    ApiExtraModels(PaginatedResultsModel, ResultsModel, ...extraModels)
-  );
-};
-
-export const ApiArrayResponseReplaceModelProperties = <T, K extends keyof T>(
-  Model: Type<T>,
-  {
-    paginated,
-    example,
-    examples,
-    description,
-  }: {
-    paginated: boolean;
-    example?: unknown;
-    examples?: unknown[] | Record<string, unknown>;
-    description?: string;
-  } = {
-    paginated: true,
-  },
-  extendItems: Record<K, Type | string>
-): ReturnType<typeof applyDecorators> => {
-  const extraModels = [];
-  const items: SchemaObject = {};
-  const keys = Object.keys(extendItems) as K[];
-
-  const obj = new Model() as unknown as Type;
-  const name = `${obj.constructor.name}-Omit-${keys.join('-')}`;
-
-  const intermediary = {
-    [name]: class extends OmitType(
-      Model as unknown as Class,
-      keys as unknown as readonly never[]
-    ) {},
-  };
-
-  items.allOf = [{ $ref: getSchemaPath(intermediary[name]) }];
-  extraModels.push(intermediary[name]);
-
-  for (const [key, value] of Object.entries(extendItems)) {
-    if (typeof value === 'function') {
-      extraModels.push(value);
-      items.allOf.push({
-        type: 'object',
-        properties: {
-          [key]: { $ref: getSchemaPath(value) },
-        },
-      });
-    }
-
-    if (typeof value === 'string') {
-      items.allOf.push({
-        type: 'object',
-        properties: {
-          [key]: { type: value },
-        },
-      });
-    }
   }
 
   return applyDecorators(
