@@ -50,8 +50,7 @@ export class TickerReservationsController {
 
   @ApiOperation({
     summary: 'Get ticker registration configuration',
-    description:
-      'This endpoint returns the chain-wide rules used to validate ticker registrations',
+    description: 'This endpoint returns the chain-wide rules used to validate ticker registrations',
   })
   @ApiOkResponse({
     description: 'Chain-wide ticker registration configuration',

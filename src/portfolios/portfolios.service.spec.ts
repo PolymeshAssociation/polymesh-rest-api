@@ -614,7 +614,10 @@ describe('PortfoliosService', () => {
       mockIdentity.portfolios.getPortfolio.mockResolvedValue(mockPortfolio);
       mockPortfolio.isAssetPreApproved.mockResolvedValue(true);
 
-      const result = await service.isAssetPreApproved(new PortfolioDto({ did, id: mockPortfolio.id }), assetId);
+      const result = await service.isAssetPreApproved(
+        new PortfolioDto({ did, id: mockPortfolio.id }),
+        assetId
+      );
 
       expect(result).toBe(true);
       expect(mockPortfolio.isAssetPreApproved).toHaveBeenCalledWith(assetId);
