@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
 
@@ -176,12 +177,12 @@ describe('CheckpointsController', () => {
       expect(result).toEqual(new NextCheckpointModel(mockNextCheckpoint));
     });
 
-    it('should return null if the Asset has no active Schedules', async () => {
+    it('should throw NotFoundException if the Asset has no active Schedules', async () => {
       mockCheckpointsService.getNextCheckpoint.mockResolvedValue(null);
 
-      const result = await controller.getNextCheckpoint({ asset: assetId });
-
-      expect(result).toBeNull();
+      await expect(controller.getNextCheckpoint({ asset: assetId })).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 

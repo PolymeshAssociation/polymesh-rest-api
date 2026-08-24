@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
@@ -189,18 +189,18 @@ export class CheckpointsController {
     example: '3616b82e-8e10-80ae-dc95-2ea28b9db8b3',
   })
   @ApiOkResponse({
-    description:
-      'The next Checkpoint details, or null if the Asset has no active Schedules',
+    description: 'The next Checkpoint details',
     type: NextCheckpointModel,
   })
+  @ApiNotFoundResponse({
+    description: 'The Asset has no active Schedules',
+  })
   @Get('schedules/next')
-  public async getNextCheckpoint(
-    @Param() { asset }: AssetParamsDto
-  ): Promise<NextCheckpointModel | null> {
+  public async getNextCheckpoint(@Param() { asset }: AssetParamsDto): Promise<NextCheckpointModel> {
     const nextCheckpoint = await this.checkpointsService.getNextCheckpoint(asset);
 
     if (!nextCheckpoint) {
-      return null;
+      throw new NotFoundException('The Asset has no active Schedules');
     }
 
     return new NextCheckpointModel(nextCheckpoint);
