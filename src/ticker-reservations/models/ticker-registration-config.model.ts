@@ -2,6 +2,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BigNumber } from '@polymeshassociation/polymesh-sdk';
+import { Transform } from 'class-transformer';
 
 import { FromBigNumber } from '~/common/decorators/transformation';
 
@@ -16,12 +17,12 @@ export class TickerRegistrationConfigModel {
 
   @ApiPropertyOptional({
     description:
-      'Amount of time (in milliseconds) a ticker reservation is valid for before it expires, starting from the moment it is reserved. Absent if ticker reservations never expire',
+      'Amount of time (in milliseconds) a ticker reservation is valid for before it expires, starting from the moment it is reserved. Null if ticker reservations never expire',
     type: 'string',
     nullable: true,
     example: '5184000000',
   })
-  @FromBigNumber()
+  @Transform(({ value }: { value: BigNumber | null }) => (value ? value.toString() : null))
   readonly registrationLength: BigNumber | null;
 
   constructor(model: TickerRegistrationConfigModel) {
