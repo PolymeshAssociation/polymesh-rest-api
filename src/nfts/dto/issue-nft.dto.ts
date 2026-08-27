@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
 import { MetadataValueDto } from '~/nfts/dto/metadata-value.dto';
@@ -16,4 +16,13 @@ export class IssueNftDto extends TransactionBaseDto {
   @Type(() => MetadataValueDto)
   @ValidateNested({ each: true })
   readonly metadata: MetadataValueDto[];
+
+  @ApiPropertyOptional({
+    description:
+      "Account to which the NFT is issued. When omitted, the NFT is issued to the signer's default portfolio",
+    example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
+  })
+  @IsOptional()
+  @IsString()
+  readonly account?: string;
 }
