@@ -2797,9 +2797,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polymeshassociation/polymesh-sdk@npm:31.0.0":
-  version: 31.0.0
-  resolution: "@polymeshassociation/polymesh-sdk@npm:31.0.0"
+"@polymeshassociation/polymesh-sdk@npm:31.1.0-beta.8":
+  version: 31.1.0-beta.8
+  resolution: "@polymeshassociation/polymesh-sdk@npm:31.1.0-beta.8"
   dependencies:
     "@apollo/client": "npm:^3.8.1"
     "@polkadot/api": "npm:16.5.2"
@@ -2807,7 +2807,6 @@ __metadata:
     "@polkadot/util-crypto": "npm:13.5.9"
     "@polymeshassociation/polymesh-types": "npm:^7.5.0"
     bignumber.js: "npm:9.0.1"
-    cross-fetch: "npm:^4.0.0"
     dayjs: "npm:1.11.9"
     graphql: "npm:^16.8.0"
     graphql-tag: "npm:2.12.6"
@@ -2817,7 +2816,7 @@ __metadata:
     semver: "npm:^7.5.4"
     ts-morph: "npm:^25.0.1"
     ws: "npm:^8.18.3"
-  checksum: 10c0/9c74bb0a6be7e0c528edb4d4d35f8841d3e754e1fdae694749ee461d9b833e200c62c2563baf3c549cb0434588f91079afc3a53c8ea60e6c009b18b265b91815
+  checksum: 10c0/1fb2f04afb80a2c97b0f7143a5e957ae6ed1fc3f14657b81af255092041aba66fb25c833a5acaf0cbeaa71badc587ed6037a52aeef10a0cee62f3c4bdda8216b
   languageName: node
   linkType: hard
 
@@ -11409,7 +11408,7 @@ __metadata:
     "@polymeshassociation/fireblocks-signing-manager": "npm:^3.0.0"
     "@polymeshassociation/hashicorp-vault-signing-manager": "npm:^4.1.0"
     "@polymeshassociation/local-signing-manager": "npm:^4.1.1"
-    "@polymeshassociation/polymesh-sdk": "npm:31.0.0"
+    "@polymeshassociation/polymesh-sdk": "npm:31.1.0-beta.8"
     "@polymeshassociation/polymesh-types": "npm:^7.5.0"
     "@polymeshassociation/signing-manager-types": "npm:^3.7.1"
     "@semantic-release/changelog": "npm:^6.0.3"
