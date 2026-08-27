@@ -47,6 +47,7 @@ import { UsersModule } from '~/users/users.module';
         POLYMESH_NODE_URL: Joi.string().required(),
         POLYMESH_MIDDLEWARE_URL: Joi.string(),
         POLYMESH_MIDDLEWARE_API_KEY: Joi.string(),
+        POLYMESH_MIDDLEWARE_V2_API_KEY: Joi.string(),
         SUBSCRIPTIONS_TTL: Joi.number().default(60000),
         SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES: Joi.number().default(5),
         SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL: Joi.number().default(5000),

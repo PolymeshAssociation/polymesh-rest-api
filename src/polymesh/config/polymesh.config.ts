@@ -4,7 +4,7 @@ import { registerAs } from '@nestjs/config';
 
 interface MiddlewareConfig {
   link: string;
-  key: string;
+  key?: string;
 }
 
 interface Config {
@@ -19,6 +19,7 @@ export default registerAs('polymesh', () => {
     POLYMESH_MIDDLEWARE_URL,
     POLYMESH_MIDDLEWARE_API_KEY,
     POLYMESH_MIDDLEWARE_V2_URL,
+    POLYMESH_MIDDLEWARE_V2_API_KEY,
   } = process.env;
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -29,7 +30,9 @@ export default registerAs('polymesh', () => {
   }
 
   if (POLYMESH_MIDDLEWARE_V2_URL) {
-    config.middlewareV2 = { link: POLYMESH_MIDDLEWARE_V2_URL, key: '' };
+    // an indexer that requires no authentication needs no key - omit it entirely rather than
+    // sending an empty `x-api-key` header
+    config.middlewareV2 = { link: POLYMESH_MIDDLEWARE_V2_URL, key: POLYMESH_MIDDLEWARE_V2_API_KEY };
   }
 
   return config;
