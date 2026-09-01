@@ -19,7 +19,7 @@ export class IssueNftDto extends TransactionBaseDto {
 
   @ApiPropertyOptional({
     description:
-      "Account to which the NFT is issued. When omitted, the NFT is issued to the signer's default portfolio",
+      "Issues the NFT to this Account's asset holdings instead of a Portfolio. Must be the signing Account - any other value is rejected. When omitted, the NFT is issued to the signer's default portfolio",
     example: '5EjsqfmY4JqMSrt7YQCe3if5DK4FrG98uUwZsaXmNW7aKdNM',
   })
   @IsOptional()
