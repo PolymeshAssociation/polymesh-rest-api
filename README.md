@@ -74,7 +74,7 @@ LOCAL_MNEMONICS=## list of comma separated mnemonics for the signer service (eac
 # Below are optional params that enable some features. The above should be good to get started with
 
 DEVELOPER_SUDO_MNEMONIC=## a mnemonic that has `sudo` privileges for a chain. Defaults to `//Alice` ##
-DEVELOPER_UTILS=## set to `true` to enable developer testing endpoints ##
+DEVELOPER_UTILS=## set to `true` to enable developer testing endpoints. Never enable this in production ##
 
 # Vault Signer:
 VAULT_URL=## The URL of a Vault transit engine##
@@ -94,6 +94,8 @@ NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
 # Auth:
 AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
 API_KEYS=## list of comma separated api keys to initialize the `apiKey` strategy with ##
+AUTH_MANAGEMENT_ENABLED=## `true` or `false` to expose the user and API key management endpoints (`/users/create`, `/auth/api-key/*`). Defaults to `false` when `AUTH_STRATEGY` includes `open`, otherwise `true` ##
+SIGNER_MANAGEMENT_ENABLED=## `true` or `false` to expose the endpoint that adds signing keys (`POST /signer`). Defaults to `false` when `AUTH_STRATEGY` includes `open`, otherwise `true` ##
 # Datastore:
 REST_POSTGRES_HOST=## Domain or IP of DB instance ##
 REST_POSTGRES_PORT=## Port the DB is listening (usually 5432) ##

@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -9,7 +8,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { AddLocalSignerDto } from '~/signing/dto/add-local-signer.dto';
 import { SignerDetailsDto } from '~/signing/dto/signer-details.dto';
 import { SignerModel } from '~/signing/models/signer.model';
 import { SigningService } from '~/signing/services';
@@ -43,24 +41,6 @@ export class SigningController {
   @Get('/:signer')
   public async getSignerAddress(@Param() { signer }: SignerDetailsDto): Promise<SignerModel> {
     const address = await this.signingService.getAddressByHandle(signer);
-
-    return new SignerModel({ address });
-  }
-
-  @ApiOperation({
-    summary: 'Add a new signer',
-    description: 'Adds a new key to the signing manager',
-  })
-  @ApiCreatedResponse({
-    description: 'The signer was successfully added',
-    type: SignerModel,
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid mnemonic or handle provided',
-  })
-  @Post()
-  public async addSigner(@Body() { handle, mnemonic }: AddLocalSignerDto): Promise<SignerModel> {
-    const address = await this.signingService.addSigner(handle, mnemonic);
 
     return new SignerModel({ address });
   }

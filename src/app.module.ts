@@ -32,6 +32,7 @@ import { PolymeshModule } from '~/polymesh/polymesh.module';
 import { PortfoliosModule } from '~/portfolios/portfolios.module';
 import { ScheduleModule } from '~/schedule/schedule.module';
 import { SettlementsModule } from '~/settlements/settlements.module';
+import { SignerManagementModule } from '~/signing/signer-management.module';
 import { SigningModule } from '~/signing/signing.module';
 import { SubscriptionsModule } from '~/subscriptions/subscriptions.module';
 import { SubsidyModule } from '~/subsidy/subsidy.module';
@@ -60,6 +61,8 @@ import { UsersModule } from '~/users/users.module';
         VAULT_URL: Joi.string().allow(''),
         DEVELOPER_SUDO_MNEMONIC: Joi.string().default('//Alice'),
         DEVELOPER_UTILS: Joi.bool().default(false),
+        AUTH_MANAGEMENT_ENABLED: Joi.bool(),
+        SIGNER_MANAGEMENT_ENABLED: Joi.bool(),
         API_KEYS: Joi.string().default(''),
         AUTH_STRATEGY: Joi.string().default(() => {
           if (process.env.NODE_ENV === 'production') {
@@ -98,8 +101,9 @@ import { UsersModule } from '~/users/users.module';
     NotificationsModule,
     ScheduleModule,
     NetworkModule,
-    AuthModule,
-    UsersModule,
+    AuthModule.register(),
+    UsersModule.register(),
+    SignerManagementModule.register(),
     DeveloperTestingModule.register(),
     MetadataModule,
     SubsidyModule,

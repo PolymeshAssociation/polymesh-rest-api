@@ -12,6 +12,7 @@ import { AppErrorToHttpResponseFilter } from '~/common/filters/app-error-to-http
 import { LoggingInterceptor } from '~/common/interceptors/logging.interceptor';
 import { WebhookResponseCodeInterceptor } from '~/common/interceptors/webhook-response-code.interceptor';
 import { swaggerDescription, swaggerTitle } from '~/common/utils';
+import { isDeveloperUtilsEnabled } from '~/common/utils/feature-flags';
 import { DeveloperTestingService } from '~/developer-testing/developer-testing.service';
 import { CoverageInterceptor } from '~/developer-testing/interceptors/coverage.interceptor';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -69,9 +70,9 @@ async function bootstrap(): Promise<void> {
     new WebhookResponseCodeInterceptor()
   );
 
-  // If developer service is present use an interceptor to track coverage
-  const developerService = app.get(DeveloperTestingService);
-  if (developerService) {
+  // If developer utils are enabled use an interceptor to track coverage
+  if (isDeveloperUtilsEnabled()) {
+    const developerService = app.get(DeveloperTestingService);
     developerService.loadSwagger(document);
     app.useGlobalInterceptors(new CoverageInterceptor(developerService));
   }
