@@ -54,7 +54,7 @@ import { createPortfolioIdentifierModel, createPortfolioModel } from '~/portfoli
 export class PortfoliosController {
   constructor(
     private readonly portfoliosService: PortfoliosService,
-    private logger: PolymeshLogger
+    private readonly logger: PolymeshLogger
   ) {
     logger.setContext(PortfoliosService.name);
   }

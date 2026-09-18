@@ -734,36 +734,41 @@ describe('IdentitiesController', () => {
     });
   });
 
+  const setupRegisteredIdentity = (): {
+    mockData: typeof txResult & { result: MockIdentity };
+    identityData: IdentityModel;
+  } => {
+    const identity = new MockIdentity();
+    const address = 'address';
+    identity.getPrimaryAccount.mockResolvedValue({
+      account: { address },
+      permissions: [],
+    });
+    identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
+    identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+
+    const identityData = new IdentityModel({
+      did,
+      primaryAccount: new PermissionedAccountModel({
+        account: new AccountModel({ address }),
+        permissions: new PermissionsModel({
+          assets: null,
+          portfolios: null,
+          transactionGroups: [],
+          transactions: null,
+        }),
+      }),
+      secondaryAccounts: [],
+      secondaryAccountsFrozen: false,
+    });
+
+    return { mockData: { ...txResult, result: identity }, identityData };
+  };
+
   describe('registerIdentity', () => {
     it('should return the transaction details on adding registering an Identity', async () => {
-      const identity = new MockIdentity();
-      const address = 'address';
-      identity.getPrimaryAccount.mockResolvedValue({
-        account: { address },
-        permissions: [],
-      });
-      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
-      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+      const { mockData, identityData } = setupRegisteredIdentity();
 
-      const identityData = new IdentityModel({
-        did,
-        primaryAccount: new PermissionedAccountModel({
-          account: new AccountModel({ address }),
-          permissions: new PermissionsModel({
-            assets: null,
-            portfolios: null,
-            transactionGroups: [],
-            transactions: null,
-          }),
-        }),
-        secondaryAccounts: [],
-        secondaryAccountsFrozen: false,
-      });
-
-      const mockData = {
-        ...txResult,
-        result: identity,
-      };
       mockIdentitiesService.registerDid.mockResolvedValue(mockData);
 
       const data: RegisterIdentityDto = {
@@ -783,34 +788,8 @@ describe('IdentitiesController', () => {
 
   describe('registerDid', () => {
     it('should return the transaction details on registering a DID', async () => {
-      const identity = new MockIdentity();
-      const address = 'address';
-      identity.getPrimaryAccount.mockResolvedValue({
-        account: { address },
-        permissions: [],
-      });
-      identity.areSecondaryAccountsFrozen.mockResolvedValue(false);
-      identity.getSecondaryAccounts.mockResolvedValue({ data: [] });
+      const { mockData, identityData } = setupRegisteredIdentity();
 
-      const identityData = new IdentityModel({
-        did,
-        primaryAccount: new PermissionedAccountModel({
-          account: new AccountModel({ address }),
-          permissions: new PermissionsModel({
-            assets: null,
-            portfolios: null,
-            transactionGroups: [],
-            transactions: null,
-          }),
-        }),
-        secondaryAccounts: [],
-        secondaryAccountsFrozen: false,
-      });
-
-      const mockData = {
-        ...txResult,
-        result: identity,
-      };
       mockIdentitiesService.registerDidAsRegistrar.mockResolvedValue(mockData);
 
       const data = {
