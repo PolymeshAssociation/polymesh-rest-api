@@ -17,5 +17,5 @@ export class GetCustomClaimTypePipe implements PipeTransform {
 }
 
 function isNumericString(value: string): boolean {
-  return !isNaN(Number(value));
+  return !Number.isNaN(Number(value));
 }

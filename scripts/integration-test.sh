@@ -9,7 +9,8 @@ git clone https://github.com/PolymeshAssociation/polymesh-dev-env.git "$DEV_ENV_
 
 pushd "$INTEGRATION_DIR"
 
-yarn
+# lifecycle scripts are disabled to avoid executing untrusted dependency code
+yarn --mode=skip-build
 echo "starting up environment"
 yarn test:start
 echo "env is set up"
@@ -24,14 +25,16 @@ export POLYMESH_MIDDLEWARE_V2_URL="http://localhost:3000"
 # register cleanup to stop the background service
 function cleanup() {
     echo "cleaning up test environment"
-    if [ -n "${SERVICE_PID}" ]; then
+    if [[ -n "${SERVICE_PID}" ]]; then
         echo "Cleaning up service with PID: ${SERVICE_PID}"
         kill "${SERVICE_PID}"
     fi
 
     yarn test:stop
 
-    rm -rf $DEV_ENV_DIR
+    rm -rf "$DEV_ENV_DIR"
+
+    return 0
 }
 trap cleanup EXIT INT TERM
 

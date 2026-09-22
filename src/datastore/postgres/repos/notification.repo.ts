@@ -11,7 +11,10 @@ import { NotificationParams } from '~/notifications/types';
 
 @Injectable()
 export class PostgresNotificationRepo implements NotificationRepo {
-  constructor(@InjectRepository(Notification) private notificationRepo: Repository<Notification>) {}
+  constructor(
+    @InjectRepository(Notification)
+    private readonly notificationRepo: Repository<Notification>
+  ) {}
 
   public async create(params: NotificationParams): Promise<NotificationModel> {
     const entity = this.notificationRepo.create({

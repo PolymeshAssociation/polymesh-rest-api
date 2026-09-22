@@ -15,7 +15,7 @@ export function IsCaCheckpoint() {
       validator: {
         async validate(value: unknown) {
           if (value instanceof Date) {
-            return !isNaN(new Date(value).getTime());
+            return !Number.isNaN(new Date(value).getTime());
           }
           if (value instanceof CorporateActionCheckpointDto) {
             return (await validateClass(value)).length === 0;

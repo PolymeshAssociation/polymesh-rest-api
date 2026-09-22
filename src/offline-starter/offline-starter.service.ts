@@ -1,6 +1,7 @@
+import { randomUUID } from 'node:crypto';
+
 import { Injectable } from '@nestjs/common';
 import { GenericPolymeshTransaction } from '@polymeshassociation/polymesh-sdk/types';
-import { randomUUID } from 'crypto';
 
 import { AddressName } from '~/common/utils/amqp';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
