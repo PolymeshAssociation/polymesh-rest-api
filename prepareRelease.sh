@@ -10,7 +10,7 @@ CHAIN_TAG='8.0.0-testnet-debian'
 # This lets it work on arm64, like Mac Books
 ARCHITECTURE=$(uname -m)
 CHAIN_REPO=polymeshassociation/polymesh
-if [ "$ARCHITECTURE" = "arm64" ]; then
+if [[ "$ARCHITECTURE" == "arm64" ]]; then
     CHAIN_REPO="polymeshassociation/polymesh-arm64"
 fi
 

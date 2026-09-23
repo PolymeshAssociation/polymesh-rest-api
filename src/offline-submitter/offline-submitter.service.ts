@@ -34,7 +34,7 @@ export class OfflineSubmitterService {
   public async submit(body: OfflineSignatureModel): Promise<void> {
     const { id, signature, payload } = body;
     const { address, nonce: rawNonce } = payload.payload;
-    const nonce = parseInt(rawNonce, 16);
+    const nonce = Number.parseInt(rawNonce, 16);
     this.logger.debug(`received signature for: ${id}`);
 
     const transaction = await this.offlineTxRepo.createTx({

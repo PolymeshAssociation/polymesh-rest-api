@@ -1,4 +1,5 @@
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
+
 import stringify from 'json-stable-stringify';
 
 import { NotificationPayload } from '~/notifications/types';

@@ -17,6 +17,9 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: 'yarn.lock'
       - name: install dependencies
-        run: yarn --immutable
+        # dependency lifecycle scripts are disabled to avoid executing untrusted code
+        run: yarn --immutable --mode=skip-build
+      - name: run trusted postinstall
+        run: yarn run postinstall
       - name: test
         run: yarn test:integration

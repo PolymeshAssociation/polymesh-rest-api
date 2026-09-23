@@ -1,11 +1,11 @@
 FROM node:lts-alpine3.17 AS builder
 
 RUN apk add --no-cache \
-    python3 \
-    make \
     cmake \
     g++ \
-    jq
+    jq \
+    make \
+    python3
 
 WORKDIR /app/builder
 RUN chown -R node: /app
