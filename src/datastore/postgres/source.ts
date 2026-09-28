@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
+import path from 'node:path';
+
 import * as dotenv from 'dotenv';
-import path from 'path';
 import { DataSource } from 'typeorm';
 
 import { readPostgresConfigFromEnv } from '~/datastore/postgres/utils';

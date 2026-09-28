@@ -9,7 +9,7 @@ import { ScheduleService } from '~/schedule/schedule.service';
 
 @Injectable()
 export class PolymeshService implements OnModuleDestroy, OnModuleInit {
-  private heartbeatIntervalId = 'polymeshHeartbeat';
+  private readonly heartbeatIntervalId = 'polymeshHeartbeat';
 
   constructor(
     @Inject(POLYMESH_API) public readonly polymeshApi: Polymesh,

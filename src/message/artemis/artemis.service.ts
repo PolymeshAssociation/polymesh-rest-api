@@ -30,8 +30,8 @@ type AddressStore = Record<AddressName, AddressEntry>;
 
 @Injectable()
 export class ArtemisService extends MessageService implements OnApplicationShutdown {
-  private receivers: Receiver[] = [];
-  private addressStore: Partial<AddressStore> = {};
+  private readonly receivers: Receiver[] = [];
+  private readonly addressStore: Partial<AddressStore> = {};
   private connectionPromise?: Promise<Connection>;
 
   constructor(

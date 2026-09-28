@@ -75,6 +75,13 @@ describe('LocalSigningService', () => {
     it('should throw if an Account is not loaded', () => {
       expect(() => service.getAddressByHandle('badId')).toThrow(AppNotFoundError);
     });
+
+    it.each(['constructor', '__proto__', 'toString'])(
+      'should throw for the Object.prototype property "%s" when it is not loaded',
+      handle => {
+        expect(() => service.getAddressByHandle(handle)).toThrow(AppNotFoundError);
+      }
+    );
   });
 
   describe('isAddress', () => {
@@ -121,6 +128,14 @@ describe('LocalSigningService', () => {
       await service.addSigner(handle, mnemonic);
 
       await expect(service.addSigner(handle, mnemonic)).rejects.toThrow(AppConflictError);
+    });
+
+    it('should add a signer whose handle is an Object.prototype property name', async () => {
+      const handle = 'constructor';
+      const expectedAddress = '15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5';
+
+      await expect(service.addSigner(handle, '//Alice')).resolves.toBe(expectedAddress);
+      await expect(service.getAddressByHandle(handle)).resolves.toBe(expectedAddress);
     });
   });
 });

@@ -30,7 +30,10 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
-        run: yarn --immutable
+        # dependency lifecycle scripts are disabled to avoid executing untrusted code
+        run: yarn --immutable --mode=skip-build
+      - name: run trusted postinstall
+        run: yarn run postinstall
       - name: lint
         run: yarn lint
 
@@ -50,7 +53,10 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
-        run: yarn --immutable
+        # dependency lifecycle scripts are disabled to avoid executing untrusted code
+        run: yarn --immutable --mode=skip-build
+      - name: run trusted postinstall
+        run: yarn run postinstall
       - name: build
         run: yarn build
 
@@ -70,7 +76,10 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
-        run: yarn --immutable
+        # dependency lifecycle scripts are disabled to avoid executing untrusted code
+        run: yarn --immutable --mode=skip-build
+      - name: run trusted postinstall
+        run: yarn run postinstall
       - name: test
         run: yarn test:cov
 
@@ -91,7 +100,10 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
       - name: install dependencies
-        run: yarn --immutable
+        # dependency lifecycle scripts are disabled to avoid executing untrusted code
+        run: yarn --immutable --mode=skip-build
+      - name: run trusted postinstall
+        run: yarn run postinstall
       # - name: integration test
       #   run: yarn test:integration
       - name: Setup SSH signing key
@@ -138,7 +150,7 @@ jobs:
 
     steps:
       - name: Checking if fast forwarding is possible
-        uses: sequoia-pgp/fast-forward@v1
+        uses: sequoia-pgp/fast-forward@ea7628bedcb0b0b96e94383ada458d812fca4979 # v1.0.0
         with:
           merge: false
           # To reduce the workflow's verbosity, use 'on-error'

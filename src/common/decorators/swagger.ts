@@ -23,18 +23,16 @@ import { ResultsModel } from '~/common/models/results.model';
 export const ApiArrayResponse = <TModel extends Type | string>(
   model: TModel,
   {
-    paginated,
+    paginated = true,
     example,
     examples,
     description,
   }: {
-    paginated: boolean;
+    paginated?: boolean;
     example?: unknown;
     examples?: unknown[] | Record<string, unknown>;
     description?: string;
-  } = {
-    paginated: true,
-  }
+  } = {}
 ): ReturnType<typeof applyDecorators> => {
   const extraModels = [];
   let items;

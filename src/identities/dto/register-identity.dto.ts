@@ -39,7 +39,7 @@ export class RegisterIdentityDto extends TransactionBaseDto {
   @ApiPropertyOptional({
     description:
       'Date at which the Identity will expire. Deprecated: as of chain v8 this no longer has any on-chain effect',
-    example: new Date(new Date().getTime() + +365 * 24 * 60 * 60 * 1000).toISOString(),
+    example: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     type: 'string',
     deprecated: true,
   })

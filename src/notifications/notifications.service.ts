@@ -19,8 +19,8 @@ import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 
 @Injectable()
 export class NotificationsService {
-  private maxTries: number;
-  private retryInterval: number;
+  private readonly maxTries: number;
+  private readonly retryInterval: number;
 
   constructor(
     @Inject(notificationsConfig.KEY) config: ConfigType<typeof notificationsConfig>,

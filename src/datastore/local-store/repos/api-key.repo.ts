@@ -11,7 +11,7 @@ import { defaultUser } from '~/users/user.consts';
 
 @Injectable()
 export class LocalApiKeysRepo implements ApiKeyRepo {
-  private apiKeys: Record<string, UserModel> = {};
+  private apiKeys: Record<string, UserModel> = Object.create(null);
 
   constructor(readonly config: ConfigService) {
     const givenApiKeys = config.getOrThrow<string>('API_KEYS');

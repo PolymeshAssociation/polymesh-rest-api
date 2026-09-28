@@ -1,6 +1,7 @@
+import { writeFileSync } from 'node:fs';
+
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { writeFileSync } from 'fs';
 
 import { AppModule } from '~/app.module';
 import { swaggerDescription, swaggerTitle } from '~/common/utils';

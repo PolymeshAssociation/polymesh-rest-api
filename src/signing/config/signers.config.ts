@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
+import { readFileSync } from 'node:fs';
+
 import { registerAs } from '@nestjs/config';
-import { readFileSync } from 'fs';
 
 export default registerAs('signer-accounts', () => {
   const {

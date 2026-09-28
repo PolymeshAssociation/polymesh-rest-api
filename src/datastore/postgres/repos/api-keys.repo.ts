@@ -11,7 +11,7 @@ import { UserModel } from '~/users/model/user.model';
 
 @Injectable()
 export class PostgresApiKeyRepo implements ApiKeyRepo {
-  constructor(@InjectRepository(ApiKey) private apiKeyRepo: Repository<ApiKey>) {}
+  constructor(@InjectRepository(ApiKey) private readonly apiKeyRepo: Repository<ApiKey>) {}
 
   public async createApiKey(user: UserModel): Promise<ApiKeyModel> {
     const secret = await generateBase64Secret(32);

@@ -11,7 +11,10 @@ import { SubscriptionParams } from '~/subscriptions/types';
 
 @Injectable()
 export class PostgresSubscriptionRepo implements SubscriptionRepo {
-  constructor(@InjectRepository(Subscription) private subscriptionRepo: Repository<Subscription>) {}
+  constructor(
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepo: Repository<Subscription>
+  ) {}
 
   public async create(params: SubscriptionParams): Promise<SubscriptionModel> {
     const entity = this.subscriptionRepo.create({

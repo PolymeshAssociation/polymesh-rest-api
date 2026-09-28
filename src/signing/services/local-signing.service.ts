@@ -7,7 +7,7 @@ import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services/signing.service';
 
 export class LocalSigningService extends SigningService {
-  private addressBook: Record<string, string> = {};
+  private addressBook: Record<string, string> = Object.create(null);
 
   constructor(
     protected readonly signingManager: LocalSigningManager,
