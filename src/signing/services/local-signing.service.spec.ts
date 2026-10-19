@@ -4,7 +4,7 @@ import { LocalSigningManager } from '@polymeshassociation/local-signing-manager'
 import { PolkadotSigner } from '@polymeshassociation/signing-manager-types';
 import { when } from 'jest-when';
 
-import { AppConflictError, AppNotFoundError } from '~/common/errors';
+import { AppConflictError, AppNotFoundError, AppValidationError } from '~/common/errors';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { POLYMESH_API } from '~/polymesh/polymesh.consts';
@@ -128,6 +128,16 @@ describe('LocalSigningService', () => {
       await service.addSigner(handle, mnemonic);
 
       await expect(service.addSigner(handle, mnemonic)).rejects.toThrow(AppConflictError);
+    });
+
+    it('should throw AppValidationError without echoing an invalid mnemonic', async () => {
+      const mnemonic = 'these words are longer than thirty two bytes but not a mnemonic';
+
+      const error = await service.addSigner('badSigner', mnemonic).catch(err => err);
+
+      expect(error).toBeInstanceOf(AppValidationError);
+      expect(error.message).not.toContain(mnemonic);
+      expect(() => service.getAddressByHandle('badSigner')).toThrow(AppNotFoundError);
     });
 
     it('should add a signer whose handle is an Object.prototype property name', async () => {

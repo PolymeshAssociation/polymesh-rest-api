@@ -1,7 +1,7 @@
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 import { forEach } from 'lodash';
 
-import { AppConflictError } from '~/common/errors';
+import { AppConflictError, AppValidationError } from '~/common/errors';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services/signing.service';
@@ -64,7 +64,14 @@ export class LocalSigningService extends SigningService {
       throw new AppConflictError(existingAddress, handle);
     }
 
-    const address = this.signingManager.addAccount({ mnemonic });
+    let address: string;
+    try {
+      address = this.signingManager.addAccount({ mnemonic });
+    } catch {
+      // the underlying error is deliberately dropped so the mnemonic can never be echoed back or logged
+      throw new AppValidationError('the provided mnemonic is not valid');
+    }
+
     this.setAddressByHandle(handle, address);
     this.logKey(handle, address);
 
