@@ -20,12 +20,16 @@ export class OfflineSubmitterService {
     private readonly logger: PolymeshLogger
   ) {
     this.logger.setContext(OfflineSubmitterService.name);
-    this.messageService.registerListener(
-      QueueName.Signatures,
-      /* istanbul ignore next */
-      msg => this.submit(msg),
-      OfflineSignatureModel
-    );
+    this.messageService
+      .registerListener(
+        QueueName.Signatures,
+        /* istanbul ignore next */
+        msg => this.submit(msg),
+        OfflineSignatureModel
+      )
+      .catch(error =>
+        this.logger.error('failed to register the "Signatures" listener', (error as Error)?.stack)
+      );
   }
 
   /**
@@ -73,7 +77,7 @@ export class OfflineSubmitterService {
 
   private async updateTransaction(tx: OfflineTxModel): Promise<void> {
     this.logger.debug(`updating transaction: ${tx.id} - ${tx.status}`);
-    this.offlineTxRepo.updateTx(tx.id, tx);
+    await this.offlineTxRepo.updateTx(tx.id, tx);
     this.logger.debug(`transaction updated: ${tx.id} - ${tx.status}`);
   }
 }

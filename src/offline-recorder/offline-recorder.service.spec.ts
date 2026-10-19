@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { QueueName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { MessageService } from '~/message/common/message.service';
 import { AnyModel } from '~/offline-recorder/model/any.model';
 import { OfflineRecorderService } from '~/offline-recorder/offline-recorder.service';
@@ -39,6 +40,25 @@ describe('OfflineRecorderService', () => {
         QueueName.EventsLog,
         expect.any(Function),
         expect.any(Function)
+      );
+    });
+
+    it('should log an error when the listener cannot be registered', async () => {
+      const error = new Error('connection refused');
+      const logger = mockPolymeshLoggerProvider.useValue;
+      mockMessageService.registerListener.mockRejectedValueOnce(error);
+
+      const failedService = new OfflineRecorderService(
+        mockMessageService,
+        mockOfflineRepo,
+        logger as unknown as PolymeshLogger
+      );
+      await new Promise(process.nextTick);
+
+      expect(failedService).toBeDefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        'failed to register the "EventsLog" listener',
+        error.stack
       );
     });
   });

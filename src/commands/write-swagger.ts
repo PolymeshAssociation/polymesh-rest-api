@@ -19,4 +19,7 @@ const writeSwaggerSpec = async (): Promise<void> => {
   writeFileSync('./polymesh-rest-api-swagger-spec.json', JSON.stringify(document));
   process.exit();
 };
-writeSwaggerSpec();
+writeSwaggerSpec().catch(error => {
+  console.error(error);
+  process.exit(1);
+});

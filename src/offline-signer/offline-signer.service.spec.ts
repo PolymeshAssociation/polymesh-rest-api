@@ -4,6 +4,7 @@ import { TransactionPayload } from '@polymeshassociation/polymesh-sdk/types';
 
 import { AddressName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { MessageService } from '~/message/common/message.service';
 import { OfflineSignerService } from '~/offline-signer/offline-signer.service';
 import { OfflineRequestModel } from '~/offline-starter/models/offline-request.model';
@@ -41,6 +42,25 @@ describe('OfflineSignerService', () => {
         AddressName.Requests,
         expect.any(Function),
         expect.any(Function)
+      );
+    });
+
+    it('should log an error when the listener cannot be registered', async () => {
+      const error = new Error('connection refused');
+      const logger = mockPolymeshLoggerProvider.useValue;
+      mockMessageService.registerListener.mockRejectedValueOnce(error);
+
+      const failedService = new OfflineSignerService(
+        mockMessageService,
+        mockSigningService,
+        logger as unknown as PolymeshLogger
+      );
+      await new Promise(process.nextTick);
+
+      expect(failedService).toBeDefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        'failed to register the "Requests" listener',
+        error.stack
       );
     });
   });

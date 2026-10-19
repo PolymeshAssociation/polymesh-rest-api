@@ -1,7 +1,7 @@
 import { LocalSigningManager } from '@polymeshassociation/local-signing-manager';
 import { forEach } from 'lodash';
 
-import { AppConflictError, AppValidationError } from '~/common/errors';
+import { AppConflictError, AppNotFoundError, AppValidationError } from '~/common/errors';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { PolymeshService } from '~/polymesh/polymesh.service';
 import { SigningService } from '~/signing/services/signing.service';
@@ -28,16 +28,16 @@ export class LocalSigningService extends SigningService {
     return Promise.resolve(address);
   }
 
-  public override async getHandleByAddress(address: string): Promise<string> {
+  public override getHandleByAddress(address: string): Promise<string> {
     const handle = Object.entries(this.addressBook).find(
       ([, keyAddress]) => keyAddress === address
     )?.[0];
 
     if (handle) {
-      return handle;
+      return Promise.resolve(handle);
     }
 
-    this.throwNoSigner(address);
+    return Promise.reject(new AppNotFoundError(address, 'signer'));
   }
 
   public setAddressByHandle(handle: string, address: string): void {
@@ -58,10 +58,10 @@ export class LocalSigningService extends SigningService {
     this.logger.log(`Key "${handle}" with address "${address}" was loaded`);
   }
 
-  public async addSigner(handle: string, mnemonic: string): Promise<string> {
+  public addSigner(handle: string, mnemonic: string): Promise<string> {
     const existingAddress = this.addressBook[handle];
     if (existingAddress) {
-      throw new AppConflictError(existingAddress, handle);
+      return Promise.reject(new AppConflictError(existingAddress, handle));
     }
 
     let address: string;
@@ -69,12 +69,12 @@ export class LocalSigningService extends SigningService {
       address = this.signingManager.addAccount({ mnemonic });
     } catch {
       // the underlying error is deliberately dropped so the mnemonic can never be echoed back or logged
-      throw new AppValidationError('the provided mnemonic is not valid');
+      return Promise.reject(new AppValidationError('the provided mnemonic is not valid'));
     }
 
     this.setAddressByHandle(handle, address);
     this.logKey(handle, address);
 
-    return address;
+    return Promise.resolve(address);
   }
 }
