@@ -19,12 +19,16 @@ export class OfflineSignerService {
   ) {
     this.logger.setContext(OfflineSignerService.name);
 
-    this.messageService.registerListener(
-      QueueName.Requests,
-      /* istanbul ignore next */
-      msg => this.autoSign(msg),
-      OfflineRequestModel
-    );
+    this.messageService
+      .registerListener(
+        QueueName.Requests,
+        /* istanbul ignore next */
+        msg => this.autoSign(msg),
+        OfflineRequestModel
+      )
+      .catch(error =>
+        this.logger.error('failed to register the "Requests" listener', (error as Error)?.stack)
+      );
   }
 
   public async autoSign(body: OfflineRequestModel): Promise<void> {

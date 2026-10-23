@@ -11,6 +11,48 @@ import { tap } from 'rxjs/operators';
 
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 
+export const REDACTED_VALUE = '*REDACTED*';
+
+/**
+ * Body fields whose values must never be written to the logs. A field is redacted when its name, lowercased and
+ * stripped of non alphanumeric characters, contains any of these (e.g. `apiKey`, `api_key`, `legitimacySecret`)
+ */
+const sensitiveFieldFragments = [
+  'mnemonic',
+  'apikey',
+  'secret',
+  'privatekey',
+  'password',
+  'passphrase',
+  'seed',
+];
+
+const isSensitiveField = (field: string): boolean => {
+  const normalized = field.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  return sensitiveFieldFragments.some(fragment => normalized.includes(fragment));
+};
+
+/**
+ * Returns a copy of a request body with the values of sensitive fields replaced, at any depth
+ */
+export const redactBody = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(redactBody);
+  }
+
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([field, fieldValue]) => [
+        field,
+        isSensitiveField(field) ? REDACTED_VALUE : redactBody(fieldValue),
+      ])
+    );
+  }
+
+  return value;
+};
+
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly ctxPrefix = LoggingInterceptor.name;
@@ -24,7 +66,8 @@ export class LoggingInterceptor implements NestInterceptor {
    */
   public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req: Request = context.switchToHttp().getRequest();
-    const { method, url, body } = req;
+    const { method, url } = req;
+    const body = redactBody(req.body);
 
     const message = `Request: ${method} ${url}`;
 
@@ -73,7 +116,8 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param context details about the current request
    */
   private logError(error: Error, context: ExecutionContext): void {
-    const { method, url, body } = context.switchToHttp().getRequest();
+    const { method, url, body: rawBody } = context.switchToHttp().getRequest();
+    const body = redactBody(rawBody);
     const ctx = this.getLogContext(method, url);
 
     if (error instanceof HttpException) {

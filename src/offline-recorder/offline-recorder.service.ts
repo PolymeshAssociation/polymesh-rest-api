@@ -18,12 +18,16 @@ export class OfflineRecorderService {
   ) {
     this.logger.setContext(OfflineRecorderService.name);
 
-    this.messageService.registerListener(
-      QueueName.EventsLog,
-      /* istanbul ignore next */
-      msg => this.recordEvent(msg),
-      AnyModel
-    );
+    this.messageService
+      .registerListener(
+        QueueName.EventsLog,
+        /* istanbul ignore next */
+        msg => this.recordEvent(msg),
+        AnyModel
+      )
+      .catch(error =>
+        this.logger.error('failed to register the "EventsLog" listener', (error as Error)?.stack)
+      );
   }
 
   public async recordEvent(msg: AnyModel): Promise<void> {

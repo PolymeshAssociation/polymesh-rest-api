@@ -16,9 +16,9 @@ import { SubscriptionStatus } from '~/subscriptions/types';
 
 @Injectable()
 export class SubscriptionsService {
-  private ttl: number;
-  private maxTries: number;
-  private retryInterval: number;
+  private readonly ttl: number;
+  private readonly maxTries: number;
+  private readonly retryInterval: number;
 
   constructor(
     @Inject(subscriptionsConfig.KEY) config: ConfigType<typeof subscriptionsConfig>,

@@ -27,7 +27,7 @@ export class FireblocksSigningService extends SigningService {
   private handleToDerivationPath(handle: string): DerivationPath {
     const sections = handle.split('-').map(Number);
 
-    if (sections.some(isNaN) || sections.length > 3 || handle === '') {
+    if (sections.some(Number.isNaN) || sections.length > 3 || handle === '') {
       throw new AppValidationError(
         'Fireblocks `signer` field should be 3 integers formatted like: `x-y-z`'
       );

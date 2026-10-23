@@ -9,7 +9,7 @@ import { ScheduleService } from '~/schedule/schedule.service';
 
 @Injectable()
 export class PolymeshService implements OnModuleDestroy, OnModuleInit {
-  private heartbeatIntervalId = 'polymeshHeartbeat';
+  private readonly heartbeatIntervalId = 'polymeshHeartbeat';
 
   constructor(
     @Inject(POLYMESH_API) public readonly polymeshApi: Polymesh,
@@ -31,7 +31,7 @@ export class PolymeshService implements OnModuleDestroy, OnModuleInit {
    * Allows for the execution of a transaction defined in the polkadot.js instance, bypassing the SDK.
    * SDK methods should be used instead of this where possible
    */
-  public async execTransaction<Args extends unknown[]>(
+  public execTransaction<Args extends unknown[]>(
     signer: AddressOrPair,
     tx: AugmentedSubmittable<(...args: Args) => SubmittableExtrinsic<'promise'>>,
     ...params: Args

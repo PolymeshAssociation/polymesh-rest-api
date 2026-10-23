@@ -7,6 +7,7 @@ import { when } from 'jest-when';
 
 import { AddressName } from '~/common/utils/amqp';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
+import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { MessageService } from '~/message/common/message.service';
 import { OfflineSignatureModel } from '~/offline-signer/models/offline-signature.model';
 import { OfflineTxModel, OfflineTxStatus } from '~/offline-submitter/models/offline-tx.model';
@@ -62,6 +63,26 @@ describe('OfflineSubmitterService', () => {
         AddressName.Signatures,
         expect.any(Function),
         expect.any(Function)
+      );
+    });
+
+    it('should log an error when the listener cannot be registered', async () => {
+      const error = new Error('connection refused');
+      const logger = mockPolymeshLoggerProvider.useValue;
+      mockMessageService.registerListener.mockRejectedValueOnce(error);
+
+      const failedService = new OfflineSubmitterService(
+        mockMessageService,
+        mockPolymeshService,
+        mockRepo,
+        logger as unknown as PolymeshLogger
+      );
+      await new Promise(process.nextTick);
+
+      expect(failedService).toBeDefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        'failed to register the "Signatures" listener',
+        error.stack
       );
     });
   });

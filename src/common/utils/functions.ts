@@ -6,7 +6,6 @@ import {
   TxTags,
 } from '@polymeshassociation/polymesh-sdk/types';
 import { randomBytes } from 'crypto';
-import { flatten } from 'lodash';
 import { promisify } from 'util';
 
 import { TransactionBaseDto } from '~/common/dto/transaction-base-dto';
@@ -28,7 +27,7 @@ import {
 import { ResultType } from '~/transactions/types';
 
 export function getTxTags(): string[] {
-  return flatten(Object.values(TxTags).map(txTag => Object.values(txTag)));
+  return Object.values(TxTags).flatMap(txTag => Object.values(txTag));
 }
 
 export function getTxTagsWithModuleNames(): string[] {

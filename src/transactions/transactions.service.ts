@@ -32,7 +32,7 @@ export class TransactionsService {
    * in-memory transaction store by Transaction Identifier. We use a Map
    *   to be able to recycle indexes easily and remove elements in a performant way
    */
-  private transactionStore: Map<
+  private readonly transactionStore: Map<
     number,
     {
       /**
@@ -51,7 +51,7 @@ export class TransactionsService {
   > = new Map();
 
   private currentId = 0;
-  private legitimacySecret: string;
+  private readonly legitimacySecret: string;
 
   constructor(
     @Inject(transactionsConfig.KEY) config: ConfigType<typeof transactionsConfig>,

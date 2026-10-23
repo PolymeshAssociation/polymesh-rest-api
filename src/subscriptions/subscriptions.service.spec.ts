@@ -292,12 +292,10 @@ describe('SubscriptionsService', () => {
   });
 
   describe('batchBumpNonce', () => {
-    it('should mark a group of subscriptions as done', async () => {
+    it('should bump the nonce of a group of subscriptions', async () => {
       await service.batchBumpNonce([1, 2]);
 
-      const result = await service.findAll();
-
-      expect(result.every(({ nextNonce }) => nextNonce === 1));
+      expect(mockSubscriptionRepo.incrementNonces).toHaveBeenCalledWith([1, 2]);
     });
   });
 });

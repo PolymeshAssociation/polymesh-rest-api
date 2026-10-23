@@ -11,7 +11,7 @@ import { defaultUser } from '~/users/user.consts';
 
 @Injectable()
 export class LocalApiKeysRepo implements ApiKeyRepo {
-  private apiKeys: Record<string, UserModel> = {};
+  private apiKeys: Record<string, UserModel> = Object.create(null);
 
   constructor(readonly config: ConfigService) {
     const givenApiKeys = config.getOrThrow<string>('API_KEYS');
@@ -21,17 +21,19 @@ export class LocalApiKeysRepo implements ApiKeyRepo {
     });
   }
 
-  public async getUserByApiKey(apiKey: string): Promise<UserModel> {
+  public getUserByApiKey(apiKey: string): Promise<UserModel> {
     const user = this.apiKeys[apiKey];
     if (!user) {
-      throw new AppNotFoundError('*REDACTED*', ApiKeyRepo.type);
+      return Promise.reject(new AppNotFoundError('*REDACTED*', ApiKeyRepo.type));
     }
 
-    return user;
+    return Promise.resolve(user);
   }
 
-  public async deleteApiKey(apiKey: string): Promise<void> {
+  public deleteApiKey(apiKey: string): Promise<void> {
     delete this.apiKeys[apiKey];
+
+    return Promise.resolve();
   }
 
   public async createApiKey(user: UserModel): Promise<ApiKeyModel> {
