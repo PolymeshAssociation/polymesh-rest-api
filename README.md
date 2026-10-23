@@ -91,6 +91,7 @@ SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscri
 NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
 NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
+WEBHOOK_ALLOW_PRIVATE_ADDRESSES=## set to `true` to allow webhook URLs that resolve to loopback, private, link-local or other internal addresses. Defaults to `false`. Only intended for local development ##
 # Auth:
 AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
 API_KEYS=## list of comma separated api keys to initialize the `apiKey` strategy with ##

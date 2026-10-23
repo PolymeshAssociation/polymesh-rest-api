@@ -4,8 +4,9 @@ import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
 import { lastValueFrom } from 'rxjs';
 
-import { AppNotFoundError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { generateBase64Secret } from '~/common/utils';
+import { assertWebhookUrlAllowed } from '~/common/utils/webhook-url';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { ScheduleService } from '~/schedule/schedule.service';
 import subscriptionsConfig from '~/subscriptions/config/subscriptions.config';
@@ -19,6 +20,7 @@ export class SubscriptionsService {
   private readonly ttl: number;
   private readonly maxTries: number;
   private readonly retryInterval: number;
+  private readonly allowPrivateAddresses: boolean;
 
   constructor(
     @Inject(subscriptionsConfig.KEY) config: ConfigType<typeof subscriptionsConfig>,
@@ -28,11 +30,12 @@ export class SubscriptionsService {
     private readonly logger: PolymeshLogger,
     private readonly subscriptionRepo: SubscriptionRepo
   ) {
-    const { ttl, maxTries: triesLeft, retryInterval } = config;
+    const { ttl, maxTries: triesLeft, retryInterval, allowPrivateAddresses } = config;
 
     this.ttl = ttl;
     this.maxTries = triesLeft;
     this.retryInterval = retryInterval;
+    this.allowPrivateAddresses = allowPrivateAddresses;
 
     logger.setContext(SubscriptionsService.name);
   }
@@ -166,9 +169,11 @@ export class SubscriptionsService {
     }
 
     const { webhookUrl, triesLeft } = subscription;
-    const { httpService, logger } = this;
+    const { httpService, logger, allowPrivateAddresses } = this;
 
     try {
+      await assertWebhookUrlAllowed(webhookUrl, allowPrivateAddresses);
+
       const secret = await generateBase64Secret(32);
 
       const response = await lastValueFrom(
@@ -180,12 +185,24 @@ export class SubscriptionsService {
               [HANDSHAKE_HEADER_KEY]: secret,
             },
             timeout: 10000,
+            maxRedirects: 0,
           }
         )
       );
 
       await this.handleHandshakeResponse(id, response, secret);
     } catch (err) {
+      if (err instanceof AppValidationError) {
+        logger.error(`Refusing to send handshake for subscription "${id}":`, err);
+
+        await this.updateSubscription(id, {
+          triesLeft: 0,
+          status: SubscriptionStatus.Rejected,
+        });
+
+        return;
+      }
+
       logger.error(`Error while sending handshake for subscription "${id}":`, err);
 
       await this.retry(id, triesLeft - 1);

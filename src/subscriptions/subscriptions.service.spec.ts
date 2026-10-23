@@ -1,13 +1,14 @@
 /* eslint-disable import/first */
 const mockLastValueFrom = jest.fn();
 const mockRandomBytes = jest.fn();
+const mockAssertWebhookUrlAllowed = jest.fn();
 
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { when } from 'jest-when';
 
-import { AppNotFoundError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { EventType } from '~/events/types';
 import { mockPolymeshLoggerProvider } from '~/logger/mock-polymesh-logger';
 import { ScheduleService } from '~/schedule/schedule.service';
@@ -22,6 +23,9 @@ import { MockHttpService, MockScheduleService } from '~/test-utils/service-mocks
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   lastValueFrom: mockLastValueFrom,
+}));
+jest.mock('~/common/utils/webhook-url', () => ({
+  assertWebhookUrlAllowed: mockAssertWebhookUrlAllowed,
 }));
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
@@ -73,6 +77,8 @@ describe('SubscriptionsService', () => {
     mockScheduleService = new MockScheduleService();
     mockHttpService = new MockHttpService();
     mockSubscriptionRepo = createMock<SubscriptionRepo>();
+    mockAssertWebhookUrlAllowed.mockReset();
+    mockAssertWebhookUrlAllowed.mockResolvedValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -86,7 +92,7 @@ describe('SubscriptionsService', () => {
         },
         {
           provide: subscriptionsConfig.KEY,
-          useValue: { ttl, maxTries, retryInterval },
+          useValue: { ttl, maxTries, retryInterval, allowPrivateAddresses: false },
         },
       ],
     })
@@ -172,6 +178,7 @@ describe('SubscriptionsService', () => {
 
       const mockSubscription = createMock<SubscriptionModel>({
         id: 3,
+        webhookUrl,
         triesLeft: 2,
         isExpired: () => false,
       });
@@ -211,6 +218,12 @@ describe('SubscriptionsService', () => {
 
       await unsafeService.sendHandshake(3);
 
+      expect(mockAssertWebhookUrlAllowed).toHaveBeenCalledWith(webhookUrl, false);
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        webhookUrl,
+        {},
+        expect.objectContaining({ maxRedirects: 0 })
+      );
       expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
         3,
         expect.objectContaining({ status: SubscriptionStatus.Active })
@@ -246,6 +259,53 @@ describe('SubscriptionsService', () => {
         4,
         expect.objectContaining({ triesLeft: 0, status: SubscriptionStatus.Rejected })
       );
+    });
+  });
+
+  describe('sendHandshake', () => {
+    it('should reject the subscription without sending a handshake if the webhook URL is not allowed', async () => {
+      const webhookUrl = 'http://169.254.169.254/latest/meta-data';
+      when(mockSubscriptionRepo.findById)
+        .calledWith(5)
+        .mockResolvedValue(
+          createMock<SubscriptionModel>({
+            id: 5,
+            webhookUrl,
+            triesLeft: maxTries,
+            isExpired: () => false,
+          })
+        );
+      mockAssertWebhookUrlAllowed.mockRejectedValue(new AppValidationError('not allowed'));
+
+      await unsafeService.sendHandshake(5);
+
+      expect(mockAssertWebhookUrlAllowed).toHaveBeenCalledWith(webhookUrl, false);
+      expect(mockHttpService.post).not.toHaveBeenCalled();
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(5, {
+        triesLeft: 0,
+        status: SubscriptionStatus.Rejected,
+      });
+      expect(mockScheduleService.addTimeout).not.toHaveBeenCalled();
+    });
+
+    it('should retry if the webhook URL check fails for another reason', async () => {
+      when(mockSubscriptionRepo.findById)
+        .calledWith(5)
+        .mockResolvedValue(
+          createMock<SubscriptionModel>({
+            id: 5,
+            webhookUrl: 'https://example.com/hook',
+            triesLeft: maxTries,
+            isExpired: () => false,
+          })
+        );
+      mockAssertWebhookUrlAllowed.mockRejectedValue(new Error('ENOTFOUND'));
+
+      await unsafeService.sendHandshake(5);
+
+      expect(mockHttpService.post).not.toHaveBeenCalled();
+      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(5, { triesLeft: maxTries - 1 });
+      expect(mockScheduleService.addTimeout).toHaveBeenCalled();
     });
   });
 

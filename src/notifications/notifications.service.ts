@@ -4,7 +4,8 @@ import { ConfigType } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
 import { lastValueFrom } from 'rxjs';
 
-import { AppNotFoundError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
+import { assertWebhookUrlAllowed } from '~/common/utils/webhook-url';
 import { EventsService } from '~/events/events.service';
 import { EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -21,6 +22,7 @@ import { SubscriptionsService } from '~/subscriptions/subscriptions.service';
 export class NotificationsService {
   private readonly maxTries: number;
   private readonly retryInterval: number;
+  private readonly allowPrivateAddresses: boolean;
 
   constructor(
     @Inject(notificationsConfig.KEY) config: ConfigType<typeof notificationsConfig>,
@@ -31,10 +33,11 @@ export class NotificationsService {
     private readonly logger: PolymeshLogger,
     private readonly notificationsRepo: NotificationRepo
   ) {
-    const { maxTries, retryInterval } = config;
+    const { maxTries, retryInterval, allowPrivateAddresses } = config;
 
     this.maxTries = maxTries;
     this.retryInterval = retryInterval;
+    this.allowPrivateAddresses = allowPrivateAddresses;
 
     logger.setContext(NotificationsService.name);
   }
@@ -133,6 +136,8 @@ export class NotificationsService {
         return;
       }
 
+      await assertWebhookUrlAllowed(webhookUrl, this.allowPrivateAddresses);
+
       const notificationPayload = this.assembleNotificationPayload(
         subscriptionId,
         type,
@@ -147,11 +152,23 @@ export class NotificationsService {
             [SIGNATURE_HEADER_KEY]: signature,
           },
           timeout: 10000,
+          maxRedirects: 0,
         })
       );
 
       await this.handleWebhookResponse(id, response);
     } catch (err) {
+      if (err instanceof AppValidationError) {
+        logger.error(`Refusing to send notification "${id}":`, err);
+
+        await this.updateNotification(id, {
+          triesLeft: 0,
+          status: NotificationStatus.Failed,
+        });
+
+        return;
+      }
+
       logger.error(`Error while sending notification "${id}":`, err);
 
       await this.retry(id, triesLeft - 1);

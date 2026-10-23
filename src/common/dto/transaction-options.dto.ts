@@ -51,7 +51,7 @@ export class TransactionOptionsDto {
   @ApiHideProperty()
   @ValidateIf(({ processMode }) => processMode === ProcessMode.SubmitWithCallback)
   @IsString()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
   readonly webhookUrl?: string;
 
   @ApiHideProperty()

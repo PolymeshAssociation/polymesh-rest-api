@@ -55,6 +55,7 @@ import { UsersModule } from '~/users/users.module';
         NOTIFICATIONS_MAX_TRIES: Joi.number().default(5),
         NOTIFICATIONS_RETRY_INTERVAL: Joi.number().default(5000),
         NOTIFICATIONS_LEGITIMACY_SECRET: Joi.string().default('defaultSecret'),
+        WEBHOOK_ALLOW_PRIVATE_ADDRESSES: Joi.bool().default(false),
         LOCAL_SIGNERS: Joi.string().allow(''),
         LOCAL_MNEMONICS: Joi.string().allow(''),
         VAULT_TOKEN: Joi.string().allow(''),
