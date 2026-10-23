@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.17 AS builder
+FROM node:24.22.1-alpine3.24 AS builder
 
 RUN apk add --no-cache \
     cmake \
@@ -25,9 +25,9 @@ RUN yarn install \
     yarn remove $(cat package.json | jq -r '.devDependencies | keys | join(" ")') && \
     rm -r /home/node/.cache/
 
-FROM node:lts-alpine3.17
+FROM node:24.22.1-alpine3.24
 WORKDIR /home/node
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 COPY --from=builder --chown=node:node /app/builder/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/builder/dist/ ./dist
