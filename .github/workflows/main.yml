@@ -27,7 +27,7 @@ jobs:
         run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           cache: 'yarn'
       - name: install dependencies
         # dependency lifecycle scripts are disabled to avoid executing untrusted code
@@ -50,7 +50,7 @@ jobs:
         run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           cache: 'yarn'
       - name: install dependencies
         # dependency lifecycle scripts are disabled to avoid executing untrusted code
@@ -73,7 +73,7 @@ jobs:
         run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           cache: 'yarn'
       - name: install dependencies
         # dependency lifecycle scripts are disabled to avoid executing untrusted code
@@ -97,7 +97,7 @@ jobs:
         run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           cache: 'yarn'
       - name: install dependencies
         # dependency lifecycle scripts are disabled to avoid executing untrusted code

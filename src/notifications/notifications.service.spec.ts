@@ -211,7 +211,12 @@ describe('NotificationsService', () => {
       expect(mockHttpService.post).toHaveBeenCalledWith(
         webhookUrl,
         expect.anything(),
-        expect.objectContaining({ maxRedirects: 0, proxy: false, ...mockWebhookAgents })
+        expect.objectContaining({
+          maxRedirects: 0,
+          decompress: false,
+          proxy: false,
+          ...mockWebhookAgents,
+        })
       );
       expect(notificationRepo.update).toHaveBeenCalledWith(2, {
         status: NotificationStatus.Acknowledged,

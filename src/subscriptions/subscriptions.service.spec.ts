@@ -224,7 +224,12 @@ describe('SubscriptionsService', () => {
       expect(mockHttpService.post).toHaveBeenCalledWith(
         webhookUrl,
         {},
-        expect.objectContaining({ maxRedirects: 0, proxy: false, ...mockWebhookAgents })
+        expect.objectContaining({
+          maxRedirects: 0,
+          decompress: false,
+          proxy: false,
+          ...mockWebhookAgents,
+        })
       );
       expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
         3,
