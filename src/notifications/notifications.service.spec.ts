@@ -1,5 +1,7 @@
 /* eslint-disable import/first */
 const mockLastValueFrom = jest.fn();
+const mockAssertWebhookUrlAllowed = jest.fn();
+const mockWebhookAgents = { httpAgent: 'mockHttpAgent', httpsAgent: 'mockHttpsAgent' };
 
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
@@ -7,7 +9,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TxTags } from '@polymeshassociation/polymesh-sdk/types';
 import { when } from 'jest-when';
 
-import { AppNotFoundError } from '~/common/errors';
+import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { TransactionType } from '~/common/types';
 import { EventsService } from '~/events/events.service';
 import { EventType } from '~/events/types';
@@ -31,6 +33,11 @@ jest.mock('rxjs', () => ({
   lastValueFrom: mockLastValueFrom,
 }));
 
+jest.mock('~/common/utils/webhook-url', () => ({
+  assertWebhookUrlAllowed: mockAssertWebhookUrlAllowed,
+  createWebhookAgents: (): typeof mockWebhookAgents => mockWebhookAgents,
+}));
+
 describe('NotificationsService', () => {
   let service: NotificationsService;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,6 +58,8 @@ describe('NotificationsService', () => {
     mockEventsService = new MockEventsService();
     mockHttpService = new MockHttpService();
     notificationRepo = createMock<NotificationRepo>();
+    mockAssertWebhookUrlAllowed.mockReset();
+    mockAssertWebhookUrlAllowed.mockReturnValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -66,7 +75,7 @@ describe('NotificationsService', () => {
         },
         {
           provide: notificationsConfig.KEY,
-          useValue: { maxTries, retryInterval },
+          useValue: { maxTries, retryInterval, allowPrivateAddresses: false },
         },
       ],
     })
@@ -198,6 +207,12 @@ describe('NotificationsService', () => {
 
       await unsafeService.sendNotification(2);
 
+      expect(mockAssertWebhookUrlAllowed).toHaveBeenCalledWith(webhookUrl, false);
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        webhookUrl,
+        expect.anything(),
+        expect.objectContaining({ maxRedirects: 0, proxy: false, ...mockWebhookAgents })
+      );
       expect(notificationRepo.update).toHaveBeenCalledWith(2, {
         status: NotificationStatus.Acknowledged,
       });
@@ -244,6 +259,81 @@ describe('NotificationsService', () => {
         status: NotificationStatus.Failed,
         triesLeft: 0,
       });
+    });
+  });
+
+  describe('sendNotification', () => {
+    it('should fail the notification without sending it if the webhook URL is not allowed', async () => {
+      const webhookUrl = 'http://127.0.0.1:8080/admin';
+      when(notificationRepo.findById)
+        .calledWith(3)
+        .mockResolvedValue(
+          createMock<NotificationModel>({
+            id: 3,
+            subscriptionId: 1,
+            eventId: 1,
+            triesLeft: maxTries,
+            status: NotificationStatus.Active,
+          })
+        );
+      mockSubscriptionsService.findOne.mockReturnValue({
+        webhookUrl,
+        id: 1,
+        isExpired: () => false,
+        legitimacySecret: 'someSecret',
+      });
+      mockEventsService.findOne.mockReturnValue({
+        payload: {},
+        type: EventType.TransactionUpdate,
+        scope: '0x01',
+      });
+      mockAssertWebhookUrlAllowed.mockImplementation(() => {
+        throw new AppValidationError('not allowed');
+      });
+
+      await unsafeService.sendNotification(3);
+
+      expect(mockAssertWebhookUrlAllowed).toHaveBeenCalledWith(webhookUrl, false);
+      expect(mockHttpService.post).not.toHaveBeenCalled();
+      expect(notificationRepo.update).toHaveBeenCalledWith(3, {
+        triesLeft: 0,
+        status: NotificationStatus.Failed,
+      });
+      expect(mockScheduleService.addTimeout).not.toHaveBeenCalled();
+    });
+
+    it('should fail the notification if the host resolves to a disallowed address at connect time', async () => {
+      when(notificationRepo.findById)
+        .calledWith(3)
+        .mockResolvedValue(
+          createMock<NotificationModel>({
+            id: 3,
+            subscriptionId: 1,
+            eventId: 1,
+            triesLeft: maxTries,
+            status: NotificationStatus.Active,
+          })
+        );
+      mockSubscriptionsService.findOne.mockReturnValue({
+        webhookUrl: 'https://rebind.example.com/hook',
+        id: 1,
+        isExpired: () => false,
+        legitimacySecret: 'someSecret',
+      });
+      mockEventsService.findOne.mockReturnValue({
+        payload: {},
+        type: EventType.TransactionUpdate,
+        scope: '0x01',
+      });
+      mockLastValueFrom.mockRejectedValue(new AppValidationError('disallowed address'));
+
+      await unsafeService.sendNotification(3);
+
+      expect(notificationRepo.update).toHaveBeenCalledWith(3, {
+        triesLeft: 0,
+        status: NotificationStatus.Failed,
+      });
+      expect(mockScheduleService.addTimeout).not.toHaveBeenCalled();
     });
   });
 

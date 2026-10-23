@@ -31,7 +31,7 @@ export class TransactionBaseDto {
   @ApiHideProperty()
   @IsOptional()
   @IsString()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
   readonly webhookUrl?: string;
 
   @ApiHideProperty()

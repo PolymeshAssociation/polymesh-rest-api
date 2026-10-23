@@ -90,7 +90,8 @@ SUBSCRIPTIONS_MAX_HANDSHAKE_TRIES=## Amount of attempts to activate a subscripti
 SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL=## Amount of milliseconds between subscription handshake attempts ##
 NOTIFICATIONS_MAX_TRIES=## Amount of attempts to deliver a notification before it is considered failed ##
 NOTIFICATIONS_RETRY_INTERVAL=## Amount of milliseconds between notification delivery attempts ##
-NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures ##
+NOTIFICATIONS_LEGITIMACY_SECRET=## A secret used to create HMAC signatures for webhook notifications. Required when `NODE_ENV=production`; otherwise defaults to an insecure placeholder with a warning ##
+WEBHOOK_ALLOW_PRIVATE_ADDRESSES=## set to `true` to allow webhook URLs that resolve to loopback, private, link-local or other internal addresses. Defaults to `false`. Only intended for local development ##
 # Auth:
 AUTH_STRATEGY=## list of comma separated auth strategies to use e.g. (`apiKey,open`) ##
 API_KEYS=## list of comma separated api keys to initialize the `apiKey` strategy with ##
