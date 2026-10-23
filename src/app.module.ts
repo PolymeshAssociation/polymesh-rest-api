@@ -54,7 +54,18 @@ import { UsersModule } from '~/users/users.module';
         SUBSCRIPTIONS_HANDSHAKE_RETRY_INTERVAL: Joi.number().default(5000),
         NOTIFICATIONS_MAX_TRIES: Joi.number().default(5),
         NOTIFICATIONS_RETRY_INTERVAL: Joi.number().default(5000),
-        NOTIFICATIONS_LEGITIMACY_SECRET: Joi.string().default('defaultSecret'),
+        NOTIFICATIONS_LEGITIMACY_SECRET: Joi.string().default(() => {
+          if (process.env.NODE_ENV === 'production') {
+            throw new AppConfigError(
+              'NOTIFICATIONS_LEGITIMACY_SECRET',
+              'must be set in a production environment'
+            );
+          }
+          console.warn(
+            'Defaulting to an insecure value for "NOTIFICATIONS_LEGITIMACY_SECRET". Webhook signatures will not be trustworthy'
+          );
+          return 'defaultSecret';
+        }),
         WEBHOOK_ALLOW_PRIVATE_ADDRESSES: Joi.bool().default(false),
         LOCAL_SIGNERS: Joi.string().allow(''),
         LOCAL_MNEMONICS: Joi.string().allow(''),
