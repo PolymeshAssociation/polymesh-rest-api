@@ -5,7 +5,7 @@ import { AxiosResponse } from 'axios';
 import { lastValueFrom } from 'rxjs';
 
 import { AppNotFoundError, AppValidationError } from '~/common/errors';
-import { assertWebhookUrlAllowed } from '~/common/utils/webhook-url';
+import { assertWebhookUrlAllowed, createWebhookAgents } from '~/common/utils/webhook-url';
 import { EventsService } from '~/events/events.service';
 import { EventType, GetPayload } from '~/events/types';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
@@ -23,6 +23,7 @@ export class NotificationsService {
   private readonly maxTries: number;
   private readonly retryInterval: number;
   private readonly allowPrivateAddresses: boolean;
+  private readonly webhookAgents: ReturnType<typeof createWebhookAgents>;
 
   constructor(
     @Inject(notificationsConfig.KEY) config: ConfigType<typeof notificationsConfig>,
@@ -38,6 +39,7 @@ export class NotificationsService {
     this.maxTries = maxTries;
     this.retryInterval = retryInterval;
     this.allowPrivateAddresses = allowPrivateAddresses;
+    this.webhookAgents = createWebhookAgents(allowPrivateAddresses);
 
     logger.setContext(NotificationsService.name);
   }
@@ -136,7 +138,7 @@ export class NotificationsService {
         return;
       }
 
-      await assertWebhookUrlAllowed(webhookUrl, this.allowPrivateAddresses);
+      assertWebhookUrlAllowed(webhookUrl, this.allowPrivateAddresses);
 
       const notificationPayload = this.assembleNotificationPayload(
         subscriptionId,
@@ -153,6 +155,9 @@ export class NotificationsService {
           },
           timeout: 10000,
           maxRedirects: 0,
+          // connect directly so the agents' lookup validates the webhook host itself
+          proxy: false,
+          ...this.webhookAgents,
         })
       );
 

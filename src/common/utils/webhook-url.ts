@@ -1,5 +1,8 @@
+import { LookupAddress, LookupOptions } from 'dns';
 import { lookup } from 'dns/promises';
-import { BlockList, isIP, isIPv4 } from 'net';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent } from 'https';
+import { BlockList, isIP, isIPv4, LookupFunction } from 'net';
 
 import { AppValidationError } from '~/common/errors';
 
@@ -76,17 +79,89 @@ export const isBlockedAddress = (address: string): boolean => {
 };
 
 /**
- * Ensure a webhook URL is safe for the server to call: it must be http(s) and its hostname must not resolve
- *   to a loopback, private, link-local or otherwise internal address
+ * Resolve a webhook hostname, rejecting it if any of its addresses are in a blocked range
+ *
+ * @throws AppValidationError if the hostname resolves to a disallowed address or to nothing
+ */
+const resolveAllowedAddresses = async (
+  hostname: string,
+  options: LookupOptions,
+  allowPrivateAddresses: boolean
+): Promise<LookupAddress[]> => {
+  const addresses = await lookup(hostname, {
+    family: options.family,
+    hints: options.hints,
+    all: true,
+    verbatim: true,
+  });
+
+  if (!addresses.length) {
+    throw new AppValidationError(`webhook URL host "${hostname}" did not resolve`);
+  }
+
+  if (!allowPrivateAddresses) {
+    const blocked = addresses.find(({ address }) => isBlockedAddress(address));
+
+    if (blocked) {
+      throw new AppValidationError(
+        `webhook URL host "${hostname}" resolves to a disallowed address (${blocked.address})`
+      );
+    }
+  }
+
+  return addresses;
+};
+
+/**
+ * Create a socket `lookup` function that only hands validated addresses to the connection. Validating the address
+ *   that is actually connected to (instead of a separate lookup beforehand) prevents DNS rebinding
+ *
+ * @param allowPrivateAddresses - skip the address check (intended for local development only)
+ */
+export const createWebhookLookup =
+  (allowPrivateAddresses: boolean): LookupFunction =>
+  (hostname, options, callback) => {
+    resolveAllowedAddresses(hostname, options, allowPrivateAddresses)
+      .then(addresses => {
+        if (options.all) {
+          callback(null, addresses);
+        } else {
+          const [{ address, family }] = addresses;
+          callback(null, address, family);
+        }
+      })
+      .catch(err => callback(err, ''));
+  };
+
+/**
+ * Create HTTP(S) agents for webhook requests whose connections are validated by {@link createWebhookLookup}
+ *
+ * @note the agents only affect address resolution, the Host header and TLS servername remain the URL's hostname
+ */
+export const createWebhookAgents = (
+  allowPrivateAddresses = false
+): { httpAgent: HttpAgent; httpsAgent: HttpsAgent } => {
+  const lookupFn = createWebhookLookup(allowPrivateAddresses);
+
+  return {
+    httpAgent: new HttpAgent({ lookup: lookupFn }),
+    httpsAgent: new HttpsAgent({ lookup: lookupFn }),
+  };
+};
+
+/**
+ * Ensure a webhook URL is safe for the server to call: it must be http(s), and if its host is an IP literal
+ *   (for which no DNS lookup happens on connect) the address must not be loopback, private, link-local or
+ *   otherwise internal. Hostnames are validated at connect time by the agents from {@link createWebhookAgents}
  *
  * @param allowPrivateAddresses - skip the address check (intended for local development only)
  *
  * @throws AppValidationError if the URL is not allowed
  */
-export const assertWebhookUrlAllowed = async (
+export const assertWebhookUrlAllowed = (
   webhookUrl: string,
   allowPrivateAddresses = false
-): Promise<void> => {
+): void => {
   let url: URL;
   try {
     url = new URL(webhookUrl);
@@ -98,26 +173,10 @@ export const assertWebhookUrlAllowed = async (
     throw new AppValidationError(`webhook URL protocol "${url.protocol}" is not allowed`);
   }
 
-  if (allowPrivateAddresses) {
-    return;
-  }
-
   // IPv6 literals are bracketed in URL hostnames
   const hostname = url.hostname.replace(/^\[(.*)\]$/, '$1');
 
-  const addresses = isIP(hostname)
-    ? [{ address: hostname }]
-    : await lookup(hostname, { all: true, verbatim: true });
-
-  if (!addresses.length) {
-    throw new AppValidationError(`webhook URL host "${hostname}" did not resolve`);
-  }
-
-  const blocked = addresses.find(({ address }) => isBlockedAddress(address));
-
-  if (blocked) {
-    throw new AppValidationError(
-      `webhook URL host "${hostname}" resolves to a disallowed address (${blocked.address})`
-    );
+  if (!allowPrivateAddresses && isIP(hostname) && isBlockedAddress(hostname)) {
+    throw new AppValidationError(`webhook URL host "${hostname}" is a disallowed address`);
   }
 };

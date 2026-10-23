@@ -6,7 +6,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { AppNotFoundError, AppValidationError } from '~/common/errors';
 import { generateBase64Secret } from '~/common/utils';
-import { assertWebhookUrlAllowed } from '~/common/utils/webhook-url';
+import { assertWebhookUrlAllowed, createWebhookAgents } from '~/common/utils/webhook-url';
 import { PolymeshLogger } from '~/logger/polymesh-logger.service';
 import { ScheduleService } from '~/schedule/schedule.service';
 import subscriptionsConfig from '~/subscriptions/config/subscriptions.config';
@@ -21,6 +21,7 @@ export class SubscriptionsService {
   private readonly maxTries: number;
   private readonly retryInterval: number;
   private readonly allowPrivateAddresses: boolean;
+  private readonly webhookAgents: ReturnType<typeof createWebhookAgents>;
 
   constructor(
     @Inject(subscriptionsConfig.KEY) config: ConfigType<typeof subscriptionsConfig>,
@@ -36,6 +37,7 @@ export class SubscriptionsService {
     this.maxTries = triesLeft;
     this.retryInterval = retryInterval;
     this.allowPrivateAddresses = allowPrivateAddresses;
+    this.webhookAgents = createWebhookAgents(allowPrivateAddresses);
 
     logger.setContext(SubscriptionsService.name);
   }
@@ -172,7 +174,7 @@ export class SubscriptionsService {
     const { httpService, logger, allowPrivateAddresses } = this;
 
     try {
-      await assertWebhookUrlAllowed(webhookUrl, allowPrivateAddresses);
+      assertWebhookUrlAllowed(webhookUrl, allowPrivateAddresses);
 
       const secret = await generateBase64Secret(32);
 
@@ -186,6 +188,9 @@ export class SubscriptionsService {
             },
             timeout: 10000,
             maxRedirects: 0,
+            // connect directly so the agents' lookup validates the webhook host itself
+            proxy: false,
+            ...this.webhookAgents,
           }
         )
       );

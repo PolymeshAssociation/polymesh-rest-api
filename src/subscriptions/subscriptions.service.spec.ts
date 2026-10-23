@@ -2,6 +2,7 @@
 const mockLastValueFrom = jest.fn();
 const mockRandomBytes = jest.fn();
 const mockAssertWebhookUrlAllowed = jest.fn();
+const mockWebhookAgents = { httpAgent: 'mockHttpAgent', httpsAgent: 'mockHttpsAgent' };
 
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
@@ -26,6 +27,7 @@ jest.mock('rxjs', () => ({
 }));
 jest.mock('~/common/utils/webhook-url', () => ({
   assertWebhookUrlAllowed: mockAssertWebhookUrlAllowed,
+  createWebhookAgents: (): typeof mockWebhookAgents => mockWebhookAgents,
 }));
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
@@ -78,7 +80,7 @@ describe('SubscriptionsService', () => {
     mockHttpService = new MockHttpService();
     mockSubscriptionRepo = createMock<SubscriptionRepo>();
     mockAssertWebhookUrlAllowed.mockReset();
-    mockAssertWebhookUrlAllowed.mockResolvedValue(undefined);
+    mockAssertWebhookUrlAllowed.mockReturnValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -222,7 +224,7 @@ describe('SubscriptionsService', () => {
       expect(mockHttpService.post).toHaveBeenCalledWith(
         webhookUrl,
         {},
-        expect.objectContaining({ maxRedirects: 0 })
+        expect.objectContaining({ maxRedirects: 0, proxy: false, ...mockWebhookAgents })
       );
       expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(
         3,
@@ -275,7 +277,9 @@ describe('SubscriptionsService', () => {
             isExpired: () => false,
           })
         );
-      mockAssertWebhookUrlAllowed.mockRejectedValue(new AppValidationError('not allowed'));
+      mockAssertWebhookUrlAllowed.mockImplementation(() => {
+        throw new AppValidationError('not allowed');
+      });
 
       await unsafeService.sendHandshake(5);
 
@@ -288,24 +292,43 @@ describe('SubscriptionsService', () => {
       expect(mockScheduleService.addTimeout).not.toHaveBeenCalled();
     });
 
-    it('should retry if the webhook URL check fails for another reason', async () => {
-      when(mockSubscriptionRepo.findById)
-        .calledWith(5)
-        .mockResolvedValue(
-          createMock<SubscriptionModel>({
-            id: 5,
-            webhookUrl: 'https://example.com/hook',
-            triesLeft: maxTries,
-            isExpired: () => false,
-          })
-        );
-      mockAssertWebhookUrlAllowed.mockRejectedValue(new Error('ENOTFOUND'));
+    describe('when the handshake request fails', () => {
+      beforeEach(() => {
+        when(mockSubscriptionRepo.findById)
+          .calledWith(5)
+          .mockResolvedValue(
+            createMock<SubscriptionModel>({
+              id: 5,
+              webhookUrl: 'https://example.com/hook',
+              triesLeft: maxTries,
+              isExpired: () => false,
+            })
+          );
+        mockRandomBytes.mockImplementation((_length, callback) => {
+          callback(undefined, Buffer.from('cGxhY2Vob2xkZXI=', 'base64'));
+        });
+      });
 
-      await unsafeService.sendHandshake(5);
+      it('should reject the subscription if the host resolves to a disallowed address at connect time', async () => {
+        mockLastValueFrom.mockRejectedValue(new AppValidationError('disallowed address'));
 
-      expect(mockHttpService.post).not.toHaveBeenCalled();
-      expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(5, { triesLeft: maxTries - 1 });
-      expect(mockScheduleService.addTimeout).toHaveBeenCalled();
+        await unsafeService.sendHandshake(5);
+
+        expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(5, {
+          triesLeft: 0,
+          status: SubscriptionStatus.Rejected,
+        });
+        expect(mockScheduleService.addTimeout).not.toHaveBeenCalled();
+      });
+
+      it('should retry for other errors', async () => {
+        mockLastValueFrom.mockRejectedValue(new Error('ENOTFOUND'));
+
+        await unsafeService.sendHandshake(5);
+
+        expect(mockSubscriptionRepo.update).toHaveBeenCalledWith(5, { triesLeft: maxTries - 1 });
+        expect(mockScheduleService.addTimeout).toHaveBeenCalled();
+      });
     });
   });
 
