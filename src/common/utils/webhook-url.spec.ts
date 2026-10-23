@@ -1,9 +1,9 @@
 /* eslint-disable import/first */
 const mockLookup = jest.fn();
 
-import { LookupOptions } from 'dns';
-import { Agent as HttpAgent, createServer, get, Server } from 'http';
-import { AddressInfo } from 'net';
+import { LookupOptions } from 'node:dns';
+import { Agent as HttpAgent, createServer, get, Server } from 'node:http';
+import { AddressInfo } from 'node:net';
 
 import { AppValidationError } from '~/common/errors';
 import {
@@ -13,8 +13,8 @@ import {
   isBlockedAddress,
 } from '~/common/utils/webhook-url';
 
-jest.mock('dns/promises', () => ({
-  ...jest.requireActual('dns/promises'),
+jest.mock('node:dns/promises', () => ({
+  ...jest.requireActual('node:dns/promises'),
   lookup: mockLookup,
 }));
 

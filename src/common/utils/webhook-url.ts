@@ -1,8 +1,8 @@
-import { LookupAddress, LookupOptions } from 'dns';
-import { lookup } from 'dns/promises';
-import { Agent as HttpAgent } from 'http';
-import { Agent as HttpsAgent } from 'https';
-import { BlockList, isIP, isIPv4, LookupFunction } from 'net';
+import { LookupAddress, LookupOptions } from 'node:dns';
+import { lookup } from 'node:dns/promises';
+import { Agent as HttpAgent } from 'node:http';
+import { Agent as HttpsAgent } from 'node:https';
+import { BlockList, isIP, isIPv4, LookupFunction } from 'node:net';
 
 import { AppValidationError } from '~/common/errors';
 
@@ -56,7 +56,7 @@ const toEmbeddedIpv4 = (address: string): string | undefined => {
     return dotted;
   }
 
-  const value = (parseInt(high, 16) << 16) | parseInt(low, 16);
+  const value = (Number.parseInt(high, 16) << 16) | Number.parseInt(low, 16);
 
   return [24, 16, 8, 0].map(shift => (value >>> shift) & 0xff).join('.');
 };
