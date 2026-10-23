@@ -9,22 +9,24 @@ import { AppValidationError } from '~/common/errors';
 /**
  * Address ranges a webhook must never resolve to. Covers loopback, private, link-local (incl. cloud metadata
  *   endpoints such as 169.254.169.254), unspecified, CGNAT, multicast and other reserved/non-routable ranges
+ *
+ * @note these IP literals are the blocklist itself, not hardcoded endpoints, hence the NOSONAR markers (S1313)
  */
 const blockedAddresses = new BlockList();
 
 (
   [
     ['0.0.0.0', 8], // "this" network / unspecified
-    ['10.0.0.0', 8], // RFC1918 private
-    ['100.64.0.0', 10], // CGNAT
+    ['10.0.0.0', 8], // NOSONAR - RFC1918 private
+    ['100.64.0.0', 10], // NOSONAR - CGNAT
     ['127.0.0.0', 8], // loopback
-    ['169.254.0.0', 16], // link-local / cloud metadata
-    ['172.16.0.0', 12], // RFC1918 private
-    ['192.0.0.0', 24], // IETF protocol assignments
-    ['192.168.0.0', 16], // RFC1918 private
-    ['198.18.0.0', 15], // benchmarking
-    ['224.0.0.0', 4], // multicast
-    ['240.0.0.0', 4], // reserved, incl. broadcast
+    ['169.254.0.0', 16], // NOSONAR - link-local / cloud metadata
+    ['172.16.0.0', 12], // NOSONAR - RFC1918 private
+    ['192.0.0.0', 24], // NOSONAR - IETF protocol assignments
+    ['192.168.0.0', 16], // NOSONAR - RFC1918 private
+    ['198.18.0.0', 15], // NOSONAR - benchmarking
+    ['224.0.0.0', 4], // NOSONAR - multicast
+    ['240.0.0.0', 4], // NOSONAR - reserved, incl. broadcast
   ] as const
 ).forEach(([network, prefix]) => blockedAddresses.addSubnet(network, prefix, 'ipv4'));
 
@@ -32,9 +34,9 @@ const blockedAddresses = new BlockList();
   [
     ['::', 128], // unspecified
     ['::1', 128], // loopback
-    ['fc00::', 7], // unique local (private)
-    ['fe80::', 10], // link-local
-    ['ff00::', 8], // multicast
+    ['fc00::', 7], // NOSONAR - unique local (private)
+    ['fe80::', 10], // NOSONAR - link-local
+    ['ff00::', 8], // NOSONAR - multicast
   ] as const
 ).forEach(([network, prefix]) => blockedAddresses.addSubnet(network, prefix, 'ipv6'));
 
