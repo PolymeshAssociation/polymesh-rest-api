@@ -188,6 +188,8 @@ export class SubscriptionsService {
             },
             timeout: 10000,
             maxRedirects: 0,
+            // only the status and headers are read, so keep the untrusted response body away from any decoder
+            decompress: false,
             // connect directly so the agents' lookup validates the webhook host itself
             proxy: false,
             ...this.webhookAgents,
